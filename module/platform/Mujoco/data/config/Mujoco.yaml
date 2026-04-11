@@ -3,6 +3,12 @@ log_level: INFO
 
 world_path: "models/nugus/scene.xml"
 
+# local: run MuJoCo simulation and rendering in this process
+# remote: connect to an external MuJoCo bridge over TCP
+mode: "remote"
+remote_host: "127.0.0.1"
+remote_port: "18080"
+
 initial_floating_base:
   pos_x: 0.0
   pos_y: 0.0

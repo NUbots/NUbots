@@ -1,0 +1,66 @@
+// MIT License
+//
+// Copyright (c) 2026 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+
+syntax = "proto3";
+
+package message.platform.mujoco;
+
+message JointCommand {
+    string name = 1;
+    double position = 2;
+    double gain = 3;
+    double torque = 4;
+}
+
+message SimulationRequest {
+    uint64 sequence_id = 1;
+    double step_dt = 2;
+    string world_path = 3;
+    bool reset = 4;
+    repeated JointCommand joint_commands = 5;
+}
+
+message Vector3 {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message JointState {
+    string name = 1;
+    double position = 2;
+    double velocity = 3;
+}
+
+message BasePose {
+    double pos_x = 1;
+    double pos_y = 2;
+    double pos_z = 3;
+    double quat_w = 4;
+    double quat_x = 5;
+    double quat_y = 6;
+    double quat_z = 7;
+}
+
+message ContactState {
+    string geom1 = 1;
+    string geom2 = 2;
+    double force = 3;
+}
+
+message SimulationResponse {
+    uint64 sequence_id = 1;
+    double sim_time = 2;
+    uint64 real_time_ms = 3;
+    Vector3 accelerometer = 4;
+    Vector3 gyroscope = 5;
+    repeated JointState joint_states = 6;
+    BasePose base_pose = 7;
+    repeated ContactState contacts = 8;
+    bool ok = 9;
+    string error = 10;
+}

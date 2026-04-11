@@ -11,6 +11,8 @@
 #include "array_safety.h"
 
 #include "message/input/Image.hpp"
+#include "message/platform/RawSensors.hpp"
+#include "message/platform/mujoco/messages.hpp"
 
 #include "utility/vision/fourcc.hpp"
 
@@ -22,9 +24,17 @@ namespace module::platform {
 
     class Mujoco : public NUClear::Reactor {
     private:
+        enum class Mode {
+            LOCAL,
+            REMOTE,
+        };
+
         /// @brief Stores configuration values
         struct Config {
-            std::string world_path = "";
+            std::string world_path  = "";
+            Mode mode               = Mode::LOCAL;
+            std::string remote_host = "127.0.0.1";
+            std::string remote_port = "18080";
         } cfg;
 
         static constexpr int UPDATE_FREQUENCY = 100;
@@ -41,6 +51,12 @@ namespace module::platform {
         float* depth       = nullptr;
 
         std::mutex render_mutex;
+
+        // Remote bridge connection state
+        int remote_fd                  = -1;
+        bool remote_connected          = false;
+        uint64_t remote_sequence_id    = 0;
+        std::vector<uint8_t> rx_buffer = {};
 
         // MuJoCo visualization
         mjvScene scn;
@@ -96,6 +112,12 @@ namespace module::platform {
 
         /// @brief Our current servo states
         std::map<std::string, ServoState> servo_state;
+
+        [[nodiscard]] int tcpip_connect() const;
+        bool connect_remote_bridge();
+        bool send_remote_request(const message::platform::mujoco::SimulationRequest& request);
+        bool read_remote_response(message::platform::mujoco::SimulationResponse& response);
+        void emit_remote_raw_sensors(const message::platform::mujoco::SimulationResponse& response);
 
         void render(void) {
             auto now = NUClear::clock::now();

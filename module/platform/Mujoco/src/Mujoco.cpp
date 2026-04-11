@@ -1,12 +1,14 @@
 #include "Mujoco.hpp"
 
 #include <X11/Xlib.h>
+#include <algorithm>
 
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/output/Mujoco.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/mujoco/messages.hpp"
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -14,6 +16,14 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
+
+extern "C" {
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
+}
 
 namespace module::platform {
 
@@ -30,6 +40,10 @@ namespace module::platform {
     using message::actuation::ServoTargets;
     using message::input::Image;
     using message::platform::RawSensors;
+    using message::platform::mujoco::JointCommand;
+    using message::platform::mujoco::JointState;
+    using message::platform::mujoco::SimulationRequest;
+    using message::platform::mujoco::SimulationResponse;
 
     std::map<uint32_t, std::string> id_to_joint_name = {
         {0, "right_shoulder_pitch"}, {1, "left_shoulder_pitch"}, {2, "right_shoulder_roll"}, {3, "left_shoulder_roll"},
@@ -38,12 +52,230 @@ namespace module::platform {
         {12, "right_knee_pitch"},    {13, "left_knee_pitch"},    {14, "right_ankle_pitch"},  {15, "left_ankle_pitch"},
         {16, "right_ankle_roll"},    {17, "left_ankle_roll"},    {18, "neck_yaw"},           {19, "head_pitch"}};
 
+    int Mujoco::tcpip_connect() const {
+        addrinfo hints{};
+        memset(&hints, 0, sizeof(addrinfo));
+        hints.ai_family   = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+
+        addrinfo* address = nullptr;
+        const int error   = getaddrinfo(cfg.remote_host.c_str(), cfg.remote_port.c_str(), &hints, &address);
+        if (error != 0) {
+            log<ERROR>(fmt::format("Cannot resolve remote bridge {}:{} ({})",
+                                   cfg.remote_host,
+                                   cfg.remote_port,
+                                   gai_strerror(error)));
+            return -1;
+        }
+
+        for (addrinfo* ptr = address; ptr != nullptr; ptr = ptr->ai_next) {
+            const int fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+            if (fd == -1) {
+                continue;
+            }
+            if (connect(fd, ptr->ai_addr, ptr->ai_addrlen) != -1) {
+                freeaddrinfo(address);
+                return fd;
+            }
+            close(fd);
+        }
+
+        freeaddrinfo(address);
+        log<ERROR>(fmt::format("Cannot connect to remote bridge {}:{}", cfg.remote_host, cfg.remote_port));
+        return -1;
+    }
+
+    bool Mujoco::connect_remote_bridge() {
+        if (remote_connected && remote_fd >= 0) {
+            return true;
+        }
+
+        remote_fd = tcpip_connect();
+        if (remote_fd < 0) {
+            remote_connected = false;
+            return false;
+        }
+
+        rx_buffer.clear();
+        remote_sequence_id = 0;
+        remote_connected   = true;
+        log<INFO>("Connected to remote MuJoCo bridge at", cfg.remote_host + ":" + cfg.remote_port);
+        return true;
+    }
+
+    bool Mujoco::send_remote_request(const SimulationRequest& request) {
+        std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<SimulationRequest>::serialise(request);
+        const uint32_t length        = htonl(static_cast<uint32_t>(payload.size()));
+
+        if (send(remote_fd, &length, sizeof(length), 0) != sizeof(length)) {
+            log<ERROR>("Failed to send MuJoCo bridge request length");
+            return false;
+        }
+        if (send(remote_fd, payload.data(), payload.size(), 0) != int(payload.size())) {
+            log<ERROR>("Failed to send MuJoCo bridge request payload");
+            return false;
+        }
+        return true;
+    }
+
+    bool Mujoco::read_remote_response(SimulationResponse& response) {
+        while (true) {
+            auto read_length = [](const std::vector<uint8_t>& buffer) {
+                return buffer.size() >= sizeof(uint32_t) ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
+                                                         : 0u;
+            };
+
+            const uint32_t length = read_length(rx_buffer);
+            if (length > 0 && rx_buffer.size() >= (sizeof(uint32_t) + length)) {
+                uint8_t* payload = rx_buffer.data() + sizeof(uint32_t);
+                response = NUClear::util::serialise::Serialise<SimulationResponse>::deserialise(payload, length);
+                rx_buffer.erase(rx_buffer.begin(), std::next(rx_buffer.begin(), sizeof(uint32_t) + length));
+                return true;
+            }
+
+            unsigned long available = 0;
+            if (::ioctl(remote_fd, FIONREAD, &available) < 0) {
+                log<ERROR>("Error querying MuJoCo bridge socket for available bytes");
+                return false;
+            }
+
+            if (available == 0) {
+                // No complete packet available yet, try a blocking read for at least one byte.
+                uint8_t byte = 0;
+                const auto n = ::read(remote_fd, &byte, 1);
+                if (n <= 0) {
+                    return false;
+                }
+                rx_buffer.push_back(byte);
+                continue;
+            }
+
+            const size_t old_size = rx_buffer.size();
+            rx_buffer.resize(old_size + available);
+            const auto bytes_read = ::read(remote_fd, rx_buffer.data() + old_size, available);
+            if (bytes_read <= 0) {
+                return false;
+            }
+            rx_buffer.resize(old_size + size_t(bytes_read));
+        }
+    }
+
+    void Mujoco::emit_remote_raw_sensors(const SimulationResponse& response) {
+        auto raw_sensors = std::make_unique<RawSensors>();
+
+        raw_sensors->accelerometer.x() = response.accelerometer.x;
+        raw_sensors->accelerometer.y() = response.accelerometer.y;
+        raw_sensors->accelerometer.z() = response.accelerometer.z;
+
+        raw_sensors->gyroscope.x() = response.gyroscope.x;
+        raw_sensors->gyroscope.y() = response.gyroscope.y;
+        raw_sensors->gyroscope.z() = response.gyroscope.z;
+
+        auto set_servo = [&](const JointState& joint) {
+            if (joint.name == "right_shoulder_pitch") {
+                raw_sensors->servo.r_shoulder_pitch.present_position = joint.position;
+                raw_sensors->servo.r_shoulder_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_shoulder_pitch") {
+                raw_sensors->servo.l_shoulder_pitch.present_position = joint.position;
+                raw_sensors->servo.l_shoulder_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_shoulder_roll") {
+                raw_sensors->servo.r_shoulder_roll.present_position = joint.position;
+                raw_sensors->servo.r_shoulder_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_shoulder_roll") {
+                raw_sensors->servo.l_shoulder_roll.present_position = joint.position;
+                raw_sensors->servo.l_shoulder_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_elbow_pitch") {
+                raw_sensors->servo.r_elbow.present_position = joint.position;
+                raw_sensors->servo.r_elbow.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_elbow_pitch") {
+                raw_sensors->servo.l_elbow.present_position = joint.position;
+                raw_sensors->servo.l_elbow.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_hip_yaw") {
+                raw_sensors->servo.r_hip_yaw.present_position = joint.position;
+                raw_sensors->servo.r_hip_yaw.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_hip_yaw") {
+                raw_sensors->servo.l_hip_yaw.present_position = joint.position;
+                raw_sensors->servo.l_hip_yaw.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_hip_roll") {
+                raw_sensors->servo.r_hip_roll.present_position = joint.position;
+                raw_sensors->servo.r_hip_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_hip_roll") {
+                raw_sensors->servo.l_hip_roll.present_position = joint.position;
+                raw_sensors->servo.l_hip_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_hip_pitch") {
+                raw_sensors->servo.r_hip_pitch.present_position = joint.position;
+                raw_sensors->servo.r_hip_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_hip_pitch") {
+                raw_sensors->servo.l_hip_pitch.present_position = joint.position;
+                raw_sensors->servo.l_hip_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_knee_pitch") {
+                raw_sensors->servo.r_knee.present_position = joint.position;
+                raw_sensors->servo.r_knee.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_knee_pitch") {
+                raw_sensors->servo.l_knee.present_position = joint.position;
+                raw_sensors->servo.l_knee.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_ankle_pitch") {
+                raw_sensors->servo.r_ankle_pitch.present_position = joint.position;
+                raw_sensors->servo.r_ankle_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_ankle_pitch") {
+                raw_sensors->servo.l_ankle_pitch.present_position = joint.position;
+                raw_sensors->servo.l_ankle_pitch.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "right_ankle_roll") {
+                raw_sensors->servo.r_ankle_roll.present_position = joint.position;
+                raw_sensors->servo.r_ankle_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "left_ankle_roll") {
+                raw_sensors->servo.l_ankle_roll.present_position = joint.position;
+                raw_sensors->servo.l_ankle_roll.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "neck_yaw") {
+                raw_sensors->servo.neck_yaw.present_position = joint.position;
+                raw_sensors->servo.neck_yaw.present_velocity = joint.velocity;
+            }
+            else if (joint.name == "head_pitch") {
+                raw_sensors->servo.head_pitch.present_position = joint.position;
+                raw_sensors->servo.head_pitch.present_velocity = joint.velocity;
+            }
+        };
+
+        for (const auto& joint : response.joint_states) {
+            set_servo(joint);
+        }
+
+        emit(std::move(raw_sensors));
+    }
+
     Mujoco::Mujoco(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Mujoco.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Mujoco.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.world_path  = config["world_path"].as<std::string>();
+            const auto mode = config["mode"].as<std::string>("local");
+            cfg.mode        = (mode == "remote") ? Mode::REMOTE : Mode::LOCAL;
+            cfg.remote_host = config["remote_host"].as<std::string>(cfg.remote_host);
+            cfg.remote_port = config["remote_port"].as<std::string>(cfg.remote_port);
+
+            if (cfg.mode == Mode::REMOTE) {
+                log<INFO>("Mujoco running in remote mode using bridge at", cfg.remote_host + ":" + cfg.remote_port);
+                return;
+            }
 
             // load and compile
             log<INFO>("Loading MuJoCo world model from:", cfg.world_path);
@@ -94,7 +326,58 @@ namespace module::platform {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH, Sync<ServoState>>().then(
             "Simulator Update Loop",
             [this] {
-                double sim_delta     = 1.0 / UPDATE_FREQUENCY;
+                double sim_delta = 1.0 / UPDATE_FREQUENCY;
+
+                if (cfg.mode == Mode::REMOTE) {
+                    const auto now = NUClear::clock::now();
+                    const auto dt  = std::chrono::duration_cast<std::chrono::microseconds>(now - current_real_time);
+                    // Drive remote sim time from real elapsed wall-time to avoid slow-motion when this loop runs below
+                    // target frequency.
+                    sim_delta         = std::max(1e-4, std::min(0.05, dt.count() / 1e6));
+                    current_real_time = now;
+
+                    if (!connect_remote_bridge()) {
+                        return;
+                    }
+
+                    SimulationRequest request;
+                    request.sequence_id = ++remote_sequence_id;
+                    request.step_dt     = sim_delta;
+                    request.world_path  = cfg.world_path;
+                    request.reset       = false;
+
+                    for (const auto& servo : servo_state) {
+                        request.joint_commands.push_back(JointCommand(servo.second.servo_name,
+                                                                      servo.second.goal_position,
+                                                                      servo.second.p_gain,
+                                                                      servo.second.torque));
+                    }
+
+                    if (!send_remote_request(request)) {
+                        close(remote_fd);
+                        remote_fd        = -1;
+                        remote_connected = false;
+                        return;
+                    }
+
+                    SimulationResponse response;
+                    if (!read_remote_response(response)) {
+                        log<WARN>("Lost connection to MuJoCo bridge, reconnecting on next tick");
+                        close(remote_fd);
+                        remote_fd        = -1;
+                        remote_connected = false;
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        log<WARN>("MuJoCo bridge reported error:", response.error);
+                        return;
+                    }
+
+                    emit_remote_raw_sensors(response);
+                    return;
+                }
+
                 double next_sim_step = d->time + sim_delta;
                 while (d->time < next_sim_step) {
                     // ctrl
@@ -232,7 +515,9 @@ namespace module::platform {
                 emit(std::move(raw_sensors));
 
                 // render in main thread, not in simulation thread
-                emit(std::make_unique<Render>());
+                if (cfg.mode == Mode::LOCAL) {
+                    emit(std::make_unique<Render>());
+                }
             });
 
         // This trigger updates our current servo state
@@ -253,6 +538,10 @@ namespace module::platform {
         });
 
         on<Trigger<Render>, Single, MainThread>().then("Render Mujoco", [this] {
+            if (cfg.mode != Mode::LOCAL) {
+                return;
+            }
+
             static bool initialized = false;
             if (!initialized) {
                 // init GLFW
@@ -328,6 +617,15 @@ namespace module::platform {
         });
 
         on<Shutdown>().then("Shutdown Mujoco", [this] {
+            if (remote_fd >= 0) {
+                close(remote_fd);
+                remote_fd = -1;
+            }
+
+            if (cfg.mode == Mode::REMOTE) {
+                return;
+            }
+
             // free buffers
             std::free(rgb);
             std::free(depth);
