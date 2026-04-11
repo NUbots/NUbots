@@ -4,6 +4,7 @@ import { ComponentType } from "react";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { AppModel } from "../app/model";
 
+import { DirectorController } from "./controller";
 import { DirectorModel } from "./model";
 import { DirectorNetwork } from "./network";
 import { DirectorView } from "./view";
@@ -19,6 +20,7 @@ export function createDirectorView(opts: {
 
   return () => {
     React.useEffect(() => DirectorNetwork.of(nusightNetwork, model).destroy, [model]);
-    return <DirectorView model={model} Menu={Menu} />;
+    const controller = DirectorController.of();
+    return <DirectorView controller={controller} model={model} Menu={Menu} />;
   };
 }

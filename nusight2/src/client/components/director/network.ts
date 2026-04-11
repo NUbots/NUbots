@@ -25,7 +25,8 @@ export class DirectorNetwork {
   };
 
   @action.bound
-  private onDirectorState(_robot: RobotModel, state: message.behaviour.DirectorState) {
-    this.model.graph = transformDirectorState(state);
+  private onDirectorState(robotModel: RobotModel, state: message.behaviour.DirectorState) {
+    const graph = transformDirectorState(state);
+    this.model.graphsByRobot.set(robotModel.id, graph);
   }
 }
