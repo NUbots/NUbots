@@ -1,7 +1,6 @@
 #include "Mujoco.hpp"
 
 #include <X11/Xlib.h>
-#include <algorithm>
 
 #include "extension/Configuration.hpp"
 
