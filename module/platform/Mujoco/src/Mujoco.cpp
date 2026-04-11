@@ -553,8 +553,8 @@ namespace module::platform {
                 glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
                 glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
                 glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-                glfwWindowHint(GLFW_VISIBLE, 0);  // Make window invisible
-                glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+                glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+                glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
                 glfwWindowHint(GLFW_X11_XCB_VULKAN_SURFACE, 0);
 
                 log<INFO>("Creating window");
@@ -571,6 +571,8 @@ namespace module::platform {
 
                 // Make context current in the main thread
                 glfwMakeContextCurrent(window);
+                glfwSwapInterval(1);
+                glfwShowWindow(window);
 
                 // initialize visualization data structures
                 mjv_defaultCamera(&cam);
@@ -593,16 +595,16 @@ namespace module::platform {
                     mjv_defaultFreeCamera(m, &cam);
                 }
 
-                // set rendering to offscreen buffer
-                mjr_setBuffer(mjFB_OFFSCREEN, &con);
-                if (con.currentBuffer != mjFB_OFFSCREEN) {
-                    log<WARN>("Offscreen rendering not supported, using default/window framebuffer");
+                // set rendering to visible window buffer for local GUI mode
+                mjr_setBuffer(mjFB_WINDOW, &con);
+                if (con.currentBuffer != mjFB_WINDOW) {
+                    log<WARN>("Window framebuffer not supported, falling back to offscreen buffer");
+                    mjr_setBuffer(mjFB_OFFSCREEN, &con);
                 }
 
-                // get size of active renderbuffer
-                viewport = mjr_maxViewport(&con);
-                W        = viewport.width;
-                H        = viewport.height;
+                // get current framebuffer size
+                glfwGetFramebufferSize(window, &W, &H);
+                viewport = {0, 0, W, H};
 
                 // allocate rgb and depth buffers
                 rgb   = (unsigned char*) std::malloc(3 * W * H);
@@ -613,6 +615,10 @@ namespace module::platform {
 
                 initialized = true;
             }
+
+            glfwGetFramebufferSize(window, &W, &H);
+            viewport = {0, 0, W, H};
+            glfwPollEvents();
             render();
         });
 
