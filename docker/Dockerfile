@@ -39,12 +39,14 @@
 ##############################################
 FROM nvcr.io/nvidia/jetpack-linux-aarch64-crosscompile-x86:6.1
 
+ARG platform=generic
+
 # Prevent interactive prompts during apt-get installs (e.g. tzdata, keyboard-configuration)
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Run JetPack sysroot setup (extracts L4T target filesystem and toolchain)
 COPY usr/local/bin/container_setup.sh /usr/local/bin/container_setup.sh
-RUN /usr/local/bin/container_setup.sh
+RUN /usr/local/bin/container_setup.sh ${platform}
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
@@ -103,7 +105,6 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 #   | | (_) | (_) | | (__| | | | (_| | | | | | #
 #   |_|\___/ \___/|_|\___|_| |_|\__,_|_|_| |_| #
 ################################################
-ARG platform=generic
 ARG prefix=/usr/local
 
 # Create a python virtual environment at ${PREFIX} to decouple python packages from the system
@@ -122,7 +123,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
-RUN install-package libncurses-dev
+RUN install-package -p ${platform} libncurses-dev
 
 RUN pip3 install pyyaml mako
 
@@ -139,10 +140,19 @@ RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0
 # Protobuf
 RUN install-package -p ${platform} protobuf-compiler && \
     install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
-    -DWITH_PROTOC="/usr/bin/protoc" \
+    -Dprotobuf_PROTOC_EXECUTABLE="/usr/bin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
     -DBUILD_SHARED_LIBS=OFF
+
+RUN if [ "${platform}" = "orinnx" ]; then \
+    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    --toolchain-dir /usr \
+    -Dprotobuf_PROTOC_EXECUTABLE="/usr/bin/protoc" \
+    -Dprotobuf_BUILD_TESTS=OFF \
+    -Dprotobuf_BUILD_LIBPROTOC=ON \
+    -DBUILD_SHARED_LIBS=OFF; \
+    fi
 
 # OpenVino - Dependencies
 RUN install-package opencl-c-headers \
@@ -324,7 +334,7 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
-RUN install-package -p ${platform} libusb-1.0-0-dev
+RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev
 
 RUN install-from-source https://github.com/realsenseai/librealsense/archive/refs/tags/v2.57.7.tar.gz \
     -DBUILD_EXAMPLES=false \

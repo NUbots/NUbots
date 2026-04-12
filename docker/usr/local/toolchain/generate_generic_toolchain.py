@@ -37,7 +37,7 @@ target = {
     "asm_flags": ["-DELF", "-D__x86_64__", "-DPIC"],
     "asm_object": "elf64",
     "prefix": "",
-    "arch": "x86_64"
+    "arch": "x86_64",
 }
 
 if __name__ == "__main__":

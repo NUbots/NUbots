@@ -39,7 +39,6 @@ def generate_cmake_toolchain(target, prefix):
             set(CMAKE_SYSROOT "{sysroot}")
             set(CMAKE_FIND_ROOT_PATH
                     "{sysroot}"
-                    "{sysroot}/usr/aarch64-linux-gnu"
                     "{sysroot}/usr/lib"
                     "{toolchain_path}/aarch64-buildroot-linux-gnu/sysroot"
                     "{toolchain_path}"
@@ -106,22 +105,13 @@ def generate_cmake_toolchain(target, prefix):
 
     return template.format(
         c_compile_options="\n".join(
-            [
-                'string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["flags"]
-            ]
+            ['string(APPEND CMAKE_C_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
         ),
         cxx_compile_options="\n".join(
-            [
-                'string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["flags"]
-            ]
+            ['string(APPEND CMAKE_CXX_FLAGS_INIT "{} ")'.format(flag) for flag in target["flags"]]
         ),
         asm_compile_options="\n".join(
-            [
-                'string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag)
-                for flag in target["asm_flags"]
-            ]
+            ['string(APPEND CMAKE_NASM_ASM_FLAGS_INIT "{} ")'.format(flag) for flag in target["asm_flags"]]
         ),
         asm_object=target["asm_object"],
         prefix=prefix,
@@ -130,7 +120,7 @@ def generate_cmake_toolchain(target, prefix):
         cxx_compiler=target.get("cxx_compiler", "/usr/bin/g++"),
         sysroot_block=sysroot_block,
         sysroot=sysroot,
-        linker_flags_block=linker_flags_block
+        linker_flags_block=linker_flags_block,
     )
 
 
@@ -172,8 +162,7 @@ def generate_meson_cross_file(target):
     flags = ", ".join(
         [
             "'{}'".format(flag)
-            for flag in target["release_flags"]
-            + [param.replace(" ", "', '") for param in target["flags"]]
+            for flag in target["release_flags"] + [param.replace(" ", "', '") for param in target["flags"]]
         ]
     )
 

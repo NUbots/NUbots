@@ -138,7 +138,10 @@ def handle_autotools(archive, args, env):
 
     # Configure the library
     subprocess.run(
-        ["./configure", f"--prefix={args.prefix}", host_arg, *args.extra_args], cwd=args.configure_path, env=env, check=True
+        ["./configure", f"--prefix={args.prefix}", host_arg, *args.extra_args],
+        cwd=args.configure_path,
+        env=env,
+        check=True,
     )
 
     # Build the library
@@ -192,7 +195,7 @@ def handle_cmake(archive, args, env):
             *args.extra_args,
             f"-DCMAKE_BUILD_TYPE=Release",
             *(
-                [f"-DCMAKE_TOOLCHAIN_FILE={os.path.join(args.prefix, 'toolchain.cmake')}"]
+                [f"-DCMAKE_TOOLCHAIN_FILE={os.path.join(args.toolchain_dir, 'toolchain.cmake')}"]
                 if not args.no_toolchain
                 else []
             ),
@@ -259,7 +262,7 @@ def handle_meson(archive, args, env):
             build,
             args.configure_path,
             *args.extra_args,
-            *([f"--cross-file={os.path.join(args.prefix, 'meson.cross')}"] if not args.no_toolchain else []),
+            *([f"--cross-file={os.path.join(args.toolchain_dir, 'meson.cross')}"] if not args.no_toolchain else []),
             "--buildtype=release",
             f"--pkg-config-path={env['PKG_CONFIG_PATH']}",
             "-Dstrip=true",
@@ -305,6 +308,7 @@ if __name__ == "__main__":
     parser.add_argument("--header-path", default="include", help="Location to install lone header files")
     parser.add_argument("--jobs", default=mp.cpu_count(), type=int, help="Number of build jobs to run in parallel")
     parser.add_argument("--no-toolchain", action="store_true", help="Don't load any toolchain settings")
+    parser.add_argument("--toolchain-dir", help="Toolchain directory")
     parser.add_argument(
         "--autotools-force-regenerate", action="store_true", help="Force autotools to regenerate configuration files"
     )
@@ -315,7 +319,8 @@ if __name__ == "__main__":
 
     args, extra_args = parser.parse_known_args()
     args.extra_args = extra_args
-
+    if not args.toolchain_dir:
+        args.toolchain_dir = args.prefix
     # Make build directory
     os.makedirs(args.build_folder, exist_ok=True)
 
@@ -373,7 +378,7 @@ if __name__ == "__main__":
     # Load toolchain environment variables
     env = {}
     if not args.no_toolchain:
-        with open(os.path.join(args.prefix, "toolchain.json"), "r") as f:
+        with open(os.path.join(args.toolchain_dir, "toolchain.json"), "r") as f:
             env = json.load(f)
 
     # Cherry pick host environment

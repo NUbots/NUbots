@@ -25,8 +25,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-# Find Aravis
-find_package(Aravis REQUIRED)
-
 # Build our NUClear module
-nuclear_module(LIBRARIES Aravis::Aravis)
+nuclear_module()

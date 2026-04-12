@@ -77,9 +77,7 @@ target = {
 }
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate toolchain files for the docker images"
-    )
+    parser = argparse.ArgumentParser(description="Generate toolchain files for the docker images")
     parser.add_argument(
         "--prefix",
         default=os.path.join("usr", "local"),
