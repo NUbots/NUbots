@@ -66,6 +66,7 @@ RUN install-package \
     ccache \
     ninja-build \
     cmake \
+    cmake-curses-gui \
     meson \
     git \
     zlib1g-dev \
@@ -123,7 +124,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
-RUN install-package -p ${platform} libncurses-dev
+RUN install-package -p ${platform} libncurses-dev libc6-dev
 
 RUN pip3 install pyyaml mako
 
@@ -133,6 +134,11 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/r
 # OpenCL loader library
 RUN install-package ruby autotools-dev automake libtool
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+
+RUN ln -sf libm.so.6      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libm.so && \
+    ln -sf libpthread.so.0 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libpthread.so && \
+    ln -sf libdl.so.2      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libdl.so && \
+    ln -sf librt.so.1      /l4t/targetfs/usr/lib/aarch64-linux-gnu/librt.so
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz

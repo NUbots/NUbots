@@ -62,7 +62,8 @@ target = {
         f"-B{_TOOLCHAIN_DIR}/lib/gcc/{_CROSS_PREFIX}",
         f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
         f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib",
-        "-Wl,--allow-shlib-undefined"
+        "-Wl,--allow-shlib-undefined",
+        "-Wl,-Bdynamic",
     ],
     "asm_object": "elf64",
     "arch": "aarch64",
