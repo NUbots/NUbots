@@ -23,4 +23,5 @@ Add this module to your role to make the robot look at balls or goals when reque
 
 ## Dependencies
 
+- Director
 - The coordinates utility

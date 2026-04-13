@@ -35,9 +35,9 @@ Hoc: # Camera to observation plane (world) homogeneous transformation
 
 ## Emits
 
-`message::output::CompressedImage` with a `JPEG` FOURCC code
+- `message::output::CompressedImage` with a `JPEG` FOURCC code
 
 ## Dependencies
 
-Eigen
-libjpeg-turbo
+- Eigen
+- libjpeg-turbo

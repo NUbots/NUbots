@@ -2,15 +2,15 @@
 
 ## Description
 
-Module that enables the robot to vocalize specified text using a text-to-speech tool and optionally perform a nodding gesture to indicate speaking.
+Module that enables the robot to vocalise specified text using a text-to-speech tool and optionally perform a nodding gesture to indicate speaking.
 
 ## Usage
 
-Include this module whenever the robot needs to vocalize or acknowledge messages via speech-like actions.
+Include this module whenever the robot needs to vocalise or acknowledge messages via speech-like actions.
 
 ## Consumes
 
-- `message::skill::Say`: A Task requesting to vocalize a text string. Contains the text to be spoken and an optional nod gesture request.
+- `message::skill::Say`: A Task requesting to vocalise a text string. Contains the text to be spoken and an optional nod gesture request.
 
 ## Emits
 
@@ -18,5 +18,6 @@ Include this module whenever the robot needs to vocalize or acknowledge messages
 
 ## Dependencies
 
+- Director
 - **mimic3**: External python based command-line text-to-speech tool.
 - **aplay**: Command-line sound player for Linux.

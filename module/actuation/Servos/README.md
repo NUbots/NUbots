@@ -24,3 +24,5 @@ Emit a servo, limb or sequence task, with priority to run according to the Direc
 - Limb messages from `message/actuation/Limbs.proto` when a Sequence message from `message/actuation/Limbs.proto` is received.
 
 ## Dependencies
+
+- Director

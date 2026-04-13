@@ -22,4 +22,5 @@ Add this module to allow the robot to kick.
 
 ## Dependencies
 
+- Director
 - Eigen

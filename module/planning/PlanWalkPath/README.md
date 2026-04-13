@@ -28,6 +28,7 @@ Include this module in the role and emit the provide Task for either reaction. T
 
 ## Dependencies
 
+- Director
 - The walk engine
 - Mathematics comparison utility
 - Mathematics intersection utility
