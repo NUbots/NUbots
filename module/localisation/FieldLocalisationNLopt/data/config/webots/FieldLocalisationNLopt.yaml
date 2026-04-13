@@ -75,14 +75,8 @@ opt:
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
-ekf:
-  # Process noise diagonal [q_x, q_y, q_theta] added to P each Sensors prediction step
-  # At ~100Hz: 0.001 ≈ 0.1 m²/s position drift. Increase if robot walks fast or IMU drifts.
-  process_noise: [0.001, 0.001, 0.001]
-  # Measurement noise scale: R = measurement_noise_scale * cost * I₃
-  # At cost_threshold=2.0 this gives R=1.0*I; tune relative to typical P values.
-  measurement_noise_scale: 0.5
-  # Initial covariance: P₀ = initial_covariance * I₃ at startup and after reset
-  initial_covariance: 1.0
-  # Large reset covariance: P = large_reset_covariance * I₃ after uncertainty_reset()
-  large_reset_covariance: 10.0
+exponential_filter:
+  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
+  # [x, y, theta] - Higher values = more responsive to new measurements
+  # Lower values = more smoothed/filtered output
+  alpha: [0.1, 0.1, 0.5]
