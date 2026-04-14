@@ -46,7 +46,7 @@ target = {
         f"-isystem {_TOOLCHAIN_DIR}/lib/gcc/{_CROSS_PREFIX}/11.3.0/include",
         f"-isystem {_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/sysroot/usr/include",
         f"-isystem {_TARGETFS_DIR}/usr/include",
-        f"-isystem {_TARGETFS_DIR}/usr/include/aarch64-linux-gnu"
+        f"-isystem {_TARGETFS_DIR}/usr/include/aarch64-linux-gnu",
     ],
     "release_flags": ["-O3", "-DNDEBUG"],
     "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
