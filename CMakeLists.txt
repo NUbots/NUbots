@@ -28,8 +28,13 @@ cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
 # Set the compiler version of the project
-set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
+if (NOT CMAKE_CROSSCOMPILING)
+  message(STATUS "Compiling to x86, using gcc-13 and g++-13")
+  set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
+  set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
+else()
+  message(STATUS "Cross compiling to ARM, using ARM compilers")
+endif()
 
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)

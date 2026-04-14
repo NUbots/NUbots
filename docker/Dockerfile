@@ -124,7 +124,11 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
-RUN install-package -p ${platform} libncurses-dev libc6-dev
+RUN install-package -p ${platform} libncurses-dev libncurses6 libtinfo6 libc6-dev && \
+    if [ "${platform}" = "orinnx" ]; then \
+        ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
+        ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
+    fi
 
 RUN pip3 install pyyaml mako
 
@@ -291,9 +295,12 @@ RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73
     --patch https://patch-diff.githubusercontent.com/raw/mandreyel/mio/pull/93.patch
 
 # zstr header to have file streams that do zlib compression
-RUN install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6/src/zstr.hpp \
+RUN INCLUDE_PREFIX=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local" || echo "/usr/local") && \
+    install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6/src/zstr.hpp \
+    --prefix ${INCLUDE_PREFIX} --no-toolchain \
     --header-path include/zstr && \
     install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6/src/strict_fstream.hpp \
+    --prefix ${INCLUDE_PREFIX} --no-toolchain \
     --header-path include/zstr
 
 # Visual Mesh
@@ -303,7 +310,9 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
     -DBUILD_OPENCL_ENGINE=ON
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
-RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+RUN INCLUDE_PREFIX=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local" || echo "/usr/local") && \
+    install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp \
+    --prefix ${INCLUDE_PREFIX} --no-toolchain
 
 # TinyXML
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
@@ -341,10 +350,6 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
     rm -rf /tmp/booster_robotics_sdk
 
 RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev
-
-RUN install-from-source https://github.com/realsenseai/librealsense/archive/refs/tags/v2.57.7.tar.gz \
-    -DBUILD_EXAMPLES=false \
-    -DBUILD_GRAPHICAL_EXAMPLES=false
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
