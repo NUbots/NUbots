@@ -540,7 +540,6 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           cameraYaw={model.camera.yaw}
         />
       ))}
-      w
       {model.fieldIntersectionsVisible && robot.rIFf && <FieldIntersections intersections={robot.rIFf} />}
 
       {model.fieldIntersectionsVisible && robot.associationLines && <AssociationLines lines={robot.associationLines} />}

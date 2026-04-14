@@ -420,10 +420,13 @@ namespace module::localisation {
                                       "rad)");
                         }
 
-                        // Always update state to the best candidate so the emitted field position is
-                        // meaningful (not zero). Broadcasted with cost=999 so teammates ignore it.
-                        state          = proposed_state;
-                        filtered_state = proposed_state;
+                        // Use the all-time best state during startup, not the current frame's best.
+                        // The current frame's best can alternate between mirror positions when both
+                        // sidelines look equally good from field lines alone — using the monotonically-
+                        // improving startup_best_state prevents this frame-to-frame flipping.
+                        // Broadcasted with cost=999 so teammates ignore it.
+                        state          = startup_best_state;
+                        filtered_state = startup_best_state;
 
                         // Commit once confident: cost is low AND either a teammate has confirmed
                         // our position (breaking mirror ambiguity) or we've waited long enough.
@@ -508,6 +511,14 @@ namespace module::localisation {
 
                     // Check if uncertainty is too high and trigger reset if needed
                     emit(graph("Cost", chosen_state_cost));
+
+                    // Position error vs ground truth (always emitted when ground truth is available)
+                    if (robot_pose_ground_truth) {
+                        Eigen::Vector2d true_pos =
+                            Eigen::Isometry3d(robot_pose_ground_truth->Hft).translation().head<2>();
+                        Eigen::Vector2d est_pos(filtered_state.x(), filtered_state.y());
+                        emit(graph("Position error (m)", (true_pos - est_pos).norm()));
+                    }
                     if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         // Cost has been high too many times, reset the localisation
