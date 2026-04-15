@@ -215,7 +215,7 @@ RUN mkdir build && cd build && \
     ninja -j$(nproc) && ninja -j$(nproc) install
 
 # Move OpenVino libraries to our library path
-RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "Intel64") && \
+RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && \
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
     cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
@@ -354,7 +354,7 @@ RUN curl -L https://gist.githubusercontent.com/ZeoNyph/69e4ec80b66cc083191522de7
     -o install_script.patch && \
     patch -p1 < install_script.patch
 
-RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
+RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "x86_64") && \
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
