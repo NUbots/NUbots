@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2019 NUbots
+# Copyright (c) 2026 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.
@@ -31,8 +31,8 @@ import os
 
 import generate_toolchains
 
-_TOOLCHAIN_DIR = "/l4t/toolchain/aarch64--glibc--stable-2022.08-1"
-_CROSS_PREFIX = "aarch64-buildroot-linux-gnu"
+_CROSS_PREFIX = "aarch64-linux-gnu"
+_GCC_VERSION = "12"
 _TARGETFS_DIR = "/l4t/targetfs"
 
 target = {
@@ -40,27 +40,25 @@ target = {
         "-fPIC",
         "-mtune=cortex-a78ae",
         "-march=armv8.2-a",
-        f"-isystem {_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/include/c++/11.3.0",
-        f"-isystem {_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/include/c++/11.3.0/{_CROSS_PREFIX}",
-        f"-isystem {_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/include/c++/11.3.0/backward",
-        f"-isystem {_TOOLCHAIN_DIR}/lib/gcc/{_CROSS_PREFIX}/11.3.0/include",
-        f"-isystem {_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/sysroot/usr/include",
+        f"-isystem /usr/{_CROSS_PREFIX}/include/c++/{_GCC_VERSION}",
+        f"-isystem /usr/{_CROSS_PREFIX}/include/c++/{_GCC_VERSION}/{_CROSS_PREFIX}",
+        f"-isystem /usr/{_CROSS_PREFIX}/include/c++/{_GCC_VERSION}/backward",
+        f"-isystem /usr/lib/gcc-cross/{_CROSS_PREFIX}/{_GCC_VERSION}/include",
+        f"-isystem {_TARGETFS_DIR}/usr/local/include",
         f"-isystem {_TARGETFS_DIR}/usr/include",
-        f"-isystem {_TARGETFS_DIR}/usr/include/aarch64-linux-gnu",
+        f"-isystem {_TARGETFS_DIR}/usr/include/{_CROSS_PREFIX}",
     ],
     "release_flags": ["-O3", "-DNDEBUG"],
     "asm_flags": ["-DELF", "-D__aarch64__", "-DPIC"],
     "linker_flags": [
         f"--sysroot={_TARGETFS_DIR}",
-        f"-L{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
+        f"-L{_TARGETFS_DIR}/usr/lib/{_CROSS_PREFIX}",
         f"-L{_TARGETFS_DIR}/usr/lib",
-        f"-L{_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/sysroot/usr/lib",
-        "-L/usr/local/cuda-12.6/targets/aarch64-linux/lib",
-        f"-B{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
+        f"-L/usr/{_CROSS_PREFIX}/lib",
+        f"-B{_TARGETFS_DIR}/usr/lib/{_CROSS_PREFIX}",
         f"-B{_TARGETFS_DIR}/usr/lib",
-        f"-B{_TOOLCHAIN_DIR}/{_CROSS_PREFIX}/sysroot/usr/lib",
-        f"-B{_TOOLCHAIN_DIR}/lib/gcc/{_CROSS_PREFIX}",
-        f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib/aarch64-linux-gnu",
+        f"-B/usr/lib/gcc-cross/{_CROSS_PREFIX}/{_GCC_VERSION}",
+        f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib/{_CROSS_PREFIX}",
         f"-Wl,-rpath-link,{_TARGETFS_DIR}/usr/lib",
         "-Wl,--allow-shlib-undefined",
         "-Wl,-Bdynamic",
@@ -68,13 +66,13 @@ target = {
     "asm_object": "elf64",
     "arch": "aarch64",
     "prefix": _CROSS_PREFIX,
-    "sysroot": "/l4t/targetfs",
-    "c_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-gcc",
-    "cxx_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-g++",
-    "target_c_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-gcc",
-    "target_cxx_compiler": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}-g++",
-    "cross_compile_prefix": f"{_TOOLCHAIN_DIR}/bin/{_CROSS_PREFIX}",
-    "toolchain_path": _TOOLCHAIN_DIR,
+    "sysroot": _TARGETFS_DIR,
+    "c_compiler": f"/usr/bin/{_CROSS_PREFIX}-gcc-{_GCC_VERSION}",
+    "cxx_compiler": f"/usr/bin/{_CROSS_PREFIX}-g++-{_GCC_VERSION}",
+    "target_c_compiler": f"/usr/bin/{_CROSS_PREFIX}-gcc-{_GCC_VERSION}",
+    "target_cxx_compiler": f"/usr/bin/{_CROSS_PREFIX}-g++-{_GCC_VERSION}",
+    "cross_compile_prefix": f"/usr/bin/{_CROSS_PREFIX}",
+    "toolchain_path": "/usr",
 }
 
 if __name__ == "__main__":

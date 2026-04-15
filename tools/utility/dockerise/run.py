@@ -187,7 +187,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "--group-add",
             "video",
             "--group-add",
-            "render",
+            "render_host",
             "--privileged",
         ]
 

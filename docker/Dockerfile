@@ -37,16 +37,12 @@
 #  \___/|____/  |____/ \___|\__|\__,_| .__/  #
 #                                    |_|     #
 ##############################################
-FROM nvcr.io/nvidia/jetpack-linux-aarch64-crosscompile-x86:6.1
+FROM ubuntu:jammy-20260322.1
 
 ARG platform=generic
 
 # Prevent interactive prompts during apt-get installs (e.g. tzdata, keyboard-configuration)
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Run JetPack sysroot setup (extracts L4T target filesystem and toolchain)
-COPY usr/local/bin/container_setup.sh /usr/local/bin/container_setup.sh
-RUN /usr/local/bin/container_setup.sh ${platform}
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
@@ -79,6 +75,9 @@ RUN install-package \
     nano \
     libmagic1 \
     libmagic-dev
+
+RUN --mount=type=bind,source=usr/local/bin,target=/usr/local/bin \
+    /usr/local/bin/container_setup.sh ${platform}
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -182,7 +181,7 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 
     git submodule update --init --recursive
 
 # Build OpenVINO
-WORKDIR /l4t/openvino
+WORKDIR /openvino
 RUN mkdir build && cd build && \
     cmake .. -DBUILD_TESTING:BOOL='OFF' \
     -DCMAKE_BUILD_TYPE:STRING='Release' \
@@ -208,7 +207,7 @@ RUN mkdir build && cd build && \
 # Move OpenVino libraries to our library path
 RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "Intel64") && \
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
-    cp /l4t/openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
+    cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -349,7 +348,7 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64") && \
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
-RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev
+RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-dev
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
@@ -400,15 +399,16 @@ RUN chmod 440 /etc/sudoers.d/user
 # Create the user and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
+ARG render_gid=110
 
 # useradd -G is not sufficient to add the nubots user to the dialout
 # group as docker manages to lose supplementary groups when changing
 # to the nubots user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
 # Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
-
-RUN groupadd --gid 1000 nubots \
-    && useradd --uid 1000 --gid nubots -G audio,dialout,uucp,video,render -m nubots
+RUN groupadd --gid $render_gid render_host \
+    && groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video,render_host -m nubots
 
 USER nubots
 
