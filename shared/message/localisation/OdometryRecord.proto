@@ -1,0 +1,59 @@
+// MIT License
+//
+// Copyright (c) 2025 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.localisation;
+
+import "google/protobuf/timestamp.proto";
+import "Matrix.proto";
+import "Vector.proto";
+import "Transform.proto";
+
+message OdometryRecord {
+    /// Timestamp of the observation
+    google.protobuf.Timestamp timestamp = 1;
+
+    /// Current velocity target from walk command (vx, vy, vtheta)
+    vec3 velocity_target = 2;
+
+    /// Sensor data
+    vec3 accelerometer = 3;
+    vec3 gyroscope = 4;
+
+    /// Actuated joints info (for NUbots, 20 joints are captured)
+    repeated double present_position = 5;
+    repeated double present_velocity = 6;
+    repeated double goal_position = 7;
+
+    /// Kinematic transform from torso to world
+    iso3 Htw = 8;
+    
+    /// Ground truth displacement torso-to-world (computed from Hft relative to start)
+    iso3 Htw_ground_truth = 9;
+
+    /// Ground truth Torso-to-field
+    iso3 Hft = 10;
+}

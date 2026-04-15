@@ -1,0 +1,53 @@
+# This role is used to manually move the robot around in Webots while collecting odometry data.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::GlobalConfig
+  support::configuration::SoccerConfig
+
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  network::PlotJuggler
+
+  # Sensors
+  input::SensorFilter
+  platform::Webots
+
+  # Director
+  extension::Director
+
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+
+  # Skills
+  skill::Walk
+  skill::KickWalk
+  skill::GetUp
+  skill::Look
+
+  # Planners
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+
+  # Purpose
+  purpose::KeyboardWalk
+
+  # Data Collection
+
+  tools::OdometryDataCollector
+
+  support::logging::DataLogging
+)
