@@ -61,6 +61,7 @@ RUN install-package \
     clang \
     ccache \
     ninja-build \
+    unzip \
     cmake \
     cmake-curses-gui \
     meson \
@@ -124,7 +125,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package -p ${platform} libncurses-dev libncurses6 libtinfo6 libc6-dev && \
-    if [ "${platform}" = "orinnx" ]; then \
+    if [ "${platform}" != "generic" ]; then \
         ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
         ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
     fi
@@ -138,23 +139,32 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/r
 RUN install-package ruby autotools-dev automake libtool
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
-RUN ln -sf libm.so.6      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libm.so && \
+RUN if [ "${platform}" != "generic" ]; then \
+    ln -sf libm.so.6      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libm.so && \
     ln -sf libpthread.so.0 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libpthread.so && \
     ln -sf libdl.so.2      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libdl.so && \
-    ln -sf librt.so.1      /l4t/targetfs/usr/lib/aarch64-linux-gnu/librt.so
+    ln -sf librt.so.1      /l4t/targetfs/usr/lib/aarch64-linux-gnu/librt.so; \
+fi
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
+RUN wget -nv https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protoc-21.4-linux-x86_64.zip -O protoc-21.4-linux-x86_64.zip && \
+    unzip protoc-21.4-linux-x86_64.zip -d /usr/ && \
+    rm protoc-21.4-linux-x86_64.zip
+
 # Protobuf
-RUN install-package -p ${platform} protobuf-compiler && \
-    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+RUN install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
     -Dprotobuf_PROTOC_EXECUTABLE="/usr/bin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
     -DBUILD_SHARED_LIBS=OFF
 
-RUN if [ "${platform}" = "orinnx" ]; then \
+# Install natively for Jetson as well, and also install protoc for host
+RUN if [ "${platform}" != "generic" ]; then \
+    wget -nv https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protoc-21.4-linux-aarch_64.zip -O protoc-21.4-linux-aarch_64.zip && \
+    unzip protoc-21.4-linux-aarch_64.zip -d /l4t/targetfs/usr/ && \
+    rm protoc-21.4-linux-aarch_64.zip && \
     install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
     --toolchain-dir /usr \
     -Dprotobuf_PROTOC_EXECUTABLE="/usr/bin/protoc" \
