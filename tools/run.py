@@ -27,7 +27,9 @@
 #
 
 import os
+from platform import machine
 import re
+import subprocess
 
 from termcolor import cprint
 
@@ -66,6 +68,20 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
 
     # Get current environment
     env = os.environ
+
+
+    file_output = subprocess.run(["file", args[0]], capture_output=True, text=True).stdout
+    if "ARM" in file_output:
+        bin_arch = "aarch64"
+    elif "x86-64" in file_output:
+        bin_arch = "x86-64"
+    else:
+        bin_arch = "unknown"
+    cpu_arch = machine()
+
+    if bin_arch != cpu_arch:
+        cprint(f"ERROR: Executable {args[0]} was compiled for {bin_arch} but is running on {cpu_arch}, make sure to use correct target!", "red", attrs=["bold"])
+        exit(1)
 
     if trace:
         env["NUCLEAR_TRACE_FILE"] = trace_output
