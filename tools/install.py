@@ -105,6 +105,11 @@ def run(target, local, user, config, toolchain, **kwargs):
         # Delete toolchain files on the receiver if they no longer exist in our toolchain
         cprint("Installing toolchain files to " + target_toolchain_dir, "blue", attrs=["bold"])
 
+        source_dir = os.path.join("/usr", "local")
+
+        if os.path.exists("/l4t"):
+            source_dir = "/l4t/targetfs" + source_dir
+
         subprocess.run(
             [
                 "rsync",
@@ -126,7 +131,7 @@ def run(target, local, user, config, toolchain, **kwargs):
                 "--delete",
                 "--prune-empty-dirs",
                 "-e ssh",
-                "/usr/local",
+                source_dir,
                 target_toolchain_dir,
             ]
         )
