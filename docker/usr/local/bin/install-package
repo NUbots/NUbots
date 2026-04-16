@@ -1,12 +1,76 @@
 #!/bin/sh
 set -e
 
+# Parse arguments
+platform=""
+packages=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -p)
+            shift
+            platform="$1"
+            shift
+            ;;
+        *)
+            packages="$packages $1"
+            shift
+            ;;
+    esac
+done
+
 # If we are not root, rerun using sudo
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Update pacman, install the packages and cleanup the cache to make the layer smaller
-    pacman -Syu --noconfirm --needed
-    pacman -S --noconfirm --needed "$@"
-    rm -rf /var/cache
+    if [ -n "$platform" ]; then
+        # -p flag was provided with a value
+        if [ "$platform" = "orinnx" ]; then
+            # Install amd64 packages on host AND extract arm64 to sysroot
+            apt-get update
+
+            # Install amd64 versions on host
+            apt-get install -y --no-install-recommends $packages
+
+            # Download arm64 packages and their dependencies to sysroot
+            mkdir -p /tmp/debs
+            chmod 777 /tmp/debs
+            cd /tmp/debs
+
+            # Get recursive dependencies for arm64 and download them
+            for pkg in $packages; do
+                # Download the requested package itself so -dev artifacts (e.g. libudev.so)
+                # are present in the sysroot, not just its runtime dependencies.
+                apt-get download "$pkg:arm64" || { echo "Error: Failed to download $pkg:arm64" >&2; exit 1; }
+
+                deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w" | sort -u)
+                if [ -z "$deps" ]; then
+                    echo "Error: No arm64 package found for $pkg" >&2
+                    exit 1
+                fi
+                for dep in $deps; do
+                    apt-get download "$dep" || { echo "Error: Failed to download $dep:arm64" >&2; exit 1; }
+                done
+            done
+
+            # Extract all downloaded debs to sysroot
+            for deb in /tmp/debs/*.deb; do
+                [ -f "$deb" ] && dpkg -x "$deb" /l4t/targetfs
+            done
+
+            cd /
+            rm -rf /tmp/debs
+            rm -rf /var/cache/apt /var/lib/apt/lists/*
+        else
+            # Normal install for other platforms
+            apt-get update
+            apt-get install -y --no-install-recommends $packages
+            rm -rf /var/cache/apt /var/lib/apt/lists/*
+        fi
+    else
+        # No -p flag, just install the packages
+        apt-get update
+        apt-get install -y --no-install-recommends $packages
+        rm -rf /var/cache/apt /var/lib/apt/lists/*
+    fi
 fi

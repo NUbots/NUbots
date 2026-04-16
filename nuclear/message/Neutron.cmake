@@ -20,7 +20,14 @@ set(py_out "${CMAKE_CURRENT_BINARY_DIR}/python")
 set(dep_out "${CMAKE_CURRENT_BINARY_DIR}/dependencies")
 
 # We need protobuf and python to generate the neutron messages
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG)
+if(Protobuf_FOUND)
+  set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc")
+  set(PROTOBUF_PROTOC_EXECUTABLE "/usr/bin/protoc")
+else()
+  message(WARNING "Falling back to cmake FindProtobuf as Protobuf was not found via CONFIG")
+  find_package(Protobuf REQUIRED)
+endif()
 find_package(Python3 REQUIRED)
 
 # We need eigen for neutron messages
