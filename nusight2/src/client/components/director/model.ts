@@ -29,6 +29,7 @@ export interface GroupModel {
   activeProvider?: ProviderModel;
   parentProvider?: ProviderModel;
   subtasks: TaskModel[];
+  failed: boolean;
 }
 
 export interface ProviderModel {
@@ -76,6 +77,7 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
     activeProvider: undefined,
     parentProvider: undefined,
     subtasks: [],
+    failed: false,
   };
 
   const rootProvider: ProviderModel = {
@@ -114,6 +116,7 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
           activeProvider: undefined,
           parentProvider: undefined,
           subtasks: [],
+          failed: g?.lastRun?.failed ?? false,
         };
       }
     }
