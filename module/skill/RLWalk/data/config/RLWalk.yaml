@@ -1,3 +1,4 @@
+
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
@@ -8,6 +9,7 @@ model:
   output_name: actions
   num_joints: 20
   obs_size: 69
+  action_alpha: 0.65
 
 servos:
   gain: 30.0

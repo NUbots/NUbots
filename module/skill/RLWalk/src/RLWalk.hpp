@@ -46,6 +46,8 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
+            /// @brief Alpha value for the action smoothing filter
+            float action_alpha;
             /// @brief Servo proportional gain used for policy-generated commands
             float servo_gain;
             /// @brief Servo torque value used for policy-generated commands

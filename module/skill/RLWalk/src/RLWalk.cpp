@@ -97,6 +97,7 @@ namespace module::skill {
             cfg.output_name     = config["model"]["output_name"].as<std::string>();
             cfg.num_joints      = config["model"]["num_joints"].as<int>();
             cfg.obs_size        = config["model"]["obs_size"].as<int>();
+            cfg.action_alpha    = config["model"]["action_alpha"].as<float>();
             cfg.servo_gain      = config["servos"]["gain"].as<float>();
             cfg.servo_torque    = config["servos"]["torque"].as<float>();
             cfg.head_servo_gain = config["servos"]["head_gains"].as<float>();
@@ -251,11 +252,10 @@ namespace module::skill {
                     }
 
                     // Filter the actions using an exponential moving average
-                    const double action_filter_alpha = 0.6;
-                    JointVector filtered_action_raw  = clipped_action_raw;
+                    JointVector filtered_action_raw = clipped_action_raw;
                     if (have_last_action) {
                         filtered_action_raw =
-                            action_filter_alpha * clipped_action_raw + (1.0 - action_filter_alpha) * last_action;
+                            cfg.action_alpha * clipped_action_raw + (1.0 - cfg.action_alpha) * last_action;
                     }
 
                     // Store the filtered action in mjlab order without scaling or offsets.
