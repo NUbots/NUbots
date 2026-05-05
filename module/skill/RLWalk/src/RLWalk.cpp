@@ -315,6 +315,14 @@ namespace module::skill {
                 throw std::runtime_error("Model file not found: " + abs);
             }
 
+            if (p.extension() == ".xml") {
+                const std::filesystem::path bin_path = p.parent_path() / (p.stem().string() + ".bin");
+                const auto bin_abs                   = std::filesystem::absolute(bin_path).string();
+                if (!std::filesystem::exists(bin_path)) {
+                    throw std::runtime_error("Model weights file not found: " + bin_abs);
+                }
+            }
+
             log<INFO>("RLWalk init model_path=",
                       abs,
                       " device=",

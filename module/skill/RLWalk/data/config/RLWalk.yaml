@@ -3,7 +3,7 @@
 log_level: INFO
 
 model:
-  path: model.onnx
+  path: walk_model.onnx
   device: CPU
   input_name: obs
   output_name: actions
