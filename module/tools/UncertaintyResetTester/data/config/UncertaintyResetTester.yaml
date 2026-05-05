@@ -1,0 +1,28 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# NBS playback mode.
+#   FAST       - as fast as possible
+#   REALTIME   - as fast as the messages were recorded
+#   SEQUENTIAL - one message at a time, waits for downstream reactions to finish
+#                (recommended for this role: it makes reset timing reflect actual
+#                worst-case work rather than getting starved by other messages)
+playback_mode: SEQUENTIAL
+
+# Messages required to drive FieldLocalisationNLopt cost evaluation.
+messages:
+  message.platform.RawSensors: true
+  message.vision.FieldLines: true
+  message.vision.FieldIntersections: true
+  message.vision.Goals: true
+
+# When > 0, every `force_reset_period` seconds the tester emits a `PenaltyReset` to
+# `force_reset_position`, pushing the filter to a deliberately bad pose so that on
+# the next FieldLines update the cost-driven uncertainty reset will fire. Set to 0
+# to only time naturally-occurring resets in the recording.
+force_reset_period: 0.0
+
+# Bad pose [x, y, theta] that the filter is forced into when `force_reset_period > 0`.
+# Default is the centre of the field rotated 90 deg, which is rarely the true pose
+# in practice and so should reliably exceed the cost threshold.
+force_reset_position: [0.0, 0.0, 1.5707963]

@@ -1,0 +1,23 @@
+# This role replays an NBS recording through FieldLocalisationNLopt and times every
+# UncertaintyResetFieldLocalisation -> FinishReset round-trip via tools::UncertaintyResetTester.
+# Use to characterise (and regression-test) the wall-clock cost of the uncertainty reset.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::GlobalConfig
+  support::configuration::SoccerConfig # Field description
+  # Network (so reset timing graphs can be observed in NUsight)
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  # Localisation under test
+  input::SensorFilter
+  localisation::FieldLocalisationNLopt
+  # Test driver and NBS playback
+  tools::UncertaintyResetTester
+  nbs::Player
+)
