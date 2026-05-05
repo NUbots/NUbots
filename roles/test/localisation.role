@@ -9,6 +9,7 @@ nuclear_role(
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig # Field description
+  support::logging::DataLogging # NBS recording
   # Network
   network::NUClearNet
   network::NetworkForwarder
