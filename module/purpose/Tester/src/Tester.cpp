@@ -39,7 +39,6 @@
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
-#include "message/strategy/AvoidRobot.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -58,7 +57,6 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
-    using message::strategy::AvoidRobot;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
 
@@ -72,7 +70,6 @@ namespace module::purpose {
             this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
             cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
-            cfg.avoid_robot_priority            = config["tasks"]["avoid_robot_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
             cfg.walk_to_kick_ball_priority      = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
             cfg.walk_to_field_position_priority = config["tasks"]["walk_to_field_position_priority"].as<int>();
@@ -106,9 +103,6 @@ namespace module::purpose {
                 }
                 if (cfg.walk_to_ball_priority > 0) {
                     emit<Task>(std::make_unique<WalkToBall>(), cfg.walk_to_ball_priority);
-                }
-                if (cfg.avoid_robot_priority > 0) {
-                    emit<Task>(std::make_unique<AvoidRobot>(), cfg.avoid_robot_priority);
                 }
                 if (cfg.walk_to_kick_ball_priority > 0) {
                     emit<Task>(std::make_unique<WalkToKickBall>(), cfg.walk_to_kick_ball_priority);

@@ -43,10 +43,22 @@ namespace module::strategy {
     using message::input::Sensors;
     using AvoidRobotTask = message::strategy::AvoidRobot;
 
+    // TODO: Figure out whether backwards step should be the primary behaviour for AvoidRobot
+    static Eigen::Vector2d backwards_step(const Eigen::Vector2d& retreat_vec,
+                                          const Eigen::Vector2d& current_blend,
+                                          double min_valid_obstacle_distance) {
+        if (current_blend.squaredNorm() <= min_valid_obstacle_distance) {
+            return retreat_vec; // fallback pure retreat
+        }
+        Eigen::Vector2d normalized = current_blend;
+        normalized.normalize();
+        return normalized;
+    }
+
     AvoidRobot::AvoidRobot(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Startup>().then([this] {
-            log<INFO>("AvoidRobot loaded");
+            log<DEBUG>("AvoidRobot loaded");
         });
 
         on<Configuration>("AvoidRobot.yaml").then([this](const Configuration& config) {
@@ -62,12 +74,12 @@ namespace module::strategy {
             cfg.near_field_avoidance_distance = config["near_field_avoidance_distance"].as<double>();
         });
 
-        on<Provide<AvoidRobotTask>, Optional<With<Robots>>, With<Sensors>>().then(
+        on<Provide<AvoidRobotTask>, With<Robots>, With<Sensors>>().then(
             [this](const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
             const auto& Hrw = sensors.Hrw;
             if (!robots || robots->robots.empty()) {
                 avoid_active = false;
-                log<INFO>("AvoidRobot tick: no robots available");
+                log<DEBUG>("AvoidRobot tick: no robots available");
                 return;
             }
 
@@ -88,17 +100,21 @@ namespace module::strategy {
 
             // Enter avoidance when either (a) close enough to be immediately unsafe, or (b) in-front and within
             // the standard activation threshold
-            if (near_field_obstacle || (obstacle_in_front && nearest_dist_to_opp < cfg.min_distance_threshold)) {
-                avoid_active = true;
-                log<INFO>("Setting Avoidance mode to TRUE");
-            }
+            const bool should_enter_avoidance = near_field_obstacle ? true
+                                                                 : (obstacle_in_front && nearest_dist_to_opp < cfg.min_distance_threshold);
+
             // Exit avoidance only once we are no longer in the forced near-field zone and either not in-front
             // anymore or far enough away that we avoid rapid on/off switching near the distance threshold.
-            else if (!near_field_obstacle
-                     && (!obstacle_in_front
-                         || nearest_dist_to_opp > (cfg.min_distance_threshold + cfg.threshold_margin))) {
+            const bool should_exit_avoidance = (!near_field_obstacle)
+                                                && (!obstacle_in_front || nearest_dist_to_opp > (cfg.min_distance_threshold + cfg.threshold_margin));
+
+            if (should_enter_avoidance) {
+                avoid_active = true;
+                log<DEBUG>("Setting Avoidance mode to TRUE");
+            }
+            else if (should_exit_avoidance) {
                 avoid_active = false;
-                log<INFO>("Setting Avoidance mode to FALSE");
+                log<DEBUG>("Setting Avoidance mode to FALSE");
             }
 
             if (avoid_active && nearest_dist_to_opp > cfg.min_valid_obstacle_distance) {
@@ -116,12 +132,7 @@ namespace module::strategy {
                                                     + (cfg.retreat_avoidance_weight * away_direction);
 
                 // If blend weights collapse to an invalid tiny vector, fall back to a stable pure retreat vector
-                if (blended_direction.squaredNorm() <= cfg.min_valid_obstacle_distance) {
-                    blended_direction = away_direction;
-                }
-                else {
-                    blended_direction.normalize();
-                }
+                blended_direction = backwards_step(away_direction, blended_direction, cfg.min_valid_obstacle_distance);
 
                 const Eigen::Vector3d velocity_target(cfg.avoidance_walk_speed * blended_direction.x(),
                                                       cfg.avoidance_walk_speed * blended_direction.y(),
