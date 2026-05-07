@@ -108,11 +108,17 @@ namespace module::localisation {
                 // Calculate cost using NLopt
                 int start_time = NUClear::clock::now().time_since_epoch().count();
                 for (const auto& angle : angles) {
+                    log<WARN>("Starting field line optimisation for hypothesis", x, y, angle);
+                    int start_of_field_line_opt = NUClear::clock::now().time_since_epoch().count();
                     hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
                                                                         field_lines.rPWw,
                                                                         field_intersections,
                                                                         goals));
                     ++hypothesis_count;
+                    int end_of_field_line_opt = NUClear::clock::now().time_since_epoch().count();
+                    log<WARN>("Local search: time for field line optimisation",
+                              (end_of_field_line_opt - start_of_field_line_opt) / 1e9,
+                              "seconds");
 
                     // Periodic progress log to find hotspots
                     if ((hypothesis_count & 0x1FF) == 0) {  // every 512 calls
@@ -128,7 +134,7 @@ namespace module::localisation {
             }
         }
 
-        log<WARN>("Local search complete: total hypotheses tried", hypothesis_count);
+        log<WARN>("!!! Local search complete: total hypotheses tried", hypothesis_count);
 
         log<WARN>("Step 5");
 

@@ -479,8 +479,8 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
-        /*int current_time = NUClear::clock::now().time_since_epoch().count();
-        log<WARN>("Starting optimization with initial guess",
+        int current_time = NUClear::clock::now().time_since_epoch().count();
+        /*log<WARN>("Starting optimization with initial guess",
                   initial_guess.x(),
                   initial_guess.y(),
                   initial_guess.z(),
