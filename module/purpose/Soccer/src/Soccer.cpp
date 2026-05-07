@@ -70,11 +70,11 @@ namespace module::purpose {
     using message::platform::ResetWebotsServos;
     using message::purpose::FieldPlayer;
     using message::purpose::FindPurpose;
-    using message::strategy::AvoidRobot;
     using message::purpose::Goalie;
     using message::purpose::Purpose;
     using message::skill::Look;
     using message::skill::Walk;
+    using message::strategy::AvoidRobot;
     using message::strategy::FallRecovery;
     using message::support::GlobalConfig;
 

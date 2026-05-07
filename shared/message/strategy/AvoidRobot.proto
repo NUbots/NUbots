@@ -27,5 +27,4 @@ syntax = "proto3";
 
 package message.strategy;
 
-message AvoidRobot {
-}
+message AvoidRobot {}
