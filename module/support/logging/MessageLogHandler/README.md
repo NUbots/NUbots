@@ -12,14 +12,10 @@ Include this module and configure NetworkForwarder or DataLogging to forward the
 
 ## Consumes
 
-- NUClear::message::LogMessage
-- NUClear::message::ReactionStatistics
+- `NUClear::message::LogMessage`
+- `NUClear::message::ReactionStatistics`
 
 ## Emits
 
-- message::nuclear::LogMessage
-- message::nuclear::ReactionStatistics
-
-## Dependencies
-
-None
+- `message::nuclear::LogMessage`
+- `message::nuclear::ReactionStatistics`

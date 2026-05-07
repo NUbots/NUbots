@@ -1,8 +1,9 @@
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
 
 import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
+import { RobotModel } from "../robot/model";
 
 export type ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
 export const ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
@@ -194,6 +195,22 @@ export class DirectorModel {
 
   static of = memoize((appModel: AppModel) => new DirectorModel(appModel));
 
-  /** Most recently received enriched graph */
-  @observable.ref graph?: DirectorGraph;
+  /** Currently selected robot */
+  @observable.ref selectedRobot?: RobotModel;
+
+  /** Map of robot id to most recently received enriched graph for that robot */
+  graphsByRobot = observable.map<string, DirectorGraph>(undefined, { deep: false });
+
+  @computed
+  get robots(): RobotModel[] {
+    return this.appModel.robots.filter((r) => r.enabled);
+  }
+
+  @computed
+  get graph(): DirectorGraph | undefined {
+    const robot = this.selectedRobot ?? this.robots[0];
+    if (!robot) return undefined;
+
+    return this.graphsByRobot.get(robot.id);
+  }
 }
