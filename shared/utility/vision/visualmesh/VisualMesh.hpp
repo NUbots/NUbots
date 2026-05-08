@@ -273,26 +273,27 @@ namespace utility::vision::visualmesh {
     }
 
     /**
-     * @brief Calculates circularity score for one merge option as observed/expected bounded points.
-     * The ball detection can be thought of a cone from the camera, with center of @p uBCw and angular radius of @p
-     * radius, this finds points on the mesh bounded inside that cone through a DFS.
+     * @brief Calculates percentage fill using the n. observed points / expected n. of observed points
+     * The ball detection can be thought of as a cone from the camera, with axis of @p uBCw and angular radius of @p
+     * radius. The cluster is assumed bounded in the cone, and expected points are found using a DFS on the mesh.
      *
-     * @tparam Iterator An input iterator over mesh point indices (column index into @p uPCw)
+     * @tparam Iterator An iterator over mesh point indices (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the mesh pointer Iterator
      * @param first Iterator at beginning of the cluster's mesh point indices
      * @param last Iterator at end of the cluster's mesh point indices
      * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
      * @param uBCw The centre axis of the ball represented as a unit vector in world space.
-     * @param radius Angular radius of the ball, equal to cos(theta).
+     * @param radius Angular radius of the ball, equal to cos(theta) where theta is angle from axis to furthest point.
      * @param uPCw Unit vectors from camera to a point in the mesh in world space.
-     * @return Circularity score measured as observed bounded points divided by expected bounded points.
+     * @return double which is fill percentage measured as observed bounded points divided by expected bounded points.
      */
-    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
-    double find_cluster_circularity(Iterator first,
-                                    Sentinel last,
-                                    const Eigen::MatrixXi& neighbours,
-                                    const Eigen::Vector3d uBCw,
-                                    const double radius,
-                                    const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+    template <typename Iterator, typename Sentinel>
+    double find_cluster_fill(Iterator first,
+                             Sentinel last,
+                             const Eigen::MatrixXi& neighbours,
+                             const Eigen::Vector3d uBCw,
+                             const double radius,
+                             const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
         // Count number of mesh points bounded in cone from camera using DFS to get expected number of bounded points
         std::vector<bool> visited(neighbours.cols(), false);
         std::vector<int> stack{};
@@ -337,12 +338,13 @@ namespace utility::vision::visualmesh {
      * vector. This represents the central axis.
      *
      * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the given mesh iterator
      * @param first Iterator at beginning of the cluster's mesh point indices
      * @param last Iterator at end of the cluster's mesh point indices
      * @param uPCw Unit vectors from the camera to a point in the mesh in world space
      * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
      */
-    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
+    template <typename Iterator, typename Sentinel>
     Eigen::Vector3d find_cluster_central_axis(Iterator first,
                                               Sentinel last,
                                               const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
@@ -364,14 +366,15 @@ namespace utility::vision::visualmesh {
      * largest angular radius possible from the edge points available. Equal to cos(theta), where theta
      * is the angle between the central ball axis (uBCw) and the edge of the ball.
      *
-     * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)
+     * @tparam Iterator An integer iterator over mesh point indexes, (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the Iterator
      * @param first Iterator at beginning of the cluster's mesh point indices
      * @param last Iterator at end of the cluster's mesh point indices
      * @param uPCw Unit vector from camera to a point in the mesh in world space
      * @param uBCw Unit vector from camera to ball central axis in world space
      * @return double, angular radius of cluster equal to cos(theta)
      */
-    template <std::input_iterator Iterator, std::sentinel_for<Iterator> Sentinel>
+    template <typename Iterator, typename Sentinel>
     double find_cluster_angular_radius(Iterator first,
                                        Sentinel last,
                                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
