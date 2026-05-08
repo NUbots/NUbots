@@ -10,6 +10,7 @@ import { AppModel } from "./components/app/model";
 import { AppNetwork } from "./components/app/network";
 import { AppView } from "./components/app/view";
 import { installChart } from "./components/chart/install";
+import { installDirector } from "./components/director/install";
 import { installKinematics } from "./components/kinematics/install";
 import { installLocalisation } from "./components/localisation/install";
 import { installLogs } from "./components/logs/install";
@@ -36,6 +37,7 @@ installChart({ nav, appModel, nusightNetwork, Menu });
 installVision({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
 installKinematics({ nav, appModel, nusightNetwork, Menu });
+installDirector({ nav, appModel, nusightNetwork, Menu });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);

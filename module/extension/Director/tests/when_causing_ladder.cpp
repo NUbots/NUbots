@@ -44,6 +44,16 @@ namespace {
         operator int() const {
             return value;
         }
+        operator std::string() const {
+            switch (value) {
+                case LEVEL_0: return "LEVEL_0";
+                case LEVEL_1: return "LEVEL_1";
+                case LEVEL_2: return "LEVEL_2";
+                case LEVEL_3: return "LEVEL_3";
+                case LEVEL_4: return "LEVEL_4";
+                default: return "UNKNOWN";
+            }
+        }
     };
 
     std::vector<std::string> events;

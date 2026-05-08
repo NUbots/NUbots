@@ -17,4 +17,4 @@ centre_reached_threshold: 1.0
 patrol_reached_threshold: 0.5
 
 # Time to turn on the spot when searching for the ball (in seconds)
-turn_duration: 5.0
+turn_duration: 15.0

@@ -11,12 +11,10 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Distance from the ball at which to perform actions
-            double ball_action_distance = 0.5;
             /// @brief Delay before playing
             int startup_delay = 0;
             /// @brief Timeout for searching for the ball
-            NUClear::clock::duration ball_search_timeout = std::chrono::seconds(5);
+            NUClear::clock::duration ball_search_timeout = std::chrono::seconds(0);
         } cfg;
 
         /// @brief A high-level update rate for the director tree
