@@ -27,11 +27,14 @@
 #
 
 import os
+from platform import machine
 import re
+import subprocess
 
 from termcolor import cprint
 
 import b
+from tools.utility import processor_check
 from utility.dockerise import run_on_docker
 from utility.roles import all_role_names
 from utility.shell import WrapPty
@@ -66,6 +69,13 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
 
     # Get current environment
     env = os.environ
+
+
+    arch = processor_check.check_architecture(args[0])
+
+    if arch["binary"] != arch["host"]:
+        cprint(f"ERROR: Executable {args[0]} was compiled for {arch['binary']} but is running on {arch['host']}, make sure to use correct target!", "red", attrs=["bold"])
+        exit(1)
 
     if trace:
         env["NUCLEAR_TRACE_FILE"] = trace_output

@@ -1,0 +1,8 @@
+[Match]
+Name=wlp0s20f3
+
+[Network]
+Address=192.168.0.1/16
+Gateway=192.168.3.1
+DNS=192.168.3.1
+DNS=8.8.8.8

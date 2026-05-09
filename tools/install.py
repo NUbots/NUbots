@@ -29,10 +29,14 @@
 import glob
 import os
 import subprocess
+import fabric
+import getpass
+from invoke import Responder
 
 from termcolor import cprint
 
 import b
+from tools.utility import processor_check
 from utility.dockerise import run_on_docker
 
 
@@ -70,8 +74,6 @@ def run(target, local, user, config, toolchain, **kwargs):
 
     # If no user, use our user
     if user is None:
-        import getpass
-
         user = getpass.getuser()
 
     # Target location to install to
@@ -89,9 +91,20 @@ def run(target, local, user, config, toolchain, **kwargs):
     # Build directory on the robot
     build_dir = b.binary_dir
 
+    # Setup connection via Fabric
+    pw = getpass.getpass("Enter SSH password to use: ")
+    conn = fabric.Connection(user=user, host=target, connect_kwargs={"password": pw})
+    sudo_responder = Responder(pattern=r"\[sudo\] password", response=pw + "\n")
+
     # Recursively gather all files under build/bin
     cprint("Installing binaries to " + target_binaries_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
+
+    for file in files:
+        arch = processor_check.check_architecture(file)
+        if arch["binary"] != 'aarch64':
+            cprint(f"File {file} is not compiled for target. Stopping install.","red", attrs=["bold"])
+            exit(1)
 
     # Add a /./ to files so rsync --relative/-R behaves how we want it to
     # For example, /home/NUbots/build/bin/binary will become /home/NUbots/build/bin/./binary
@@ -104,6 +117,16 @@ def run(target, local, user, config, toolchain, **kwargs):
         # Only send toolchain files if ours are newer than the receivers.
         # Delete toolchain files on the receiver if they no longer exist in our toolchain
         cprint("Installing toolchain files to " + target_toolchain_dir, "blue", attrs=["bold"])
+
+        # Fix permissions on /usr/local to allow the user to write
+        if not local:
+            cprint("Fixing permissions on /usr/local", "blue", attrs=["bold"])
+            conn.run("sudo setfacl -m u:{}:rwx /usr/local /usr/local/lib /usr/local/sbin /usr/local/share /usr/local/man".format(user), pty=True, watchers=[sudo_responder])
+
+        source_dir = os.path.join("/usr", "local")
+
+        if os.path.exists("/l4t"):
+            source_dir = "/l4t/targetfs" + source_dir
 
         subprocess.run(
             [
@@ -123,10 +146,9 @@ def run(target, local, user, config, toolchain, **kwargs):
                 "--include=local/man/**",
                 "--exclude=*",
                 "--checksum",
-                "--delete",
                 "--prune-empty-dirs",
                 "-e ssh",
-                "/usr/local",
+                source_dir,
                 target_toolchain_dir,
             ]
         )
@@ -134,7 +156,7 @@ def run(target, local, user, config, toolchain, **kwargs):
         # Run ldconfig on the robot to ensure the system knows that the new libraries are there
         if not local:
             cprint("Running ldconfig on {}".format(target), "blue", attrs=["bold"])
-            subprocess.run(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
+            conn.run("sudo ldconfig", pty=True, watchers=[sudo_responder])
 
     # Get list of different config files for concatenation
     script_files = b.cmake_cache["SCRIPT_FILES"]
