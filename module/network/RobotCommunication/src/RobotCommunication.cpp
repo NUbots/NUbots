@@ -152,6 +152,16 @@ namespace module::network {
             emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
         });
 
+        on<Trigger<GameState>>().then([this](const GameState& game_state) {
+            // Reset message counter when a new game ends
+            if (game_state.phase == GameState::Phase::FINISHED) {
+                if (messages_sent > 0) {
+                    log<INFO>("Game ended. Total messages sent:", messages_sent);
+                    messages_sent = 0;
+                }
+            }
+        });
+
         on<Every<2, Per<std::chrono::seconds>>,
            With<StartupDelay>,
            Optional<With<Ball>>,
@@ -172,7 +182,7 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkTo>& walk_to,
-                         const std::shared_ptr<const Robots>& robot_localisation,
+                         // const std::shared_ptr<const Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -272,45 +282,45 @@ namespace module::network {
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
-                // Where the robot thinks the other robots are.
-                if (robot_localisation && field) {
+                // // Where the robot thinks the other robots are.
+                // if (robot_localisation && field) {
 
-                    // Iterate through robots detected by localisation
-                    for (const auto& local_bot : robot_localisation->robots) {
-                        // Create new robot message
-                        message::input::Robot rc_robot;
+                //     // Iterate through robots detected by localisation
+                //     for (const auto& local_bot : robot_localisation->robots) {
+                //         // Create new robot message
+                //         message::input::Robot rc_robot;
 
-                        // Assign player ID from purpose
-                        rc_robot.player_id = local_bot.purpose.player_id;
+                //         // Assign player ID from purpose
+                //         rc_robot.player_id = local_bot.purpose.player_id;
 
-                        // Convert world to field coords
-                        Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
+                //         // Convert world to field coords
+                //         Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
 
-                        // Store 2D position (x, y) and set (z) to 0
-                        rc_robot.position     = rRFf.cast<float>();
-                        rc_robot.position.z() = 0.0f;
+                //         // Store 2D position (x, y) and set (z) to 0
+                //         rc_robot.position     = rRFf.cast<float>();
+                //         rc_robot.position.z() = 0.0f;
 
-                        // Check if covariance matrix is valid
-                        // Initialise with zeros
-                        rc_robot.covariance = Eigen::Matrix3f::Zero();
-                        if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
-                            rc_robot.covariance.block<2, 2>(0, 0) =
-                                local_bot.covariance.block<2, 2>(0, 0).cast<float>();
-                        }
+                //         // Check if covariance matrix is valid
+                //         // Initialise with zeros
+                //         rc_robot.covariance = Eigen::Matrix3f::Zero();
+                //         if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
+                //             rc_robot.covariance.block<2, 2>(0, 0) =
+                //                 local_bot.covariance.block<2, 2>(0, 0).cast<float>();
+                //         }
 
-                        if (local_bot.teammate) {
-                            rc_robot.team = msg->current_pose.team;
-                        }
-                        else {
-                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
-                                                ? message::input::Team::RED
-                                                : message::input::Team::BLUE;
-                        }
+                //         if (local_bot.teammate) {
+                //             rc_robot.team = msg->current_pose.team;
+                //         }
+                //         else {
+                //             rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
+                //                                 ? message::input::Team::RED
+                //                                 : message::input::Team::BLUE;
+                //         }
 
-                        // Add robot information to list of other robots in message
-                        msg->others.push_back(std::move(rc_robot));
-                    }
-                }
+                //         // Add robot information to list of other robots in message
+                //         msg->others.push_back(std::move(rc_robot));
+                //     }
+                // }
 
 
                 // Current purpose (soccer position) of the Robot
@@ -319,6 +329,26 @@ namespace module::network {
                 }
                 // Override the player ID in the purpose message to be consistent, and in case purpose is not set
                 msg->purpose.player_id = config.player_id;
+
+                // Check serialised size before sending
+                auto payload = NUClear::util::serialise::Serialise<RoboCup>::serialise(*msg);
+                if (payload.size() > 512) {
+                    log<WARN>("RoboCup message size", payload.size(), "bytes exceeds 512 byte limit");
+                }
+                else {
+                    log<DEBUG>("RoboCup message size:", payload.size(), "bytes");
+                }
+
+                // Only count messages during Ready, Set, and Playing states per 2026 rules
+                if (game_state) {
+                    const bool is_counting_state = game_state->phase == GameState::Phase::READY
+                                                   || game_state->phase == GameState::Phase::SET
+                                                   || game_state->phase == GameState::Phase::PLAYING;
+                    if (is_counting_state) {
+                        messages_sent++;
+                        log<DEBUG>("Messages sent this game:", messages_sent, "/ 12000");
+                    }
+                }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
