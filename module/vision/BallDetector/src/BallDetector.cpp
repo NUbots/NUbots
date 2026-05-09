@@ -147,7 +147,7 @@ namespace module::vision {
                 //    d) For each connected component, check if merging nCn or nCn-1 ball candidates is preferred
                 //    e) Create a new ball candidate from the merged candidates, then compute its radius and axis
                 //    f) Mark candidates used for merging as used in merging
-                // 3) Discard all ball candidates who's points are entirely above the green horizon
+                // 3) Discard all ball candidates whose points are entirely above the green horizon
 
                 std::vector<std::vector<int>> clusters{};
                 utility::vision::visualmesh::cluster_points(indices.begin(),
@@ -188,8 +188,8 @@ namespace module::vision {
                 }
 
                 // Find connected components (potential merges) through depth first search of the ball candidates
-                std::vector<bool> visited(ball_candidates.size(), false);
                 const size_t original_count = ball_candidates.size();
+                std::vector<bool> visited(original_count, false);
                 for (size_t i = 0; i < original_count; ++i) {
                     if (visited[i]) {
                         continue;
@@ -217,7 +217,7 @@ namespace module::vision {
                         continue;
                     }
 
-                    // evaluates a merge returning std::tuple<>
+                    // Evaluates a merge returning a std::tuple<> of uBCw, radius and fill
                     auto evaluate_merge = [&](const std::vector<size_t>& cluster_indices) {
                         // Combine views of the balls clusters to make a flattened view of all its uPCw mesh indices.
                         // Use its iterators to traverse over all mesh points on the ball simply.
@@ -239,7 +239,7 @@ namespace module::vision {
                     best_fill *= cfg.merge_preference;
                     std::optional<size_t> excluded_index = std::nullopt;
 
-                    // Greedily check nCn-1 options
+                    // Greedily check nC(n-1) options
                     for (size_t i = 0; i < proposed_component.size(); ++i) {
                         std::vector<size_t> filtered_indices = proposed_component;
                         filtered_indices.erase(filtered_indices.begin() + i);

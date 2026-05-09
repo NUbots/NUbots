@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 confidence_threshold: 0.9 # Minimum confidence required for a ball point to be a ball point
 cluster_points: 1 # Minimum number of points for a cluster to be a viable ball
