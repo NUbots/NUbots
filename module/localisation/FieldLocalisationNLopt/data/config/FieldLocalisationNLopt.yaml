@@ -40,7 +40,7 @@ reset_delay: 3
 # Maximum number of times the cost can be over threshold before a reset is triggered
 max_over_cost: 100
 # Step size for localisation reset search (m)
-step_size: 0.5
+step_size: 1
 # Local search window size for localisation reset (m)
 window_size: 2.0
 # Number of angles to check during localisation reset search
@@ -69,11 +69,11 @@ goal_post_error_tolerance: 0.5
 
 opt:
   # Relative tolerance on the optimisation parameters
-  xtol_rel: 1e-3
+  xtol_rel: 1e-2
   # Relative tolerance on the optimisation function value
-  ftol_rel: 1e-3
+  ftol_rel: 1e-2
   # Maximum number of evaluations for the optimisation
-  maxeval: 200
+  maxeval: 100
 
 exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
