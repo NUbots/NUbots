@@ -34,6 +34,7 @@ import subprocess
 from termcolor import cprint
 
 import b
+from tools.utility import processor_check
 from utility.dockerise import run_on_docker
 from utility.roles import all_role_names
 from utility.shell import WrapPty
@@ -70,17 +71,10 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
     env = os.environ
 
 
-    file_output = subprocess.run(["file", args[0]], capture_output=True, text=True).stdout
-    if "ARM" in file_output:
-        bin_arch = "aarch64"
-    elif "x86-64" in file_output:
-        bin_arch = "x86-64"
-    else:
-        bin_arch = "unknown"
-    cpu_arch = machine()
+    arch = processor_check.check_architecture(args[0])
 
-    if bin_arch != cpu_arch:
-        cprint(f"ERROR: Executable {args[0]} was compiled for {bin_arch} but is running on {cpu_arch}, make sure to use correct target!", "red", attrs=["bold"])
+    if arch["binary"] != arch["host"]:
+        cprint(f"ERROR: Executable {args[0]} was compiled for {arch['binary']} but is running on {arch['host']}, make sure to use correct target!", "red", attrs=["bold"])
         exit(1)
 
     if trace:

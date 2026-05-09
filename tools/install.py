@@ -36,6 +36,7 @@ from invoke import Responder
 from termcolor import cprint
 
 import b
+from tools.utility import processor_check
 from utility.dockerise import run_on_docker
 
 
@@ -98,6 +99,12 @@ def run(target, local, user, config, toolchain, **kwargs):
     # Recursively gather all files under build/bin
     cprint("Installing binaries to " + target_binaries_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
+
+    for file in files:
+        arch = processor_check.check_architecture(file)
+        if arch["binary"] != 'aarch64':
+            cprint(f"File {file} is not compiled for target. Stopping install.","red", attrs=["bold"])
+            exit(1)
 
     # Add a /./ to files so rsync --relative/-R behaves how we want it to
     # For example, /home/NUbots/build/bin/binary will become /home/NUbots/build/bin/./binary
