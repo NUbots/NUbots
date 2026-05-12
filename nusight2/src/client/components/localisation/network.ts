@@ -33,6 +33,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.output.Mujoco, this.onMujoco);
     this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);
@@ -228,6 +229,10 @@ export class LocalisationNetwork {
     robot.Hwp = Matrix4.from(walk_state.Hwp);
     robot.walkPhase = walk_state.phase;
   }
+
+  @action
+  private onMujoco = (robotModel: RobotModel, mujoco: message.output.Mujoco) => {
+  };
 
   @action
   private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
