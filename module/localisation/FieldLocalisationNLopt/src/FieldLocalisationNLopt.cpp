@@ -386,7 +386,8 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
-        const std::shared_ptr<const Goals>& goals) {
+        const std::shared_ptr<const Goals>& goals,
+        bool uncertainty_optimisation = false) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
@@ -457,9 +458,17 @@ namespace module::localisation {
         constexpr unsigned int n   = 3;
         nlopt::algorithm algorithm = nlopt::LN_COBYLA;
         nlopt::opt opt             = nlopt::opt(algorithm, n);
-        opt.set_xtol_rel(cfg.xtol_rel);
-        opt.set_ftol_rel(cfg.ftol_rel);
-        opt.set_maxeval(cfg.maxeval);
+
+        if (uncertainty_optimisation) {
+            opt.set_xtol_rel(cfg.uncertainty_xtol_rel);
+            opt.set_ftol_rel(cfg.uncertainty_ftol_rel);
+            opt.set_maxeval(cfg.uncertainty_maxeval);
+        }
+        else {
+            opt.set_xtol_rel(cfg.xtol_rel);
+            opt.set_ftol_rel(cfg.ftol_rel);
+            opt.set_maxeval(cfg.maxeval);
+        }
 
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
