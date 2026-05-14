@@ -387,7 +387,7 @@ namespace module::localisation {
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const std::shared_ptr<const Goals>& goals,
-        bool uncertainty_optimisation = false) {
+        bool uncertainty_optimisation) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
