@@ -97,13 +97,9 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.normal_xtol_rel = config["normal_opt"]["xtol_rel"].as<double>();
-            cfg.normal_ftol_rel = config["normal_opt"]["ftol_rel"].as<double>();
-            cfg.normal_maxeval  = config["normal_opt"]["maxeval"].as<int>();
-
-            cfg.uncertainty_reset_xtol_rel = config["uncertainty_opt"]["xtol_rel"].as<double>();
-            cfg.uncertainty_reset_ftol_rel = config["uncertainty_opt"]["ftol_rel"].as<double>();
-            cfg.uncertainty_reset_maxeval  = config["uncertainty_opt"]["maxeval"].as<int>();
+            cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
+            cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
+            cfg.maxeval  = config["opt"]["maxeval"].as<int>();
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
@@ -386,8 +382,7 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
-        const std::shared_ptr<const Goals>& goals,
-        bool use_regular_optimisation = true) {
+        const std::shared_ptr<const Goals>& goals) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
@@ -458,16 +453,9 @@ namespace module::localisation {
         constexpr unsigned int n   = 3;
         nlopt::algorithm algorithm = nlopt::LN_COBYLA;
         nlopt::opt opt             = nlopt::opt(algorithm, n);
-        if (use_regular_optimisation) {
-            opt.set_xtol_rel(cfg.regular_xtol_rel);
-            opt.set_ftol_rel(cfg.regular_ftol_rel);
-            opt.set_maxeval(cfg.regular_maxeval);
-        }
-        else {
-            opt.set_xtol_rel(cfg.uncertainty_reset_xtol_rel);
-            opt.set_ftol_rel(cfg.uncertainty_reset_ftol_rel);
-            opt.set_maxeval(cfg.uncertainty_reset_maxeval);
-        }
+        opt.set_xtol_rel(cfg.xtol_rel);
+        opt.set_ftol_rel(cfg.ftol_rel);
+        opt.set_maxeval(cfg.maxeval);
 
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
@@ -491,22 +479,8 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
-        int current_time = NUClear::clock::now().time_since_epoch().count();
-        /*log<WARN>("Starting optimization with initial guess",
-                  initial_guess.x(),
-                  initial_guess.y(),
-                  initial_guess.z(),
-                  "at time",
-                  current_time);*/
         opt.optimize(x, final_cost);
-        /*int after_time = NUClear::clock::now().time_since_epoch().count();
-        log<WARN>("Finished optimization with final cost",
-                  final_cost,
-                  "at time",
-                  after_time,
-                  "taking",
-                  (after_time - current_time) / 1e9,
-                  "seconds");*/
+
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);
         nlopt_to_eigen<double, n>(x, optimized_solution);
