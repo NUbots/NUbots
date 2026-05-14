@@ -97,9 +97,13 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
-            cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
-            cfg.maxeval  = config["opt"]["maxeval"].as<int>();
+            cfg.normal_xtol_rel = config["normal_opt"]["xtol_rel"].as<double>();
+            cfg.normal_ftol_rel = config["normal_opt"]["ftol_rel"].as<double>();
+            cfg.normal_maxeval  = config["normal_opt"]["maxeval"].as<int>();
+
+            cfg.uncertainty_xtol_rel = config["uncertainty_opt"]["xtol_rel"].as<double>();
+            cfg.uncertainty_ftol_rel = config["uncertainty_opt"]["ftol_rel"].as<double>();
+            cfg.uncertainty_maxeval  = config["uncertainty_opt"]["maxeval"].as<int>();
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
