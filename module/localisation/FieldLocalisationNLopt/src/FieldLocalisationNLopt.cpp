@@ -465,9 +465,9 @@ namespace module::localisation {
             opt.set_maxeval(cfg.uncertainty_maxeval);
         }
         else {
-            opt.set_xtol_rel(cfg.xtol_rel);
-            opt.set_ftol_rel(cfg.ftol_rel);
-            opt.set_maxeval(cfg.maxeval);
+            opt.set_xtol_rel(cfg.normal_xtol_rel);
+            opt.set_ftol_rel(cfg.normal_ftol_rel);
+            opt.set_maxeval(cfg.normal_maxeval);
         }
 
         // Set the objective function
