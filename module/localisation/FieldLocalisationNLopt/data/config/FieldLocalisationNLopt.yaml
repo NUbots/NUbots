@@ -67,13 +67,21 @@ change_limit: [0.5, 0.5, 0.5]
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
 
-opt:
+normal_opt:
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
   # Relative tolerance on the optimisation function value
   ftol_rel: 1e-6
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
+
+uncertainty_opt:
+  # Relative tolerance on the optimisation parameters
+  xtol_rel: 1e-2
+  # Relative tolerance on the optimisation function value
+  ftol_rel: 1e-2
+  # Maximum number of evaluations for the optimisation
+  maxeval: 100
 
 exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
