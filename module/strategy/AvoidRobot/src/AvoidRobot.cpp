@@ -73,8 +73,8 @@ namespace module::strategy {
             cfg.near_field_avoidance_distance = config["near_field_avoidance_distance"].as<double>();
         });
 
-        on<Provide<AvoidRobotTask>, With<Robots>, Trigger<Sensors>>().then(
-            [this](const Robots& robots, const Sensors& sensors) {
+        on<Provide<AvoidRobotTask>, With<Robots>, Trigger<Sensors>>().then([this](const Robots& robots,
+                                                                                  const Sensors& sensors) {
             const auto& Hrw = sensors.Hrw;
             if (robots.robots.empty()) {
                 avoid_active = false;
