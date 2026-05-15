@@ -49,6 +49,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/support/GlobalConfig.hpp"
+#include "message/strategy/AvoidRobot.hpp"
 
 namespace module::purpose {
 
