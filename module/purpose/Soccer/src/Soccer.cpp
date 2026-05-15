@@ -111,10 +111,9 @@ namespace module::purpose {
         on<Trigger<StartSoccer>>().then([this] {
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
-
             // General robot emit avoidance with higher priority than fall recovery but lower than finding its purpose
             emit<Task>(std::make_unique<AvoidRobot>(), 2);
+            // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 

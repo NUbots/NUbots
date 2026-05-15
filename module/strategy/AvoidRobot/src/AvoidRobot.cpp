@@ -73,19 +73,18 @@ namespace module::strategy {
             cfg.near_field_avoidance_distance = config["near_field_avoidance_distance"].as<double>();
         });
 
-        on<Provide<AvoidRobotTask>, With<Robots>, With<Sensors>>().then([this](
-                                                                            const std::shared_ptr<const Robots>& robots,
-                                                                            const Sensors& sensors) {
+        on<Provide<AvoidRobotTask>, With<Robots>, Trigger<Sensors>>().then(
+            [this](const Robots& robots, const Sensors& sensors) {
             const auto& Hrw = sensors.Hrw;
-            if (!robots || robots->robots.empty()) {
+            if (robots.robots.empty()) {
                 avoid_active = false;
                 log<DEBUG>("AvoidRobot tick: no robots available");
                 return;
             }
 
             std::vector<Eigen::Vector2d> all_obstacles{};
-            all_obstacles.reserve(robots->robots.size());
-            for (const auto& robot : robots->robots) {
+            all_obstacles.reserve(robots.robots.size());
+            for (const auto& robot : robots.robots) {
                 all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
             }
 
@@ -139,7 +138,7 @@ namespace module::strategy {
                                                       0.0);
 
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
-                log<INFO>(
+                log<DEBUG>(
                     fmt::format("Avoiding nearest robot at ({:.3f}, {:.3f}) distance {:.3f}m with velocity ({:.3f}, "
                                 "{:.3f}, {:.3f})",
                                 nearest_obstacle.x(),
