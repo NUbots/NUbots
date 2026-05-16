@@ -302,7 +302,12 @@ namespace module::localisation {
                         // Emit that we are resetting, eg for behaviour
                         emit(std::make_unique<UncertaintyResetFieldLocalisation>());
                         // Reset localisation by finding a new low cost state
+                        const auto reset_start = NUClear::clock::now();
                         uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
+                        const auto reset_end = NUClear::clock::now();
+                        const auto reset_duration =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
+                        log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
                         // Reset variables
                         num_over_cost = 0;
                         last_reset    = NUClear::clock::now();
