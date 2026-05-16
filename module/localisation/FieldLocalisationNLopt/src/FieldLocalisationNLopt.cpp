@@ -497,7 +497,17 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
-        opt.optimize(x, final_cost);
+        nlopt::result result = opt.optimize(x, final_cost);
+
+        // Debug information about the optimization result
+        log<DEBUG>("Final Cost: ", final_cost);
+        switch (result) {
+            case nlopt::FTOL_REACHED: log<DEBUG>("Optimization stopped: function tolerance reached"); break;
+            case nlopt::XTOL_REACHED: log<DEBUG>("Optimization stopped: variable tolerance reached"); break;
+            case nlopt::MAXEVAL_REACHED: log<DEBUG>("Optimization stopped: maximum evaluations reached"); break;
+            default: log<ERROR>("Optimization failed with code ", result); break;
+        }
+        log<DEBUG>("Number of evaluations: ", opt.get_numevals());
 
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);
