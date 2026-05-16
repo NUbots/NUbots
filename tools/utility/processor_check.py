@@ -23,11 +23,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from tools.utility.dockerise import run_on_docker
 import subprocess
 from platform import machine
 
-@run_on_docker
 def check_architecture(filepath: str) -> dict:
     file_output = subprocess.run(["file", filepath], capture_output=True, text=True).stdout
     bin_arch: str = ""
