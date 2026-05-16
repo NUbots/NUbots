@@ -461,7 +461,7 @@ namespace module::localisation {
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
         constexpr unsigned int n   = 3;
-        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+        nlopt::algorithm algorithm = nlopt::LN_BOBYQA;
         nlopt::opt opt             = nlopt::opt(algorithm, n);
 
         if (uncertainty_optimisation) {
