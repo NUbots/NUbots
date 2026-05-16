@@ -233,6 +233,9 @@ namespace module::localisation {
             /// @brief Normal optimisation - Maximum number of evaluations for the optimisation
             size_t normal_maxeval = 0;
 
+            /// @brief Normal optimisation - Algorithm to use
+            std::string normal_algorithm;
+
             /// @brief Uncertainty optimisation - Relative tolerance on the optimisation parameters
             double uncertainty_xtol_rel = 0.0;
 
@@ -241,6 +244,9 @@ namespace module::localisation {
 
             /// @brief Uncertainty optimisation - Maximum number of evaluations for the optimisation
             size_t uncertainty_maxeval = 0;
+
+            /// @brief Uncertainty optimisation - Algorithm to use
+            std::string uncertainty_algorithm;
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
