@@ -97,13 +97,15 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.normal_xtol_rel = config["normal_opt"]["xtol_rel"].as<double>();
-            cfg.normal_ftol_rel = config["normal_opt"]["ftol_rel"].as<double>();
-            cfg.normal_maxeval  = config["normal_opt"]["maxeval"].as<int>();
+            cfg.normal_xtol_rel  = config["normal_opt"]["xtol_rel"].as<double>();
+            cfg.normal_ftol_rel  = config["normal_opt"]["ftol_rel"].as<double>();
+            cfg.normal_maxeval   = config["normal_opt"]["maxeval"].as<int>();
+            cfg.normal_algorithm = config["normal_opt"]["algorithm"].as<std::string>();
 
-            cfg.uncertainty_xtol_rel = config["uncertainty_opt"]["xtol_rel"].as<double>();
-            cfg.uncertainty_ftol_rel = config["uncertainty_opt"]["ftol_rel"].as<double>();
-            cfg.uncertainty_maxeval  = config["uncertainty_opt"]["maxeval"].as<int>();
+            cfg.uncertainty_xtol_rel  = config["uncertainty_opt"]["xtol_rel"].as<double>();
+            cfg.uncertainty_ftol_rel  = config["uncertainty_opt"]["ftol_rel"].as<double>();
+            cfg.uncertainty_maxeval   = config["uncertainty_opt"]["maxeval"].as<int>();
+            cfg.uncertainty_algorithm = config["uncertainty_opt"]["algorithm"].as<std::string>();
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());

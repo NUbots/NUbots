@@ -234,7 +234,7 @@ namespace module::localisation {
             size_t normal_maxeval = 0;
 
             /// @brief Normal optimisation - Algorithm to use
-            std::string normal_algorithm;
+            std::string normal_algorithm = "LN_COBYLA";
 
             /// @brief Uncertainty optimisation - Relative tolerance on the optimisation parameters
             double uncertainty_xtol_rel = 0.0;
@@ -246,7 +246,7 @@ namespace module::localisation {
             size_t uncertainty_maxeval = 0;
 
             /// @brief Uncertainty optimisation - Algorithm to use
-            std::string uncertainty_algorithm;
+            std::string uncertainty_algorithm = "LN_BOBYQA";
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
