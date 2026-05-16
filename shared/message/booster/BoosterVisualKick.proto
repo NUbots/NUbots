@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package message.booster;
+
+enum VisualKickVer {
+    V1 = 0;
+    V2 = 1;
+}
+
+message BoosterVisualKick {
+    bool start = 1;
+    VisualKickVer version = 2;
+}

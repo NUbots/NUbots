@@ -1,0 +1,5 @@
+log_level: INFO
+
+walk:
+  # Maximum acceleration for smoothing walk commands
+  acceleration: [0.2, 0.2, 0.5]
