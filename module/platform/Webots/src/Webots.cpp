@@ -49,7 +49,6 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
-#include "utility/platform/aliases.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
@@ -315,24 +314,15 @@ namespace module::platform {
             // Compute Hpc, the transform from the camera to the head pitch space
             auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
             auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    std::string("left_camera"),
-                                                                    std::string("head"));
+                                                                            nugus_model.home_configuration(),
+                                                                            std::string("left_camera"),
+                                                                            std::string("head"));
 
-            // Open the config directory for the robot running this module
-            std::string hostname   = utility::support::get_hostname();
-            std::string robot_name = utility::platform::get_robot_alias(hostname);
-
-            auto camera_in_use = config["is_left_camera"].as<bool>() ? "Left" : "Right";
-            auto robot_config  = YAML::LoadFile(fmt::format("config/{}/Cameras/{}.yaml", robot_name, camera_in_use));
-
-            log<INFO>(fmt::format("Applying camera offsets for {}", robot_name));
-
-            // Apply roll and pitch offsets using the name of the robot that's running this code
-            double roll_offset  = robot_config["roll_offset"].as<Expression>();
-            double pitch_offset = robot_config["pitch_offset"].as<Expression>();
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
             context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+                                  * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
