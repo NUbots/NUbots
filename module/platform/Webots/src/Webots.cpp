@@ -314,15 +314,15 @@ namespace module::platform {
             // Compute Hpc, the transform from the camera to the head pitch space
             auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
             auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                            nugus_model.home_configuration(),
-                                                                            std::string("left_camera"),
-                                                                            std::string("head"));
+                                                                    nugus_model.home_configuration(),
+                                                                    std::string("left_camera"),
+                                                                    std::string("head"));
 
             // Apply roll and pitch offsets
             double roll_offset  = config["roll_offset"].as<Expression>();
             double pitch_offset = config["pitch_offset"].as<Expression>();
             context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                                  * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
