@@ -12,11 +12,13 @@ using booster::robot::ChannelFactory;
 using booster::robot::b1::JointIndex;
 using extension::Configuration;
 using extension::behaviour::RunReason;
-using message::behaviour::state::Stability;
 using message::platform::RawSensors;
+using message::booster::BoosterFallDownState;
+using message::booster::FallDownStateType;
 using message::booster::BoosterWalk;
 using message::booster::BoosterVisualKick;
 using message::booster::VisualKickVer;
+using message::booster::BoosterGetUp;
 
 static void fill_servo(RawSensors::Servo& servo, const booster_interface::msg::MotorState& motor) {
     servo.present_position = motor.q();
@@ -106,6 +108,13 @@ HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : NUCl
             log<ERROR>("Failed to visual kick: " + res_code_to_string(res));
         }
     });
+
+    on<Trigger<BoosterGetUp>>().then([this](const BoosterGetUp& getup){
+       int32_t res = booster_client.GetUpWithMode(RobotMode::kSoccer);
+       if (res != 0) {
+           log<ERROR>("Failed to visual kick: " + res_code_to_string(res));
+       }
+    });
 }
 
 void HardwareIO::low_state_handler(const void* msg) {
@@ -188,15 +197,16 @@ void HardwareIO::battery_handler(const void* msg) {
 
 void HardwareIO::fall_down_handler(const void* msg) {
     const auto* fd_msg = static_cast<const booster_interface::msg::FallDownState*>(msg);
-    Stability stability{};
+    auto out = std::make_unique<BoosterFallDownState>();
     switch (fd_msg->fall_down_state()) {
-        case booster_interface::msg::IS_READY:      stability = Stability::STANDING; break;
-        case booster_interface::msg::IS_FALLING:    stability = Stability::FALLING; break;
-        case booster_interface::msg::HAS_FALLEN:    stability = Stability::FALLEN; break;
-        case booster_interface::msg::IS_GETTING_UP: stability = Stability::FALLEN; break;
-        default:                                    stability = Stability::UNKNOWN; break;
+        case booster_interface::msg::IS_READY:      out->fall_down_state = FallDownStateType::IS_READY; break;
+        case booster_interface::msg::IS_FALLING:    out->fall_down_state = FallDownStateType::IS_FALLING; break;
+        case booster_interface::msg::HAS_FALLEN:    out->fall_down_state = FallDownStateType::HAS_FALLEN; break;
+        case booster_interface::msg::IS_GETTING_UP: out->fall_down_state = FallDownStateType::IS_GETTING_UP; break;
+        default:                                    out->fall_down_state = FallDownStateType::IS_READY; break;
     }
-    emit(std::make_unique<Stability>(stability));
+    out->is_recovery_available = fd_msg->is_recovery_available();
+    emit(std::move(out));
 }
 
 void HardwareIO::button_event_handler(const void* msg) {

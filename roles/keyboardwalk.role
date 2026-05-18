@@ -20,7 +20,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::K1Walk
-  skill::GetUp
+  skill::K1GetUp
   skill::Look
   # Planners
   planning::GetUpPlanner

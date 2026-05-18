@@ -3,8 +3,7 @@
 
 #include <mutex>
 #include <nuclear>
-#include <string_view>
-
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
@@ -18,11 +17,11 @@
 #include <booster/robot/channel/channel_factory.hpp>
 #include <booster/robot/b1/b1_loco_client.hpp>
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/booster/BoosterFallDownState.hpp"
 #include "message/booster/BoosterWalk.hpp"
-#include "message/behaviour/state/Stability.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
+#include "message/booster/BoosterGetUp.hpp"
 
 
 namespace module::platform::Booster {
@@ -60,16 +59,16 @@ private:
     void battery_handler(const void* msg);
     void button_event_handler(const void* msg);
 
-    constexpr static std::string_view res_code_to_string(int32_t res_code) {
-        std::string_view out {""};
+    static std::string res_code_to_string(int32_t res_code) {
+        std::string out;
         switch (res_code) {
-            case 0: out = "Success"; break;
+            case 0:   out = "Success"; break;
             case 100: out = "Request timed out"; break;
             case 400: out = "Bad request"; break;
             case 409: out = "Request conflict"; break;
             case 500: out = "Internal server error"; break;
             case 501: out = "Request rejected"; break;
-            default: out = "UNKNOWN"; break;
+            default:  out = "UNKNOWN"; break;
         }
         return out + " (" + std::to_string(res_code) + ")";
     }

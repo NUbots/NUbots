@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Walk.hpp"
+#include "K1Walk.hpp"
 
 #include "extension/Configuration.hpp"
 
@@ -47,9 +47,9 @@ namespace module::skill {
 
     using utility::nusight::graph;
 
-    Walk::Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+    K1Walk::K1Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("Walk.yaml").then([this](const Configuration& config) {
+        on<Configuration>("K1Walk.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
@@ -78,7 +78,7 @@ namespace module::skill {
                 walk.velocity_target.isZero() ? WalkState::State::STOPPED : WalkState::State::WALKING;
             emit(std::make_unique<WalkState>(state, walk.velocity_target));
 
-            if (log_level <= NUClear::DEBUG) {
+            if (log_level <= NUClear::LogLevel::DEBUG) {
                 emit(graph("Walk velocity target",
                            walk.velocity_target.x(),
                            walk.velocity_target.y(),
