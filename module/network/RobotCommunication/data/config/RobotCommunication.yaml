@@ -3,7 +3,7 @@ log_level: INFO
 startup_delay: 3
 ball_timeout: 3
 
-send_port: 3737
-receive_port: 3737
+send_port: 10012
+receive_port: 10012
 broadcast_ip: "10.1.255.255"
 udp_filter_address: ""

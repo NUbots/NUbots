@@ -46,7 +46,7 @@ namespace module::input {
      */
     class GameController : public NUClear::Reactor {
     private:
-        static constexpr const uint SUPPORTED_VERSION       = 12;
+        static constexpr const uint SUPPORTED_VERSION       = 19;
         static constexpr const uint PLAYERS_PER_TEAM        = 6;
         static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
         static constexpr const uint NUM_TEAMS               = 2;
@@ -66,13 +66,14 @@ namespace module::input {
         ReactionHandle listen_handle;
 
         gamecontroller::GameControllerPacket packet;
-        gamecontroller::Mode mode;
+        gamecontroller::GamePhase game_phase;
+        gamecontroller::SetPlay set_play;
 
         void reset_state();
         void process(const message::input::GameState& old_game_state,
                      const gamecontroller::GameControllerPacket& old_packet,
                      const gamecontroller::GameControllerPacket& new_packet);
-        void send_reply_message(const gamecontroller::ReplyMessage& message);
+        void send_reply_message();
         [[nodiscard]] const gamecontroller::Team& get_own_team(const gamecontroller::GameControllerPacket& state) const;
         [[nodiscard]] const gamecontroller::Team& get_opponent_team(
             const gamecontroller::GameControllerPacket& state) const;
