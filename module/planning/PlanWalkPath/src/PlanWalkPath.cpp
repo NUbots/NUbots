@@ -37,6 +37,8 @@
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/support/FieldDescription.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -59,6 +61,8 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
 
     using message::strategy::StandStill;
 
@@ -111,6 +115,16 @@ namespace module::planning {
             cfg.starting_velocity = config["starting_velocity"].as<Expression>();
         });
 
+        on<Startup, Trigger<FieldDescription>>().then("Update Goalpost Positions", [this](const FieldDescription& fd) {
+            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_own_l.x(),fd.goalpost_own_l.y() , 0));
+            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_own_r.x(),fd.goalpost_own_r.y() , 0));
+            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_opp_l.x(),fd.goalpost_opp_l.y() , 0));
+            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_opp_r.x(),fd.goalpost_opp_r.y() , 0));
+
+            opp_goal_line_x = -fd.dimensions.field_length / 2.0;
+            self_goal_line_x = fd.dimensions.field_length / 2.0;
+        });
+
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
             // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
             if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
@@ -135,10 +149,16 @@ namespace module::planning {
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading = vector_to_bearing(Hrd.linear().col(0).head(2));
 
+                std::vector<Eigen::Vector2d> all_obstacles{};
+
+                // Add goalposts to list of obstacles to avoid
+                for (const auto& goalpost : list_goalposts) {
+                    all_obstacles.emplace_back((Hrw * goalpost).head(2));
+                }
+
                 // If there are robots, check if they're in the way
                 if (robots) {
                     // Get the positions of all robots in the world
-                    std::vector<Eigen::Vector2d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
                         all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
                     }
@@ -169,8 +189,23 @@ namespace module::planning {
                         // Total path length by traversing the triangle from the robot->obstacle->original target
                         auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
-                        // Take the shorter path
-                        rDRr = path(left) < path(right) ? left : right;
+                        // If we are going to walk outside the goal line, pick left or right based on which is away from goal line
+                        // Otherwise take the shorter path
+
+                        bool left_outside  = left.x()  < opp_goal_line_x || left.x()  > self_goal_line_x;
+                        bool right_outside = right.x() < opp_goal_line_x || right.x() > self_goal_line_x;
+
+                        if (left_outside && !right_outside) {
+                            log<DEBUG>("Left path exits field, taking right");
+                            rDRr = right;
+                        } else if (!left_outside && right_outside) {
+                            log<DEBUG>("Right path exits field, taking left");
+                            rDRr = left;
+                        } else {
+                            // Both inside (or both outside) — fall back to shorter path
+                            log<DEBUG>("Choosing path around obstacle based on path length");
+                            rDRr = path(left) < path(right) ? left : right;
+                        }
 
                         // Angle to the target point may have changed after adjusting for obstacles
                         angle_to_target = vector_to_bearing(rDRr);
@@ -293,6 +328,19 @@ namespace module::planning {
         const auto angular = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
 
         return {v.x() * s, v.y() * s, angular};
+    }
+
+    std::vector<Eigen::Vector2d> add_goalposts_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts ,Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
+
+        // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
+        for(const auto& goalpost_pos : list_goalposts){
+            auto rFWw = Hwf * goalpost_pos;        // Convert goalpost position from field space to world space
+            auto rFRr = Hrw * rFWw;                        // Convert that to robot space
+
+            all_obstacles.emplace_back(rFRr.head(2));
+        }
+
+        return all_obstacles;
     }
 
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
