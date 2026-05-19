@@ -195,12 +195,15 @@ namespace module::planning {
                     // Total path length by traversing the triangle from the robot->obstacle->original target
                     auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
+                    // Transform goal line to robot frame to check if we are going off field or into net
+                    const Eigen::Isometry3d Hrf = Hrw * Hwf;
+                    const double opp_goal_line_x_r  = (Hrf * Eigen::Vector3d(opp_goal_line_x,  0, 0)).x();
+                    const double self_goal_line_x_r = (Hrf * Eigen::Vector3d(self_goal_line_x, 0, 0)).x();
+                    bool left_outside  = left.x()  < opp_goal_line_x_r || left.x()  > self_goal_line_x_r;
+                    bool right_outside = right.x() < opp_goal_line_x_r || right.x() > self_goal_line_x_r;
+
                     // If we are going to walk outside the goal line, pick left or right based on which is away from goal line
                     // Otherwise take the shorter path
-
-                    bool left_outside  = left.x()  < opp_goal_line_x || left.x()  > self_goal_line_x;
-                    bool right_outside = right.x() < opp_goal_line_x || right.x() > self_goal_line_x;
-
                     if (left_outside && !right_outside) {
                         log<DEBUG>("Left path exits field, taking right");
                         rDRr = right;
