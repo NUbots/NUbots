@@ -62,23 +62,73 @@ namespace module::tools {
         });
 
         on<Trigger<ChangeVelocity>>().then([this] {
-            // Generate a random angle for 2D walk direction
-            std::uniform_real_distribution<double> dist_angle(-M_PI, M_PI);
-            // Generate a random magnitude up to max_velocity
-            std::uniform_real_distribution<double> dist_magnitude(0.0, cfg.max_velocity);
-            // Generate a random rotation from -max_rotation to max_rotation
-            std::uniform_real_distribution<double> dist_rotation(-cfg.max_rotation, cfg.max_rotation);
-            
-            double angle = dist_angle(rng);
-            double magnitude = dist_magnitude(rng);
-            
-            Eigen::Vector3d velocity(
-                magnitude * std::cos(angle),
-                magnitude * std::sin(angle),
-                dist_rotation(rng)
-            );
-            
-            log<NUClear::LogLevel::INFO>("Changing velocity to: x=", velocity.x(), "y=", velocity.y(), "theta=", velocity.z());
+            Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
+
+            enum class SequenceState {
+                STAND_STILL,
+                WALK_FORWARD,
+                WALK_BACKWARD,
+                WALK_LEFT,
+                WALK_RIGHT,
+                TURN_CW,
+                TURN_CCW,
+                RANDOM,
+                COUNT
+            };
+
+            SequenceState state = static_cast<SequenceState>(sequence_index % static_cast<int>(SequenceState::COUNT));
+            sequence_index++;
+
+            switch (state) {
+                case SequenceState::STAND_STILL:
+                    velocity = Eigen::Vector3d::Zero();
+                    log<NUClear::LogLevel::INFO>("Sequence: STAND STILL");
+                    break;
+                case SequenceState::WALK_FORWARD:
+                    velocity = Eigen::Vector3d(cfg.max_velocity, 0, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK FORWARD");
+                    break;
+                case SequenceState::WALK_BACKWARD:
+                    velocity = Eigen::Vector3d(-cfg.max_velocity * 0.5, 0, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK BACKWARD");
+                    break;
+                case SequenceState::WALK_LEFT:
+                    velocity = Eigen::Vector3d(0, cfg.max_velocity * 0.5, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK LEFT (SIDEWAYS)");
+                    break;
+                case SequenceState::WALK_RIGHT:
+                    velocity = Eigen::Vector3d(0, -cfg.max_velocity * 0.5, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK RIGHT (SIDEWAYS)");
+                    break;
+                case SequenceState::TURN_CW:
+                    velocity = Eigen::Vector3d(0, 0, -cfg.max_rotation);
+                    log<NUClear::LogLevel::INFO>("Sequence: TURN CW (ON THE SPOT)");
+                    break;
+                case SequenceState::TURN_CCW:
+                    velocity = Eigen::Vector3d(0, 0, cfg.max_rotation);
+                    log<NUClear::LogLevel::INFO>("Sequence: TURN CCW (ON THE SPOT)");
+                    break;
+                case SequenceState::RANDOM:
+                default: {
+                    // Generate a random angle for 2D walk direction
+                    std::uniform_real_distribution<double> dist_angle(-M_PI, M_PI);
+                    // Generate a random magnitude up to max_velocity
+                    std::uniform_real_distribution<double> dist_magnitude(0.0, cfg.max_velocity);
+                    // Generate a random rotation from -max_rotation to max_rotation
+                    std::uniform_real_distribution<double> dist_rotation(-cfg.max_rotation, cfg.max_rotation);
+                    
+                    double angle = dist_angle(rng);
+                    double magnitude = dist_magnitude(rng);
+                    
+                    velocity = Eigen::Vector3d(
+                        magnitude * std::cos(angle),
+                        magnitude * std::sin(angle),
+                        dist_rotation(rng)
+                    );
+                    log<NUClear::LogLevel::INFO>("Sequence: RANDOM (x=", velocity.x(), "y=", velocity.y(), "theta=", velocity.z(), ")");
+                    break;
+                }
+            }
             
             emit<Task>(std::make_unique<message::skill::Walk>(velocity), 1);
             

@@ -53,6 +53,9 @@ namespace module::tools {
         bool ground_truth_initialised = false;
         
         std::mt19937 rng;
+        
+        /// @brief Index to cycle through standard walk sequences
+        int sequence_index = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the OdometryDataCollector reactor.
