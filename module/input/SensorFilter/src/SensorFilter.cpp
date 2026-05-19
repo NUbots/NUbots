@@ -91,6 +91,7 @@ namespace module::input {
             cfg.neural_odom.use_neural_odometry = config["neural_odom"]["use_neural_odometry"].as<bool>();
             cfg.neural_odom.model_path          = config["neural_odom"]["model_path"].as<std::string>();
             cfg.neural_odom.device              = config["neural_odom"]["device"].as<std::string>();
+            cfg.neural_odom.zero_velocity_threshold = config["neural_odom"]["zero_velocity_threshold"].as<double>();
 
             if (cfg.neural_odom.use_neural_odometry && !model_loaded) {
                 try {

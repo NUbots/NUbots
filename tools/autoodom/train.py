@@ -20,7 +20,7 @@ def get_mlp_class():
                 nn.ReLU(),
                 nn.Linear(128, 64),
                 nn.ReLU(),
-                nn.Linear(64, 2)  # Output: dx, dy
+                nn.Linear(64, 3)  # Output: dx, dy, dtheta
             )
 
         def forward(self, x):
@@ -44,7 +44,7 @@ def iso3_to_matrix(iso3_msg):
         col0 = [iso3_msg.x.x, iso3_msg.x.y, iso3_msg.x.z, getattr(iso3_msg.x, 'w', getattr(iso3_msg.x, 't', 0))]
         col1 = [iso3_msg.y.x, iso3_msg.y.y, iso3_msg.y.z, getattr(iso3_msg.y, 'w', getattr(iso3_msg.y, 't', 0))]
         col2 = [iso3_msg.z.x, iso3_msg.z.y, iso3_msg.z.z, getattr(iso3_msg.z, 'w', getattr(iso3_msg.z, 't', 0))]
-        col3 = [iso3_msg.t.x, iso3_msg.t.y, iso3_msg.t.z, getattr(iso3_msg.t, 'w', getattr(iso3_msg.t, 't', 1))]
+        col3 = [iso3_msg.t.x, iso3_msg.t.y, iso3_msg.t.z, getattr(iso3_msg.t, 'w', getattr(iso3_msg.t, 't', 0))]
         mat = np.column_stack((col0, col1, col2, col3))
     return mat
 
@@ -56,15 +56,38 @@ def get_world_translation(Htw_msg):
     Hwt = np.linalg.inv(Htw)
     return Hwt[0:2, 3] # (x, y) translation in world frame
 
-from utility.dockerise import run_on_docker
+def get_world_rotation(Htw_msg):
+    import numpy as np
+    Htw = iso3_to_matrix(Htw_msg)
+    Hwt = np.linalg.inv(Htw)
+    return Hwt[0:3, 0:3]
 
-def compute_relative_transformation(Htw_gt_t, Htw_gt_t_minus_H):
-    # p_w: (x, y) in world frame
+def compute_local_step_displacement(Htw_gt_t, Htw_gt_t_minus_1):
+    import numpy as np
     p_w_t = get_world_translation(Htw_gt_t)
-    p_w_t_minus_H = get_world_translation(Htw_gt_t_minus_H)
+    p_w_t_minus_1 = get_world_translation(Htw_gt_t_minus_1)
     
-    # We want displacement in the world frame
-    return p_w_t - p_w_t_minus_H
+    # World displacement
+    disp_w = p_w_t - p_w_t_minus_1
+    
+    # Local rotation
+    R_w_t = get_world_rotation(Htw_gt_t)
+    R_w_t_minus_1 = get_world_rotation(Htw_gt_t_minus_1)
+    
+    # Rotate world displacement into the local frame of t-1
+    disp_local = R_w_t_minus_1.T @ np.array([disp_w[0], disp_w[1], 0.0])
+    
+    # Calculate yaw change dtheta
+    yaw_t = np.arctan2(R_w_t[1, 0], R_w_t[0, 0])
+    yaw_t_minus_1 = np.arctan2(R_w_t_minus_1[1, 0], R_w_t_minus_1[0, 0])
+    
+    # Wrap difference to [-pi, pi]
+    dtheta = yaw_t - yaw_t_minus_1
+    dtheta = (dtheta + np.pi) % (2 * np.pi) - np.pi
+    
+    return np.array([disp_local[0], disp_local[1], dtheta])
+
+from utility.dockerise import run_on_docker
 
 @run_on_docker
 def register(command):
@@ -128,8 +151,8 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
         window = raw_features[i : i + window_size]
         flattened_window = np.concatenate(window)
         
-        # Ground truth delta position between start of the window and the end of the window
-        gt_disp = compute_relative_transformation(raw_positions[i + window_size], raw_positions[i])
+        # Ground truth delta position between end-1 and end of the window (0.02s step) in local frame
+        gt_disp = compute_local_step_displacement(raw_positions[i + window_size], raw_positions[i + window_size - 1])
         
         X.append(flattened_window)
         Y.append(gt_disp)
@@ -186,17 +209,45 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
         with torch.no_grad():
             predictions = model(X)
         
-        # Integrate to get paths
+        # Integrate step-by-step in the world frame using the integrated yaw orientations
         gt_path_x = [0.0]
         gt_path_y = [0.0]
         pred_path_x = [0.0]
         pred_path_y = [0.0]
         
+        gt_yaw = 0.0
+        pred_yaw = 0.0
+        
         for i in range(len(Y)):
-            gt_path_x.append(gt_path_x[-1] + Y[i][0].item())
-            gt_path_y.append(gt_path_y[-1] + Y[i][1].item())
-            pred_path_x.append(pred_path_x[-1] + predictions[i][0].item())
-            pred_path_y.append(pred_path_y[-1] + predictions[i][1].item())
+            # Ground truth step integration
+            gt_dx_local = Y[i][0].item()
+            gt_dy_local = Y[i][1].item()
+            gt_dtheta = Y[i][2].item()
+            
+            gt_yaw += gt_dtheta
+            R_w_gt = np.array([
+                [np.cos(gt_yaw), -np.sin(gt_yaw), 0.0],
+                [np.sin(gt_yaw), np.cos(gt_yaw), 0.0],
+                [0.0, 0.0, 1.0]
+            ])
+            gt_disp_w = R_w_gt @ np.array([gt_dx_local, gt_dy_local, 0.0])
+            gt_path_x.append(gt_path_x[-1] + gt_disp_w[0])
+            gt_path_y.append(gt_path_y[-1] + gt_disp_w[1])
+            
+            # Predicted step integration
+            pred_dx_local = predictions[i][0].item()
+            pred_dy_local = predictions[i][1].item()
+            pred_dtheta = predictions[i][2].item()
+            
+            pred_yaw += pred_dtheta
+            R_w_pred = np.array([
+                [np.cos(pred_yaw), -np.sin(pred_yaw), 0.0],
+                [np.sin(pred_yaw), np.cos(pred_yaw), 0.0],
+                [0.0, 0.0, 1.0]
+            ])
+            pred_disp_w = R_w_pred @ np.array([pred_dx_local, pred_dy_local, 0.0])
+            pred_path_x.append(pred_path_x[-1] + pred_disp_w[0])
+            pred_path_y.append(pred_path_y[-1] + pred_disp_w[1])
             
         import matplotlib.pyplot as plt
         plt.figure(figsize=(10, 8))

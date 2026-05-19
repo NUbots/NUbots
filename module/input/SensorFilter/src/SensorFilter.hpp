@@ -92,6 +92,7 @@ namespace module::input {
                 bool use_neural_odometry = false;
                 std::string model_path  = "";
                 std::string device      = "CPU";
+                double zero_velocity_threshold = 0.01;
             } neural_odom;
         } cfg;
 

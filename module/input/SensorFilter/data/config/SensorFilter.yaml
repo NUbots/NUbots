@@ -53,3 +53,4 @@ neural_odom:
   use_neural_odometry: true
   model_path: "autoodom_mlp.onnx"
   device: "CPU"
+  zero_velocity_threshold: 0.01

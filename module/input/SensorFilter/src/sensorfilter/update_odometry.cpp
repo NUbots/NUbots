@@ -196,7 +196,7 @@ namespace module::input {
         }
 
         bool run_neural = cfg.neural_odom.use_neural_odometry && model_loaded
-                          && (feature_history.size() == WINDOW_SIZE) && (position_history.size() == WINDOW_SIZE);
+                          && (feature_history.size() == WINDOW_SIZE);
 
         if (run_neural) {
             try {
@@ -217,14 +217,34 @@ namespace module::input {
                 const float* out_data = output.data<const float>();
                 double dx             = out_data[0];
                 double dy             = out_data[1];
+                double dtheta         = out_data[2];
 
-                // Integrate local displacement (dx, dy) rotated by the heading 50 frames ago
-                Eigen::Vector3d p_prev     = position_history.front();
-                Eigen::Matrix3d R_prev     = rotation_history.front();
+                // If command velocity is near zero, suppress odometry updates to prevent drift when standing still
+                if (last_walk_state.velocity_target.norm() < cfg.neural_odom.zero_velocity_threshold) {
+                    dx     = 0.0;
+                    dy     = 0.0;
+                    dtheta = 0.0;
+                }
+
+                // Integrate step-by-step using previous frame's orientation and position
+                Eigen::Vector3d p_prev = previous_sensors ? Eigen::Vector3d(previous_sensors->Htw.inverse().translation()) : Eigen::Vector3d(Hwt_anchor.translation());
+                Eigen::Matrix3d R_prev = previous_sensors ? Eigen::Matrix3d(previous_sensors->Htw.inverse().linear()) : Eigen::Matrix3d(Hwt_anchor.linear());
+                
+                // Rotate local displacement step (dx, dy) into world coordinates using previous orientation
                 Eigen::Vector3d disp_world = R_prev * Eigen::Vector3d(dx, dy, 0.0);
 
                 Hwt.translation() = p_prev + disp_world;
                 Hwt.translation().z() = Hwt_anchor.translation().z();
+
+                // Get previous integrated yaw
+                double yaw_prev = previous_sensors ? mat_to_rpy_intrinsic(R_prev).z() : kinematic_yaw;
+                
+                // Integrate neural yaw step update
+                double yaw_curr = yaw_prev + dtheta;
+                
+                // Keep roll and pitch from Mahony filter, override yaw with neural yaw
+                Eigen::Vector3d rpy_curr(rpy_mahony.x(), rpy_mahony.y(), yaw_curr);
+                Hwt.linear() = rpy_intrinsic_to_mat(rpy_curr);
             }
             catch (const std::exception& e) {
                 log<ERROR>("Neural Odometry inference failed: ", e.what());
