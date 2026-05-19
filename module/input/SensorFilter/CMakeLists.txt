@@ -25,5 +25,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
+set(OpenVINO_DIR /usr/local/lib/cmake)
+find_package(OpenVINO REQUIRED)
+find_package(TBB REQUIRED)
+
 # Build our NUClear module
-nuclear_module()
+nuclear_module(LIBRARIES TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES})

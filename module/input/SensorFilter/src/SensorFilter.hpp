@@ -34,6 +34,9 @@
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
+#include <deque>
+#include <openvino/openvino.hpp>
+
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -81,8 +84,15 @@ namespace module::input {
             double x_cut_off_frequency = 0.0;
             /// @brief Cutoff frequency for the low pass filter of torso y velocity
             double y_cut_off_frequency = 0.0;
-            /// @brief Bool to determine whether to use ground truth from the simulator
+            // Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Config for Neural Odometry
+            struct NeuralOdom {
+                bool use_neural_odometry = false;
+                std::string model_path  = "";
+                std::string device      = "CPU";
+            } neural_odom;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -116,6 +126,29 @@ namespace module::input {
 
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
+
+        /// @brief OpenVINO runtime core
+        ov::Core openvino_core{};
+        /// @brief OpenVINO compiled model for neural odometry
+        ov::CompiledModel compiled_model{};
+        /// @brief OpenVINO inference request for neural odometry
+        ov::InferRequest infer_request{};
+        /// @brief Flag to indicate if the model has been compiled/loaded successfully
+        bool model_loaded = false;
+
+        /// @brief Store the last walk state to get the target velocity
+        WalkState last_walk_state{};
+
+        /// @brief Window size and feature dimension parameters for the neural network
+        static constexpr int WINDOW_SIZE = 50;
+        static constexpr int FEATURE_DIM = 69;
+
+        /// @brief History buffer of flattened feature vectors (WINDOW_SIZE * FEATURE_DIM values)
+        std::deque<std::vector<float>> feature_history{};
+        /// @brief History buffer of torso positions in world frame over the last WINDOW_SIZE frames
+        std::deque<Eigen::Vector3d> position_history{};
+        /// @brief History buffer of torso orientations (rotation matrices) over the last WINDOW_SIZE frames
+        std::deque<Eigen::Matrix3d> rotation_history{};
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.

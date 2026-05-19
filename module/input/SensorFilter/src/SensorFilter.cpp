@@ -86,6 +86,29 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+
+            // Neural Odometry Config
+            cfg.neural_odom.use_neural_odometry = config["neural_odom"]["use_neural_odometry"].as<bool>();
+            cfg.neural_odom.model_path          = config["neural_odom"]["model_path"].as<std::string>();
+            cfg.neural_odom.device              = config["neural_odom"]["device"].as<std::string>();
+
+            if (cfg.neural_odom.use_neural_odometry && !model_loaded) {
+                try {
+                    log<INFO>("Loading Neural Odometry model from: ", cfg.neural_odom.model_path);
+                    compiled_model = openvino_core.compile_model(cfg.neural_odom.model_path, cfg.neural_odom.device);
+                    infer_request  = compiled_model.create_infer_request();
+                    model_loaded   = true;
+                    log<INFO>("Neural Odometry model loaded successfully");
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("Failed to load Neural Odometry model: ", e.what());
+                    cfg.neural_odom.use_neural_odometry = false;
+                }
+            }
+        });
+
+        on<Trigger<WalkState>>().then([this](const WalkState& walk_state) {
+            last_walk_state = walk_state;
         });
 
         on<Startup>().then([this] {
