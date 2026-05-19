@@ -32,6 +32,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/OdometryRecord.hpp"
+#include "message/skill/Walk.hpp"
 
 #include "utility/math/euler.hpp"
 
@@ -47,10 +48,41 @@ namespace module::tools {
     using utility::math::euler::rpy_intrinsic_to_mat;
 
     OdometryDataCollector::OdometryDataCollector(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("OdometryDataCollector.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.velocity_change_interval = config["velocity_change_interval"].as<double>();
+            cfg.max_velocity = config["max_velocity"].as<double>();
+            cfg.max_rotation = config["max_rotation"].as<double>();
+        });
+
+        on<Startup>().then([this] {
+            emit(std::make_unique<ChangeVelocity>());
+        });
+
+        on<Trigger<ChangeVelocity>>().then([this] {
+            // Generate a random angle for 2D walk direction
+            std::uniform_real_distribution<double> dist_angle(-M_PI, M_PI);
+            // Generate a random magnitude up to max_velocity
+            std::uniform_real_distribution<double> dist_magnitude(0.0, cfg.max_velocity);
+            // Generate a random rotation from -max_rotation to max_rotation
+            std::uniform_real_distribution<double> dist_rotation(-cfg.max_rotation, cfg.max_rotation);
+            
+            double angle = dist_angle(rng);
+            double magnitude = dist_magnitude(rng);
+            
+            Eigen::Vector3d velocity(
+                magnitude * std::cos(angle),
+                magnitude * std::sin(angle),
+                dist_rotation(rng)
+            );
+            
+            log<NUClear::LogLevel::INFO>("Changing velocity to: x=", velocity.x(), "y=", velocity.y(), "theta=", velocity.z());
+            
+            emit<Task>(std::make_unique<message::skill::Walk>(velocity), 1);
+            
+            emit<Scope::DELAY>(std::make_unique<ChangeVelocity>(), std::chrono::milliseconds(int(cfg.velocity_change_interval * 1000)));
         });
 
         on<Trigger<Sensors>, With<WalkState>, With<RobotPoseGroundTruth>>().then(

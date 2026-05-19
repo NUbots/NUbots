@@ -30,19 +30,29 @@
 #include <nuclear>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <random>
+
+#include "extension/Behaviour.hpp"
 
 namespace module::tools {
 
-    class OdometryDataCollector : public NUClear::Reactor {
+    struct ChangeVelocity {};
+
+    class OdometryDataCollector : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Stores configuration values
-        struct Config {} cfg;
+        struct Config {
+            double velocity_change_interval;
+            double max_velocity;
+            double max_rotation;
+        } cfg;
         
         /// @brief The initialised ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw;
         
         /// @brief Whether the ground truth Hfw has been initialised
         bool ground_truth_initialised = false;
+        
+        std::mt19937 rng;
 
     public:
         /// @brief Called by the powerplant to build and setup the OdometryDataCollector reactor.

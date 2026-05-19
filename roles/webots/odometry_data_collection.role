@@ -42,9 +42,6 @@ nuclear_role(
   strategy::FallRecovery
   strategy::StandStill
 
-  # Purpose
-  purpose::KeyboardWalk
-
   # Data Collection
 
   tools::OdometryDataCollector

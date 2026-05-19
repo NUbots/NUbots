@@ -1,1 +1,8 @@
 log_level: INFO
+
+velocity_change_interval: 10.0
+
+# Maximum translational speed (m/s) - a random direction is chosen each interval
+max_velocity: 0.2
+# Maximum rotational speed (rad/s) - sign is also randomised
+max_rotation: 0.3
