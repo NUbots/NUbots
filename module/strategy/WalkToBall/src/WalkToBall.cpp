@@ -137,22 +137,22 @@ namespace module::strategy {
                 // Potentially change the target position from the goal to an avoidance point
                 Eigen::Vector3d rTFf = rGFf;
 
-                // If we're aligned with the goal and close, adjust the Goal target
-                if (std::abs(rRFf.y()) < field_description.dimensions.goal_width / 2.0) {
-                    auto goal_line_x = -field_description.dimensions.field_length / 2.0;
-                    // If we're in the goal, set the target to the middle of the goal
-                    if (rRFf.x() < goal_line_x) {
-                        rTFf.x() = rGFf.x() - field_description.dimensions.goal_depth / 2.0;
-                    }
-                    // If we're in the goal area, set the target to far away (approximately -x vector)
-                    else if (rRFf.x() < goal_line_x + field_description.dimensions.goal_area_length) {
-                        rTFf.x() = rGFf.x() - 3.0;
-                    }
-                    // If we're in the penalty area, set the target to the back of the goal
-                    else if (rRFf.x() < goal_line_x + field_description.dimensions.penalty_area_length) {
-                        rTFf.x() = rGFf.x() - field_description.dimensions.goal_depth;
-                    }
-                }
+                // // If we're aligned with the goal and close, adjust the Goal target
+                // if (std::abs(rRFf.y()) < field_description.dimensions.goal_width / 2.0) {
+                //     auto goal_line_x = -field_description.dimensions.field_length / 2.0;
+                //     // If we're in the goal, set the target to the middle of the goal
+                //     if (rRFf.x() < goal_line_x) {
+                //         rTFf.x() = rGFf.x() - field_description.dimensions.goal_depth / 2.0;
+                //     }
+                //     // If we're in the goal area, set the target to far away (approximately -x vector)
+                //     else if (rRFf.x() < goal_line_x + field_description.dimensions.goal_area_length) {
+                //         rTFf.x() = rGFf.x() - 3.0;
+                //     }
+                //     // If we're in the penalty area, set the target to the back of the goal
+                //     else if (rRFf.x() < goal_line_x + field_description.dimensions.penalty_area_length) {
+                //         rTFf.x() = rGFf.x() - field_description.dimensions.goal_depth;
+                //     }
+                // }
 
                 // Target positions in field frame
                 Eigen::Vector3d rTBf = rTFf - rBFf;              // Vector from ball to goal

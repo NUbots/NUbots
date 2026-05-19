@@ -116,10 +116,10 @@ namespace module::planning {
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goalpost Positions", [this](const FieldDescription& fd) {
-            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_own_l.x(),fd.goalpost_own_l.y() , 0));
-            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_own_r.x(),fd.goalpost_own_r.y() , 0));
-            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_opp_l.x(),fd.goalpost_opp_l.y() , 0));
-            list_goalposts.emplace_back(Eigen::Vector3d(fd.goalpost_opp_r.x(),fd.goalpost_opp_r.y() , 0));
+            list_goalposts.emplace_back(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0.0);
+            list_goalposts.emplace_back(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0.0);
+            list_goalposts.emplace_back(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0.0);
+            list_goalposts.emplace_back(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0.0);
 
             opp_goal_line_x = -fd.dimensions.field_length / 2.0;
             self_goal_line_x = fd.dimensions.field_length / 2.0;
@@ -136,8 +136,8 @@ namespace module::planning {
             stability = new_stability;
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Field>, With<Sensors>>().then(
+            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Field& field, const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;
@@ -152,66 +152,71 @@ namespace module::planning {
                 std::vector<Eigen::Vector2d> all_obstacles{};
 
                 // Add goalposts to list of obstacles to avoid
+                const Eigen::Isometry3d Hwf = field.Hfw.inverse();
                 for (const auto& goalpost : list_goalposts) {
-                    all_obstacles.emplace_back((Hrw * goalpost).head(2));
+                    const Eigen::Vector3d rFRr = Hrw * Hwf * goalpost;
+                    log<DEBUG>("Goalpost in robot frame:", rFRr.head(2).transpose());
+                    all_obstacles.emplace_back(rFRr.head(2));
                 }
 
                 // If there are robots, check if they're in the way
                 if (robots) {
+                    log<DEBUG>("Adding", robots->robots.size(), "robots as obstacles");
                     // Get the positions of all robots in the world
                     for (const auto& robot : robots->robots) {
                         all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
                     }
-                    // Sort obstacles based on distance from the robot
-                    std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
-                    // Get the obstacles in the way of the current path
-                    const auto obstacles = get_obstacles(all_obstacles, rDRr);
+                }
 
-                    // If there are obstacles in the way, walk around them
-                    if (!obstacles.empty()) {
-                        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                // Sort obstacles based on distance from the robot
+                std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
+                // Get the obstacles in the way of the current path
+                const auto obstacles = get_obstacles(all_obstacles, rDRr);
 
-                        // Calculate a perpendicular vector to the direction of the target point
-                        const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
+                // If there are obstacles in the way, walk around them
+                if (!obstacles.empty()) {
+                    log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
 
-                        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
-                        auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
+                    // Calculate a perpendicular vector to the direction of the target point
+                    const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
 
-                        // Most positive and negative projections of the obstacles to find the two candidate target
-                        // paths. Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note
-                        // this can cause us to slightly clip into the obstacle radius, especially if the obstacle is
-                        // very close to the target
-                        const Eigen::Vector2d left =
-                            *std::ranges::min_element(obstacles, {}, proj) - perp * cfg.obstacle_radius;
-                        const Eigen::Vector2d right =
-                            *std::ranges::max_element(obstacles, {}, proj) + perp * cfg.obstacle_radius;
+                    // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+                    auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
 
-                        // Total path length by traversing the triangle from the robot->obstacle->original target
-                        auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
+                    // Most positive and negative projections of the obstacles to find the two candidate target
+                    // paths. Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note
+                    // this can cause us to slightly clip into the obstacle radius, especially if the obstacle is
+                    // very close to the target
+                    const Eigen::Vector2d left =
+                        *std::ranges::min_element(obstacles, {}, proj) - perp * cfg.obstacle_radius;
+                    const Eigen::Vector2d right =
+                        *std::ranges::max_element(obstacles, {}, proj) + perp * cfg.obstacle_radius;
 
-                        // If we are going to walk outside the goal line, pick left or right based on which is away from goal line
-                        // Otherwise take the shorter path
+                    // Total path length by traversing the triangle from the robot->obstacle->original target
+                    auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
-                        bool left_outside  = left.x()  < opp_goal_line_x || left.x()  > self_goal_line_x;
-                        bool right_outside = right.x() < opp_goal_line_x || right.x() > self_goal_line_x;
+                    // If we are going to walk outside the goal line, pick left or right based on which is away from goal line
+                    // Otherwise take the shorter path
 
-                        if (left_outside && !right_outside) {
-                            log<DEBUG>("Left path exits field, taking right");
-                            rDRr = right;
-                        } else if (!left_outside && right_outside) {
-                            log<DEBUG>("Right path exits field, taking left");
-                            rDRr = left;
-                        } else {
-                            // Both inside (or both outside) — fall back to shorter path
-                            log<DEBUG>("Choosing path around obstacle based on path length");
-                            rDRr = path(left) < path(right) ? left : right;
-                        }
+                    bool left_outside  = left.x()  < opp_goal_line_x || left.x()  > self_goal_line_x;
+                    bool right_outside = right.x() < opp_goal_line_x || right.x() > self_goal_line_x;
 
-                        // Angle to the target point may have changed after adjusting for obstacles
-                        angle_to_target = vector_to_bearing(rDRr);
-                        // Final heading should now point toward the original target point from the adjusted target
-                        angle_to_final_heading = vector_to_bearing(Hrd.translation().head(2) - rDRr);
+                    if (left_outside && !right_outside) {
+                        log<DEBUG>("Left path exits field, taking right");
+                        rDRr = right;
+                    } else if (!left_outside && right_outside) {
+                        log<DEBUG>("Right path exits field, taking left");
+                        rDRr = left;
+                    } else {
+                        // Both inside (or both outside) — fall back to shorter path
+                        log<DEBUG>("Choosing path around obstacle based on path length");
+                        rDRr = path(left) < path(right) ? left : right;
                     }
+
+                    // Angle to the target point may have changed after adjusting for obstacles
+                    angle_to_target = vector_to_bearing(rDRr);
+                    // Final heading should now point toward the original target point from the adjusted target
+                    angle_to_final_heading = vector_to_bearing(Hrd.translation().head(2) - rDRr);
                 }
 
                 // Straight to max magnitude, smoother handles ramping up
@@ -330,19 +335,6 @@ namespace module::planning {
         return {v.x() * s, v.y() * s, angular};
     }
 
-    std::vector<Eigen::Vector2d> add_goalposts_as_obstacles(std::vector<Eigen::Vector2d> all_obstacles, std::vector<Eigen::Vector3d> list_goalposts ,Eigen::Isometry3d Hwf, Eigen::Isometry3d Hrw){
-
-        // Loop through this list, converting all of the goalpost position from field space to robot space, then add them back in all_obstacles list
-        for(const auto& goalpost_pos : list_goalposts){
-            auto rFWw = Hwf * goalpost_pos;        // Convert goalpost position from field space to world space
-            auto rFRr = Hrw * rFWw;                        // Convert that to robot space
-
-            all_obstacles.emplace_back(rFRr.head(2));
-        }
-
-        return all_obstacles;
-    }
-
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                                    const Eigen::Vector2d& rDRr) {
         // If there are no obstacles, return an empty group
@@ -357,6 +349,8 @@ namespace module::planning {
             const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
             const bool intersects =
                 intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
+            log<DEBUG>("Checking obstacle at", obstacle, "in_front:", in_front, "before_target:", before_target,
+                       "intersects:", intersects, "close_to_target:", close_to_target);
 
             return in_front && before_target && intersects && !close_to_target;
         });
