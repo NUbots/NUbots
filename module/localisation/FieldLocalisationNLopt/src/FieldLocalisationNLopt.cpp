@@ -97,9 +97,31 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
-            cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
-            cfg.maxeval  = config["opt"]["maxeval"].as<int>();
+            cfg.normal_xtol_rel  = config["normal_opt"]["xtol_rel"].as<double>();
+            cfg.normal_ftol_rel  = config["normal_opt"]["ftol_rel"].as<double>();
+            cfg.normal_maxeval   = config["normal_opt"]["maxeval"].as<int>();
+            {
+                auto it = nlopt_algorithm_map.find(config["normal_opt"]["algorithm"].as<std::string>());
+                if (it != nlopt_algorithm_map.end()) {
+                    cfg.normal_algorithm = it->second;
+                }
+                else {
+                    log<WARN>("Unknown normal optimisation algorithm '", config["normal_opt"]["algorithm"].as<std::string>(), "', using default");
+                }
+            }
+
+            cfg.uncertainty_xtol_rel = config["uncertainty_opt"]["xtol_rel"].as<double>();
+            cfg.uncertainty_ftol_rel = config["uncertainty_opt"]["ftol_rel"].as<double>();
+            cfg.uncertainty_maxeval  = config["uncertainty_opt"]["maxeval"].as<int>();
+            {
+                auto it = nlopt_algorithm_map.find(config["uncertainty_opt"]["algorithm"].as<std::string>());
+                if (it != nlopt_algorithm_map.end()) {
+                    cfg.uncertainty_algorithm = it->second;
+                }
+                else {
+                    log<WARN>("Unknown uncertainty optimisation algorithm '", config["uncertainty_opt"]["algorithm"].as<std::string>(), "', using default");
+                }
+            }
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
@@ -298,7 +320,12 @@ namespace module::localisation {
                         // Emit that we are resetting, eg for behaviour
                         emit(std::make_unique<UncertaintyResetFieldLocalisation>());
                         // Reset localisation by finding a new low cost state
+                        const auto reset_start = NUClear::clock::now();
                         uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
+                        const auto reset_end = NUClear::clock::now();
+                        const auto reset_duration =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
+                        log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
                         // Reset variables
                         num_over_cost = 0;
                         last_reset    = NUClear::clock::now();
@@ -382,7 +409,8 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
-        const std::shared_ptr<const Goals>& goals) {
+        const std::shared_ptr<const Goals>& goals,
+        bool uncertainty_optimisation) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
@@ -451,11 +479,19 @@ namespace module::localisation {
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
         constexpr unsigned int n   = 3;
-        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+        nlopt::algorithm algorithm = uncertainty_optimisation ? cfg.uncertainty_algorithm : cfg.normal_algorithm;
         nlopt::opt opt             = nlopt::opt(algorithm, n);
-        opt.set_xtol_rel(cfg.xtol_rel);
-        opt.set_ftol_rel(cfg.ftol_rel);
-        opt.set_maxeval(cfg.maxeval);
+
+        if (uncertainty_optimisation) {
+            opt.set_xtol_rel(cfg.uncertainty_xtol_rel);
+            opt.set_ftol_rel(cfg.uncertainty_ftol_rel);
+            opt.set_maxeval(cfg.uncertainty_maxeval);
+        }
+        else {
+            opt.set_xtol_rel(cfg.normal_xtol_rel);
+            opt.set_ftol_rel(cfg.normal_ftol_rel);
+            opt.set_maxeval(cfg.normal_maxeval);
+        }
 
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
@@ -479,7 +515,34 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
-        opt.optimize(x, final_cost);
+        nlopt::result result = opt.optimize(x, final_cost);
+
+        log<DEBUG>("Ran optimisation with algorithm ",
+                   algorithm,
+                   " and initial guess (",
+                   initial_guess.x(),
+                   ", ",
+                   initial_guess.y(),
+                   ", ",
+                   initial_guess.z(),
+                   "), resulting in proposed state (",
+                   x[0],
+                   ", ",
+                   x[1],
+                   ", ",
+                   x[2],
+                   ") with cost ",
+                   final_cost);
+
+        // Debug information about the optimization result
+        log<DEBUG>("Final Cost: ", final_cost);
+        switch (result) {
+            case nlopt::FTOL_REACHED: log<DEBUG>("Optimization stopped: function tolerance reached"); break;
+            case nlopt::XTOL_REACHED: log<DEBUG>("Optimization stopped: variable tolerance reached"); break;
+            case nlopt::MAXEVAL_REACHED: log<DEBUG>("Optimization stopped: maximum evaluations reached"); break;
+            default: log<ERROR>("Optimization failed with code ", result); break;
+        }
+        log<DEBUG>("Number of evaluations: ", opt.get_numevals());
 
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);
