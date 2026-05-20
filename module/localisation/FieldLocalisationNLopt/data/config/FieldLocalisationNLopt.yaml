@@ -68,7 +68,7 @@ change_limit: [0.5, 0.5, 0.5]
 goal_post_error_tolerance: 0.5
 
 normal_opt:
-  algorithm: LN_COBYLA
+  algorithm: WEIRDASSALGORITHM
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
   # Relative tolerance on the optimisation function value

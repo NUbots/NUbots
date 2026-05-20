@@ -56,6 +56,19 @@ namespace module::localisation {
     using utility::localisation::Landmark;
     using utility::localisation::OccupancyMap;
 
+    inline const std::map<std::string, nlopt::algorithm> nlopt_algorithm_map = {
+        {"LN_COBYLA", nlopt::LN_COBYLA},
+        {"LN_BOBYQA", nlopt::LN_BOBYQA},
+        {"LN_NEWUOA", nlopt::LN_NEWUOA},
+        {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
+        {"LD_LBFGS", nlopt::LD_LBFGS},
+        {"LD_MMA", nlopt::LD_MMA},
+        {"LD_TNEWTON", nlopt::LD_TNEWTON},
+        {"LD_TNEWTON_RESTART", nlopt::LD_TNEWTON_RESTART},
+        {"LD_VAR1", nlopt::LD_VAR1},
+        {"LD_VAR2", nlopt::LD_VAR2},
+    };
+
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
         Value value = Value::UNKNOWN;
@@ -234,7 +247,7 @@ namespace module::localisation {
             size_t normal_maxeval = 0;
 
             /// @brief Normal optimisation - Algorithm to use
-            std::string normal_algorithm = "LN_COBYLA";
+            nlopt::algorithm normal_algorithm = nlopt::LN_COBYLA;
 
             /// @brief Uncertainty optimisation - Relative tolerance on the optimisation parameters
             double uncertainty_xtol_rel = 0.0;
@@ -246,7 +259,7 @@ namespace module::localisation {
             size_t uncertainty_maxeval = 0;
 
             /// @brief Uncertainty optimisation - Algorithm to use
-            std::string uncertainty_algorithm = "LN_BOBYQA";
+            nlopt::algorithm uncertainty_algorithm = nlopt::LN_BOBYQA;
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
