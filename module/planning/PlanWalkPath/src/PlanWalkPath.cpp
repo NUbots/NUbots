@@ -201,8 +201,8 @@ namespace module::planning {
                     // Check candidates in field frame so the goal-line constraint (field-x) is valid
                     // regardless of which direction the robot is facing
                     const Eigen::Isometry3d Hfr = (Hrw * Hwf).inverse();
-                    const Eigen::Vector3d rLFf   = Hfr * Eigen::Vector3d(left.x(), left.y(), 0);
-                    const Eigen::Vector3d rRFf   = Hfr * Eigen::Vector3d(right.x(), right.y(), 0);
+                    const Eigen::Vector3d rLFf  = Hfr * Eigen::Vector3d(left.x(), left.y(), 0);
+                    const Eigen::Vector3d rRFf  = Hfr * Eigen::Vector3d(right.x(), right.y(), 0);
                     bool left_outside           = rLFf.x() < opp_goal_line_x || rLFf.x() > self_goal_line_x;
                     bool right_outside          = rRFf.x() < opp_goal_line_x || rRFf.x() > self_goal_line_x;
 
