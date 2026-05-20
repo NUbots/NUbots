@@ -80,7 +80,7 @@ export class VisualMeshViewModel {
       viewSize: { value: new Vector2(this.canvas.width, this.canvas.height).toThree() },
       focalLength: { value: this.params.lens.focalLength },
       centre: { value: this.params.lens.centre.toThree() },
-      k: { value: this.params.lens.distortionCoeffecients.toThree() },
+      k: { value: this.params.lens.distortionCoefficients.toThree() },
       imageAspectRatio: { value: this.imageAspectRatio },
       projection: { value: this.params.lens.projection },
     },
