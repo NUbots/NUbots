@@ -33,11 +33,11 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
 
 #include "utility/math/angle.hpp"
@@ -53,6 +53,7 @@ namespace module::planning {
 
     using message::behaviour::state::Stability;
     using message::input::Sensors;
+    using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
@@ -61,7 +62,6 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
-    using message::localisation::Field;
     using message::support::FieldDescription;
 
     using message::strategy::StandStill;
@@ -121,7 +121,7 @@ namespace module::planning {
             list_goalposts.emplace_back(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0.0);
             list_goalposts.emplace_back(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0.0);
 
-            opp_goal_line_x = -fd.dimensions.field_length / 2.0;
+            opp_goal_line_x  = -fd.dimensions.field_length / 2.0;
             self_goal_line_x = fd.dimensions.field_length / 2.0;
         });
 
@@ -137,7 +137,10 @@ namespace module::planning {
         });
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Field>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Field& field, const Sensors& sensors) {
+            [this](const WalkTo& walk_to,
+                   const std::shared_ptr<const Robots>& robots,
+                   const Field& field,
+                   const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;
@@ -198,20 +201,22 @@ namespace module::planning {
                     // Check candidates in field frame so the goal-line constraint (field-x) is valid
                     // regardless of which direction the robot is facing
                     const Eigen::Isometry3d Hfr = (Hrw * Hwf).inverse();
-                    const double left_field_x  = (Hfr * Eigen::Vector3d(left.x(),  left.y(),  0)).x();
-                    const double right_field_x = (Hfr * Eigen::Vector3d(right.x(), right.y(), 0)).x();
-                    bool left_outside  = left_field_x  < opp_goal_line_x || left_field_x  > self_goal_line_x;
-                    bool right_outside = right_field_x < opp_goal_line_x || right_field_x > self_goal_line_x;
+                    const double left_field_x   = (Hfr * Eigen::Vector3d(left.x(), left.y(), 0)).x();
+                    const double right_field_x  = (Hfr * Eigen::Vector3d(right.x(), right.y(), 0)).x();
+                    bool left_outside           = left_field_x < opp_goal_line_x || left_field_x > self_goal_line_x;
+                    bool right_outside          = right_field_x < opp_goal_line_x || right_field_x > self_goal_line_x;
 
-                    // If we are going to walk outside the goal line, pick left or right based on which is away from goal line
-                    // Otherwise take the shorter path
+                    // If we are going to walk outside the goal line, pick left or right based on which is away from
+                    // goal line Otherwise take the shorter path
                     if (left_outside && !right_outside) {
                         log<DEBUG>("Left path exits field, taking right");
                         rDRr = right;
-                    } else if (!left_outside && right_outside) {
+                    }
+                    else if (!left_outside && right_outside) {
                         log<DEBUG>("Right path exits field, taking left");
                         rDRr = left;
-                    } else {
+                    }
+                    else {
                         // Both inside (or both outside) — fall back to shorter path
                         log<DEBUG>("Choosing path around obstacle based on path length");
                         rDRr = path(left) < path(right) ? left : right;
@@ -353,8 +358,16 @@ namespace module::planning {
             const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
             const bool intersects =
                 intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
-            log<DEBUG>("Checking obstacle at", obstacle, "in_front:", in_front, "before_target:", before_target,
-                       "intersects:", intersects, "close_to_target:", close_to_target);
+            log<DEBUG>("Checking obstacle at",
+                       obstacle,
+                       "in_front:",
+                       in_front,
+                       "before_target:",
+                       before_target,
+                       "intersects:",
+                       intersects,
+                       "close_to_target:",
+                       close_to_target);
 
             return in_front && before_target && intersects && !close_to_target;
         });
