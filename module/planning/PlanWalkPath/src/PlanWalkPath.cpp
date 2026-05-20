@@ -201,10 +201,10 @@ namespace module::planning {
                     // Check candidates in field frame so the goal-line constraint (field-x) is valid
                     // regardless of which direction the robot is facing
                     const Eigen::Isometry3d Hfr = (Hrw * Hwf).inverse();
-                    const double left_field_x   = (Hfr * Eigen::Vector3d(left.x(), left.y(), 0)).x();
-                    const double right_field_x  = (Hfr * Eigen::Vector3d(right.x(), right.y(), 0)).x();
-                    bool left_outside           = left_field_x < opp_goal_line_x || left_field_x > self_goal_line_x;
-                    bool right_outside          = right_field_x < opp_goal_line_x || right_field_x > self_goal_line_x;
+                    const Eigen::Vector3d rLFf   = Hfr * Eigen::Vector3d(left.x(), left.y(), 0);
+                    const Eigen::Vector3d rRFf   = Hfr * Eigen::Vector3d(right.x(), right.y(), 0);
+                    bool left_outside           = rLFf.x() < opp_goal_line_x || rLFf.x() > self_goal_line_x;
+                    bool right_outside          = rRFf.x() < opp_goal_line_x || rRFf.x() > self_goal_line_x;
 
                     // If we are going to walk outside the goal line, pick left or right based on which is away from
                     // goal line Otherwise take the shorter path
