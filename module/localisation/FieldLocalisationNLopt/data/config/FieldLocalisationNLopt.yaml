@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -68,7 +68,7 @@ change_limit: [0.5, 0.5, 0.5]
 goal_post_error_tolerance: 0.5
 
 normal_opt:
-  algorithm: WEIRDASSALGORITHM
+  algorithm: LN_COBYLA
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
   # Relative tolerance on the optimisation function value
@@ -77,11 +77,11 @@ normal_opt:
   maxeval: 1000
 
 uncertainty_opt:
-  algorithm: LN_BOBYQA
+  algorithm: LN_COBYLA
   # Relative tolerance on the optimisation parameters
-  xtol_rel: 1e-2
+  xtol_rel: 1e-3
   # Relative tolerance on the optimisation function value
-  ftol_rel: 1e-2
+  ftol_rel: 1e-3
   # Maximum number of evaluations for the optimisation
   maxeval: 100
 
