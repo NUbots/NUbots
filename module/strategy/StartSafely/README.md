@@ -18,3 +18,5 @@ Emit the Task on Startup at the root of the Director tree.
 - `message::actuation::Body` to move the whole body to the stand position.
 
 ## Dependencies
+
+- Director

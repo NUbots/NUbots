@@ -2,12 +2,47 @@
 
 ## Description
 
-This module forwards messages that are emitted in the system over NUClearNetwork.
-Messages that are emitted are sent to the target when they are enabled in the configuration file.
-The configuration file is able to set either `true` for a message type in which case it will attempt to send every single packet or you can set a number and it will rate limit that packet.
+Forwards selected NUClear messages to named network targets over NUClearNet.
 
-The forwarder will split messages rate limiting by an id field if they have one
+Forwarding is configured per target and per message type in `NetworkForwarder.yaml`.
+Each type can be disabled, sent at full rate, or rate-limited to a maximum frequency.
+
+If a message type has an `id` field, rate limiting is applied per-id. Otherwise, a single global rate limit is used for that message type/target.
+
+## Usage
+
+Configure targets and message types in `data/config/NetworkForwarder.yaml`:
+
+- `false`: disable forwarding for this message type
+- `true`: forward every message
+- `<number>`: forward at most `<number>` messages per second (fps)
+
+Example:
+
+```yaml
+targets:
+	nusight:
+		message.support.nusight.Overview: true
+		message.output.CompressedImage: 10
+		message.nuclear.LogMessage: false
+```
+
+Notes:
+
+- Message names use protobuf-style dotted names (e.g. `message.support.nusight.Overview`)
+- Unknown type names are ignored with a warning
+- Reactions are enabled only when at least one target is subscribed to that message type
+
+## Consumes
+
+- `extension::Configuration` from `NetworkForwarder.yaml`
+- Dynamically registered NUClear messages listed in `targets` (one reaction per known type)
 
 ## Emits
 
-Network emits every message that is in the configuration over NUClearNet to the target
+- Configured message types forwarded via `Scope::NETWORK` to each configured target
+
+## Dependencies
+
+- NUClear networking (`Scope::NETWORK`)
+- Python 3 at build time (used to generate message handle registrations)

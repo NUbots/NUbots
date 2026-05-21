@@ -24,5 +24,3 @@ Incluide this role to track other robots on the field.
 ## Emits
 
 - `message::localisation::Robots` contains filtered robot positions and velocity estimates
-
-## Dependencies
