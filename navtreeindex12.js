@@ -1,5 +1,12 @@
 var NAVTREEINDEX12 =
 {
+"structextension_1_1behaviour_1_1Task.html":[3,0,1,0,14],
+"structextension_1_1behaviour_1_1Task.html#ac53ed3720298f3bbcdaf94ee156b705a":[3,0,1,0,14,0],
+"structextension_1_1behaviour_1_1Uses.html":[3,0,1,0,15],
+"structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707":[3,0,1,0,15,2],
+"structextension_1_1behaviour_1_1Uses.html#a92b8b468b32e2ad3c6c16a52aaace1f5":[3,0,1,0,15,0],
+"structextension_1_1behaviour_1_1Uses.html#aaf8a4311472c0e4a3fbf6d0849621307":[3,0,1,0,15,1],
+"structextension_1_1behaviour_1_1Wait.html":[3,0,1,0,16],
 "structextension_1_1behaviour_1_1Wait.html#a27748543a4f3c7043acd35baf3b21545":[3,0,1,0,16,1],
 "structextension_1_1behaviour_1_1Wait.html#aba0a4f69391f5757a477edc00e2db9b0":[3,0,1,0,16,0],
 "structextension_1_1behaviour_1_1When.html":[3,0,1,0,17],
@@ -242,12 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#a92735f101905b4913478b38ba8b5925a":[3,0,3,2,7,2,2],
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#aa9c79de395d98d920b5296555580f0cf":[3,0,3,2,7,2,1],
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#ac64c0140f7bdd59013d193976170452c":[3,0,3,2,7,2,0],
-"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#acf8a301553c5fab7bfff16a7968f6b8e":[3,0,3,2,7,2,6],
-"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#ada61384e49c2536411433562f7d36afb":[3,0,3,2,7,2,4],
-"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#af2764fe7184d8594f1d63235d74dab45":[3,0,3,2,7,2,3],
-"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html":[3,0,3,2,7,3],
-"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a00e6db1251d4ef8527ea2c90b2f116d3":[3,0,3,2,7,3,1],
-"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a1813885366e814ce68f97c6ac0383f91":[3,0,3,2,7,3,3],
-"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a340176cfc0c38b13cb596822a8694285":[3,0,3,2,7,3,4],
-"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a3e67bad3cec8d8727d21caa336efdf5f":[3,0,3,2,7,3,10]
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#acf8a301553c5fab7bfff16a7968f6b8e":[3,0,3,2,7,2,6]
 };

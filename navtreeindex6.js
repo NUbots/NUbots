@@ -215,8 +215,11 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443":[3,0,3,14,1,1],
 "classmodule_1_1vision_1_1BallDetector.html#a13c93d4c232967260da96066fa09aaa7":[3,0,3,14,1,5],
 "classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3":[3,0,3,14,1,0],
+"classmodule_1_1vision_1_1BallDetector.html#a550724fc7dc60fcbe163628858fc54b3":[3,0,3,14,1,8],
 "classmodule_1_1vision_1_1BallDetector.html#a7777f6fa085025e20895b1afe3dd06e9":[3,0,3,14,1,2],
-"classmodule_1_1vision_1_1BallDetector.html#aa2ccc4afe38b2c1772bd5fe532b0aa3b":[3,0,3,14,1,7],
+"classmodule_1_1vision_1_1BallDetector.html#a89969f421ca36dd6c5eec6ba61c900ff":[3,0,3,14,1,7],
+"classmodule_1_1vision_1_1BallDetector.html#aa2ccc4afe38b2c1772bd5fe532b0aa3b":[3,0,3,14,1,9],
+"classmodule_1_1vision_1_1BallDetector.html#ad785f67e1d400550a04e822297dab252":[3,0,3,14,1,10],
 "classmodule_1_1vision_1_1BallDetector.html#ae1cf5e0a55fdd2aa990fa856a6eaf9b9":[3,0,3,14,1,4],
 "classmodule_1_1vision_1_1BallDetector.html#af27571cebdabe6fd96ca31df77a22d3a":[3,0,3,14,1,3],
 "classmodule_1_1vision_1_1FieldLineDetector.html":[3,0,3,14,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1VisualMesh.html#a9736218788eb3a7cad03068e81ea5b0b":[3,0,3,14,6,2],
 "classmodule_1_1vision_1_1VisualMesh.html#adc5ba8529498ec4d556ef07da34860ba":[3,0,3,14,6,3],
 "classmodule_1_1vision_1_1Yolo.html":[3,0,3,14,7],
-"classmodule_1_1vision_1_1Yolo.html#a3efe041e42bd2898ba4c4d54abd20942":[3,0,3,14,7,5],
-"classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7":[3,0,3,14,7,2],
-"classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79":[3,0,3,14,7,6],
-"classmodule_1_1vision_1_1Yolo.html#a66ed7bc23d9a80df95239954e50d3a80":[3,0,3,14,7,4]
+"classmodule_1_1vision_1_1Yolo.html#a3efe041e42bd2898ba4c4d54abd20942":[3,0,3,14,7,5]
 };

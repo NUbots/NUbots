@@ -1,5 +1,12 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac12679620e235cde00f0b0f6c92e29da":[3,0,3,8,1,1,0,106],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac19a4d6627a66ccf4dfdf3338cbee757":[3,0,3,8,1,1,0,173],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac2789807e565d13e14864bcc5e122cb5":[3,0,3,8,1,1,0,160],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac47787b6ee5f99e8fed6cc7ebaa08df4":[3,0,3,8,1,1,0,270],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac4a6c25963abd09faf07531067c6c098":[3,0,3,8,1,1,0,147],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac5ee0e6f69a25ed829bc9e54e65e3cb0":[3,0,3,8,1,1,0,180],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac65a5fbff4312301145433ec3d95ab5e":[3,0,3,8,1,1,0,23],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac7755a93d4acc70b34fb303eef530c9f":[3,0,3,8,1,1,0,19],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dac92c89c94c4b8ce3a303b732ed4e6067":[3,0,3,8,1,1,0,192],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daca535e5797fce0e65fb7db94b4996dd5":[3,0,3,8,1,1,0,149],
@@ -242,12 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#acef4282092c646c746e0fb9e2ffbf77a":[3,0,3,9,19,0,13],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#af5705c1ec66420e365ba3784e053c5aa":[3,0,3,9,19,0,11],
 "structmodule_1_1skill_1_1CurrentWalkTask.html":[3,0,3,10,1],
-"structmodule_1_1skill_1_1GPT_1_1Config.html":[3,0,3,10,4,0],
-"structmodule_1_1skill_1_1GPT_1_1Config.html#a26b7e7880f973188ad3cf380aeec2777":[3,0,3,10,4,0,2],
-"structmodule_1_1skill_1_1GPT_1_1Config.html#a4e9568416d9fc1dfbdfd4ca91f6f8c59":[3,0,3,10,4,0,0],
-"structmodule_1_1skill_1_1GPT_1_1Config.html#ab6f64672b4eacabd35a4c974b8411d36":[3,0,3,10,4,0,1],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html":[3,0,3,10,3,0],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a15df7091f6c30e256529aafe4eba2f58":[3,0,3,10,3,0,5],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a317fa7c40af34863afcba7c479acd28a":[3,0,3,10,3,0,0],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a518b29943f662419a208390bc46ff6d8":[3,0,3,10,3,0,4]
+"structmodule_1_1skill_1_1GPT_1_1Config.html":[3,0,3,10,4,0]
 };

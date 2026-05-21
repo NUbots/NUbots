@@ -1117,8 +1117,12 @@ var namespaces_dup =
         ] ],
         [ "visualmesh", null, [
           [ "boundary_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637", null ],
-          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac21f7b62d03694ada0517dbbd1518fde", null ],
+          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a265dd178f856b688c7769575070863db", null ],
           [ "cluster_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4", null ],
+          [ "find_cluster_angular_radius", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac413caba2ea41afdf0043b974872d48b", null ],
+          [ "find_cluster_central_axis", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ae8d166444539e1fa34d7d1e073dd8685", null ],
+          [ "find_cluster_fill", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aaec13dffeebee3a154185b11fee28de1", null ],
+          [ "get_green_horizon_side_mask", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#abc415fc1e00742aa6c83004fbb10abbe", null ],
           [ "partition_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959", null ]
         ] ],
         [ "Colour", "structutility_1_1vision_1_1Colour.html", "structutility_1_1vision_1_1Colour" ],

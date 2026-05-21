@@ -1,5 +1,8 @@
 var NAVTREEINDEX11 =
 {
+"quantization__matrix_8cpp.html#aaa85ed4fef1efdc929e3ddde853719e0":[2,0,3,6,0,1,1,7],
+"quaternion_8hpp.html#a125dc8461b108045bb8763abaf1019ff":[2,0,7,6,5,0],
+"quaternion_8hpp.html#a85b29996c0d776de35dc74b241911f20":[2,0,7,6,5,1],
 "quaternion_8hpp.html#ab77fdf01cc1ef83f3be36c92f8d9cf77":[2,0,7,6,5,2],
 "random_8cpp.html#ade04216eaaf80b00efca9928bf8f5ebb":[2,0,7,13,0],
 "range__constructible_8hpp.html#a39d62c6172cd200a015d52c9e86176b4":[2,0,7,20,3],
@@ -8,8 +11,12 @@ var NAVTREEINDEX11 =
 "residual_8hpp.html#a3666903fbc2bb877aac34c9574b99fdb":[2,0,7,6,7,0,5],
 "settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe":[2,0,3,2,52],
 "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4":[2,0,7,21,3,2],
-"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959":[2,0,7,21,3,3],
-"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac21f7b62d03694ada0517dbbd1518fde":[2,0,7,21,3,1],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959":[2,0,7,21,3,7],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a265dd178f856b688c7769575070863db":[2,0,7,21,3,1],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aaec13dffeebee3a154185b11fee28de1":[2,0,7,21,3,5],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#abc415fc1e00742aa6c83004fbb10abbe":[2,0,7,21,3,6],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac413caba2ea41afdf0043b974872d48b":[2,0,7,21,3,3],
+"shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ae8d166444539e1fa34d7d1e073dd8685":[2,0,7,21,3,4],
 "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637":[2,0,7,21,3,0],
 "si__unit_8hpp.html#a6b9566482ed5592a474e636478704b32":[2,0,7,19,17],
 "si__unit_8hpp.html#ab8e765009f64846cc16953ca01587b67":[2,0,7,19,16],
@@ -242,12 +249,5 @@ var NAVTREEINDEX11 =
 "structextension_1_1behaviour_1_1ProviderScope.html#aed3039762075459755488b3cb6c0eca9":[3,0,1,0,11,1],
 "structextension_1_1behaviour_1_1ProviderScope.html#aee16e8888ba0f7c8a269058a3e3e9b6a":[3,0,1,0,11,7],
 "structextension_1_1behaviour_1_1Start.html":[3,0,1,0,12],
-"structextension_1_1behaviour_1_1Stop.html":[3,0,1,0,13],
-"structextension_1_1behaviour_1_1Task.html":[3,0,1,0,14],
-"structextension_1_1behaviour_1_1Task.html#ac53ed3720298f3bbcdaf94ee156b705a":[3,0,1,0,14,0],
-"structextension_1_1behaviour_1_1Uses.html":[3,0,1,0,15],
-"structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707":[3,0,1,0,15,2],
-"structextension_1_1behaviour_1_1Uses.html#a92b8b468b32e2ad3c6c16a52aaace1f5":[3,0,1,0,15,0],
-"structextension_1_1behaviour_1_1Uses.html#aaf8a4311472c0e4a3fbf6d0849621307":[3,0,1,0,15,1],
-"structextension_1_1behaviour_1_1Wait.html":[3,0,1,0,16]
+"structextension_1_1behaviour_1_1Stop.html":[3,0,1,0,13]
 };

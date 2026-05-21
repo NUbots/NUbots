@@ -201,180 +201,379 @@ $(document).ready(function(){initNavTree('shared_2utility_2vision_2visualmesh_2V
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#define UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;queue&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/math/geometry/ConvexHull.hpp&quot;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">namespace </span>utility::vision::visualmesh {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Func&gt;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    Iterator partition_points(Iterator first,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                              Iterator last,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                              <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                              Func&amp;&amp; pred,  <span class="comment">// function determining if the index has a high enough confidence to use</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                              <span class="keyword">const</span> std::initializer_list&lt;int&gt;&amp; search_space = {0, 1, 2, 3, 4, 5}) {</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordflow">return</span> std::partition(first, last, [&amp;](<span class="keyword">const</span> value_type&amp; idx) {</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            <span class="comment">// Check if this index satisfies our confidence requirements</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            <span class="keywordtype">bool</span> prediction = pred(idx);</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            <span class="comment">// Check if any of the required neighbours satisfy our confidence requirements</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="comment">// Required neighbours are from the search space list</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            <span class="keywordtype">bool</span> check = std::any_of(search_space.begin(), search_space.end(), [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; n) {</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                return !pred(neighbours(n, idx));</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            });</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            <span class="keywordflow">return</span> prediction &amp;&amp; check;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        });</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Func&gt;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    Iterator boundary_points(Iterator first,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                             Iterator last,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                             <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                             Func&amp;&amp; pred,  <span class="comment">// function determining if the index has a high enough confidence to use</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                             <span class="keyword">const</span> std::initializer_list&lt;int&gt;&amp; search_space = {0, 1, 2, 3, 4, 5}) {</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="comment">// Check if any of the required neighbours satisfy our confidence requirements</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="comment">// Required neighbours are from the search space list</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordflow">return</span> std::partition(first, last, [&amp;](<span class="keyword">const</span> value_type&amp; idx) {</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;            <span class="keywordflow">return</span> std::any_of(search_space.begin(), search_space.end(), [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; n) {</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                return !pred(neighbours(n, idx));</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            });</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        });</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    }</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">     * @brief Clusters connected mesh point indices using DFS.</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">     * @tparam Iterator An iterator over integers representing point indices [0, N).</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">     * @param first Iterator to the beginning of point indices.</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">     * @param last Iterator to the end of point indices.</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">     * @param min_cluster_size Minimum number of points for a cluster to be valid.</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">     * @param clusters Output vector of clusters, each a vector of indices.</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator&gt;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keywordtype">void</span> cluster_points(Iterator first,</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                        Iterator last,</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                        <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                        <span class="keywordtype">int</span> min_cluster_size,</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                        std::vector&lt;std::vector&lt;int&gt;&gt;&amp; clusters) {</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">int</span> N = std::distance(first, last);</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="comment">// If there are no points, return immediately</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordflow">if</span> (N == 0) {</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        }</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="comment">// Copy values (point indices) for indexed access</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        std::vector&lt;value_type&gt; values(first, last);</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;concepts&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;queue&gt;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/math/geometry/ConvexHull.hpp&quot;</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">namespace </span>utility::vision::visualmesh {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Func&gt;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    Iterator partition_points(Iterator first,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;                              Iterator last,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                              <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                              Func&amp;&amp; pred,  <span class="comment">// Function determining if the index has a high enough confidence to use</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                              <span class="keyword">const</span> std::initializer_list&lt;int&gt;&amp; search_space = {0, 1, 2, 3, 4, 5}) {</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keywordflow">return</span> std::partition(first, last, [&amp;](<span class="keyword">const</span> value_type&amp; idx) {</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="comment">// Check if this index satisfies our confidence requirements</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            <span class="keywordtype">bool</span> prediction = pred(idx);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="comment">// Check if any of the required neighbours satisfy our confidence requirements</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            <span class="comment">// Required neighbours are from the search space list</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <span class="keywordtype">bool</span> check = std::any_of(search_space.begin(), search_space.end(), [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; n) {</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                return !pred(neighbours(n, idx));</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            });</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            <span class="keywordflow">return</span> prediction &amp;&amp; check;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        });</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Func&gt;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    Iterator boundary_points(Iterator first,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                             Iterator last,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                             <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                             Func&amp;&amp; pred,  <span class="comment">// Function determining if the index has a high enough confidence to use</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                             <span class="keyword">const</span> std::initializer_list&lt;int&gt;&amp; search_space = {0, 1, 2, 3, 4, 5}) {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="comment">// Check if any of the required neighbours satisfy our confidence requirements</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="comment">// Required neighbours are from the search space list</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keywordflow">return</span> std::partition(first, last, [&amp;](<span class="keyword">const</span> value_type&amp; idx) {</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            <span class="keywordflow">return</span> std::any_of(search_space.begin(), search_space.end(), [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; n) {</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                return !pred(neighbours(n, idx));</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            });</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        });</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    }</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">     * @brief Clusters connected mesh point indices using DFS.</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">     * @tparam Iterator An iterator over integers representing point indices [0, N).</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">     * @param first Iterator to the beginning of point indices.</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">     * @param last Iterator to the end of point indices.</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">     * @param min_cluster_size Minimum number of points for a cluster to be valid.</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">     * @param clusters Output vector of clusters, each a vector of indices.</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator&gt;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordtype">void</span> cluster_points(Iterator first,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                        Iterator last,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                        <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                        <span class="keywordtype">int</span> min_cluster_size,</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                        std::vector&lt;std::vector&lt;int&gt;&gt;&amp; clusters) {</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keyword">using</span> value_type = <span class="keyword">typename</span> std::iterator_traits&lt;Iterator&gt;::value_type;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">int</span> N = std::distance(first, last);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="comment">// If there are no points, return immediately</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        <span class="keywordflow">if</span> (N == 0) {</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;            <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        }</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="comment">// Lookup table: which indices are in the input set</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        std::vector&lt;bool&gt; is_in_input(neighbours.cols(), <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> idx : values) {</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;            <span class="keywordflow">if</span> (idx &gt;= 0 &amp;&amp; idx &lt; <span class="keywordtype">int</span>(is_in_input.size())) {</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                is_in_input[idx] = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;            }</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        }</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        <span class="comment">// Track visited status of all points</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        std::vector&lt;bool&gt; visited(neighbours.cols(), <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="comment">// Copy values (point indices) for indexed access</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        std::vector&lt;value_type&gt; values(first, last);</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="comment">// Lookup table: which indices are in the input set</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        std::vector&lt;bool&gt; is_in_input(neighbours.cols(), <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> idx : values) {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;            <span class="keywordflow">if</span> (idx &gt;= 0 &amp;&amp; idx &lt; <span class="keywordtype">int</span>(is_in_input.size())) {</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                is_in_input[idx] = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            }</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        }</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="comment">// Iterate through each index and form clusters via DFS</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) {</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;            <span class="keywordtype">int</span> seed = values[i];</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;            <span class="keywordflow">if</span> (visited[seed]) {</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;            }</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;            std::vector&lt;int&gt; cluster;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;            std::vector&lt;int&gt; stack;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;            stack.push_back(seed);</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;            <span class="comment">// Perform DFS to find all connected points in the cluster</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;            <span class="keywordflow">while</span> (!stack.empty()) {</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                <span class="keywordtype">int</span> current = stack.back();</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                stack.pop_back();</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                <span class="comment">// If already visited, skip</span></div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                <span class="keywordflow">if</span> (visited[current]) {</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                    <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                }</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                visited[current] = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                cluster.push_back(current);</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;                <span class="comment">// Push unvisited neighbours that are also in the input set</span></div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; neighbours.rows(); ++n) {</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                    <span class="keywordtype">int</span> neigh = neighbours(n, current);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                    <span class="keywordflow">if</span> (neigh &gt;= 0 &amp;&amp; neigh &lt; <span class="keywordtype">int</span>(visited.size()) &amp;&amp; !visited[neigh] &amp;&amp; is_in_input[neigh]) {</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                        stack.push_back(neigh);</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                    }</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                }</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;            }</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            <span class="comment">// If the cluster is large enough, add it to the output</span></div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;            <span class="keywordflow">if</span> (<span class="keywordtype">int</span>(cluster.size()) &gt;= min_cluster_size) {</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;                clusters.emplace_back(std::move(cluster));</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;            }</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        }</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    }</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160; </div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keyword">auto</span> check_green_horizon_side(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; clusters,</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                                  <span class="keyword">const</span> std::vector&lt;Eigen::Vector3d&gt;&amp; horizon,</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                                  <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; rays,</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; outside   = <span class="keyword">true</span>,    <span class="comment">// accept clusters completely outside</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; inside    = <span class="keyword">true</span>,    <span class="comment">// accept clusters completely inside</span></div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; intersect = <span class="keyword">true</span>) {  <span class="comment">// accept clusters that go over the boundary</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160; </div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        <span class="keyword">auto</span> success = [&amp;](<span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; cluster_outside, <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; cluster_inside) {</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;            <span class="comment">// Cluster is completely outside</span></div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; !cluster_inside) {</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                <span class="keywordflow">return</span> outside;</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;            }</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;            <span class="comment">// Cluster is completely inside</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;            <span class="keywordflow">if</span> (!cluster_outside &amp;&amp; cluster_inside) {</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                <span class="keywordflow">return</span> inside;</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;            }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;            <span class="comment">// Cluster intersects the boundary</span></div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; cluster_inside) {</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                <span class="keywordflow">return</span> intersect;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            }</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;            <span class="comment">// Last option is it&#39;s neither in or out</span></div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;                <span class="stringliteral">&quot;Cluster is neither inside or outside the green horizon. This is bad.&quot;</span>);</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;        };</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;        <span class="comment">// Move any clusters that don&#39;t intersect the green horizon to the end of the list</span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="comment">// We need to find one point above the green horizon and one below it</span></div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="keywordflow">return</span> std::partition(clusters.begin(), clusters.end(), [&amp;](<span class="keyword">const</span> std::vector&lt;int&gt;&amp; cluster) {</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;            bool out = false;</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;            bool in  = false;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160; </div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            for (unsigned int idx = 0; idx &lt; cluster.size(); ++idx) {</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                bool position =</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;                <span class="comment">// Only set if it is in or out as we want to find across the cluster</span></div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;                in  = position ? true : in;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                out = !position ? true : out;</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;            }</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            <span class="keywordflow">return</span> success(out, in);</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        });</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    }</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;}  <span class="comment">// namespace utility::vision::visualmesh</span></div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="comment">// Track visited status of all points</span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        std::vector&lt;bool&gt; visited(neighbours.cols(), <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160; </div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="comment">// Iterate through each index and form clusters via DFS</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) {</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;            <span class="keywordtype">int</span> seed = values[i];</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;            <span class="keywordflow">if</span> (visited[seed]) {</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;            }</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;            std::vector&lt;int&gt; cluster;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;            std::vector&lt;int&gt; stack;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;            stack.push_back(seed);</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;            visited[seed] = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;            <span class="comment">// Perform DFS to find all connected points in the cluster</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;            <span class="keywordflow">while</span> (!stack.empty()) {</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                <span class="keywordtype">int</span> current = stack.back();</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                stack.pop_back();</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                cluster.push_back(current);</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                <span class="comment">// Push unvisited neighbours that are also in the input set</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; neighbours.rows(); ++n) {</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;                    <span class="keywordtype">int</span> neigh = neighbours(n, current);</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;                    <span class="keywordflow">if</span> (neigh &gt;= 0 &amp;&amp; neigh &lt; <span class="keywordtype">int</span>(visited.size()) &amp;&amp; !visited[neigh] &amp;&amp; is_in_input[neigh]) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                        visited[neigh] = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                        stack.push_back(neigh);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                    }</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                }</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            }</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;            <span class="comment">// If the cluster is large enough, add it to the output</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            <span class="keywordflow">if</span> (<span class="keywordtype">int</span>(cluster.size()) &gt;= min_cluster_size) {</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                clusters.emplace_back(std::move(cluster));</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            }</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    }</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;<span class="comment">     * @brief Get the green horizon side mask object</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment">     * @param clusters Vector of clusters, each a vector of indices.</span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment">     * @param horizon Rays making up the green horizon</span></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment">     * @param rays Vectors @p clusters indices index into</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">     * @param outside Accept clusters completely outside the green horizon.</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">     * @param inside Accept clusters completely inside the green horizon.</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment">     * @param intersect Accept clusters that intersect the green horizon</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment">     * @return std::vector&lt;bool&gt; mask for accepted clusters</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    std::vector&lt;bool&gt; get_green_horizon_side_mask(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt;&amp; clusters,</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                                                  <span class="keyword">const</span> std::vector&lt;Eigen::Vector3d&gt;&amp; horizon,</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                                                  <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; rays,</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> outside   = <span class="keyword">true</span>,</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> inside    = <span class="keyword">true</span>,</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> intersect = <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        <span class="keyword">auto</span> success = [&amp;](<span class="keyword">const</span> <span class="keywordtype">bool</span> cluster_outside, <span class="keyword">const</span> <span class="keywordtype">bool</span> cluster_inside) {</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;            <span class="comment">// Cluster is completely outside</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; !cluster_inside) {</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                <span class="keywordflow">return</span> outside;</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            }</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;            <span class="comment">// Cluster is completely inside</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;            <span class="keywordflow">if</span> (!cluster_outside &amp;&amp; cluster_inside) {</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                <span class="keywordflow">return</span> inside;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;            }</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;            <span class="comment">// Cluster intersects the boundary</span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; cluster_inside) {</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;                <span class="keywordflow">return</span> intersect;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;            }</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;            <span class="comment">// Last option is it&#39;s neither in or out</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;                <span class="stringliteral">&quot;Cluster is neither inside or outside the green horizon. This is bad.&quot;</span>);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;        };</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        std::vector&lt;bool&gt; is_accepted;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        is_accepted.reserve(clusters.size());</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; cluster : clusters) {</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;            <span class="keywordtype">bool</span> out = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            <span class="keywordtype">bool</span> in  = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> idx = 0; idx &lt; cluster.size(); ++idx) {</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;                <span class="keywordtype">bool</span> position =</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                <span class="comment">// Only set if it is in or out as we want to find across the cluster</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;                in  = position ? true : in;</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                out = !position ? true : out;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                <span class="keywordflow">if</span> (out &amp;&amp; in) {</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                    <span class="comment">// Known to be an intersection case</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                }</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;            }</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;            is_accepted.push_back(success(out, in));</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        }</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="keywordflow">return</span> is_accepted;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    }</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="comment">     * @brief</span></div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;<span class="comment">     * @param clusters Vector of clusters, each a vector of indices.</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="comment">     * @param horizon Rays making up the green horizon</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="comment">     * @param rays Vectors @p clusters indices index into</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="comment">     * @param outside Accept clusters completely outside the green horizon.</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="comment">     * @param inside Accept clusters completely inside the green horizon.</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;<span class="comment">     * @param intersect Accept clusters that intersect the green horizon</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;<span class="comment">     * @return auto</span></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    <span class="keyword">auto</span> check_green_horizon_side(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; clusters,</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                                  <span class="keyword">const</span> std::vector&lt;Eigen::Vector3d&gt;&amp; horizon,</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                                  <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; rays,</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> outside   = <span class="keyword">true</span>,</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> inside    = <span class="keyword">true</span>,</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;                                  <span class="keyword">const</span> <span class="keywordtype">bool</span> intersect = <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        <span class="keyword">auto</span> success = [&amp;](<span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; cluster_outside, <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; cluster_inside) {</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;            <span class="comment">// Cluster is completely outside</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; !cluster_inside) {</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                <span class="keywordflow">return</span> outside;</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;            }</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;            <span class="comment">// Cluster is completely inside</span></div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;            <span class="keywordflow">if</span> (!cluster_outside &amp;&amp; cluster_inside) {</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;                <span class="keywordflow">return</span> inside;</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;            }</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;            <span class="comment">// Cluster intersects the boundary</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;            <span class="keywordflow">if</span> (cluster_outside &amp;&amp; cluster_inside) {</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;                <span class="keywordflow">return</span> intersect;</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            }</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;            <span class="comment">// Last option is it&#39;s neither in or out</span></div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;            NUClear::log&lt;NUClear::LogLevel::ERROR&gt;(</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;                <span class="stringliteral">&quot;Cluster is neither inside or outside the green horizon. This is bad.&quot;</span>);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;        };</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;        <span class="comment">// Move any clusters that don&#39;t meet success criterion to the end of the list</span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;        <span class="comment">// We need to find if there are points above the green horizon and/or one below it</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        <span class="keywordflow">return</span> std::partition(clusters.begin(), clusters.end(), [&amp;](<span class="keyword">const</span> std::vector&lt;int&gt;&amp; cluster) {</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;            bool out = false;</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;            bool in  = false;</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;            for (unsigned int idx = 0; idx &lt; cluster.size(); ++idx) {</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                bool position =</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                <span class="comment">// Only set if it is in or out as we want to find across the cluster</span></div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;                in  = position ? true : in;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                out = !position ? true : out;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160; </div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;                if (out &amp;&amp; in) {</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;                    <span class="comment">// Known to be an intersection case</span></div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;                    break;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;                }</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;            }</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;            <span class="keywordflow">return</span> success(out, in);</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        });</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    }</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;<span class="comment">     * @brief Calculates percentage fill using the n. observed points / expected n. of observed points</span></div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;<span class="comment">     * The ball detection can be thought of as a cone from the camera, with axis of @p uBCw and angular radius of @p</span></div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;<span class="comment">     * radius. The cluster is assumed bounded in the cone, and expected points are found using a DFS on the mesh.</span></div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="comment">     * @tparam Iterator An iterator over mesh point indices (column index into @p uPCw)</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="comment">     * @tparam Sentinel A sentinel for the mesh pointer Iterator</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="comment">     * @param first Iterator at beginning of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="comment">     * @param last Iterator at end of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="comment">     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.</span></div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;<span class="comment">     * @param uBCw The centre axis of the ball represented as a unit vector in world space.</span></div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="comment">     * @param radius Angular radius of the ball, equal to cos(theta) where theta is angle from axis to furthest point.</span></div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;<span class="comment">     * @param uPCw Unit vectors from camera to a point in the mesh in world space.</span></div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<span class="comment">     * @return double which is fill percentage measured as observed bounded points divided by expected bounded points.</span></div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Sentinel&gt;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    <span class="keywordtype">double</span> find_cluster_fill(Iterator first,</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;                             Sentinel last,</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;                             <span class="keyword">const</span> Eigen::MatrixXi&amp; neighbours,</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;                             <span class="keyword">const</span> Eigen::Vector3d uBCw,</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;                             <span class="keyword">const</span> <span class="keywordtype">double</span> radius,</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;                             <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; uPCw) {</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;        <span class="comment">// Count number of mesh points bounded in cone from camera using DFS to get expected number of bounded points</span></div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;        std::vector&lt;bool&gt; visited(neighbours.cols(), <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        std::vector&lt;int&gt; stack{};</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160; </div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        <span class="comment">// Indices are known to be unique and are bounded in the cone so they are added to the stack without checks</span></div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;        <span class="keywordflow">for</span> (; first != last; ++first) {</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">int</span> idx = *first;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            stack.push_back(idx);</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            visited[idx] = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;        }</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160; </div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">size_t</span> observed_bounded = stack.size();</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;        <span class="keywordtype">size_t</span> expected_bounded       = stack.size();</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160; </div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;        <span class="keywordflow">if</span> (expected_bounded == 0) {</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;        }</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160; </div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        <span class="comment">// Depth first search where if a points neighbours are bounded by the cone they are connected</span></div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        <span class="keywordflow">while</span> (!stack.empty()) {</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;            <span class="keywordtype">int</span> current = stack.back();</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;            stack.pop_back();</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160; </div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; neighbours.rows(); ++i) {</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;                <span class="keywordtype">int</span> neigh = neighbours(i, current);</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;                <span class="comment">// When uPCw.col(neigh).dot(uBCw) &gt;= radius it is bounded inside as both are in cos(theta)</span></div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;                <span class="keywordflow">if</span> (neigh &gt;= 0 &amp;&amp; <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(neigh) &lt; visited.size() &amp;&amp; !visited[neigh]</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;                    &amp;&amp; uPCw.col(neigh).dot(uBCw) &gt;= radius) {</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;                    stack.push_back(neigh);</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;                    visited[neigh] = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;                    ++expected_bounded;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;                }</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            }</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;        }</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160; </div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(observed_bounded) / expected_bounded;</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    }</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;<span class="comment">     * @brief Finds central axis of a cluster</span></div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;<span class="comment">     * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average</span></div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;<span class="comment">     * vector. This represents the central axis.</span></div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;<span class="comment">     * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)</span></div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;<span class="comment">     * @tparam Sentinel A sentinel for the given mesh iterator</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;<span class="comment">     * @param first Iterator at beginning of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;<span class="comment">     * @param last Iterator at end of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;<span class="comment">     * @param uPCw Unit vectors from the camera to a point in the mesh in world space</span></div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;<span class="comment">     * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space</span></div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Sentinel&gt;</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;    Eigen::Vector3d find_cluster_central_axis(Iterator first,</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;                                              Sentinel last,</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                                              <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; uPCw) {</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;        Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;        <span class="keywordflow">for</span> (; first != last; ++first) {</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">int</span> idx = *first;</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;            uBCw += uPCw.col(idx);</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;        }</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;        <span class="keywordflow">if</span> (uBCw.squaredNorm() &gt; 0.0) {</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;            uBCw.normalize();</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;        }</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160; </div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;        <span class="keywordflow">return</span> uBCw;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;    }</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;<span class="comment">     * @brief Finds the angular radius of the cluster from the camera</span></div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;<span class="comment">     * Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the</span></div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;<span class="comment">     * largest angular radius possible from the edge points available. Equal to cos(theta), where theta</span></div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment">     * is the angle between the central ball axis (uBCw) and the edge of the ball.</span></div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;<span class="comment">     * @tparam Iterator An integer iterator over mesh point indexes, (column index into @p uPCw)</span></div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;<span class="comment">     * @tparam Sentinel A sentinel for the Iterator</span></div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="comment">     * @param first Iterator at beginning of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="comment">     * @param last Iterator at end of the cluster&#39;s mesh point indices</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;<span class="comment">     * @param uPCw Unit vector from camera to a point in the mesh in world space</span></div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;<span class="comment">     * @param uBCw Unit vector from camera to ball central axis in world space</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="comment">     * @return double, angular radius of cluster equal to cos(theta)</span></div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator, <span class="keyword">typename</span> Sentinel&gt;</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    <span class="keywordtype">double</span> find_cluster_angular_radius(Iterator first,</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                                       Sentinel last,</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                                       <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; uPCw,</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                                       <span class="keyword">const</span> Eigen::Vector3d&amp; uBCw) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;        <span class="keywordtype">double</span> radius = 1.0;</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;        <span class="keywordflow">for</span> (; first != last; ++first) {</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;            <span class="keyword">const</span> <span class="keywordtype">int</span> idx = *first;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;            <span class="comment">// Unit vector from the camera to the ball edge, in world space</span></div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;            <span class="keyword">const</span> Eigen::Vector3d&amp; uECw(uPCw.col(idx));</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;            <span class="comment">// Find the vector that gives the largest angle between the central axis and ball edge</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;            <span class="comment">// Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.</span></div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;            radius = std::min(radius, uBCw.dot(uECw));</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;        }</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160; </div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        <span class="keywordflow">return</span> radius;</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    }</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160; </div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;}  <span class="comment">// namespace utility::vision::visualmesh</span></div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160; </div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_0732c0f32685034b3208add2f1dba931.html">vision</a></li><li class="navelem"><a class="el" href="dir_390d83350d762254e83e153bb2d91bec.html">visualmesh</a></li><li class="navelem"><b>VisualMesh.hpp</b></li>
-    <li class="footer">Generated on Wed May 20 2026 09:57:12 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu May 21 2026 02:07:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

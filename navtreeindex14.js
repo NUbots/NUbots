@@ -1,5 +1,12 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aa7fe138e00442bdbd062a1dd9e494ea1":[3,0,3,3,6,0,1],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9":[3,0,3,3,6,0,4],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html":[3,0,3,3,6,0,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html#a35bb495fb7f38d7f06d263442bad6847":[3,0,3,3,6,0,0,2],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html#ae70a1ccc7d03a292ff81b8c7235c99be":[3,0,3,3,6,0,0,3],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html":[3,0,3,3,6,0,0,0],
+"structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html#a83c2361ee73aac8d8813072c55a7e005":[3,0,3,3,6,0,0,0,0],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html#ab4e1cb0e783e4d88b727a9538b885883":[3,0,3,3,6,0,0,0,1],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html":[3,0,3,3,6,0,0,1],
 "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html#ad3e66b86c41b4e2260790cf627f2d023":[3,0,3,3,6,0,0,1,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a1ceecf42080b2d3de4f6dcd7277b9286":[3,0,3,8,0,1,0],
 "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html#a9f7ca29a7f6fe2dee9e2a5d488bc1c29":[3,0,3,8,0,1,1],
 "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html":[3,0,3,8,0,2,0],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a5068f68dd606db1039090d209765ab8c":[3,0,3,8,0,2,0,3],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a607d75ed948a8e4e0752887a2d1e19b7":[3,0,3,8,0,2,0,2],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a7bbc5c256a9d51f36e5ee05af3d5598f":[3,0,3,8,0,2,0,4],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#aa4e7f5944f271c9ff3170a403b072f75":[3,0,3,8,0,2,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html":[3,0,3,8,0,2,0,0],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a017925976b949017a096b342367e8173":[3,0,3,8,0,2,0,0,1],
-"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config_1_1ServoConfiguration.html#a0f01406fa80fd4f261d9e457410ac8a5":[3,0,3,8,0,2,0,0,0],
-"structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html":[3,0,3,8,0,4]
+"structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html#a5068f68dd606db1039090d209765ab8c":[3,0,3,8,0,2,0,3]
 };
