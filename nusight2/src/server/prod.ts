@@ -16,6 +16,7 @@ import { WebSocketServer } from "./web_socket/web_socket_server";
 const args = minimist(process.argv.slice(2));
 const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
+const nuclearnetPort = args.port || "7447";
 
 const app = express();
 const server = http.createServer(app);
@@ -46,5 +47,5 @@ if (withVirtualRobots) {
 
 NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
   fakeNetworking: withVirtualRobots,
-  connectionOpts: { name: "nusight", address: nuclearnetAddress },
+  connectionOpts: { name: "nusight", address: nuclearnetAddress, port: nuclearnetPort },
 });
