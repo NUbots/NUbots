@@ -36,7 +36,7 @@ from invoke import Responder
 from termcolor import cprint
 
 import b
-from tools.utility import processor_check
+import utility.processor_check as processor_check
 from utility.dockerise import run_on_docker
 
 
@@ -101,6 +101,8 @@ def run(target, local, user, config, toolchain, **kwargs):
     files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
 
     for file in files:
+        if not os.path.isfile(file):
+            continue
         arch = processor_check.check_architecture(file)
         if arch["binary"] != 'aarch64':
             cprint(f"File {file} is not compiled for target. Stopping install.","red", attrs=["bold"])

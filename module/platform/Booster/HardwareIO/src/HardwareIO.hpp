@@ -1,0 +1,82 @@
+#ifndef MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
+#define MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
+
+#include <mutex>
+#include <nuclear>
+#include <string>
+
+#include "extension/Behaviour.hpp"
+
+#include <booster/idl/b1/BatteryState.h>
+#include <booster/idl/b1/ButtonEvent.h>
+#include <booster/idl/b1/FallDownState.h>
+#include <booster/idl/b1/LowState.h>
+#include <booster/idl/b1/Odometer.h>
+#include <booster/idl/b1/RemoteControllerState.h>
+#include <booster/idl/b1/RobotStates.h>
+#include <booster/robot/channel/channel_factory.hpp>
+#include <booster/robot/b1/b1_loco_client.hpp>
+
+#include "message/platform/RawSensors.hpp"
+#include "message/booster/BoosterFallDownState.hpp"
+#include "message/booster/BoosterWalk.hpp"
+#include "message/booster/BoosterVisualKick.hpp"
+#include "message/booster/BoosterGetUp.hpp"
+
+
+namespace module::platform::Booster {
+
+class HardwareIO : public NUClear::Reactor {
+private:
+    struct Config {
+    } cfg;
+
+    struct Buttons {
+        bool left   = false;
+        bool middle = false;
+        bool right  = false;
+    } buttons;
+    std::mutex buttons_mutex;
+
+    float battery_soc = 0.0f;
+    std::mutex battery_mutex;
+    constexpr static int UPDATE_FREQUENCY = 10;
+
+    Eigen::Vector3d last_walk_velocity = Eigen::Vector3d::Zero();
+
+    booster::robot::ChannelPtr<booster_interface::msg::LowState> low_state_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::BatteryState> battery_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::FallDownState> fall_down_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::ButtonEventMsg> button_event_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::RemoteControllerState> rc_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::RobotStatesMsg> robot_states_channel;
+    booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
+
+    booster::robot::b1::B1LocoClient booster_client;
+
+    void low_state_handler(const void* msg);
+    void fall_down_handler(const void* msg);
+    void battery_handler(const void* msg);
+    void button_event_handler(const void* msg);
+
+    static std::string res_code_to_string(int32_t res_code) {
+        std::string out;
+        switch (res_code) {
+            case 0:   out = "Success"; break;
+            case 100: out = "Request timed out"; break;
+            case 400: out = "Bad request"; break;
+            case 409: out = "Request conflict"; break;
+            case 500: out = "Internal server error"; break;
+            case 501: out = "Request rejected"; break;
+            default:  out = "UNKNOWN"; break;
+        }
+        return out + " (" + std::to_string(res_code) + ")";
+    }
+
+public:
+    explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
+};
+
+}  // namespace module::platform::Booster
+
+#endif  // MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP

@@ -1,0 +1,4 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+# What version of Booster's visual kick to use
+version: 2

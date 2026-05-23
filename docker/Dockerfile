@@ -343,10 +343,10 @@ RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9
 
 RUN install-package curl lsb-release
 
-RUN curl -L https://github.com/BoosterRobotics/booster_robotics_sdk/archive/f9ab807a0475b51aa5fb28b093c85652dd57fb69.tar.gz \
+RUN curl -L https://github.com/BoosterRobotics/booster_robotics_sdk/archive/324946e7c885de6cd6d37220eca64ed4e0f8d418.tar.gz \
     -o /tmp/booster_robotics_sdk.tar.gz && \
     cd /tmp && tar -xzf booster_robotics_sdk.tar.gz && \
-    mv booster_robotics_sdk-f9ab807a0475b51aa5fb28b093c85652dd57fb69 booster_robotics_sdk && \
+    mv booster_robotics_sdk-324946e7c885de6cd6d37220eca64ed4e0f8d418 booster_robotics_sdk && \
     rm /tmp/booster_robotics_sdk.tar.gz
 
 WORKDIR /tmp/booster_robotics_sdk

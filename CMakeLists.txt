@@ -72,13 +72,13 @@ endif()
 
 # Allow selection of subcontroller for conditional build
 if(NOT SUBCONTROLLER)
-  message(STATUS "Setting subcontroller to 'NUSense' as none was specified.")
+  message(STATUS "Setting subcontroller to 'Booster' as none was specified.")
   set(SUBCONTROLLER
-      NUSense
+      Booster
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
-  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "NUSense" "OpenCR")
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "Booster")
 endif()
 
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is

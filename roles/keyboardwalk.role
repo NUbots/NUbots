@@ -19,9 +19,8 @@ nuclear_role(
   actuation::Kinematics
   actuation::FootController
   # Skills
-  skill::Walk
-  skill::KickWalk
-  skill::GetUp
+  skill::K1Walk
+  skill::K1GetUp
   skill::Look
   # Planners
   planning::GetUpPlanner
@@ -31,6 +30,7 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  output::Overview
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
 )
