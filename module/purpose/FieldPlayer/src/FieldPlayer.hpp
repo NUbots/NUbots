@@ -27,6 +27,7 @@
 #ifndef MODULE_FIELDPLAYER_HPP
 #define MODULE_FIELDPLAYER_HPP
 
+#include <json.hpp>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -51,6 +52,9 @@ namespace module::purpose {
             /// @brief Whether to search around the field if the robot's localisation cost is high
             bool search_when_lost = false;
         } cfg;
+
+        /// Formation JSON loaded at config time. Empty when the file is absent — Support module fallback is used.
+        nlohmann::json formation_json{};
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldPlayer reactor.

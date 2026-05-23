@@ -8,3 +8,7 @@ center_circle_offset: 0.5
 
 max_localisation_cost: 3.0
 search_when_lost: false
+
+# Formation JSON file for support positioning (relative to this config directory).
+# Teams swap this file before each match — no code change needed.
+formation_file: "formation.json"

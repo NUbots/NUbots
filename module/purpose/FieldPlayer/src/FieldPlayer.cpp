@@ -26,6 +26,10 @@
  */
 #include "FieldPlayer.hpp"
 
+#include <filesystem>
+#include <fstream>
+#include <json.hpp>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -43,6 +47,8 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/math/euler.hpp"
+#include "utility/strategy/formation.hpp"
 #include "utility/strategy/positioning.hpp"
 #include "utility/strategy/soccer_strategy.hpp"
 
@@ -83,8 +89,17 @@ namespace module::purpose {
             cfg.equidistant_threshold     = config["equidistant_threshold"].as<double>();
             cfg.ball_off_center_threshold = config["ball_off_center_threshold"].as<double>();
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
-            cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
-            cfg.search_when_lost          = config["search_when_lost"].as<bool>();
+            cfg.max_localisation_cost = config["max_localisation_cost"].as<double>();
+            cfg.search_when_lost      = config["search_when_lost"].as<bool>();
+
+            // Load the formation JSON from the same directory as FieldPlayer.yaml.
+            // If the file is absent, formation_json stays empty and Support module fallback is used.
+            std::filesystem::path formation_path =
+                std::filesystem::path(config.path).parent_path()
+                / config["formation_file"].as<std::string>();
+            if (std::ifstream f(formation_path); f.good()) {
+                formation_json = nlohmann::json::parse(f);
+            }
         });
 
         // PLAYING state
@@ -262,7 +277,76 @@ namespace module::purpose {
                 }
 
                 // If we're not the attacker, nor are we the robot hanging back to protect in case the opponent takes
-                // the ball up towards our goal, we should help out the attacker however makes sense in the situation
+                // the ball up towards our goal, we should help out the attacker however makes sense in the situation.
+                // Try formation-based positioning first; fall through to the Support module if no entry is found.
+
+                // Map GameState enums to the string keys used by the formation JSON
+                std::string game_phase = "normal";
+                if (game_state.mode.value == GameState::Mode::PENALTY_SHOOTOUT) {
+                    game_phase = "penalty_shoot_out";
+                }
+                else if (game_state.mode.value == GameState::Mode::OVERTIME) {
+                    game_phase = "extra_time";
+                }
+                else if (game_state.mode.value == GameState::Mode::TIMEOUT_MODE) {
+                    game_phase = "timeout";
+                }
+
+                std::string set_play = "none";
+                if (game_state.mode.value == GameState::Mode::DIRECT_FREEKICK) {
+                    set_play = "direct_free_kick";
+                }
+                else if (game_state.mode.value == GameState::Mode::INDIRECT_FREEKICK) {
+                    set_play = "indirect_free_kick";
+                }
+                else if (game_state.mode.value == GameState::Mode::PENALTYKICK) {
+                    set_play = "penalty_kick";
+                }
+                else if (game_state.mode.value == GameState::Mode::CORNER_KICK) {
+                    set_play = "corner_kick";
+                }
+                else if (game_state.mode.value == GameState::Mode::GOAL_KICK) {
+                    set_play = "goal_kick";
+                }
+                else if (game_state.mode.value == GameState::Mode::THROW_IN) {
+                    set_play = "throw_in";
+                }
+
+                // kicking_team only meaningful during kickoff (when set_play is "none")
+                std::optional<int> kicking_team = std::nullopt;
+                if (set_play == "none") {
+                    kicking_team = game_state.our_kick_off
+                                       ? static_cast<int>(game_state.team.team_id)
+                                       : static_cast<int>(game_state.opponent.team_id);
+                }
+
+                auto formation_pos = utility::strategy::formation::compute_support_position(
+                    formation_json,
+                    static_cast<int>(global_config.player_id),
+                    game_phase,
+                    "playing",
+                    set_play,
+                    kicking_team,
+                    static_cast<int>(game_state.team.team_id),
+                    Eigen::Vector2d(rBFf.x(), rBFf.y()),
+                    fd.dimensions);
+
+                if (formation_pos.has_value()) {
+                    log<DEBUG>("Support (formation)!");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::SUPPORT,
+                                                   true,
+                                                   true,
+                                                   game_state.team.team_colour));
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(
+                        utility::math::euler::pos_rpy_to_transform(
+                            Eigen::Vector3d(formation_pos->x(), formation_pos->y(), 0.0),
+                            Eigen::Vector3d(0, 0, M_PI)),
+                        true));
+                    return;
+                }
+
+                // No formation entry for this player — fall back to the Support module's positioning
                 log<DEBUG>("Support!");
                 emit<Task>(std::make_unique<Support>());
                 emit(std::make_unique<Purpose>(global_config.player_id,
