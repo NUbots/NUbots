@@ -71,7 +71,7 @@ export class LineProjection {
   }));
 
   private readonly material = shaderMaterial((segment: ConeSegment) => {
-    const { projection, focalLength, centre = Vector2.of(), distortionCoeffecients = Vector2.of() } = this.lens;
+    const { projection, focalLength, centre = Vector2.of(), distortionCoefficients = Vector2.of() } = this.lens;
     return {
       shader: LineProjection.shader,
       uniforms: {
@@ -79,7 +79,7 @@ export class LineProjection {
         projection: { value: projection },
         focalLength: { value: focalLength },
         centre: { value: centre.toThree() },
-        k: { value: distortionCoeffecients.toThree() },
+        k: { value: distortionCoefficients.toThree() },
         imageAspectRatio: { value: this.imageAspectRatio },
         axis: { value: segment.axis?.toThree() },
         start: { value: segment.start.toThree() },
