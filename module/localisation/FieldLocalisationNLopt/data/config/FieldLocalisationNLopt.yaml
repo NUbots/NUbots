@@ -77,7 +77,7 @@ normal_opt:
   maxeval: 1000
 
 uncertainty_opt:
-  algorithm: LN_COBYLA
+  algorithm: LN_SBPLX
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-3
   # Relative tolerance on the optimisation function value

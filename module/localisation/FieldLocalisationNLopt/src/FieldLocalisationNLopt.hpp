@@ -61,6 +61,7 @@ namespace module::localisation {
         {"LN_BOBYQA", nlopt::LN_BOBYQA},
         {"LN_NEWUOA", nlopt::LN_NEWUOA},
         {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
+        {"LN_SBPLX", nlopt::LN_SBPLX},
         {"LD_LBFGS", nlopt::LD_LBFGS},
         {"LD_MMA", nlopt::LD_MMA},
         {"LD_TNEWTON", nlopt::LD_TNEWTON},
