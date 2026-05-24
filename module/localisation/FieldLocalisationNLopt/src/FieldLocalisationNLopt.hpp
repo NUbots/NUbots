@@ -257,10 +257,10 @@ namespace module::localisation {
             double uncertainty_ftol_rel = 0.0;
 
             /// @brief Uncertainty optimisation - Maximum number of evaluations for the optimisation
-            size_t uncertainty_maxeval = 0;
+            size_t uncertainty_maxeval = 100;
 
-            /// @brief Uncertainty optimisation - Algorithm to use
-            nlopt::algorithm uncertainty_algorithm = nlopt::LN_BOBYQA;
+            /// @brief Algorithm to use when localisation is uncertain
+            nlopt::algorithm uncertainty_algorithm = nlopt::LN_SBPLX;
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;

@@ -76,11 +76,11 @@ normal_opt:
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
-uncertainty_opt:
-  algorithm: LN_SBPLX
-  # Relative tolerance on the optimisation parameters
+uncertainty_opt: // Quicker optimisation, but less accurate.
+  algorithm: LN_SBPLX // Subplex, a variant of Nelder-Mead that seems to perform better for this specific problem (quick and nasty optimisation)
+ # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation parameters at time t. Stop optimising when del_x < xtol_rel.
   xtol_rel: 1e-3
-  # Relative tolerance on the optimisation function value
+  # Relative tolerance on the optimisation function value, del_f = |(f_{t}-f{t-1})/f_{t-1}|.
   ftol_rel: 1e-3
   # Maximum number of evaluations for the optimisation
   maxeval: 100

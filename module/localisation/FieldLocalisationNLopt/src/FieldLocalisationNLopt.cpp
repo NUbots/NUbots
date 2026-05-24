@@ -97,30 +97,32 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.normal_xtol_rel  = config["normal_opt"]["xtol_rel"].as<double>();
-            cfg.normal_ftol_rel  = config["normal_opt"]["ftol_rel"].as<double>();
-            cfg.normal_maxeval   = config["normal_opt"]["maxeval"].as<int>();
-            {
-                auto it = nlopt_algorithm_map.find(config["normal_opt"]["algorithm"].as<std::string>());
-                if (it != nlopt_algorithm_map.end()) {
-                    cfg.normal_algorithm = it->second;
-                }
-                else {
-                    log<WARN>("Unknown normal optimisation algorithm '", config["normal_opt"]["algorithm"].as<std::string>(), "', using default");
-                }
+            cfg.normal_xtol_rel        = config["normal_opt"]["xtol_rel"].as<double>();
+            cfg.normal_ftol_rel        = config["normal_opt"]["ftol_rel"].as<double>();
+            cfg.normal_maxeval         = config["normal_opt"]["maxeval"].as<int>();
+            std::string normal_opt_alg = config["normal_opt"]["algorithm"].as<std::string>();
+            if (auto it = nlopt_algorithm_map.find(normal_opt_alg); it != nlopt_algorithm_map.end()) {
+                cfg.normal_algorithm = it->second;
+            }
+            else {
+                log<WARN>("Unknown normal optimisation algorithm '",
+                          config["normal_opt"]["algorithm"].as<std::string>(),
+                          "', using default");
+                cfg.normal_algorithm = nlopt::LN_COBYLA;
             }
 
-            cfg.uncertainty_xtol_rel = config["uncertainty_opt"]["xtol_rel"].as<double>();
-            cfg.uncertainty_ftol_rel = config["uncertainty_opt"]["ftol_rel"].as<double>();
-            cfg.uncertainty_maxeval  = config["uncertainty_opt"]["maxeval"].as<int>();
-            {
-                auto it = nlopt_algorithm_map.find(config["uncertainty_opt"]["algorithm"].as<std::string>());
-                if (it != nlopt_algorithm_map.end()) {
-                    cfg.uncertainty_algorithm = it->second;
-                }
-                else {
-                    log<WARN>("Unknown uncertainty optimisation algorithm '", config["uncertainty_opt"]["algorithm"].as<std::string>(), "', using default");
-                }
+
+            cfg.uncertainty_xtol_rel        = config["uncertainty_opt"]["xtol_rel"].as<double>();
+            cfg.uncertainty_ftol_rel        = config["uncertainty_opt"]["ftol_rel"].as<double>();
+            cfg.uncertainty_maxeval         = config["uncertainty_opt"]["maxeval"].as<int>();
+            std::string uncertainty_opt_alg = config["uncertainty_opt"]["algorithm"].as<std::string>();
+            if (auto it = nlopt_algorithm_map.find(uncertainty_opt_alg); it != nlopt_algorithm_map.end()) {
+                cfg.uncertainty_algorithm = it->second;
+            }
+            else {
+                log<WARN>("Unknown uncertainty optimisation algorithm '",
+                          config["uncertainty_opt"]["algorithm"].as<std::string>(),
+                          "', using default");
             }
 
             // Exponential filter parameters
@@ -537,9 +539,16 @@ namespace module::localisation {
         // Debug information about the optimization result
         log<DEBUG>("Final Cost: ", final_cost);
         switch (result) {
+            case nlopt::SUCCESS: log<DEBUG>("Optimization succeeded"); break;
             case nlopt::FTOL_REACHED: log<DEBUG>("Optimization stopped: function tolerance reached"); break;
             case nlopt::XTOL_REACHED: log<DEBUG>("Optimization stopped: variable tolerance reached"); break;
-            case nlopt::MAXEVAL_REACHED: log<DEBUG>("Optimization stopped: maximum evaluations reached"); break;
+            case nlopt::MAXEVAL_REACHED:
+                log<DEBUG>("Optimization stopped: maximum evaluations reached (ftol_rel=",
+                           uncertainty_optimisation ? cfg.uncertainty_ftol_rel : cfg.normal_ftol_rel,
+                           ", xtol_rel=",
+                           uncertainty_optimisation ? cfg.uncertainty_xtol_rel : cfg.normal_xtol_rel,
+                           ")");
+                break;
             default: log<ERROR>("Optimization failed with code ", result); break;
         }
         log<DEBUG>("Number of evaluations: ", opt.get_numevals());
