@@ -56,19 +56,11 @@ namespace module::localisation {
     using utility::localisation::Landmark;
     using utility::localisation::OccupancyMap;
 
-    inline const std::map<std::string, nlopt::algorithm> nlopt_algorithm_map = {
-        {"LN_COBYLA", nlopt::LN_COBYLA},
-        {"LN_BOBYQA", nlopt::LN_BOBYQA},
-        {"LN_NEWUOA", nlopt::LN_NEWUOA},
-        {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
-        {"LN_SBPLX", nlopt::LN_SBPLX},
-        {"LD_LBFGS", nlopt::LD_LBFGS},
-        {"LD_MMA", nlopt::LD_MMA},
-        {"LD_TNEWTON", nlopt::LD_TNEWTON},
-        {"LD_TNEWTON_RESTART", nlopt::LD_TNEWTON_RESTART},
-        {"LD_VAR1", nlopt::LD_VAR1},
-        {"LD_VAR2", nlopt::LD_VAR2},
-    };
+    inline const std::map<std::string, nlopt::algorithm> nlopt_algorithm_map = {{"LN_COBYLA", nlopt::LN_COBYLA},
+                                                                                {"LN_BOBYQA", nlopt::LN_BOBYQA},
+                                                                                {"LN_NEWUOA", nlopt::LN_NEWUOA},
+                                                                                {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
+                                                                                {"LN_SBPLX", nlopt::LN_SBPLX}};
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
