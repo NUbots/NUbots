@@ -1,19 +1,28 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
 # Distance (m) to the nearest robot at which avoidance activates (subject to front-gate unless near-field override)
-min_distance_threshold: 0.8
+min_distance_threshold: 0.9
+
 # Extra distance (m) before turning avoidance off, so the mode does not flicker on/off near the threshold
 threshold_margin: 0.05
+
 # Translational speed magnitude (m/s) used for the avoidance WalkProposal
-avoidance_walk_speed: 0.25
+max_x_avoidance_velocity: 0.175
+max_y_avoidance_velocity: 0.1
+
 # Minimum distance (m) used to guard against normalising near-zero obstacle vectors
 # when obstacle estimate is effectively at robot origin
-min_valid_obstacle_distance: 0.000001
+min_valid_obstacle_distance: 1e-6
+
 # Weight applied to lateral sidestep direction in blended avoidance vector
 lateral_avoidance_weight: 0.7
+
 # Weight applied to backward retreat direction in blended avoidance vector
 retreat_avoidance_weight: 0.3
+
 # Minimum forward x (m) in robot frame for an obstacle to count as "in-front"
 min_forward_obstacle_x: 0.1
+
 # Force avoidance for any obstacle within this distance (m), even if not in-front
 near_field_avoidance_distance: 0.3

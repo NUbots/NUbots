@@ -43,18 +43,6 @@ namespace module::strategy {
     using message::planning::WalkProposal;
     using AvoidRobotTask = message::strategy::AvoidRobot;
 
-    // TODO: Figure out whether backwards step should be the primary behaviour for AvoidRobot
-    static Eigen::Vector2d backwards_step(const Eigen::Vector2d& retreat_vec,
-                                          const Eigen::Vector2d& current_blend,
-                                          double min_valid_obstacle_distance) {
-        if (current_blend.squaredNorm() <= min_valid_obstacle_distance) {
-            return retreat_vec;  // fallback pure retreat
-        }
-        Eigen::Vector2d normalized = current_blend;
-        normalized.normalize();
-        return normalized;
-    }
-
     AvoidRobot::AvoidRobot(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
@@ -65,7 +53,8 @@ namespace module::strategy {
             this->log_level                   = config["log_level"].as<NUClear::LogLevel>();
             cfg.min_distance_threshold        = config["min_distance_threshold"].as<double>();
             cfg.threshold_margin              = config["threshold_margin"].as<double>();
-            cfg.avoidance_walk_speed          = config["avoidance_walk_speed"].as<double>();
+            cfg.max_x_avoidance_velocity      = config["max_x_avoidance_velocity"].as<double>();
+            cfg.max_y_avoidance_velocity      = config["max_y_avoidance_velocity"].as<double>();
             cfg.min_valid_obstacle_distance   = config["min_valid_obstacle_distance"].as<double>();
             cfg.lateral_avoidance_weight      = config["lateral_avoidance_weight"].as<double>();
             cfg.retreat_avoidance_weight      = config["retreat_avoidance_weight"].as<double>();
@@ -73,9 +62,12 @@ namespace module::strategy {
             cfg.near_field_avoidance_distance = config["near_field_avoidance_distance"].as<double>();
         });
 
-        on<Provide<AvoidRobotTask>, With<Robots>, Trigger<Sensors>>().then([this](const Robots& robots,
-                                                                                  const Sensors& sensors) {
+        // Provide WalkProposal so Director can choose this provider when a WalkProposal is requested.
+        // Use Optional<With<Robots>> since some call sites may not include robot observations.
+        on<Provide<AvoidRobotTask>, With<Robots>, Trigger<Sensors>>().then(
+            [this](const Robots& robots, const Sensors& sensors) {
             const auto& Hrw = sensors.Hrw;
+
             if (robots.robots.empty()) {
                 avoid_active = false;
                 log<DEBUG>("AvoidRobot tick: no robots available");
@@ -120,35 +112,39 @@ namespace module::strategy {
             if (avoid_active && nearest_dist_to_opp > cfg.min_valid_obstacle_distance) {
                 const Eigen::Vector2d away_direction = -nearest_obstacle.normalized();
 
-                // Use a deterministic sidestep direction so we do not oscillate left-right each tick
-                const Eigen::Vector2d left_perpendicular(-nearest_obstacle.y(), nearest_obstacle.x());
-                const Eigen::Vector2d right_perpendicular(nearest_obstacle.y(), -nearest_obstacle.x());
-                const Eigen::Vector2d side_direction =
-                    nearest_obstacle.y() >= 0.0 ? right_perpendicular.normalized() : left_perpendicular.normalized();
+                // Construct velocity in robot frame and constrain to avoidance-specific maxima
+                Eigen::Vector3d velocity_target(cfg.max_x_avoidance_velocity * away_direction.x(),
+                                                cfg.max_y_avoidance_velocity * away_direction.y(),
+                                                0.0);
 
-                // Failsafe behaviour to mostly sidestep to leave the collision line, with slight retreat
-                Eigen::Vector2d blended_direction =
-                    (cfg.lateral_avoidance_weight * side_direction) + (cfg.retreat_avoidance_weight * away_direction);
-
-                // If blend weights collapse to an invalid tiny vector, fall back to a stable pure retreat vector
-                blended_direction = backwards_step(away_direction, blended_direction, cfg.min_valid_obstacle_distance);
-
-                const Eigen::Vector3d velocity_target(cfg.avoidance_walk_speed * blended_direction.x(),
-                                                      cfg.avoidance_walk_speed * blended_direction.y(),
-                                                      0.0);
+                velocity_target = constrain_velocity(velocity_target);
 
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
-                log<DEBUG>(
-                    fmt::format("Avoiding nearest robot at ({:.3f}, {:.3f}) distance {:.3f}m with velocity ({:.3f}, "
-                                "{:.3f}, {:.3f})",
-                                nearest_obstacle.x(),
-                                nearest_obstacle.y(),
-                                nearest_dist_to_opp,
-                                velocity_target.x(),
-                                velocity_target.y(),
-                                velocity_target.z()));
+                log<DEBUG>(fmt::format(
+                    "Avoiding nearest robot at ({:.3f}, {:.3f}) distance {:.3f}m with velocity ({:.3f}, "
+                    "{:.3f}, {:.3f})",
+                    nearest_obstacle.x(),
+                    nearest_obstacle.y(),
+                    nearest_dist_to_opp,
+                    velocity_target.x(),
+                    velocity_target.y(),
+                    velocity_target.z()));
             }
         });
+    }
+
+    //TODO: Put commment about this function
+    Eigen::Vector3d AvoidRobot::constrain_velocity(const Eigen::Vector3d& v) {
+        // Scale factors in each translational axis (∞ if the component is 0)
+        const auto inf = std::numeric_limits<double>::infinity();
+        const auto sx  = v.x() ? cfg.max_x_avoidance_velocity / std::abs(v.x()) : inf;
+        const auto sy  = v.y() ? cfg.max_y_avoidance_velocity / std::abs(v.y()) : inf;
+
+        // no scaling (s=1) unless either axis exceeds the limit
+        const auto s = std::min({1.0, sx, sy});
+
+        // Angular component is not used for avoidance proposals in current config; pass-through
+        return {v.x() * s, v.y() * s, v.z()};
     }
 
 }  // namespace module::strategy

@@ -46,8 +46,11 @@ namespace module::strategy {
             /// @brief A margin beyond which avoidance can be stopped to prevent oscillation
             double threshold_margin = 0.0;
 
-            /// @brief Speed magnitude used when walking away from nearby robots
-            double avoidance_walk_speed = 0.0;
+            /// @brief Max velocity in x-direction when walking away from nearby robots
+            double max_x_avoidance_velocity = 0.0;
+
+            /// @brief Max velocity in y-direction used when walking away from nearby robots
+            double max_y_avoidance_velocity = 0.0;
 
             /// @brief Minimum valid opponent distance used to avoid normalising near-zero vectors
             double min_valid_obstacle_distance = 0.0;
@@ -69,6 +72,11 @@ namespace module::strategy {
 
         /// @brief Whether avoidance mode is currently active
         bool avoid_active = false;
+
+        /// @brief Constrain a velocity vector to ensure it is within the limits
+        /// @param v velocity vector to constrain
+        /// @return Constrained velocity vector
+        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
 
     public:
         /// @brief Called by the powerplant to build and setup the AvoidRobot reactor.

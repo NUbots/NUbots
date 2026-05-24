@@ -54,7 +54,6 @@ nuclear_role(
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::AvoidRobot
   # Purposes
   purpose::Tester
 )
