@@ -3,7 +3,9 @@ log_level: INFO
 startup_delay: 3
 ball_timeout: 3
 
-send_port: 10012
-receive_port: 10012
+# Team messages must be sent on port 10000 + team number assigned by TC at competition
+# NUbots team_id is 1 by default in config/teams.yaml of the GameController app, so port is 10001
+send_port: 10001
+receive_port: 10001
 broadcast_ip: "10.1.255.255"
 udp_filter_address: ""
