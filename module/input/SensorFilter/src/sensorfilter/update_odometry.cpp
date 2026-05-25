@@ -230,14 +230,18 @@ namespace module::input {
                 Eigen::Vector3d p_prev = previous_sensors ? Eigen::Vector3d(previous_sensors->Htw.inverse().translation()) : Eigen::Vector3d(Hwt_anchor.translation());
                 Eigen::Matrix3d R_prev = previous_sensors ? Eigen::Matrix3d(previous_sensors->Htw.inverse().linear()) : Eigen::Matrix3d(Hwt_anchor.linear());
                 
-                // Rotate local displacement step (dx, dy) into world coordinates using previous orientation
-                Eigen::Vector3d disp_world = R_prev * Eigen::Vector3d(dx, dy, 0.0);
+                // Get previous integrated yaw
+                double yaw_prev = previous_sensors ? mat_to_rpy_intrinsic(R_prev).z() : kinematic_yaw;
+                
+                // Create a yaw-only rotation matrix for the 2D local frame (heading frame)
+                Eigen::Matrix3d R_yaw_prev = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw_prev));
+                
+                // Rotate local displacement step (dx, dy) into world coordinates using previous yaw
+                Eigen::Vector3d disp_world = R_yaw_prev * Eigen::Vector3d(dx, dy, 0.0);
 
                 Hwt.translation() = p_prev + disp_world;
                 Hwt.translation().z() = Hwt_anchor.translation().z();
 
-                // Get previous integrated yaw
-                double yaw_prev = previous_sensors ? mat_to_rpy_intrinsic(R_prev).z() : kinematic_yaw;
                 
                 // Integrate neural yaw step update
                 double yaw_curr = yaw_prev + dtheta;
