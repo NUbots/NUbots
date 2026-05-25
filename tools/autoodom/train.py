@@ -6,14 +6,34 @@ import sys
 
 # Imports delayed to run in docker where deps are met
 
-def get_gru_class():
+def get_model_class():
     import torch
     import torch.nn as nn
-    class AutoOdomGRU(nn.Module):
-        def __init__(self, input_dim, hidden_dim=128, num_layers=2, mean=None, std=None, target_mean=None, target_std=None):
+    
+    class ResBlock1D(nn.Module):
+        def __init__(self, channels):
+            super().__init__()
+            self.conv1 = nn.Conv1d(channels, channels, kernel_size=3, padding=1)
+            self.bn1 = nn.BatchNorm1d(channels)
+            self.relu = nn.ReLU()
+            self.conv2 = nn.Conv1d(channels, channels, kernel_size=3, padding=1)
+            self.bn2 = nn.BatchNorm1d(channels)
+            
+        def forward(self, x):
+            residual = x
+            out = self.conv1(x)
+            out = self.bn1(out)
+            out = self.relu(out)
+            out = self.conv2(out)
+            out = self.bn2(out)
+            out += residual
+            out = self.relu(out)
+            return out
+
+    class AutoOdomResNet(nn.Module):
+        def __init__(self, input_dim, hidden_dim=64, num_layers=3, mean=None, std=None, target_mean=None, target_std=None):
             super().__init__()
             self.input_dim = input_dim
-            self.hidden_dim = hidden_dim
 
             if mean is None:
                 mean = torch.zeros(input_dim)
@@ -29,30 +49,45 @@ def get_gru_class():
             self.register_buffer("target_mean", torch.tensor(target_mean, dtype=torch.float32))
             self.register_buffer("target_std", torch.tensor(target_std, dtype=torch.float32))
 
-            self.gru = nn.GRU(input_dim, hidden_dim, num_layers, batch_first=True, dropout=0.1)
+            # ResNet feature extractor
+            layers = [
+                nn.Conv1d(input_dim, hidden_dim, kernel_size=5, padding=2),
+                nn.BatchNorm1d(hidden_dim),
+                nn.ReLU()
+            ]
+            for _ in range(num_layers):
+                layers.append(ResBlock1D(hidden_dim))
+            
+            layers.append(nn.AdaptiveAvgPool1d(1)) # Global Average Pooling
+            self.net = nn.Sequential(*layers)
+            
             self.fc = nn.Sequential(
                 nn.Linear(hidden_dim, 64),
                 nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32, 3) # Output: dx, dy, dtheta
+                nn.Linear(64, 3) # Output: dx, dy, dtheta
             )
 
         def forward(self, x):
-            # Use .size(0) instead of .shape[0] for ONNX dynamic axes compatibility
+            # Reshape inputs to [batch, seq_len, features]
             if len(x.shape) == 2:
                 x = x.view(x.size(0), -1, self.input_dim)
 
             x_norm = (x - self.mean) / (self.std + 1e-8)
-            gru_out, _ = self.gru(x_norm)
-            out = self.fc(gru_out[:, -1, :])
+            
+            # Conv1D expects [batch, features, seq_len]
+            x_norm = x_norm.transpose(1, 2)
+            
+            features = self.net(x_norm) # [batch, hidden_dim, 1]
+            features = features.squeeze(2) # [batch, hidden_dim]
+            
+            out = self.fc(features)
             
             if not self.training:
                 # Scale back to real-world units during inference/ONNX export
                 out = out * self.target_std + self.target_mean
                 
             return out
-    return AutoOdomGRU
+    return AutoOdomResNet
 
 def iso3_to_matrix(iso3_msg):
     import numpy as np
@@ -218,11 +253,11 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
     X_test, Y_eval = X[split_idx:], Y_raw_tensor[split_idx:]
     print(f"Train split: {len(X_train)} samples | Test split: {len(X_test)} samples")
 
-    AutoOdomGRU = get_gru_class()
+    AutoOdomModel = get_model_class()
     feature_dim = X.shape[1] // window_size
-    model = AutoOdomGRU(
+    model = AutoOdomModel(
         input_dim=feature_dim, 
-        hidden_dim=128, 
+        hidden_dim=256, 
         mean=mean_val, 
         std=std_val,
         target_mean=target_mean_val,
@@ -429,7 +464,7 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
             ax = fig.add_subplot(gs[s, 0])
             gt_x, gt_y, pred_x, pred_y, seg_ate = segment_plots[s]
             ax.plot(gt_x, gt_y, color='#1f77b4', linewidth=2.5, label='Ground Truth')
-            ax.plot(pred_x, pred_y, color='#ff7f0e', linewidth=2.0, linestyle='--', label='GRU Odometry')
+            ax.plot(pred_x, pred_y, color='#ff7f0e', linewidth=2.0, linestyle='--', label='ResNet Odometry')
             ax.set_xlabel('X (m)', fontsize=9)
             ax.set_ylabel('Y (m)', fontsize=9)
             ax.set_title(f'Segment {s+1} (10s) Trajectory | ATE: {seg_ate:.4f}m', fontsize=10, fontweight='bold')
@@ -476,8 +511,10 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
     dataset = TensorDataset(X_train, Y_train)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    # Use L1Loss instead of MSELoss to prevent "regression to the mean" which causes undershooting
+    criterion = nn.L1Loss()
+    optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
     print(f"Starting Training for {epochs} epochs on {device}...")
     model.train()
@@ -492,13 +529,22 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
             # Loss computed directly on the natively scaled targets
             loss = criterion(outputs, targets)
             loss.backward()
+            
+            # Clip gradients to prevent exploding gradients in the GRU
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            
             optimizer.step()
 
             epoch_loss += loss.item()
 
         avg_loss = epoch_loss / len(dataloader)
+        
+        # Step the scheduler to reduce LR if loss plateaus
+        scheduler.step(avg_loss)
+        
         if (epoch + 1) % 10 == 0 or epoch == 0:
-            print(f"Epoch [{epoch + 1}/{epochs}] | MSE Loss: {avg_loss:.6f}")
+            current_lr = optimizer.param_groups[0]['lr']
+            print(f"Epoch [{epoch + 1}/{epochs}] | L1 Loss (MAE): {avg_loss:.6f} | LR: {current_lr:.6e}")
 
     print("Training finished.")
     save_dir = os.path.join("module", "input", "SensorFilter", "data")

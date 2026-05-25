@@ -84,30 +84,42 @@ namespace module::tools {
                     velocity = Eigen::Vector3d::Zero();
                     log<NUClear::LogLevel::INFO>("Sequence: STAND STILL");
                     break;
-                case SequenceState::WALK_FORWARD:
-                    velocity = Eigen::Vector3d(cfg.max_velocity, 0, 0);
-                    log<NUClear::LogLevel::INFO>("Sequence: WALK FORWARD");
+                case SequenceState::WALK_FORWARD: {
+                    std::uniform_real_distribution<double> dist(0.1 * cfg.max_velocity, cfg.max_velocity);
+                    velocity = Eigen::Vector3d(dist(rng), 0, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK FORWARD (vx=", velocity.x(), ")");
                     break;
-                case SequenceState::WALK_BACKWARD:
-                    velocity = Eigen::Vector3d(-cfg.max_velocity * 0.5, 0, 0);
-                    log<NUClear::LogLevel::INFO>("Sequence: WALK BACKWARD");
+                }
+                case SequenceState::WALK_BACKWARD: {
+                    std::uniform_real_distribution<double> dist(-cfg.max_velocity, -0.1 * cfg.max_velocity);
+                    velocity = Eigen::Vector3d(dist(rng), 0, 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK BACKWARD (vx=", velocity.x(), ")");
                     break;
-                case SequenceState::WALK_LEFT:
-                    velocity = Eigen::Vector3d(0, cfg.max_velocity * 0.5, 0);
-                    log<NUClear::LogLevel::INFO>("Sequence: WALK LEFT (SIDEWAYS)");
+                }
+                case SequenceState::WALK_LEFT: {
+                    std::uniform_real_distribution<double> dist(0.1 * cfg.max_velocity, cfg.max_velocity);
+                    velocity = Eigen::Vector3d(0, dist(rng), 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK LEFT (SIDEWAYS) (vy=", velocity.y(), ")");
                     break;
-                case SequenceState::WALK_RIGHT:
-                    velocity = Eigen::Vector3d(0, -cfg.max_velocity * 0.5, 0);
-                    log<NUClear::LogLevel::INFO>("Sequence: WALK RIGHT (SIDEWAYS)");
+                }
+                case SequenceState::WALK_RIGHT: {
+                    std::uniform_real_distribution<double> dist(-cfg.max_velocity, -0.1 * cfg.max_velocity);
+                    velocity = Eigen::Vector3d(0, dist(rng), 0);
+                    log<NUClear::LogLevel::INFO>("Sequence: WALK RIGHT (SIDEWAYS) (vy=", velocity.y(), ")");
                     break;
-                case SequenceState::TURN_CW:
-                    velocity = Eigen::Vector3d(0, 0, -cfg.max_rotation);
-                    log<NUClear::LogLevel::INFO>("Sequence: TURN CW (ON THE SPOT)");
+                }
+                case SequenceState::TURN_CW: {
+                    std::uniform_real_distribution<double> dist(-cfg.max_rotation, -0.1 * cfg.max_rotation);
+                    velocity = Eigen::Vector3d(0, 0, dist(rng));
+                    log<NUClear::LogLevel::INFO>("Sequence: TURN CW (ON THE SPOT) (vtheta=", velocity.z(), ")");
                     break;
-                case SequenceState::TURN_CCW:
-                    velocity = Eigen::Vector3d(0, 0, cfg.max_rotation);
-                    log<NUClear::LogLevel::INFO>("Sequence: TURN CCW (ON THE SPOT)");
+                }
+                case SequenceState::TURN_CCW: {
+                    std::uniform_real_distribution<double> dist(0.1 * cfg.max_rotation, cfg.max_rotation);
+                    velocity = Eigen::Vector3d(0, 0, dist(rng));
+                    log<NUClear::LogLevel::INFO>("Sequence: TURN CCW (ON THE SPOT) (vtheta=", velocity.z(), ")");
                     break;
+                }
                 case SequenceState::RANDOM:
                 default: {
                     // Generate a random angle for 2D walk direction
