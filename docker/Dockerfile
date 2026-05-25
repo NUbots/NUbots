@@ -360,6 +360,9 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "x86_64
 
 RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-dev
 
+RUN install-from-source https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz \
+    --build-system cmake
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
