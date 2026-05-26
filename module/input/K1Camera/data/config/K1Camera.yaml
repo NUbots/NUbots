@@ -1,0 +1,11 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# One entry per shared memory segment written by NUbridge.
+# segment: POSIX shm name (ROS2 topic path with '/' replaced by '_')
+# id:      integer camera ID emitted in message::input::Image
+cameras:
+  - segment: _boostercamera_head_rgb
+    id: 0
+  - segment: _boostercamera_head_right_rgb
+    id: 1
