@@ -162,16 +162,20 @@ def register(command):
     command.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
     command.add_argument("--batch-size", type=int, default=32, help="Training batch size")
     command.add_argument("--window-size", type=int, default=50, help="Window size (H)")
+    command.add_argument("--rollout-length", type=int, default=100, help="Number of consecutive steps for trajectory rollout loss (100=2s at 50Hz)")
+    command.add_argument("--lambda-traj", type=float, default=5.0, help="Weight for multi-step trajectory rollout loss")
+    command.add_argument("--lambda-bias", type=float, default=0.5, help="Weight for zero-mean bias penalty")
+    command.add_argument("--warmup-epochs", type=int, default=20, help="Epochs of per-step-only training before rollout loss kicks in")
     command.add_argument("--evaluate", action="store_true", help="Evaluate the model on the test split and plot")
     command.add_argument("--export-onnx", action="store_true", help="Export the trained model to ONNX format")
 
 @run_on_docker
-def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=False, **kwargs):
+def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_traj=5.0, lambda_bias=0.5, warmup_epochs=20, evaluate=False, export_onnx=False, **kwargs):
     import numpy as np
     import torch
     import torch.nn as nn
     import torch.optim as optim
-    from torch.utils.data import DataLoader, TensorDataset
+    from torch.utils.data import DataLoader, TensorDataset, Dataset
     from utility.nbs import LinearDecoder
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -507,46 +511,230 @@ def run(nbs_file, epochs, batch_size, window_size, evaluate=False, export_onnx=F
         print(f"Evaluation plot saved to {plot_path}")
         return
 
-    # Proceed with training using X_train and Y_train natively scaled
-    dataset = TensorDataset(X_train, Y_train)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # ============================================================================
+    # Differentiable trajectory integration for rollout loss (fully vectorised)
+    # ============================================================================
+    def integrate_trajectory_torch(steps):
+        """
+        Integrate local-frame (dx, dy, dθ) steps into world-frame trajectories.
+        Uses previous-yaw convention consistent with C++ SensorFilter inference.
 
-    # Use L1Loss instead of MSELoss to prevent "regression to the mean" which causes undershooting
+        Fully vectorised using cumsum — no Python loops.
+
+        Args:
+            steps: [batch, seq_len, 3] tensor of (dx, dy, dtheta) in local frame
+
+        Returns:
+            positions: [batch, seq_len+1, 2] world-frame (x, y) positions
+            yaws: [batch, seq_len+1] world-frame yaw angles
+        """
+        B, K, _ = steps.shape
+        dx_local = steps[:, :, 0]   # [B, K]
+        dy_local = steps[:, :, 1]   # [B, K]
+        dtheta = steps[:, :, 2]     # [B, K]
+
+        # Cumulative yaw: yaw[t] = sum(dtheta[0:t])
+        cum_yaw = torch.cumsum(dtheta, dim=1)  # [B, K]
+
+        # Previous-yaw convention: rotation at step t uses yaw BEFORE adding dtheta[t]
+        # prev_yaw[0] = 0, prev_yaw[1] = dtheta[0], prev_yaw[t] = sum(dtheta[0:t])
+        zeros = torch.zeros(B, 1, device=steps.device)
+        prev_yaw = torch.cat([zeros, cum_yaw[:, :-1]], dim=1)  # [B, K]
+
+        # Rotate all local displacements to world frame in parallel
+        cos_yaw = torch.cos(prev_yaw)
+        sin_yaw = torch.sin(prev_yaw)
+        dx_world = cos_yaw * dx_local - sin_yaw * dy_local  # [B, K]
+        dy_world = sin_yaw * dx_local + cos_yaw * dy_local  # [B, K]
+
+        # Cumulative sum for world-frame positions
+        cum_x = torch.cumsum(dx_world, dim=1)  # [B, K]
+        cum_y = torch.cumsum(dy_world, dim=1)  # [B, K]
+
+        # Prepend origin (0, 0) and yaw=0
+        positions = torch.stack([
+            torch.cat([zeros, cum_x], dim=1),
+            torch.cat([zeros, cum_y], dim=1)
+        ], dim=-1)  # [B, K+1, 2]
+
+        yaws = torch.cat([zeros, cum_yaw], dim=1)  # [B, K+1]
+
+        return positions, yaws
+
+    # ============================================================================
+    # Sequential dataset for contiguous rollout sequences
+    # ============================================================================
+    class OdometrySequenceDataset(Dataset):
+        """Yields contiguous sequences of windows for multi-step rollout training.
+        Uses a stride to avoid excessive overlap between sequences."""
+
+        def __init__(self, X, Y_norm, Y_raw, seq_length, stride=None):
+            self.X = X
+            self.Y_norm = Y_norm
+            self.Y_raw = Y_raw
+            self.seq_length = seq_length
+            # Default stride = half the sequence length (50% overlap)
+            self.stride = stride if stride is not None else max(1, seq_length // 2)
+            max_start = len(X) - seq_length
+            self.starts = list(range(0, max_start + 1, self.stride))
+
+        def __len__(self):
+            return len(self.starts)
+
+        def __getitem__(self, idx):
+            start = self.starts[idx]
+            end = start + self.seq_length
+            return self.X[start:end], self.Y_norm[start:end], self.Y_raw[start:end]
+
+    # ============================================================================
+    # Training setup
+    # ============================================================================
+    # Keep raw targets for the train split (needed for rollout and bias losses)
+    Y_train_raw = Y_raw_tensor[:split_idx]
+
     criterion = nn.L1Loss()
     optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
-    print(f"Starting Training for {epochs} epochs on {device}...")
-    model.train()
-    for epoch in range(epochs):
-        epoch_loss = 0.0
-        for batch_i, (inputs, targets) in enumerate(dataloader):
-            inputs, targets = inputs.to(device), targets.to(device)
-            optimizer.zero_grad()
+    # Convert normalisation stats to tensors on device for denormalization in rollout
+    t_mean = torch.tensor(target_mean_val, dtype=torch.float32).to(device)
+    t_std = torch.tensor(target_std_val, dtype=torch.float32).to(device)
 
-            outputs = model(inputs)
+    # Clamp rollout length to available training data
+    effective_rollout = min(rollout_length, len(X_train) - 1)
+    if effective_rollout < 10:
+        print(f"Warning: Training data too short for rollout (need >{rollout_length} samples). Disabling rollout loss.")
+        warmup_epochs = epochs  # Fallback to per-step only
 
-            # Loss computed directly on the natively scaled targets
-            loss = criterion(outputs, targets)
-            loss.backward()
-            
-            # Clip gradients to prevent exploding gradients in the GRU
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-            
-            optimizer.step()
+    print(f"\n{'='*60}")
+    print(f"Training Plan:")
+    print(f"  Total epochs:       {epochs}")
+    print(f"  Phase 1 (warmup):   {warmup_epochs} epochs — per-step L1 loss only")
+    print(f"  Phase 2 (rollout):  {epochs - warmup_epochs} epochs — step + trajectory + bias")
+    print(f"  Rollout length:     {effective_rollout} steps ({effective_rollout / 50.0:.1f}s at 50Hz)")
+    print(f"  λ_traj:             {lambda_traj}")
+    print(f"  λ_bias:             {lambda_bias}")
+    print(f"{'='*60}\n")
 
-            epoch_loss += loss.item()
+    # ============================================================================
+    # Phase 1: Per-step warmup (shuffled, per-step L1 only)
+    # ============================================================================
+    if warmup_epochs > 0:
+        print(f"=== Phase 1: Per-Step Warmup ({warmup_epochs} epochs) ===")
+        dataset_step = TensorDataset(X_train, Y_train)
+        loader_step = DataLoader(dataset_step, batch_size=batch_size, shuffle=True)
 
-        avg_loss = epoch_loss / len(dataloader)
-        
-        # Step the scheduler to reduce LR if loss plateaus
-        scheduler.step(avg_loss)
-        
-        if (epoch + 1) % 10 == 0 or epoch == 0:
-            current_lr = optimizer.param_groups[0]['lr']
-            print(f"Epoch [{epoch + 1}/{epochs}] | L1 Loss (MAE): {avg_loss:.6f} | LR: {current_lr:.6e}")
+        model.train()
+        for epoch in range(warmup_epochs):
+            epoch_loss = 0.0
+            for inputs, targets in loader_step:
+                inputs, targets = inputs.to(device), targets.to(device)
+                optimizer.zero_grad()
+                outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+                epoch_loss += loss.item()
 
-    print("Training finished.")
+            avg_loss = epoch_loss / len(loader_step)
+            scheduler.step(avg_loss)
+
+            if (epoch + 1) % 10 == 0 or epoch == 0:
+                current_lr = optimizer.param_groups[0]['lr']
+                print(f"  [Warmup {epoch + 1}/{warmup_epochs}] Step L1: {avg_loss:.6f} | LR: {current_lr:.6e}")
+
+    # ============================================================================
+    # Phase 2: Multi-step rollout training (sequential, combined loss)
+    # ============================================================================
+    rollout_epochs = epochs - warmup_epochs
+    if rollout_epochs > 0 and effective_rollout >= 10:
+        print(f"\n=== Phase 2: Rollout Training ({rollout_epochs} epochs) ===")
+
+        # Sequence batch size is smaller since each sample is a full rollout
+        seq_batch_size = max(1, min(8, batch_size // 4))
+
+        seq_dataset = OdometrySequenceDataset(X_train, Y_train, Y_train_raw, effective_rollout)
+        seq_loader = DataLoader(seq_dataset, batch_size=seq_batch_size, shuffle=True)
+
+        # Reset scheduler for Phase 2 with a fresh LR
+        current_lr = optimizer.param_groups[0]['lr']
+        phase2_lr = max(current_lr, 5e-4)  # Don't start Phase 2 with a decayed LR
+        for pg in optimizer.param_groups:
+            pg['lr'] = phase2_lr
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=8)
+
+        model.train()
+        for epoch in range(rollout_epochs):
+            epoch_step_loss = 0.0
+            epoch_traj_loss = 0.0
+            epoch_bias_loss = 0.0
+            epoch_total_loss = 0.0
+
+            for X_seq, Y_norm_seq, Y_raw_seq in seq_loader:
+                X_seq = X_seq.to(device)         # [B, K, input_flat]
+                Y_norm_seq = Y_norm_seq.to(device)  # [B, K, 3]
+                Y_raw_seq = Y_raw_seq.to(device)    # [B, K, 3]
+
+                B, K, input_flat = X_seq.shape
+                optimizer.zero_grad()
+
+                # Forward pass: flatten sequences, run model, reshape back
+                pred_norm = model(X_seq.reshape(B * K, input_flat))  # [B*K, 3]
+                pred_norm = pred_norm.view(B, K, 3)
+
+                # --- Per-step L1 loss (normalised space) ---
+                step_loss = criterion(pred_norm, Y_norm_seq)
+
+                # --- Denormalise predictions for trajectory integration ---
+                pred_real = pred_norm * t_std + t_mean
+
+                # --- Multi-step rollout trajectory loss (ATE) ---
+                pred_pos, pred_yaws = integrate_trajectory_torch(pred_real)
+                gt_pos, gt_yaws = integrate_trajectory_torch(Y_raw_seq)
+
+                # Absolute Trajectory Error: L1 distance at each integrated timestep
+                pos_errors = torch.sqrt(((pred_pos - gt_pos) ** 2).sum(dim=-1) + 1e-8)
+                traj_loss = pos_errors.mean()
+
+                # Also penalise yaw drift over the trajectory
+                yaw_errors = torch.abs(pred_yaws - gt_yaws)
+                traj_loss = traj_loss + 0.1 * yaw_errors.mean()
+
+                # --- Zero-mean bias penalty ---
+                # Penalise batch-mean predicted displacement differing from batch-mean GT
+                pred_batch_mean = pred_real.mean(dim=(0, 1))  # [3]
+                gt_batch_mean = Y_raw_seq.mean(dim=(0, 1))    # [3]
+                bias_loss = torch.abs(pred_batch_mean - gt_batch_mean).mean()
+
+                # --- Combined loss ---
+                total_loss = step_loss + lambda_traj * traj_loss + lambda_bias * bias_loss
+                total_loss.backward()
+
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+
+                epoch_step_loss += step_loss.item()
+                epoch_traj_loss += traj_loss.item()
+                epoch_bias_loss += bias_loss.item()
+                epoch_total_loss += total_loss.item()
+
+            n_batches = len(seq_loader)
+            avg_step = epoch_step_loss / n_batches
+            avg_traj = epoch_traj_loss / n_batches
+            avg_bias = epoch_bias_loss / n_batches
+            avg_total = epoch_total_loss / n_batches
+
+            scheduler.step(avg_total)
+
+            if (epoch + 1) % 5 == 0 or epoch == 0:
+                current_lr = optimizer.param_groups[0]['lr']
+                global_epoch = warmup_epochs + epoch + 1
+                print(f"  [Rollout {epoch + 1}/{rollout_epochs} (epoch {global_epoch})] "
+                      f"Total: {avg_total:.6f} | Step: {avg_step:.6f} | "
+                      f"Traj ATE: {avg_traj:.4f}m | Bias: {avg_bias:.6f} | LR: {current_lr:.6e}")
+
+    print("\nTraining finished.")
     save_dir = os.path.join("module", "input", "SensorFilter", "data")
     os.makedirs(save_dir, exist_ok=True)
     model_path = os.path.join(save_dir, "autoodom_mlp.pt")
