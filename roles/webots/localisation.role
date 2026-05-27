@@ -15,6 +15,7 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   support::logging::MessageLogHandler # Used to send log messages and reaction statistics to NUsight
+  support::logging::DataLogging # NBS recording
   network::PlotJuggler
   # Platform
   input::SensorFilter

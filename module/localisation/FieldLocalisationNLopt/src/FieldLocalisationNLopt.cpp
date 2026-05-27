@@ -479,8 +479,22 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
+        int current_time = NUClear::clock::now().time_since_epoch().count();
+        /*log<WARN>("Starting optimization with initial guess",
+                  initial_guess.x(),
+                  initial_guess.y(),
+                  initial_guess.z(),
+                  "at time",
+                  current_time);*/
         opt.optimize(x, final_cost);
-
+        /*int after_time = NUClear::clock::now().time_since_epoch().count();
+        log<WARN>("Finished optimization with final cost",
+                  final_cost,
+                  "at time",
+                  after_time,
+                  "taking",
+                  (after_time - current_time) / 1e9,
+                  "seconds");*/
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);
         nlopt_to_eigen<double, n>(x, optimized_solution);
