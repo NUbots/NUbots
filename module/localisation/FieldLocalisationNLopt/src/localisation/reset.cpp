@@ -113,30 +113,11 @@ namespace module::localisation {
                     hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
                                                                         field_lines.rPWw,
                                                                         field_intersections,
-                                                                        goals));
-                    ++hypothesis_count;
-                    int end_of_field_line_opt = NUClear::clock::now().time_since_epoch().count();
-                    log<DEBUG>("Local search: time for field line optimisation",
-                               (end_of_field_line_opt - start_of_field_line_opt) / 1e9,
-                               "seconds");
-
-                    // Periodic progress log to find hotspots
-                    if ((hypothesis_count & 0x1FF) == 0) {  // every 512 calls
-                        log<DEBUG>("Local search: hypotheses tried so far, current_xy_angle",
-                                   hypothesis_count,
-                                   x,
-                                   y,
-                                   angle);
-                    }
+                                                                        goals,
+                                                                        true));
                 }
-                int end_time = NUClear::clock::now().time_since_epoch().count();
-                log<DEBUG>("Local search: time for dx, dy", dx, dy, (end_time - start_time) / 1e9, "seconds");
             }
         }
-
-        log<DEBUG>("!!! Local search complete: total hypotheses tried", hypothesis_count);
-
-        log<DEBUG>("Step 5");
 
         // Sort hypotheses by cost (ascending)
         std::sort(hypotheses.begin(), hypotheses.end(), [](const auto& a, const auto& b) {
@@ -178,7 +159,8 @@ namespace module::localisation {
                     hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
                                                                         field_lines.rPWw,
                                                                         field_intersections,
-                                                                        goals));
+                                                                        goals,
+                                                                        true));
                 }
             }
         }
