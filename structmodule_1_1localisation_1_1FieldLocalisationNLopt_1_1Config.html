@@ -207,10 +207,6 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8e4ba2c9310cc9d312337c4cbf4ac8a5">field_line_intersection_weight</a> = 0.0</td></tr>
 <tr class="memdesc:a8e4ba2c9310cc9d312337c4cbf4ac8a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with distance to field intersections. <br /></td></tr>
 <tr class="separator:a8e4ba2c9310cc9d312337c4cbf4ac8a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a885cd2105bf9ef4c3f87f336509bce7d"><td class="memItemLeft" align="right" valign="top"><a id="a885cd2105bf9ef4c3f87f336509bce7d"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a885cd2105bf9ef4c3f87f336509bce7d">ftol_rel</a> = 0.0</td></tr>
-<tr class="memdesc:a885cd2105bf9ef4c3f87f336509bce7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimisation function value. <br /></td></tr>
-<tr class="separator:a885cd2105bf9ef4c3f87f336509bce7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8bf51b10d8a072fa5844fd1c77ede4ad"><td class="memItemLeft" align="right" valign="top"><a id="a8bf51b10d8a072fa5844fd1c77ede4ad"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8bf51b10d8a072fa5844fd1c77ede4ad">goal_post_distance_weight</a> = 0.0</td></tr>
 <tr class="memdesc:a8bf51b10d8a072fa5844fd1c77ede4ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with distance to goal posts. <br /></td></tr>
@@ -239,10 +235,6 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a25ca04207717bf42c0bdcd5a9c88c8df">max_over_cost</a> = 0</td></tr>
 <tr class="memdesc:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of times the cost can be over the threshold before resetting. <br /></td></tr>
 <tr class="separator:a25ca04207717bf42c0bdcd5a9c88c8df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada3d1d390296b78dc421530278ed1313"><td class="memItemLeft" align="right" valign="top"><a id="ada3d1d390296b78dc421530278ed1313"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ada3d1d390296b78dc421530278ed1313">maxeval</a> = 0</td></tr>
-<tr class="memdesc:ada3d1d390296b78dc421530278ed1313"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of evaluations for the optimisation. <br /></td></tr>
-<tr class="separator:ada3d1d390296b78dc421530278ed1313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae33dccc610078b9c69675a27e5b02c51"><td class="memItemLeft" align="right" valign="top"><a id="ae33dccc610078b9c69675a27e5b02c51"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae33dccc610078b9c69675a27e5b02c51">min_field_line_intersections</a> = 0</td></tr>
 <tr class="memdesc:ae33dccc610078b9c69675a27e5b02c51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line intersections for an update to run. <br /></td></tr>
@@ -251,6 +243,22 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a39f2469ba1fdb2a7dd474f9517b19115">min_field_line_points</a> = 0</td></tr>
 <tr class="memdesc:a39f2469ba1fdb2a7dd474f9517b19115"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line points for an update to run. <br /></td></tr>
 <tr class="separator:a39f2469ba1fdb2a7dd474f9517b19115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9656a9d22e776f89f3f12ad4297d5525"><td class="memItemLeft" align="right" valign="top"><a id="a9656a9d22e776f89f3f12ad4297d5525"></a>
+nlopt::algorithm&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9656a9d22e776f89f3f12ad4297d5525">normal_algorithm</a> = nlopt::LN_COBYLA</td></tr>
+<tr class="memdesc:a9656a9d22e776f89f3f12ad4297d5525"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal optimisation - Algorithm to use. <br /></td></tr>
+<tr class="separator:a9656a9d22e776f89f3f12ad4297d5525"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b395d1065fa1c842188df1abc3ffce4"><td class="memItemLeft" align="right" valign="top"><a id="a8b395d1065fa1c842188df1abc3ffce4"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8b395d1065fa1c842188df1abc3ffce4">normal_ftol_rel</a> = 0.0</td></tr>
+<tr class="memdesc:a8b395d1065fa1c842188df1abc3ffce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal optimisation - Relative tolerance on the optimisation function value. <br /></td></tr>
+<tr class="separator:a8b395d1065fa1c842188df1abc3ffce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a301109c729054bb7dc6e6bf2b39b35e6"><td class="memItemLeft" align="right" valign="top"><a id="a301109c729054bb7dc6e6bf2b39b35e6"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a301109c729054bb7dc6e6bf2b39b35e6">normal_maxeval</a> = 0</td></tr>
+<tr class="memdesc:a301109c729054bb7dc6e6bf2b39b35e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal optimisation - Maximum number of evaluations for the optimisation. <br /></td></tr>
+<tr class="separator:a301109c729054bb7dc6e6bf2b39b35e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4bda853359927e637d4ad54a50344f1"><td class="memItemLeft" align="right" valign="top"><a id="aa4bda853359927e637d4ad54a50344f1"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aa4bda853359927e637d4ad54a50344f1">normal_xtol_rel</a> = 0.0</td></tr>
+<tr class="memdesc:aa4bda853359927e637d4ad54a50344f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal optimisation - Relative tolerance on the optimisation parameters. <br /></td></tr>
+<tr class="separator:aa4bda853359927e637d4ad54a50344f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ff55616ba6c719421e305662dc17096"><td class="memItemLeft" align="right" valign="top"><a id="a8ff55616ba6c719421e305662dc17096"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8ff55616ba6c719421e305662dc17096">num_angles</a> = 0</td></tr>
 <tr class="memdesc:a8ff55616ba6c719421e305662dc17096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of yaw angles to try during uncertainty reset. <br /></td></tr>
@@ -287,6 +295,22 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aab913d6391edc0f63d1f78919843a117">step_size</a> = 0.0</td></tr>
 <tr class="memdesc:aab913d6391edc0f63d1f78919843a117"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size for the grid search during uncertainty reset. <br /></td></tr>
 <tr class="separator:aab913d6391edc0f63d1f78919843a117"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bac74f03aa8a714b94d7493e4efeeaa"><td class="memItemLeft" align="right" valign="top"><a id="a9bac74f03aa8a714b94d7493e4efeeaa"></a>
+nlopt::algorithm&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9bac74f03aa8a714b94d7493e4efeeaa">uncertainty_algorithm</a> = nlopt::LN_SBPLX</td></tr>
+<tr class="memdesc:a9bac74f03aa8a714b94d7493e4efeeaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Algorithm to use when localisation is uncertain. <br /></td></tr>
+<tr class="separator:a9bac74f03aa8a714b94d7493e4efeeaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56f95f1c2c0d8e167f802544b8e86fa7"><td class="memItemLeft" align="right" valign="top"><a id="a56f95f1c2c0d8e167f802544b8e86fa7"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a56f95f1c2c0d8e167f802544b8e86fa7">uncertainty_ftol_rel</a> = 0.0</td></tr>
+<tr class="memdesc:a56f95f1c2c0d8e167f802544b8e86fa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty optimisation - Relative tolerance on the optimisation function value. <br /></td></tr>
+<tr class="separator:a56f95f1c2c0d8e167f802544b8e86fa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afca00589eb2afac5bd8efa319455a0fc"><td class="memItemLeft" align="right" valign="top"><a id="afca00589eb2afac5bd8efa319455a0fc"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#afca00589eb2afac5bd8efa319455a0fc">uncertainty_maxeval</a> = 100</td></tr>
+<tr class="memdesc:afca00589eb2afac5bd8efa319455a0fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty optimisation - Maximum number of evaluations for the optimisation. <br /></td></tr>
+<tr class="separator:afca00589eb2afac5bd8efa319455a0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48b15232bdf5feb78622497e7bce5851"><td class="memItemLeft" align="right" valign="top"><a id="a48b15232bdf5feb78622497e7bce5851"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a48b15232bdf5feb78622497e7bce5851">uncertainty_xtol_rel</a> = 0.0</td></tr>
+<tr class="memdesc:a48b15232bdf5feb78622497e7bce5851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty optimisation - Relative tolerance on the optimisation parameters. <br /></td></tr>
+<tr class="separator:a48b15232bdf5feb78622497e7bce5851"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af48eb9b6efb78db5298c78077c79e712"><td class="memItemLeft" align="right" valign="top"><a id="af48eb9b6efb78db5298c78077c79e712"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af48eb9b6efb78db5298c78077c79e712">use_ground_truth_localisation</a></td></tr>
 <tr class="memdesc:af48eb9b6efb78db5298c78077c79e712"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to enable/disable using ground truth for localisation. <br /></td></tr>
@@ -299,10 +323,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a3000b4348c1c4df7135398c0925f4c28">window_size</a> = 0.0</td></tr>
 <tr class="memdesc:a3000b4348c1c4df7135398c0925f4c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">The window size for the local search during uncertainty reset. <br /></td></tr>
 <tr class="separator:a3000b4348c1c4df7135398c0925f4c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a15457bdf13245bd8f816e5a80e836a"><td class="memItemLeft" align="right" valign="top"><a id="a7a15457bdf13245bd8f816e5a80e836a"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a">xtol_rel</a> = 0.0</td></tr>
-<tr class="memdesc:a7a15457bdf13245bd8f816e5a80e836a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance on the optimisation parameters. <br /></td></tr>
-<tr class="separator:a7a15457bdf13245bd8f816e5a80e836a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
@@ -333,7 +353,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Wed May 27 2026 03:43:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed May 27 2026 09:03:27 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

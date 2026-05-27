@@ -291,7 +291,8 @@ var namespaces_dup =
         [ "VisionRobots", "RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0", null ],
         [ "eigen_objective_wrapper", "FieldLocalisationNLopt_8hpp.html#abbd4794b915645a76862b28d102ce9ba", null ],
         [ "eigen_to_nlopt", "FieldLocalisationNLopt_8hpp.html#a8afa1eb801f638e4c890f687a71f0c32", null ],
-        [ "nlopt_to_eigen", "FieldLocalisationNLopt_8hpp.html#ad86283b67507ebac4528671874b068eb", null ]
+        [ "nlopt_to_eigen", "FieldLocalisationNLopt_8hpp.html#ad86283b67507ebac4528671874b068eb", null ],
+        [ "nlopt_algorithm_map", "FieldLocalisationNLopt_8hpp.html#a96c6b82934209e9f1892cc535e303d2b", null ]
       ] ],
       [ "nbs", null, [
         [ "Player", "classmodule_1_1nbs_1_1Player.html", "classmodule_1_1nbs_1_1Player" ]

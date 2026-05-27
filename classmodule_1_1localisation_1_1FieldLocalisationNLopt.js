@@ -8,7 +8,7 @@ var classmodule_1_1localisation_1_1FieldLocalisationNLopt =
     [ "greedy_association", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a", null ],
     [ "hungarian_association", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd", null ],
     [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4fc1160c4cb18d64161bfafd169bfade", null ],
-    [ "run_field_line_optimisation", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2c6211882d65b38aab49915399034d7c", null ],
+    [ "run_field_line_optimisation", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#af606cf6b3f00fc683347f3236afa84cd", null ],
     [ "uncertainty_reset", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9fa30b90f7d6d279e4b1312a1192dd8c", null ],
     [ "cfg", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#acba2abc63250fe7776dd0dc61b993ee5", null ],
     [ "expected_goal_post_distance", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4e540cd6107e3a69f0b6672c92359f7e", null ],
