@@ -48,13 +48,20 @@ namespace module::input {
     using Unpenalisation = GameEvents::Unpenalisation;
     using HalfTime       = GameEvents::HalfTime;
     using KickOffTeam    = GameEvents::KickOffTeam;
-    using GameEventPhase      = GameEvents::GamePhase;
+    using GameEventPhase = GameEvents::GamePhase;
     using GameMode       = GameEvents::GameMode;
     using PenaltyReason  = GameState::PenaltyReason;
     using TeamColour     = GameState::TeamColour::Value;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), receive_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), game_phase(), set_play() {
+        : Reactor(std::move(environment))
+        , receive_port(0)
+        , send_port(0)
+        , TEAM_ID(0)
+        , PLAYER_ID(0)
+        , packet()
+        , game_phase()
+        , set_play() {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
@@ -127,8 +134,7 @@ namespace module::input {
                       reset_state();
                   });
 
-        on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply",
-                                                       [this] { send_reply_message(); });
+        on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply", [this] { send_reply_message(); });
     }
 
     void GameController::send_reply_message() {
@@ -143,13 +149,13 @@ namespace module::input {
 
         // fallen, pose, ball_age and ball should be optional to be sent to the GameController
         // TODO: wire up from localisation if required in the future
-        packet->fallen  = self_penalised ? 1 : 0;
-        packet->pose[0] = 0.f;
-        packet->pose[1] = 0.f;
-        packet->pose[2] = 0.f;
+        packet->fallen   = self_penalised ? 1 : 0;
+        packet->pose[0]  = 0.f;
+        packet->pose[1]  = 0.f;
+        packet->pose[2]  = 0.f;
         packet->ball_age = -1.f;
-        packet->ball[0] = 0.f;
-        packet->ball[1] = 0.f;
+        packet->ball[0]  = 0.f;
+        packet->ball[1]  = 0.f;
 
         if (game_controller_address != "") {
             emit<Scope::UDP>(packet, game_controller_address, send_port);
@@ -159,7 +165,7 @@ namespace module::input {
     void GameController::reset_state() {
 
         game_phase = static_cast<gamecontroller::GamePhase>(-1);
-        set_play = static_cast<gamecontroller::SetPlay>(-1);
+        set_play   = static_cast<gamecontroller::SetPlay>(-1);
 
         std::copy(std::begin(gamecontroller::RECEIVE_HEADER),
                   std::end(gamecontroller::RECEIVE_HEADER),
@@ -169,18 +175,18 @@ namespace module::input {
         packet.players_per_team = PLAYERS_PER_TEAM;
         packet.state            = static_cast<gamecontroller::State>(-1);
         packet.first_half       = true;
-        packet.kicking_team  = 0;
+        packet.kicking_team     = 0;
         packet.game_phase       = static_cast<gamecontroller::GamePhase>(-1);
         packet.set_play         = static_cast<gamecontroller::SetPlay>(-1);
         packet.secs_remaining   = 0;
         packet.secondary_time   = 0;
         for (uint i = 0; i < NUM_TEAMS; i++) {
-            auto& own_team        = packet.teams[i];
-            own_team.team_id      = (i == 0 ? TEAM_ID : 0);
+            auto& own_team               = packet.teams[i];
+            own_team.team_id             = (i == 0 ? TEAM_ID : 0);
             own_team.field_player_colour = static_cast<gamecontroller::TeamColour>(-1);
-            own_team.score        = 0;
-            own_team.penalty_shot = 0;
-            own_team.single_shots = 0;
+            own_team.score               = 0;
+            own_team.penalty_shot        = 0;
+            own_team.single_shots        = 0;
             for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
                 auto& player = own_team.players[i];
                 if (i <= ACTIVE_PLAYERS_PER_TEAM) {
@@ -232,8 +238,9 @@ namespace module::input {
         // Get colours
         state->team.team_colour =
             new_own_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
-        state->opponent.team_colour =
-            new_opponent_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
+        state->opponent.team_colour = new_opponent_team.field_player_colour == gamecontroller::TeamColour::BLUE
+                                          ? TeamColour::BLUE
+                                          : TeamColour::RED;
 
         /*******************************************************************************************
          * Process score updates
@@ -393,8 +400,8 @@ namespace module::input {
          * Process our team colour
          ******************************************************************************************/
         if (old_own_team.field_player_colour != new_own_team.field_player_colour) {
-            TeamColour colour =
-                new_own_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
+            TeamColour colour = new_own_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE
+                                                                                                     : TeamColour::RED;
             state_changes.emplace_back([this, colour] { emit(std::make_unique<TeamColour>(colour)); });
         }
 
@@ -403,7 +410,8 @@ namespace module::input {
          * Process game phase changes
          ******************************************************************************************/
 
-        if (old_packet.game_phase != gamecontroller::GamePhase::TIMEOUT && new_packet.game_phase == gamecontroller::GamePhase::TIMEOUT) {
+        if (old_packet.game_phase != gamecontroller::GamePhase::TIMEOUT
+            && new_packet.game_phase == gamecontroller::GamePhase::TIMEOUT) {
 
             // Change the game state to timeout
             auto time = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
@@ -584,18 +592,18 @@ namespace module::input {
     PenaltyReason GameController::get_penalty_reason(const gamecontroller::PenaltyState& penalty_state) {
         // ugly incoming
         switch (penalty_state) {
-            case gamecontroller::PenaltyState::UNPENALISED:         return PenaltyReason::UNPENALISED;
+            case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
             case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_DEFENSE;
-            case gamecontroller::PenaltyState::MOTION_IN_SET:       return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK:    return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::INCAPABLE_ROBOT:     return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::PICK_UP:             return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::BALL_HOLDING:        return PenaltyReason::BALL_MANIPULATION;
-            case gamecontroller::PenaltyState::LEAVING_THE_FIELD:   return PenaltyReason::REQUEST_FOR_SERVICE;
+            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::PHYSICAL_CONTACT;
+            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::REQUEST_FOR_PICKUP;
+            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::REQUEST_FOR_PICKUP;
+            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_MANIPULATION;
+            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::REQUEST_FOR_SERVICE;
             case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::ILLEGAL_ATTACK;
-            case gamecontroller::PenaltyState::PLAYER_PUSHING:      return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::SENT_OFF:            return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::SUBSTITUTE:          return PenaltyReason::SUBSTITUTE;
+            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PHYSICAL_CONTACT;
+            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");
         }
     }
