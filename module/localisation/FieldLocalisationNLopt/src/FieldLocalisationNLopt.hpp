@@ -56,6 +56,12 @@ namespace module::localisation {
     using utility::localisation::Landmark;
     using utility::localisation::OccupancyMap;
 
+    inline const std::map<std::string, nlopt::algorithm> nlopt_algorithm_map = {{"LN_COBYLA", nlopt::LN_COBYLA},
+                                                                                {"LN_BOBYQA", nlopt::LN_BOBYQA},
+                                                                                {"LN_NEWUOA", nlopt::LN_NEWUOA},
+                                                                                {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
+                                                                                {"LN_SBPLX", nlopt::LN_SBPLX}};
+
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
         Value value = Value::UNKNOWN;
@@ -224,14 +230,29 @@ namespace module::localisation {
             /// @brief Constraint on the maximum change in state
             Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
 
-            /// @brief Relative tolerance on the optimisation parameters
-            double xtol_rel = 0.0;
+            /// @brief Normal optimisation - Relative tolerance on the optimisation parameters
+            double normal_xtol_rel = 0.0;
 
-            /// @brief Relative tolerance on the optimisation function value
-            double ftol_rel = 0.0;
+            /// @brief Normal optimisation - Relative tolerance on the optimisation function value
+            double normal_ftol_rel = 0.0;
 
-            /// @brief Maximum number of evaluations for the optimisation
-            size_t maxeval = 0;
+            /// @brief Normal optimisation - Maximum number of evaluations for the optimisation
+            size_t normal_maxeval = 0;
+
+            /// @brief Normal optimisation - Algorithm to use
+            nlopt::algorithm normal_algorithm = nlopt::LN_COBYLA;
+
+            /// @brief Uncertainty optimisation - Relative tolerance on the optimisation parameters
+            double uncertainty_xtol_rel = 0.0;
+
+            /// @brief Uncertainty optimisation - Relative tolerance on the optimisation function value
+            double uncertainty_ftol_rel = 0.0;
+
+            /// @brief Uncertainty optimisation - Maximum number of evaluations for the optimisation
+            size_t uncertainty_maxeval = 100;
+
+            /// @brief Algorithm to use when localisation is uncertain
+            nlopt::algorithm uncertainty_algorithm = nlopt::LN_SBPLX;
 
             /// @brief Goal error tolerance [m]
             double goal_post_error_tolerance = 0.0;
@@ -341,7 +362,8 @@ namespace module::localisation {
             const Eigen::Vector3d& initial_guess,
             const std::vector<Eigen::Vector3d>& field_lines,
             const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const std::shared_ptr<const Goals>& goals);
+            const std::shared_ptr<const Goals>& goals,
+            bool uncertainty_optimisation = false);
 
         /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
