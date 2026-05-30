@@ -54,14 +54,7 @@ namespace module::input {
     using TeamColour     = GameState::TeamColour::Value;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , receive_port(0)
-        , send_port(0)
-        , TEAM_ID(0)
-        , PLAYER_ID(0)
-        , packet()
-        , game_phase()
-        , set_play() {
+        : Reactor(std::move(environment)) {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
