@@ -29,4 +29,5 @@ Include this module and emit a ReadyAttack task if the robot cannot attack due t
 
 ## Dependencies
 
+- Director
 - `utility::math::euler::pos_rpy_to_transform` for field position matrix creation.

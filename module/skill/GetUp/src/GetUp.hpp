@@ -50,6 +50,8 @@ namespace module::skill {
             std::vector<std::string> getup_upright;
             /// @brief Script sequence to run when told to get up while upside down
             std::vector<std::string> getup_upside_down;
+            /// @brief Script sequence to run when told to get up while on the side
+            std::vector<std::string> getup_side;
         } cfg;
 
     public:

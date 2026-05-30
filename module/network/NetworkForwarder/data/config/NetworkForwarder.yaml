@@ -45,3 +45,4 @@ targets:
     message.planning.WalkToDebug: true
     message.strategy.WalkInsideBoundedBox: true
     message.behaviour.state.WalkState: true
+    message.behaviour.DirectorState: false

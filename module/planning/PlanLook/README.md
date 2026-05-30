@@ -18,3 +18,5 @@ Add this module to your role to make the robot look around when requested.
 - `message::planning::LookAround` a Task requesting to run the search pattern to look around the environment
 
 ## Dependencies
+
+- Director

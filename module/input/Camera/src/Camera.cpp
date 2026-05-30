@@ -45,6 +45,7 @@ extern "C" {
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/platform/aliases.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
@@ -192,10 +193,32 @@ namespace module::input {
                                                                     camera_frame,
                                                                     std::string("head"));
 
-            // Apply roll and pitch offsets
-            double roll_offset  = config["roll_offset"].as<Expression>();
-            double pitch_offset = config["pitch_offset"].as<Expression>();
-            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+            // Open the config directory for the robot running this module
+            std::string hostname   = utility::support::get_hostname();
+            std::string robot_name = utility::platform::get_robot_alias(hostname);
+
+            auto camera_in_use = config["is_left_camera"].as<bool>() ? "Left" : "Right";
+            auto robot_config  = YAML::LoadFile(fmt::format("config/{}/Cameras/{}.yaml", robot_name, camera_in_use));
+
+            log<INFO>(fmt::format("Applying camera offsets for {}", robot_name));
+
+            // Apply roll, pitch, and yaw offsets using the name of the robot that's running this code
+            double roll_offset  = robot_config["roll_offset"].as<Expression>();
+            double pitch_offset = robot_config["pitch_offset"].as<Expression>();
+            double yaw_offset   = robot_config["yaw_offset"].as<Expression>();
+
+            // Log all the offsets for debugging to compare against the config files
+            log<DEBUG>(
+                fmt::format("Applying camera offsets for {}: roll offset = {:.2f} deg, pitch offset = {:.2f} deg, yaw "
+                            "offset = {:.2f} deg",
+                            robot_name,
+                            roll_offset * 180.0 / M_PI,
+                            pitch_offset * 180.0 / M_PI,
+                            yaw_offset * 180.0 / M_PI));
+
+
+            context.Hpc = Eigen::AngleAxisd(yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
+                          * Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
                           * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             // Apply image offsets to lens_centre, optical axis:

@@ -139,7 +139,7 @@ namespace utility::math::angle {
         return dist1 < dist2 ? (source > dest ? -dist1 : dist1) : (source > dest ? dist2 : -dist2);
     }
 
-    inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
+    inline double vector_to_bearing(const Eigen::Vector2d& dirVec) {
         return std::atan2(dirVec.y(), dirVec.x());
     }
 

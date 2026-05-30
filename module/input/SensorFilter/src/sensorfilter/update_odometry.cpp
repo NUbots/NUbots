@@ -82,6 +82,14 @@ namespace module::input {
                 .count(),
             0.0);
 
+        // Adapt Mahony filter Kp gain based on stability state
+        if (stability == Stability::STANDING) {
+            mahony_filter.set_Kp(cfg.adaptive_gains.standing_Kp);
+        }
+        else {
+            mahony_filter.set_Kp(cfg.adaptive_gains.dynamic_Kp);
+        }
+
         // Perform Mahony update
         const auto Rwt_mahony      = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
         Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);

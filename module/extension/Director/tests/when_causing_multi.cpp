@@ -50,6 +50,13 @@ namespace {
         operator int() const {
             return value;
         }
+        operator std::string() const {
+            switch (value) {
+                case BLOCK: return "BLOCK";
+                case ALLOW: return "ALLOW";
+                default: return "UNKNOWN";
+            }
+        }
     };
 
     std::vector<std::string> events;

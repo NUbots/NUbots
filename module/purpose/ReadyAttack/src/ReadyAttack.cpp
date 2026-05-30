@@ -73,7 +73,7 @@ namespace module::purpose {
                     // Waiting for kick off, position outside the center circle
                     log<DEBUG>("Waiting for kick off...");
                     Eigen::Vector3d rPFf =
-                        Eigen::Vector3d(0, 0, fd.dimensions.center_circle_diameter / 2 + cfg.center_circle_offset);
+                        Eigen::Vector3d(fd.dimensions.center_circle_diameter / 2 + cfg.center_circle_offset, 0.0, 0.0);
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
                         utility::math::euler::pos_rpy_to_transform(rPFf, Eigen::Vector3d(0, 0, -M_PI)),
                         true));

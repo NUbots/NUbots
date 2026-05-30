@@ -18,6 +18,18 @@ Filenames will be of the format year, month, day, T, hours, \_, minutes, \_, sec
 Files that are currently being written to will have an underscore prepended to the name, which will be removed when the
 file is closed.
 
+## Consumes
+
+- `extension::Configuration` from `DataLogging.yaml`
+- `NUClear::message::CommandLineArguments` (used to derive role/binary output folder)
+- Dynamically registered serialisable message types enabled in `messages` config
+
 ## Emits
 
+- `module::support::logging::DataLogging::DataLog` (internal sync message used by the logger pipeline)
+
 ## Dependencies
+
+- NBS encoder/index utilities (`utility::nbs::Encoder`, `utility::nbs::Index`)
+- `zstr` (compressed stream support)
+- Python 3 at build time (generates per-message recorder handles)

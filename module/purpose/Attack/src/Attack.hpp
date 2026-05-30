@@ -34,6 +34,13 @@
 namespace module::purpose {
 
     class Attack : public ::extension::behaviour::BehaviourReactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief When to kick the ball - "Never", "Always", "AttackingThird"
+            std::string kick_when = "";  // Default to kicking in the attacking third
+        } cfg;
+
     public:
         /// @brief Called by the powerplant to build and setup the Attack reactor.
         explicit Attack(std::unique_ptr<NUClear::Environment> environment);
