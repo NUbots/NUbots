@@ -31,6 +31,8 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/planning/LookAround.hpp"
 #include "message/skill/Look.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/vision/Goal.hpp"
@@ -42,6 +44,8 @@ namespace module::strategy {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::planning::LookAround;
     using message::skill::Look;
     using message::strategy::LookAtBall;
     using message::strategy::LookAtGoals;
@@ -58,6 +62,7 @@ namespace module::strategy {
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
             cfg.goal_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["goal_search_timeout"].as<double>()));
+            cfg.max_localisation_cost = config["max_localisation_cost"].as<double>();
         });
 
         // Trigger on Ball to update readings
@@ -83,6 +88,22 @@ namespace module::strategy {
                     Eigen::Vector3d rGCt = (sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
                     // Look at the goal
                     emit<Task>(std::make_unique<Look>(rGCt, true));
+                }
+            });
+
+        // If we haven't seen the ball or goals for a while, or our localisation is poor, look around
+        on<Provide<LookAround>, With<Field>, Optional<With<Ball>>, Optional<With<Goals>>, Sync<StrategiseLook>>().then(
+            [this](const Field& field,
+                   const std::shared_ptr<const Ball>& ball,
+                   const std::shared_ptr<const Goals>& goals) {
+                const bool stale_ball =
+                    !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
+                const bool stale_goals       = !goals || goals->goals.empty()
+                                               || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
+                const bool poor_localisation = field.cost > cfg.max_localisation_cost;
+
+                if ((stale_ball && stale_goals) || poor_localisation) {
+                    emit<Task>(std::make_unique<LookAround>());
                 }
             });
     }

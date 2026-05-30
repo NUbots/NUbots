@@ -41,6 +41,8 @@ namespace module::strategy {
             NUClear::clock::duration ball_search_timeout{};
             /// @brief How long before the goal measurement is too old and we have nothing to look at
             NUClear::clock::duration goal_search_timeout{};
+            /// @brief Localisation cost threshold above which we should search for landmarks again
+            double max_localisation_cost = 0.0;
         } cfg;
 
     public:
