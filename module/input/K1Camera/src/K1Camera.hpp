@@ -41,13 +41,14 @@ namespace module::input {
     class K1Camera : public NUClear::Reactor {
     private:
         struct CameraContext {
-            std::string          segment_name;
-            uint32_t             id{0};
-            std::atomic<bool>    running{true};
-            std::thread          thread;
+            std::string segment_name;
+            std::string camera_name;
+            uint32_t id{0};
+            std::atomic<bool> running{true};
+            std::thread thread;
         };
 
-        std::mutex                                 cameras_mutex;
+        std::mutex cameras_mutex;
         std::vector<std::unique_ptr<CameraContext>> cameras;
 
         void camera_thread(CameraContext& ctx);

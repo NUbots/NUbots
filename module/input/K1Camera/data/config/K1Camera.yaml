@@ -6,6 +6,8 @@ log_level: INFO
 # id:      integer camera ID emitted in message::input::Image
 cameras:
   - segment: _boostercamera_head_rgb
+    name: Left Camera
     id: 0
   - segment: _boostercamera_head_right_rgb
+    name: Right Camera
     id: 1
