@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,36 +24,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef MODULE_INPUT_K1CAMERA_HPP
+#define MODULE_INPUT_K1CAMERA_HPP
 
-#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_HPP
-#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_HPP
-
-#include <CL/opencl.h>
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <mutex>
+#include <nuclear>
 #include <string>
-#include <type_traits>
+#include <thread>
+#include <vector>
 
-namespace module::output::compressor::vaapi::cl {
+namespace module::input {
 
-    template <typename T>
-    struct opencl_wrapper : public std::shared_ptr<std::remove_pointer_t<T>> {
-        using std::shared_ptr<std::remove_pointer_t<T>>::shared_ptr;
-
-        operator T() const {
-            return this->get();
-        }
-
+    class K1Camera : public NUClear::Reactor {
     private:
-        T ptr = nullptr;
+        struct CameraContext {
+            std::string segment_name;
+            std::string camera_name;
+            uint32_t id{0};
+            std::atomic<bool> running{true};
+            std::thread thread;
+        };
+
+        std::mutex cameras_mutex;
+        std::vector<std::unique_ptr<CameraContext>> cameras;
+
+        void camera_thread(CameraContext& ctx);
+        void stop_cameras();
+
+    public:
+        /// @brief Called by the powerplant to build and setup the K1Camera reactor.
+        explicit K1Camera(std::unique_ptr<NUClear::Environment> environment);
+        ~K1Camera();
     };
 
-    using command_queue = opencl_wrapper<::cl_command_queue>;
-    using context       = opencl_wrapper<::cl_context>;
-    using event         = opencl_wrapper<::cl_event>;
-    using kernel        = opencl_wrapper<::cl_kernel>;
-    using mem           = opencl_wrapper<::cl_mem>;
-    using program       = opencl_wrapper<::cl_program>;
+}  // namespace module::input
 
-}  // namespace module::output::compressor::vaapi::cl
-
-#endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_WRAPPER_HPP
+#endif  // MODULE_INPUT_K1CAMERA_HPP

@@ -358,7 +358,7 @@ RUN BOOSTER_ARG=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "x86_64
     /tmp/booster_robotics_sdk/install.sh ${BOOSTER_ARG:+$BOOSTER_ARG} && \
     rm -rf /tmp/booster_robotics_sdk
 
-RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-dev
+RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-dev libboost-dev
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
