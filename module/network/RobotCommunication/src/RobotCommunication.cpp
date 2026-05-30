@@ -75,22 +75,26 @@ namespace module::network {
                 // Ball timeout to use the ball position
                 cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
 
-                // Need to determine send and receive ports
-                cfg.send_port = config["send_port"].as<uint>();
+                // Compute ports as 10000 + team_id unless overridden in config
+                const uint configured_send_port = config["send_port"].as<uint>();
+                cfg.send_port = (configured_send_port != 0) ? configured_send_port : 10000 + global_config.team_id;
+                const uint configured_receive_port = config["receive_port"].as<uint>();
+                const uint new_receive_port = (configured_receive_port != 0) ? configured_receive_port : 10000 + global_config.team_id;
+
                 // Need to determine broadcast ip
                 cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
                 // Need to determine optional filtering packets
                 cfg.udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                 // If we are changing ports (the port starts at 0 so this should start it the first time)
-                if (config["receive_port"].as<uint>() != cfg.receive_port) {
+                if (new_receive_port != cfg.receive_port) {
                     // If we have an old binding, then unbind it
                     // The port starts at 0 so this should work
                     if (cfg.receive_port != 0) {
                         listen_handle.unbind();
                     }
 
-                    cfg.receive_port = config["receive_port"].as<uint>();
+                    cfg.receive_port = new_receive_port;
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
