@@ -77,9 +77,10 @@ namespace module::input {
         [[nodiscard]] const gamecontroller::Team& get_own_team(const gamecontroller::GameControllerPacket& state) const;
         [[nodiscard]] const gamecontroller::Team& get_opponent_team(
             const gamecontroller::GameControllerPacket& state) const;
+        [[nodiscard]] static GameState::TeamColour::Value get_team_colour(
+            const gamecontroller::TeamColour& colour);
         [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
             const gamecontroller::PenaltyState& penalty_state);
-
         [[nodiscard]] static std::string ip_address_int_to_string(const uint32_t& ip_addr);
 
     public:

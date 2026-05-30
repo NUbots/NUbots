@@ -236,11 +236,8 @@ namespace module::input {
         log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
 
         // Get colours
-        state->team.team_colour =
-            new_own_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE : TeamColour::RED;
-        state->opponent.team_colour = new_opponent_team.field_player_colour == gamecontroller::TeamColour::BLUE
-                                          ? TeamColour::BLUE
-                                          : TeamColour::RED;
+        state->team.team_colour     = get_team_colour(new_own_team.field_player_colour);
+        state->opponent.team_colour = get_team_colour(new_opponent_team.field_player_colour);
 
         /*******************************************************************************************
          * Process score updates
@@ -400,8 +397,7 @@ namespace module::input {
          * Process our team colour
          ******************************************************************************************/
         if (old_own_team.field_player_colour != new_own_team.field_player_colour) {
-            TeamColour colour = new_own_team.field_player_colour == gamecontroller::TeamColour::BLUE ? TeamColour::BLUE
-                                                                                                     : TeamColour::RED;
+            TeamColour colour = get_team_colour(new_own_team.field_player_colour);
             state_changes.emplace_back([this, colour] { emit(std::make_unique<TeamColour>(colour)); });
         }
 
@@ -638,5 +634,14 @@ namespace module::input {
         std::string addr = inet_ntop(AF_INET, &ip_addr_n, c, sizeof(c));
 
         return addr;
+    }
+
+    GameState::TeamColour::Value GameController::get_team_colour(const gamecontroller::TeamColour& colour) {
+        switch (colour) {
+            case gamecontroller::TeamColour::BLUE: return TeamColour::BLUE;
+            case gamecontroller::TeamColour::RED:  return TeamColour::RED;
+            // TODO: update GameState.proto TeamColour enum to support all v3 colours
+            default: return TeamColour::UNKNOWN;
+        }
     }
 }  // namespace module::input
