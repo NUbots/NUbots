@@ -9,3 +9,9 @@ send_port: 0
 receive_port: 0
 broadcast_ip: "10.1.255.255"
 udp_filter_address: ""
+
+# Maximum payload size in bytes per message
+max_message_size: 512
+
+# Maximum number of team messages per game
+max_messages_per_game: 12000

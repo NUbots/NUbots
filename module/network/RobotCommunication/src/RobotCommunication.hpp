@@ -36,9 +36,9 @@ namespace module::network {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The port to communicate over
+            /// @brief The port to send team messages, 0 to auto-compute as 10000 + team_id
             uint send_port = 0;
-            /// @brief The port to communicate over (should match receive port)
+            /// @brief The port to receive team messages, 0 to auto-compute as 10000 + team_id
             uint receive_port = 0;
             /// @brief The IP address used for broadcasting data
             std::string broadcast_ip = "";
@@ -48,6 +48,10 @@ namespace module::network {
             int startup_delay = 0;
             /// @brief The timeout for the ball position to be used
             std::chrono::seconds ball_timeout{0};
+            /// @brief Maximum payload size in bytes per team message
+            uint max_message_size = 512;
+            /// @brief Maximum number of team messages per game (Ready/Set/Playing states)
+            uint max_messages_per_game = 12000;
         } cfg;
 
         /// @brief ignore packets from these IP addresses
