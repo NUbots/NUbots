@@ -219,6 +219,29 @@ RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && 
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
     cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
+RUN install-package -p ${platform} build-essential
+
+# CUDA Toolkit
+COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
+RUN /usr/local/bin/install-cuda.sh ${platform}
+
+RUN install-package -p ${platform} cuda-toolkit-12-5
+
+# Clone TensorRT repository
+WORKDIR /
+RUN git clone https://github.com/NVIDIA/TensorRT.git --branch v10.3.0 && \
+    cd TensorRT && \
+    git submodule update --init --recursive
+
+WORKDIR /TensorRT
+RUN mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE:STRING='Release' \
+    -DCMAKE_TOOLCHAIN_FILE=${prefix}/toolchain.cmake \
+    -DBUILD_SAMPLES:BOOL='OFF' \
+    -Wno-dev \
+    -GNinja && \
+    ninja -j$(nproc) && ninja -j$(nproc) install
+
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
@@ -261,23 +284,6 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
     -DCATCH_CONFIG_CPP17_VARIANT=ON \
     -DCATCH_CONFIG_CPP17_OPTIONAL=ON \
     -DCATCH_CONFIG_CPP17_BYTE=ON
-
-# Aravis
-# RUN install-package -p ${platform} libudev-dev libudev1
-# RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
-# RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
-#     --without-python
-# RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-# RUN install-package libglib2.0-dev
-# RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
-#     -Ddefault_library=both && \
-#     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-# RUN  ls ${prefix}/include && \
-#     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
-#     -Ddefault_library=both \
-#     -Dusb=enabled \
-#     -Ddocumentation=disabled \
-#     -Dintrospection=disabled
 
 # LibUV
 RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz \
@@ -389,7 +395,8 @@ ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
 ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
-ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES all
 RUN install-package clinfo
 
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
