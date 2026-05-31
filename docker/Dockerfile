@@ -77,8 +77,8 @@ RUN install-package \
     libmagic1 \
     libmagic-dev
 
-RUN --mount=type=bind,source=usr/local/bin,target=/usr/local/bin \
-    /usr/local/bin/container_setup.sh ${platform}
+COPY usr/local/bin/container_setup.sh /usr/local/bin/container_setup.sh
+RUN /usr/local/bin/container_setup.sh ${platform}
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -219,28 +219,32 @@ RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && 
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
     cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
-RUN install-package -p ${platform} build-essential
-
 # CUDA Toolkit
 COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
 RUN /usr/local/bin/install-cuda.sh ${platform}
 
-RUN install-package -p ${platform} cuda-toolkit-12-5
+RUN install-package -p ${platform} \
+    cuda-cudart-12-5 \
+    cuda-cudart-dev-12-5 \
+    cuda-compat-12-5 \
+    cuda-driver-dev-12-5 \
+    cuda-nvcc-12-5 \
+    cuda-crt-12-5 \
+    libcublas-12-5 \
+    libcublas-dev-12-5 \
+    libnvjitlink-12-5 \
+    libnvjitlink-dev-12-5 \
+    cuda-nvrtc-12-5 \
+    cuda-nvrtc-dev-12-5
 
-# Clone TensorRT repository
-WORKDIR /
-RUN git clone https://github.com/NVIDIA/TensorRT.git --branch v10.3.0 && \
-    cd TensorRT && \
-    git submodule update --init --recursive
-
-WORKDIR /TensorRT
-RUN mkdir build && cd build && \
-    cmake .. -DCMAKE_BUILD_TYPE:STRING='Release' \
-    -DCMAKE_TOOLCHAIN_FILE=${prefix}/toolchain.cmake \
-    -DBUILD_SAMPLES:BOOL='OFF' \
-    -Wno-dev \
-    -GNinja && \
-    ninja -j$(nproc) && ninja -j$(nproc) install
+# TensorRT - install binary packages from NVIDIA CUDA repository
+# NvInfer.h, NvOnnxParser.h, libnvinfer.so, libnvonnxparsers.so
+RUN install-package -p ${platform} \
+    libnvinfer-dev \
+    libnvonnxparsers-dev \
+    libnvinfer-plugin-dev \
+    libnvinfer-lean-dev \
+    libnvinfer-vc-plugin-dev
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -395,8 +399,8 @@ ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
 ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES all
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 RUN install-package clinfo
 
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
