@@ -34,6 +34,7 @@ cache_registry = "nubots"
 image = "nubots"
 image_user = "nubots"
 directory = "NUbots"
+jobs = os.cpu_count() or 1
 
 # This can fail if the local user id doesn't exist (e.g. you're in docker and set a uid)
 # In those cases, we really don't care so we just use the local userid instead
