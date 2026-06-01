@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package message.booster;
+
+import "Vector.proto";
+
+enum Mode {
+    DAMP = 0;
+    PREP = 1;
+    WALK = 2;
+    CUSTOM = 3;
+    SOCCER = 4;
+}
+
+message BoosterMode {
+    Mode mode = 1;
+}
