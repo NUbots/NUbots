@@ -63,7 +63,7 @@ def run(target, username, uid, reset, **kwargs):
                 "image",
                 "tag",
                 defaults.image_name(target, username=username),
-                defaults.image_name("selected", username=username),
+                defaults.image_name("selected_k1", username=username),
             ]
         )
         if err != 0:
