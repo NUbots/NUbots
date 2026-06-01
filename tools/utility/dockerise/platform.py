@@ -84,8 +84,12 @@ def build(image, platform, username, uid, reset):
     pty = WrapPty()
 
     # If we are building the selected platform we need to work out what that refers to
-    _selected = platform == "selected"
+    _selected = platform == "selected_k1"
     platform = selected(image) if _selected else platform
+
+    # Temporary workaround to prevent conflict with NUgus
+    if platform == "generic":
+        platform += "_k1"
 
     local_tag = defaults.image_name(platform, image, username)
     dockerdir = os.path.join(b.project_dir, "docker")
@@ -167,7 +171,7 @@ def build(image, platform, username, uid, reset):
                 "image",
                 "tag",
                 defaults.image_name(platform, image, username),
-                defaults.image_name("selected", image, username),
+                defaults.image_name("selected_k1", image, username),
             ],
             stdout=subprocess.DEVNULL,
         )
