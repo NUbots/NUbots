@@ -38,11 +38,19 @@ def register(command):
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
+    command.add_argument(
+        "--keep-zeros",
+        action="store_true",
+        default=False,
+        help="Include fields whose value is zero/default in the JSON output (proto3 normally omits them)",
+    )
 
 
-def run(files, **kwargs):
+def run(files, keep_zeros, **kwargs):
     for packet in LinearDecoder(*files):
-        out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
+        out = re.sub(
+            r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros)
+        )
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type.name, packet.emit_timestamp, out)
         # Print as a json object
         print(out)
