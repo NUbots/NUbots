@@ -15,6 +15,7 @@ export interface OtherRobotsModel {
   readonly timestamp: number;
   readonly Hcw: Matrix4;
   readonly rRCc: Vector3;
+  readonly radius: number;
 }
 
 export class OtherRobotsViewModel {
@@ -45,14 +46,35 @@ export class OtherRobotsViewModel {
     const Hwc = new THREE.Matrix4().copy(m.Hcw.toThree()).invert();
     const Hcc = Matrix4.fromThree(this.params.Hcw.toThree().multiply(Hwc));
 
-    // Transform the axis so that it is in the perspective of the latest camera image.
-    const axis = Vector3.fromThree(m.rRCc.toThree().applyMatrix4(Hcc.toThree())).normalize();
+    // Transform the robot centre so it is in the perspective of the latest camera image.
+    const rRCc = Vector3.fromThree(m.rRCc.toThree().applyMatrix4(Hcc.toThree()));
+    const Rcw = new THREE.Matrix3().setFromMatrix4(this.params.Hcw.toThree());
 
-    return this.lineProjection.cone({
-      axis,
-      radius: 0.999,
+    // We get normal to ground in world space, then view the normal to ground in camera space
+    const groundNormalC = new THREE.Vector3(0, 0, 1).applyMatrix3(Rcw).normalize();
+
+    // Build an orthonormal basis, spanning the ground plane in camera coordinates.
+    const basisSeed = Math.abs(groundNormalC.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+    const u = new THREE.Vector3().crossVectors(groundNormalC, basisSeed).normalize();
+    const v = new THREE.Vector3().crossVectors(groundNormalC, u).normalize();
+
+    // Sample points on a 3D circle (robots footprint)
+    const raySamples = 16;
+    const angleDelta = (2 * Math.PI) / raySamples;
+    const centre = rRCc.normalize().toThree();
+    const rays = new Array(raySamples).fill(0).map((_, i) => {
+      const t = i * angleDelta;
+      const pointC = centre
+        .clone()
+        .add(u.clone().multiplyScalar(Math.acos(m.radius) * Math.cos(t)))
+        .add(v.clone().multiplyScalar(Math.acos(m.radius) * Math.sin(t)));
+      return Vector3.fromThree(pointC.normalize());
+    });
+
+    return this.lineProjection.rayLoop({
+      rays,
       color: ROBOT_COLOUR,
-      lineWidth: 8,
+      lineWidth: 4,
     });
   });
 }
