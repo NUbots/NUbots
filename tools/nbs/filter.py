@@ -27,6 +27,7 @@
 #
 
 import fnmatch
+import os
 
 from tqdm import tqdm
 
@@ -55,26 +56,10 @@ def register(command):
     command.add_argument("-o", "--output", help="The output file to store the filtered nbs in")
 
 
-def run(files, keep, remove, output, **kwargs):
-    # If we don't have a output, choose a default output name
-    if output is None:
-        output = "filtered.nbs"
-
-    # If no remove was provided, we assume we remove all
-    if remove is None:
-        if keep is None:
-            print("You must provide either something to remove or keep")
-            exit(1)
-        else:
-            remove = ["*"]
-
-    # If we didn't provide any keep arguments we at least need to ignore them
-    if keep is None:
-        keep = []
-
+def _filter_to(input_files, output, keep, remove):
     with Encoder(output) as out:
         for packet in tqdm(
-            LinearDecoder(*files, show_progress=True),
+            LinearDecoder(*input_files, show_progress=True),
             unit="packet",
             unit_scale=True,
             dynamic_ncols=True,
@@ -95,6 +80,48 @@ def run(files, keep, remove, output, **kwargs):
             # If it's still valid write it to the new file
             if valid:
                 out.write(packet.emit_timestamp, packet.msg)
+
+
+def run(files, keep, remove, output, **kwargs):
+    # If no remove was provided, we assume we remove all
+    if remove is None:
+        if keep is None:
+            print("You must provide either something to remove or keep")
+            exit(1)
+        else:
+            remove = ["*"]
+
+    # If we didn't provide any keep arguments we at least need to ignore them
+    if keep is None:
+        keep = []
+
+    if output is not None:
+        # Explicit output path: merge all input files into one output
+        _filter_to(files, output, keep, remove)
+    else:
+        # Default: write each input to a "filtered" subfolder alongside it.
+        # Directories are expanded to their contained .nbs files, each filtered individually.
+        for f in files:
+            f_abs = os.path.abspath(f)
+            if os.path.isdir(f_abs):
+                nbs_files = sorted(
+                    os.path.join(f_abs, name)
+                    for name in os.listdir(f_abs)
+                    if name.endswith(".nbs")
+                )
+                if not nbs_files:
+                    print(f"No .nbs files found in directory: {f}")
+                    continue
+                for nbs_file in nbs_files:
+                    out_dir = os.path.join(f_abs, "filtered")
+                    os.makedirs(out_dir, exist_ok=True)
+                    out_path = os.path.join(out_dir, os.path.basename(nbs_file))
+                    _filter_to([nbs_file], out_path, keep, remove)
+            else:
+                out_dir = os.path.join(os.path.dirname(f_abs), "filtered")
+                os.makedirs(out_dir, exist_ok=True)
+                out_path = os.path.join(out_dir, os.path.basename(f_abs))
+                _filter_to([f_abs], out_path, keep, remove)
 
 
 def match_pattern(packet, pattern):
