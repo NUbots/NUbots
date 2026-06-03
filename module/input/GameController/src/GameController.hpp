@@ -106,7 +106,8 @@ namespace module::input {
             const gamecontroller::GameControllerPacket& state) const;
 
         /// @brief Converts a gamecontroller::TeamColour to a GameState::TeamColour::Value
-        [[nodiscard]] static GameState::TeamColour::Value get_team_colour(const gamecontroller::TeamColour& colour);
+        [[nodiscard]] static message::input::GameState::TeamColour::Value get_team_colour(
+            const gamecontroller::TeamColour& colour);
 
         /// @brief Converts a gamecontroller::PenaltyState to a GameState::PenaltyReason
         [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
