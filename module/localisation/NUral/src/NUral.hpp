@@ -14,6 +14,10 @@ namespace module::localisation {
             std::string model_path;
         } cfg;
 
+        ov::Core core;
+        ov::CompiledModel compiled_model;
+        ov::InferRequest infer_request;
+
     public:
         /// @brief Called by the powerplant to build and setup the NUral reactor.
         explicit NUral(std::unique_ptr<NUClear::Environment> environment);
