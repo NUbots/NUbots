@@ -10,6 +10,8 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   network::PlotJuggler
+  # Localisation
+  localisation::NUral
   # Sensors
   input::SensorFilter
   platform::Webots
