@@ -67,13 +67,23 @@ change_limit: [0.5, 0.5, 0.5]
 # Goal post error tolerance [m]
 goal_post_error_tolerance: 0.5
 
-opt:
+normal_opt:
+  algorithm: LN_COBYLA
   # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
   # Relative tolerance on the optimisation function value
   ftol_rel: 1e-6
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
+
+uncertainty_opt: # Quicker optimisation, but less accurate.
+  algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific problem (quick and nasty optimisation)
+  # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation parameters at time t. Stop optimising when del_x < xtol_rel.
+  xtol_rel: 1e-3
+  # Relative tolerance on the optimisation function value, del_f = |(f_{t}-f{t-1})/f_{t-1}|.
+  ftol_rel: 1e-3
+  # Maximum number of evaluations for the optimisation
+  maxeval: 100
 
 exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
