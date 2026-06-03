@@ -72,14 +72,15 @@ namespace module::network {
                 // Ball timeout to use the ball position
                 cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
                 // Maximum message size and count
-                cfg.max_message_size     = config["max_message_size"].as<uint>();
+                cfg.max_message_size      = config["max_message_size"].as<uint>();
                 cfg.max_messages_per_game = config["max_messages_per_game"].as<uint>();
 
                 // Compute ports as 10000 + team_id unless overridden in config
                 const uint configured_send_port = config["send_port"].as<uint>();
                 cfg.send_port = (configured_send_port != 0) ? configured_send_port : 10000 + global_config.team_id;
                 const uint configured_receive_port = config["receive_port"].as<uint>();
-                const uint new_receive_port = (configured_receive_port != 0) ? configured_receive_port : 10000 + global_config.team_id;
+                const uint new_receive_port =
+                    (configured_receive_port != 0) ? configured_receive_port : 10000 + global_config.team_id;
 
                 // Need to determine broadcast ip
                 cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
@@ -294,7 +295,11 @@ namespace module::network {
                 // Check serialised size before sending
                 auto payload = NUClear::util::serialise::Serialise<RoboCup>::serialise(*msg);
                 if (payload.size() > cfg.max_message_size) {
-                    log<WARN>("RoboCup message size", payload.size(), "bytes exceeds", cfg.max_message_size, "byte limit");
+                    log<WARN>("RoboCup message size",
+                              payload.size(),
+                              "bytes exceeds",
+                              cfg.max_message_size,
+                              "byte limit");
                 }
                 else {
                     log<DEBUG>("RoboCup message size:", payload.size(), "bytes");

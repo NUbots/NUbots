@@ -632,7 +632,7 @@ namespace module::input {
     GameState::TeamColour::Value GameController::get_team_colour(const gamecontroller::TeamColour& colour) {
         switch (colour) {
             case gamecontroller::TeamColour::BLUE: return TeamColour::BLUE;
-            case gamecontroller::TeamColour::RED:  return TeamColour::RED;
+            case gamecontroller::TeamColour::RED: return TeamColour::RED;
             // TODO: update GameState.proto TeamColour enum to support all v3 colours
             default: return TeamColour::UNKNOWN;
         }

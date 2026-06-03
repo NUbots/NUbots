@@ -92,8 +92,8 @@ namespace module::input {
 
         /// @brief Processes a new GameController packet and emits state changes
         void process(const message::input::GameState& old_game_state,
-                    const gamecontroller::GameControllerPacket& old_packet,
-                    const gamecontroller::GameControllerPacket& new_packet);
+                     const gamecontroller::GameControllerPacket& old_packet,
+                     const gamecontroller::GameControllerPacket& new_packet);
 
         /// @brief Sends a reply packet to the GameController
         void send_reply_message();
@@ -106,8 +106,7 @@ namespace module::input {
             const gamecontroller::GameControllerPacket& state) const;
 
         /// @brief Converts a gamecontroller::TeamColour to a GameState::TeamColour::Value
-        [[nodiscard]] static GameState::TeamColour::Value get_team_colour(
-            const gamecontroller::TeamColour& colour);
+        [[nodiscard]] static GameState::TeamColour::Value get_team_colour(const gamecontroller::TeamColour& colour);
 
         /// @brief Converts a gamecontroller::PenaltyState to a GameState::PenaltyReason
         [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
