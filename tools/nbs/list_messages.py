@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2019 NUbots
+# Copyright (c) 2020 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.
@@ -26,27 +26,30 @@
 # SOFTWARE.
 #
 
-import os
-
-from .encoder import Encoder
-from .grouped_decoder import GroupDecoder
-from .linear_decoder import LinearDecoder
-from .protobuf_types import MessageTypes
+from utility.nbs import MessageTypes, resolve_nbs_paths
+from utility.nbs.load_nbs import load_nbs
 
 
-def resolve_nbs_paths(paths):
-    """Expand directories to .nbs files and drop .nbs.idx index files."""
-    result = []
-    for p in paths:
-        p_abs = os.path.abspath(p)
-        if os.path.isdir(p_abs):
-            result.extend(
-                sorted(
-                    os.path.join(p_abs, name)
-                    for name in os.listdir(p_abs)
-                    if name.endswith(".nbs")
-                )
-            )
-        elif p_abs.endswith(".nbs"):
-            result.append(p_abs)
-    return result
+def register(command):
+    command.description = "List all message types present in one or more nbs files"
+
+    command.add_argument("files", metavar="files", nargs="+", help="The nbs files or directories to inspect")
+
+
+def run(files, **kwargs):
+    nbs_files = resolve_nbs_paths(files)
+    if not nbs_files:
+        print("No .nbs files found")
+        exit(1)
+
+    index, maps = load_nbs(*nbs_files, show_progress=True)
+
+    type_names = []
+    for h in set(index["type_hash"]):
+        if h in MessageTypes:
+            type_names.append(MessageTypes[h].name)
+        else:
+            type_names.append(f"<unknown:{h:#018x}>")
+
+    for name in sorted(type_names):
+        print(name)

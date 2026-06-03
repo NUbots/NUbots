@@ -30,7 +30,7 @@ import re
 
 from google.protobuf.json_format import MessageToJson
 
-from utility.nbs import LinearDecoder
+from utility.nbs import LinearDecoder, resolve_nbs_paths
 
 
 def register(command):
@@ -47,7 +47,7 @@ def register(command):
 
 
 def run(files, keep_zeros, **kwargs):
-    for packet in LinearDecoder(*files):
+    for packet in LinearDecoder(*resolve_nbs_paths(files)):
         out = re.sub(
             r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros)
         )

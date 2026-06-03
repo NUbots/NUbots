@@ -31,7 +31,7 @@ import os
 
 from tqdm import tqdm
 
-from utility.nbs import Encoder, LinearDecoder
+from utility.nbs import Encoder, LinearDecoder, resolve_nbs_paths
 
 
 def register(command):
@@ -95,33 +95,21 @@ def run(files, keep, remove, output, **kwargs):
     if keep is None:
         keep = []
 
+    nbs_files = resolve_nbs_paths(files)
+    if not nbs_files:
+        print("No .nbs files found")
+        exit(1)
+
     if output is not None:
-        # Explicit output path: merge all input files into one output
-        _filter_to(files, output, keep, remove)
+        # Explicit output path: merge all inputs into one output
+        _filter_to(nbs_files, output, keep, remove)
     else:
-        # Default: write each input to a "filtered" subfolder alongside it.
-        # Directories are expanded to their contained .nbs files, each filtered individually.
-        for f in files:
-            f_abs = os.path.abspath(f)
-            if os.path.isdir(f_abs):
-                nbs_files = sorted(
-                    os.path.join(f_abs, name)
-                    for name in os.listdir(f_abs)
-                    if name.endswith(".nbs")
-                )
-                if not nbs_files:
-                    print(f"No .nbs files found in directory: {f}")
-                    continue
-                for nbs_file in nbs_files:
-                    out_dir = os.path.join(f_abs, "filtered")
-                    os.makedirs(out_dir, exist_ok=True)
-                    out_path = os.path.join(out_dir, os.path.basename(nbs_file))
-                    _filter_to([nbs_file], out_path, keep, remove)
-            else:
-                out_dir = os.path.join(os.path.dirname(f_abs), "filtered")
-                os.makedirs(out_dir, exist_ok=True)
-                out_path = os.path.join(out_dir, os.path.basename(f_abs))
-                _filter_to([f_abs], out_path, keep, remove)
+        # Default: write each input to a "filtered" subfolder alongside it
+        for f in nbs_files:
+            out_dir = os.path.join(os.path.dirname(f), "filtered")
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, os.path.basename(f))
+            _filter_to([f], out_path, keep, remove)
 
 
 def match_pattern(packet, pattern):
