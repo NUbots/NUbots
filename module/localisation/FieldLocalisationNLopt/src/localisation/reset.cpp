@@ -82,7 +82,8 @@ namespace module::localisation {
                     hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
                                                                         field_lines.rPWw,
                                                                         field_intersections,
-                                                                        goals));
+                                                                        goals,
+                                                                        true));
                 }
             }
         }
@@ -121,7 +122,8 @@ namespace module::localisation {
                     hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
                                                                         field_lines.rPWw,
                                                                         field_intersections,
-                                                                        goals));
+                                                                        goals,
+                                                                        true));
                 }
             }
         }

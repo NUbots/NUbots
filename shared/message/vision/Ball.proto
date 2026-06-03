@@ -58,6 +58,8 @@ message Ball {
     /// Colour of the ball for NUsight. In debug mode, discarded balls are emitted in different colours depending on
     /// the reason it was discarded
     vec4 colour = 5;
+    /// Marks whether this ball was discarded. Discarded balls can be ignored outside debugging.
+    bool is_invalid = 6;
 }
 message Balls {
     /// ID of the camera that took the image containing the balls
