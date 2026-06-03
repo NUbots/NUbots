@@ -67,7 +67,7 @@ export class LineProjection {
   }
 
   // Draw a closed loop by connecting successive rays with projected great-circle arcs
-  readonly rayLoop = group(({ rays, color, lineWidth }: { rays: Vector3[]; color: Vector4; lineWidth: number}) => {
+  readonly rayLoop = group(({ rays, color, lineWidth }: { rays: Vector3[]; color: Vector4; lineWidth: number }) => {
     if (rays.length < 2) {
       return undefined;
     }
@@ -86,7 +86,7 @@ export class LineProjection {
       }
 
       const axis = Vector3.fromThree(cross.normalize());
-      return this.coneSegment({ axis, start, end, color, lineWidth});
+      return this.coneSegment({ axis, start, end, color, lineWidth });
     });
 
     return { children };
