@@ -40,13 +40,7 @@ def resolve_nbs_paths(paths):
     for p in paths:
         p_abs = os.path.abspath(p)
         if os.path.isdir(p_abs):
-            result.extend(
-                sorted(
-                    os.path.join(p_abs, name)
-                    for name in os.listdir(p_abs)
-                    if name.endswith(".nbs")
-                )
-            )
+            result.extend(sorted(os.path.join(p_abs, name) for name in os.listdir(p_abs) if name.endswith(".nbs")))
         elif p_abs.endswith(".nbs"):
             result.append(p_abs)
     return result

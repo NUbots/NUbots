@@ -48,9 +48,7 @@ def register(command):
 
 def run(files, keep_zeros, **kwargs):
     for packet in LinearDecoder(*resolve_nbs_paths(files)):
-        out = re.sub(
-            r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros)
-        )
+        out = re.sub(r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros))
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type.name, packet.emit_timestamp, out)
         # Print as a json object
         print(out)
