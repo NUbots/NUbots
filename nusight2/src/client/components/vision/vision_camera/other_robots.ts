@@ -59,7 +59,7 @@ export class OtherRobotsViewModel {
     const v = new THREE.Vector3().crossVectors(groundNormalC, u).normalize();
 
     // Sample points on a 3D circle (robots footprint)
-    const raySamples = 16;
+    const raySamples = 32;
     const angleDelta = (2 * Math.PI) / raySamples;
     const centre = rRCc.normalize().toThree();
     const rays = new Array(raySamples).fill(0).map((_, i) => {
