@@ -37,7 +37,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
@@ -53,10 +52,8 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::localisation::Robots;
     using message::planning::WalkTo;
     using message::purpose::Purpose;
-    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -179,7 +176,6 @@ namespace module::network {
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
            Optional<With<WalkTo>>,
-           Optional<With<Robots>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -189,7 +185,6 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkTo>& walk_to,
-                         // const std::shared_ptr<const Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
