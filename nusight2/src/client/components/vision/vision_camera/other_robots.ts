@@ -72,7 +72,7 @@ export class OtherRobotsViewModel {
     });
 
     return this.lineProjection.rayLoop({
-      rays,
+      rays: rays,
       color: ROBOT_COLOUR,
       lineWidth: 4,
     });

@@ -61,7 +61,6 @@ namespace module::vision {
             cfg.confidence_threshold   = config["confidence_threshold"].as<double>();
             cfg.cluster_points         = config["cluster_points"].as<int>();
             cfg.minimum_robot_distance = config["minimum_robot_distance"].as<double>();
-            cfg.robot_radius           = config["robot_radius"].as<double>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Visual Mesh", [this](const GreenHorizon& horizon) {
