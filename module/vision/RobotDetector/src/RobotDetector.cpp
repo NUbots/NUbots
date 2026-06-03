@@ -136,8 +136,6 @@ namespace module::vision {
                 // Transform the point so it is from the camera
                 robot.rRCc = horizon.Hcw * rPWw.col(*closest_element);
 
-                // Eigen::Vector3d closest_point = horizon.Hcw * rPWw.col(*closest_element);
-
                 // Robots that are too close to us are unlikely to be other robots
                 if (robot.rRCc.norm() < cfg.minimum_robot_distance) {
                     log<DEBUG>(fmt::format("Cluster rejected due to distance: {}. Min allowed distance {}.",
@@ -149,15 +147,15 @@ namespace module::vision {
                 // Returns rPCc, vector of point from camera in camera space
                 auto camera_transform = [&](int idx) -> Eigen::Vector3d { return horizon.Hcw * rPWw.col(idx); };
 
+                // Returns yaw in theta, where x is forward, y sideways and z up.
                 auto find_yaw = [](const Eigen::Vector3d v) -> double { return std::atan2(v.y(), v.x()); };
 
                 const auto [min, max] = std::minmax_element(cluster.begin(), cluster.end(), [&](int a, int b) {
                     return find_yaw(camera_transform(a)) < find_yaw(camera_transform(b));
                 });
 
-                double min_yaw = find_yaw(camera_transform(*min));
-                double max_yaw = find_yaw(camera_transform(*max));
-                // double mid_yaw    = (min_yaw + max_yaw) / 2;
+                double min_yaw    = find_yaw(camera_transform(*min));
+                double max_yaw    = find_yaw(camera_transform(*max));
                 double yaw_radius = (max_yaw - min_yaw) / 2;
 
                 log<DEBUG>(fmt::format("Robots yaw radius is {}", yaw_radius));

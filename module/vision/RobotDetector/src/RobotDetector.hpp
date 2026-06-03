@@ -42,8 +42,6 @@ namespace module::vision {
             int cluster_points = 0;
             /// @brief The minimum distance a robot can be to be considered a robot, to exclude the self robot
             double minimum_robot_distance = 0.0;
-            /// @brief Assumed radius of robots
-            double robot_radius = 0.0;
         } cfg;
 
     public:
