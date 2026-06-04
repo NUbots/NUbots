@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/localisation/Field.hpp"
+#include "message/localisation/NUral.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -39,6 +40,7 @@ namespace module::input {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
+    using message::localisation::NUral;
     using message::localisation::ResetFieldLocalisation;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::math::filter::MahonyFilter;
@@ -143,6 +145,42 @@ namespace module::input {
 
             // Reset yaw filter
             yaw_filter.reset();
+        });
+
+        // Subscribe to NUral localisation estimates so we can optionally use them for odometry
+        on<Trigger<NUral>>().then([this](const NUral& n) {
+            // get the x,y,z,roll,pitch,yaw from the NUral message
+            std::vector<float> pose{n.estimated_x,
+                                    n.estimated_y,
+                                    n.estimated_z,
+                                    n.estimated_roll,
+                                    n.estimated_pitch,
+                                    n.estimated_yaw};
+            if (pose.size() < 6) {
+                log<WARN>("Received NUral message with insufficient pose size: ", pose.size());
+                return;
+            }
+
+            // Build Htw from NUral pose: [x,y,z,roll,pitch,yaw]
+            Eigen::Isometry3d Htw = Eigen::Isometry3d::Identity();
+            Htw.translation()     = Eigen::Vector3d(pose[0], pose[1], pose[2]);
+            Htw.linear() =
+                rpy_intrinsic_to_mat(Eigen::Vector3d(pose[3], pose[4], pose[5]));  // roll, pitch, yaw ordering
+
+            latest_nural_Htw  = Htw;
+            latest_nural_time = std::chrono::steady_clock::now();
+
+            log<DEBUG>("Received NUral localisation estimate: ({}, {}, {}), Rotation: ({}, {}, {})",
+                       pose[0],
+                       pose[1],
+                       pose[2],
+                       pose[3],
+                       pose[4],
+                       pose[5]);
+
+            auto msg = std::make_unique<message::localisation::Field>();
+            msg->Hfw = Htw;
+            emit(std::move(msg));
         });
     }
 

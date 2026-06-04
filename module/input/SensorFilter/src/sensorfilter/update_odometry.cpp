@@ -82,6 +82,34 @@ namespace module::input {
                 .count(),
             0.0);
 
+        // If NUral odometry is enabled and we have a recent NUral pose, use it instead of dead-reckoning
+        if (cfg.use_nural_odometry && latest_nural_Htw.has_value()) {
+            // Use NUral Htw directly
+            sensors->Htw = latest_nural_Htw.value();
+
+            // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
+            Eigen::Isometry3d Hwt = sensors->Htw.inverse();
+            Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+            Hwr.linear() = Eigen::AngleAxisd(mat_to_rpy_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            Hwr.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+            sensors->Hrw = Hwr.inverse();
+
+            // Velocity: reuse the same low-pass structure as the normal odometry path
+            const double y_current     = Hwt.translation().y();
+            const double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+            const double y_dot_current = (y_current - y_prev) / dt;
+            const double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
+                                 + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
+            const double x_current     = Hwt.translation().x();
+            const double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+            const double x_dot_current = (x_current - x_prev) / dt;
+            const double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
+                                   + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
+            sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
+
+            return;
+        }
+
         // Adapt Mahony filter Kp gain based on stability state
         if (stability == Stability::STANDING) {
             mahony_filter.set_Kp(cfg.adaptive_gains.standing_Kp);

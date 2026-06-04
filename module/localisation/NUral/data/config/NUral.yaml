@@ -1,4 +1,7 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 model_path: "model.onnx"
+
+translation_threshold: 0.1
+rotation_threshold: 0.2

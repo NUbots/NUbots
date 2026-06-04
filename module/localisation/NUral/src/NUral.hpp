@@ -12,11 +12,14 @@ namespace module::localisation {
         struct Config {
             /// @brief Path to the NUral ONNX model file
             std::string model_path;
+            double translation_threshold;
+            double rotation_threshold;
         } cfg;
 
         ov::Core core;
         ov::CompiledModel compiled_model;
         ov::InferRequest infer_request;
+        bool model_loaded = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the NUral reactor.

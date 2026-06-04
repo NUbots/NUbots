@@ -30,7 +30,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <chrono>
 #include <nuclear>
+#include <optional>
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
@@ -38,6 +40,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/NUral.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/filter/MahonyFilter.hpp"
@@ -51,6 +54,7 @@ namespace module::input {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using message::localisation::NUral;
     using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
 
@@ -83,6 +87,8 @@ namespace module::input {
             double y_cut_off_frequency = 0.0;
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+            /// @brief Bool to determine whether to use NUral odometry when available
+            bool use_nural_odometry = false;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -113,6 +119,11 @@ namespace module::input {
 
         /// @brief Bool indicating if the ground truth is initialised
         bool ground_truth_initialised = false;
+
+        /// @brief Latest NUral pose (Htw) if received
+        std::optional<Eigen::Isometry3d> latest_nural_Htw = std::nullopt;
+        /// @brief Timestamp of latest NUral (steady clock)
+        std::optional<std::chrono::steady_clock::time_point> latest_nural_time = std::nullopt;
 
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();

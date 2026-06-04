@@ -18,6 +18,7 @@ nuclear_role(
   actuation::Servos
   actuation::Kinematics
   actuation::FootController
+  localisation::NUral
   # Skills
   skill::Walk
   skill::KickWalk

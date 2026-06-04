@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package message.localisation;
+
+message NUral {
+    /// The estimated pose of the robot in world space (x, y, z, roll, pitch, yaw)
+    float estimated_x = 1;
+    float estimated_y = 2;
+    float estimated_z = 3;
+    float estimated_roll = 4;
+    float estimated_pitch = 5;
+    float estimated_yaw = 6;
+}
