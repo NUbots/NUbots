@@ -87,14 +87,13 @@ namespace module::tools {
 
             // Compute the offset-free base Hpc (head-pitch {p} from camera {c}) using forward kinematics, the
             // same way the Camera module does before applying the extrinsic offsets.
-            auto nugus_model = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
-            auto camera_frame =
-                cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
-            auto Hpc = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+            auto nugus_model  = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
+            auto camera_frame = cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
+            auto Hpc          = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
                                                                     nugus_model.home_configuration(),
                                                                     camera_frame,
                                                                     std::string("head"));
-            Hpc_base = Eigen::Isometry3d(Hpc.matrix());
+            Hpc_base          = Eigen::Isometry3d(Hpc.matrix());
 
             // Read the robot's current extrinsic offsets, which form the initial guess for the optimisation
             std::string hostname   = utility::support::get_hostname();
@@ -135,7 +134,7 @@ namespace module::tools {
                     return;
                 }
 
-                const auto now     = NUClear::clock::now();
+                const auto now = NUClear::clock::now();
                 const double since_startup =
                     std::chrono::duration_cast<std::chrono::duration<double>>(now - startup_time).count();
 
@@ -175,9 +174,8 @@ namespace module::tools {
                     log<INFO>(fmt::format("Collection complete: {} associated samples", samples.size()));
 
                     if (samples.size() < cfg.min_samples) {
-                        log<ERROR>(fmt::format("Not enough samples to calibrate ({} < {})",
-                                               samples.size(),
-                                               cfg.min_samples));
+                        log<ERROR>(
+                            fmt::format("Not enough samples to calibrate ({} < {})", samples.size(), cfg.min_samples));
                         return;
                     }
 

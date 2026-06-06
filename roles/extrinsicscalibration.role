@@ -1,6 +1,6 @@
-# This role places the robot static at the centre of the field, looking straight toward the goal, and optimises
-# the selected camera's extrinsic offsets (roll, pitch, yaw) so that the YOLO field-landmark detections align
-# with the known ground-truth landmark positions. See module/tools/ExtrinsicsCalibration for details.
+# This role places the robot static at the centre of the field, looking straight toward the goal, and optimises the
+# selected camera's extrinsic offsets (roll, pitch, yaw) so that the YOLO field-landmark detections align with the known
+# ground-truth landmark positions. See module/tools/ExtrinsicsCalibration for details.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
