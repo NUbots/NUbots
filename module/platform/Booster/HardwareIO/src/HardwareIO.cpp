@@ -59,10 +59,6 @@ namespace module::platform::Booster {
                 ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::ButtonEventMsg>(
                     "rt/button_event",
                     [this](const void* msg) { button_event_handler(msg); });
-
-            odometer_channel =
-                ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>("rt/odometer_state",
-                                                                                                [this](const void*) {});
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
