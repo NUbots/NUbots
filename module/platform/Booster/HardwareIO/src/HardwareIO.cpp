@@ -18,6 +18,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
+    using message::booster::K1Mode;
     using message::booster::VisualKickVer;
     using message::platform::RawSensors;
 
@@ -95,21 +96,21 @@ namespace module::platform::Booster {
             }
         });
 
-        on<Trigger<BoosterGetUp>>().then([this](const BoosterGetUp& getup) {
+        on<Trigger<BoosterGetUp>>().then([this]() {
             int32_t res = booster_client.GetUpWithMode(RobotMode::kSoccer);
             if (res != 0) {
                 log<ERROR>("Failed to get up: " + res_code_to_string(res));
             }
         });
 
-        on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode) {
+        on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode_msg) {
             RobotMode robot_mode;
-            switch (mode.mode) {
-                case BoosterMode::DAMP: robot_mode = RobotMode::kDamping; break;
-                case BoosterMode::PREP: robot_mode = RobotMode::kPrepare; break;
-                case BoosterMode::WALK: robot_mode = RobotMode::kWalking; break;
-                case BoosterMode::CUSTOM: robot_mode = RobotMode::kCustom; break;
-                case BoosterMode::SOCCER: robot_mode = RobotMode::kSoccer; break;
+            switch (static_cast<int>(mode_msg.mode)) {
+                case K1Mode::DAMP: robot_mode = RobotMode::kDamping; break;
+                case K1Mode::PREP: robot_mode = RobotMode::kPrepare; break;
+                case K1Mode::WALK: robot_mode = RobotMode::kWalking; break;
+                case K1Mode::CUSTOM: robot_mode = RobotMode::kCustom; break;
+                case K1Mode::SOCCER: robot_mode = RobotMode::kSoccer; break;
                 default: robot_mode = RobotMode::kSoccer; break;
             }
             int32_t res = booster_client.ChangeMode(robot_mode);

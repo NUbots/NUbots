@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package message.booster;
 
-enum Mode {
+enum K1Mode {
     DAMP = 0;
     PREP = 1;
     WALK = 2;
@@ -11,5 +11,5 @@ enum Mode {
 }
 
 message BoosterMode {
-    Mode mode = 1;
+    K1Mode mode = 1;
 }
