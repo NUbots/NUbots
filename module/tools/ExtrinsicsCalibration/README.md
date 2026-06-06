@@ -2,17 +2,13 @@
 
 ## Description
 
-Automatically tunes a single camera's extrinsic offsets (`roll_offset`, `pitch_offset`, `yaw_offset`) so that
-the offsets no longer have to be hand-tuned after a game.
+Automatically tunes a single camera's extrinsic offsets (`roll_offset`, `pitch_offset`, `yaw_offset`) so that the offsets no longer have to be hand-tuned after a game.
 
-The module assumes the robot is placed **static at the centre of the field, looking straight toward the goal**,
-and that the **field type is known** (lab or RoboCup field) via the `FieldDescription`. Because the field
-dimensions are known, the ground-truth positions of the field landmarks (X, L and T intersections) are known to
-a high degree of accuracy.
+The module assumes the robot is placed **static at the centre of the field, looking straight toward the goal**, and that the **field type is known** (lab or RoboCup field) via the `FieldDescription`. Because the field dimensions are known, the ground-truth positions of the field landmarks (X, L and T intersections) are known to a high degree of accuracy.
 
-The YOLO network detects the field landmarks and projects them onto the ground plane. The module re-projects
-those detections under candidate extrinsic offsets and minimises the total squared distance between each
-detection and the landmark it should correspond to.
+**Field dimensions MUST be measured first and the necessary values must be updated in FieldDescription.yaml before running this binary.**
+
+The YOLO network detects the field landmarks and projects them onto the ground plane. The module re-projects those detections under candidate extrinsic offsets and minimises the total squared distance between each detection and the landmark it should correspond to.
 
 ### How it works
 
@@ -24,8 +20,7 @@ detection and the landmark it should correspond to.
 2. **Known field pose.** From the placement assumption, the field-from-world transform `Hfw` is synthesised:
    the torso is at the field centre `(x = y = 0)` facing the goal (`field_yaw`), with roll/pitch/height taken
    from `Sensors`.
-3. **Initialise with the Hungarian algorithm.** As frames arrive, the detections are projected to field space
-   at the current offsets and associated to the same-type ground-truth landmarks with the Hungarian algorithm
+3. **Initialise with the Hungarian algorithm.** As frames arrive, the detections are projected to field space at the current offsets and associated to the same-type ground-truth landmarks with the Hungarian algorithm
    (`utility::algorithm::determine_assignment`). Matched samples are accumulated.
 4. **Refine with BOBYQA.** Once the collection window closes, NLopt's BOBYQA minimises
    `Σ ‖Hfw · project(θ) − rLFf‖²` over the offset deltas `del_roll`, `del_pitch`, `del_yaw` (bounded about the

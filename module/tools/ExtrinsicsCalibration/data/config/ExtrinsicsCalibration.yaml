@@ -12,14 +12,8 @@ camera: "Left"
 # 0 = facing the +x field axis.
 field_yaw: 0.0
 
-# Seconds to wait after startup before collecting detections (lets the robot settle and the pipeline warm up)
-start_delay: 5.0
-
-# Seconds over which to accumulate field landmark detections once collection begins
-collection_duration: 10.0
-
 # Minimum number of associated detection<->landmark samples required before running the optimisation
-min_samples: 20
+min_samples: 100
 
 # Maximum distance [m] in field space for a detection to be associated with a ground-truth landmark.
 # Pairings beyond this distance (evaluated at the initial offsets) are rejected.

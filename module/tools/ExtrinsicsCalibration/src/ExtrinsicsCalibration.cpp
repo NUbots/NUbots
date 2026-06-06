@@ -68,13 +68,11 @@ namespace module::tools {
         on<Configuration>("ExtrinsicsCalibration.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.urdf_path           = config["urdf_path"].as<std::string>();
-            cfg.camera              = config["camera"].as<std::string>();
-            cfg.is_left_camera      = cfg.camera == "Left";
-            cfg.field_yaw           = config["field_yaw"].as<Expression>();
-            cfg.start_delay         = config["start_delay"].as<double>();
-            cfg.collection_duration = config["collection_duration"].as<double>();
-            cfg.min_samples         = config["min_samples"].as<size_t>();
+            cfg.urdf_path      = config["urdf_path"].as<std::string>();
+            cfg.camera         = config["camera"].as<std::string>();
+            cfg.is_left_camera = cfg.camera == "Left";
+            cfg.field_yaw      = config["field_yaw"].as<Expression>();
+            cfg.min_samples    = config["min_samples"].as<size_t>();
 
             cfg.max_association_distance = config["max_association_distance"].as<double>();
             cfg.offset_bounds            = Eigen::Vector3d(config["offset_bounds"].as<Expression>());
@@ -120,8 +118,7 @@ namespace module::tools {
 
         // Generate the ground-truth landmarks once the field description is known
         on<Startup, Trigger<FieldDescription>>().then("Setup field landmarks", [this](const FieldDescription& fd) {
-            landmarks    = utility::localisation::setup_field_landmarks(fd);
-            startup_time = NUClear::clock::now();
+            landmarks = utility::localisation::setup_field_landmarks(fd);
             log<INFO>(fmt::format("Loaded {} ground-truth field landmarks", landmarks.size()));
         });
 
@@ -130,24 +127,6 @@ namespace module::tools {
         on<Trigger<FieldIntersections>, With<Sensors>, With<FieldDescription>, Single>().then(
             "ExtrinsicsCalibration",
             [this](const FieldIntersections& field_intersections, const Sensors& sensors, const FieldDescription&) {
-                if (state == State::DONE || landmarks.empty()) {
-                    return;
-                }
-
-                const auto now = NUClear::clock::now();
-                const double since_startup =
-                    std::chrono::duration_cast<std::chrono::duration<double>>(now - startup_time).count();
-
-                // Wait for the configured start delay before collecting
-                if (state == State::WAITING) {
-                    if (since_startup < cfg.start_delay) {
-                        return;
-                    }
-                    state            = State::COLLECTING;
-                    collection_start = now;
-                    log<INFO>("Started collecting field landmark detections");
-                }
-
                 // --- Build the known transforms for this frame ---
                 // Offset-free world {w} from head-pitch {p}, computed the same way as the Camera module
                 Eigen::Isometry3d Htw(sensors.Htw);
@@ -165,21 +144,9 @@ namespace module::tools {
 
                 // Associate this frame's detections with the known landmarks and store the matched samples
                 associate_and_store(field_intersections, Hwp, Hfw);
-
-                // Once the collection window has elapsed, run the optimisation
-                const double collecting =
-                    std::chrono::duration_cast<std::chrono::duration<double>>(now - collection_start).count();
-                if (collecting >= cfg.collection_duration) {
-                    state = State::DONE;
-                    log<INFO>(fmt::format("Collection complete: {} associated samples", samples.size()));
-
-                    if (samples.size() < cfg.min_samples) {
-                        log<ERROR>(
-                            fmt::format("Not enough samples to calibrate ({} < {})", samples.size(), cfg.min_samples));
-                        return;
-                    }
-
-                    auto [offsets, cost] = optimise();
+                log<INFO>(fmt::format("Collected {}/{} samples", samples.size(), cfg.min_samples));
+                if (samples.size() >= cfg.min_samples) {
+                    auto [offsets, cost, result] = optimise();
                     log<INFO>(fmt::format(
                         "Optimised offsets (deg): roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f} (final cost {:.6f})",
                         offsets.x() * 180.0 / M_PI,
@@ -189,6 +156,16 @@ namespace module::tools {
 
                     if (cfg.write_config) {
                         write_offsets(offsets);
+                    }
+
+                    if (result < 0) {
+                        log<ERROR>(fmt::format("Optimisation failed: {}",
+                                               ::nlopt_result_to_string(static_cast<nlopt_result>(result))));
+                    }
+                    else {
+                        log<INFO>(fmt::format("Optimisation succeeded: {}, exiting...",
+                                              ::nlopt_result_to_string(static_cast<nlopt_result>(result))));
+                        exit(0);
                     }
                 }
             });
@@ -281,7 +258,7 @@ namespace module::tools {
         return self->total_cost(self->current_offsets + delta);
     }
 
-    std::pair<Eigen::Vector3d, double> ExtrinsicsCalibration::optimise() {
+    std::tuple<Eigen::Vector3d, double, nlopt::result> ExtrinsicsCalibration::optimise() {
         nlopt::opt opt(nlopt::LN_BOBYQA, n_params);
         opt.set_min_objective(ExtrinsicsCalibration::objective, this);
         opt.set_xtol_rel(cfg.xtol_rel);
@@ -296,16 +273,17 @@ namespace module::tools {
 
         // Initial guess is zero delta (i.e. the current offsets)
         std::vector<double> x{0.0, 0.0, 0.0};
-        double final_cost = 0.0;
+        double final_cost    = 0.0;
+        nlopt::result result = nlopt::FAILURE;
         try {
-            opt.optimize(x, final_cost);
+            result = opt.optimize(x, final_cost);
         }
         catch (const std::exception& e) {
             log<ERROR>(fmt::format("Optimisation failed: {}", e.what()));
         }
 
         const Eigen::Vector3d offsets = current_offsets + Eigen::Vector3d(x[0], x[1], x[2]);
-        return {offsets, final_cost};
+        return {offsets, final_cost, result};
     }
 
     void ExtrinsicsCalibration::write_offsets(const Eigen::Vector3d& offsets) {

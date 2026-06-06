@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <nlopt.hpp>
 #include <nuclear>
 #include <string>
 #include <vector>
@@ -69,12 +70,6 @@ namespace module::tools {
             /// @brief Assumed torso heading in field space when placed at the centre [rad]
             double field_yaw = 0.0;
 
-            /// @brief Seconds to wait after startup before collecting detections
-            double start_delay = 0.0;
-
-            /// @brief Seconds over which to accumulate detections once collection begins
-            double collection_duration = 0.0;
-
             /// @brief Minimum number of associated samples required before running the optimisation
             size_t min_samples = 0;
 
@@ -108,19 +103,6 @@ namespace module::tools {
             /// @brief Associated ground-truth landmark position in field {f} space
             Eigen::Vector3d rLFf = Eigen::Vector3d::Zero();
         };
-
-        /// @brief Calibration lifecycle states
-        enum class State { WAITING, COLLECTING, DONE };
-
-        /// @brief Current calibration state
-        State state = State::WAITING;
-
-        /// @brief Time at which the module started up
-        NUClear::clock::time_point startup_time = NUClear::clock::now();
-
-        /// @brief Time at which detection collection began
-        NUClear::clock::time_point collection_start = NUClear::clock::now();
-
         /// @brief Base (offset-free) head-pitch {p} from camera {c} transform, from URDF forward kinematics
         Eigen::Isometry3d Hpc_base = Eigen::Isometry3d::Identity();
 
@@ -183,9 +165,9 @@ namespace module::tools {
 
         /**
          * @brief Run the BOBYQA optimisation over the accumulated samples to find the best offsets.
-         * @return Pair <optimal offsets (roll, pitch, yaw), final cost>
+         * @return Tuple <optimal offsets (roll, pitch, yaw), final cost, optimisation result code>
          */
-        std::pair<Eigen::Vector3d, double> optimise();
+        std::tuple<Eigen::Vector3d, double, nlopt::result> optimise();
 
         /**
          * @brief Write the optimised offsets back to the robot's camera config file, formatted as
