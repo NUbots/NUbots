@@ -43,7 +43,7 @@ from . import defaults
 def selected(image, username):
     # Get information about the selected image
     try:
-        selected_img = defaults.image_name("selected", image, username)
+        selected_img = defaults.image_name("selected_k1", image, username)
         prefix = "{}:".format(selected_img.split(":")[0])
         img_info = json.loads(
             subprocess.Popen(["docker", "image", "inspect", selected_img], stdout=subprocess.PIPE).communicate()[0]
