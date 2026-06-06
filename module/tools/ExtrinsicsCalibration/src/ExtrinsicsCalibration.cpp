@@ -71,7 +71,6 @@ namespace module::tools {
             cfg.urdf_path      = config["urdf_path"].as<std::string>();
             cfg.camera         = config["camera"].as<std::string>();
             cfg.is_left_camera = cfg.camera == "Left";
-            cfg.field_yaw      = config["field_yaw"].as<Expression>();
             cfg.min_samples    = config["min_samples"].as<size_t>();
 
             cfg.max_association_distance = config["max_association_distance"].as<double>();
@@ -80,8 +79,6 @@ namespace module::tools {
             cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
             cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
             cfg.maxeval  = config["opt"]["maxeval"].as<size_t>();
-
-            cfg.write_config = config["write_config"].as<bool>();
 
             // Compute the offset-free base Hpc (head-pitch {p} from camera {c}) using forward kinematics, the
             // same way the Camera module does before applying the extrinsic offsets.
@@ -131,15 +128,15 @@ namespace module::tools {
                 // Offset-free world {w} from head-pitch {p}, computed the same way as the Camera module
                 Eigen::Isometry3d Htw(sensors.Htw);
                 Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
-                Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
-
                 // Known field {f} from world {w}, synthesised from the placement assumption: the torso is at the
-                // field centre (x = y = 0) facing the goal (field_yaw), with roll/pitch/height taken from sensors.
+                // field centre (x = y = 0) facing the goal, with roll/pitch/height taken from sensors.
                 Eigen::Isometry3d Hwt = Htw.inverse();
+                Eigen::Isometry3d Hwp = Hwt * Htp;
+
                 Eigen::Vector3d rpy   = mat_to_rpy_intrinsic(Hwt.rotation());
                 Eigen::Isometry3d Hft = Eigen::Isometry3d::Identity();
-                Hft.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy.x(), rpy.y(), cfg.field_yaw));
-                Hft.translation()     = Eigen::Vector3d(0.0, 0.0, Hwt.translation().z());
+                Hft.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy.x(), rpy.y(), 0.0));
+                Hft.translation().z() = Hwt.translation().z();
                 Eigen::Isometry3d Hfw = Hft * Htw;
 
                 // Associate this frame's detections with the known landmarks and store the matched samples
@@ -154,9 +151,6 @@ namespace module::tools {
                         offsets.z() * 180.0 / M_PI,
                         cost));
 
-                    if (cfg.write_config) {
-                        write_offsets(offsets);
-                    }
 
                     if (result < 0) {
                         log<ERROR>(fmt::format("Optimisation failed: {}",
@@ -165,6 +159,9 @@ namespace module::tools {
                     else {
                         log<INFO>(fmt::format("Optimisation succeeded: {}, exiting...",
                                               ::nlopt_result_to_string(static_cast<nlopt_result>(result))));
+                        write_offsets(offsets);
+                        log<INFO>("New offsets written to config.");
+
                         exit(0);
                     }
                 }

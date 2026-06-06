@@ -13,20 +13,21 @@ The YOLO network detects the field landmarks and projects them onto the ground p
 ### How it works
 
 1. **Recover the geometry without changing the vision pipeline.** Each `FieldIntersection` already carries its
-   world-space ground projection `rIWw` and the frame transform `Hcw`. The offset-independent camera-frame ray
-   is recovered as `uICc = (Hcw · rIWw).normalized()`. The offset-free `Hwp` (world from head-pitch) and the
-   base `Hpc` (head-pitch from camera, from URDF forward kinematics) are recomputed exactly as the `Camera`
-   module does, so the candidate transform is `Hwc(θ) = Hwp · R_offset(θ) · Hpc_base`.
-2. **Known field pose.** From the placement assumption, the field-from-world transform `Hfw` is synthesised:
-   the torso is at the field centre `(x = y = 0)` facing the goal (`field_yaw`), with roll/pitch/height taken
+   world-space ground projection $r^{w}_{I/W}$ and the frame transform $H^{c}_{w}$. The offset-independent camera-frame ray
+   is recovered as $u_{I/C}^c = (H^{c}_{w} \cdot r^{w}_{I/W}).normalized()$. The offset-free $H^{p}_{w}$ (world from head-pitch) and the
+   base $H^{c}_{p}$ (head-pitch from camera, from URDF forward kinematics) are recomputed exactly as the `Camera`
+   module does, so the candidate transform is $H^{c}_{w}(\theta) = H^{c}_{p,\text{base}} \cdot R_{\text{offset}}(\theta) \cdot H^{p}_{w}$.
+2. **Known field pose.** From the placement assumption, the field-from-world transform $H^{f}_{w}$ is synthesised:
+   the torso is at the field centre $(x = y = 0)$ facing the goal, with roll/pitch/height taken
    from `Sensors`.
 3. **Initialise with the Hungarian algorithm.** As frames arrive, the detections are projected to field space at the current offsets and associated to the same-type ground-truth landmarks with the Hungarian algorithm
    (`utility::algorithm::determine_assignment`). Matched samples are accumulated.
 4. **Refine with BOBYQA.** Once the collection window closes, NLopt's BOBYQA minimises
-   `Σ ‖Hfw · project(θ) − rLFf‖²` over the offset deltas `del_roll`, `del_pitch`, `del_yaw` (bounded about the
+   $$\sum \left\|H^{f}_{w} \cdot \text{project}(\theta) - r^{f}_{L/F}\right\|^2$$
+   over the offset deltas $\Delta\text{roll}$, $\Delta\text{pitch}$, $\Delta\text{yaw}$ (bounded about the
    current offsets).
 5. **Write back.** The optimised offsets are written back to `config/<robot>/Cameras/<camera>.yaml` as
-   `"<degrees> * pi / 180"` expression strings (when `write_config` is enabled).
+   `"<degrees> * pi / 180"` expression strings (where $\text{degrees}$ is the angle in degrees).
 
 ## Usage
 
@@ -36,12 +37,12 @@ the camera to calibrate and the field type via configuration. Run again with the
 ## Consumes
 
 - `message::vision::FieldIntersections` the YOLO X/L/T field landmark detections and frame transform
-- `message::input::Sensors` for the offset-free kinematics (`Htw`, `Htx[HEAD_PITCH]`)
+- `message::input::Sensors` for the offset-free kinematics ($H^{w}_{t}$, $H^{x[\text{HEAD\_PITCH}]}_{t}$)
 - `message::support::FieldDescription` for the field dimensions / ground-truth landmark positions
 
 ## Emits
 
-- Nothing. The optimised offsets are logged and (optionally) written back to the camera config file.
+- Nothing. The optimised offsets are logged and written back to the camera config file when the optimisation succeeds.
 
 ## Dependencies
 

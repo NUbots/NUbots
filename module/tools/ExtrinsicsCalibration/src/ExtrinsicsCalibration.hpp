@@ -67,9 +67,6 @@ namespace module::tools {
             /// @brief True if the calibrated camera is the left camera
             bool is_left_camera = true;
 
-            /// @brief Assumed torso heading in field space when placed at the centre [rad]
-            double field_yaw = 0.0;
-
             /// @brief Minimum number of associated samples required before running the optimisation
             size_t min_samples = 0;
 

@@ -8,10 +8,6 @@ urdf_path: "models/robot.urdf"
 # other camera selected to calibrate both.
 camera: "Left"
 
-# Assumed torso heading in field space [rad] when the robot is placed at the field centre facing the goal.
-# 0 = facing the +x field axis.
-field_yaw: 0.0
-
 # Minimum number of associated detection<->landmark samples required before running the optimisation
 min_samples: 100
 
@@ -27,6 +23,3 @@ opt:
   xtol_rel: 1.0e-6
   ftol_rel: 1.0e-6
   maxeval: 1000
-
-# Whether to write the optimised offsets back to config/<robot>/Cameras/<camera>.yaml
-write_config: true
