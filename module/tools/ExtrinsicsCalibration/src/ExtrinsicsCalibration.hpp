@@ -84,9 +84,6 @@ namespace module::tools {
 
             /// @brief NLopt maximum number of evaluations
             size_t maxeval = 0;
-
-            /// @brief Whether to write the optimised offsets back to the robot's camera config file
-            bool write_config = false;
         } cfg;
 
         /// @brief A single associated calibration sample.
