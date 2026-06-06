@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package message.booster;
 
-import "Vector.proto";
-
 enum Mode {
     DAMP = 0;
     PREP = 1;
