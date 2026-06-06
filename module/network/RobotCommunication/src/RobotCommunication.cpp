@@ -97,7 +97,7 @@ namespace module::network {
                         on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
                             .then([this, &global_config](const UDP::Packet& p,
                                                          const std::shared_ptr<const GameState>& game_state) {
-                                std::string remote_addr = p.remote.address;
+                                std::string remote_addr = p.remote.address().first;
 
                                 // Apply filtering of packets if udp_filter_address is set in config
                                 if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {

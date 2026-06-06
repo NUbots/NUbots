@@ -87,7 +87,7 @@ namespace module::input {
                           std::tie(listen_handle, std::ignore, std::ignore) =
                               on<UDP::Broadcast, With<GameState>, Single>(receive_port)
                                   .then([this](const UDP::Packet& p, const GameState& game_state) {
-                                      std::string remote_addr = p.remote.address;
+                                      std::string remote_addr = p.remote.address().first;
 
                                       // Apply filtering of packets if udp_filter_address is set in config
                                       if (!udp_filter_address.empty() && remote_addr != udp_filter_address) {
