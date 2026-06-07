@@ -722,6 +722,7 @@ var namespaces_dup =
         [ "userRequestedShutdown", "SignalCatcher_8cpp.html#a6fb2c65ed6e2ef01c78a40ff06798673", null ]
       ] ],
       [ "tools", null, [
+        [ "ExtrinsicsCalibration", "classmodule_1_1tools_1_1ExtrinsicsCalibration.html", "classmodule_1_1tools_1_1ExtrinsicsCalibration" ],
         [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", "classmodule_1_1tools_1_1LocalisationBenchmark" ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
         [ "OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html", "classmodule_1_1tools_1_1OdometryBenchmark" ],

@@ -1,0 +1,586 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::tools::ExtrinsicsCalibration Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1tools_1_1ExtrinsicsCalibration.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
+<a href="classmodule_1_1tools_1_1ExtrinsicsCalibration-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::tools::ExtrinsicsCalibration Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>Calibrates a single camera's extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_roll, del_pitch, del_yaw) so that the projected YOLO field-landmark detections (X, L, T intersections) align with the known ground-truth landmark positions.  
+ <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ExtrinsicsCalibration_8hpp_source.html">ExtrinsicsCalibration.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for module::tools::ExtrinsicsCalibration:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1tools_1_1ExtrinsicsCalibration__inherit__graph.png" border="0" usemap="#amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map" id="amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map">
+<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="5,80,188,121"/>
+<area shape="rect" title=" " alt="" coords="29,5,164,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::tools::ExtrinsicsCalibration:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1tools_1_1ExtrinsicsCalibration__coll__graph.png" border="0" usemap="#amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map" id="amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map">
+<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="72,109,255,151"/>
+<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html" title="Stores configuration values." alt="" coords="164,5,347,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html">Config</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores configuration values.  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single associated calibration sample.  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a78b80bd57fc216537a82a8a3435d725b"><td class="memItemLeft" align="right" valign="top"><a id="a78b80bd57fc216537a82a8a3435d725b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a78b80bd57fc216537a82a8a3435d725b">ExtrinsicsCalibration</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:a78b80bd57fc216537a82a8a3435d725b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro...">ExtrinsicsCalibration</a> reactor. <br /></td></tr>
+<tr class="separator:a78b80bd57fc216537a82a8a3435d725b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ac1bf024669f94542e9b80f70503ad88c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ac1bf024669f94542e9b80f70503ad88c">associate_and_store</a> (const message::vision::FieldIntersections &amp;field_intersections, const Eigen::Isometry3d &amp;Hwp, const Eigen::Isometry3d &amp;Hfw)</td></tr>
+<tr class="memdesc:ac1bf024669f94542e9b80f70503ad88c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the detections in a frame with the known landmarks using the Hungarian algorithm, evaluated at the current extrinsic offsets, and append the matched samples to the buffer.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ac1bf024669f94542e9b80f70503ad88c">More...</a><br /></td></tr>
+<tr class="separator:ac1bf024669f94542e9b80f70503ad88c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae51905b758687602ff10c252514f35c0"><td class="memItemLeft" align="right" valign="top">Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae51905b758687602ff10c252514f35c0">offset_rotation</a> (const Eigen::Vector3d &amp;offsets) const</td></tr>
+<tr class="memdesc:ae51905b758687602ff10c252514f35c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the extrinsic offset rotation matrix from (roll, pitch, yaw), matching the convention used by the Camera module.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae51905b758687602ff10c252514f35c0">More...</a><br /></td></tr>
+<tr class="separator:ae51905b758687602ff10c252514f35c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21e719462970449a4056f793bec8104e"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; Eigen::Vector3d, double, nlopt::result &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a21e719462970449a4056f793bec8104e">optimise</a> ()</td></tr>
+<tr class="memdesc:a21e719462970449a4056f793bec8104e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the BOBYQA optimisation over the accumulated samples to find the best offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a21e719462970449a4056f793bec8104e">More...</a><br /></td></tr>
+<tr class="separator:a21e719462970449a4056f793bec8104e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#adf09c0cc1cf90ee3ee4e23061a4753da">project_to_field</a> (const Eigen::Vector3d &amp;offsets, const <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a> &amp;sample) const</td></tr>
+<tr class="memdesc:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Re-project a detection ray onto the field ground plane in field {f} space for a given set of extrinsic offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#adf09c0cc1cf90ee3ee4e23061a4753da">More...</a><br /></td></tr>
+<tr class="separator:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aef0dc88e8ff24d73321c99c2b1eb4267">total_cost</a> (const Eigen::Vector3d &amp;offsets) const</td></tr>
+<tr class="memdesc:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total squared re-projection cost over all accumulated samples for a given set of offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aef0dc88e8ff24d73321c99c2b1eb4267">More...</a><br /></td></tr>
+<tr class="separator:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82f05ff8b705d593922fc1ca15140101"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a82f05ff8b705d593922fc1ca15140101">write_offsets</a> (const Eigen::Vector3d &amp;offsets)</td></tr>
+<tr class="memdesc:a82f05ff8b705d593922fc1ca15140101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the optimised offsets back to the robot's camera config file, formatted as "&lt;degrees&gt; * pi / 180" expression strings.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a82f05ff8b705d593922fc1ca15140101">More...</a><br /></td></tr>
+<tr class="separator:a82f05ff8b705d593922fc1ca15140101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:ab6258370fc1906e7aa38cd342fc1c151"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ab6258370fc1906e7aa38cd342fc1c151">objective</a> (const std::vector&lt; double &gt; &amp;x, std::vector&lt; double &gt; &amp;grad, void *data)</td></tr>
+<tr class="memdesc:ab6258370fc1906e7aa38cd342fc1c151"><td class="mdescLeft">&#160;</td><td class="mdescRight">NLopt objective.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ab6258370fc1906e7aa38cd342fc1c151">More...</a><br /></td></tr>
+<tr class="separator:ab6258370fc1906e7aa38cd342fc1c151"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a3cb0159f217bba2f76d36555ccc4756d"><td class="memItemLeft" align="right" valign="top"><a id="a3cb0159f217bba2f76d36555ccc4756d"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a3cb0159f217bba2f76d36555ccc4756d">camera_config_path</a> {}</td></tr>
+<tr class="memdesc:a3cb0159f217bba2f76d36555ccc4756d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the robot's camera config file that will be (re)written. <br /></td></tr>
+<tr class="separator:a3cb0159f217bba2f76d36555ccc4756d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed265c984f3459b64363a0bf099a8cbc"><td class="memItemLeft" align="right" valign="top"><a id="aed265c984f3459b64363a0bf099a8cbc"></a>
+struct <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html">module::tools::ExtrinsicsCalibration::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:aed265c984f3459b64363a0bf099a8cbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06481614267f1d2772a985182eaf04b5"><td class="memItemLeft" align="right" valign="top"><a id="a06481614267f1d2772a985182eaf04b5"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a06481614267f1d2772a985182eaf04b5">current_offsets</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a06481614267f1d2772a985182eaf04b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current extrinsic offsets (roll, pitch, yaw) read from the robot's camera config [rad]. <br /></td></tr>
+<tr class="separator:a06481614267f1d2772a985182eaf04b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21b2f2ecd2f02c7548a5d07ce19cec88"><td class="memItemLeft" align="right" valign="top"><a id="a21b2f2ecd2f02c7548a5d07ce19cec88"></a>
+Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a21b2f2ecd2f02c7548a5d07ce19cec88">Hpc_base</a> = Eigen::Isometry3d::Identity()</td></tr>
+<tr class="memdesc:a21b2f2ecd2f02c7548a5d07ce19cec88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base (offset-free) head-pitch {p} from camera {c} transform, from URDF forward kinematics. <br /></td></tr>
+<tr class="separator:a21b2f2ecd2f02c7548a5d07ce19cec88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bec21593fd657f4da836a3062ca76b7"><td class="memItemLeft" align="right" valign="top"><a id="a8bec21593fd657f4da836a3062ca76b7"></a>
+std::vector&lt; <a class="el" href="structutility_1_1localisation_1_1Landmark.html">utility::localisation::Landmark</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a8bec21593fd657f4da836a3062ca76b7">landmarks</a> {}</td></tr>
+<tr class="memdesc:a8bec21593fd657f4da836a3062ca76b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ground-truth field landmarks (position in field space + type) <br /></td></tr>
+<tr class="separator:a8bec21593fd657f4da836a3062ca76b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65e35eb07cc5f65011f53f996501f1b0"><td class="memItemLeft" align="right" valign="top"><a id="a65e35eb07cc5f65011f53f996501f1b0"></a>
+std::vector&lt; <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a65e35eb07cc5f65011f53f996501f1b0">samples</a> {}</td></tr>
+<tr class="memdesc:a65e35eb07cc5f65011f53f996501f1b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulated associated samples used for the optimisation. <br /></td></tr>
+<tr class="separator:a65e35eb07cc5f65011f53f996501f1b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a4c0eb45bcd80a16ed903bbbebe6a1255"><td class="memItemLeft" align="right" valign="top"><a id="a4c0eb45bcd80a16ed903bbbebe6a1255"></a>
+static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a4c0eb45bcd80a16ed903bbbebe6a1255">n_params</a> = 3</td></tr>
+<tr class="memdesc:a4c0eb45bcd80a16ed903bbbebe6a1255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of optimisation variables (del_roll, del_pitch, del_yaw) <br /></td></tr>
+<tr class="separator:a4c0eb45bcd80a16ed903bbbebe6a1255"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Calibrates a single camera's extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_roll, del_pitch, del_yaw) so that the projected YOLO field-landmark detections (X, L, T intersections) align with the known ground-truth landmark positions. </p>
+<p>Assumptions:</p><ul>
+<li>The robot is static, placed on the centre of the field, looking straight toward the goal.</li>
+<li>The field type (and hence the field dimensions / ground-truth landmark positions) is known via the FieldDescription. </li>
+</ul>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac1bf024669f94542e9b80f70503ad88c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1bf024669f94542e9b80f70503ad88c">&#9670;&nbsp;</a></span>associate_and_store()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::tools::ExtrinsicsCalibration::associate_and_store </td>
+          <td>(</td>
+          <td class="paramtype">const message::vision::FieldIntersections &amp;&#160;</td>
+          <td class="paramname"><em>field_intersections</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hwp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hfw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Associate the detections in a frame with the known landmarks using the Hungarian algorithm, evaluated at the current extrinsic offsets, and append the matched samples to the buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">field_intersections</td><td>The field intersection detections </td></tr>
+    <tr><td class="paramname">Hwp</td><td>The offset-free world from head-pitch transform for this frame </td></tr>
+    <tr><td class="paramname">Hfw</td><td>The field from world transform for this frame </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab6258370fc1906e7aa38cd342fc1c151"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6258370fc1906e7aa38cd342fc1c151">&#9670;&nbsp;</a></span>objective()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double module::tools::ExtrinsicsCalibration::objective </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>grad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>NLopt objective. </p>
+<p>The optimisation variables are the offset deltas (del_roll, del_pitch, del_yaw); the cost is evaluated at (current_offsets + delta). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The offset deltas (del_roll, del_pitch, del_yaw) [rad] </td></tr>
+    <tr><td class="paramname">grad</td><td>Unused (BOBYQA is derivative-free) </td></tr>
+    <tr><td class="paramname">data</td><td>Pointer to the owning <a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro...">ExtrinsicsCalibration</a> instance </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The total re-projection cost </dd></dl>
+
+</div>
+</div>
+<a id="ae51905b758687602ff10c252514f35c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae51905b758687602ff10c252514f35c0">&#9670;&nbsp;</a></span>offset_rotation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Matrix3d module::tools::ExtrinsicsCalibration::offset_rotation </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>offsets</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Build the extrinsic offset rotation matrix from (roll, pitch, yaw), matching the convention used by the Camera module. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>The offsets (roll, pitch, yaw) [rad] </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The offset rotation matrix </dd></dl>
+
+</div>
+</div>
+<a id="a21e719462970449a4056f793bec8104e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21e719462970449a4056f793bec8104e">&#9670;&nbsp;</a></span>optimise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::tuple&lt; Eigen::Vector3d, double, nlopt::result &gt; module::tools::ExtrinsicsCalibration::optimise </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run the BOBYQA optimisation over the accumulated samples to find the best offsets. </p>
+<dl class="section return"><dt>Returns</dt><dd>Tuple &lt;optimal offsets (roll, pitch, yaw), final cost, optimisation result code&gt; </dd></dl>
+
+</div>
+</div>
+<a id="adf09c0cc1cf90ee3ee4e23061a4753da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf09c0cc1cf90ee3ee4e23061a4753da">&#9670;&nbsp;</a></span>project_to_field()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3d module::tools::ExtrinsicsCalibration::project_to_field </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>offsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a> &amp;&#160;</td>
+          <td class="paramname"><em>sample</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Re-project a detection ray onto the field ground plane in field {f} space for a given set of extrinsic offsets. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>The candidate extrinsic offsets (roll, pitch, yaw) [rad] </td></tr>
+    <tr><td class="paramname">sample</td><td>The sample to re-project </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The projected landmark position in field {f} space </dd></dl>
+
+</div>
+</div>
+<a id="aef0dc88e8ff24d73321c99c2b1eb4267"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef0dc88e8ff24d73321c99c2b1eb4267">&#9670;&nbsp;</a></span>total_cost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double module::tools::ExtrinsicsCalibration::total_cost </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>offsets</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Total squared re-projection cost over all accumulated samples for a given set of offsets. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>The candidate extrinsic offsets (roll, pitch, yaw) [rad] </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The summed squared distance between each projected detection and its associated landmark </dd></dl>
+
+</div>
+</div>
+<a id="a82f05ff8b705d593922fc1ca15140101"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82f05ff8b705d593922fc1ca15140101">&#9670;&nbsp;</a></span>write_offsets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::tools::ExtrinsicsCalibration::write_offsets </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>offsets</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the optimised offsets back to the robot's camera config file, formatted as "&lt;degrees&gt; * pi / 180" expression strings. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>The optimised offsets (roll, pitch, yaw) [rad] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/tools/ExtrinsicsCalibration/src/<a class="el" href="ExtrinsicsCalibration_8hpp_source.html">ExtrinsicsCalibration.hpp</a></li>
+<li>module/tools/ExtrinsicsCalibration/src/ExtrinsicsCalibration.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>tools</b></li><li class="navelem"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html">ExtrinsicsCalibration</a></li>
+    <li class="footer">Generated on Sun Jun 7 2026 02:48:09 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>
