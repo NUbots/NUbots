@@ -42,6 +42,8 @@
 namespace module::localisation {
     class RobotLocalisation : public NUClear::Reactor {
     private:
+        uint player_id = 1;
+
         struct Config {
             /// @brief UKF config
             struct UKF {
@@ -68,7 +70,8 @@ namespace module::localisation {
             double max_distance_from_field = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
-
+            /// @brief Whether to use ground truth robot data from Webots when available
+            bool use_ground_truth = false;
         } cfg;
 
         struct TrackedRobot {
