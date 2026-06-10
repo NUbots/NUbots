@@ -100,6 +100,7 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
+            cfg.min_avoidance_x = config["min_avoidance_x"].as<double>();
 
             // Exponential smoothing configuration
             cfg.tau = config["tau"].as<Expression>();
@@ -114,18 +115,11 @@ namespace module::planning {
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Obstacles", [this](const FieldDescription& fd) {
-            goal_obstacles.clear();
-
             auto add_goalpost_obstacles = [this, &fd](const Eigen::Vector2d& post) {
-                const double net_x_direction = post.x() > 0.0 ? 1.0 : -1.0;
+                // const double net_x_direction = post.x() > 0.0 ? 1.0 : -1.0;
                 const Eigen::Vector3d goalpost(post.x(), post.y(), 0.0);
-                const Eigen::Vector3d half_net_depth(net_x_direction * fd.dimensions.goal_depth * 0.5, 0.0, 0.0);
-                const Eigen::Vector3d full_net_depth(net_x_direction * fd.dimensions.goal_depth, 0.0, 0.0);
 
-                // add extra obstacles in case we
                 goal_obstacles.emplace_back(goalpost);
-                goal_obstacles.emplace_back(goalpost + half_net_depth);
-                goal_obstacles.emplace_back(goalpost + full_net_depth);
             };
 
             add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y()));
@@ -188,7 +182,7 @@ namespace module::planning {
                 // If there are obstacles in the way, walk around them
                 if (!obstacles.empty()) {
                     // log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
-                    const double min_avoidance_x = std::min(0.0, rDRr.x());
+                    const double min_avoidance_x = std::min(cfg.min_avoidance_x, rDRr.x());
 
                     // Calculate a perpendicular vector to the direction of the target point
                     const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
@@ -212,7 +206,6 @@ namespace module::planning {
                     log<DEBUG>("Choosing path around obstacle based on path length");
                     rDRr = path(left) < path(right) ? left : right;
                     if (rDRr.x() < min_avoidance_x) {
-                        log<DEBUG>("Clamping obstacle avoidance x from", rDRr.x(), "to", min_avoidance_x);
                         rDRr.x() = min_avoidance_x;
                     }
 

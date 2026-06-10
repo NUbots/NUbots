@@ -79,6 +79,8 @@ namespace module::planning {
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
+            /// @brief Minimum x value for obstacle avoidance targets in robot coordinates
+            double min_avoidance_x = 0.0;
 
             /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
             /// @note  Set to [0, 0, 0] to functionally disable smoothing
