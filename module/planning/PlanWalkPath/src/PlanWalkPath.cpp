@@ -359,8 +359,7 @@ namespace module::planning {
         for (const Eigen::Vector2d& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
             if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
-                    return (obstacle - ao).norm()
-                           < cfg.obstacle_radius * 2;  // 3 represents 2 obstacles and the robot
+                    return (obstacle - ao).norm() < cfg.obstacle_radius * 3;  // 3 represents 2 obstacles and the robot
                 })) {
                 avoid_obstacles.push_back(obstacle);
             }
