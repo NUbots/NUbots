@@ -36,7 +36,11 @@
 #include <chrono>
 #include <cstring>
 #include <fmt/format.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <thread>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "extension/Configuration.hpp"
 
@@ -56,17 +60,17 @@ namespace module::input {
     struct SharedImageHeader {
         bip::interprocess_mutex mutex;
         bip::interprocess_condition has_new_frame;
-        uint64_t sequence{0};   // increments each frame
-        uint32_t data_size{0};  // bytes of pixel data following this header
+        uint64_t sequence{0};
+        uint32_t data_size{0};
         uint32_t width{0};
         uint32_t height{0};
-        char encoding[32]{};  // ROS2 encoding string, e.g. "rgb8"
-        float focal_length{0.0};
-        float fov{0.0};
-        float centre_x{0.0};
-        float centre_y{0.0};
-        float k1{0.0};
-        float k2{0.0};
+        char encoding[32]{};
+        float focal_length{0.0f};
+        float fov{0.0f};
+        float centre_x{0.0f};
+        float centre_y{0.0f};
+        float k1{0.0f};
+        float k2{0.0f};
     };
 
     static constexpr std::size_t MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -80,12 +84,15 @@ namespace module::input {
         if (enc == "bayer_grbg8")  return fourcc("GRBG");
         if (enc == "bayer_rggb8")  return fourcc("RGGB");
         if (enc == "bayer_gbrg8")  return fourcc("GBRG");
+        if (enc == "nv12")         return fourcc("NV12");
         // clang-format on
         return 0;
     }
 
     void K1Camera::stop_cameras() {
         std::unique_lock<std::mutex> lock(cameras_mutex);
+
+        log<INFO>("Stopping camera threads");
 
         for (auto& cam : cameras) {
             cam->running = false;
@@ -104,8 +111,10 @@ namespace module::input {
 
     void K1Camera::camera_thread(CameraContext& ctx) {
         // Outer loop: retry until the segment is available (NUbridge may start after NUbots).
+        log<INFO>(fmt::format("Starting thread for camera '{}'", ctx.camera_name));
         while (ctx.running) {
             try {
+                log<INFO>(fmt::format("Opening segment '{}' for camera '{}'", ctx.segment_name, ctx.camera_name));
                 // read_write is required even for the reader because interprocess_mutex and
                 // interprocess_condition must modify their internal state on lock/wait.
                 bip::shared_memory_object shm(bip::open_only, ctx.segment_name.c_str(), bip::read_write);
@@ -115,6 +124,10 @@ namespace module::input {
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
 
                 uint64_t last_sequence = 0;
+
+                log<INFO>(fmt::format("K1Camera: successfully mapped segment '{}' for camera '{}'",
+                                      ctx.segment_name,
+                                      ctx.camera_name));
 
                 // Inner loop: read frames until shutdown or segment disappears.
                 while (ctx.running) {
@@ -180,7 +193,26 @@ namespace module::input {
 
                         // Copy pixel data while holding the lock; release before emit.
                         log<DEBUG>(fmt::format("Copying data from {}", ctx.segment_name));
-                        data.assign(pixels, pixels + data_size);
+                        if (format == fourcc("NV12")) {
+                            const cv::Mat nv12(height * 3 / 2, width, CV_8UC1, const_cast<uint8_t*>(pixels));
+                            cv::Mat rgb;
+                            cv::cvtColor(nv12, rgb, cv::COLOR_YUV2RGB_NV12);
+                            cv::Mat bayer(height, width, CV_8UC1);
+                            for (uint32_t y{}; y < height; ++y) {
+                                const cv::Vec3b* rgb_row = rgb.ptr<cv::Vec3b>(y);
+                                uint8_t* bayer_row       = bayer.ptr<uint8_t>(y);
+                                for (uint32_t x{}; x < width; ++x) {
+                                    const int channel = ((y & 1) == 0) ? (((x & 1) == 0) ? 0 : 1)   // R : G
+                                                                       : (((x & 1) == 0) ? 1 : 2);  // G : B
+                                    bayer_row[x]      = rgb_row[x][channel];
+                                }
+                            }
+                            format = fourcc("RGGB");
+                            data.assign(bayer.datastart, bayer.dataend);
+                        }
+                        else {
+                            data.assign(pixels, pixels + data_size);
+                        }
                     }
 
                     if (last_sequence != 0 && seq != last_sequence + 1) {
@@ -202,6 +234,7 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
+                    msg->Hcw               = ctx.Hcw;
 
                     emit(msg);
                 }
@@ -220,8 +253,6 @@ namespace module::input {
     K1Camera::K1Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
-            stop_cameras();
-
             std::lock_guard<std::mutex> lock(cameras_mutex);
             for (const auto& entry : cfg["cameras"]) {
                 auto ctx          = std::make_unique<CameraContext>();
@@ -229,16 +260,13 @@ namespace module::input {
                 ctx->camera_name  = entry["name"].as<std::string>();
                 ctx->id           = entry["id"].as<uint32_t>();
                 ctx->running      = true;
+                ctx->Hcw          = Eigen::Isometry3d::Identity();  // TODO: load from config when available
                 ctx->thread       = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
                 cameras.push_back(std::move(ctx));
             }
         });
 
         on<Shutdown>().then([this] { stop_cameras(); });
-    }
-
-    K1Camera::~K1Camera() {
-        stop_cameras();
     }
 
 }  // namespace module::input

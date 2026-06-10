@@ -77,8 +77,8 @@ RUN install-package \
     libmagic1 \
     libmagic-dev
 
-RUN --mount=type=bind,source=usr/local/bin,target=/usr/local/bin \
-    /usr/local/bin/container_setup.sh ${platform}
+COPY usr/local/bin/container_setup.sh /usr/local/bin/container_setup.sh
+RUN /usr/local/bin/container_setup.sh ${platform}
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
@@ -126,25 +126,30 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package -p ${platform} libncurses-dev libncurses6 libtinfo6 libc6-dev && \
     if [ "${platform}" != "generic" ]; then \
-        ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
-        ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
+    ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
+    ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
     fi
 
 RUN pip3 install pyyaml mako
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
+
 
 # OpenCL loader library
 RUN install-package ruby autotools-dev automake libtool
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
 
 RUN if [ "${platform}" != "generic" ]; then \
     ln -sf libm.so.6      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libm.so && \
     ln -sf libpthread.so.0 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libpthread.so && \
     ln -sf libdl.so.2      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libdl.so && \
     ln -sf librt.so.1      /l4t/targetfs/usr/lib/aarch64-linux-gnu/librt.so; \
-fi
+    fi
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
@@ -185,6 +190,13 @@ RUN install-package opencl-c-headers \
     rapidjson-dev \
     libsnappy-dev
 
+
+RUN install-from-source https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2021.13.0.tar.gz \
+    --build-system cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DTBB_TEST:BOOL='OFF' \
+    -DTBB_BENCH:BOOL='OFF'
+
 # Clone OpenVINO repository
 RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
     cd openvino && \
@@ -208,6 +220,7 @@ RUN mkdir build && cd build && \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
     -DENABLE_INTEL_GPU:BOOL='OFF' \
     -DENABLE_INTEL_CPU:BOOL='OFF' \
+    -DENABLE_ARM_COMPUTE_CMAKE:BOOL='ON' \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_CXX_STANDARD='17' \
     -Wno-dev \
@@ -219,12 +232,41 @@ RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && 
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
     cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
+# # CUDA Toolkit
+# COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
+# RUN /usr/local/bin/install-cuda.sh ${platform}
+
+# RUN install-package -p ${platform} \
+#     cuda-cudart-12-5 \
+#     cuda-cudart-dev-12-5 \
+#     cuda-compat-12-5 \
+#     cuda-driver-dev-12-5 \
+#     cuda-nvcc-12-5 \
+#     cuda-crt-12-5 \
+#     libcublas-12-5 \
+#     libcublas-dev-12-5 \
+#     libnvjitlink-12-5 \
+#     libnvjitlink-dev-12-5 \
+#     cuda-nvrtc-12-5 \
+#     cuda-nvrtc-dev-12-5
+
+# # TensorRT - install binary packages from NVIDIA CUDA repository
+# # NvInfer.h, NvOnnxParser.h, libnvinfer.so, libnvonnxparsers.so
+# RUN install-package -p ${platform} \
+#     libnvinfer-dev \
+#     libnvonnxparsers-dev \
+#     libnvinfer-plugin-dev \
+#     libnvinfer-lean-dev \
+#     libnvinfer-vc-plugin-dev
+
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
 # tcmalloc
 RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
     --build-system autotools \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
 
@@ -262,23 +304,6 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
     -DCATCH_CONFIG_CPP17_OPTIONAL=ON \
     -DCATCH_CONFIG_CPP17_BYTE=ON
 
-# Aravis
-# RUN install-package -p ${platform} libudev-dev libudev1
-# RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
-# RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
-#     --without-python
-# RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-# RUN install-package libglib2.0-dev
-# RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
-#     -Ddefault_library=both && \
-#     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
-# RUN  ls ${prefix}/include && \
-#     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
-#     -Ddefault_library=both \
-#     -Dusb=enabled \
-#     -Ddocumentation=disabled \
-#     -Dintrospection=disabled
-
 # LibUV
 RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz \
     -Dlibuv_buildtests=OFF \
@@ -290,12 +315,16 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/925dca0f3148
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8602fda64e78f1f46563220f2ee9f7e70819c51d.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --without-system-libunwind \
     --enable-shared \
     --enable-static
 
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --without-debug
 RUN install-package -p ${platform} alsa-utils
 
@@ -334,7 +363,9 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
     -DBUILD_TESTS=OFF
 
 # lame
-RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
 
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
@@ -389,6 +420,7 @@ ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
 ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
+ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 RUN install-package clinfo
 
@@ -427,6 +459,7 @@ RUN git config --global --add safe.directory '*'
 
 # Copy over GDB alias'
 COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
+
 
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots \
