@@ -37,7 +37,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
@@ -53,10 +52,8 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::localisation::Robots;
     using message::planning::WalkTo;
     using message::purpose::Purpose;
-    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -74,23 +71,31 @@ namespace module::network {
                 cfg.startup_delay = config["startup_delay"].as<int>();
                 // Ball timeout to use the ball position
                 cfg.ball_timeout = std::chrono::seconds(config["ball_timeout"].as<int>());
+                // Maximum message size and count
+                cfg.max_message_size      = config["max_message_size"].as<uint>();
+                cfg.max_messages_per_game = config["max_messages_per_game"].as<uint>();
 
-                // Need to determine send and receive ports
-                cfg.send_port = config["send_port"].as<uint>();
+                // Compute ports as 10000 + team_id unless overridden in config
+                const uint configured_send_port = config["send_port"].as<uint>();
+                cfg.send_port = (configured_send_port != 0) ? configured_send_port : 10000 + global_config.team_id;
+                const uint configured_receive_port = config["receive_port"].as<uint>();
+                const uint new_receive_port =
+                    (configured_receive_port != 0) ? configured_receive_port : 10000 + global_config.team_id;
+
                 // Need to determine broadcast ip
                 cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
                 // Need to determine optional filtering packets
                 cfg.udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                 // If we are changing ports (the port starts at 0 so this should start it the first time)
-                if (config["receive_port"].as<uint>() != cfg.receive_port) {
+                if (new_receive_port != cfg.receive_port) {
                     // If we have an old binding, then unbind it
                     // The port starts at 0 so this should work
                     if (cfg.receive_port != 0) {
                         listen_handle.unbind();
                     }
 
-                    cfg.receive_port = config["receive_port"].as<uint>();
+                    cfg.receive_port = new_receive_port;
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
@@ -152,6 +157,16 @@ namespace module::network {
             emit<Scope::DELAY>(std::make_unique<StartupDelay>(), std::chrono::seconds(cfg.startup_delay));
         });
 
+        on<Trigger<GameState>>().then([this](const GameState& game_state) {
+            // Reset message counter when a new game ends
+            if (game_state.phase == GameState::Phase::FINISHED) {
+                if (messages_sent > 0) {
+                    log<INFO>("Game ended. Total messages sent:", messages_sent);
+                    messages_sent = 0;
+                }
+            }
+        });
+
         on<Every<2, Per<std::chrono::seconds>>,
            With<StartupDelay>,
            Optional<With<Ball>>,
@@ -162,7 +177,6 @@ namespace module::network {
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
            Optional<With<WalkTo>>,
-           Optional<With<Robots>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -172,7 +186,6 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkTo>& walk_to,
-                         const std::shared_ptr<const Robots>& robot_localisation,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -272,53 +285,40 @@ namespace module::network {
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
-                // Where the robot thinks the other robots are.
-                if (robot_localisation && field) {
-
-                    // Iterate through robots detected by localisation
-                    for (const auto& local_bot : robot_localisation->robots) {
-                        // Create new robot message
-                        message::input::Robot rc_robot;
-
-                        // Assign player ID from purpose
-                        rc_robot.player_id = local_bot.purpose.player_id;
-
-                        // Convert world to field coords
-                        Eigen::Vector3d rRFf = field->Hfw * local_bot.rRWw;
-
-                        // Store 2D position (x, y) and set (z) to 0
-                        rc_robot.position     = rRFf.cast<float>();
-                        rc_robot.position.z() = 0.0f;
-
-                        // Check if covariance matrix is valid
-                        // Initialise with zeros
-                        rc_robot.covariance = Eigen::Matrix3f::Zero();
-                        if (local_bot.covariance.rows() >= 2 && local_bot.covariance.cols() >= 2) {
-                            rc_robot.covariance.block<2, 2>(0, 0) =
-                                local_bot.covariance.block<2, 2>(0, 0).cast<float>();
-                        }
-
-                        if (local_bot.teammate) {
-                            rc_robot.team = msg->current_pose.team;
-                        }
-                        else {
-                            rc_robot.team = msg->current_pose.team == message::input::Team::BLUE
-                                                ? message::input::Team::RED
-                                                : message::input::Team::BLUE;
-                        }
-
-                        // Add robot information to list of other robots in message
-                        msg->others.push_back(std::move(rc_robot));
-                    }
-                }
-
-
                 // Current purpose (soccer position) of the Robot
                 if (purpose) {
                     msg->purpose = *purpose;
                 }
                 // Override the player ID in the purpose message to be consistent, and in case purpose is not set
                 msg->purpose.player_id = config.player_id;
+
+                // Check serialised size before sending
+                auto payload = NUClear::util::serialise::Serialise<RoboCup>::serialise(*msg);
+                if (payload.size() > cfg.max_message_size) {
+                    log<WARN>("RoboCup message size",
+                              payload.size(),
+                              "bytes exceeds",
+                              cfg.max_message_size,
+                              "byte limit");
+                }
+                else {
+                    log<DEBUG>("RoboCup message size:", payload.size(), "bytes");
+                }
+
+                // Only count messages during Ready, Set, and Playing states
+                if (game_state) {
+                    const bool is_counting_state = game_state->phase == GameState::Phase::READY
+                                                   || game_state->phase == GameState::Phase::SET
+                                                   || game_state->phase == GameState::Phase::PLAYING;
+                    if (is_counting_state) {
+                        if (messages_sent >= cfg.max_messages_per_game) {
+                            log<WARN>("Message budget exhausted, dropping packet");
+                            return;
+                        }
+                        messages_sent++;
+                        log<DEBUG>("Messages sent this game:", messages_sent, "/ ", cfg.max_messages_per_game);
+                    }
+                }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

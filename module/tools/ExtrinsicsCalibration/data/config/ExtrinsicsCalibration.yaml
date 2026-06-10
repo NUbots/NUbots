@@ -1,0 +1,25 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Path to the URDF model used for camera forward kinematics (matches the Camera module)
+urdf_path: "models/robot.urdf"
+
+# Which camera to calibrate. Either "Left" or "Right". Only one camera is calibrated per run; run again with the
+# other camera selected to calibrate both.
+camera: "Left"
+
+# Minimum number of associated detection<->landmark samples required before running the optimisation
+min_samples: 100
+
+# Maximum distance [m] in field space for a detection to be associated with a ground-truth landmark.
+# Pairings beyond this distance (evaluated at the initial offsets) are rejected.
+max_association_distance: 1.0
+
+# Search bounds (half-width) on each offset delta [rad]: del_roll, del_pitch, del_yaw
+offset_bounds: [10.0 * pi / 180, 10.0 * pi / 180, 10.0 * pi / 180]
+
+# NLopt BOBYQA optimisation parameters
+opt:
+  xtol_rel: 1.0e-6
+  ftol_rel: 1.0e-6
+  maxeval: 1000
