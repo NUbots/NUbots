@@ -191,6 +191,10 @@ namespace module::platform::NUSense {
                 // Battery data
                 sensors->battery = 0;  // not yet implemented
 
+                // Fan data
+                sensors->fan_warning.fan1_warning = data.fan_warnings.fan1_warning;
+                sensors->fan_warning.fan2_warning = data.fan_warnings.fan2_warning;  // Fan warning status
+
                 // Servo data
                 for (const auto& [key, val] : data.servo_map) {
                     // Get a reference to the servo we are populating

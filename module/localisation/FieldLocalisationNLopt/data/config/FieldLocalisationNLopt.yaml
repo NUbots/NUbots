@@ -9,8 +9,6 @@ starting_side: EITHER
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
-# For striker in penalty shootout: -2.6, 0.0, -3.14
-# For goalie in penalty shootout: 4.5, 0.0, -3.14
 
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false
@@ -49,7 +47,7 @@ window_size: 2.0
 num_angles: 8
 
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 5.0
+field_line_distance_weight: 1.0
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 5.0
@@ -70,34 +68,15 @@ change_limit: [0.5, 0.5, 0.5]
 goal_post_error_tolerance: 0.5
 
 opt:
-  # Relative tolerance on the optimization parameters
+  # Relative tolerance on the optimisation parameters
   xtol_rel: 1e-6
-  # Relative tolerance on the optimization function value
+  # Relative tolerance on the optimisation function value
   ftol_rel: 1e-6
-  # Maximum number of evaluations for the optimization
+  # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
-kalman:
-  # Continuous time process model:
-  A:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-  # Continuous time input model: No inputs
-  B: []
-  # Continuous time measurement model:
-  C:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
-
-  # Process model noise
-  Q:
-    - [1e-1, 0, 0]
-    - [0, 1e-1, 0]
-    - [0, 0, 1e-1]
-  # Measurement model noise
-  R:
-    - [1, 0, 0]
-    - [0, 1, 0]
-    - [0, 0, 1]
+exponential_filter:
+  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
+  # [x, y, theta] - Higher values = more responsive to new measurements
+  # Lower values = more smoothed/filtered output
+  alpha: [0.1, 0.1, 0.5]

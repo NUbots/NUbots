@@ -18,4 +18,5 @@ Add this module to the role and emit a Dive Task to execute a Dive.
 
 ## Dependencies
 
+- Director
 - The script utility to load the Dive scripts
