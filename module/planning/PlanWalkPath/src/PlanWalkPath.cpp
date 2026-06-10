@@ -26,6 +26,8 @@
  */
 #include "PlanWalkPath.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <ranges>
 
 #include "extension/Behaviour.hpp"
@@ -37,7 +39,6 @@
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
-#include "message/strategy/StandStill.hpp"
 #include "message/support/FieldDescription.hpp"
 
 #include "utility/math/angle.hpp"
@@ -61,10 +62,7 @@ namespace module::planning {
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
-    using message::strategy::StandStill;
     using message::support::FieldDescription;
-
-    using message::strategy::StandStill;
 
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -115,14 +113,25 @@ namespace module::planning {
             cfg.starting_velocity = config["starting_velocity"].as<Expression>();
         });
 
-        on<Startup, Trigger<FieldDescription>>().then("Update Goalpost Positions", [this](const FieldDescription& fd) {
-            list_goalposts.emplace_back(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0.0);
-            list_goalposts.emplace_back(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0.0);
-            list_goalposts.emplace_back(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0.0);
-            list_goalposts.emplace_back(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0.0);
+        on<Startup, Trigger<FieldDescription>>().then("Update Goal Obstacles", [this](const FieldDescription& fd) {
+            goal_obstacles.clear();
 
-            opp_goal_line_x  = -fd.dimensions.field_length / 2.0;
-            self_goal_line_x = fd.dimensions.field_length / 2.0;
+            auto add_goalpost_obstacles = [this, &fd](const Eigen::Vector2d& post) {
+                const double net_x_direction = post.x() > 0.0 ? 1.0 : -1.0;
+                const Eigen::Vector3d goalpost(post.x(), post.y(), 0.0);
+                const Eigen::Vector3d half_net_depth(net_x_direction * fd.dimensions.goal_depth * 0.5, 0.0, 0.0);
+                const Eigen::Vector3d full_net_depth(net_x_direction * fd.dimensions.goal_depth, 0.0, 0.0);
+
+                // add extra obstacles in case we
+                goal_obstacles.emplace_back(goalpost);
+                goal_obstacles.emplace_back(goalpost + half_net_depth);
+                goal_obstacles.emplace_back(goalpost + full_net_depth);
+            };
+
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y()));
         });
 
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
@@ -154,17 +163,17 @@ namespace module::planning {
 
                 std::vector<Eigen::Vector2d> all_obstacles{};
 
-                // Add goalposts to list of obstacles to avoid
+                // Add goalposts and net proxy points to the list of obstacles to avoid
                 const Eigen::Isometry3d Hwf = field.Hfw.inverse();
-                for (const auto& goalpost : list_goalposts) {
-                    const Eigen::Vector3d rFRr = Hrw * Hwf * goalpost;
-                    log<DEBUG>("Goalpost in robot frame:", rFRr.head(2).transpose());
+                for (const auto& goal_obstacle : goal_obstacles) {
+                    const Eigen::Vector3d rFRr = Hrw * Hwf * goal_obstacle;
+                    // log<DEBUG>("Goal obstacle in robot frame:", rFRr.head(2).transpose());
                     all_obstacles.emplace_back(rFRr.head(2));
                 }
 
                 // If there are robots, check if they're in the way
                 if (robots) {
-                    log<DEBUG>("Adding", robots->robots.size(), "robots as obstacles");
+                    // log<DEBUG>("Adding", robots->robots.size(), "robots as obstacles");
                     // Get the positions of all robots in the world
                     for (const auto& robot : robots->robots) {
                         all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
@@ -178,7 +187,8 @@ namespace module::planning {
 
                 // If there are obstacles in the way, walk around them
                 if (!obstacles.empty()) {
-                    log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                    // log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                    const double min_avoidance_x = std::min(0.0, rDRr.x());
 
                     // Calculate a perpendicular vector to the direction of the target point
                     const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
@@ -198,28 +208,12 @@ namespace module::planning {
                     // Total path length by traversing the triangle from the robot->obstacle->original target
                     auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
-                    // Check candidates in field frame so the goal-line constraint (field-x) is valid
-                    // regardless of which direction the robot is facing
-                    const Eigen::Isometry3d Hfr = (Hrw * Hwf).inverse();
-                    const Eigen::Vector3d rDlFf  = Hfr * Eigen::Vector3d(left.x(), left.y(), 0);
-                    const Eigen::Vector3d rDrFf  = Hfr * Eigen::Vector3d(right.x(), right.y(), 0);
-                    bool left_outside           = rDlFf.x() < opp_goal_line_x || rDlFf.x() > self_goal_line_x;
-                    bool right_outside          = rDrFf.x() < opp_goal_line_x || rDrFf.x() > self_goal_line_x;
-
-                    // If we are going to walk outside the goal line, pick left or right based on which is away from
-                    // goal line Otherwise take the shorter path
-                    if (left_outside && !right_outside) {
-                        log<DEBUG>("Left path exits field, taking right");
-                        rDRr = right;
-                    }
-                    else if (!left_outside && right_outside) {
-                        log<DEBUG>("Right path exits field, taking left");
-                        rDRr = left;
-                    }
-                    else {
-                        // Both inside (or both outside) — fall back to shorter path
-                        log<DEBUG>("Choosing path around obstacle based on path length");
-                        rDRr = path(left) < path(right) ? left : right;
+                    // Take the shorter path around the obstacle group
+                    log<DEBUG>("Choosing path around obstacle based on path length");
+                    rDRr = path(left) < path(right) ? left : right;
+                    if (rDRr.x() < min_avoidance_x) {
+                        log<DEBUG>("Clamping obstacle avoidance x from", rDRr.x(), "to", min_avoidance_x);
+                        rDRr.x() = min_avoidance_x;
                     }
 
                     // Angle to the target point may have changed after adjusting for obstacles
@@ -358,16 +352,6 @@ namespace module::planning {
             const bool close_to_target = (obstacle - rDRr).norm() < cfg.obstacle_radius;
             const bool intersects =
                 intersection_line_and_circle(Eigen::Vector2d::Zero(), rDRr, obstacle, cfg.obstacle_radius);
-            log<DEBUG>("Checking obstacle at",
-                       obstacle,
-                       "in_front:",
-                       in_front,
-                       "before_target:",
-                       before_target,
-                       "intersects:",
-                       intersects,
-                       "close_to_target:",
-                       close_to_target);
 
             return in_front && before_target && intersects && !close_to_target;
         });
@@ -383,7 +367,7 @@ namespace module::planning {
             // If the obstacle is close to the group, add it to the group
             if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
                     return (obstacle - ao).norm()
-                           < cfg.obstacle_radius * 3;  // 3 represents two obstacles and the robot
+                           < cfg.obstacle_radius * 2;  // 3 represents 2 obstacles and the robot
                 })) {
                 avoid_obstacles.push_back(obstacle);
             }

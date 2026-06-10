@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <vector>
 
 #include "extension/Behaviour.hpp"
 
@@ -101,13 +102,8 @@ namespace module::planning {
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
 
-        /// @brief List of goalpost positions in field coordinates
-        std::vector<Eigen::Vector3d> list_goalposts{};
-
-        /// @brief x-coordinate of the opponent goal line in field coordinates
-        double opp_goal_line_x = 0.0;
-        /// @brief x-coordinate of the own goal line in field coordinates
-        double self_goal_line_x = 0.0;
+        /// @brief List of goalpost and goal net proxy obstacle positions in field coordinates
+        std::vector<Eigen::Vector3d> goal_obstacles{};
 
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};
