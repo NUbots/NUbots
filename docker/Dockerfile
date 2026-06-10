@@ -126,25 +126,30 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package -p ${platform} libncurses-dev libncurses6 libtinfo6 libc6-dev && \
     if [ "${platform}" != "generic" ]; then \
-        ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
-        ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
+    ln -sf libncursesw.so.6 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libncursesw.so && \
+    ln -sf libtinfo.so.6    /l4t/targetfs/usr/lib/aarch64-linux-gnu/libtinfo.so; \
     fi
 
 RUN pip3 install pyyaml mako
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
+
 
 # OpenCL loader library
 RUN install-package ruby autotools-dev automake libtool
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
 
 RUN if [ "${platform}" != "generic" ]; then \
     ln -sf libm.so.6      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libm.so && \
     ln -sf libpthread.so.0 /l4t/targetfs/usr/lib/aarch64-linux-gnu/libpthread.so && \
     ln -sf libdl.so.2      /l4t/targetfs/usr/lib/aarch64-linux-gnu/libdl.so && \
     ln -sf librt.so.1      /l4t/targetfs/usr/lib/aarch64-linux-gnu/librt.so; \
-fi
+    fi
 
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
@@ -252,6 +257,8 @@ RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-
 # tcmalloc
 RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
     --build-system autotools \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
 
@@ -300,12 +307,16 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/925dca0f3148
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8602fda64e78f1f46563220f2ee9f7e70819c51d.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --without-system-libunwind \
     --enable-shared \
     --enable-static
 
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local \
     --without-debug
 RUN install-package -p ${platform} alsa-utils
 
@@ -344,7 +355,9 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
     -DBUILD_TESTS=OFF
 
 # lame
-RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz \
+    --prefix /l4t/targetfs/${prefix} \
+    --toolchain-dir /usr/local
 
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
@@ -407,6 +420,7 @@ RUN install-package clinfo
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 # Re-run ldconfig to make sure the database is up to date
+RUN ln -sf /l4t/targetfs/usr/local/include/opencv4/opencv2 /l4t/targetfs/usr/local/include/opencv2
 RUN ldconfig
 
 ##############################
@@ -438,6 +452,7 @@ RUN git config --global --add safe.directory '*'
 
 # Copy over GDB alias'
 COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
+
 
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots \

@@ -188,14 +188,13 @@ def generate_json_env(target, prefix):
     sysroot = target.get("sysroot", "")
     arch = target.get("arch", "")
     if sysroot:
-        pkg_config_paths.extend(
-            [
-                f"{sysroot}/usr/lib/pkgconfig",
-                f"{sysroot}/usr/share/pkgconfig",
-            ]
-        )
+        sysroot_paths = [
+            f"{sysroot}/usr/lib/pkgconfig",
+            f"{sysroot}/usr/share/pkgconfig",
+        ]
         if arch:
-            pkg_config_paths.append(f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+            sysroot_paths.insert(0, f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+        pkg_config_paths = sysroot_paths + pkg_config_paths
 
     return json.dumps(
         {
@@ -224,9 +223,10 @@ def generate_toolchain_script(target, prefix):
     sysroot = target.get("sysroot", "")
     arch = target.get("arch", "")
     if sysroot:
-        pkg_config_paths.extend([f"{sysroot}/usr/lib/pkgconfig", f"{sysroot}/usr/share/pkgconfig"])
+        sysroot_paths = [f"{sysroot}/usr/lib/pkgconfig", f"{sysroot}/usr/share/pkgconfig"]
         if arch:
-            pkg_config_paths.append(f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+            sysroot_paths.insert(0, f"{sysroot}/usr/lib/{arch}-linux-gnu/pkgconfig")
+        pkg_config_paths = sysroot_paths + pkg_config_paths
 
     template = dedent(
         """\
