@@ -27,6 +27,8 @@
 #ifndef MODULE_INPUT_K1CAMERA_HPP
 #define MODULE_INPUT_K1CAMERA_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -44,9 +46,11 @@ namespace module::input {
             std::string segment_name;
             std::string camera_name;
             uint32_t id{0};
+            Eigen::Isometry3d Hcw{Eigen::Isometry3d::Identity()};
             std::atomic<bool> running{true};
             std::thread thread;
         };
+
 
         std::mutex cameras_mutex;
         std::vector<std::unique_ptr<CameraContext>> cameras;
@@ -57,7 +61,6 @@ namespace module::input {
     public:
         /// @brief Called by the powerplant to build and setup the K1Camera reactor.
         explicit K1Camera(std::unique_ptr<NUClear::Environment> environment);
-        ~K1Camera();
     };
 
 }  // namespace module::input

@@ -26,6 +26,6 @@ SOFTWARE.
 ]]
 
 find_package(Boost REQUIRED)
-
+find_package(OpenCV REQUIRED)
 # Build our NUClear module
-nuclear_module(LIBRARIES Boost::headers)
+nuclear_module(LIBRARIES Boost::headers ${OpenCV_LIBS})
