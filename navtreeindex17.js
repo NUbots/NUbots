@@ -1,9 +1,5 @@
 var NAVTREEINDEX17 =
 {
-"structmodule_1_1purpose_1_1StartPenalty.html":[3,0,3,9,15],
-"structmodule_1_1purpose_1_1StartSoccer.html":[3,0,3,9,16],
-"structmodule_1_1purpose_1_1StartTester.html":[3,0,3,9,17],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html":[3,0,3,9,19,0],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a028d65df5a6a554f5b9cdc02e2f9b878":[3,0,3,9,19,0,7],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a10075b62d8b33a5d455b59dcf38a39c5":[3,0,3,9,19,0,4],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a17a77264f11814759527cf9b03667005":[3,0,3,9,19,0,9],
@@ -249,5 +245,9 @@ var NAVTREEINDEX17 =
 "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#af5a97b0ce14cd00909044ef73a424c1e":[3,0,3,14,0,1,6],
 "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#afd1db10ad9472b03282f28a2085702bd":[3,0,3,14,0,1,7],
 "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html":[3,0,3,14,0,2],
-"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a0259ee8f0f5e3a019f5a4834cb78ce05":[3,0,3,14,0,2,9]
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a0259ee8f0f5e3a019f5a4834cb78ce05":[3,0,3,14,0,2,9],
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a07d9b4d82d41079cc49b437b4da30228":[3,0,3,14,0,2,11],
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a167b3dd51927ce4c4111e32f3dd3070d":[3,0,3,14,0,2,7],
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a38397542fe50d93db858c7109b714da7":[3,0,3,14,0,2,13],
+"structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a3b44c9de2fb42841bc07f8212587c691":[3,0,3,14,0,2,8]
 };

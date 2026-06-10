@@ -1,12 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html":[3,0,3,3,3],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a04c08d68e8f0daffc06a813c5cba0145":[3,0,3,3,3,24],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a":[3,0,3,3,3,4],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1c69156bf32af42aa9f6d01088fc98c2":[3,0,3,3,3,22],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1fe31b774192866e5aae3636ce42c1bd":[3,0,3,3,3,6],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a2e537a3bbbd2926d513d2459fa50c983":[3,0,3,3,3,23],
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3ceee27c66409dabd78ec22957d8bfc3":[3,0,3,3,3,2],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3d929cfe1f495eeceb7d24a098ce1c6b":[3,0,3,3,3,17],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3e09b70de20f23332c5e947d0b6fd658":[3,0,3,3,3,25],
 "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a4802594fa0756ca2d7caae1caa989297":[3,0,3,3,3,1],
@@ -90,6 +83,7 @@ var NAVTREEINDEX3 =
 "classmodule_1_1network_1_1RobotCommunication.html":[3,0,3,5,3],
 "classmodule_1_1network_1_1RobotCommunication.html#a85276463a975478b4170980dfef01c47":[3,0,3,5,3,2],
 "classmodule_1_1network_1_1RobotCommunication.html#a8e2ba96611aae7d22e3a73f508aa34c0":[3,0,3,5,3,3],
+"classmodule_1_1network_1_1RobotCommunication.html#a958969863e9e4b424fa5492a4dd5396e":[3,0,3,5,3,5],
 "classmodule_1_1network_1_1RobotCommunication.html#aa955f5692c176e6192174bb33a2f1370":[3,0,3,5,3,1],
 "classmodule_1_1network_1_1RobotCommunication.html#ab281b1413e84ce12251d85134f8c6983":[3,0,3,5,3,4],
 "classmodule_1_1output_1_1ImageCompressor.html":[3,0,3,6,1],
@@ -249,5 +243,11 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58412c43be7c2197ce8a595596f2a650":[3,0,3,8,1,6,22],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58f19b0d15954f1f93f5b3ccd116cb3f":[3,0,3,8,1,6,32],
 "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6336eb277b0e53a9e1e9733613b4c2ea":[3,0,3,8,1,6,10],
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217":[3,0,3,8,1,6,28]
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217":[3,0,3,8,1,6,28],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a65d7cb92bed3b78243a223ea03d385b2":[3,0,3,8,1,6,11],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a70d30843b39895654a1c4246b7865324":[3,0,3,8,1,6,14],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb":[3,0,3,8,1,6,29],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a80be5675965277ccb3d6a20811fc3487":[3,0,3,8,1,6,19],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a862aebba2af2a4c3964f7c5dfc60fc1f":[3,0,3,8,1,6,16],
+"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46":[3,0,3,8,1,6,23]
 };

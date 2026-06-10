@@ -2,6 +2,8 @@ var structmodule_1_1network_1_1RobotCommunication_1_1Config =
 [
     [ "ball_timeout", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#ae882ee6168c7e8be5f151bbf5aa70cb0", null ],
     [ "broadcast_ip", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#ac151d88b94d4f104d6caef6b07fc2353", null ],
+    [ "max_message_size", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#a6d2014d8e869fa90a8793d0d2b4369b5", null ],
+    [ "max_messages_per_game", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#a197f7ab78da14128e8ad4f86b50d730d", null ],
     [ "receive_port", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#abb9e6b41b54c7095ea0f9ca98dda1dfc", null ],
     [ "send_port", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#add7386e92dc2ca1235f5178752f8bba6", null ],
     [ "startup_delay", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#a9afa8e7f107837f93d66c82b1caa3f68", null ],

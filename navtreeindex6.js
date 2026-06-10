@@ -1,11 +1,5 @@
 var NAVTREEINDEX6 =
 {
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a0fe9e4b13109ae8dc3aca409d758d169":[3,0,3,12,2,1,4],
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a44b658127045f412c5aae484990a61c6":[3,0,3,12,2,1,5],
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a56449097454e9589521a78af68bc28da":[3,0,3,12,2,1,2],
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a6c0cd7db53e32d4f9f682e3e3b4dd702":[3,0,3,12,2,1,3],
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a9e8240d97e5f6ea905b9f24cc633b3dc":[3,0,3,12,2,1,1],
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#aaa3b4d64f1b5d9532b09d2deadbd2880":[3,0,3,12,2,1,0],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#ad18e8ab6f4bd5158c881145d3dfdbac3":[3,0,3,12,2,1,6],
 "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#af6640a2fe24857c1d58409d6e23a9c03":[3,0,3,12,2,1,7],
 "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html":[3,0,3,12,2,2],
@@ -249,5 +243,11 @@ var NAVTREEINDEX6 =
 "classmodule_1_1vision_1_1GoalDetector.html#a55442d2b5801edf7dcf51232676b7186":[3,0,3,14,3,4],
 "classmodule_1_1vision_1_1GoalDetector.html#a865047de4b3ed731d93a5e5cc54acd97":[3,0,3,14,3,3],
 "classmodule_1_1vision_1_1GoalDetector.html#ae45cd4f8e2ff7da4bb0f4d837d2bbc58":[3,0,3,14,3,0],
-"classmodule_1_1vision_1_1GoalDetector.html#af7ecb607ba95f573e9bfbd4ec83bfb8e":[3,0,3,14,3,2]
+"classmodule_1_1vision_1_1GoalDetector.html#af7ecb607ba95f573e9bfbd4ec83bfb8e":[3,0,3,14,3,2],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html":[3,0,3,14,4],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[3,0,3,14,4,2],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a71d62b24b67d6f9f7553831abe319cd0":[3,0,3,14,4,1],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[3,0,3,14,4,0],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#ac4a510f2298038c54f5e015c550e1f5a":[3,0,3,14,4,4],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#ad5f2264ce6dbfd90e8be2bb076c283d2":[3,0,3,14,4,3]
 };

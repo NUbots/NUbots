@@ -148,48 +148,34 @@ var namespaces_dup =
           [ "GameControllerReplyPacket", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket" ],
           [ "Robot", "structmodule_1_1input_1_1gamecontroller_1_1Robot.html", "structmodule_1_1input_1_1gamecontroller_1_1Robot" ],
           [ "Team", "structmodule_1_1input_1_1gamecontroller_1_1Team.html", "structmodule_1_1input_1_1gamecontroller_1_1Team" ],
-          [ "GameType", "GameControllerData_8hpp.html#aa1b3905e0eb78f6437fc4f4e60f05634", [
-            [ "ROUND_ROBIN", "GameControllerData_8hpp.html#aa1b3905e0eb78f6437fc4f4e60f05634a1ebd8dbf8c34e255f5cbf28f35860b71", null ],
-            [ "PLAYOFF", "GameControllerData_8hpp.html#aa1b3905e0eb78f6437fc4f4e60f05634a255f563663b5582f0c86aa0898349281", null ],
-            [ "DROPIN", "GameControllerData_8hpp.html#aa1b3905e0eb78f6437fc4f4e60f05634ac9ff251bbc2803e5c2faebd350422752", null ]
-          ] ],
-          [ "Mode", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541e", [
-            [ "NORMAL", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea1e23852820b9154316c7c06e2b7ba051", null ],
-            [ "PENALTY_SHOOTOUT", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea654e91e7d93eb77fc971a217c7811f3f", null ],
-            [ "OVERTIME", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea1185e652e1f2d6d6a18861aee840cbb4", null ],
-            [ "TIMEOUT", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea070a0fb40f6c308ab544b227660aadff", null ],
-            [ "DIRECT_FREEKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea0ffc0c2697ebcf8b7da76213a7f53c80", null ],
-            [ "INDIRECT_FREEKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541eaaf04625962fe8ac1933a88baf20346c7", null ],
-            [ "PENALTYKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea084b86cd45b4d23e3145d21e781f4e51", null ],
-            [ "CORNER_KICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea472f3d45de8018bfb63987a203dca8e4", null ],
-            [ "GOAL_KICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea0fdbca2289dacdc8f12ccf9b31c3ed08", null ],
-            [ "THROW_IN", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea4652c1e0327ad75fd82cbc5e7bf322bf", null ]
+          [ "GamePhase", "GameControllerData_8hpp.html#af00a279ef5c3155b29563e513c3bc4dd", [
+            [ "NORMAL", "GameControllerData_8hpp.html#af00a279ef5c3155b29563e513c3bc4dda1e23852820b9154316c7c06e2b7ba051", null ],
+            [ "PENALTY_SHOOTOUT", "GameControllerData_8hpp.html#af00a279ef5c3155b29563e513c3bc4dda654e91e7d93eb77fc971a217c7811f3f", null ],
+            [ "EXTRA_TIME", "GameControllerData_8hpp.html#af00a279ef5c3155b29563e513c3bc4ddae926ad11365eadca7cb17574e8a7de2c", null ],
+            [ "TIMEOUT", "GameControllerData_8hpp.html#af00a279ef5c3155b29563e513c3bc4dda070a0fb40f6c308ab544b227660aadff", null ]
           ] ],
           [ "PenaltyState", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02d", [
             [ "UNPENALISED", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae73408f8b4266198a9118042e5e9e31e", null ],
-            [ "ILLEGAL_BALL_CONTACT", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da3f3595beb34955b5c17ae4bf9a50348b", null ],
-            [ "PLAYER_PUSHING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dad0c13a6f89d811bc008491ba0f5dae63", null ],
-            [ "ILLEGAL_MOTION_IN_SET", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da0faf1a5587ec4f4f62b34b54c12cc762", null ],
-            [ "INACTIVE_PLAYER", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da669ef4f1fe7589df713a3782d6b8f48e", null ],
-            [ "ILLEGAL_DEFENDER", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02daa4ff043af36129338448c57542877e91", null ],
+            [ "ILLEGAL_POSITIONING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da66211db5a0a15b2578fcf3e6d1160873", null ],
+            [ "MOTION_IN_SET", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da3d47482d40bd236e93d1968bf4bdcc98", null ],
+            [ "LOCAL_GAME_STUCK", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da9d512dabfe2d3c8da266b5fd951c6c5b", null ],
+            [ "INCAPABLE_ROBOT", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da42a3dfc26113594a8d422df22782d2fc", null ],
+            [ "PICK_UP", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dac9c8152bdc60f34810ab636ce1ca74b9", null ],
+            [ "BALL_HOLDING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae60b99f70dd8c19006e91fabd9122cf7", null ],
             [ "LEAVING_THE_FIELD", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da8097d6886ae8fe35e947d016ca16f358", null ],
-            [ "KICK_OFF_GOAL", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da5ae0403e1d1c281553dc6a81daf97de2", null ],
-            [ "SPL_REQUEST_FOR_PICKUP", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da703a5e5829e4cb91d0814a63b6ec810f", null ],
-            [ "COACH_MOTION", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da56faced95387843b91d95b643e0e906d", null ],
-            [ "SUBSTITUTE", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da1ecc48d9fd9fb4263803c34de630f01b", null ],
-            [ "MANUAL", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02daa60a6a471c0681e5a49c4f5d00f6bc5a", null ],
-            [ "BALL_MANIPULATION", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae6f63c13c0f5a90c415275893de50ab4", null ],
-            [ "PHYSICAL_CONTACT", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da45e469e0f56390d75eb1ab47428dc95a", null ],
-            [ "ILLEGAL_ATTACK", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da28a3cc0e5286a34777606d07c2c4a415", null ],
-            [ "ILLEGAL_DEFENSE", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae88430ed6322c07c3afbbd177662b3cd", null ],
-            [ "REQUEST_FOR_PICKUP", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da1d4c57d1aff20b97259dce533d41b88b", null ],
-            [ "REQUEST_FOR_SERVICE", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da9505eb80eac4a0c6ce1090919ecc2116", null ],
-            [ "UNKNOWN", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da696b031073e74bf2cb98e5ef201d4aa3", null ]
+            [ "PLAYING_WITH_ARMS_HANDS", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da8bda2559a9c1b04bf1b69f619be3587e", null ],
+            [ "PLAYER_PUSHING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dad0c13a6f89d811bc008491ba0f5dae63", null ],
+            [ "SENT_OFF", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dad45b1363a1e4ef62632cc548c344f527", null ],
+            [ "SUBSTITUTE", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da1ecc48d9fd9fb4263803c34de630f01b", null ]
           ] ],
-          [ "ReplyMessage", "GameControllerData_8hpp.html#a94fe537e7df19bb32496239c636cfac5", [
-            [ "PENALISED", "GameControllerData_8hpp.html#a94fe537e7df19bb32496239c636cfac5ad071dc05feea040f78dce66d17662b87", null ],
-            [ "UNPENALISED", "GameControllerData_8hpp.html#a94fe537e7df19bb32496239c636cfac5ae73408f8b4266198a9118042e5e9e31e", null ],
-            [ "ALIVE", "GameControllerData_8hpp.html#a94fe537e7df19bb32496239c636cfac5a3bfa0eed9e858c516e816a519b2a82eb", null ]
+          [ "SetPlay", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43", [
+            [ "NONE", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43ab50339a10e1de285ac99d4c3990b8693", null ],
+            [ "DIRECT_FREE_KICK", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43a2ebdb8196d350f9e8c9be0aaa802416d", null ],
+            [ "INDIRECT_FREE_KICK", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43a80c3d8692579cafcd45adf7d670400f9", null ],
+            [ "PENALTY_KICK", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43af4ddd3a6410eec4d636185769b083e82", null ],
+            [ "THROW_IN", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43a4652c1e0327ad75fd82cbc5e7bf322bf", null ],
+            [ "GOAL_KICK", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43a0fdbca2289dacdc8f12ccf9b31c3ed08", null ],
+            [ "CORNER_KICK", "GameControllerData_8hpp.html#ae855cce3156b2f2207fcfbd8da729b43a472f3d45de8018bfb63987a203dca8e4", null ]
           ] ],
           [ "State", "GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675", [
             [ "INITIAL", "GameControllerData_8hpp.html#ae0fd4ef00aa2c417c230617a0c8ed675a91d26e4b2b105c74655093c9becd30b7", null ],
@@ -201,7 +187,14 @@ var namespaces_dup =
           [ "TeamColour", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaada", [
             [ "BLUE", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa1b3e1ee9bff86431dea6b181365ba65f", null ],
             [ "RED", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaaa2d9547b5d3dd9f05984475f7c926da0", null ],
-            [ "DROPBALL", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaae7333fbe78ea5bbe03c7da23360d667d", null ]
+            [ "YELLOW", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa8a568e5f41b7e4da88fe5c4a00aad34e", null ],
+            [ "BLACK", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa08d0012388564e95c3b4a7407cf04965", null ],
+            [ "WHITE", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaab5bf627e448384cf3a4c35121ca6008d", null ],
+            [ "GREEN", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa9de0e5dd94e861317e74964bed179fa0", null ],
+            [ "ORANGE", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa5b6490317b6f7270bc3ab5ffd07c1f52", null ],
+            [ "PURPLE", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaaec9c138095a352a9b7ef9ca5363b14d9", null ],
+            [ "BROWN", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa493cacf6f6a2ae4798b319b8b9ba9488", null ],
+            [ "GRAY", "GameControllerData_8hpp.html#a71b5152b39954fafa11531b6ef1aaadaa48bf014c704c9eaae100a98006a37bf7", null ]
           ] ],
           [ "operator<<", "GameControllerData_8hpp.html#a3f1506355f0c6ec99092ae7d6ae46e19", null ],
           [ "operator<<", "GameControllerData_8hpp.html#a9114def2987b3624a609315b8f8bdae5", null ],
@@ -209,8 +202,7 @@ var namespaces_dup =
           [ "MAX_NUM_PLAYERS", "GameControllerData_8hpp.html#afe973d7b19ea6549964a35d2331842ec", null ],
           [ "RECEIVE_HEADER", "GameControllerData_8hpp.html#a86e9ec5573a41133abaf1fd1f7c3dfad", null ],
           [ "RETURN_HEADER", "GameControllerData_8hpp.html#afd24b3ffaa316203057f9d98dec53ac1", null ],
-          [ "RETURN_VERSION", "GameControllerData_8hpp.html#ac739fd672d5d657249250d153cf30761", null ],
-          [ "SPL_COACH_MESSAGE_SIZE", "GameControllerData_8hpp.html#a24f013b41c05c2fdbe08dfdd8378f8e8", null ]
+          [ "RETURN_VERSION", "GameControllerData_8hpp.html#ac739fd672d5d657249250d153cf30761", null ]
         ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
         [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
@@ -241,12 +233,10 @@ var namespaces_dup =
         [ "SettingsFunctions< ArvGcEnumeration >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4" ],
         [ "SettingsFunctions< ArvGcFloat >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4" ],
         [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ],
-        [ "BallKickedOut", "GameController_8cpp.html#ae0f29ffd8b2d3111f112fe87c2d34ca1", null ],
-        [ "Coach_message", "GameController_8cpp.html#af34c0224ad6ed63aac5c40752a94136f", null ],
         [ "Device", "Parse_8hpp.html#aa65603961328a2fabede3c79195ea028", null ],
         [ "ForcePlate", "Parse_8hpp.html#ac1f71f1a76fde732ec47a6deadb6e70d", null ],
+        [ "GameEventPhase", "GameController_8cpp.html#a114fd7bb98acddbdd3795d0122bccaae", null ],
         [ "GameMode", "GameController_8cpp.html#a21e73993b501d83acd594a66cf88e193", null ],
-        [ "GamePhase", "GameController_8cpp.html#a2e96041c2172d7968bdbbbbf5ad879fb", null ],
         [ "GoalScored", "GameController_8cpp.html#a0150e3e80f651e1033d90be521f7573d", null ],
         [ "HalfTime", "GameController_8cpp.html#ad4a8f12a07474f3d34fadb35354c3aee", null ],
         [ "KickOffTeam", "GameController_8cpp.html#a4db2f9e6f64be94a968b57eebaf83d58", null ],

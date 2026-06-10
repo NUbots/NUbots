@@ -1,9 +1,5 @@
 var NAVTREEINDEX16 =
 {
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa9858a56f05c6a13f09ab5935ce04a13":[3,0,3,8,1,1,0,112],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa9d256b0bb59ecf9e970c4458bf924eb":[3,0,3,8,1,1,0,83],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daab05843c87aeddfed59b94dfa3aa54fc":[3,0,3,8,1,1,0,247],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daac83f38b3b5053371aee190c01479e78":[3,0,3,8,1,1,0,205],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daad61faaeb14e22720172a1cdfa21e616":[3,0,3,8,1,1,0,118],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daaeb7e05ac69dc73cd0848deaf0ab1f68":[3,0,3,8,1,1,0,40],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daaf5a690fd5ec6f789dbfc51ec6a891ba":[3,0,3,8,1,1,0,90],
@@ -249,5 +245,9 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html":[3,0,3,9,14,0],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html#a7ee256be4be71c5a8c29f258b7dca2f0":[3,0,3,9,14,0,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Config.html#aa5cc28f89200f5ca9b017edace28e35a":[3,0,3,9,14,0,0],
-"structmodule_1_1purpose_1_1Soccer_1_1Config.html#ac2654612a0baa52bd0489fedb9afd270":[3,0,3,9,14,0,2]
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html#ac2654612a0baa52bd0489fedb9afd270":[3,0,3,9,14,0,2],
+"structmodule_1_1purpose_1_1StartPenalty.html":[3,0,3,9,15],
+"structmodule_1_1purpose_1_1StartSoccer.html":[3,0,3,9,16],
+"structmodule_1_1purpose_1_1StartTester.html":[3,0,3,9,17],
+"structmodule_1_1purpose_1_1Tester_1_1Config.html":[3,0,3,9,19,0]
 };

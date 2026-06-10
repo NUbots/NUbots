@@ -1,11 +1,5 @@
 var NAVTREEINDEX8 =
 {
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a38843fb5d1bb3dd76f4751299ec01399":[3,0,7,5,0,1,2],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a64b523d9056b0d9224f781a34ce98474":[3,0,7,5,0,1,10],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8a60ef3654780d672950aee042d7eb28":[3,0,7,5,0,1,7],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8fea4c5a6e7d496517218e571a5d1983":[3,0,7,5,0,1,12],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#aa632e1f6df3cb5545769050af80236ae":[3,0,7,5,0,1,3],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#ab671e2f66e1c55771ac4c51c75debcb5":[3,0,7,5,0,1,11],
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#ad010d5390ab3d65f9d13531ea98469cd":[3,0,7,5,0,1,5],
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#ae55775b3de104f7f090eb6633385f02d":[3,0,7,5,0,1,1],
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#af2097e7413690f39f6ee619cbe971d44":[3,0,7,5,0,1,6],
@@ -249,5 +243,11 @@ var NAVTREEINDEX8 =
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#ab7aa595b6abeee1e6d195a2abb397933":[3,0,7,8,0,11,18],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#ac7364060ede646a5fe85220954529b24":[3,0,7,8,0,11,9],
 "classutility_1_1openai_1_1__detail_1_1OpenAI.html#acb1e2cbb829a10e05cc5df9475a54011":[3,0,7,8,0,11,30],
-"classutility_1_1openai_1_1__detail_1_1OpenAI.html#aced506c10094809f1f58c9ea5cb354fd":[3,0,7,8,0,11,33]
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#aced506c10094809f1f58c9ea5cb354fd":[3,0,7,8,0,11,33],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#ad33c7039286ab0aad24bf8876151d8c0":[3,0,7,8,0,11,6],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#adad32a383e29da1f69fa2f65b89ca575":[3,0,7,8,0,11,0],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#adebb981b64b913de236db3e6cba8ec19":[3,0,7,8,0,11,10],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#ae465e9ccd905a022864b0047e7ea44b9":[3,0,7,8,0,11,5],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#aebed27851b84794d6b7ed0d527d378ff":[3,0,7,8,0,11,32],
+"classutility_1_1openai_1_1__detail_1_1OpenAI.html#affdb6a30f899520ff0cfadcf2fdfdd77":[3,0,7,8,0,11,19]
 };

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['yawfilter_1986',['YawFilter',['../classutility_1_1math_1_1filter_1_1YawFilter.html',1,'utility::math::filter']]],
-  ['yawfilter_3c_20double_20_3e_1987',['YawFilter&lt; double &gt;',['../classutility_1_1math_1_1filter_1_1YawFilter.html',1,'utility::math::filter']]],
-  ['yolo_1988',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]],
-  ['yolococo_1989',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html',1,'module::vision']]]
+  ['yawfilter_2002',['YawFilter',['../classutility_1_1math_1_1filter_1_1YawFilter.html',1,'utility::math::filter']]],
+  ['yawfilter_3c_20double_20_3e_2003',['YawFilter&lt; double &gt;',['../classutility_1_1math_1_1filter_1_1YawFilter.html',1,'utility::math::filter']]],
+  ['yolo_2004',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]],
+  ['yolococo_2005',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html',1,'module::vision']]]
 ];

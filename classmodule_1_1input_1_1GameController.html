@@ -205,71 +205,97 @@ Collaboration diagram for module::input::GameController:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab861157c82444f6a7dd48b6b6708b02e"><td class="memItemLeft" align="right" valign="top"><a id="ab861157c82444f6a7dd48b6b6708b02e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>GameController</b> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#ab861157c82444f6a7dd48b6b6708b02e">GameController</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:ab861157c82444f6a7dd48b6b6708b02e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> reactor. <br /></td></tr>
 <tr class="separator:ab861157c82444f6a7dd48b6b6708b02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:ae81dc353f3e9287a6cec47543c9e3840"><td class="memItemLeft" align="right" valign="top"><a id="ae81dc353f3e9287a6cec47543c9e3840"></a>
-const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_opponent_team</b> (const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;state) const</td></tr>
+const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#ae81dc353f3e9287a6cec47543c9e3840">get_opponent_team</a> (const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;state) const</td></tr>
+<tr class="memdesc:ae81dc353f3e9287a6cec47543c9e3840"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the team from the packet that does not match our team ID. <br /></td></tr>
 <tr class="separator:ae81dc353f3e9287a6cec47543c9e3840"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9049d7b653c057621553c0c63852aac9"><td class="memItemLeft" align="right" valign="top"><a id="a9049d7b653c057621553c0c63852aac9"></a>
-const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_own_team</b> (const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;state) const</td></tr>
+const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">gamecontroller::Team</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a9049d7b653c057621553c0c63852aac9">get_own_team</a> (const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;state) const</td></tr>
+<tr class="memdesc:a9049d7b653c057621553c0c63852aac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the team from the packet that matches our team ID. <br /></td></tr>
 <tr class="separator:a9049d7b653c057621553c0c63852aac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a435a4fcef06a22e29f4c51522e562160"><td class="memItemLeft" align="right" valign="top"><a id="a435a4fcef06a22e29f4c51522e562160"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>process</b> (const message::input::GameState &amp;old_game_state, const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;old_packet, const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;new_packet)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a435a4fcef06a22e29f4c51522e562160">process</a> (const message::input::GameState &amp;old_game_state, const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;old_packet, const <a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a> &amp;new_packet)</td></tr>
+<tr class="memdesc:a435a4fcef06a22e29f4c51522e562160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processes a new <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> packet and emits state changes. <br /></td></tr>
 <tr class="separator:a435a4fcef06a22e29f4c51522e562160"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d18714780a73407222b6992175d0455"><td class="memItemLeft" align="right" valign="top"><a id="a0d18714780a73407222b6992175d0455"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>reset_state</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a0d18714780a73407222b6992175d0455">reset_state</a> ()</td></tr>
+<tr class="memdesc:a0d18714780a73407222b6992175d0455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the game state to initial values. <br /></td></tr>
 <tr class="separator:a0d18714780a73407222b6992175d0455"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad82b15dc8b430a7c95c8cd3287c9d42a"><td class="memItemLeft" align="right" valign="top"><a id="ad82b15dc8b430a7c95c8cd3287c9d42a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>send_reply_message</b> (const gamecontroller::ReplyMessage &amp;message)</td></tr>
-<tr class="separator:ad82b15dc8b430a7c95c8cd3287c9d42a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefe7e63d86877891299cb36db1e667d6"><td class="memItemLeft" align="right" valign="top"><a id="aefe7e63d86877891299cb36db1e667d6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aefe7e63d86877891299cb36db1e667d6">send_reply_message</a> ()</td></tr>
+<tr class="memdesc:aefe7e63d86877891299cb36db1e667d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends a reply packet to the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a>. <br /></td></tr>
+<tr class="separator:aefe7e63d86877891299cb36db1e667d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
 <tr class="memitem:a08fa685c12bda08a7599872749ad6a34"><td class="memItemLeft" align="right" valign="top"><a id="a08fa685c12bda08a7599872749ad6a34"></a>
-static message::input::GameState::PenaltyReason&#160;</td><td class="memItemRight" valign="bottom"><b>get_penalty_reason</b> (const gamecontroller::PenaltyState &amp;penalty_state)</td></tr>
+static message::input::GameState::PenaltyReason&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a08fa685c12bda08a7599872749ad6a34">get_penalty_reason</a> (const gamecontroller::PenaltyState &amp;penalty_state)</td></tr>
+<tr class="memdesc:a08fa685c12bda08a7599872749ad6a34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a gamecontroller::PenaltyState to a GameState::PenaltyReason. <br /></td></tr>
 <tr class="separator:a08fa685c12bda08a7599872749ad6a34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a374a434269fd08be0524926fba69e400"><td class="memItemLeft" align="right" valign="top"><a id="a374a434269fd08be0524926fba69e400"></a>
+static message::input::GameState::TeamColour::Value&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a374a434269fd08be0524926fba69e400">get_team_colour</a> (const gamecontroller::TeamColour &amp;colour)</td></tr>
+<tr class="memdesc:a374a434269fd08be0524926fba69e400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a gamecontroller::TeamColour to a GameState::TeamColour::Value. <br /></td></tr>
+<tr class="separator:a374a434269fd08be0524926fba69e400"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f6cc7a8c32bfd1f0724e1bd19dba597"><td class="memItemLeft" align="right" valign="top"><a id="a0f6cc7a8c32bfd1f0724e1bd19dba597"></a>
-static std::string&#160;</td><td class="memItemRight" valign="bottom"><b>ip_address_int_to_string</b> (const uint32_t &amp;ip_addr)</td></tr>
+static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a0f6cc7a8c32bfd1f0724e1bd19dba597">ip_address_int_to_string</a> (const uint32_t &amp;ip_addr)</td></tr>
+<tr class="memdesc:a0f6cc7a8c32bfd1f0724e1bd19dba597"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an integer IP address to a string. <br /></td></tr>
 <tr class="separator:a0f6cc7a8c32bfd1f0724e1bd19dba597"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a14d21bf060502e88c9b86cc3b058fda8"><td class="memItemLeft" align="right" valign="top"><a id="a14d21bf060502e88c9b86cc3b058fda8"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">game_controller_address</a> = &quot;&quot;</td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">game_controller_address</a> {}</td></tr>
 <tr class="memdesc:a14d21bf060502e88c9b86cc3b058fda8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The address to use to send reply packets back to game controller (unicast) <br /></td></tr>
 <tr class="separator:a14d21bf060502e88c9b86cc3b058fda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c96e07aff3ede805ce9c57b78a7cab6"><td class="memItemLeft" align="right" valign="top"><a id="a2c96e07aff3ede805ce9c57b78a7cab6"></a>
+gamecontroller::GamePhase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a2c96e07aff3ede805ce9c57b78a7cab6">game_phase</a> {}</td></tr>
+<tr class="memdesc:a2c96e07aff3ede805ce9c57b78a7cab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current game phase from the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> packet. <br /></td></tr>
+<tr class="separator:a2c96e07aff3ede805ce9c57b78a7cab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a238ff12d77c3f42e3d8f6cbd98749701"><td class="memItemLeft" align="right" valign="top"><a id="a238ff12d77c3f42e3d8f6cbd98749701"></a>
-std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ignored_ip_addresses</b> {}</td></tr>
+std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a238ff12d77c3f42e3d8f6cbd98749701">ignored_ip_addresses</a> {}</td></tr>
+<tr class="memdesc:a238ff12d77c3f42e3d8f6cbd98749701"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set of IP addresses that have been ignored due to not matching the udp_filter_address. <br /></td></tr>
 <tr class="separator:a238ff12d77c3f42e3d8f6cbd98749701"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51971ab114f2472f71e8febacc716978"><td class="memItemLeft" align="right" valign="top"><a id="a51971ab114f2472f71e8febacc716978"></a>
-ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><b>listen_handle</b></td></tr>
+ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a51971ab114f2472f71e8febacc716978">listen_handle</a></td></tr>
+<tr class="memdesc:a51971ab114f2472f71e8febacc716978"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle for our registered UDP receive callback. <br /></td></tr>
 <tr class="separator:a51971ab114f2472f71e8febacc716978"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe8b57c31dd6904be067a463c282173f"><td class="memItemLeft" align="right" valign="top"><a id="afe8b57c31dd6904be067a463c282173f"></a>
-gamecontroller::Mode&#160;</td><td class="memItemRight" valign="bottom"><b>mode</b></td></tr>
-<tr class="separator:afe8b57c31dd6904be067a463c282173f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab78f793343a94ccb3bf4461a3be8dc49"><td class="memItemLeft" align="right" valign="top"><a id="ab78f793343a94ccb3bf4461a3be8dc49"></a>
-<a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&#160;</td><td class="memItemRight" valign="bottom"><b>packet</b></td></tr>
+<a class="el" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">gamecontroller::GameControllerPacket</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#ab78f793343a94ccb3bf4461a3be8dc49">packet</a> {}</td></tr>
+<tr class="memdesc:ab78f793343a94ccb3bf4461a3be8dc49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Latest packet received from the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a>. <br /></td></tr>
 <tr class="separator:ab78f793343a94ccb3bf4461a3be8dc49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7483a8699fcfadc5f6afa6b96edb4daa"><td class="memItemLeft" align="right" valign="top"><a id="a7483a8699fcfadc5f6afa6b96edb4daa"></a>
-uint&#160;</td><td class="memItemRight" valign="bottom"><b>PLAYER_ID</b></td></tr>
+uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a7483a8699fcfadc5f6afa6b96edb4daa">PLAYER_ID</a> {0}</td></tr>
+<tr class="memdesc:a7483a8699fcfadc5f6afa6b96edb4daa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Player ID of this robot. <br /></td></tr>
 <tr class="separator:a7483a8699fcfadc5f6afa6b96edb4daa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94b56ab486d51495d2d4cd3aea83a2b2"><td class="memItemLeft" align="right" valign="top"><a id="a94b56ab486d51495d2d4cd3aea83a2b2"></a>
-uint&#160;</td><td class="memItemRight" valign="bottom"><b>receive_port</b></td></tr>
+uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a94b56ab486d51495d2d4cd3aea83a2b2">receive_port</a> {0}</td></tr>
+<tr class="memdesc:a94b56ab486d51495d2d4cd3aea83a2b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port to receive <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> packets on. <br /></td></tr>
 <tr class="separator:a94b56ab486d51495d2d4cd3aea83a2b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a569471921c4fb843a1490ede4e0a047b"><td class="memItemLeft" align="right" valign="top"><a id="a569471921c4fb843a1490ede4e0a047b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>self_penalised</b> = true</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a569471921c4fb843a1490ede4e0a047b">self_penalised</a> {true}</td></tr>
+<tr class="memdesc:a569471921c4fb843a1490ede4e0a047b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if the current player is penalised. <br /></td></tr>
 <tr class="separator:a569471921c4fb843a1490ede4e0a047b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7789049cd317c2ef430b09af624bbe01"><td class="memItemLeft" align="right" valign="top"><a id="a7789049cd317c2ef430b09af624bbe01"></a>
-uint&#160;</td><td class="memItemRight" valign="bottom"><b>send_port</b></td></tr>
+uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a7789049cd317c2ef430b09af624bbe01">send_port</a> {0}</td></tr>
+<tr class="memdesc:a7789049cd317c2ef430b09af624bbe01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Port to send reply packets to the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> on. <br /></td></tr>
 <tr class="separator:a7789049cd317c2ef430b09af624bbe01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f1647754624c102a732355764f4b77c"><td class="memItemLeft" align="right" valign="top"><a id="a5f1647754624c102a732355764f4b77c"></a>
+gamecontroller::SetPlay&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a5f1647754624c102a732355764f4b77c">set_play</a> {}</td></tr>
+<tr class="memdesc:a5f1647754624c102a732355764f4b77c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current set play from the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> packet. <br /></td></tr>
+<tr class="separator:a5f1647754624c102a732355764f4b77c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeca9d62a419dd69308c8cd038482d09f"><td class="memItemLeft" align="right" valign="top"><a id="aeca9d62a419dd69308c8cd038482d09f"></a>
-uint&#160;</td><td class="memItemRight" valign="bottom"><b>TEAM_ID</b></td></tr>
+uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aeca9d62a419dd69308c8cd038482d09f">TEAM_ID</a> {0}</td></tr>
+<tr class="memdesc:aeca9d62a419dd69308c8cd038482d09f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Team ID of the robot's team. <br /></td></tr>
 <tr class="separator:aeca9d62a419dd69308c8cd038482d09f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9dc27cdd03c1ecb6947480c5e7bf5e8d"><td class="memItemLeft" align="right" valign="top"><a id="a9dc27cdd03c1ecb6947480c5e7bf5e8d"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>udp_filter_address</b> = &quot;&quot;</td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a9dc27cdd03c1ecb6947480c5e7bf5e8d">udp_filter_address</a> {}</td></tr>
+<tr class="memdesc:a9dc27cdd03c1ecb6947480c5e7bf5e8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional IP address to filter incoming packets by source, ignoring all others if set. <br /></td></tr>
 <tr class="separator:a9dc27cdd03c1ecb6947480c5e7bf5e8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
@@ -284,7 +310,7 @@ static constexpr const uint&#160;</td><td class="memItemRight" valign="bottom"><
 static constexpr const uint&#160;</td><td class="memItemRight" valign="bottom"><b>PLAYERS_PER_TEAM</b> = 6</td></tr>
 <tr class="separator:a92e61a0a9f53b48ba50028c3ca04dd2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a709e97d9f316e480721cdad1d81fbdf7"><td class="memItemLeft" align="right" valign="top"><a id="a709e97d9f316e480721cdad1d81fbdf7"></a>
-static constexpr const uint&#160;</td><td class="memItemRight" valign="bottom"><b>SUPPORTED_VERSION</b> = 12</td></tr>
+static constexpr const uint&#160;</td><td class="memItemRight" valign="bottom"><b>SUPPORTED_VERSION</b> = 19</td></tr>
 <tr class="separator:a709e97d9f316e480721cdad1d81fbdf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -304,7 +330,7 @@ Trent Houliston </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1GameController.html">GameController</a></li>
-    <li class="footer">Generated on Sun Jun 7 2026 02:48:09 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 10 2026 06:00:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

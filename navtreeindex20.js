@@ -1,9 +1,5 @@
 var NAVTREEINDEX20 =
 {
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,13,2,4],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,13,2,5],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,13,2,8],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[3,0,7,13,2,3],
 "structutility_1_1support_1_1LazyEvaluation.html":[3,0,7,13,3],
 "structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[3,0,7,13,3,1],
 "structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[3,0,7,13,3,0],
@@ -104,7 +100,7 @@ var NAVTREEINDEX20 =
 "structutility_1_1vision_1_1Pixel.html#af57c2b4af8fddd6bc40e25402c6325d7":[3,0,7,15,2,1],
 "systematic_8hpp.html#a5ad5d87b0c3b66bc0f6559cdfee34782":[2,0,7,6,7,0,7],
 "this--example.html":[4,0],
-"time__sync_8cpp.html#a235ccd7baf919af6cc690c4b193bf879":[2,0,3,2,53],
+"time__sync_8cpp.html#a235ccd7baf919af6cc690c4b193bf879":[2,0,3,2,51],
 "tinyrobotics_8hpp.html#a0867a02e8d463829bc789af482c99f74":[2,0,7,0,1,6],
 "tinyrobotics_8hpp.html#a1c507ba419daed35009b8311425d8d1d":[2,0,7,0,1,1],
 "tinyrobotics_8hpp.html#a2264553f0a06ca8267d8b0f05c9667d3":[2,0,7,0,1,4],

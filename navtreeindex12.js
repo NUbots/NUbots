@@ -1,11 +1,5 @@
 var NAVTREEINDEX12 =
 {
-"structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6":[3,0,1,0,10,1],
-"structextension_1_1behaviour_1_1ProviderBase.html#ae7c18560e4bd4fef0fd0fc2373b2178d":[3,0,1,0,10,3],
-"structextension_1_1behaviour_1_1ProviderScope.html":[3,0,1,0,11],
-"structextension_1_1behaviour_1_1ProviderScope.html#a3d9243f00ec02925350f439513dc8416":[3,0,1,0,11,9],
-"structextension_1_1behaviour_1_1ProviderScope.html#a4dea87aabd6306443a13be3e31dfe6d7":[3,0,1,0,11,0],
-"structextension_1_1behaviour_1_1ProviderScope.html#aa452c2db94714e49dee19fc4b1af08b1":[3,0,1,0,11,4],
 "structextension_1_1behaviour_1_1ProviderScope.html#aa94e8d41e9497635d822b99861b4b8ec":[3,0,1,0,11,11],
 "structextension_1_1behaviour_1_1ProviderScope.html#ac15703715fb8c6244fa5b419007a706f":[3,0,1,0,11,8],
 "structextension_1_1behaviour_1_1ProviderScope.html#ad152e7ea971e7e0816f844d0f6f92065":[3,0,1,0,11,5],
@@ -249,5 +243,11 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html":[3,0,3,2,6,0,0],
 "structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#a3fc2684a829d0292e9d3b9dab31f663a":[3,0,3,2,6,0,0,0],
 "structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#ae6b15f6cc52f1b862fe242a16836e235":[3,0,3,2,6,0,0,1],
-"structmodule_1_1input_1_1NatNet_1_1CameraModel.html":[3,0,3,2,7,0]
+"structmodule_1_1input_1_1NatNet_1_1CameraModel.html":[3,0,3,2,7,0],
+"structmodule_1_1input_1_1NatNet_1_1CameraModel.html#a004a5f13d33ac2bea7487861e3e215d8":[3,0,3,2,7,0,0],
+"structmodule_1_1input_1_1NatNet_1_1CameraModel.html#a135dcb39ab5e051139e0f11545100ac6":[3,0,3,2,7,0,3],
+"structmodule_1_1input_1_1NatNet_1_1CameraModel.html#a907911b10b5472ce36651f94597f45bb":[3,0,3,2,7,0,2],
+"structmodule_1_1input_1_1NatNet_1_1CameraModel.html#a973470d5a61011922c43df28884fe6d6":[3,0,3,2,7,0,1],
+"structmodule_1_1input_1_1NatNet_1_1Config.html":[3,0,3,2,7,1],
+"structmodule_1_1input_1_1NatNet_1_1Config.html#a595ccb81c4a21f33d4daadc75181ef88":[3,0,3,2,7,1,0]
 };

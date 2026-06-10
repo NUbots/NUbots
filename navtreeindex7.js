@@ -1,11 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"classmodule_1_1vision_1_1GreenHorizonDetector.html":[3,0,3,14,4],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[3,0,3,14,4,2],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a71d62b24b67d6f9f7553831abe319cd0":[3,0,3,14,4,1],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[3,0,3,14,4,0],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#ac4a510f2298038c54f5e015c550e1f5a":[3,0,3,14,4,4],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#ad5f2264ce6dbfd90e8be2bb076c283d2":[3,0,3,14,4,3],
 "classmodule_1_1vision_1_1RobotDetector.html":[3,0,3,14,5],
 "classmodule_1_1vision_1_1RobotDetector.html#a12135a036c8a25caba5be2838abdd58e":[3,0,3,14,5,2],
 "classmodule_1_1vision_1_1RobotDetector.html#ae0ac1f24535772f2f4603251ad3c414f":[3,0,3,14,5,1],
@@ -249,5 +243,11 @@ var NAVTREEINDEX7 =
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#a01d4230ad186a8e861956a7845878ce8":[3,0,7,5,0,1,4],
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#a21f9a92f67dd88ea850e5c5341f3970c":[3,0,7,5,0,1,0],
 "classutility_1_1math_1_1filter_1_1MahonyFilter.html#a25faf2506af03ccdb055a56216291b6d":[3,0,7,5,0,1,8],
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a29b26f043c744cf7e1b45db500116da1":[3,0,7,5,0,1,9]
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a29b26f043c744cf7e1b45db500116da1":[3,0,7,5,0,1,9],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a38843fb5d1bb3dd76f4751299ec01399":[3,0,7,5,0,1,2],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a64b523d9056b0d9224f781a34ce98474":[3,0,7,5,0,1,10],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8a60ef3654780d672950aee042d7eb28":[3,0,7,5,0,1,7],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a8fea4c5a6e7d496517218e571a5d1983":[3,0,7,5,0,1,12],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#aa632e1f6df3cb5545769050af80236ae":[3,0,7,5,0,1,3],
+"classutility_1_1math_1_1filter_1_1MahonyFilter.html#ab671e2f66e1c55771ac4c51c75debcb5":[3,0,7,5,0,1,11]
 };

@@ -1,11 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"positioning_8hpp.html#a9134cd33af38dc0fee8acf641ae7a52a":[2,0,7,17,4],
-"positioning_8hpp.html#af732bac7d6eec7b68cb796c8519c54a9":[2,0,7,17,5],
-"projection_8hpp.html#a00940814ed9686c920cb1953a2946c49":[2,0,7,21,0,0],
-"projection_8hpp.html#a22b611de984047ae8574396e761da7d6":[2,0,7,21,29],
-"projection_8hpp.html#a23ed0f263dc15e3b9be4328b063f88b4":[2,0,7,21,27],
-"projection_8hpp.html#a3395668bc08de38add739f8e9482c3ba":[2,0,7,21,32],
 "projection_8hpp.html#a409e8a9b035d58d1dd297071313372f4":[2,0,7,21,0,1],
 "projection_8hpp.html#a673987033c5032614296b209770423fb":[2,0,7,21,1,1],
 "projection_8hpp.html#a6778802b91999c3242fa137456726995":[2,0,7,21,2,1],
@@ -26,7 +20,7 @@ var NAVTREEINDEX11 =
 "read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e":[2,0,3,12,1,24],
 "resample_8hpp.html#ad303838c627903439887c863cc1ef49a":[2,0,7,6,7,0,4],
 "residual_8hpp.html#a3666903fbc2bb877aac34c9574b99fdb":[2,0,7,6,7,0,5],
-"settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe":[2,0,3,2,52],
+"settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe":[2,0,3,2,50],
 "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4":[2,0,7,21,3,2],
 "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959":[2,0,7,21,3,7],
 "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a265dd178f856b688c7769575070863db":[2,0,7,21,3,1],
@@ -249,5 +243,11 @@ var NAVTREEINDEX11 =
 "structextension_1_1behaviour_1_1Provide.html":[3,0,1,0,9],
 "structextension_1_1behaviour_1_1ProviderBase.html":[3,0,1,0,10],
 "structextension_1_1behaviour_1_1ProviderBase.html#a6e26a64213aa83e54bc8424a4663732b":[3,0,1,0,10,2],
-"structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc":[3,0,1,0,10,0]
+"structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc":[3,0,1,0,10,0],
+"structextension_1_1behaviour_1_1ProviderBase.html#ae648cbbff7536af4f363c27e1e4265f6":[3,0,1,0,10,1],
+"structextension_1_1behaviour_1_1ProviderBase.html#ae7c18560e4bd4fef0fd0fc2373b2178d":[3,0,1,0,10,3],
+"structextension_1_1behaviour_1_1ProviderScope.html":[3,0,1,0,11],
+"structextension_1_1behaviour_1_1ProviderScope.html#a3d9243f00ec02925350f439513dc8416":[3,0,1,0,11,9],
+"structextension_1_1behaviour_1_1ProviderScope.html#a4dea87aabd6306443a13be3e31dfe6d7":[3,0,1,0,11,0],
+"structextension_1_1behaviour_1_1ProviderScope.html#aa452c2db94714e49dee19fc4b1af08b1":[3,0,1,0,11,4]
 };

@@ -175,6 +175,12 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>game_controller_address
 : <a class="el" href="classmodule_1_1input_1_1GameController.html#a14d21bf060502e88c9b86cc3b058fda8">module::input::GameController</a>
 </li>
+<li>game_phase
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#a2c96e07aff3ede805ce9c57b78a7cab6">module::input::GameController</a>
+</li>
+<li>GameController()
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#ab861157c82444f6a7dd48b6b6708b02e">module::input::GameController</a>
+</li>
 <li>gen
 : <a class="el" href="structutility_1_1math_1_1stats_1_1MultivariateNormal.html#a0bf5fc5db7e60d4b8ebed418abcbbb12">utility::math::stats::MultivariateNormal&lt; Scalar, N &gt;</a>
 , <a class="el" href="structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a640eb32ea161703a4b4014df35c2bfcc">utility::math::stats::resample::Systematic&lt; Scalar &gt;</a>
@@ -231,7 +237,7 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 </li>
 <li>get_foot_pose()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#acd19026ad0f8655722a4b6fdd59cc31a">utility::skill::KickGenerator&lt; Scalar &gt;</a>
-, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ae4a2cf23845d5ccc8550db4b29028447">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_foot_width_offset()
 : <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
@@ -254,6 +260,12 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>get_occupancy_value()
 : <a class="el" href="classutility_1_1localisation_1_1OccupancyMap.html#ac1ffe9dec67dea8c4c43f91c5f132b70">utility::localisation::OccupancyMap&lt; Scalar &gt;</a>
 </li>
+<li>get_opponent_team()
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#ae81dc353f3e9287a6cec47543c9e3840">module::input::GameController</a>
+</li>
+<li>get_own_team()
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#a9049d7b653c057621553c0c63852aac9">module::input::GameController</a>
+</li>
 <li>get_parameters()
 : <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#acd7f26d8f7eada562239f7f92f5b70ab">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
@@ -268,6 +280,9 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 </li>
 <li>get_particles_as_vector()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a38144334248f1f5de0393a9faf7eda75">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
+</li>
+<li>get_penalty_reason()
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#a08fa685c12bda08a7599872749ad6a34">module::input::GameController</a>
 </li>
 <li>get_phase()
 : <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ae05a0d003cb492731fb7dfacc691c7d9">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
@@ -289,7 +304,10 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 </li>
 <li>get_swing_foot_pose()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9b45e1f0f5545062f80c3e83ff3795d9">utility::skill::KickGenerator&lt; Scalar &gt;</a>
-, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a5090024ceeb8df8ad9f23b3f2e53a5f9">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a619111a6b275259e3a66873f72771a6c">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+</li>
+<li>get_team_colour()
+: <a class="el" href="classmodule_1_1input_1_1GameController.html#a374a434269fd08be0524926fba69e400">module::input::GameController</a>
 </li>
 <li>get_time()
 : <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9f2bafa831db292709df608b719e3b01">utility::skill::KickGenerator&lt; Scalar &gt;</a>
@@ -434,7 +452,7 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jun 7 2026 02:48:10 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 10 2026 06:00:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
