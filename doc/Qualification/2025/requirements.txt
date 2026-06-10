@@ -1,0 +1,20 @@
+2.3) Extended Abstract
+-----------------------------
+
+A two-page extended abstract must be submitted. For teams which have previously participated in the Humanoid League, the extended abstract needs to:
+
+- include lessons learned from the participation in previous RoboCup competitions
+- highlight major problems that the team is trying to solve for the upcoming competition
+- outline the plans for the major changes that the teams anticipate to have implemented by the RoboCup 2025 competition
+- describe the implementation status of the changes planned by the time of submitting the application
+
+For teams which have never participated in the RoboCup Humanoid League, the Extended Abstract needs to pitch the scientific aspects of their humanoid robotic system and highlight their research interests.
+
+The Extended Abstract is limited to 2 pages maximum and must be submitted in PDF format. Extended Abstracts are designed to highlight the changes and scientific developments since the last RoboCup. Thus, we expect the usage of material from previous TDPs or Extended Abstracts to be minimal. If used, they need to be cited appropriately. Submissions of last year’s Extended Abstract will be desk-rejected.
+
+The Extended Abstract must follow the LNCS format which can be downloaded from https://www.springer.com/gp/computer-science/lncs/conference-proceedings-guidelines. Teams that do to follow the LNCS formatting and style guidelines will not be qualified. No exceptions to this rule will be made.
+
+3) Plagiarism
+-----------------------------------------
+
+Plagiarism, loosely the unattributed use of other peoples' words, code, and ideas is not tolerated in the RoboCup community. See plagiarism_FAQ.html for a more detailed description. The teams and team members that plagiarize other peoples' work and present it as their own will be disqualified. For a first offense, the team and team members will be banned from RoboCup competition for two years (usually the current and next year). Harsher penalties will be applied to repeat offenders or extremely serious cases of plagiarism. A team may be disqualified at any time for plagiarism, even after the competition has started. RoboCup will not reimburse teams for any expenses related to their disqualification.

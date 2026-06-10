@@ -84,6 +84,9 @@ namespace module::platform::OpenCR {
             battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
             battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
             battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
+
+            // Gyro offset
+            cfg.gyro_offset = config["gyro_offset"].as<Expression>();
         });
 
         on<Trigger<ServoOffsets>>().then([this](const ServoOffsets& offsets) {

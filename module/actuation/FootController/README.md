@@ -21,4 +21,5 @@ Include this module to allow the robot to control the feet of robot.
 
 ## Dependencies
 
+- Director
 - Eigen

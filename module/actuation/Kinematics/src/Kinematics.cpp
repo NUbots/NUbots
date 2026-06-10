@@ -29,6 +29,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
@@ -42,6 +43,7 @@
 namespace module::actuation {
 
     using extension::Configuration;
+
     using message::actuation::Head;
     using message::actuation::HeadIK;
     using message::actuation::KinematicsModel;
@@ -50,7 +52,7 @@ namespace module::actuation {
     using message::actuation::RightLeg;
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
-    using message::actuation::ServoState;
+
     using utility::actuation::kinematics::calculate_head_joints;
     using utility::actuation::kinematics::calculate_leg_joints;
     using utility::actuation::tinyrobotics::configuration_to_servos;
@@ -183,10 +185,10 @@ namespace module::actuation {
                 auto servos = std::make_unique<Head>();
                 auto joints = calculate_head_joints<double>(head_ik.uPCt);
                 // Get head kinematics limits
-                double max_yaw   = kinematics_model.head.MAX_YAW;
-                double min_yaw   = kinematics_model.head.MIN_YAW;
-                double max_pitch = kinematics_model.head.MAX_PITCH;
-                double min_pitch = kinematics_model.head.MIN_PITCH;
+                const double max_yaw   = kinematics_model.head.MAX_YAW;
+                const double min_yaw   = kinematics_model.head.MIN_YAW;
+                const double max_pitch = kinematics_model.head.MAX_PITCH;
+                const double min_pitch = kinematics_model.head.MIN_PITCH;
                 // Clamp head angles with max/min limits
                 for (auto& joint : joints) {
                     if (joint.first == ServoID::HEAD_PITCH) {
@@ -205,13 +207,13 @@ namespace module::actuation {
             });
     }
 
-    InverseKinematicsMethod Kinematics::ik_string_to_method(const std::string& method_string) {
-        static std::map<std::string, InverseKinematicsMethod> string_to_method_map = {
-            {"JACOBIAN", InverseKinematicsMethod::JACOBIAN},
-            {"NLOPT", InverseKinematicsMethod::NLOPT},
-            {"LEVENBERG_MARQUARDT", InverseKinematicsMethod::LEVENBERG_MARQUARDT},
-            {"PARTICLE_SWARM", InverseKinematicsMethod::PARTICLE_SWARM},
-            {"BFGS", InverseKinematicsMethod::BFGS}};
+    tinyrobotics::InverseKinematicsMethod Kinematics::ik_string_to_method(const std::string& method_string) {
+        static std::map<std::string, tinyrobotics::InverseKinematicsMethod> string_to_method_map = {
+            {"JACOBIAN", tinyrobotics::InverseKinematicsMethod::JACOBIAN},
+            {"NLOPT", tinyrobotics::InverseKinematicsMethod::NLOPT},
+            {"LEVENBERG_MARQUARDT", tinyrobotics::InverseKinematicsMethod::LEVENBERG_MARQUARDT},
+            {"PARTICLE_SWARM", tinyrobotics::InverseKinematicsMethod::PARTICLE_SWARM},
+            {"BFGS", tinyrobotics::InverseKinematicsMethod::BFGS}};
 
         auto it = string_to_method_map.find(method_string);
         if (it == string_to_method_map.end()) {

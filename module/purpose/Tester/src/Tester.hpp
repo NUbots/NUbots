@@ -40,8 +40,6 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Priority of StartSafely task
-            int start_safely_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task
@@ -50,20 +48,6 @@ namespace module::purpose {
             int walk_to_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_kick_ball_priority = 0;
-            /// @brief Walk inside bounding box task
-            int walk_inside_bounded_box_priority = 0;
-            /// @brief x minimum bound on field to walk within
-            double bounded_region_x_min = 0.0;
-            /// @brief x maximum bound on field to walk within
-            double bounded_region_x_max = 0.0;
-            /// @brief y minimum bound on field to walk within
-            double bounded_region_y_min = 0.0;
-            /// @brief y maximum bound on field to walk within
-            double bounded_region_y_max = 0.0;
-            /// @brief Priority of AlignBallToGoal task
-            int align_ball_to_goal_priority = 0;
-            /// @brief Priority of KickToGoal task
-            int kick_to_goal_priority = 0;
             /// @brief Priority of WalkToFieldPosition task
             int walk_to_field_position_priority = 0;
             /// @brief Priority of KickTo task

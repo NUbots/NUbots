@@ -29,6 +29,10 @@
 import multiprocessing
 import os
 
+# Tell tensorflow to shut up
+if "TF_CPP_MIN_LOG_LEVEL" not in os.environ:
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
@@ -38,10 +42,8 @@ from utility.nbs import LinearDecoder
 from .images import decode_image
 from .images.video_recorder import Recorder
 
-gpus = tf.config.experimental.list_physical_devices("GPU")
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
-    tf.config.set_soft_device_placement(True)
+# Configure TensorFlow to use CPU only for multiprocessing compatibility
+tf.config.set_visible_devices([], "GPU")
 
 
 def register(command):
@@ -58,6 +60,11 @@ def register(command):
         choices=["libx264", "h264_nvenc"],
         help="The encoder to use when encoding video",
     )
+
+
+def init_worker():
+    """Initialize worker process with TensorFlow CPU-only configuration"""
+    tf.config.set_visible_devices([], "GPU")
 
 
 def process_frame(item):
@@ -90,7 +97,7 @@ def run(files, output, encoder, quality, **kwargs):
 
     recorders = {}
 
-    with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
+    with multiprocessing.Pool(multiprocessing.cpu_count(), initializer=init_worker) as pool:
 
         def record_frame(msg):
             # If we haven't seen this camera before, make a new encoder for it

@@ -17,6 +17,7 @@ const args = minimist(process.argv.slice(2));
 
 const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
+const nuclearnetPort = args.port || "7447";
 
 async function main() {
   const app = express();
@@ -26,7 +27,7 @@ async function main() {
   // Initialize socket.io namespace immediately to catch reconnections.
   NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
     fakeNetworking: withVirtualRobots,
-    connectionOpts: { name: "nusight", address: nuclearnetAddress },
+    connectionOpts: { name: "nusight", address: nuclearnetAddress, port: nuclearnetPort },
   });
 
   const viteDevServer = await createViteServer({

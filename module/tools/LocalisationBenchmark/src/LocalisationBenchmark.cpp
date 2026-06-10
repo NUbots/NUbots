@@ -34,7 +34,6 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/platform/RawSensors.hpp"
 
 namespace module::tools {
 
@@ -53,7 +52,7 @@ namespace module::tools {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
-    using message::platform::RawSensors;
+    using message::localisation::RobotPoseGroundTruth;
 
     using NUClear::message::CommandLineArguments;
 
@@ -116,14 +115,13 @@ namespace module::tools {
         });
 
 
-        on<Trigger<Field>, With<Sensors>, With<RawSensors>>().then(
-            [this](const Field& field, const Sensors& sensors, const RawSensors& raw_sensors) {
+        on<Trigger<Field>, With<Sensors>, With<RobotPoseGroundTruth>>().then(
+            [this](const Field& field, const Sensors& sensors, const RobotPoseGroundTruth& robot_pose_ground_truth) {
                 // Compute estimated Hft
                 Eigen::Isometry3d Hft_est = field.Hfw * sensors.Htw.inverse();
 
                 // Compute ground truth Hft
-                Eigen::Isometry3d Hft_gt = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw)
-                                           * Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
+                Eigen::Isometry3d Hft_gt = Eigen::Isometry3d(robot_pose_ground_truth.Hft);
 
                 // Compute localisation error
                 Eigen::Matrix<double, 6, 1> localisation_error = tinyrobotics::homogeneous_error(Hft_gt, Hft_est);

@@ -34,14 +34,9 @@
 #include "message/planning/LookAround.hpp"
 #include "message/skill/GPT.hpp"
 #include "message/skill/Say.hpp"
-#include "message/strategy/AlignBallToGoal.hpp"
-#include "message/strategy/FindFeature.hpp"
-#include "message/strategy/KickToGoal.hpp"
+#include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
-#include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/strategy/StartSafely.hpp"
-#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -58,14 +53,9 @@ namespace module::purpose {
     using message::skill::GPTAudioRequest;
     using message::skill::GPTChatRequest;
     using message::skill::Say;
-    using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
-    using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
-    using message::strategy::Ready;
     using message::strategy::StandStill;
-    using message::strategy::StartSafely;
-    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
@@ -77,30 +67,22 @@ namespace module::purpose {
 
         on<Configuration>("Tester.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Tester.yaml
-            this->log_level                      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.start_safely_priority            = config["tasks"]["start_safely_priority"].as<int>();
-            cfg.find_ball_priority               = config["tasks"]["find_ball_priority"].as<int>();
-            cfg.look_at_ball_priority            = config["tasks"]["look_at_ball_priority"].as<int>();
-            cfg.walk_to_ball_priority            = config["tasks"]["walk_to_ball_priority"].as<int>();
-            cfg.walk_to_kick_ball_priority       = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
-            cfg.align_ball_to_goal_priority      = config["tasks"]["align_ball_to_goal_priority"].as<int>();
-            cfg.kick_to_goal_priority            = config["tasks"]["kick_to_goal_priority"].as<int>();
-            cfg.walk_to_field_position_priority  = config["tasks"]["walk_to_field_position_priority"].as<int>();
-            cfg.kick_to_priority                 = config["tasks"]["kick_to_priority"].as<int>();
-            cfg.look_around_priority             = config["tasks"]["look_around_priority"].as<int>();
-            cfg.stand_still_priority             = config["tasks"]["stand_still_priority"].as<int>();
-            cfg.say_priority                     = config["tasks"]["say_priority"].as<int>();
-            cfg.chatgpt_priority                 = config["tasks"]["chatgpt_priority"].as<int>();
-            cfg.audiogpt_priority                = config["tasks"]["audiogpt_priority"].as<int>();
-            cfg.audiogpt_listen_duration         = config["audiogpt_listen_duration"].as<int>();
-            cfg.walk_to_field_position_position  = config["walk_to_field_position_position"].as<Expression>();
-            cfg.say_text                         = config["say_text"].as<std::string>();
-            cfg.chatgpt_prompt                   = config["chatgpt_prompt"].as<std::string>();
-            cfg.walk_inside_bounded_box_priority = config["tasks"]["walk_inside_bounded_box"].as<int>();
-            cfg.bounded_region_x_min             = config["bounded_region_x_min"].as<Expression>();
-            cfg.bounded_region_x_max             = config["bounded_region_x_max"].as<Expression>();
-            cfg.bounded_region_y_min             = config["bounded_region_y_min"].as<Expression>();
-            cfg.bounded_region_y_max             = config["bounded_region_y_max"].as<Expression>();
+            this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
+            cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
+            cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
+            cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
+            cfg.walk_to_kick_ball_priority      = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
+            cfg.walk_to_field_position_priority = config["tasks"]["walk_to_field_position_priority"].as<int>();
+            cfg.kick_to_priority                = config["tasks"]["kick_to_priority"].as<int>();
+            cfg.look_around_priority            = config["tasks"]["look_around_priority"].as<int>();
+            cfg.stand_still_priority            = config["tasks"]["stand_still_priority"].as<int>();
+            cfg.say_priority                    = config["tasks"]["say_priority"].as<int>();
+            cfg.chatgpt_priority                = config["tasks"]["chatgpt_priority"].as<int>();
+            cfg.audiogpt_priority               = config["tasks"]["audiogpt_priority"].as<int>();
+            cfg.audiogpt_listen_duration        = config["audiogpt_listen_duration"].as<int>();
+            cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
+            cfg.say_text                        = config["say_text"].as<std::string>();
+            cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
 
             cfg.start_delay = config["start_delay"].as<int>();
         });
@@ -113,9 +95,6 @@ namespace module::purpose {
         on<Trigger<StartTester>>().then([this] {
             on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>>().then([this] {
                 // Emit all the tasks with priorities higher than 0
-                if (cfg.start_safely_priority > 0) {
-                    emit<Task>(std::make_unique<StartSafely>(), cfg.start_safely_priority);
-                }
                 if (cfg.find_ball_priority > 0) {
                     emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
                 }
@@ -128,12 +107,6 @@ namespace module::purpose {
                 if (cfg.walk_to_kick_ball_priority > 0) {
                     emit<Task>(std::make_unique<WalkToKickBall>(), cfg.walk_to_kick_ball_priority);
                 }
-                if (cfg.align_ball_to_goal_priority > 0) {
-                    emit<Task>(std::make_unique<AlignBallToGoal>(), cfg.align_ball_to_goal_priority);
-                }
-                if (cfg.kick_to_goal_priority > 0) {
-                    emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);
-                }
                 if (cfg.walk_to_field_position_priority > 0) {
                     emit<Task>(std::make_unique<WalkToFieldPosition>(
                                    pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
@@ -142,19 +115,6 @@ namespace module::purpose {
                                                         Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z())),
                                    true),
                                cfg.walk_to_field_position_priority);
-                }
-                if (cfg.walk_inside_bounded_box_priority > 0) {
-                    emit<Task>(
-                        std::make_unique<WalkInsideBoundedBox>(
-                            cfg.bounded_region_x_min,
-                            cfg.bounded_region_x_max,
-                            cfg.bounded_region_y_min,
-                            cfg.bounded_region_y_max,
-                            pos_rpy_to_transform(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
-                                                                 cfg.walk_to_field_position_position.y(),
-                                                                 0),
-                                                 Eigen::Vector3d(0, 0, cfg.walk_to_field_position_position.z()))),
-                        cfg.walk_inside_bounded_box_priority);
                 }
                 if (cfg.kick_to_priority > 0) {
                     emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);

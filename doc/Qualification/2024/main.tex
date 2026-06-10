@@ -1,0 +1,112 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NUbots' TDP 2020
+%
+% Date: 24.11.2019
+%
+%
+\documentclass{llncs}
+%
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{verbatim}
+%
+\begin{document}
+%
+
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{The NUbots Qualification Material for RoboCup 2024} % additional mark in the TOC
+%
+%
+\mainmatter              % start of the contributions
+%
+\title{The NUbots Team Extended Abstract 2024}
+%
+\titlerunning{The NUbots Extended Abstract for 2024}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+
+\author{Joe Bailey \and Clayton Carlon \and Stephan Chalup \and Liam Craft \and Joel Ferguson \and Angelique Herfel \and Dexter Konijn \and Sam McFarlane \and Alexandre Mendes \and Johanne Montano \and Thomas O'Brien \and Corah Oliver \and Jesse Perrin \and Mikyla Peters \and Ysobel Sims \and Cottrell Tamessar \and Jesse Williamson}
+       
+%
+\authorrunning{Bailey et al.}   % abbreviated author list (for running head)
+%
+%%%% modified list of auther for the TOC (add the affiliations)
+\tocauthor{
+J. Bailey,
+C. Carlon,
+S. Chalup,
+L. Craft,
+J. Ferguson,
+A. Herfel,
+D. Konijn,
+S. McFarlane,
+A. Mendes,
+J. Montano,
+T. O'Brien,
+C. Oliver,
+J. Perrin,
+M. Peters,
+Y. Sims,
+C. Tamessar,
+J. Williamson
+}
+
+%
+\institute{Newcastle Robotics Laboratory\\
+% College of Engineering, Science and Environment\\
+The University of Newcastle, Callaghan 2308, Australia\\
+Contact: \email{nubots@newcastle.edu.au}\\
+% Homepage: \url{http://robots.newcastle.edu.au}
+}
+%
+
+\maketitle              % typeset the title of the contribution
+
+% * ... include lessons learned from the participation in the previous RoboCup competition
+% * ... highlight major problems the team is trying to solve for the upcoming competition
+
+% \noindent\textbf{Lessons Learned:} NUbots have been competitors in RoboCup since 2002, and have placed first in 2006 in the Four Legged League and in 2008 in the Standard Platform League. Since joining the Humanoid League the team has faced issues in the areas of mechanics, electronics and control theory. The team has improved in these areas, and will be continuing to address them alongside utilising its strengths to overcome software-focused problems. In 2022, the majority of the team had never attended a RoboCup competition. Furthermore, the airline did not send the team's luggage to Thailand until the end of the first competition day. Despite these problems and the inexperience of the team, the team very quickly had functioning robots for the first game. In the future, robots will be taken in carry-on luggage. In previous years, the walk engine was the biggest issue faced by the team. Now, with a stable walk, the major problems to overcome are vision and localisation. In the last competition, the team learned it was important to have a robust grasp of the networking set up on the robots, and since then a tool has been made to simplify the process. In the last competition the team had a problem with the walk engine not running fast enough, however it was discovered that four threads were assigned to the Visual Mesh when the computer only had four threads in total. Since reducing this to two threads, the system has no computational complexity issues. A full debrief of RoboCup Bangkok can be found on NUbook~\cite{nubotsNUbookGit}, the team handbook.\\
+
+\noindent\textbf{Lessons Learned:} For the RoboCup 2023 competition, the team updated all systems, with some systems overhauled completely. The team used a new behaviour, localisation and odometry system, walk and kick engine, and integrated a new subcontroller. A new Visual Mesh network was use and major improvements were made to the debugging system, NUsight. With all of these changes, the team faced issues with not having enough time to test and tune the new system, particularly with robots still being built and upgraded days before leaving for the competition. Despite these issues, the team was able to score a goal and win a game for the first time with the current platform. For RoboCup 2024, the team will allow for enough time for tuning and testing to ensure a smooth system, and will not plan any hardware upgrades close to the competition. \newline
+
+\noindent\textbf{Major Problems:} In the 2023 drop-in games, the team had issues with their robots running into other robots consistently. This resulted in a poor performance. Hardware issues around servos overheating and seizing were major problems. Furthermore, the kick engine lacked stability and was turned off for the competition. Localisation experienced issues at times with the position flipping to the other side of the field and inaccuracy when the robot fell over.  \newline
+
+% NUbots are the RoboCup team at the University of Newcastle, Australia. In 2023 they will participate in the Kid Size Humanoid League, with their NUgus design based on the iGus platform\cite{Nimbro2018TDP}. NUbots have previously participated in the Standard Platform League (2002-2011), the Kid Size Humanoid League (2012-2017, 2021-2022), and the Teen Size Humanoid league (2018-2019).% rewrite
+
+% The NUbots' research addresses applications of machine learning, computer vision, sensor fusion and hardware. % The team's current research focus is Deep Learning. % This extended abstract gives an overview of developments made by the team and planned developments.
+
+% In the last RoboCup competition, which was held in 2019, NUbots faced issues with localisation and vision.
+
+% The team learnt at the 2019 competition that the vision system lacked robustness. Because of this the team is working towards new ways to get large robust datasets for vision and improving our existing methods. 
+
+% The walk engine used is a legacy walk engine based on the Team Darwin 2013 code release. This has not been suitable for the larger NUgus robot, and so a major problem the team is trying to solve for the 2020 competition is the walk engine. The team has multiple projects being worked on to develop a new walk engine. 
+
+% The team is working to improve the robot hardware and sensor capabilities. Several mechatronics projects are in progress to address issues with these areas.
+
+% * ... outline the plans of major changes the team anticipates to have implemented by the RoboCup 2020 competition
+% * ... describes the status of implementation of the planned changes by the time of submitting the application
+
+\noindent\textbf{Robot Avoidance and Team Behaviour:}
+One of the major problems at RoboCup 2023 was the lack of coordination of the robots. During drop-in games, they ran into other robots. In normal games, they lacked the ability to dynamically change their strategy for the number of robots on the field.
+Robot-to-robot communication has been developed since the competition and will be used to improve self and object localisation. It will also be used to dynamically determine the strategy of the robot - whether offensive or defensive. Currently, the Visual Mesh~\cite{Houliston2018VisualMR} accurately segments robots as robots, however the team needs to use this information to determine the location of robots in the world. This information will then be integrated into the path planning module to avoid walking into robots. Some issues within the vision system have hindered this development, with bug fixes in the field convex hull calculation recently being completed. \newline
+
+\noindent\textbf{Hardware:}
+In the 2023 competition, the NUgus robots subcontroller was upgraded to the OpenCR. Despite its successful integration, we encountered significant challenges, including issues with connectivity, frequent breakages, and complex cabling. To address these problems, we are developing a more efficient and reliable alternative: the NUSense subcontroller. NUSense is designed to provide ultra-fast polling, exploiting multiple buses for high-frequency communications and redundancy. The electronics and PCB design is completed and the majority of the Dynamixel firmware for servo communication has been developed. The USB communication between the main computer and NUSense is planned for completion in early 2024.
+
+The NUgus platform, based on the iGus platform~\cite{Nimbro2018TDP}, encountered challenges with components breaking upon impact from falls. This year, we are focusing on implementing protective measures, such as the addition of bumpers, to mitigate damage from such incidents.
+
+\noindent\textbf{Odometry and Localisation}:
+The team's ability to localise was greatly enhanced last year with the overhaul of the localisation and odometry systems. However, the robot sometimes failed to localise to the right side of the field on startup or lost its position as it makes its way towards the opposing goal. Some updates to the particle filter weighting method have been made to fix these problems. Additionally, major update to include field line features in addition to raw field lines points is being investigated.\newline
+
+\noindent\textbf{Stability and Kinematics}:
+In recent competitions, the NUgus robots demonstrated significant advancements in walking capabilities. However, the current walk engine is an open-loop system, which inherently limits its robustness. This limitation becomes evident in the face of disturbances or manufacturing inconsistencies and gear backlash. To address these challenges, our team is integrating feedback control mechanisms into the walk engine. This addition aims to enhance the robot's balance and stability by actively responding to dynamic conditions and unforeseen disturbances. The feedback control system will use real-time sensory data to adjust the robot's movements, ensuring a more stable and adaptable walking pattern. A PID controller for torso position and orientation regulation has been implemented and has shown promising results in preliminary tests, significantly improving the robot's balance.
+
+The kinematics system has been improved since RoboCup 2023. We have transitioned to using a more accurate model by employing a URDF (Unified Robot Description Format) file. This file is generated directly from a CAD model using the onshape-to-robot API \cite{onshapetorobot}. Furthermore, we are exploring the development of an optimisation pipeline for kinematics calibration, aiming to reduce the impact of manufacturing variances and improve repeatability across platforms.
+
+\bibliographystyle{plain}
+% argument is your BibTeX string definitions and bibliography database(s)
+\bibliography{nubots}
+
+\end{document}

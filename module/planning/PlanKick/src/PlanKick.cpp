@@ -32,7 +32,6 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/planning/KickTo.hpp"
@@ -45,7 +44,6 @@
 namespace module::planning {
 
     using extension::Configuration;
-    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::planning::KickTo;
@@ -66,12 +64,8 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, Trigger<Stability>, With<Sensors>>().then(
-            [this](const KickTo& kick_to,
-                   const Uses<Kick>& kick,
-                   const Ball& ball,
-                   const Stability& stability,
-                   const Sensors& sensors) {
+        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>>().then(
+            [this](const KickTo& kick_to, const Uses<Kick>& kick, const Ball& ball, const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == RunState::RUNNING && !kick.done) {
                     emit<Task>(std::make_unique<Continue>());
@@ -114,13 +108,6 @@ namespace module::planning {
                 // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
                 if (kick.run_state == RunState::QUEUED) {
                     emit<Task>(std::make_unique<Continue>());
-                    return;
-                }
-
-                // If the robot is not standing, make it stand before kicking
-                if (stability != Stability::STANDING) {
-                    log<DEBUG>("Standing to kick!");
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     return;
                 }
 

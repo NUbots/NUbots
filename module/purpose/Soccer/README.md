@@ -2,36 +2,63 @@
 
 ## Description
 
-Starts the Director graph for the soccer scenario. If the robot is penalised, it will make it stand still. Otherwise, it will emit the Task corresponding to the soccer position specified in configuration.
+Coordinates the high-level soccer behaviour state machine.
 
-If the configuration is set to "dynamic" it will choose the appropriate position out of Defender and Striker. The robot listens for the positions of other robots and makes its decision.
+This module manages when the robot should actively play, idle, or pause due to penalties, then starts the purpose-selection flow and persistent
+recovery behaviours.
 
-Possible positions are Striker, Goalie and Defender.
+Key responsibilities:
+
+- Startup initialisation (`Stability`, `WalkState`, idle stand/look)
+- Starting purpose selection (`FindPurpose`) and always-on fall recovery
+- Selecting `Goalie` or `FieldPlayer` based on `GameState.self.goalie`
+- Handling self penalisation/unpenalisation transitions
+- Handling button-based idle enable/disable flow with configurable delay
 
 ## Usage
 
-Include this in your role to start the Director tree to play soccer.
+Include this module in a soccer role.
+
+Configuration is read from `Soccer.yaml`:
+
+- `force_playing`: if true, forces `GameState::Phase::PLAYING`
+- `disable_idle_delay`: delay (seconds) before exiting idle after middle button press
+- `startup_delay`: delay (seconds) before starting soccer behaviours after startup
+
+Control flow:
+
+- Left button (`ButtonLeftDown`) enables idle mode (pauses soccer tasks)
+- Middle button (`ButtonMiddleDown`) disables idle mode after `disable_idle_delay`
+- On penalisation (`GameEvents::Penalisation` for self), purpose tasks are cancelled and localisation/servo state is reset
+- On unpenalisation, purpose and fall-recovery tasks are restarted (unless idling)
 
 ## Consumes
 
-- `message::purpose::FindPurpose` to find the right purpose to emit
-- `message::input::Robocup` to dynamically determine the robot's purpose
-- `message::localisation::Ball` to determine the robot's distance to the ball, for comparison with other potential strikers
-- `message::input::Sensors` to transform the ball from world to robot space
-- `message::input::GameEvents::Penalisation` to find out if the robot has been penalised and should stop moving
-- `message::input::GameEvents::Unpenalisation` to find out if the robot has been unpenalised and can play again
-- `message::input::ButtonMiddleDown` to force play with a middle button press
+- `extension::Configuration` from `Soccer.yaml`
+- `message::input::GameState`
+- `message::support::GlobalConfig`
+- `message::input::GameEvents::Penalisation`
+- `message::input::GameEvents::Unpenalisation`
+- `message::input::ButtonLeftDown`
+- `message::input::ButtonLeftUp`
+- `message::input::ButtonMiddleDown`
+- `message::input::ButtonMiddleUp`
 
 ## Emits
 
-- `message::purpose::FindPurpose` a Task to request to find the robot's soccer playing purpose, to start the Director graph to play soccer
-- `message::purpose::Purposes` to inform the other robots of their purposes
-- `message::strategy::StandStill` to make the robot still while penalised
-- `message::platform::ResetWebotsServos` to reset the servos in Webots when penalised
-- `message::behaviour::state::Stability` to set the robot's initial stability state to standing
-- `message::strategy::FallRecovery` a Task to request the robot to manage falling
-- `message::purpose::Striker` a Task to request the robot acts as a striker
-- `message::purpose::Goalie` a Task to request the robot acts as a goalie
-- `message::purpose::Defender` a Task to request the robot acts as a defender
+- `message::behaviour::state::Stability`
+- `message::behaviour::state::WalkState`
+- `message::skill::Walk`
+- `message::skill::Look`
+- `message::purpose::FindPurpose`
+- `message::purpose::FieldPlayer`
+- `message::purpose::Goalie`
+- `message::strategy::FallRecovery`
+- `message::purpose::Purpose`
+- `message::localisation::ResetFieldLocalisation`
+- `message::platform::ResetWebotsServos`
+- `message::output::Buzzer`
 
 ## Dependencies
+
+- Director

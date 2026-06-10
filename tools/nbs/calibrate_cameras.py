@@ -59,6 +59,7 @@ from .images import decode_image, fourcc
 TF_CALIBRATION_DTYPE = tf.float64
 NP_CALIBRATION_DTYPE = np.float64
 
+
 # This code here is needed for OpenCV to work with multiprocessing. When finding the grids we use all the cpu cores
 # available. However to do this we need to be able to send the OpenCV data back and because of the way that the OpenCV
 # module works, pickling doesn't work properly by default as the class is a function. By remappping it here we can fix
@@ -222,10 +223,12 @@ def find_grids(files, rows, cols, show_grids):
                         "timestamp": msg["timestamp"],
                         # Normalise the pixel coordinates to be based from the centre of the image
                         # And then divide by the width of the image to get a normalised coordinate
-                        "centres": None
-                        if msg["centres"] is None
-                        else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"])
-                        / img.shape[1],
+                        "centres": (
+                            None
+                            if msg["centres"] is None
+                            else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"])
+                            / img.shape[1]
+                        ),
                         "dimensions": img.shape,
                     }
                 )

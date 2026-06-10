@@ -41,3 +41,6 @@ Include this in your role to start the Director tree to run KeyboardWalk.
 - `message::skill::Walk` to walk with desired velocity
 
 ## Dependencies
+
+- Director
+- ncurses

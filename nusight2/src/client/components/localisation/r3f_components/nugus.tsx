@@ -57,7 +57,7 @@ export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
 
   // Update the material of the robot
   const material = new THREE.MeshStandardMaterial({
-    color: "#666666",
+    color: "#888888",
     roughness: 0.5,
     metalness: 0.2,
   });
@@ -66,6 +66,8 @@ export const Nugus = ({ model }: { model: LocalisationRobotModel }) => {
       if (child.type === "URDFVisual" && child.children.length > 0) {
         const mesh = child.children[0] as THREE.Mesh;
         mesh.material = material;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
       }
     });
   }

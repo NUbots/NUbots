@@ -29,7 +29,10 @@
 #define UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP
 
 #include <Eigen/Core>
+#include <algorithm>
+#include <concepts>
 #include <iterator>
+#include <optional>
 #include <queue>
 #include <vector>
 
@@ -40,7 +43,7 @@ namespace utility::vision::visualmesh {
     Iterator partition_points(Iterator first,
                               Iterator last,
                               const Eigen::MatrixXi& neighbours,
-                              Func&& pred,  // function determining if the index has a high enough confidence to use
+                              Func&& pred,  // Function determining if the index has a high enough confidence to use
                               const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
@@ -61,7 +64,7 @@ namespace utility::vision::visualmesh {
     Iterator boundary_points(Iterator first,
                              Iterator last,
                              const Eigen::MatrixXi& neighbours,
-                             Func&& pred,  // function determining if the index has a high enough confidence to use
+                             Func&& pred,  // Function determining if the index has a high enough confidence to use
                              const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
@@ -74,63 +77,159 @@ namespace utility::vision::visualmesh {
         });
     }
 
-
+    /**
+     * @brief Clusters connected mesh point indices using DFS.
+     *
+     * @tparam Iterator An iterator over integers representing point indices [0, N).
+     * @param first Iterator to the beginning of point indices.
+     * @param last Iterator to the end of point indices.
+     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
+     * @param min_cluster_size Minimum number of points for a cluster to be valid.
+     * @param clusters Output vector of clusters, each a vector of indices.
+     */
     template <typename Iterator>
     void cluster_points(Iterator first,
                         Iterator last,
                         const Eigen::MatrixXi& neighbours,
                         int min_cluster_size,
                         std::vector<std::vector<int>>& clusters) {
-
-        // TODO(VisionTeam):
-        // 1) Do a reverse lookup-style reduction
-        // 2) Convert to multi-partition and return a list of Iterators to each cluster
-
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
-        // Do a DFS over all valid points and their neighbours to make connected clusters
-        std::vector<bool> visited(std::distance(first, last), false);
-        for (Iterator it = first; it != last; it = std::next(it)) {
-            std::vector<Iterator> q;
-            std::vector<value_type> cluster;
+        const int N = std::distance(first, last);
+        // If there are no points, return immediately
+        if (N == 0) {
+            return;
+        }
 
-            // First element is always in the cluster
-            q.push_back(it);
+        // Copy values (point indices) for indexed access
+        std::vector<value_type> values(first, last);
 
-            while (!q.empty()) {
-                // Get the next element to check
-                Iterator current = q.back();
-                q.pop_back();
+        // Lookup table: which indices are in the input set
+        std::vector<bool> is_in_input(neighbours.cols(), false);
+        for (int idx : values) {
+            if (idx >= 0 && idx < int(is_in_input.size())) {
+                is_in_input[idx] = true;
+            }
+        }
 
-                // Make sure we haven't seen this point before
-                if (!visited[std::distance(first, current)]) {
-                    // Add new point to cluster and mark it as seen
-                    cluster.push_back(*current);
-                    visited[std::distance(first, current)] = true;
+        // Track visited status of all points
+        std::vector<bool> visited(neighbours.cols(), false);
 
-                    // Find the current points neighbours
-                    for (int n = 0; n < 6; ++n) {
-                        const value_type neighbour_idx = neighbours(n, *current);
-                        Iterator neighbour             = std::find(first, last, neighbour_idx);
-                        if ((neighbour != last) && (!visited[std::distance(first, neighbour)])) {
-                            q.push_back(neighbour);
-                        }
+        // Iterate through each index and form clusters via DFS
+        for (int i = 0; i < N; ++i) {
+            int seed = values[i];
+            if (visited[seed]) {
+                continue;
+            }
+
+            std::vector<int> cluster;
+            std::vector<int> stack;
+            stack.push_back(seed);
+            visited[seed] = true;
+
+            // Perform DFS to find all connected points in the cluster
+            while (!stack.empty()) {
+                int current = stack.back();
+                stack.pop_back();
+                cluster.push_back(current);
+
+                // Push unvisited neighbours that are also in the input set
+                for (int n = 0; n < neighbours.rows(); ++n) {
+                    int neigh = neighbours(n, current);
+                    if (neigh >= 0 && neigh < int(visited.size()) && !visited[neigh] && is_in_input[neigh]) {
+                        visited[neigh] = true;
+                        stack.push_back(neigh);
                     }
                 }
             }
-            // Only add cluster to list if it meets minimum size requirment
+
+            // If the cluster is large enough, add it to the output
             if (int(cluster.size()) >= min_cluster_size) {
                 clusters.emplace_back(std::move(cluster));
             }
         }
     }
 
+    /**
+     * @brief Get the green horizon side mask object
+     *
+     * @param clusters Vector of clusters, each a vector of indices.
+     * @param horizon Rays making up the green horizon
+     * @param rays Vectors @p clusters indices index into
+     * @param outside Accept clusters completely outside the green horizon.
+     * @param inside Accept clusters completely inside the green horizon.
+     * @param intersect Accept clusters that intersect the green horizon
+     * @return std::vector<bool> mask for accepted clusters
+     */
+    std::vector<bool> get_green_horizon_side_mask(const std::vector<std::vector<int>>& clusters,
+                                                  const std::vector<Eigen::Vector3d>& horizon,
+                                                  const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+                                                  const bool outside   = true,
+                                                  const bool inside    = true,
+                                                  const bool intersect = true) {
+
+        auto success = [&](const bool cluster_outside, const bool cluster_inside) {
+            // Cluster is completely outside
+            if (cluster_outside && !cluster_inside) {
+                return outside;
+            }
+            // Cluster is completely inside
+            if (!cluster_outside && cluster_inside) {
+                return inside;
+            }
+            // Cluster intersects the boundary
+            if (cluster_outside && cluster_inside) {
+                return intersect;
+            }
+            // Last option is it's neither in or out
+            NUClear::log<NUClear::LogLevel::ERROR>(
+                "Cluster is neither inside or outside the green horizon. This is bad.");
+            return false;
+        };
+
+        std::vector<bool> is_accepted;
+        is_accepted.reserve(clusters.size());
+
+        for (const auto& cluster : clusters) {
+            bool out = false;
+            bool in  = false;
+
+            for (size_t idx = 0; idx < cluster.size(); ++idx) {
+                bool position =
+                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));
+                // Only set if it is in or out as we want to find across the cluster
+                in  = position ? true : in;
+                out = !position ? true : out;
+
+                if (out && in) {
+                    // Known to be an intersection case
+                    break;
+                }
+            }
+
+            is_accepted.push_back(success(out, in));
+        }
+
+        return is_accepted;
+    }
+
+    /**
+     * @brief
+     *
+     * @param clusters Vector of clusters, each a vector of indices.
+     * @param horizon Rays making up the green horizon
+     * @param rays Vectors @p clusters indices index into
+     * @param outside Accept clusters completely outside the green horizon.
+     * @param inside Accept clusters completely inside the green horizon.
+     * @param intersect Accept clusters that intersect the green horizon
+     * @return auto
+     */
     auto check_green_horizon_side(std::vector<std::vector<int>>& clusters,
                                   const std::vector<Eigen::Vector3d>& horizon,
                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-                                  const bool& outside   = true,    // accept clusters completely outside
-                                  const bool& inside    = true,    // accept clusters completely inside
-                                  const bool& intersect = true) {  // accept clusters that go over the boundary
+                                  const bool outside   = true,
+                                  const bool inside    = true,
+                                  const bool intersect = true) {
 
         auto success = [&](const bool& cluster_outside, const bool& cluster_inside) {
             // Cluster is completely outside
@@ -151,8 +250,8 @@ namespace utility::vision::visualmesh {
             return false;
         };
 
-        // Move any clusters that don't intersect the green horizon to the end of the list
-        // We need to find one point above the green horizon and one below it
+        // Move any clusters that don't meet success criterion to the end of the list
+        // We need to find if there are points above the green horizon and/or one below it
         return std::partition(clusters.begin(), clusters.end(), [&](const std::vector<int>& cluster) {
             bool out = false;
             bool in  = false;
@@ -163,10 +262,136 @@ namespace utility::vision::visualmesh {
                 // Only set if it is in or out as we want to find across the cluster
                 in  = position ? true : in;
                 out = !position ? true : out;
+
+                if (out && in) {
+                    // Known to be an intersection case
+                    break;
+                }
             }
             return success(out, in);
         });
     }
+
+    /**
+     * @brief Calculates percentage fill using the n. observed points / expected n. of observed points
+     * The ball detection can be thought of as a cone from the camera, with axis of @p uBCw and angular radius of @p
+     * radius. The cluster is assumed bounded in the cone, and expected points are found using a DFS on the mesh.
+     *
+     * @tparam Iterator An iterator over mesh point indices (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the mesh pointer Iterator
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
+     * @param neighbours MxN matrix where each column contains M neighbour indices for a point.
+     * @param uBCw The centre axis of the ball represented as a unit vector in world space.
+     * @param radius Angular radius of the ball, equal to cos(theta) where theta is angle from axis to furthest point.
+     * @param uPCw Unit vectors from camera to a point in the mesh in world space.
+     * @return double which is fill percentage measured as observed bounded points divided by expected bounded points.
+     */
+    template <typename Iterator, typename Sentinel>
+    double find_cluster_fill(Iterator first,
+                             Sentinel last,
+                             const Eigen::MatrixXi& neighbours,
+                             const Eigen::Vector3d uBCw,
+                             const double radius,
+                             const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+        // Count number of mesh points bounded in cone from camera using DFS to get expected number of bounded points
+        std::vector<bool> visited(neighbours.cols(), false);
+        std::vector<int> stack{};
+
+        // Indices are known to be unique and are bounded in the cone so they are added to the stack without checks
+        for (; first != last; ++first) {
+            const int idx = *first;
+            stack.push_back(idx);
+            visited[idx] = true;
+        }
+
+        const size_t observed_bounded = stack.size();
+        size_t expected_bounded       = stack.size();
+
+        if (expected_bounded == 0) {
+            return 0.0;
+        }
+
+        // Depth first search where if a points neighbours are bounded by the cone they are connected
+        while (!stack.empty()) {
+            int current = stack.back();
+            stack.pop_back();
+
+            for (int i = 0; i < neighbours.rows(); ++i) {
+                int neigh = neighbours(i, current);
+                // When uPCw.col(neigh).dot(uBCw) >= radius it is bounded inside as both are in cos(theta)
+                if (neigh >= 0 && static_cast<size_t>(neigh) < visited.size() && !visited[neigh]
+                    && uPCw.col(neigh).dot(uBCw) >= radius) {
+                    stack.push_back(neigh);
+                    visited[neigh] = true;
+                    ++expected_bounded;
+                }
+            }
+        }
+
+        return static_cast<double>(observed_bounded) / expected_bounded;
+    }
+
+    /**
+     * @brief Finds central axis of a cluster
+     * Adds up all the unit vectors of each point (camera to point in world space) in the cluster to find an average
+     * vector. This represents the central axis.
+     *
+     * @tparam Iterator An iterator over mesh point indexes, (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the given mesh iterator
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
+     * @param uPCw Unit vectors from the camera to a point in the mesh in world space
+     * @return Eigen::Vector3d, uBCw: unit vector from camera to ball central axis in world space
+     */
+    template <typename Iterator, typename Sentinel>
+    Eigen::Vector3d find_cluster_central_axis(Iterator first,
+                                              Sentinel last,
+                                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw) {
+        Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
+        for (; first != last; ++first) {
+            const int idx = *first;
+            uBCw += uPCw.col(idx);
+        }
+        if (uBCw.squaredNorm() > 0.0) {
+            uBCw.normalize();
+        }
+
+        return uBCw;
+    }
+
+    /**
+     * @brief Finds the angular radius of the cluster from the camera
+     * Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
+     * largest angular radius possible from the edge points available. Equal to cos(theta), where theta
+     * is the angle between the central ball axis (uBCw) and the edge of the ball.
+     *
+     * @tparam Iterator An integer iterator over mesh point indexes, (column index into @p uPCw)
+     * @tparam Sentinel A sentinel for the Iterator
+     * @param first Iterator at beginning of the cluster's mesh point indices
+     * @param last Iterator at end of the cluster's mesh point indices
+     * @param uPCw Unit vector from camera to a point in the mesh in world space
+     * @param uBCw Unit vector from camera to ball central axis in world space
+     * @return double, angular radius of cluster equal to cos(theta)
+     */
+    template <typename Iterator, typename Sentinel>
+    double find_cluster_angular_radius(Iterator first,
+                                       Sentinel last,
+                                       const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw,
+                                       const Eigen::Vector3d& uBCw) {
+        double radius = 1.0;
+        for (; first != last; ++first) {
+            const int idx = *first;
+            // Unit vector from the camera to the ball edge, in world space
+            const Eigen::Vector3d& uECw(uPCw.col(idx));
+            // Find the vector that gives the largest angle between the central axis and ball edge
+            // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
+            radius = std::min(radius, uBCw.dot(uECw));
+        }
+
+        return radius;
+    }
+
 }  // namespace utility::vision::visualmesh
 
 #endif  // UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP

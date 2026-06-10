@@ -23,3 +23,15 @@ acceptance_radius: 2
 
 # Maximum number of ball rejections before acceptance
 max_rejections: 25
+
+# Robot to robot communication parameters
+use_r2r_balls: true
+
+# Maximum time in seconds before a teammates ball is discarded
+team_ball_recency: 3.0
+
+# Maximum acceptable standard deviation in meters for the combined team ball
+team_guess_error: 0.5
+
+# Maximimum time in seconds where we have not seen the ball before defaulting to team guesses
+team_guess_default_timer: 2.0
