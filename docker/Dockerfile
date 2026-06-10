@@ -190,6 +190,13 @@ RUN install-package opencl-c-headers \
     rapidjson-dev \
     libsnappy-dev
 
+
+RUN install-from-source https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2021.13.0.tar.gz \
+    --build-system cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DTBB_TEST:BOOL='OFF' \
+    -DTBB_BENCH:BOOL='OFF'
+
 # Clone OpenVINO repository
 RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
     cd openvino && \
@@ -213,6 +220,7 @@ RUN mkdir build && cd build && \
     -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
     -DENABLE_INTEL_GPU:BOOL='OFF' \
     -DENABLE_INTEL_CPU:BOOL='OFF' \
+    -DENABLE_ARM_COMPUTE_CMAKE:BOOL='ON' \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_CXX_STANDARD='17' \
     -Wno-dev \
@@ -224,32 +232,32 @@ RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && 
     LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
     cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
-# CUDA Toolkit
-COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
-RUN /usr/local/bin/install-cuda.sh ${platform}
+# # CUDA Toolkit
+# COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
+# RUN /usr/local/bin/install-cuda.sh ${platform}
 
-RUN install-package -p ${platform} \
-    cuda-cudart-12-5 \
-    cuda-cudart-dev-12-5 \
-    cuda-compat-12-5 \
-    cuda-driver-dev-12-5 \
-    cuda-nvcc-12-5 \
-    cuda-crt-12-5 \
-    libcublas-12-5 \
-    libcublas-dev-12-5 \
-    libnvjitlink-12-5 \
-    libnvjitlink-dev-12-5 \
-    cuda-nvrtc-12-5 \
-    cuda-nvrtc-dev-12-5
+# RUN install-package -p ${platform} \
+#     cuda-cudart-12-5 \
+#     cuda-cudart-dev-12-5 \
+#     cuda-compat-12-5 \
+#     cuda-driver-dev-12-5 \
+#     cuda-nvcc-12-5 \
+#     cuda-crt-12-5 \
+#     libcublas-12-5 \
+#     libcublas-dev-12-5 \
+#     libnvjitlink-12-5 \
+#     libnvjitlink-dev-12-5 \
+#     cuda-nvrtc-12-5 \
+#     cuda-nvrtc-dev-12-5
 
-# TensorRT - install binary packages from NVIDIA CUDA repository
-# NvInfer.h, NvOnnxParser.h, libnvinfer.so, libnvonnxparsers.so
-RUN install-package -p ${platform} \
-    libnvinfer-dev \
-    libnvonnxparsers-dev \
-    libnvinfer-plugin-dev \
-    libnvinfer-lean-dev \
-    libnvinfer-vc-plugin-dev
+# # TensorRT - install binary packages from NVIDIA CUDA repository
+# # NvInfer.h, NvOnnxParser.h, libnvinfer.so, libnvonnxparsers.so
+# RUN install-package -p ${platform} \
+#     libnvinfer-dev \
+#     libnvonnxparsers-dev \
+#     libnvinfer-plugin-dev \
+#     libnvinfer-lean-dev \
+#     libnvinfer-vc-plugin-dev
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
@@ -420,7 +428,6 @@ RUN install-package clinfo
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 # Re-run ldconfig to make sure the database is up to date
-RUN ln -sf /l4t/targetfs/usr/local/include/opencv4/opencv2 /l4t/targetfs/usr/local/include/opencv2
 RUN ldconfig
 
 ##############################
