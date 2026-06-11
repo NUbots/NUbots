@@ -47,9 +47,9 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
+    using message::skill::SemiDynamicGetup;
     using message::strategy::StandStill;
     using utility::skill::load_script;
-    using message::skill::SemiDynamicGetup;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 

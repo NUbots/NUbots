@@ -1,7 +1,87 @@
-# Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Number of trailing frames from getup_back treated as the "rise phase" (balance-corrected).
+# The remaining frames run unmodified as the "early phase".
+rise_frame_count: 3
+
+# Expected signed forward pitch of the torso (rad) at the start of the rise phase.
+# atan2-based: 0 = fully upright, positive = leaning forward, negative = leaning backward
+# (lying flat on the back = -π/2).
+# The robot should be crouched leaning forward here, so ~40° (0.7 rad) is a reasonable default.
+pitch_reference: 0.7
+
+# Correction gain applied to both hip pitch joints in the rise frames.
+# correction = clamp(Kp * (measured_pitch - pitch_reference), -max_correction, max_correction)
+# Positive Kp: leaning further forward than expected extends the hips (raising the torso);
+# leaning backward flexes them (pushing the CoM forward over the feet).
+Kp: 0.3
+
+# Maximum magnitude of the hip pitch correction (rad).
+max_correction: 0.3
+
+# ---------------------------------------------------------------------------
+# Fall detection
+#
+# Mid-script (RISE/STAND) and during stabilisation, a fall is declared when
+# torso tilt exceeds fall_recovery_tilt AND gyroscope magnitude exceeds
+# fall_gyro_threshold for fall_debounce_ticks consecutive sensor updates.
+# The gyro/debounce coupling stops transient orientation-estimate spikes
+# during dynamic motion from triggering spurious restarts.
+# A fall that has already settled (high tilt, low gyro) is caught by the
+# tilt-only check at the end of each phase.
+# ---------------------------------------------------------------------------
+
+# Torso tilt threshold (rad) for fall detection: 0 = upright, π/2 = horizontal.
+# ~57° (1.0 rad) means the robot has clearly re-fallen and is not recovering.
+fall_recovery_tilt: 1.0
+
+# Gyroscope magnitude (rad/s) that must accompany the tilt breach mid-script.
+# FallingRelaxPlanner uses 2.0 rad/s as its "falling" threshold; tune on robot.
+fall_gyro_threshold: 2.0
+
+# Consecutive sensor updates the fall condition must hold before restarting.
+fall_debounce_ticks: 3
+
+# ---------------------------------------------------------------------------
+# Foot polygon geometry
+# These values should match KinematicsConfiguration.yaml.
+# Origin is the ankle joint centre, with x-forward and y-left in the foot frame.
+# ---------------------------------------------------------------------------
+foot_toe_length: 0.130 # m — ankle to toe tip     (= KinematicsConfiguration leg.foot.toe_length)
+foot_heel_length: 0.085 # m — ankle to heel         (= KinematicsConfiguration leg.heel_length)
+foot_width: 0.130 # m — total lateral width   (= KinematicsConfiguration leg.foot.width)
+
+# ---------------------------------------------------------------------------
+# Capture-point stabilisation (STABILISE phase)
+#
+# After standing, the robot checks whether the Capture Point (Hof 2008)
+#   CP = CoM_xy + CoM_vel_xy / ω,   ω = sqrt(g / h_com)
+# lies inside the support polygon formed by both foot outlines.
+# If not, it issues a corrective Walk command and re-checks every sensor cycle.
+# ---------------------------------------------------------------------------
+
+# Give up after this many seconds regardless of CP state.
+max_stabilisation_time: 5.0
+
+# CP must be at least this far (m) inside the support polygon to count as stable.
+# Positive margin = conservative (requires CP to be well inside the polygon).
+cp_margin: 0.02
+
+# Walk speed per unit CP offset from the polygon centroid  (m/s per m).
+# Larger values → faster corrective step; too large → overshoot.
+cp_velocity_gain: 1.5
+
+# Maximum speed of the corrective walk command in any direction (m/s).
+max_step_velocity: 0.2
+
+# Maximum rate (Hz) at which corrective Walk tasks are re-emitted.
+# Between emissions the previous command stays active; the walk engine
+# rate-limits itself internally, so commanding faster than ~10 Hz only adds
+# Director churn.
+walk_command_rate: 10.0
 
 scripts:
   getup_back:
     - "StandUpBack.yaml"
+  getup_stand:
     - "Stand.yaml"
