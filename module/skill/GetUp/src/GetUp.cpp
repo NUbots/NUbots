@@ -110,6 +110,7 @@ namespace module::skill {
                 else if (on_back) {
                     log<INFO>("Getting up from back");
                     // emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                    log<DEBUG>("Emitting semidynamic getup task");
                     emit<Task>(std::make_unique<SemiDynamicGetup>());
                 }
                 else if (on_right || on_left) {

@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 # Number of trailing frames from getup_back treated as the "rise phase" (balance-corrected).
 # The remaining frames run unmodified as the "early phase".

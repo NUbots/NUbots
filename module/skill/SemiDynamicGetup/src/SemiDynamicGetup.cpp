@@ -192,8 +192,7 @@ namespace module::skill {
                 // Shared sensor helpers
                 // -----------------------------------------------------------------
 
-                // Direction-agnostic tilt of the torso z-axis from world vertical (rad).
-                // atan2 form is well-conditioned near 0 and π, unlike acos.
+                // Tilt angle
                 auto tilt_from_vertical = [&]() -> double {
                     const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
                     const Eigen::Vector3d uZTw = Hwt.rotation().col(2);
@@ -202,29 +201,20 @@ namespace module::skill {
 
                 // Signed forward pitch of the torso (rad): 0 = upright, positive = leaning
                 // forward, negative = leaning backward (lying flat on the back = -π/2).
-                // Unlike the tilt above this distinguishes the lean direction, so the hip
-                // correction pushes the right way when the robot under-rotates backward.
                 auto forward_pitch = [&]() -> double {
                     const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
                     return std::atan2(-Hwt.rotation()(2, 0), Hwt.rotation()(2, 2));
                 };
 
-                // Debounced fall detection for the dynamic phases: the tilt breach must be
-                // accompanied by significant angular velocity and hold for
-                // fall_debounce_ticks consecutive sensor updates, so transient
-                // orientation-estimate spikes mid-motion don't trigger spurious restarts.
-                // A fall that has already settled (high tilt, low gyro) is caught by the
-                // tilt-only checks at the end of each phase.
+                // Debounced fall detection for the dynamic phases
                 auto fall_detected = [&]() -> bool {
                     const bool falling = tilt_from_vertical() > cfg.fall_recovery_tilt
                                          && sensors.gyroscope.norm() > cfg.fall_gyro_threshold;
-                    fall_tick_count = falling ? fall_tick_count + 1 : 0;
+                    fall_tick_count    = falling ? fall_tick_count + 1 : 0;
                     return fall_tick_count >= cfg.fall_debounce_ticks;
                 };
 
-                // After a fall, restart the getup only if the robot is still on its back —
-                // it may have toppled onto its front, where replaying the back-getup would
-                // flail. Otherwise escalate with Done so GetUp/GetUpPlanner re-classify.
+                // After a fall, restart the getup only if the robot is still on its back // TODO
                 auto restart_or_escalate = [&]() {
                     fall_tick_count = 0;
                     const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
@@ -243,8 +233,6 @@ namespace module::skill {
 
                 // Compute support polygon from both feet and the current capture point.
                 // Returns {capture_point_world_xy, support_polygon_hull}.
-                // Uses both feet unconditionally — post-getup they are always grounded,
-                // and sensor contact detection may lag slightly after standing up.
                 auto compute_cp_and_polygon = [&]() -> std::pair<Eigen::Vector2d, std::vector<Eigen::Vector2d>> {
                     Eigen::Isometry3d Hwt(sensors.Htw.inverse());
 
