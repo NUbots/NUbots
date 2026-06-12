@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include "extension/Behaviour.hpp"
+
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldIntersections.hpp"
 
@@ -46,12 +48,15 @@ namespace module::tools {
      * (del_roll, del_pitch, del_yaw) so that the projected YOLO field-landmark detections (X, L, T
      * intersections) align with the known ground-truth landmark positions.
      *
+     * The robot stands itself up and automatically sweeps its head through a yaw/pitch grid (emitting Look
+     * tasks) so the detections span the image without any manual input.
+     *
      * Assumptions:
-     *  - The robot is static, placed on the centre of the field, looking straight toward the goal.
+     *  - The robot is placed on the centre of the field, looking straight toward the goal.
      *  - The field type (and hence the field dimensions / ground-truth landmark positions) is known via the
      *    FieldDescription.
      */
-    class ExtrinsicsCalibration : public NUClear::Reactor {
+    class ExtrinsicsCalibration : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Number of optimisation variables (del_roll, del_pitch, del_yaw)
         static constexpr unsigned int n_params = 3;
@@ -73,6 +78,18 @@ namespace module::tools {
             /// @brief Maximum distance [m] in field space for a detection to be associated with a landmark
             double max_association_distance = 0.0;
 
+            /// @brief Minimum head yaw/pitch change [rad] since the last captured frame before a new frame is
+            /// gathered. Keeps samples spread across distinct head poses (the head sweeps automatically) instead
+            /// of over-sampling whatever pose the head is lingering in.
+            double min_head_pose_change = 0.0;
+
+            /// @brief Time [s] to linger at each head-scan position before moving to the next
+            double scan_fixation_time = 0.0;
+
+            /// @brief Head-scan grid: (yaw, pitch) [rad] positions the head sweeps through. Positive pitch looks
+            /// down (matching the head-pitch servo convention).
+            std::vector<Eigen::Vector2d> scan_positions{};
+
             /// @brief Search bounds (half-width) on each offset delta [rad] (del_roll, del_pitch, del_yaw)
             Eigen::Vector3d offset_bounds = Eigen::Vector3d::Zero();
 
@@ -84,9 +101,32 @@ namespace module::tools {
 
             /// @brief NLopt maximum number of evaluations
             size_t maxeval = 0;
+
+            /// @brief Maximum number of ICP iterations (re-associate then re-optimise) before giving up
+            size_t max_icp_iterations = 0;
         } cfg;
 
-        /// @brief A single associated calibration sample.
+        /// @brief A single raw detection, kept so it can be re-associated as the offsets are refined (ICP).
+        struct Observation {
+            /// @brief Detection ray in camera {c} space (offset-independent, recovered from the pixel)
+            Eigen::Vector3d uICc = Eigen::Vector3d::Zero();
+            /// @brief Detection type (X / L / T intersection), used to restrict same-type associations
+            message::vision::FieldIntersection::IntersectionType type =
+                message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+        };
+
+        /// @brief One captured frame: the offset-free transforms plus every detection in that frame.
+        /// Detections are grouped per frame so the Hungarian association stays one-to-one within a frame.
+        struct Frame {
+            /// @brief World {w} from head-pitch {p} transform for this frame (offset-free)
+            Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
+            /// @brief Field {f} from world {w} transform for this frame (from placement assumption)
+            Eigen::Isometry3d Hfw = Eigen::Isometry3d::Identity();
+            /// @brief Raw detections captured in this frame
+            std::vector<Observation> observations{};
+        };
+
+        /// @brief A single associated calibration sample (one detection paired with a ground-truth landmark).
         struct Sample {
             /// @brief Detection ray in camera {c} space (offset-independent, recovered from the pixel)
             Eigen::Vector3d uICc = Eigen::Vector3d::Zero();
@@ -103,10 +143,31 @@ namespace module::tools {
         /// @brief Current extrinsic offsets (roll, pitch, yaw) read from the robot's camera config [rad]
         Eigen::Vector3d current_offsets = Eigen::Vector3d::Zero();
 
+        /// @brief Head yaw/pitch [rad] of the most recently captured frame, used to gather samples only once the
+        /// head has moved far enough (see Config::min_head_pose_change)
+        double last_head_yaw   = 0.0;
+        double last_head_pitch = 0.0;
+
+        /// @brief Index of the current head-scan position in Config::scan_positions
+        size_t scan_idx = 0;
+
+        /// @brief Time the head last moved to a new scan position
+        NUClear::clock::time_point last_scan_move = NUClear::clock::now();
+
+        /// @brief True once the calibration has finished and written the offsets. The robot keeps standing and the
+        /// head holds still (rather than exiting and collapsing); the operator stops the binary.
+        bool calibrated = false;
+
         /// @brief Ground-truth field landmarks (position in field space + type)
         std::vector<utility::localisation::Landmark> landmarks{};
 
-        /// @brief Accumulated associated samples used for the optimisation
+        /// @brief Accumulated raw frames (re-associated each ICP iteration)
+        std::vector<Frame> frames{};
+
+        /// @brief Total number of raw detections collected so far across all frames
+        size_t collected_detections = 0;
+
+        /// @brief Associated samples for the current ICP iteration (rebuilt by associate(), used by the optimiser)
         std::vector<Sample> samples{};
 
         /// @brief Path to the robot's camera config file that will be (re)written
@@ -130,15 +191,31 @@ namespace module::tools {
         Eigen::Vector3d project_to_field(const Eigen::Vector3d& offsets, const Sample& sample) const;
 
         /**
-         * @brief Associate the detections in a frame with the known landmarks using the Hungarian algorithm,
-         * evaluated at the current extrinsic offsets, and append the matched samples to the buffer.
+         * @brief Recover the offset-independent camera-frame rays for a frame's detections and store the raw
+         * frame for later (re-)association. No landmark association is committed here.
          * @param field_intersections The field intersection detections
          * @param Hwp The offset-free world from head-pitch transform for this frame
          * @param Hfw The field from world transform for this frame
          */
-        void associate_and_store(const message::vision::FieldIntersections& field_intersections,
-                                 const Eigen::Isometry3d& Hwp,
-                                 const Eigen::Isometry3d& Hfw);
+        void collect(const message::vision::FieldIntersections& field_intersections,
+                     const Eigen::Isometry3d& Hwp,
+                     const Eigen::Isometry3d& Hfw);
+
+        /**
+         * @brief (Re-)associate every collected detection with the known landmarks using the Hungarian algorithm,
+         * evaluated at the given offsets. Rebuilds the `samples` buffer used by the optimiser.
+         * @param offsets The extrinsic offsets (roll, pitch, yaw) [rad] at which to project and associate
+         * @return Per-observation signature (frame-major) of assigned landmark indices, -1 where unassociated.
+         *         Used to detect ICP convergence (associations no longer changing).
+         */
+        std::vector<int> associate(const Eigen::Vector3d& offsets);
+
+        /**
+         * @brief Run the ICP loop: alternate (associate at the current best offsets) and (optimise the offsets
+         * with those associations held fixed), re-centring on the refined offsets each iteration, until the
+         * associations stop changing or the iteration cap is reached. Writes the result and exits on success.
+         */
+        void run_calibration();
 
         /**
          * @brief Total squared re-projection cost over all accumulated samples for a given set of offsets.

@@ -12,8 +12,35 @@ camera: "Left"
 min_samples: 100
 
 # Maximum distance [m] in field space for a detection to be associated with a ground-truth landmark.
-# Pairings beyond this distance (evaluated at the initial offsets) are rejected.
-max_association_distance: 1.0
+# Pairings beyond this distance (re-evaluated each ICP iteration) are rejected. Keep this comfortably below the
+# spacing between same-type landmarks (e.g. the centre-circle X's are ~0.75 m apart) so ambiguous detections are
+# dropped rather than mis-matched. 0.25 m is a good default; tighten to ~0.2 m if mis-association persists.
+max_association_distance: 0.25
+
+# Minimum head yaw/pitch change [rad] since the last captured frame before a new frame is gathered. The head
+# sweeps automatically (see scan_positions); this spreads samples across distinct viewpoints instead of
+# over-sampling whichever pose the head is lingering in during each fixation.
+min_head_pose_change: 0.5 * pi / 180
+
+# Automatic head sweep. The robot stands itself up and moves its head through the (yaw, pitch) [rad] grid below,
+# lingering scan_fixation_time seconds at each position, so the field landmarks are seen across the whole image.
+# Positive pitch looks down (matches the head-pitch servo convention).
+scan_fixation_time: 1.0
+scan_positions:
+  - [-0.7, 0.0] # yaw left,  level-ish
+  - [0.0, 0.0] # centre,     level-ish
+  - [0.7, 0.0] # yaw right,  level-ish
+  - [0.7, 0.35] # yaw right,  look down
+  - [0.0, 0.35] # centre,     look down
+  - [-0.7, 0.35] # yaw left,   look down
+  - [-0.7, 0.6] # yaw left,   look further down
+  - [0.0, 0.6] # centre,      look further down
+  - [0.7, 0.6] # yaw right,   look further down
+
+# Maximum number of ICP iterations. Each iteration re-associates every collected detection at the current best
+# offsets, then re-optimises with those associations held fixed. The loop stops early once the associations stop
+# changing.
+max_icp_iterations: 10
 
 # Search bounds (half-width) on each offset delta [rad]: del_roll, del_pitch, del_yaw
 offset_bounds: [10.0 * pi / 180, 10.0 * pi / 180, 10.0 * pi / 180]
