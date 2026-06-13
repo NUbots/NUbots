@@ -12,4 +12,15 @@ cameras:
     name: Right Camera
     id: 1
 
+head_pose:
+  - segment: _head_pose
+
+extrinsics:
+  # cam(x right y down z forward) -> head(x forward y left z up)
+  # Note: pitch compensation is done in code, here we only put the real offset of
+  - [0.0753363073, 0.0190046262, 0.996977091, -0.0122268423]
+  - [-0.99715662, -0.000328667404, 0.0753561407, 0.0440084077]
+  - [0.00175978895, -0.999819338, 0.018925827, -0.0283811111]
+  - [0, 0, 0, 1]
+
 urdf: models/robot.urdf

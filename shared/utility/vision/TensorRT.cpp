@@ -29,6 +29,7 @@
 #include <cuda_runtime.h>
 #include <fstream>
 #include <iostream>
+#include <nuclear>
 #include <stdexcept>
 
 #include "NvInfer.h"
@@ -43,8 +44,12 @@ namespace utility::vision {
         /// Logger for TensorRT that only reports warnings and errors
         class Logger : public ILogger {
             void log(Severity severity, char const* msg) noexcept override {
-                if (severity <= Severity::kWARNING) {
-                    std::cout << msg << std::endl;
+                switch (severity) {
+                    case Severity::kINTERNAL_ERROR:
+                    case Severity::kERROR: NUClear::log<NUClear::LogLevel::ERROR>(msg); break;
+                    case Severity::kWARNING: NUClear::log<NUClear::LogLevel::WARN>(msg); break;
+                    case Severity::kINFO: NUClear::log<NUClear::LogLevel::INFO>(msg); break;
+                    case Severity::kVERBOSE: NUClear::log<NUClear::LogLevel::DEBUG>(msg); break;
                 }
             }
         };
@@ -99,11 +104,11 @@ namespace utility::vision {
         std::unique_ptr<IExecutionContext> context{};
         std::vector<int64_t> input_shape{};
         std::vector<int64_t> output_shape{};
-        size_t input_count    = 0;
-        size_t output_count   = 0;
-        void* d_input         = nullptr;
-        void* d_output        = nullptr;
-        cudaStream_t stream   = nullptr;
+        size_t input_count  = 0;
+        size_t output_count = 0;
+        void* d_input       = nullptr;
+        void* d_output      = nullptr;
+        cudaStream_t stream = nullptr;
 
         ~Impl() {
             // Tear down the execution context before freeing the memory it may reference
@@ -205,15 +210,21 @@ namespace utility::vision {
         }
 
         std::vector<float> output(impl->output_count);
-        cuda_check(
-            cudaMemcpyAsync(impl->d_input, input.data(), input.size() * sizeof(float), cudaMemcpyHostToDevice, impl->stream),
-            "copy input to device");
+        cuda_check(cudaMemcpyAsync(impl->d_input,
+                                   input.data(),
+                                   input.size() * sizeof(float),
+                                   cudaMemcpyHostToDevice,
+                                   impl->stream),
+                   "copy input to device");
         if (!impl->context->enqueueV3(impl->stream)) {
             throw std::runtime_error("enqueueV3 failed");
         }
-        cuda_check(
-            cudaMemcpyAsync(output.data(), impl->d_output, output.size() * sizeof(float), cudaMemcpyDeviceToHost, impl->stream),
-            "copy output to host");
+        cuda_check(cudaMemcpyAsync(output.data(),
+                                   impl->d_output,
+                                   output.size() * sizeof(float),
+                                   cudaMemcpyDeviceToHost,
+                                   impl->stream),
+                   "copy output to host");
         cuda_check(cudaStreamSynchronize(impl->stream), "cudaStreamSynchronize");
         return output;
     }

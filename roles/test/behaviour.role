@@ -16,7 +16,7 @@ nuclear_role(
   output::ImageCompressor
   # Sensors
   input::SensorFilter
-  input::Camera
+  input::K1Camera
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector

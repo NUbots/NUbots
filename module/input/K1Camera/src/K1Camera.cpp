@@ -73,6 +73,14 @@ namespace module::input {
         float k2{0.0f};
     };
 
+    struct SharedPoseHeader {
+        bip::interprocess_mutex mutex;
+        bip::interprocess_condition has_new_data;
+        uint64_t sequence{0};
+        double position[3]{0.0, 0.0, 0.0};
+        double orientation[4]{0.0, 0.0, 0.0, 1.0};  // Quaternion (x,y,z,w)
+    };
+
     static constexpr std::size_t MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
     static uint32_t ros_encoding_to_fourcc(const std::string& enc) {
@@ -119,6 +127,25 @@ namespace module::input {
                 // interprocess_condition must modify their internal state on lock/wait.
                 bip::shared_memory_object shm(bip::open_only, ctx.segment_name.c_str(), bip::read_write);
                 bip::mapped_region region(shm, bip::read_write);
+
+                // Try to open pose segment — may not be available if NUbridge hasn't published it yet.
+                std::unique_ptr<bip::shared_memory_object> pose_shm;
+                std::unique_ptr<bip::mapped_region> pose_region;
+                SharedPoseHeader* pose_hdr = nullptr;
+                try {
+                    pose_shm    = std::make_unique<bip::shared_memory_object>(bip::open_only,
+                                                                              ctx.pose_segment_name.c_str(),
+                                                                              bip::read_write);
+                    pose_region = std::make_unique<bip::mapped_region>(*pose_shm, bip::read_write);
+                    pose_hdr    = reinterpret_cast<SharedPoseHeader*>(pose_region->get_address());
+                    log<INFO>(fmt::format("K1Camera: mapped pose segment '{}' for camera '{}'",
+                                          ctx.pose_segment_name,
+                                          ctx.camera_name));
+                }
+                catch (const bip::interprocess_exception&) {
+                    log<WARN>(fmt::format("K1Camera: pose segment '{}' unavailable, Hpc will remain identity",
+                                          ctx.pose_segment_name));
+                }
 
                 auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
@@ -221,6 +248,20 @@ namespace module::input {
                     }
                     last_sequence = seq;
 
+                    // Read latest head pose from shared memory; skip update if the writer holds the lock.
+                    if (pose_hdr != nullptr) {
+                        bip::scoped_lock<bip::interprocess_mutex> pose_lock(pose_hdr->mutex, bip::try_to_lock);
+                        if (pose_lock.owns()) {
+                            const Eigen::Quaterniond q(pose_hdr->orientation[3],   // w
+                                                       pose_hdr->orientation[0],   // x
+                                                       pose_hdr->orientation[1],   // y
+                                                       pose_hdr->orientation[2]);  // z
+                            ctx.Hpc.linear() = q.toRotationMatrix();
+                            ctx.Hpc.translation() =
+                                Eigen::Vector3d(pose_hdr->position[0], pose_hdr->position[1], pose_hdr->position[2]);
+                        }
+                    }
+
                     auto msg               = std::make_unique<Image>();
                     msg->format            = format;
                     msg->dimensions.x()    = width;
@@ -234,7 +275,7 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
-                    msg->Hcw               = ctx.Hcw;
+                    msg->Hcw               = ctx.Hpc * ctx.Hcr;
 
                     emit(msg);
                 }
@@ -254,14 +295,27 @@ namespace module::input {
 
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
             std::lock_guard<std::mutex> lock(cameras_mutex);
+
+            const std::string pose_segment = cfg["head_pose"][0]["segment"].as<std::string>();
+
+            Eigen::Matrix4d ext = Eigen::Matrix4d::Identity();
+            const auto& rows    = cfg["extrinsics"];
+            for (int r = 0; r < 4; ++r) {
+                for (int c = 0; c < 4; ++c) {
+                    ext(r, c) = rows[r][c].as<double>();
+                }
+            }
+            const Eigen::Isometry3d Hcr(ext);
+
             for (const auto& entry : cfg["cameras"]) {
-                auto ctx          = std::make_unique<CameraContext>();
-                ctx->segment_name = entry["segment"].as<std::string>();
-                ctx->camera_name  = entry["name"].as<std::string>();
-                ctx->id           = entry["id"].as<uint32_t>();
-                ctx->running      = true;
-                ctx->Hcw          = Eigen::Isometry3d::Identity();  // TODO: load from config when available
-                ctx->thread       = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
+                auto ctx               = std::make_unique<CameraContext>();
+                ctx->segment_name      = entry["segment"].as<std::string>();
+                ctx->pose_segment_name = pose_segment;
+                ctx->camera_name       = entry["name"].as<std::string>();
+                ctx->id                = entry["id"].as<uint32_t>();
+                ctx->Hcr               = Hcr;
+                ctx->running           = true;
+                ctx->thread            = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
                 cameras.push_back(std::move(ctx));
             }
         });

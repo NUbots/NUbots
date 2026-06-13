@@ -38,7 +38,8 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
   set(CUDAToolkit_ROOT "/l4t/targetfs/usr/local/cuda-12.5")
 endif()
 
-find_package(CUDAToolkit REQUIRED)
+# QUIET suppress the nvcc output
+find_package(CUDAToolkit REQUIRED QUIET)
 target_link_libraries(nuclear_utility PUBLIC CUDA::cudart CUDA::cuda_driver)
 
 # TensorRT is only used by vision modules, link it privately to reduce symbol propagation
