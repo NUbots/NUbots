@@ -98,19 +98,19 @@ namespace module::tools {
                 cfg.scan_positions.push_back(Eigen::Vector2d(position.as<Expression>()));
             }
 
-            cfg.xtol_rel            = config["opt"]["xtol_rel"].as<double>();
-            cfg.ftol_rel            = config["opt"]["ftol_rel"].as<double>();
-            cfg.maxeval             = config["opt"]["maxeval"].as<size_t>();
-            cfg.max_icp_iterations  = config["max_icp_iterations"].as<size_t>();
+            cfg.xtol_rel           = config["opt"]["xtol_rel"].as<double>();
+            cfg.ftol_rel           = config["opt"]["ftol_rel"].as<double>();
+            cfg.maxeval            = config["opt"]["maxeval"].as<size_t>();
+            cfg.max_icp_iterations = config["max_icp_iterations"].as<size_t>();
 
             // Compute the offset-free base Hpc (head-pitch {p} from camera {c}) using forward kinematics, the
             // same way the Camera module does before applying the extrinsic offsets.
             auto nugus_model  = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
             auto camera_frame = cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
             auto Hpc          = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    camera_frame,
-                                                                    std::string("head"));
+                                                                             nugus_model.home_configuration(),
+                                                                             camera_frame,
+                                                                             std::string("head"));
             Hpc_base          = Eigen::Isometry3d(Hpc.matrix());
 
             // Read the robot's current extrinsic offsets, which form the initial guess for the optimisation
@@ -121,8 +121,8 @@ namespace module::tools {
             try {
                 YAML::Node cam_cfg = YAML::LoadFile(camera_config_path);
                 current_offsets    = Eigen::Vector3d(cam_cfg["roll_offset"].as<Expression>(),
-                                                  cam_cfg["pitch_offset"].as<Expression>(),
-                                                  cam_cfg["yaw_offset"].as<Expression>());
+                                                     cam_cfg["pitch_offset"].as<Expression>(),
+                                                     cam_cfg["yaw_offset"].as<Expression>());
                 log<INFO>(fmt::format(
                     "Calibrating {} camera for {}. Initial offsets (deg): roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}",
                     cfg.camera,
@@ -168,8 +168,8 @@ namespace module::tools {
             }
             const Eigen::Vector2d& target = cfg.scan_positions[scan_idx];
             const Eigen::Vector3d uPCt    = (Eigen::AngleAxisd(target.x(), Eigen::Vector3d::UnitZ())
-                                          * Eigen::AngleAxisd(target.y(), Eigen::Vector3d::UnitY()))
-                                         * Eigen::Vector3d::UnitX();
+                                             * Eigen::AngleAxisd(target.y(), Eigen::Vector3d::UnitY()))
+                                            * Eigen::Vector3d::UnitX();
             emit<Task>(std::make_unique<Look>(uPCt, true), 1);
         });
 
@@ -212,8 +212,10 @@ namespace module::tools {
                 // Store this frame's raw detections. Association is deferred to the ICP loop so it can be
                 // re-evaluated as the offsets are refined.
                 collect(field_intersections, Hwp, Hfw);
-                log<INFO>(
-                    fmt::format("Collected {}/{} detections across {} frames", collected_detections, cfg.min_samples, frames.size()));
+                log<INFO>(fmt::format("Collected {}/{} detections across {} frames",
+                                      collected_detections,
+                                      cfg.min_samples,
+                                      frames.size()));
                 if (collected_detections >= cfg.min_samples) {
                     run_calibration();
                 }
@@ -311,11 +313,11 @@ namespace module::tools {
                     const int l = it->second;
                     // Gate on the field-space distance to reject ambiguous / wrong-type pairings.
                     if (cost_matrix(d, l) < cfg.max_association_distance) {
-                        Sample s          = Sample{};
-                        s.uICc            = frame.observations[d].uICc;
-                        s.Hwp             = frame.Hwp;
-                        s.Hfw             = frame.Hfw;
-                        s.rLFf            = landmarks[l].rLFf;
+                        Sample s = Sample{};
+                        s.uICc   = frame.observations[d].uICc;
+                        s.Hwp    = frame.Hwp;
+                        s.Hfw    = frame.Hfw;
+                        s.rLFf   = landmarks[l].rLFf;
                         samples.push_back(s);
                         assigned_landmark = l;
                     }
@@ -328,6 +330,9 @@ namespace module::tools {
     }
 
     void ExtrinsicsCalibration::run_calibration() {
+        // Capture the warm-start offsets (the config values the run began with) so the optimised fit can be
+        // compared against the starting fit once the optimisation finishes.
+        const Eigen::Vector3d warm_start_offsets = current_offsets;
         std::vector<int> previous_signature;
         Eigen::Vector3d offsets = current_offsets;
         double cost             = 0.0;
@@ -364,6 +369,7 @@ namespace module::tools {
             // Converged once the refined offsets reproduce the same associations
             if (signature == previous_signature) {
                 log<INFO>(fmt::format("ICP converged after {} iteration(s): associations stable.", iter + 1));
+                calibrated = true;
                 break;
             }
             previous_signature = signature;
@@ -375,11 +381,44 @@ namespace module::tools {
             current_offsets.y() * 180.0 / M_PI,
             current_offsets.z() * 180.0 / M_PI,
             cost));
-        write_offsets(current_offsets);
-        // Don't exit(0): the robot is actively standing, so terminating now would drop it. Latch done instead and
-        // keep holding the stance; the operator stops the binary.
-        calibrated = true;
-        log<INFO>("New offsets written to config. Calibration complete - holding stance, safe to stop the binary.");
+
+        // --- Diagnostic: did the optimisation find a genuinely better fit than the starting (warm-start) config? ---
+        // Re-associate and score each offset set under its OWN associations (not a shared set), then report the RMS
+        // re-projection error in metres, normalised for the differing inlier counts. If the optimised RMS is lower,
+        // the optimiser is fitting the data better than the warm start; if the warm start (e.g. the manually
+        // calibrated values) fits better, the global minimum is not where the optimiser landed - a sign the
+        // objective is biased rather than the search being mis-initialised. NOTE: associate() rebuilds the shared
+        // `samples` buffer, but the ICP loop is finished so clobbering it here is harmless.
+        const auto evaluate = [this](const Eigen::Vector3d& o) {
+            associate(o);
+            const size_t n   = samples.size();
+            const double c   = total_cost(o);
+            const double rms = n > 0 ? std::sqrt(c / static_cast<double>(n)) : 0.0;
+            return std::make_tuple(n, c, rms);
+        };
+        const auto [warm_n, warm_cost, warm_rms] = evaluate(warm_start_offsets);
+        const auto [opt_n, opt_cost, opt_rms]    = evaluate(current_offsets);
+        log<INFO>(fmt::format("Cost comparison | warm start (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
+                              "{} samples, cost = {:.6f}, RMS = {:.4f} m",
+                              warm_start_offsets.x() * 180.0 / M_PI,
+                              warm_start_offsets.y() * 180.0 / M_PI,
+                              warm_start_offsets.z() * 180.0 / M_PI,
+                              warm_n,
+                              warm_cost,
+                              warm_rms));
+        log<INFO>(fmt::format("Cost comparison | optimised  (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
+                              "{} samples, cost = {:.6f}, RMS = {:.4f} m",
+                              current_offsets.x() * 180.0 / M_PI,
+                              current_offsets.y() * 180.0 / M_PI,
+                              current_offsets.z() * 180.0 / M_PI,
+                              opt_n,
+                              opt_cost,
+                              opt_rms));
+
+        if (calibrated) {
+            write_offsets(current_offsets);
+            log<INFO>("New offsets written to config. Calibration complete.");
+        }
     }
 
     double ExtrinsicsCalibration::total_cost(const Eigen::Vector3d& offsets) const {

@@ -9,7 +9,7 @@ urdf_path: "models/robot.urdf"
 camera: "Left"
 
 # Minimum number of associated detection<->landmark samples required before running the optimisation
-min_samples: 100
+min_samples: 5000
 
 # Maximum distance [m] in field space for a detection to be associated with a ground-truth landmark.
 # Pairings beyond this distance (re-evaluated each ICP iteration) are rejected. Keep this comfortably below the
@@ -40,7 +40,7 @@ scan_positions:
 # Maximum number of ICP iterations. Each iteration re-associates every collected detection at the current best
 # offsets, then re-optimises with those associations held fixed. The loop stops early once the associations stop
 # changing.
-max_icp_iterations: 10
+max_icp_iterations: 100
 
 # Search bounds (half-width) on each offset delta [rad]: del_roll, del_pitch, del_yaw
 offset_bounds: [10.0 * pi / 180, 10.0 * pi / 180, 10.0 * pi / 180]
