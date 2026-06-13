@@ -155,7 +155,7 @@ def compute_local_step_displacement(Htw_gt_t, Htw_gt_t_minus_1):
 
 from utility.dockerise import run_on_docker
 
-@run_on_docker
+@run_on_docker(default_gpus="all")
 def register(command):
     command.description = "Train a GRU to predict odometry x-y translation from an NBS dataset"
     command.add_argument("nbs_file", help="The nbs file containing OdometryRecord messages")
