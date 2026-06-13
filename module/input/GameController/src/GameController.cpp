@@ -584,6 +584,7 @@ namespace module::input {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
             case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_DEFENSE;
             case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::PHYSICAL_CONTACT;
+            case gamecontroller::PenaltyState::MOTION_IN_STOP: return PenaltyReason::PHYSICAL_CONTACT;
             case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::MANUAL;
             case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::REQUEST_FOR_PICKUP;
             case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::REQUEST_FOR_PICKUP;
@@ -591,6 +592,7 @@ namespace module::input {
             case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::REQUEST_FOR_SERVICE;
             case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::ILLEGAL_ATTACK;
             case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PHYSICAL_CONTACT;
+            case gamecontroller::PenaltyState::CAUTIONED:      return PenaltyReason::MANUAL;
             case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::MANUAL;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");

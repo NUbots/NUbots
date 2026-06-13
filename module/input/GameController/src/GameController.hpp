@@ -46,7 +46,7 @@ namespace module::input {
      */
     class GameController : public NUClear::Reactor {
     private:
-        static constexpr const uint SUPPORTED_VERSION       = 19;
+        static constexpr const uint SUPPORTED_VERSION       = 20;
         static constexpr const uint PLAYERS_PER_TEAM        = 6;
         static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
         static constexpr const uint NUM_TEAMS               = 2;
