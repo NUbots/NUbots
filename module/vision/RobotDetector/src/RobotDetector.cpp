@@ -151,8 +151,8 @@ namespace module::vision {
                 auto find_yaw   = [](const Eigen::Vector3d v) -> double { return std::atan2(v.y(), v.x()); };
                 auto find_pitch = [](const Eigen::Vector3d v) -> double { return std::atan2(v.z(), v.x()); };
 
-                // If the robot is standing features like outreached hands inflates the detected radius. To avoid this
-                // we cutoff points above stop_pitch to only take the yaw of the robot's bottom part.
+                // Outreached hands can inflate the other robot's detected radius as it uses yaw. To avoid
+                // this we cutoff points above stop_pitch to only take the min/max yaw near the robots feet.
                 double stop_pitch = std::atan2(robot.rRCc.z() + cfg.radius_cutoff_height, robot.rRCc.x());
 
                 auto filtered_cluster = cluster | std::views::filter([&, stop_pitch](int a) {

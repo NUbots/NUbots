@@ -42,7 +42,7 @@ namespace module::vision {
             int cluster_points = 0;
             /// @brief The minimum distance a robot can be to be considered a robot, to exclude the self robot
             double minimum_robot_distance = 0.0;
-            /// @brief The cutoff height in m for points that are considered when detecting a robot's radius
+            /// @brief The cutoff height in m for points considered when detecting a robot's radius
             double radius_cutoff_height = 0.0;
         } cfg;
 
