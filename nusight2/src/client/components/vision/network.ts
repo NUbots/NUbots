@@ -132,6 +132,7 @@ export class VisionNetwork {
       timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       rRCc: Vector3.from(robot.rRCc),
+      radius: robot.radius ?? 0.9999,
     }));
   }
 
