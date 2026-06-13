@@ -126,23 +126,9 @@ namespace module::network {
                                 bool own_player_message =
                                     global_config.player_id == incoming_msg.current_pose.player_id;
 
-                                // If there is game state information, get the colour
-                                message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
-                                if (game_state) {
-                                    switch (int(game_state->team.team_colour)) {
-                                        case GameState::TeamColour::BLUE:
-                                            team_colour = message::input::Team::BLUE;
-                                            break;
-                                        case GameState::TeamColour::RED: team_colour = message::input::Team::RED; break;
-                                        default: team_colour = message::input::Team::UNKNOWN_TEAM;
-                                    }
-                                }
-
-                                // Check if the incoming message is from the same team
-                                bool own_team_message = team_colour == incoming_msg.current_pose.team;
-
-                                // Filter out messages from ourselves and from other teams
-                                if (!own_player_message && own_team_message) {
+                                // Port-per-team ensures only teammates broadcast on this port
+                                // Filter out messages from ourselves only
+                                if (!own_player_message) {
                                     log<DEBUG>("Message received from teammate ID",
                                                incoming_msg.current_pose.player_id);
                                     emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
