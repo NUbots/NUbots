@@ -99,9 +99,8 @@ namespace module::network {
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
-                            .then([this, &global_config](const UDP::Packet& p,
-                                                         const std::shared_ptr<const GameState>& game_state) {
+                        on<UDP::Broadcast, Single>(cfg.receive_port)
+                            .then([this, &global_config](const UDP::Packet& p) {
                                 std::string remote_addr = p.remote.address;
 
                                 // Apply filtering of packets if udp_filter_address is set in config
@@ -206,6 +205,14 @@ namespace module::network {
                     switch (int(game_state->team.team_colour)) {
                         case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
                         case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                        case GameState::TeamColour::YELLOW:msg->current_pose.team = message::input::Team::YELLOW; break;
+                        case GameState::TeamColour::BLACK:msg->current_pose.team = message::input::Team::BLACK; break;
+                        case GameState::TeamColour::WHITE:msg->current_pose.team = message::input::Team::WHITE; break;
+                        case GameState::TeamColour::GREEN:msg->current_pose.team = message::input::Team::GREEN; break;
+                        case GameState::TeamColour::ORANGE:msg->current_pose.team = message::input::Team::ORANGE; break;
+                        case GameState::TeamColour::PURPLE:msg->current_pose.team = message::input::Team::PURPLE; break;
+                        case GameState::TeamColour::BROWN:msg->current_pose.team = message::input::Team::BROWN; break;
+                        case GameState::TeamColour::GRAY:msg->current_pose.team = message::input::Team::GRAY; break;
                         default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
                     }
                 }
