@@ -147,6 +147,13 @@ namespace module::input {
                           debug_sensor_filter(sensors, robot_pose_ground_truth);
                       }
 
+                      // Populate ground truth for data collection and plotting
+                      if (robot_pose_ground_truth) {
+                          Eigen::Isometry3d Hft(robot_pose_ground_truth->Hft);
+                          Eigen::Isometry3d true_Hwt = ground_truth_Hfw.inverse() * Hft;
+                          sensors->Htw_ground_truth  = true_Hwt.inverse();
+                      }
+
                       emit(std::move(sensors));
                   });
 

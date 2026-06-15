@@ -161,4 +161,7 @@ message Sensors {
     vec3 vTw = 16;
 
     behaviour.state.WalkState.Phase planted_foot_phase = 17;
+    
+    /// Ground truth homogeneous transform: world {w} to torso {t} from simulator
+    iso3 Htw_ground_truth = 18;
 }
