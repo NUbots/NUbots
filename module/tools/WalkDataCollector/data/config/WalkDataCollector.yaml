@@ -1,0 +1,57 @@
+log_level: INFO
+
+# Output directory for generated training data
+output_directory: "recordings/walk_data"
+
+# URDF path for tinyrobotics IK (same as Kinematics module)
+urdf_path: "models/robot.urdf"
+
+# IK settings (same as Kinematics module)
+ik_tolerance: 1e-5
+ik_max_iterations: 500
+ik_method: LEVENBERG_MARQUARDT
+
+# Link names in tinyrobotics model (same as Kinematics module)
+links:
+  torso: "torso"
+  left_foot: "left_foot_base"
+  right_foot: "right_foot_base"
+
+# Walk engine parameters (same as Walk.yaml)
+walk:
+  period: 0.32
+  only_switch_when_planted: false  # No physics, always switch on time
+  step:
+    limits: [0.5, 0.2, 0.4]
+    height: 0.085
+    width: 0.27
+    apex_ratio: 0.4
+  torso:
+    height: 0.44
+    pitch: 12 * pi / 180
+    position_offset: [0.01, 0, 0]
+    sway_offset: [0, 0.1, 0]
+    start_sway_offset: [0, 0.1, 0]
+    sway_ratio: 0.5
+    final_position_ratio: [0.5, 0.5, 1]
+  acceleration: [0.2, 0.2, 0.5]
+
+# Data collection parameters
+collection:
+  # Number of episodes to generate
+  num_episodes: 10000
+  # Timesteps per episode (at 100 Hz)
+  episode_length: 1000
+  # Update frequency in Hz
+  update_frequency: 100
+  # Random seed for reproducibility
+  seed: 42
+  # Velocity change interval range [min, max] in seconds
+  velocity_change_interval: [1.0, 3.0]
+
+# Velocity sampling ranges
+velocity_ranges:
+  # Maximum velocity ranges for random sampling
+  vx: [-0.3, 0.5]
+  vy: [-0.2, 0.2]
+  vtheta: [-0.4, 0.4]

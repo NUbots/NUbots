@@ -1,0 +1,14 @@
+# This role runs the WalkDataCollector tool to generate dataset for the Walk engine distillation.
+# It includes only what is necessary to run the tool and supply it with Kinematics configuration.
+nuclear_role(
+  # Core
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+
+  # Configuration
+  actuation::KinematicsConfiguration # Provides KinematicsModel for analytical IK
+
+  # Tool
+  tools::WalkDataCollector
+)
