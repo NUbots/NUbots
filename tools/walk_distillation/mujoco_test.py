@@ -9,7 +9,7 @@ import mujoco
 import mujoco.viewer
 from glfw import KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_Q, KEY_W, KEY_A, KEY_S, KEY_D
 
-from .model import WalkPolicy
+from .model import WalkPolicy, ActorCritic
 
 class WalkEngineState:
     def __init__(self, step_period=0.32):
@@ -66,8 +66,14 @@ def register(command):
         default="checkpoints/dataset_stats.npz",
         help="Path to the dataset statistics (.npz)"
     )
+    command.add_argument(
+        "--rl-checkpoint", "-r",
+        type=str,
+        default=None,
+        help="Path to the trained student RL policy (.pt)"
+    )
 
-def run(checkpoint, stats, **kwargs):
+def run(checkpoint, stats, rl_checkpoint, **kwargs):
     # 1. Load the model and stats
     print("Loading model and stats...")
     device = torch.device("cpu")
@@ -85,6 +91,14 @@ def run(checkpoint, stats, **kwargs):
     checkpoint_data = torch.load(checkpoint, map_location=device)
     model.load_state_dict(checkpoint_data.get("model_state_dict", checkpoint_data))
     model.eval()
+
+    rl_model = None
+    if rl_checkpoint and os.path.exists(rl_checkpoint):
+        print(f"Loading RL student policy from {rl_checkpoint}...")
+        # commands(3) + proj_g(3) + lin_v(3) + ang_v(3) + qpos_err(20) + qvel(20) + last_actions(20) = 72
+        rl_model = ActorCritic(num_obs=72, num_actions=12).to(device)
+        rl_model.load_state_dict(torch.load(rl_checkpoint, map_location=device))
+        rl_model.eval()
 
     # 2. Load MuJoCo model
     mj_model = mujoco.MjModel.from_xml_path("tools/walk_distillation/mujoco/scene.xml")
@@ -108,10 +122,49 @@ def run(checkpoint, stats, **kwargs):
     # Let's get the standing pose from the first few frames of evaluation, or just use 0.
     # Actually, we can get it from the dataset stats! target_mean is the average pose.
     history = [stats_data["target_mean"].copy() for _ in range(3)]
+    
+    # Store last RL actions (actually 20 elements because env.py has self.NU = 20 for NUgus)
+    last_actions = mj_data.ctrl.copy()
 
     # Target velocity controlled by keyboard
     target_velocity = np.zeros(3, dtype=np.float32)
     current_velocity = np.zeros(3, dtype=np.float32)
+    
+    default_qpos = None
+    key_id = mujoco.mj_name2id(mj_model, mujoco.mjtObj.mjOBJ_KEY, "stand_bent_knees")
+    if key_id != -1:
+        default_qpos = mj_model.key_qpos[key_id].copy()
+    else:
+        default_qpos = np.zeros(mj_model.nq)
+
+    def get_rl_obs(target_vel, mj_model, mj_data, default_qpos, last_actions):
+        # Base quaternion q = [w, x, y, z]
+        qw, qx, qy, qz = mj_data.qpos[3:7]
+        
+        # quat_rotate_inverse implementation in numpy
+        # q_vec_inv = [-qx, -qy, -qz]
+        def quat_rotate_inverse(q, v):
+            q_vec_inv = np.array([-q[1], -q[2], -q[3]])
+            uv = np.cross(q_vec_inv, v)
+            uuv = np.cross(q_vec_inv, uv)
+            return v + 2.0 * (q[0] * uv + uuv)
+            
+        global_gravity = np.array([0.0, 0.0, -1.0])
+        proj_gravity = quat_rotate_inverse(mj_data.qpos[3:7], global_gravity)
+        
+        base_lin_vel = quat_rotate_inverse(mj_data.qpos[3:7], mj_data.qvel[0:3])
+        base_ang_vel = quat_rotate_inverse(mj_data.qpos[3:7], mj_data.qvel[3:6])
+        
+        obs = np.concatenate([
+            target_vel,
+            proj_gravity,
+            base_lin_vel,
+            base_ang_vel,
+            mj_data.qpos[7:] - default_qpos[7:],
+            mj_data.qvel[6:],
+            last_actions
+        ])
+        return torch.tensor(obs, dtype=torch.float32, device=device).unsqueeze(0)
 
     def keyboard_callback(keycode):
         nonlocal target_velocity
@@ -162,15 +215,25 @@ def run(checkpoint, stats, **kwargs):
                 norm_target = model(norm_obs)
 
             pred_target = (norm_target * target_std) + target_mean
-            target_joints = pred_target.squeeze(0).cpu().numpy()
+            teacher_joints = pred_target.squeeze(0).cpu().numpy()
+            
+            final_joints = teacher_joints
+            
+            if rl_model is not None:
+                rl_obs = get_rl_obs(current_velocity, mj_model, mj_data, default_qpos, last_actions)
+                with torch.no_grad():
+                    actions, _ = rl_model(rl_obs)
+                residuals = actions.squeeze(0).cpu().numpy()
+                final_joints = teacher_joints + 0.2 * np.tanh(residuals)
 
             # Update history (shift)
             history[2] = history[1]
             history[1] = history[0]
-            history[0] = target_joints
+            history[0] = final_joints.copy()
 
             # Set MJ control (actuators match the 12 leg joints, followed by 8 arm/head joints)
-            mj_data.ctrl[:12] = target_joints
+            mj_data.ctrl[:12] = final_joints
+            last_actions[:12] = final_joints
 
             # Step physics
             # Physics is 0.002s, policy is 0.01s, so step physics 5 times

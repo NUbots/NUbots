@@ -11,4 +11,6 @@ b.dependencies.register(
     "onnxscript",
     "tensorboard",
     "mujoco",
+    "mujoco-warp",
+    "warp-lang",
 )
