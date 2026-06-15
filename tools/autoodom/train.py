@@ -155,7 +155,7 @@ def compute_local_step_displacement(Htw_gt_t, Htw_gt_t_minus_1):
 
 from utility.dockerise import run_on_docker
 
-@run_on_docker
+@run_on_docker(default_gpus="all")
 def register(command):
     command.description = "Train a GRU to predict odometry x-y translation from an NBS dataset"
     command.add_argument("nbs_file", help="The nbs file containing OdometryRecord messages")
@@ -189,6 +189,7 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
 
     raw_features = []
     raw_positions = []
+    raw_timestamps = []
 
     # Iterate through NBS dataset
     for packet in LinearDecoder(nbs_file):
@@ -208,6 +209,7 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
 
             raw_features.append(fv)
             raw_positions.append(msg.Htw_ground_truth)
+            raw_timestamps.append(packet.index_timestamp)
 
     total_records = len(raw_features)
     print(f"Extracted {total_records} OdometryRecords.")
@@ -216,16 +218,36 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
         print("Not enough records in the dataset to form a single window and displacement step.")
         return
 
+    # Detect gaps caused by mocap tracking dropouts (OdometryLogger only emits when
+    # a valid rigid body is found, so lost tracking produces no records for those frames).
+    EXPECTED_PERIOD_NS = 20_000_000   # 20 ms at 50 Hz
+    GAP_THRESHOLD_NS   = 3 * EXPECTED_PERIOD_NS  # 60 ms = clearly missing frames
+
+    timestamps = np.array(raw_timestamps, dtype=np.int64)
+    is_gap = np.zeros(total_records, dtype=bool)
+    if total_records > 1:
+        is_gap[1:] = (timestamps[1:] - timestamps[:-1]) > GAP_THRESHOLD_NS
+    segment_ids = np.cumsum(is_gap)   # integer segment ID per record
+
+    num_gaps = int(is_gap.sum())
+    if num_gaps > 0:
+        print(f"Detected {num_gaps} mocap tracking gap(s) — windows crossing gaps will be excluded.")
+
     # Calculate dataset mean and std for normalization
     all_features = np.array(raw_features)
     mean_val = np.mean(all_features, axis=0)
     std_val = np.std(all_features, axis=0)
     std_val[std_val == 0.0] = 1.0
 
-    # Build windows
+    # Build windows, skipping any that span a mocap tracking gap
     X = []
     Y = []
+    window_seg_ids = []
     for i in range(total_records - window_size):
+        # Skip if any record in [i+1, i+window_size-1] follows a gap
+        if is_gap[i + 1 : i + window_size].any():
+            continue
+
         # A window is a flattened array of size H * feature_dim
         window = raw_features[i : i + window_size]
         flattened_window = np.concatenate(window)
@@ -238,6 +260,9 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
 
         X.append(flattened_window)
         Y.append(gt_disp)
+        window_seg_ids.append(segment_ids[i])
+
+    window_seg_ids = np.array(window_seg_ids)
 
     X = torch.tensor(np.array(X), dtype=torch.float32)
     
@@ -255,6 +280,7 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
     split_idx = int(len(X) * 0.8)
     X_train, Y_train = X[:split_idx], Y_norm_tensor[:split_idx]
     X_test, Y_eval = X[split_idx:], Y_raw_tensor[split_idx:]
+    seg_ids_train = window_seg_ids[:split_idx]
     print(f"Train split: {len(X_train)} samples | Test split: {len(X_test)} samples")
 
     AutoOdomModel = get_model_class()
@@ -566,9 +592,10 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
     # ============================================================================
     class OdometrySequenceDataset(Dataset):
         """Yields contiguous sequences of windows for multi-step rollout training.
-        Uses a stride to avoid excessive overlap between sequences."""
+        Uses a stride to avoid excessive overlap between sequences.
+        Sequences that span a mocap tracking gap are excluded."""
 
-        def __init__(self, X, Y_norm, Y_raw, seq_length, stride=None):
+        def __init__(self, X, Y_norm, Y_raw, seq_length, segment_ids, stride=None):
             self.X = X
             self.Y_norm = Y_norm
             self.Y_raw = Y_raw
@@ -576,7 +603,11 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
             # Default stride = half the sequence length (50% overlap)
             self.stride = stride if stride is not None else max(1, seq_length // 2)
             max_start = len(X) - seq_length
-            self.starts = list(range(0, max_start + 1, self.stride))
+            # Only keep starts where the whole sequence lies within the same mocap segment
+            self.starts = [
+                s for s in range(0, max_start + 1, self.stride)
+                if segment_ids[s] == segment_ids[s + seq_length - 1]
+            ]
 
         def __len__(self):
             return len(self.starts)
@@ -654,7 +685,7 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
         # Sequence batch size is smaller since each sample is a full rollout
         seq_batch_size = max(1, min(8, batch_size // 4))
 
-        seq_dataset = OdometrySequenceDataset(X_train, Y_train, Y_train_raw, effective_rollout)
+        seq_dataset = OdometrySequenceDataset(X_train, Y_train, Y_train_raw, effective_rollout, seg_ids_train)
         seq_loader = DataLoader(seq_dataset, batch_size=seq_batch_size, shuffle=True)
 
         # Reset scheduler for Phase 2 with a fresh LR
