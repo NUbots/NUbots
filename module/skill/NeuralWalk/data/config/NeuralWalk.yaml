@@ -1,0 +1,21 @@
+log_level: DEBUG
+
+# Path to the exported ONNX model
+model_path: "model/walk_policy.onnx"
+
+# OpenVINO inference device (CPU, GPU, MYRIAD, etc)
+device: "CPU"
+
+step_period: 0.32
+
+gains:
+  legs: 30
+  arms: 30
+
+arms:
+  right_shoulder_pitch: 1.7
+  left_shoulder_pitch: 1.7
+  right_shoulder_roll: -0.4
+  left_shoulder_roll: 0.35
+  right_elbow: -0.7
+  left_elbow: -0.7

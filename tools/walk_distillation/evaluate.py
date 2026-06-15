@@ -29,7 +29,7 @@ def register(command):
     command.add_argument(
         "--data-dir", "-d",
         type=str,
-        default="walk_data",
+        default="recordings/walk_data",
         help="Directory containing metadata.yaml and episode bins"
     )
 

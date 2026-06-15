@@ -165,20 +165,19 @@ namespace module::tools {
                                                              cfg.velocity_change_interval[1]);
 
         log<NUClear::LogLevel::INFO>("Starting data collection:");
-        log<NUClear::LogLevel::INFO>("  Episodes: {}", cfg.num_episodes);
-        log<NUClear::LogLevel::INFO>("  Episode length: {} timesteps ({:.1f}s)",
-                                     cfg.episode_length,
-                                     cfg.episode_length * dt);
-        log<NUClear::LogLevel::INFO>("  Output directory: {}", cfg.output_directory);
-        log<NUClear::LogLevel::INFO>("  Observation dim: {}", obs_dim);
-        log<NUClear::LogLevel::INFO>("  Target dim: {}", target_dim);
-        log<NUClear::LogLevel::INFO>("  Total floats per sample: {}", sample_dim);
+        log<NUClear::LogLevel::INFO>("  Episodes:", cfg.num_episodes);
+        log<NUClear::LogLevel::INFO>("  Episode length:", cfg.episode_length, "timesteps",
+                                     fmt::format("({:.1f}s)", cfg.episode_length * dt));
+        log<NUClear::LogLevel::INFO>("  Output directory:", cfg.output_directory);
+        log<NUClear::LogLevel::INFO>("  Observation dim:", obs_dim);
+        log<NUClear::LogLevel::INFO>("  Target dim:", target_dim);
+        log<NUClear::LogLevel::INFO>("  Total floats per sample:", sample_dim);
 
         size_t total_samples = 0;
 
         for (int episode = 0; episode < cfg.num_episodes; episode++) {
             if (episode % 1000 == 0) {
-                log<NUClear::LogLevel::INFO>("Episode {}/{}", episode, cfg.num_episodes);
+                log<NUClear::LogLevel::INFO>("Episode", episode, "/", cfg.num_episodes);
             }
 
             // Reset the walk engine for each episode
@@ -215,8 +214,31 @@ namespace module::tools {
             for (int t = 0; t < cfg.episode_length; t++) {
                 // Change velocity target periodically
                 if (episode_time >= next_change_time) {
-                    target_velocity  = sample_velocity(rng);
-                    next_change_time = episode_time + interval_dist(rng);
+                    static bool next_is_stop = false;
+
+                    if (next_is_stop) {
+                        // Force a complete stop after a short tap so the network learns STARTING -> STOPPING
+                        target_velocity = Eigen::Vector3d::Zero();
+                        next_change_time = episode_time + interval_dist(rng); // Wait long enough to fully settle
+                        next_is_stop = false;
+                    } else {
+                        target_velocity = sample_velocity(rng);
+                        
+                        // Use a mix of long walks and very short taps to ensure the network learns
+                        // both sustained walking and immediate STARTING -> STOPPING transitions!
+                        if (!target_velocity.isZero()) {
+                            std::uniform_real_distribution<double> short_tap(0.0, 1.0);
+                            if (short_tap(rng) < 0.2) {
+                                std::uniform_real_distribution<double> interval_dist_short(0.1, 0.5);
+                                next_change_time = episode_time + interval_dist_short(rng);
+                                next_is_stop = true; // Force the NEXT change to be a full stop
+                            } else {
+                                next_change_time = episode_time + interval_dist(rng);
+                            }
+                        } else {
+                            next_change_time = episode_time + interval_dist(rng);
+                        }
+                    }
                 }
 
                 // Smooth velocity with acceleration limits (same as Walk.cpp:219-222)
@@ -467,9 +489,11 @@ namespace module::tools {
             kinematics_model.leg.LEFT_TO_RIGHT_ANKLE_PITCH = left_right["ankle_pitch"].as<int>();
             kinematics_model.leg.LEFT_TO_RIGHT_ANKLE_ROLL  = left_right["ankle_roll"].as<int>();
 
-            log<NUClear::LogLevel::INFO>("KinematicsModel loaded: upper_leg={}, lower_leg={}, foot_height={}",
+            log<NUClear::LogLevel::INFO>("KinematicsModel loaded: upper_leg=",
                                          kinematics_model.leg.UPPER_LEG_LENGTH,
+                                         "lower_leg=",
                                          kinematics_model.leg.LOWER_LEG_LENGTH,
+                                         "foot_height=",
                                          kinematics_model.leg.FOOT_HEIGHT);
         });
 

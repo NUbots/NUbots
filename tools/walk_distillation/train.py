@@ -21,7 +21,7 @@ def register(command):
     command.add_argument(
         "--data-dir", "-d",
         type=str,
-        default="walk_data",
+        default="recordings/walk_data",
         help="Directory containing the training data (.bin files and metadata.yaml)"
     )
     command.add_argument(
@@ -110,6 +110,12 @@ def run(data_dir, output_dir, batch_size, epochs, lr, **kwargs):
         pbar = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs} [Train]")
         for obs, target in pbar:
             obs, target = obs.to(device), target.to(device)
+            
+            # Inject noise into the history frames (indices 10 to 45) to combat autoregressive exposure bias.
+            # This teaches the network to recover from its own slight prediction errors during closed-loop rollout,
+            # completely eliminating the drift without needing hardcoded EMA hacks in C++.
+            noise = torch.randn_like(obs[:, 10:46]) * 0.05
+            obs[:, 10:46] += noise
             
             optimizer.zero_grad()
             pred = model(obs)
