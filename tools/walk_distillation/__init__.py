@@ -10,4 +10,5 @@ b.dependencies.register(
     "onnx",
     "onnxscript",
     "tensorboard",
+    "mujoco",
 )
