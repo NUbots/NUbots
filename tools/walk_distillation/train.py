@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import yaml
 
@@ -96,6 +97,11 @@ def run(data_dir, output_dir, batch_size, epochs, lr, **kwargs):
     criterion = nn.SmoothL1Loss()
 
     best_val_loss = float("inf")
+    
+    # Initialize TensorBoard writer
+    log_dir = os.path.join(output_dir, "logs")
+    writer = SummaryWriter(log_dir=log_dir)
+    print(f"TensorBoard logging to {log_dir}")
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -116,7 +122,6 @@ def run(data_dir, output_dir, batch_size, epochs, lr, **kwargs):
             pbar.set_postfix({"loss": f"{loss.item():.5f}"})
             
         train_loss /= len(train_loader)
-        scheduler.step()
         
         # Validation
         model.eval()
@@ -129,6 +134,13 @@ def run(data_dir, output_dir, batch_size, epochs, lr, **kwargs):
                 val_loss += loss.item()
                 
         val_loss /= len(val_loader)
+        
+        # Log to TensorBoard
+        writer.add_scalar('Loss/train', train_loss, epoch)
+        writer.add_scalar('Loss/val', val_loss, epoch)
+        writer.add_scalar('LearningRate', scheduler.get_last_lr()[0], epoch)
+        
+        scheduler.step()
         
         print(f"Epoch {epoch}: Train Loss = {train_loss:.6f}, Val Loss = {val_loss:.6f}")
         
@@ -145,4 +157,5 @@ def run(data_dir, output_dir, batch_size, epochs, lr, **kwargs):
             torch.save(checkpoint, save_path)
             print(f"Saved new best model to {save_path}")
 
+    writer.close()
     print("Training complete.")

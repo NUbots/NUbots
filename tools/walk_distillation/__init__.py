@@ -9,4 +9,5 @@ b.dependencies.register(
     "pyyaml",
     "onnx",
     "onnxscript",
+    "tensorboard",
 )
