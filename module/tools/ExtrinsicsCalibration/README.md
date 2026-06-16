@@ -6,7 +6,7 @@ Automatically tunes a single camera's extrinsic offsets (`roll_offset`, `pitch_o
 
 The module assumes the robot is placed at the **centre of the field, looking straight toward the goal**, and that the **field type is known** (lab or RoboCup field) via the `FieldDescription`. Because the field dimensions are known, the ground-truth positions of the field landmarks (X, L and T intersections) are known to a high degree of accuracy.
 
-Once running, the robot **stands itself up and automatically sweeps its head** through a configured yaw/pitch grid (see `scan_positions`), so the field landmarks are seen across the whole image without any manual input. Samples are gathered only once the head has moved far enough since the last capture, spreading them across distinct viewpoints.
+Once running, the robot **stands itself up and automatically sweeps its head** through a yaw/pitch grid, so the field landmarks are seen across the whole image without any manual input. The sweep is delegated to the `PlanLook` provider (the module emits a `LookAround` task); the grid is configured per-role in `config/bin/extrinsicscalibration/PlanLook.yaml` so it does not affect the shared soccer ball-search sweep. Samples are gathered only once the head has moved far enough since the last capture, spreading them across distinct viewpoints.
 
 **Field dimensions MUST be measured first and the necessary values must be updated in FieldDescription.yaml before running this binary.**
 
@@ -26,7 +26,7 @@ The YOLO network detects the field landmarks and projects them onto the ground p
    transforms) are stored. No landmark association is committed at collection time, so the same detections can be
    re-matched as the offsets improve.
 4. **Refine with ICP.** Once enough detections have been gathered, the module runs an Iterative Closest Point loop:
-   - **Associate:** project every detection to field space at the *current best* offsets and match each frame's
+   - **Associate:** project every detection to field space at the _current best_ offsets and match each frame's
      detections to the same-type ground-truth landmarks with the Hungarian algorithm
      (`utility::algorithm::determine_assignment`), gated by `max_association_distance`.
    - **Optimise:** with those associations held fixed, NLopt's BOBYQA minimises
@@ -55,8 +55,8 @@ the field type via configuration. Run again with the other camera to calibrate b
 
 ## Emits
 
-- `message::skill::Walk` (zero velocity), `message::strategy::FallRecovery` and `message::skill::Look` tasks to
-  stand the robot and sweep its head through the scan grid.
+- `message::skill::Walk` (zero velocity) and `message::strategy::FallRecovery` tasks to stand the robot, and a
+  `message::planning::LookAround` task so the `PlanLook` provider sweeps the head through the scan grid.
 - The optimised offsets are logged and written back to the camera config file when the optimisation succeeds.
 
 ## Dependencies
@@ -66,4 +66,4 @@ the field type via configuration. Run again with the other camera to calibrate b
 - `tinyrobotics` for camera forward kinematics
 - `utility::algorithm::determine_assignment` (Hungarian algorithm)
 - `utility::localisation::setup_field_landmarks`
-- The Director behaviour stack (`Walk`, `Look`, `FallRecovery`, `GetUp`) to stand and move the head
+- The Director behaviour stack (`Walk`, `PlanLook`, `Look`, `FallRecovery`, `GetUp`) to stand and move the head

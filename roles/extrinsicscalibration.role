@@ -1,7 +1,7 @@
 # This role places the robot at the centre of the field, looking toward the goal. The robot stands itself up and
-# automatically sweeps its head while ExtrinsicsCalibration optimises the selected camera's extrinsic offsets
-# (roll, pitch, yaw) so that the YOLO field-landmark detections align with the known ground-truth landmark
-# positions. See module/tools/ExtrinsicsCalibration for details.
+# automatically sweeps its head while ExtrinsicsCalibration optimises the selected camera's extrinsic offsets (roll,
+# pitch, yaw) so that the YOLO field-landmark detections align with the known ground-truth landmark positions. See
+# module/tools/ExtrinsicsCalibration for details.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
@@ -21,7 +21,8 @@ nuclear_role(
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::FieldLineDetector # Produces FieldLines for NUsight visualisation (so the projected lines can be seen moving with the offsets); not used by the calibration optimisation
+  vision::FieldLineDetector # Produces FieldLines for NUsight visualisation (so the projected lines can be seen moving
+                            # with the offsets); not used by the calibration optimisation
   vision::Yolo
   # Director
   extension::Director
@@ -36,6 +37,7 @@ nuclear_role(
   # Planners
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
+  planning::PlanLook # Sweeps the head through the (yaw, pitch) grid in config/bin/extrinsicscalibration/PlanLook.yaml
   # Strategies
   strategy::FallRecovery
   # Calibration (stands the robot, sweeps the head, and optimises the camera offsets)

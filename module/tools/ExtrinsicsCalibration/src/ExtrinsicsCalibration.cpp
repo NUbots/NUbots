@@ -27,7 +27,6 @@
 #include "ExtrinsicsCalibration.hpp"
 
 #include <Eigen/Dense>
-#include <chrono>
 #include <cmath>
 #include <fmt/format.h>
 #include <fstream>
@@ -43,7 +42,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/skill/Look.hpp"
+#include "message/planning/LookAround.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 
@@ -63,7 +62,7 @@ namespace module::tools {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
-    using message::skill::Look;
+    using message::planning::LookAround;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::support::FieldDescription;
@@ -92,12 +91,6 @@ namespace module::tools {
             cfg.min_head_pose_change     = config["min_head_pose_change"].as<Expression>();
             cfg.offset_bounds            = Eigen::Vector3d(config["offset_bounds"].as<Expression>());
 
-            cfg.scan_fixation_time = config["scan_fixation_time"].as<double>();
-            cfg.scan_positions.clear();
-            for (const auto& position : config["scan_positions"].config) {
-                cfg.scan_positions.push_back(Eigen::Vector2d(position.as<Expression>()));
-            }
-
             cfg.xtol_rel           = config["opt"]["xtol_rel"].as<double>();
             cfg.ftol_rel           = config["opt"]["ftol_rel"].as<double>();
             cfg.maxeval            = config["opt"]["maxeval"].as<size_t>();
@@ -108,9 +101,9 @@ namespace module::tools {
             auto nugus_model  = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
             auto camera_frame = cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
             auto Hpc          = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                             nugus_model.home_configuration(),
-                                                                             camera_frame,
-                                                                             std::string("head"));
+                                                                    nugus_model.home_configuration(),
+                                                                    camera_frame,
+                                                                    std::string("head"));
             Hpc_base          = Eigen::Isometry3d(Hpc.matrix());
 
             // Read the robot's current extrinsic offsets, which form the initial guess for the optimisation
@@ -121,8 +114,8 @@ namespace module::tools {
             try {
                 YAML::Node cam_cfg = YAML::LoadFile(camera_config_path);
                 current_offsets    = Eigen::Vector3d(cam_cfg["roll_offset"].as<Expression>(),
-                                                     cam_cfg["pitch_offset"].as<Expression>(),
-                                                     cam_cfg["yaw_offset"].as<Expression>());
+                                                  cam_cfg["pitch_offset"].as<Expression>(),
+                                                  cam_cfg["yaw_offset"].as<Expression>());
                 log<INFO>(fmt::format(
                     "Calibrating {} camera for {}. Initial offsets (deg): roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}",
                     cfg.camera,
@@ -148,29 +141,8 @@ namespace module::tools {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Always try to recover from a fall, and stand still (a zero-velocity walk).
-            emit<Task>(std::make_unique<FallRecovery>(), 5);
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
-        });
-
-        // Automatically sweep the head through the configured (yaw, pitch) grid, lingering scan_fixation_time at
-        // each position, so detections span the image without any manual input. Re-emitting the Look task each
-        // tick keeps it alive and lets the Look skill smooth toward the target.
-        on<Every<10, Per<std::chrono::seconds>>>().then("Head scan", [this] {
-            if (cfg.scan_positions.empty()) {
-                return;
-            }
-            // Advance to the next scan position once we have lingered long enough (frozen once calibrated).
-            if (!calibrated
-                && std::chrono::duration<double>(NUClear::clock::now() - last_scan_move).count()
-                       >= cfg.scan_fixation_time) {
-                scan_idx       = (scan_idx + 1) % cfg.scan_positions.size();
-                last_scan_move = NUClear::clock::now();
-            }
-            const Eigen::Vector2d& target = cfg.scan_positions[scan_idx];
-            const Eigen::Vector3d uPCt    = (Eigen::AngleAxisd(target.x(), Eigen::Vector3d::UnitZ())
-                                             * Eigen::AngleAxisd(target.y(), Eigen::Vector3d::UnitY()))
-                                            * Eigen::Vector3d::UnitX();
-            emit<Task>(std::make_unique<Look>(uPCt, true), 1);
+            emit<Task>(std::make_unique<FallRecovery>(), 1);
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
         });
 
         // Main calibration loop: collect associated detections while the robot is static at the field centre,
@@ -178,10 +150,17 @@ namespace module::tools {
         on<Trigger<FieldIntersections>, With<Sensors>, With<FieldDescription>, Single>().then(
             "ExtrinsicsCalibration",
             [this](const FieldIntersections& field_intersections, const Sensors& sensors, const FieldDescription&) {
-                // Stop collecting / optimising once we are done (the robot keeps standing and holding its head).
+                // Stop collecting / optimising once we are done. We also stop requesting the head sweep so the head
+                // holds its last position while the robot keeps standing (rather than continuing to scan).
                 if (calibrated) {
                     return;
                 }
+
+                // Sweep the head automatically via the PlanLook provider, which steps through the (yaw, pitch) grid
+                // configured in the role-specific PlanLook.yaml (config/bin/extrinsicscalibration/PlanLook.yaml) so
+                // the field landmarks are seen across the whole image. Re-emitted each frame (FieldIntersections is
+                // published every frame) so PlanLook keeps advancing through the grid.
+                emit<Task>(std::make_unique<LookAround>(), 1);
 
                 // Only gather a sample once the head has swept far enough since the last capture, so the data
                 // spans distinct viewpoints (the head sweeps automatically) rather than over-sampling one pose.
@@ -398,22 +377,24 @@ namespace module::tools {
         };
         const auto [warm_n, warm_cost, warm_rms] = evaluate(warm_start_offsets);
         const auto [opt_n, opt_cost, opt_rms]    = evaluate(current_offsets);
-        log<INFO>(fmt::format("Cost comparison | warm start (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
-                              "{} samples, cost = {:.6f}, RMS = {:.4f} m",
-                              warm_start_offsets.x() * 180.0 / M_PI,
-                              warm_start_offsets.y() * 180.0 / M_PI,
-                              warm_start_offsets.z() * 180.0 / M_PI,
-                              warm_n,
-                              warm_cost,
-                              warm_rms));
-        log<INFO>(fmt::format("Cost comparison | optimised  (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
-                              "{} samples, cost = {:.6f}, RMS = {:.4f} m",
-                              current_offsets.x() * 180.0 / M_PI,
-                              current_offsets.y() * 180.0 / M_PI,
-                              current_offsets.z() * 180.0 / M_PI,
-                              opt_n,
-                              opt_cost,
-                              opt_rms));
+        log<INFO>(
+            fmt::format("Cost comparison | warm start (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
+                        "{} samples, cost = {:.6f}, RMS = {:.4f} m",
+                        warm_start_offsets.x() * 180.0 / M_PI,
+                        warm_start_offsets.y() * 180.0 / M_PI,
+                        warm_start_offsets.z() * 180.0 / M_PI,
+                        warm_n,
+                        warm_cost,
+                        warm_rms));
+        log<INFO>(
+            fmt::format("Cost comparison | optimised  (deg) roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}: "
+                        "{} samples, cost = {:.6f}, RMS = {:.4f} m",
+                        current_offsets.x() * 180.0 / M_PI,
+                        current_offsets.y() * 180.0 / M_PI,
+                        current_offsets.z() * 180.0 / M_PI,
+                        opt_n,
+                        opt_cost,
+                        opt_rms));
 
         if (calibrated) {
             write_offsets(current_offsets);

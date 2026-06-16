@@ -48,8 +48,9 @@ namespace module::tools {
      * (del_roll, del_pitch, del_yaw) so that the projected YOLO field-landmark detections (X, L, T
      * intersections) align with the known ground-truth landmark positions.
      *
-     * The robot stands itself up and automatically sweeps its head through a yaw/pitch grid (emitting Look
-     * tasks) so the detections span the image without any manual input.
+     * The robot stands itself up and automatically sweeps its head through a yaw/pitch grid (via the PlanLook
+     * LookAround provider, configured by the role-specific PlanLook.yaml) so the detections span the image
+     * without any manual input.
      *
      * Assumptions:
      *  - The robot is placed on the centre of the field, looking straight toward the goal.
@@ -82,13 +83,6 @@ namespace module::tools {
             /// gathered. Keeps samples spread across distinct head poses (the head sweeps automatically) instead
             /// of over-sampling whatever pose the head is lingering in.
             double min_head_pose_change = 0.0;
-
-            /// @brief Time [s] to linger at each head-scan position before moving to the next
-            double scan_fixation_time = 0.0;
-
-            /// @brief Head-scan grid: (yaw, pitch) [rad] positions the head sweeps through. Positive pitch looks
-            /// down (matching the head-pitch servo convention).
-            std::vector<Eigen::Vector2d> scan_positions{};
 
             /// @brief Search bounds (half-width) on each offset delta [rad] (del_roll, del_pitch, del_yaw)
             Eigen::Vector3d offset_bounds = Eigen::Vector3d::Zero();
@@ -147,12 +141,6 @@ namespace module::tools {
         /// head has moved far enough (see Config::min_head_pose_change)
         double last_head_yaw   = 0.0;
         double last_head_pitch = 0.0;
-
-        /// @brief Index of the current head-scan position in Config::scan_positions
-        size_t scan_idx = 0;
-
-        /// @brief Time the head last moved to a new scan position
-        NUClear::clock::time_point last_scan_move = NUClear::clock::now();
 
         /// @brief True once the calibration has finished and written the offsets. The robot keeps standing and the
         /// head holds still (rather than exiting and collapsing); the operator stops the binary.
