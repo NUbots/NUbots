@@ -6,6 +6,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/math/comparison.hpp"
+
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
@@ -79,13 +81,24 @@ namespace module::platform::Booster {
         });
 
         on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
-            if (head.rot.isApprox(last_head_rot)) {
+            // Clamp to the Booster SDK RotateHead limits (radians):
+            //   pitch: downward positive, range [-0.3, 1.0]
+            //   yaw:   leftward positive, range [-0.785, 0.785]
+            constexpr double MIN_PITCH = -0.3;
+            constexpr double MAX_PITCH = 1.0;
+            constexpr double MIN_YAW   = -0.785;
+            constexpr double MAX_YAW   = 0.785;
+
+            const Eigen::Vector2d rot(utility::math::clamp(MIN_YAW, head.rot.x(), MAX_YAW),
+                                      utility::math::clamp(MIN_PITCH, head.rot.y(), MAX_PITCH));
+
+            if (rot.isApprox(last_head_rot)) {
                 return;
             }
-            last_head_rot = head.rot;
-            log<DEBUG>("Sending head rotation command with yaw=" + std::to_string(head.rot.x())
-                       + ", pitch=" + std::to_string(head.rot.y()));
-            int32_t res = booster_client.RotateHead(head.rot.y(), head.rot.x());
+            last_head_rot = rot;
+            log<DEBUG>("Sending head rotation command with yaw=" + std::to_string(rot.x())
+                       + ", pitch=" + std::to_string(rot.y()));
+            int32_t res = booster_client.RotateHead(rot.y(), rot.x());
             if (res != 0) {
                 log<ERROR>("Failed to rotate head: " + res_code_to_string(res));
             }
