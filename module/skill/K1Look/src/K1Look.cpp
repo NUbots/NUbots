@@ -51,7 +51,6 @@ namespace module::skill {
             cfg.smoothing_factor = config["smoothing_factor"].as<float>();
         });
 
-        // Re-run at a fixed rate so the smoothing filter keeps converging towards the goal between new tasks
         on<Provide<LookTask>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
             // Normalise the look vector
             Eigen::Vector3d req_uPCt = look.rPCt.normalized();
