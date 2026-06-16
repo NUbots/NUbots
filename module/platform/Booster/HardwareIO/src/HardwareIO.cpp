@@ -14,6 +14,7 @@ namespace module::platform::Booster {
     using extension::behaviour::RunReason;
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
+    using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
@@ -74,6 +75,19 @@ namespace module::platform::Booster {
             int32_t res = booster_client.Move(move.velocity.x(), move.velocity.y(), move.velocity.z());
             if (res != 0) {
                 log<ERROR>("Failed to move: " + res_code_to_string(res));
+            }
+        });
+
+        on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
+            if (head.rot.isApprox(last_head_rot)) {
+                return;
+            }
+            last_head_rot = head.rot;
+            log<DEBUG>("Sending head rotation command with yaw=" + std::to_string(head.rot.x())
+                       + ", pitch=" + std::to_string(head.rot.y()));
+            int32_t res = booster_client.RotateHead(head.rot.y(), head.rot.x());
+            if (res != 0) {
+                log<ERROR>("Failed to rotate head: " + res_code_to_string(res));
             }
         });
 
