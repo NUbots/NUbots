@@ -195,8 +195,8 @@ namespace module::input {
             feature_history.pop_front();
         }
 
-        bool run_neural = cfg.neural_odom.use_neural_odometry && model_loaded
-                          && (feature_history.size() == WINDOW_SIZE);
+        bool run_neural =
+            cfg.neural_odom.use_neural_odometry && model_loaded && (feature_history.size() == WINDOW_SIZE);
 
         if (run_neural) {
             try {
@@ -206,7 +206,7 @@ namespace module::input {
                     input_data.insert(input_data.end(), f.begin(), f.end());
                 }
 
-                auto input_port = compiled_model.input();
+                auto input_port        = compiled_model.input();
                 ov::Shape static_shape = {1, size_t(WINDOW_SIZE * FEATURE_DIM)};
                 ov::Tensor input_tensor(input_port.get_element_type(), static_shape);
                 std::memcpy(input_tensor.data<float>(), input_data.data(), WINDOW_SIZE * FEATURE_DIM * sizeof(float));
@@ -217,9 +217,9 @@ namespace module::input {
                 const float* out_data = output.data<const float>();
                 // Model outputs displacement in the training ground-truth frame, which is negated
                 // relative to the integration convention used here (forward = +dx at runtime).
-                double dx             = -out_data[0];
-                double dy             = -out_data[1];
-                double dtheta         = out_data[2];
+                double dx     = out_data[0];
+                double dy     = out_data[1];
+                double dtheta = out_data[2];
 
                 // If command velocity is near zero, suppress odometry updates to prevent drift when standing still
                 if (last_walk_state.velocity_target.norm() < cfg.neural_odom.zero_velocity_threshold) {
@@ -229,19 +229,22 @@ namespace module::input {
                 }
 
                 // Integrate step-by-step using previous frame's orientation and position
-                Eigen::Vector3d p_prev = previous_sensors ? Eigen::Vector3d(previous_sensors->Htw.inverse().translation()) : Eigen::Vector3d(Hwt_anchor.translation());
-                Eigen::Matrix3d R_prev = previous_sensors ? Eigen::Matrix3d(previous_sensors->Htw.inverse().linear()) : Eigen::Matrix3d(Hwt_anchor.linear());
-                
+                Eigen::Vector3d p_prev = previous_sensors
+                                             ? Eigen::Vector3d(previous_sensors->Htw.inverse().translation())
+                                             : Eigen::Vector3d(Hwt_anchor.translation());
+                Eigen::Matrix3d R_prev = previous_sensors ? Eigen::Matrix3d(previous_sensors->Htw.inverse().linear())
+                                                          : Eigen::Matrix3d(Hwt_anchor.linear());
+
                 // Get previous integrated yaw
                 double yaw_prev = previous_sensors ? mat_to_rpy_intrinsic(R_prev).z() : kinematic_yaw;
-                
+
                 // Create a yaw-only rotation matrix for the 2D local frame (heading frame)
                 Eigen::Matrix3d R_yaw_prev = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw_prev));
-                
+
                 // Rotate local displacement step (dx, dy) into world coordinates using previous yaw
                 Eigen::Vector3d disp_world = R_yaw_prev * Eigen::Vector3d(dx, dy, 0.0);
 
-                Hwt.translation() = p_prev + disp_world;
+                Hwt.translation()     = p_prev + disp_world;
                 Hwt.translation().z() = Hwt_anchor.translation().z();
 
                 // Integrate neural yaw step update
@@ -253,9 +256,9 @@ namespace module::input {
 
                 // Construct robot {r} to world {w} using neural yaw so Hrw stays consistent with Htw
                 Eigen::Isometry3d Hwr_neural = Eigen::Isometry3d::Identity();
-                Hwr_neural.linear() = Eigen::AngleAxisd(yaw_curr, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-                Hwr_neural.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-                sensors->Hrw = Hwr_neural.inverse();
+                Hwr_neural.linear()          = Eigen::AngleAxisd(yaw_curr, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                Hwr_neural.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+                sensors->Hrw                 = Hwr_neural.inverse();
             }
             catch (const std::exception& e) {
                 log<ERROR>("Neural Odometry inference failed: ", e.what());
