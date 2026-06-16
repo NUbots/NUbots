@@ -69,8 +69,7 @@ set(ALIAS_CONFIG
 )
 
 # Copy the entire models directory to the build directory
-file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/models"
-     DESTINATION "${PROJECT_BINARY_DIR}")
+file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/models" DESTINATION "${PROJECT_BINARY_DIR}")
 
 # Set the MODEL_FILES variable to include all files in the models directory
 file(GLOB_RECURSE all_files "${PROJECT_BINARY_DIR}/models/*")
