@@ -46,14 +46,18 @@
 
 #include "message/input/Image.hpp"
 
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/vision/fourcc.hpp"
 
+
 namespace bip = boost::interprocess;
+
 
 namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
+    using utility::nusight::graph;
     using utility::vision::fourcc;
 
     // Must match the writer-side layout in NUbridge exactly (binary compatibility).
@@ -157,6 +161,7 @@ namespace module::input {
                                       ctx.camera_name));
 
                 // Inner loop: read frames until shutdown or segment disappears.
+                auto last_frame_time = std::chrono::steady_clock::now();
                 while (ctx.running) {
                     uint64_t seq       = 0;
                     uint32_t data_size = 0;
@@ -182,6 +187,12 @@ namespace module::input {
                             header->has_new_frame.timed_wait(lock,
                                                              boost::posix_time::microsec_clock::universal_time()
                                                                  + boost::posix_time::milliseconds(100));
+                            if (header->sequence == last_sequence
+                                && std::chrono::steady_clock::now() - last_frame_time > std::chrono::seconds(5)) {
+                                log<WARN>(fmt::format("K1Camera: no new frame from '{}' for 5 s — reconnecting",
+                                                      ctx.segment_name));
+                                goto reconnect;
+                            }
                         }
 
                         if (!ctx.running) {
@@ -246,7 +257,8 @@ namespace module::input {
                         log<DEBUG>(
                             fmt::format("K1Camera: {} dropped {} frame(s)", ctx.camera_name, seq - last_sequence - 1));
                     }
-                    last_sequence = seq;
+                    last_sequence   = seq;
+                    last_frame_time = std::chrono::steady_clock::now();
 
                     // Read latest head pose from shared memory; skip update if the writer holds the lock.
                     if (pose_hdr != nullptr) {
@@ -254,10 +266,10 @@ namespace module::input {
                         if (pose_lock.owns()) {
                             const Eigen::Quaterniond q(pose_hdr->orientation[3],   // w
                                                        pose_hdr->orientation[0],   // x
-                                                       pose_hdr->orientation[1],   // y
-                                                       pose_hdr->orientation[2]);  // z
-                            ctx.Hpc.linear() = q.toRotationMatrix();
-                            ctx.Hpc.translation() =
+                                                       pose_hdr->orientation[2],   // y
+                                                       pose_hdr->orientation[1]);  // z
+                            ctx.Hwp.linear() = q.toRotationMatrix();
+                            ctx.Hwp.translation() =
                                 Eigen::Vector3d(pose_hdr->position[0], pose_hdr->position[1], pose_hdr->position[2]);
                         }
                     }
@@ -275,10 +287,14 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
-                    msg->Hcw               = ctx.Hpc * ctx.Hcr;
-
+                    msg->Hcw               = (ctx.Hwp * ctx.Hpc).inverse();
+                    emit(graph("Camera Pose",
+                               msg->Hcw.translation().x(),
+                               msg->Hcw.translation().y(),
+                               msg->Hcw.translation().z()));
                     emit(msg);
                 }
+            reconnect:;
             }
             catch (const bip::interprocess_exception& ex) {
                 if (ctx.running) {
@@ -305,7 +321,7 @@ namespace module::input {
                     ext(r, c) = rows[r][c].as<double>();
                 }
             }
-            const Eigen::Isometry3d Hcr(ext);
+            const Eigen::Isometry3d Hpc(ext);
 
             for (const auto& entry : cfg["cameras"]) {
                 auto ctx               = std::make_unique<CameraContext>();
@@ -313,7 +329,7 @@ namespace module::input {
                 ctx->pose_segment_name = pose_segment;
                 ctx->camera_name       = entry["name"].as<std::string>();
                 ctx->id                = entry["id"].as<uint32_t>();
-                ctx->Hcr               = Hcr;
+                ctx->Hpc               = Hpc;
                 ctx->running           = true;
                 ctx->thread            = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
                 cameras.push_back(std::move(ctx));

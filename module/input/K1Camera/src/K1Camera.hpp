@@ -47,8 +47,8 @@ namespace module::input {
             std::string pose_segment_name;
             std::string camera_name;
             uint32_t id{0};
-            Eigen::Isometry3d Hcr{Eigen::Isometry3d::Identity()};  // cam-to-head (static, from config)
-            Eigen::Isometry3d Hpc{Eigen::Isometry3d::Identity()};  // head pose (dynamic, from shared memory)
+            Eigen::Isometry3d Hpc{Eigen::Isometry3d::Identity()};  // cam-to-head (static, from config)
+            Eigen::Isometry3d Hwp{Eigen::Isometry3d::Identity()};  // head pose (dynamic, from shared memory)
             std::atomic<bool> running{true};
             std::thread thread;
         };
