@@ -215,8 +215,10 @@ namespace module::input {
                 infer_request.infer();
                 auto output           = infer_request.get_output_tensor(0);
                 const float* out_data = output.data<const float>();
-                double dx             = out_data[0];
-                double dy             = out_data[1];
+                // Model outputs displacement in the training ground-truth frame, which is negated
+                // relative to the integration convention used here (forward = +dx at runtime).
+                double dx             = -out_data[0];
+                double dy             = -out_data[1];
                 double dtheta         = out_data[2];
 
                 // If command velocity is near zero, suppress odometry updates to prevent drift when standing still
@@ -242,13 +244,18 @@ namespace module::input {
                 Hwt.translation() = p_prev + disp_world;
                 Hwt.translation().z() = Hwt_anchor.translation().z();
 
-                
                 // Integrate neural yaw step update
                 double yaw_curr = yaw_prev + dtheta;
-                
+
                 // Keep roll and pitch from Mahony filter, override yaw with neural yaw
                 Eigen::Vector3d rpy_curr(rpy_mahony.x(), rpy_mahony.y(), yaw_curr);
                 Hwt.linear() = rpy_intrinsic_to_mat(rpy_curr);
+
+                // Construct robot {r} to world {w} using neural yaw so Hrw stays consistent with Htw
+                Eigen::Isometry3d Hwr_neural = Eigen::Isometry3d::Identity();
+                Hwr_neural.linear() = Eigen::AngleAxisd(yaw_curr, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                Hwr_neural.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+                sensors->Hrw = Hwr_neural.inverse();
             }
             catch (const std::exception& e) {
                 log<ERROR>("Neural Odometry inference failed: ", e.what());
@@ -272,10 +279,13 @@ namespace module::input {
         sensors->Htw = Hwt.inverse();
 
         // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
-        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hrw          = Hwr.inverse();
+        // Only reached when neural odom did not run; otherwise Hrw is set inside the neural block above.
+        if (!run_neural) {
+            Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+            Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+            sensors->Hrw          = Hwr.inverse();
+        }
 
         // Low pass filter for torso velocity
         const double y_current     = Hwt.translation().y();
