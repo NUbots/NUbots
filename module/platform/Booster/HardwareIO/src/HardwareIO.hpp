@@ -15,6 +15,7 @@
 
 #include "message/booster/BoosterFallDownState.hpp"
 #include "message/booster/BoosterGetUp.hpp"
+#include "message/booster/BoosterHeadRot.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/booster/BoosterWalk.hpp"
@@ -40,6 +41,7 @@ namespace module::platform::Booster {
         constexpr static int UPDATE_FREQUENCY = 10;
 
         Eigen::Vector3d last_walk_velocity = Eigen::Vector3d::Zero();
+        Eigen::Vector2d last_head_rot      = Eigen::Vector2d::Zero();
 
         booster::robot::ChannelPtr<booster_interface::msg::LowState> low_state_channel;
         booster::robot::ChannelPtr<booster_interface::msg::BatteryState> battery_channel;
