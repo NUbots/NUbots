@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,33 +24,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_VISION_ROBOTDETECTOR_HPP
-#define MODULE_VISION_ROBOTDETECTOR_HPP
+#ifndef MODULE_SKILL_K1LOOK_HPP
+#define MODULE_SKILL_K1LOOK_HPP
 
 #include <Eigen/Core>
 #include <nuclear>
 
-namespace module::vision {
+#include "extension/Behaviour.hpp"
 
-    class RobotDetector : public NUClear::Reactor {
+namespace module::skill {
+
+    class K1Look : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The threshold for the confidence of a point to be a robot
-            double confidence_threshold = 0.0;
-            /// @brief The minimum number of points in a cluster to be considered a robot
-            int cluster_points = 0;
-            /// @brief The minimum distance a robot can be to be considered a robot, to exclude the self robot
-            double minimum_robot_distance = 0.0;
-            /// @brief The cutoff height in m for points considered when detecting a robot's radius
-            double radius_cutoff_height = 0.0;
+            float smoothing_factor = 0.0;
         } cfg;
 
+        /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
+        /// between smoothing and not smoothing. Smoothing is given by the message.
+        bool smooth = false;
+
+        /// @brief Last goal vector, used for smoothing
+        Eigen::Vector3d uPCt = Eigen::Vector3d::Zero();
+
     public:
-        /// @brief Called by the powerplant to build and setup the RobotDetector reactor.
-        explicit RobotDetector(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the K1Look reactor.
+        explicit K1Look(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::vision
+}  // namespace module::skill
 
-#endif  // MODULE_VISION_ROBOTDETECTOR_HPP
+#endif  // MODULE_SKILL_K1LOOK_HPP

@@ -21,7 +21,7 @@ nuclear_role(
   # Skills
   skill::K1Walk
   skill::K1GetUp
-  skill::Look
+  skill::K1Look
   # Planners
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
