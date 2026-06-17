@@ -9,7 +9,7 @@ model:
   num_joints: 20
   obs_size: 69
   action_alpha: 0.65
-  action_scale: 0.049445848912000656 * 5
+  action_scale: 0.24722924456000328 # 0.049445848912000656 * 5
 
 servos:
   torque: 100.0
