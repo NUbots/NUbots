@@ -68,10 +68,11 @@ namespace module::skill {
             // Convert the look direction into head yaw/pitch angles the K1 SDK understands
             // Returns {atan2(y, x), atan2(z, x)} = {yaw, pitch}
             Eigen::Vector2d rot = screen_angular_from_object_direction(uPCt);
+            rot.y()             = -rot.y();  // swap signs for SDK
 
             // Send the head rotation command to the Booster SDK (handled by Booster HardwareIO)
-            auto msg  = std::make_unique<BoosterHeadRot>();
-            msg->rot  = rot;
+            auto msg = std::make_unique<BoosterHeadRot>();
+            msg->rot = rot;
             emit(std::move(msg));
 
             if (log_level <= NUClear::LogLevel::DEBUG) {
