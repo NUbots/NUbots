@@ -633,7 +633,14 @@ namespace module::input {
         switch (colour) {
             case gamecontroller::TeamColour::BLUE: return TeamColour::BLUE;
             case gamecontroller::TeamColour::RED: return TeamColour::RED;
-            // TODO: update GameState.proto TeamColour enum to support all v3 colours
+            case gamecontroller::TeamColour::YELLOW: return TeamColour::YELLOW;
+            case gamecontroller::TeamColour::BLACK: return TeamColour::BLACK;
+            case gamecontroller::TeamColour::WHITE: return TeamColour::WHITE;
+            case gamecontroller::TeamColour::GREEN: return TeamColour::GREEN;
+            case gamecontroller::TeamColour::ORANGE: return TeamColour::ORANGE;
+            case gamecontroller::TeamColour::PURPLE: return TeamColour::PURPLE;
+            case gamecontroller::TeamColour::BROWN: return TeamColour::BROWN;
+            case gamecontroller::TeamColour::GRAY: return TeamColour::GRAY;
             default: return TeamColour::UNKNOWN;
         }
     }
