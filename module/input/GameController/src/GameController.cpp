@@ -579,21 +579,20 @@ namespace module::input {
     }
 
     PenaltyReason GameController::get_penalty_reason(const gamecontroller::PenaltyState& penalty_state) {
-        // ugly incoming
         switch (penalty_state) {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
-            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_DEFENSE;
-            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::MOTION_IN_STOP: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_MANIPULATION;
-            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::REQUEST_FOR_SERVICE;
-            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::ILLEGAL_ATTACK;
-            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::CAUTIONED:      return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_POSITIONING;
+            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::MOTION_IN_SET;
+            case gamecontroller::PenaltyState::MOTION_IN_STOP: return PenaltyReason::MOTION_IN_STOP;
+            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::LOCAL_GAME_STUCK;
+            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::INCAPABLE_ROBOT;
+            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::PICK_UP;
+            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_HOLDING;
+            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::LEAVING_THE_FIELD;
+            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::PLAYING_WITH_ARMS_HANDS;
+            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PLAYER_PUSHING;
+            case gamecontroller::PenaltyState::CAUTIONED:      return PenaltyReason::CAUTIONED;
+            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::SENT_OFF;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");
         }

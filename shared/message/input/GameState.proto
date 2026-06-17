@@ -70,18 +70,20 @@ message GameState {
     }
 
     enum PenaltyReason {
-        UNKNOWN_PENALTY_REASON        = 0;
-        UNPENALISED                   = 1;
-        BALL_MANIPULATION             = 2;
-        PHYSICAL_CONTACT              = 3;
-        ILLEGAL_ATTACK                = 4;
-        ILLEGAL_DEFENSE               = 5;
-        REQUEST_FOR_PICKUP            = 6;
-        REQUEST_FOR_SERVICE           = 7;
-        REQUEST_FOR_PICKUP_TO_SERVICE = 8;
-        SUBSTITUTE                    = 9;
-        MANUAL                        = 10;
-        PLAYER_PUSHING                = 11;
+        UNPENALISED             = 0;
+        ILLEGAL_POSITIONING     = 1;
+        MOTION_IN_SET           = 2;
+        MOTION_IN_STOP          = 3;
+        LOCAL_GAME_STUCK        = 4;
+        INCAPABLE_ROBOT         = 5;
+        PICK_UP                 = 6;
+        BALL_HOLDING            = 7;
+        LEAVING_THE_FIELD       = 8;
+        PLAYING_WITH_ARMS_HANDS = 9;
+        PLAYER_PUSHING          = 10;
+        CAUTIONED               = 11;
+        SENT_OFF                = 12;
+        SUBSTITUTE              = 13;
     }
 
     /// Used to keep track of penalised robots
@@ -98,8 +100,7 @@ message GameState {
         uint32         team_id       = 1;
         TeamColour     team_colour   = 2;
         uint32         score         = 3;
-        string         coach_message = 4;
-        repeated Robot players       = 5;
+        repeated Robot players       = 4;
     }
 
     enum SubMode {

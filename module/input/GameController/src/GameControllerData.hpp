@@ -87,7 +87,6 @@ namespace module::input::gamecontroller {
     struct Robot {
         PenaltyState penalty_state;   // penalty state of the player
         uint8_t penalised_time_left;  // estimate of time till unpenalised (seconds)
-        uint8_t warnings;             // number of warnings
         uint8_t cautions;             // number of cautions (yellow cards)
     };
 
@@ -135,7 +134,6 @@ namespace module::input::gamecontroller {
     inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
         os << "\t\tPenalty state......: " << uint(robot.penalty_state) << std::endl
            << "\t\tPenalised time left: " << uint(robot.penalised_time_left) << std::endl
-           << "\t\tNumber of warnings: " << uint(robot.warnings) << std::endl
            << "\t\tYellow Card Count..: " << uint(robot.cautions) << std::endl;
         return os;
     }
