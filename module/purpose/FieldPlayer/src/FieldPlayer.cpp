@@ -104,6 +104,12 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
+                // If play is stopped, do nothing
+                if (game_state.stopped) {
+                    log<DEBUG>("Play is stopped, do nothing.");
+                    return;
+                }
+                
                 // Determine if the game is in a penalty situation
                 // Do this first to ensure the robot freezes if necessary
                 bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK

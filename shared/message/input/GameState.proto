@@ -128,4 +128,5 @@ message GameState {
     Team                      opponent        = 10;
     Robot                     self            = 11;
     SecondaryState            secondary_state = 12;
+    bool                      stopped         = 13;
 }

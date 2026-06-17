@@ -218,19 +218,22 @@ namespace module::input {
 
         std::vector<std::function<void()>> state_changes;
 
-        // game score
+        // Stopped play
+        state->stopped = new_packet.stopped;
+
+        // Game score
         const auto& old_own_team = get_own_team(old_packet);
         const auto& new_own_team = get_own_team(new_packet);
 
         const auto& old_opponent_team = get_opponent_team(old_packet);
         const auto& new_opponent_team = get_opponent_team(new_packet);
 
-        // Log message budget for cross-checking against local counter
-        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
-
-        // Get colours
+        // Team colours
         state->team.team_colour     = get_team_colour(new_own_team.field_player_colour);
         state->opponent.team_colour = get_team_colour(new_opponent_team.field_player_colour);
+
+        // Log message budget for cross-checking against local counter
+        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
 
         /*******************************************************************************************
          * Process score updates
