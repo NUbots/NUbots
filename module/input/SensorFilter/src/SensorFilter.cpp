@@ -78,12 +78,7 @@ namespace module::input {
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
             cfg.y_cut_off_frequency = config["velocity_low_pass"]["y_cut_off_frequency"].as<double>();
 
-            // Initialise the anchor frame (left foot base)
-            Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
-                                                                                       nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
-                                        .translation()
-                                        .y();
+            // Hwp is now initialised using actual sensor data on the first update in update_odometry
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
 
@@ -164,13 +159,8 @@ namespace module::input {
             });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            // Reset anchor frame
-            Hwp                   = Eigen::Isometry3d::Identity();
-            Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
-                                                                                       nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
-                                        .translation()
-                                        .y();
+            // Reset anchor frame initialisation flag
+            Hwp_initialised = false;
 
             // Reset yaw filter
             yaw_filter.reset();

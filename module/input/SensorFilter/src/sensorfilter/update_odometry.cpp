@@ -126,6 +126,33 @@ namespace module::input {
             return;
         }
 
+        // If the anchor frame is not yet initialised, initialise it using the current planted foot kinematic position
+        if (!Hwp_initialised) {
+            if (sensors->planted_foot_phase == WalkState::Phase::DOUBLE) {
+                planted_anchor_foot = WalkState::Phase::LEFT;
+            }
+            else {
+                planted_anchor_foot = sensors->planted_foot_phase;
+            }
+
+            Eigen::Isometry3d Hpt_initial = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                                ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
+                                                : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
+
+            // We want Hwt_anchor (which is Hwp * Hpt_initial) to have x=0, y=0, and yaw=0 initially.
+            double pt_yaw = mat_to_rpy_intrinsic(Hpt_initial.linear()).z();
+
+            Hwp = Eigen::Isometry3d::Identity();
+            Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, -pt_yaw));
+
+            Eigen::Vector3d torso_offset = Hwp.linear() * Hpt_initial.translation();
+            Hwp.translation().x() = -torso_offset.x();
+            Hwp.translation().y() = -torso_offset.y();
+            Hwp.translation().z() = 0; // Anchor frame is on the ground
+
+            Hwp_initialised = true;
+        }
+
         // If sensors detected a new foot phase, update the anchor frame
         if (planted_anchor_foot != sensors->planted_foot_phase
             && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
