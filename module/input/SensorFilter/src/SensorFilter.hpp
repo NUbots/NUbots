@@ -108,6 +108,9 @@ namespace module::input {
         /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
+        /// @brief Bool indicating if the anchor frame is initialised from real sensors
+        bool Hwp_initialised = false;
+
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
 
