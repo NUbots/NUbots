@@ -26,9 +26,6 @@ namespace module::platform::Booster {
 
     class HardwareIO : public NUClear::Reactor {
     private:
-        struct Config {
-        } cfg;
-
         struct Buttons {
             bool left   = false;
             bool middle = false;
@@ -38,7 +35,6 @@ namespace module::platform::Booster {
 
         float battery_soc = 0.0f;
         std::mutex battery_mutex;
-        constexpr static int UPDATE_FREQUENCY = 10;
 
         Eigen::Vector3d last_walk_velocity = Eigen::Vector3d::Zero();
         Eigen::Vector2d last_head_rot      = Eigen::Vector2d::Zero();

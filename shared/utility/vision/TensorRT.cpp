@@ -123,8 +123,7 @@ namespace utility::vision {
 
     TensorRT::TensorRT(const std::string& onnx_path, bool fp16) : impl(std::make_unique<Impl>()) {
         // Engine plans are only valid for this GPU and TensorRT build, so cache per TensorRT version
-        const std::string plan_path =
-            onnx_path + ".trt" + std::to_string(getInferLibVersion()) + (fp16 ? ".fp16" : ".fp32") + ".plan";
+        const std::string plan_path = onnx_path + ".engine";
 
         std::vector<char> plan = read_file(plan_path);
         bool from_cache        = !plan.empty();
