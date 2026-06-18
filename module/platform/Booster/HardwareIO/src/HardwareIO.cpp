@@ -21,6 +21,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
+    using message::booster::BoosterOdometry;
     using message::booster::K1Mode;
     using message::booster::VisualKickVer;
     using message::platform::RawSensors;
@@ -63,6 +64,10 @@ namespace module::platform::Booster {
                 ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::ButtonEventMsg>(
                     "rt/button_event",
                     [this](const void* msg) { button_event_handler(msg); });
+
+            odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
+                "rt/odometer_state",
+                [this](const void* msg) { odometer_handler(msg); });
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
@@ -211,6 +216,15 @@ namespace module::platform::Booster {
         }
 
         emit(std::move(sensors));
+    }
+
+    void HardwareIO::odometer_handler(const void* msg) {
+        const auto* odo_msg = static_cast<const booster_interface::msg::Odometer*>(msg);
+        auto out            = std::make_unique<BoosterOdometry>();
+        out->x              = odo_msg->x();
+        out->y              = odo_msg->y();
+        out->theta          = odo_msg->theta();
+        emit(std::move(out));
     }
 
     void HardwareIO::battery_handler(const void* msg) {

@@ -5,6 +5,7 @@
 #include <booster/idl/b1/ButtonEvent.h>
 #include <booster/idl/b1/FallDownState.h>
 #include <booster/idl/b1/LowState.h>
+#include <booster/idl/b1/Odometer.h>
 #include <booster/robot/b1/b1_loco_client.hpp>
 #include <booster/robot/channel/channel_factory.hpp>
 #include <mutex>
@@ -17,6 +18,7 @@
 #include "message/booster/BoosterGetUp.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
 #include "message/booster/BoosterMode.hpp"
+#include "message/booster/BoosterOdometry.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/booster/BoosterWalk.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -43,6 +45,7 @@ namespace module::platform::Booster {
         booster::robot::ChannelPtr<booster_interface::msg::BatteryState> battery_channel;
         booster::robot::ChannelPtr<booster_interface::msg::FallDownState> fall_down_channel;
         booster::robot::ChannelPtr<booster_interface::msg::ButtonEventMsg> button_event_channel;
+        booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
 
         booster::robot::b1::B1LocoClient booster_client;
 
@@ -50,6 +53,7 @@ namespace module::platform::Booster {
         void fall_down_handler(const void* msg);
         void battery_handler(const void* msg);
         void button_event_handler(const void* msg);
+        void odometer_handler(const void* msg);
 
         static std::string res_code_to_string(int32_t res_code) {
             std::string out;
