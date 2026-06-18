@@ -37,3 +37,10 @@ yaw_filter:
 velocity_low_pass:
   x_cut_off_frequency: 0.015
   y_cut_off_frequency: 0.01
+
+# Neural Odometry configuration
+neural_odom:
+  use_neural_odometry: true
+  model_path: "autoodom_mlp_webots.onnx"
+  device: "CPU"
+  zero_velocity_threshold: 0.01
