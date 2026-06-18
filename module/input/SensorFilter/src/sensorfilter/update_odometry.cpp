@@ -47,17 +47,19 @@ namespace module::input {
                                        const RawSensors& raw_sensors,
                                        const message::behaviour::state::Stability& stability,
                                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+        // Initialise ground truth Hfw if we have ground truth data, regardless of whether we use it for odometry
+        if (robot_pose_ground_truth && !ground_truth_initialised) {
+            Eigen::Isometry3d Hft                    = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+            ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+            ground_truth_Hfw.translation()[2]        = 0;
+            double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+            ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+            ground_truth_initialised                 = true;
+        }
+
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
-            if (!ground_truth_initialised) {
-                // Initialise the ground truth Hfw
-                ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
-                ground_truth_Hfw.translation()[2]        = 0;
-                double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
-                ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
-                ground_truth_initialised                 = true;
-            }
 
             // Construct world {w} to torso {t} space transform from ground truth pose
             sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
@@ -142,13 +144,13 @@ namespace module::input {
             // We want Hwt_anchor (which is Hwp * Hpt_initial) to have x=0, y=0, and yaw=0 initially.
             double pt_yaw = mat_to_rpy_intrinsic(Hpt_initial.linear()).z();
 
-            Hwp = Eigen::Isometry3d::Identity();
+            Hwp          = Eigen::Isometry3d::Identity();
             Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, -pt_yaw));
 
             Eigen::Vector3d torso_offset = Hwp.linear() * Hpt_initial.translation();
-            Hwp.translation().x() = -torso_offset.x();
-            Hwp.translation().y() = -torso_offset.y();
-            Hwp.translation().z() = 0; // Anchor frame is on the ground
+            Hwp.translation().x()        = -torso_offset.x();
+            Hwp.translation().y()        = -torso_offset.y();
+            Hwp.translation().z()        = 0;  // Anchor frame is on the ground
 
             Hwp_initialised = true;
         }
@@ -193,7 +195,7 @@ namespace module::input {
 
         // Store dead-reckoning estimate before any neural correction
         Eigen::Isometry3d Hwt_dead_reckoning = Eigen::Isometry3d::Identity();
-        Hwt_dead_reckoning.linear()           = rpy_intrinsic_to_mat(
+        Hwt_dead_reckoning.linear()          = rpy_intrinsic_to_mat(
             Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), mat_to_rpy_intrinsic(Hwt_anchor.linear()).z()));
         Hwt_dead_reckoning.translation() = Hwt_anchor.translation();
         sensors->Htw_kinematic           = Hwt_dead_reckoning.inverse();
@@ -249,11 +251,9 @@ namespace module::input {
                 infer_request.infer();
                 auto output           = infer_request.get_output_tensor(0);
                 const float* out_data = output.data<const float>();
-                // Model outputs displacement in the training ground-truth frame, which is negated
-                // relative to the integration convention used here (forward = +dx at runtime).
-                double dx     = out_data[0];
-                double dy     = out_data[1];
-                double dtheta = out_data[2];
+                double dx             = out_data[0];
+                double dy             = out_data[1];
+                double dtheta         = out_data[2];
 
                 // If command velocity is near zero, suppress odometry updates to prevent drift when standing still
                 if (last_walk_state.velocity_target.norm() < cfg.neural_odom.zero_velocity_threshold) {
