@@ -47,17 +47,19 @@ namespace module::input {
                                        const RawSensors& raw_sensors,
                                        const message::behaviour::state::Stability& stability,
                                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+        // Initialise ground truth Hfw if we have ground truth data, regardless of whether we use it for odometry
+        if (robot_pose_ground_truth && !ground_truth_initialised) {
+            Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+            ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+            ground_truth_Hfw.translation()[2]        = 0;
+            double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+            ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+            ground_truth_initialised                 = true;
+        }
+
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
-            if (!ground_truth_initialised) {
-                // Initialise the ground truth Hfw
-                ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
-                ground_truth_Hfw.translation()[2]        = 0;
-                double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
-                ground_truth_Hfw.linear()                = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
-                ground_truth_initialised                 = true;
-            }
 
             // Construct world {w} to torso {t} space transform from ground truth pose
             sensors->Htw = Eigen::Isometry3d(Hft).inverse() * ground_truth_Hfw;
@@ -215,10 +217,8 @@ namespace module::input {
                 infer_request.infer();
                 auto output           = infer_request.get_output_tensor(0);
                 const float* out_data = output.data<const float>();
-                // Model outputs displacement in the training ground-truth frame, which is negated
-                // relative to the integration convention used here (forward = +dx at runtime).
-                double dx             = -out_data[0];
-                double dy             = -out_data[1];
+                double dx             = out_data[0];
+                double dy             = out_data[1];
                 double dtheta         = out_data[2];
 
                 // If command velocity is near zero, suppress odometry updates to prevent drift when standing still
@@ -231,13 +231,13 @@ namespace module::input {
                 // Integrate step-by-step using previous frame's orientation and position
                 Eigen::Vector3d p_prev = previous_sensors ? Eigen::Vector3d(previous_sensors->Htw.inverse().translation()) : Eigen::Vector3d(Hwt_anchor.translation());
                 Eigen::Matrix3d R_prev = previous_sensors ? Eigen::Matrix3d(previous_sensors->Htw.inverse().linear()) : Eigen::Matrix3d(Hwt_anchor.linear());
-                
+
                 // Get previous integrated yaw
                 double yaw_prev = previous_sensors ? mat_to_rpy_intrinsic(R_prev).z() : kinematic_yaw;
-                
+
                 // Create a yaw-only rotation matrix for the 2D local frame (heading frame)
                 Eigen::Matrix3d R_yaw_prev = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw_prev));
-                
+
                 // Rotate local displacement step (dx, dy) into world coordinates using previous yaw
                 Eigen::Vector3d disp_world = R_yaw_prev * Eigen::Vector3d(dx, dy, 0.0);
 
