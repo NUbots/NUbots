@@ -210,17 +210,17 @@ namespace module::tools {
             }
 
             /**********
-             * PACMAN *
+             * APT *
              **********/
-            log<INFO>("Ensuring relevant pacman packages are installed");
+            log<INFO>("Ensuring relevant APT packages are installed");
             log<DEBUG>("Updating existing packages and upgrading");
-            std::system("pacman -Syyuu --noconfirm --needed --overwrite \\*");
-            for (const auto& c : config["pacman"].config) {
+            std::system("apt-get update && apt-get upgrade -y");
+            for (const auto& c : config["apt"].config) {
                 std::string package = c.as<std::string>();
                 log<TRACE>(fmt::format("Checking package {}", package));
-                if (std::system(fmt::format("pacman -Qi {} &>/dev/null", package).c_str()) != 0) {
-                    log<DEBUG>(fmt::format("Installing pacman package {}", package));
-                    std::system(fmt::format("pacman -S --noconfirm --needed {}", package).c_str());
+                if (std::system(fmt::format("dpkg -s {} &>/dev/null", package).c_str()) != 0) {
+                    log<DEBUG>(fmt::format("Installing APT package {}", package));
+                    std::system(fmt::format("apt-get install --yes {}", package).c_str());
                 }
             }
 
@@ -243,14 +243,6 @@ namespace module::tools {
             if (config["generate_locale"].as<bool>()) {
                 log<INFO>("Ensuring locales are generated");
                 std::system("locale-gen");
-            }
-
-            /********
-             * GRUB *
-             ********/
-            if (config["generate_grub"].as<bool>()) {
-                log<INFO>("Ensuring grub config is generated");
-                std::system("grub-mkconfig -o /boot/grub/grub.cfg");
             }
 
             /********
@@ -300,51 +292,26 @@ namespace module::tools {
             /*******
              * ZSH *
              *******/
-            log<INFO>("Ensuring zsh is configured");
-            fs::path home         = fs::path("/home") / user;
-            fs::path zprezto_root = home / ".zprezto";
-            if (!fs::exists(zprezto_root)) {
-                log<INFO>(fmt::format("Cloning zprezto to {}", zprezto_root.string()));
-                std::system(fmt::format("git clone --recursive https://github.com/sorin-ionescu/prezto.git {}",
-                                        zprezto_root.string())
-                                .c_str());
-            }
-            else {
-                log<INFO>(fmt::format("Pulling latest zprezto in {}", zprezto_root.string()));
-                std::system(fmt::format("git -C {} pull --recurse-submodules=yes", zprezto_root.string()).c_str());
-            }
-
-            log<INFO>("Making zprezto symlinks");
-            for (const auto& p : fs::directory_iterator(zprezto_root / "runcoms")) {
-                if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
-                    fs::path target = p.path();
-                    fs::path link   = home / fmt::format(".{}", p.path().filename().string());
-                    symlink(link, target);
-                }
-            }
-
-            log<INFO>("Changing user shell to zsh");
-            std::system(fmt::format("chsh -s /usr/bin/zsh {}", user).c_str());
-
-            log<INFO>("Appending fuzzy find scripts to zshrc");
-            std::ifstream ifs_zshrc(home / ".zshrc");
+            log<INFO>("Appending fuzzy find scripts to bashrc");
+            std::ifstream ifs_bashrc(home / ".bashrc");
             std::string line;
             bool fuzzy_found = false;
-            while (std::getline(ifs_zshrc, line)) {
+            while (std::getline(ifs_bashrc, line)) {
                 if (line.compare("# Source the fuzzy find scripts") == 0) {
                     fuzzy_found = true;
                     break;
                 }
             }
-            ifs_zshrc.close();
+            ifs_bashrc.close();
 
             if (!fuzzy_found) {
-                std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
-                ofs_zshrc << std::endl
-                          << "# Source the fuzzy find scripts" << std::endl
-                          << "source /usr/share/fzf/key-bindings.zsh" << std::endl
-                          << "source /usr/share/fzf/completion.zsh" << std::endl;
-                ofs_zshrc.close();
+                std::ofstream ofs_bashrc(home / ".bashrc",
+                                         std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+                ofs_bashrc << std::endl
+                           << "# Source the fuzzy find scripts" << std::endl
+                           << "source /usr/share/fzf/key-bindings.bash" << std::endl
+                           << "source /usr/share/fzf/completion.bash" << std::endl;
+                ofs_bashrc.close();
             }
 
             /**********

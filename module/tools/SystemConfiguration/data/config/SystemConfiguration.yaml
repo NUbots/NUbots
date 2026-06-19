@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Username
-user: nubots
+user: booster
 
 # File permissions that need to be set
 permissions:
@@ -10,7 +10,7 @@ permissions:
   /etc/sudoers.d/wheel: 0440
 
 # Pacman packages that should be installed and updated
-pacman:
+apt:
   - linux-headers
   - screen
   - wpa_supplicant
@@ -24,17 +24,13 @@ pacman:
   - bluez-utils
   - rsync
   - fzf
-  - zsh
-  - zsh-completions
   - git
 
 # Systemd units that should be enabled
 systemd:
-  - systemd-networkd.service
   - systemd-resolved.service
   - systemd-timesyncd.service
   - sshd.service
-  - wpa_supplicant@wlp0s20f3.service
 
 # Groups that should exist and that the user should be a member of
 groups:
@@ -52,6 +48,3 @@ links:
 
 # Generate locale
 generate_locale: True
-
-# Generate grub config
-generate_grub: True
