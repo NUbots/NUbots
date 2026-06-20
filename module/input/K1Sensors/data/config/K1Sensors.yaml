@@ -1,5 +1,12 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 head_pose:
   - segment: _head_pose
+
+Hpk:
+  translation: [-0.0122268423, 0.0440084077, -0.0283811111]
+  rotation:
+    - [0.0753363073, 0.0190046262, 0.996977091]
+    - [-0.99715662, -0.000328667404, 0.0753561407]
+    - [0.00175978895, -0.999819338, 0.018925827]

@@ -1,6 +1,7 @@
 #ifndef MODULE_INPUT_K1SENSORS_HPP
 #define MODULE_INPUT_K1SENSORS_HPP
 
+#include <Eigen/Geometry>
 #include <array>
 #include <memory>
 #include <mutex>
@@ -16,11 +17,19 @@ namespace module::input {
         /// @brief Stores configuration values
         struct Config {
             std::string pose_segment;
+            Eigen::Isometry3d Hpk = Eigen::Isometry3d::Identity();
         } cfg;
 
         std::mutex pose_mutex;
         std::unique_ptr<PoseSharedMemory> pose_shared_memory;
         bool pose_unavailable_logged = false;
+
+        std::mutex odometry_mutex;
+        bool booster_odometry_has_offset = false;
+        std::array<double, 3> booster_odometry_offset{};
+
+        bool left_down   = false;
+        bool middle_down = false;
 
         void connect_head_pose();
         bool read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation);

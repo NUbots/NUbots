@@ -5,9 +5,6 @@ log_level: INFO
 # segment: POSIX shm name (ROS2 topic path with '/' replaced by '_')
 # id:      integer camera ID emitted in message::input::Image
 cameras:
-  - segment: _boostercamera_head_raw_rgb
+  - segment: _boostercamera_head_rgb
     name: Left Camera
     id: 0
-  - segment: _boostercamera_head_raw_right_rgb
-    name: Right Camera
-    id: 1
