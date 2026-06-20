@@ -1,6 +1,7 @@
 #include "RLWalk.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 
@@ -103,7 +104,7 @@ namespace module::skill {
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
             cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
             cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
-
+            cfg.gait_period        = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
 
             // Initialize vectors
             last_action      = JointVector::Zero();
@@ -228,13 +229,23 @@ namespace module::skill {
                     }
                     idx += COMMAND_SIZE;
 
+                    // Phase (2). Use a fractional-seconds duration: integral std::chrono::seconds would quantise the
+                    // clock to 1s and make the phase jump once per second instead of advancing smoothly at the control
+                    // rate.
+                    double seconds =
+                        std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+                    double phase = std::fmod(seconds / cfg.gait_period, 1.0);
+                    observation.segment<PHASE_SIZE>(idx) =
+                        Eigen::Vector2d(std::sin(2 * M_PI * phase), std::cos(2 * M_PI * phase));
+                    idx += PHASE_SIZE;
+
                     // Run inference
                     JointVector inference_output_raw = run_inference(observation);
                     if (log_level <= DEBUG) {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Clip the output here as a safety measure to prevent extremely fast movements.
+                    // Clip the output here as a safety measure to prevent extremely fast movements. TODO: FIXME
                     const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
 
                     // Convert raw action to physical joint offsets (mjlab order), then clip per-joint

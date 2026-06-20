@@ -18,8 +18,9 @@ namespace module::skill {
     static constexpr int GRAVITY_SIZE   = 3;
     static constexpr int JOINT_POS_SIZE = 20;
     static constexpr int COMMAND_SIZE   = 3;
+    static constexpr int PHASE_SIZE     = 2;
     static constexpr int TOTAL_OBS_SIZE =
-        GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE;  // 69
+        GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + COMMAND_SIZE + PHASE_SIZE;  // 71
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
@@ -58,6 +59,8 @@ namespace module::skill {
             float arm_servo_gain;
             /// @brief Scale factor to convert inference outputs to joint angles
             double nugus_action_scale;
+            /// @brief Gait period used in the phase calculation
+            double gait_period;
         } cfg;
 
         /// @brief OpenVINO model and inference request
