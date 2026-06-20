@@ -11,15 +11,18 @@ search_fixation_time: 1.0
 
 # Head-scan grid: (yaw, pitch) [rad] positions the head sweeps through so the field landmarks are seen across the
 # whole image. Positive pitch looks down (matches the head-pitch servo convention).
-search_positions:
-  [
-    [-0.7, 0.0], # yaw left,   level-ish
-    [0.0, 0.0], # centre,      level-ish
-    [0.7, 0.0], # yaw right,   level-ish
-    [0.7, 0.35], # yaw right,  look down
-    [0.0, 0.35], # centre,     look down
-    [-0.7, 0.35], # yaw left,  look down
-    [-0.7, 0.6], # yaw left,   look further down
-    [0.0, 0.6], # centre,      look further down
-    [0.7, 0.6], # yaw right,   look further down
+#
+# Ordered as a diagonal sweep so that most steps change BOTH yaw and pitch at once - the head looks up/down and
+# left/right together rather than doing a flat left-right pass first. The path hits all four image corners
+# (left/right x level/down) plus the centre, keeping yaw and pitch variety balanced across the whole collection.
+search_positions: [
+    [-0.7, 0.0], # left,   level          (top-left corner)
+    [0.0, 0.3], # centre,  mid            (diagonal toward centre)
+    [0.7, 0.6], # right,   look down      (bottom-right corner)
+    [0.7, 0.3], # right,   mid
+    [0.0, 0.0], # centre,  level          (diagonal back up)
+    [-0.7, 0.3], # left,   mid
+    [-0.7, 0.6], # left,   look down      (bottom-left corner)
+    [0.0, 0.6], # centre,  look down
+    [0.7, 0.0], # right,   level          (top-right corner)
   ]
