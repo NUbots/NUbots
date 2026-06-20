@@ -26,6 +26,7 @@
  */
 #include "K1Camera.hpp"
 
+#include <algorithm>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -34,6 +35,7 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <chrono>
+#include <cmath>
 #include <cstring>
 #include <fmt/format.h>
 #include <opencv2/core.hpp>
@@ -45,10 +47,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/vision/fourcc.hpp"
-
 
 namespace bip = boost::interprocess;
 
@@ -57,6 +59,7 @@ namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using utility::nusight::graph;
     using utility::vision::fourcc;
 
@@ -75,14 +78,6 @@ namespace module::input {
         float centre_y{0.0f};
         float k1{0.0f};
         float k2{0.0f};
-    };
-
-    struct SharedPoseHeader {
-        bip::interprocess_mutex mutex;
-        bip::interprocess_condition has_new_data;
-        uint64_t sequence{0};
-        double position[3]{0.0, 0.0, 0.0};
-        double orientation[4]{0.0, 0.0, 0.0, 1.0};  // Quaternion (x,y,z,w)
     };
 
     static constexpr std::size_t MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -131,25 +126,6 @@ namespace module::input {
                 // interprocess_condition must modify their internal state on lock/wait.
                 bip::shared_memory_object shm(bip::open_only, ctx.segment_name.c_str(), bip::read_write);
                 bip::mapped_region region(shm, bip::read_write);
-
-                // Try to open pose segment — may not be available if NUbridge hasn't published it yet.
-                std::unique_ptr<bip::shared_memory_object> pose_shm;
-                std::unique_ptr<bip::mapped_region> pose_region;
-                SharedPoseHeader* pose_hdr = nullptr;
-                try {
-                    pose_shm    = std::make_unique<bip::shared_memory_object>(bip::open_only,
-                                                                              ctx.pose_segment_name.c_str(),
-                                                                              bip::read_write);
-                    pose_region = std::make_unique<bip::mapped_region>(*pose_shm, bip::read_write);
-                    pose_hdr    = reinterpret_cast<SharedPoseHeader*>(pose_region->get_address());
-                    log<INFO>(fmt::format("K1Camera: mapped pose segment '{}' for camera '{}'",
-                                          ctx.pose_segment_name,
-                                          ctx.camera_name));
-                }
-                catch (const bip::interprocess_exception&) {
-                    log<WARN>(fmt::format("K1Camera: pose segment '{}' unavailable, Hpc will remain identity",
-                                          ctx.pose_segment_name));
-                }
 
                 auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
@@ -260,20 +236,6 @@ namespace module::input {
                     last_sequence   = seq;
                     last_frame_time = std::chrono::steady_clock::now();
 
-                    // Read latest head pose from shared memory; skip update if the writer holds the lock.
-                    if (pose_hdr != nullptr) {
-                        bip::scoped_lock<bip::interprocess_mutex> pose_lock(pose_hdr->mutex, bip::try_to_lock);
-                        if (pose_lock.owns()) {
-                            const Eigen::Quaterniond q(pose_hdr->orientation[3],   // w
-                                                       pose_hdr->orientation[0],   // x
-                                                       pose_hdr->orientation[2],   // y
-                                                       pose_hdr->orientation[1]);  // z
-                            ctx.Hwp.linear() = q.toRotationMatrix();
-                            ctx.Hwp.translation() =
-                                Eigen::Vector3d(pose_hdr->position[0], pose_hdr->position[1], pose_hdr->position[2]);
-                        }
-                    }
-
                     auto msg               = std::make_unique<Image>();
                     msg->format            = format;
                     msg->dimensions.x()    = width;
@@ -287,7 +249,34 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
-                    msg->Hcw               = (ctx.Hwp * ctx.Hpc).inverse();
+
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d::Identity();
+                    {
+                        std::lock_guard<std::mutex> lock(sensors_mutex);
+
+                        if (!Hcws.empty()) {
+                            auto Hcw_it =
+                                std::lower_bound(Hcws.begin(),
+                                                 Hcws.end(),
+                                                 std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
+                                                 [](const auto& a, const auto& b) { return a.first < b.first; });
+
+                            if (Hcw_it == Hcws.end()) {
+                                Hcw = std::prev(Hcw_it)->second;
+                            }
+                            else if (Hcw_it == Hcws.begin()) {
+                                Hcw = Hcw_it->second;
+                            }
+                            else {
+                                Hcw = std::abs((Hcw_it->first - msg->timestamp).count())
+                                              < std::abs((std::prev(Hcw_it)->first - msg->timestamp).count())
+                                          ? Hcw_it->second
+                                          : std::prev(Hcw_it)->second;
+                            }
+                        }
+                    }
+
+                    msg->Hcw = Hcw;
                     emit(graph("Camera Pose",
                                msg->Hcw.translation().x(),
                                msg->Hcw.translation().y(),
@@ -312,28 +301,24 @@ namespace module::input {
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
             std::lock_guard<std::mutex> lock(cameras_mutex);
 
-            const std::string pose_segment = cfg["head_pose"][0]["segment"].as<std::string>();
-
-            Eigen::Matrix4d ext = Eigen::Matrix4d::Identity();
-            const auto& rows    = cfg["extrinsics"];
-            for (int r = 0; r < 4; ++r) {
-                for (int c = 0; c < 4; ++c) {
-                    ext(r, c) = rows[r][c].as<double>();
-                }
-            }
-            const Eigen::Isometry3d Hpc(ext);
-
             for (const auto& entry : cfg["cameras"]) {
-                auto ctx               = std::make_unique<CameraContext>();
-                ctx->segment_name      = entry["segment"].as<std::string>();
-                ctx->pose_segment_name = pose_segment;
-                ctx->camera_name       = entry["name"].as<std::string>();
-                ctx->id                = entry["id"].as<uint32_t>();
-                ctx->Hpc               = Hpc;
-                ctx->running           = true;
-                ctx->thread            = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
+                auto ctx          = std::make_unique<CameraContext>();
+                ctx->segment_name = entry["segment"].as<std::string>();
+                ctx->camera_name  = entry["name"].as<std::string>();
+                ctx->id           = entry["id"].as<uint32_t>();
+                ctx->running      = true;
+                ctx->thread       = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
                 cameras.push_back(std::move(ctx));
             }
+        });
+
+        on<Trigger<Sensors>>().then("Buffer Hcw", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hcws.resize(std::distance(Hcws.begin(), std::remove_if(Hcws.begin(), Hcws.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
+            Hcws.emplace_back(sensors.timestamp, Eigen::Isometry3d(sensors.Hcw));
         });
 
         on<Shutdown>().then([this] { stop_cameras(); });

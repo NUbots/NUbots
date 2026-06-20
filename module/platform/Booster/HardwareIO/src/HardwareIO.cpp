@@ -18,10 +18,10 @@ namespace module::platform::Booster {
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
+    using message::booster::BoosterOdometry;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
-    using message::booster::BoosterOdometry;
     using message::booster::K1Mode;
     using message::booster::VisualKickVer;
     using message::platform::RawSensors;
@@ -192,8 +192,8 @@ namespace module::platform::Booster {
         fill_serial(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
         fill_serial(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
         fill_serial(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
-        fill_serial(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);    // L ankle pitch
-        fill_serial(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);   // L ankle roll
+        fill_serial(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);   // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);  // L ankle roll
         fill_serial(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
         fill_serial(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
         fill_serial(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
@@ -224,7 +224,9 @@ namespace module::platform::Booster {
         out->x              = odo_msg->x();
         out->y              = odo_msg->y();
         out->theta          = odo_msg->theta();
-        emit(std::move(out));
+        log<DEBUG>("Received odometry: x=" + std::to_string(out->x) + ", y=" + std::to_string(out->y)
+                   + ", theta=" + std::to_string(out->theta));
+        emit(out);
     }
 
     void HardwareIO::battery_handler(const void* msg) {
