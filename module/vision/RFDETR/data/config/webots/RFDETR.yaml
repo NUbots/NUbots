@@ -1,0 +1,27 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Path to the model weights (ONNX, loaded directly by OpenVINO)
+model_path: "rfdetr.onnx"
+
+# Minimum confidence required for a ball detection to be accepted
+ball_confidence_threshold: 0.5
+
+# Minimum confidence required for a goal detection to be accepted
+goalpost_confidence_threshold: 0.5
+
+# Minimum confidence required for a robot detection to be accepted
+robot_confidence_threshold: 0.5
+
+# Minimum confidence required for a field line intersection detection to be accepted
+intersection_confidence_threshold: 0.5
+
+# Global minimum score (sigmoid of the class logit) below which detections are discarded
+score_threshold: 0.3
+
+# Class-channel offset: logit channel = class_id + offset.
+# The shipped RF-DETR export currently behaves correctly with offset 0.
+class_offset: 0
+
+# OpenVino device (CPU, GPU). Webots typically runs on CPU.
+device: CPU
