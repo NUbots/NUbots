@@ -282,6 +282,8 @@ var hierarchy =
     [ "module::support::optimisation::StrafeEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html", null ],
     [ "module::support::optimisation::WalkEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html", null ],
     [ "module::tools::ExtrinsicsCalibration::Config", "structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html", null ],
+    [ "module::tools::ExtrinsicsCalibration::Frame", "structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Frame.html", null ],
+    [ "module::tools::ExtrinsicsCalibration::Observation", "structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Observation.html", null ],
     [ "module::tools::ExtrinsicsCalibration::Sample", "structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html", null ],
     [ "module::tools::OdometryBenchmark::Config", "structmodule_1_1tools_1_1OdometryBenchmark_1_1Config.html", null ],
     [ "module::tools::RoboCupConfiguration::Config", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Config.html", null ],
@@ -350,7 +352,8 @@ var hierarchy =
         [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ],
         [ "module::strategy::WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", null ],
         [ "module::strategy::WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", null ],
-        [ "module::support::optimisation::NSGA2Evaluator", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html", null ]
+        [ "module::support::optimisation::NSGA2Evaluator", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html", null ],
+        [ "module::tools::ExtrinsicsCalibration", "classmodule_1_1tools_1_1ExtrinsicsCalibration.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::extension::Director", "classmodule_1_1extension_1_1Director.html", null ],
@@ -391,7 +394,6 @@ var hierarchy =
       [ "module::support::logging::MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", null ],
       [ "module::support::optimisation::NSGA2Optimiser", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html", null ],
       [ "module::support::optimisation::OnboardWalkOptimisation", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html", null ],
-      [ "module::tools::ExtrinsicsCalibration", "classmodule_1_1tools_1_1ExtrinsicsCalibration.html", null ],
       [ "module::tools::LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", null ],
       [ "module::tools::NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", null ],
       [ "module::tools::OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html", null ],

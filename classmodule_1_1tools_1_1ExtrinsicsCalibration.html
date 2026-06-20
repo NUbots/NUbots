@@ -188,7 +188,8 @@ Inheritance diagram for module::tools::ExtrinsicsCalibration:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1tools_1_1ExtrinsicsCalibration__inherit__graph.png" border="0" usemap="#amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map" alt="Inheritance graph"/></div>
 <map name="amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map" id="amodule_1_1tools_1_1ExtrinsicsCalibration_inherit__map">
-<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="5,80,188,121"/>
+<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="5,169,188,211"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="17,80,176,121"/>
 <area shape="rect" title=" " alt="" coords="29,5,164,32"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
@@ -197,9 +198,10 @@ Collaboration diagram for module::tools::ExtrinsicsCalibration:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1tools_1_1ExtrinsicsCalibration__coll__graph.png" border="0" usemap="#amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map" id="amodule_1_1tools_1_1ExtrinsicsCalibration_coll__map">
-<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="72,109,255,151"/>
+<area shape="rect" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="445,53,628,95"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="201,5,360,47"/>
 <area shape="rect" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html" title="Stores configuration values." alt="" coords="164,5,347,47"/>
+<area shape="rect" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html" title="Stores configuration values." alt="" coords="189,71,372,112"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -208,8 +210,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html">Config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores configuration values.  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Frame.html">Frame</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One captured frame: the offset-free transforms plus every detection in that frame. Detections are grouped per frame so the Hungarian association stays one-to-one within a frame.  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Frame.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Observation.html">Observation</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single raw detection, kept so it can be re-associated as the offsets are refined (ICP).  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Observation.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single associated calibration sample.  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single associated calibration sample (one detection paired with a ground-truth landmark).  <a href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -221,9 +229,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:ac1bf024669f94542e9b80f70503ad88c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ac1bf024669f94542e9b80f70503ad88c">associate_and_store</a> (const message::vision::FieldIntersections &amp;field_intersections, const Eigen::Isometry3d &amp;Hwp, const Eigen::Isometry3d &amp;Hfw)</td></tr>
-<tr class="memdesc:ac1bf024669f94542e9b80f70503ad88c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associate the detections in a frame with the known landmarks using the Hungarian algorithm, evaluated at the current extrinsic offsets, and append the matched samples to the buffer.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ac1bf024669f94542e9b80f70503ad88c">More...</a><br /></td></tr>
-<tr class="separator:ac1bf024669f94542e9b80f70503ad88c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a287807243fd29790da545fc4469d7a45"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a287807243fd29790da545fc4469d7a45">associate</a> (const Eigen::Vector3d &amp;offsets)</td></tr>
+<tr class="memdesc:a287807243fd29790da545fc4469d7a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">(Re-)associate every collected detection with the known landmarks using the Hungarian algorithm, evaluated at the given offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a287807243fd29790da545fc4469d7a45">More...</a><br /></td></tr>
+<tr class="separator:a287807243fd29790da545fc4469d7a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaaa1605cc0c292549b3e17d5da9c6a92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aaaa1605cc0c292549b3e17d5da9c6a92">collect</a> (const message::vision::FieldIntersections &amp;field_intersections, const Eigen::Isometry3d &amp;Hwp, const Eigen::Isometry3d &amp;Hfw)</td></tr>
+<tr class="memdesc:aaaa1605cc0c292549b3e17d5da9c6a92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recover the offset-independent camera-frame rays for a frame's detections and store the raw frame for later (re-)association.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aaaa1605cc0c292549b3e17d5da9c6a92">More...</a><br /></td></tr>
+<tr class="separator:aaaa1605cc0c292549b3e17d5da9c6a92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae51905b758687602ff10c252514f35c0"><td class="memItemLeft" align="right" valign="top">Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae51905b758687602ff10c252514f35c0">offset_rotation</a> (const Eigen::Vector3d &amp;offsets) const</td></tr>
 <tr class="memdesc:ae51905b758687602ff10c252514f35c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build the extrinsic offset rotation matrix from (roll, pitch, yaw), matching the convention used by the Camera module.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae51905b758687602ff10c252514f35c0">More...</a><br /></td></tr>
 <tr class="separator:ae51905b758687602ff10c252514f35c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -233,6 +244,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#adf09c0cc1cf90ee3ee4e23061a4753da">project_to_field</a> (const Eigen::Vector3d &amp;offsets, const <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a> &amp;sample) const</td></tr>
 <tr class="memdesc:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Re-project a detection ray onto the field ground plane in field {f} space for a given set of extrinsic offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#adf09c0cc1cf90ee3ee4e23061a4753da">More...</a><br /></td></tr>
 <tr class="separator:adf09c0cc1cf90ee3ee4e23061a4753da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4ea432a495f315b640e595695e0a5a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae4ea432a495f315b640e595695e0a5a6">run_calibration</a> ()</td></tr>
+<tr class="memdesc:ae4ea432a495f315b640e595695e0a5a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the ICP loop: alternate (associate at the current best offsets) and (optimise the offsets with those associations held fixed), re-centring on the refined offsets each iteration, until the associations stop changing or the iteration cap is reached.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ae4ea432a495f315b640e595695e0a5a6">More...</a><br /></td></tr>
+<tr class="separator:ae4ea432a495f315b640e595695e0a5a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aef0dc88e8ff24d73321c99c2b1eb4267">total_cost</a> (const Eigen::Vector3d &amp;offsets) const</td></tr>
 <tr class="memdesc:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total squared re-projection cost over all accumulated samples for a given set of offsets.  <a href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aef0dc88e8ff24d73321c99c2b1eb4267">More...</a><br /></td></tr>
 <tr class="separator:aef0dc88e8ff24d73321c99c2b1eb4267"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -248,6 +262,10 @@ Static Private Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
+<tr class="memitem:a1990913f55f11785c5723c18a931da8d"><td class="memItemLeft" align="right" valign="top"><a id="a1990913f55f11785c5723c18a931da8d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a1990913f55f11785c5723c18a931da8d">calibrated</a> = false</td></tr>
+<tr class="memdesc:a1990913f55f11785c5723c18a931da8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">True once the calibration has finished and written the offsets. The robot keeps standing and the head holds still (rather than exiting and collapsing); the operator stops the binary. <br /></td></tr>
+<tr class="separator:a1990913f55f11785c5723c18a931da8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cb0159f217bba2f76d36555ccc4756d"><td class="memItemLeft" align="right" valign="top"><a id="a3cb0159f217bba2f76d36555ccc4756d"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a3cb0159f217bba2f76d36555ccc4756d">camera_config_path</a> {}</td></tr>
 <tr class="memdesc:a3cb0159f217bba2f76d36555ccc4756d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Path to the robot's camera config file that will be (re)written. <br /></td></tr>
@@ -255,10 +273,18 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:aed265c984f3459b64363a0bf099a8cbc"><td class="memItemLeft" align="right" valign="top"><a id="aed265c984f3459b64363a0bf099a8cbc"></a>
 struct <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html">module::tools::ExtrinsicsCalibration::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:aed265c984f3459b64363a0bf099a8cbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb48f46092b9e6afb508322e8ea3e233"><td class="memItemLeft" align="right" valign="top"><a id="aeb48f46092b9e6afb508322e8ea3e233"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#aeb48f46092b9e6afb508322e8ea3e233">collected_detections</a> = 0</td></tr>
+<tr class="memdesc:aeb48f46092b9e6afb508322e8ea3e233"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of raw detections collected so far across all frames. <br /></td></tr>
+<tr class="separator:aeb48f46092b9e6afb508322e8ea3e233"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06481614267f1d2772a985182eaf04b5"><td class="memItemLeft" align="right" valign="top"><a id="a06481614267f1d2772a985182eaf04b5"></a>
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a06481614267f1d2772a985182eaf04b5">current_offsets</a> = Eigen::Vector3d::Zero()</td></tr>
 <tr class="memdesc:a06481614267f1d2772a985182eaf04b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current extrinsic offsets (roll, pitch, yaw) read from the robot's camera config [rad]. <br /></td></tr>
 <tr class="separator:a06481614267f1d2772a985182eaf04b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a377a89d5a81ef3d54541b026cdbea0b1"><td class="memItemLeft" align="right" valign="top"><a id="a377a89d5a81ef3d54541b026cdbea0b1"></a>
+std::vector&lt; <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Frame.html">Frame</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a377a89d5a81ef3d54541b026cdbea0b1">frames</a> {}</td></tr>
+<tr class="memdesc:a377a89d5a81ef3d54541b026cdbea0b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulated raw frames (re-associated each ICP iteration) <br /></td></tr>
+<tr class="separator:a377a89d5a81ef3d54541b026cdbea0b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21b2f2ecd2f02c7548a5d07ce19cec88"><td class="memItemLeft" align="right" valign="top"><a id="a21b2f2ecd2f02c7548a5d07ce19cec88"></a>
 Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a21b2f2ecd2f02c7548a5d07ce19cec88">Hpc_base</a> = Eigen::Isometry3d::Identity()</td></tr>
 <tr class="memdesc:a21b2f2ecd2f02c7548a5d07ce19cec88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base (offset-free) head-pitch {p} from camera {c} transform, from URDF forward kinematics. <br /></td></tr>
@@ -267,9 +293,16 @@ Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 std::vector&lt; <a class="el" href="structutility_1_1localisation_1_1Landmark.html">utility::localisation::Landmark</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a8bec21593fd657f4da836a3062ca76b7">landmarks</a> {}</td></tr>
 <tr class="memdesc:a8bec21593fd657f4da836a3062ca76b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ground-truth field landmarks (position in field space + type) <br /></td></tr>
 <tr class="separator:a8bec21593fd657f4da836a3062ca76b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43f137c9a83b13129611278334f496f4"><td class="memItemLeft" align="right" valign="top"><a id="a43f137c9a83b13129611278334f496f4"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>last_head_pitch</b> = 0.0</td></tr>
+<tr class="separator:a43f137c9a83b13129611278334f496f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad70e5902d2fae638ac85915f55d295d2"><td class="memItemLeft" align="right" valign="top"><a id="ad70e5902d2fae638ac85915f55d295d2"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#ad70e5902d2fae638ac85915f55d295d2">last_head_yaw</a> = 0.0</td></tr>
+<tr class="memdesc:ad70e5902d2fae638ac85915f55d295d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Head yaw/pitch [rad] of the most recently captured frame, used to gather samples only once the head has moved far enough (see <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Config.html#a2cdba58e7c101c5daad4ce6772677c8a" title="Minimum head yaw/pitch change [rad] since the last captured frame before a new frame is gathered....">Config::min_head_pose_change</a>) <br /></td></tr>
+<tr class="separator:ad70e5902d2fae638ac85915f55d295d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65e35eb07cc5f65011f53f996501f1b0"><td class="memItemLeft" align="right" valign="top"><a id="a65e35eb07cc5f65011f53f996501f1b0"></a>
 std::vector&lt; <a class="el" href="structmodule_1_1tools_1_1ExtrinsicsCalibration_1_1Sample.html">Sample</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a65e35eb07cc5f65011f53f996501f1b0">samples</a> {}</td></tr>
-<tr class="memdesc:a65e35eb07cc5f65011f53f996501f1b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulated associated samples used for the optimisation. <br /></td></tr>
+<tr class="memdesc:a65e35eb07cc5f65011f53f996501f1b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associated samples for the current ICP iteration (rebuilt by <a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a287807243fd29790da545fc4469d7a45" title="(Re-)associate every collected detection with the known landmarks using the Hungarian algorithm,...">associate()</a>, used by the optimiser) <br /></td></tr>
 <tr class="separator:a65e35eb07cc5f65011f53f996501f1b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
@@ -278,16 +311,68 @@ Static Private Attributes</h2></td></tr>
 static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a4c0eb45bcd80a16ed903bbbebe6a1255">n_params</a> = 3</td></tr>
 <tr class="memdesc:a4c0eb45bcd80a16ed903bbbebe6a1255"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of optimisation variables (del_roll, del_pitch, del_yaw) <br /></td></tr>
 <tr class="separator:a4c0eb45bcd80a16ed903bbbebe6a1255"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td colspan="2" onclick="javascript:toggleInherit('pro_types_classextension_1_1behaviour_1_1BehaviourReactor')"><img src="closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="classextension_1_1behaviour_1_1BehaviourReactor.html">extension::behaviour::BehaviourReactor</a></td></tr>
+<tr class="memitem:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a6812db9db23210910859eeb041fbe7e3"></a>
+template&lt;typename State , State::Value value&gt; </td></tr>
+<tr class="memitem:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Causing</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Causing.html">extension::behaviour::Causing</a>&lt; State, value &gt;</td></tr>
+<tr class="separator:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bc51e51dece83c4e31d892953f7bcd6 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="a9bc51e51dece83c4e31d892953f7bcd6"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Continue</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Continue.html">extension::behaviour::Continue</a></td></tr>
+<tr class="separator:a9bc51e51dece83c4e31d892953f7bcd6 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2760227e5692c47ae2bf2fb48d37d2a inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="ae2760227e5692c47ae2bf2fb48d37d2a"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Done</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Done.html">extension::behaviour::Done</a></td></tr>
+<tr class="separator:ae2760227e5692c47ae2bf2fb48d37d2a inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a11ff7db6ef7c27ad993fbef780bc98c4"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Needs</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Needs.html">extension::behaviour::Needs</a>&lt; T &gt;</td></tr>
+<tr class="separator:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="ae322aad29122aeb742de6ff6b4950a67"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Provide</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Provide.html">extension::behaviour::Provide</a>&lt; T &gt;</td></tr>
+<tr class="separator:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8e995167424161b9f5459f5ed0359c8 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="ad8e995167424161b9f5459f5ed0359c8"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RunReason</b> = ::extension::behaviour::RunReason</td></tr>
+<tr class="separator:ad8e995167424161b9f5459f5ed0359c8 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5e714c1d9b1aaee94c408a82b123ae5 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="ae5e714c1d9b1aaee94c408a82b123ae5"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RunState</b> = ::extension::behaviour::RunState</td></tr>
+<tr class="separator:ae5e714c1d9b1aaee94c408a82b123ae5 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="ac2ed6b879ec18a39306e88ef73d2549e"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Start</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Start.html">extension::behaviour::Start</a>&lt; T &gt;</td></tr>
+<tr class="separator:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="aea1dfde4b3a5d35b48288405bc990caf"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Stop</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Stop.html">extension::behaviour::Stop</a>&lt; T &gt;</td></tr>
+<tr class="separator:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a4513ce7303cfb0ce526bee9d5cf2470b"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Task</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Task.html">extension::behaviour::Task</a>&lt; T &gt;</td></tr>
+<tr class="separator:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a8bbea33283ec03979c745484242719b7"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Uses</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Uses.html">extension::behaviour::Uses</a>&lt; T &gt;</td></tr>
+<tr class="separator:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a562529a74d93dfed5d72bea2fbdaca inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="a3a562529a74d93dfed5d72bea2fbdaca"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Wait</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Wait.html">extension::behaviour::Wait</a></td></tr>
+<tr class="separator:a3a562529a74d93dfed5d72bea2fbdaca inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a5c9bec81a70b4ff798c6507379bfa7ee"></a>
+template&lt;typename State , template&lt; typename &gt; class expr, State::Value value&gt; </td></tr>
+<tr class="memitem:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>When</b> = ::<a class="el" href="structextension_1_1behaviour_1_1When.html">extension::behaviour::When</a>&lt; State, expr, value &gt;</td></tr>
+<tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Calibrates a single camera's extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_roll, del_pitch, del_yaw) so that the projected YOLO field-landmark detections (X, L, T intersections) align with the known ground-truth landmark positions. </p>
+<p>The robot stands itself up and automatically sweeps its head through a yaw/pitch grid (via the PlanLook LookAround provider, configured by the role-specific PlanLook.yaml) so the detections span the image without any manual input.</p>
 <p>Assumptions:</p><ul>
-<li>The robot is static, placed on the centre of the field, looking straight toward the goal.</li>
+<li>The robot is placed on the centre of the field, looking straight toward the goal.</li>
 <li>The field type (and hence the field dimensions / ground-truth landmark positions) is known via the FieldDescription. </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ac1bf024669f94542e9b80f70503ad88c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac1bf024669f94542e9b80f70503ad88c">&#9670;&nbsp;</a></span>associate_and_store()</h2>
+<a id="a287807243fd29790da545fc4469d7a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a287807243fd29790da545fc4469d7a45">&#9670;&nbsp;</a></span>associate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -296,7 +381,42 @@ static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::tools::ExtrinsicsCalibration::associate_and_store </td>
+          <td class="memname">std::vector&lt; int &gt; module::tools::ExtrinsicsCalibration::associate </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>offsets</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>(Re-)associate every collected detection with the known landmarks using the Hungarian algorithm, evaluated at the given offsets. </p>
+<p>Rebuilds the <code>samples</code> buffer used by the optimiser. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>The extrinsic offsets (roll, pitch, yaw) [rad] at which to project and associate </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Per-observation signature (frame-major) of assigned landmark indices, -1 where unassociated. Used to detect ICP convergence (associations no longer changing). </dd></dl>
+
+</div>
+</div>
+<a id="aaaa1605cc0c292549b3e17d5da9c6a92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaaa1605cc0c292549b3e17d5da9c6a92">&#9670;&nbsp;</a></span>collect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::tools::ExtrinsicsCalibration::collect </td>
           <td>(</td>
           <td class="paramtype">const message::vision::FieldIntersections &amp;&#160;</td>
           <td class="paramname"><em>field_intersections</em>, </td>
@@ -326,8 +446,8 @@ static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"
 </table>
 </div><div class="memdoc">
 
-<p>Associate the detections in a frame with the known landmarks using the Hungarian algorithm, evaluated at the current extrinsic offsets, and append the matched samples to the buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Recover the offset-independent camera-frame rays for a frame's detections and store the raw frame for later (re-)association. </p>
+<p>No landmark association is committed here. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">field_intersections</td><td>The field intersection detections </td></tr>
     <tr><td class="paramname">Hwp</td><td>The offset-free world from head-pitch transform for this frame </td></tr>
@@ -500,6 +620,34 @@ static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"
 
 </div>
 </div>
+<a id="ae4ea432a495f315b640e595695e0a5a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4ea432a495f315b640e595695e0a5a6">&#9670;&nbsp;</a></span>run_calibration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::tools::ExtrinsicsCalibration::run_calibration </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Run the ICP loop: alternate (associate at the current best offsets) and (optimise the offsets with those associations held fixed), re-centring on the refined offsets each iteration, until the associations stop changing or the iteration cap is reached. </p>
+<p>Writes the result and exits on success. </p>
+
+</div>
+</div>
 <a id="aef0dc88e8ff24d73321c99c2b1eb4267"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aef0dc88e8ff24d73321c99c2b1eb4267">&#9670;&nbsp;</a></span>total_cost()</h2>
 
@@ -579,7 +727,7 @@ static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>tools</b></li><li class="navelem"><a class="el" href="classmodule_1_1tools_1_1ExtrinsicsCalibration.html">ExtrinsicsCalibration</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 03:23:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 20 2026 09:40:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

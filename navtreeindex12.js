@@ -1,5 +1,12 @@
 var NAVTREEINDEX12 =
 {
+"structextension_1_1behaviour_1_1information_1_1TaskDataStore.html#a867e90a0f9235f6470182e1fb734dd1f":[3,0,1,0,1,2,3],
+"structextension_1_1behaviour_1_1information_1_1TaskDataStore.html#a91945cb757a3c6193332845147149b9a":[3,0,1,0,1,2,4],
+"structextension_1_1behaviour_1_1information_1_1TaskDataStore.html#ae85178633b66c9f97fbc5d15402cfe1e":[3,0,1,0,1,2,1],
+"structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html":[3,0,2,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html":[3,0,3,0,0,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#a07556dda5f5cb0cd8c23c2b4c9714b61":[3,0,3,0,0,0,11],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#a099c6c5096e2dc9f7d058f998b46eb2d":[3,0,3,0,0,0,7],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#a1a246fffca7e5e69fba80da1775e7b2f":[3,0,3,0,0,0,5],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#a1b29dbf8f43adf58fe0213e46cad615d":[3,0,3,0,0,0,12],
 "structmodule_1_1actuation_1_1FootController_1_1Config.html#a46b29cdde23abc6bde37f0f77abac6b4":[3,0,3,0,0,0,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1DeviceModel_01_4.html#a00dd07fe89586c816cfd469bf47ae46a":[3,0,3,2,15,0],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1ForcePlateModel_01_4.html":[3,0,3,2,16],
 "structmodule_1_1input_1_1ReadData_3_01NatNet_1_1ForcePlateModel_01_4.html#a67eff072dde0e6d663449bc688945907":[3,0,3,2,16,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html":[3,0,3,2,17],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html#af203d409bae21fb9dfb3d62916d291b9":[3,0,3,2,17,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html":[3,0,3,2,18],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1RigidBodyModel_01_4.html#a0e95cbf77069acf7271fcb4a236a2d88":[3,0,3,2,18,0],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html":[3,0,3,2,19],
-"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1SkeletonModel_01_4.html#a83a637aa02cd1c2e402e1368ad7331fe":[3,0,3,2,19,0],
-"structmodule_1_1input_1_1ReadData_3_01RigidBody_01_4.html":[3,0,3,2,20],
-"structmodule_1_1input_1_1ReadData_3_01RigidBody_01_4.html#a837361d2b8fc111ce641bc4013844d6a":[3,0,3,2,20,0]
+"structmodule_1_1input_1_1ReadData_3_01NatNet_1_1MarkerSetModel_01_4.html":[3,0,3,2,17]
 };

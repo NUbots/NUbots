@@ -1,5 +1,5 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,1011,347,1052"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,1036,347,1077"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="439,5,587,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="439,71,587,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="439,136,587,177"/>
@@ -38,5 +38,6 @@
 <area shape="rect" id="node38" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1854,619,1881"/>
 <area shape="rect" id="node39" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1905,607,1947"/>
 <area shape="rect" id="node40" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html" title=" " alt="" coords="404,1971,623,2012"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,1018,140,1045"/>
+<area shape="rect" id="node41" href="$classmodule_1_1tools_1_1ExtrinsicsCalibration.html" title="Calibrates a single camera&#39;s extrinsic offsets (roll, pitch, yaw) by optimising offset deltas (del_ro..." alt="" coords="422,2036,605,2077"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,1043,140,1070"/>
 </map>

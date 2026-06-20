@@ -1,5 +1,12 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a52958fdec0d243fd5a267b84869d673a":[3,0,3,8,1,2,3],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a70709bcfd6c50b7259264bceda0efaa1":[3,0,3,8,1,2,0],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#af23c897ee2c31a8900ff0eb042a5b111":[3,0,3,8,1,2,2],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#af91d5b532db3c5e7619d2a5fe149d2db":[3,0,3,8,1,2,1],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html":[3,0,3,8,1,3],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a491938a8483cab4a422614b33a2dd82a":[3,0,3,8,1,3,0],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a60525613066ade744ee17c9f46f77f9f":[3,0,3,8,1,3,1],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a6278746008df001eccc7658d177f6346":[3,0,3,8,1,3,2],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#a7bb7146f91f85e7a2d2b1743e96bc6be":[3,0,3,8,1,3,3],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html#ad50744a4ecd6acbd067ef0325641fd3d":[3,0,3,8,1,3,5],
@@ -242,12 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a4dae3184ec29a55186c5d2a68afb87b8":[3,0,3,11,2,0,1],
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a76245341420b126ec22af604d4bf9973":[3,0,3,11,2,0,0],
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a9e4a657c13111b80133ada463fecddae":[3,0,3,11,2,0,5],
-"structmodule_1_1strategy_1_1FindObject_1_1Config.html#aac0b061d135be4405209261b92b0af0e":[3,0,3,11,2,0,6],
-"structmodule_1_1strategy_1_1FindObject_1_1Config.html#afc02b3e5ad5322ac3689c17190a952d6":[3,0,3,11,2,0,2],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html":[3,0,3,11,4,0],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html#a1abf6abdc8fa2ced560aaee31e548a2b":[3,0,3,11,4,0,1],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html#a26446ee0d94afcbcd2919fd1ff8ec319":[3,0,3,11,4,0,4],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html#a388e3ba9c4cafb16df809ed4eab96e49":[3,0,3,11,4,0,0],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html#aa572a5c140b104188e69ace973ca8618":[3,0,3,11,4,0,2],
-"structmodule_1_1strategy_1_1StartSafely_1_1Config.html#ab9902856185b4b7e9f4094bc22a249b7":[3,0,3,11,4,0,3]
+"structmodule_1_1strategy_1_1FindObject_1_1Config.html#aac0b061d135be4405209261b92b0af0e":[3,0,3,11,2,0,6]
 };

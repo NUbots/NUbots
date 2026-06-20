@@ -1,5 +1,12 @@
 var NAVTREEINDEX10 =
 {
+"namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a":[2,0,7,6,0,1],
+"namespaceutility_1_1math_1_1angle.html#ad2ac2cb47e41dcec768e82c097bd2c90":[2,0,7,6,0,0],
+"namespaceutility_1_1math_1_1angle.html#ad768a98e6ebcc91ecf92252e8bdd7340":[2,0,7,6,0,7],
+"namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945":[2,0,7,6,0,4],
+"namespaceutility_1_1math_1_1coordinates.html":[2,0,7,6,1],
+"namespaceutility_1_1math_1_1coordinates.html#a01e89eb3bda815a486ee7a0823a74f05":[2,0,7,6,1,3],
+"namespaceutility_1_1math_1_1coordinates.html#a208468c2d587343fa313ce096bd670f1":[2,0,7,6,1,4],
 "namespaceutility_1_1math_1_1coordinates.html#a609b54a1e798004b615df0bbf1e63243":[2,0,7,6,1,2],
 "namespaceutility_1_1math_1_1coordinates.html#ad41104ac1ba92d65d37c1a53871ce779":[2,0,7,6,1,1],
 "namespaceutility_1_1math_1_1coordinates.html#af411658f783b5709d8a8c4c56fd82218":[2,0,7,6,1,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX10 =
 "structdynamixel_1_1v2_1_1BulkReadCommand.html#ac434b23511b15b7088afb40014ed930b":[3,0,0,0,1,3],
 "structdynamixel_1_1v2_1_1BulkReadCommand.html#ad099b33593b01ef64881fdf6696d2148":[3,0,0,0,1,0],
 "structdynamixel_1_1v2_1_1BulkReadCommand.html#ae5b8eeee543755678f6a4362bcde58e6":[3,0,0,0,1,2],
-"structdynamixel_1_1v2_1_1BulkReadCommand.html#afb92685103676a61f5c5bf1ee12b9acf":[3,0,0,0,1,5],
-"structdynamixel_1_1v2_1_1BulkReadData.html":[3,0,0,0,2],
-"structdynamixel_1_1v2_1_1BulkReadData.html#a30e422f4d3e6ccf4add7bd2d017522b5":[3,0,0,0,2,2],
-"structdynamixel_1_1v2_1_1BulkReadData.html#a57a892d931e27329ba83610a4f923a75":[3,0,0,0,2,3],
-"structdynamixel_1_1v2_1_1BulkReadData.html#a9f2fa3e06ed403cfabe56bda7b101927":[3,0,0,0,2,1],
-"structdynamixel_1_1v2_1_1BulkReadData.html#aa16d5b1fd9434ac1a9c2042239784f2d":[3,0,0,0,2,0],
-"structdynamixel_1_1v2_1_1BulkWriteCommand.html":[3,0,0,0,3],
-"structdynamixel_1_1v2_1_1BulkWriteCommand.html#a19504c02c73fc02de0b0163292d5489f":[3,0,0,0,3,3]
+"structdynamixel_1_1v2_1_1BulkReadCommand.html#afb92685103676a61f5c5bf1ee12b9acf":[3,0,0,0,1,5]
 };
