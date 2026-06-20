@@ -88,7 +88,8 @@ namespace module::tools {
                         record->goal_position.push_back(servo.goal_position);
                     }
 
-                    record->Htw = sensors.Htw;
+                    record->Htw            = sensors.Htw;
+                    record->Htw_kinematic  = sensors.Htw_kinematic;
 
                     if (!ground_truth_initialised) {
                         ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();

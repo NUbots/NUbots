@@ -164,4 +164,7 @@ message Sensors {
     
     /// Ground truth homogeneous transform: world {w} to torso {t} from simulator
     iso3 Htw_ground_truth = 18;
+
+    /// Dead-reckoning (kinematic anchor) homogeneous transform: world {w} to torso {t}, without neural correction
+    iso3 Htw_kinematic = 19;
 }

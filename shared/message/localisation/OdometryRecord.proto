@@ -56,4 +56,7 @@ message OdometryRecord {
 
     /// Ground truth Torso-to-field
     iso3 Hft = 10;
+
+    /// Dead-reckoning (kinematic anchor) homogeneous transform: world {w} to torso {t}, without neural correction
+    iso3 Htw_kinematic = 11;
 }

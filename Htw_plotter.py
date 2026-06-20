@@ -3,7 +3,7 @@ import json
 import numpy as np
 from matplotlib import pyplot as plt
 
-json_file = "mocap_htw.json"
+json_file = "mocap_htw_3.json"
 
 def HtwMessagetoHtw(HtwMessage):
     def v(row, col):
@@ -36,11 +36,14 @@ def Hwt(rec, key):
 
 point_trail = [HtwtoCoord(Hwt(r, "Htw")) for r in records]
 gt_point_trail = [HtwtoCoord(Hwt(r, "Htw_ground_truth")) for r in records]
+kin_point_trail = [HtwtoCoord(Hwt(r, "Htw_kinematic")) for r in records]
 
 x, y = np.array(point_trail).T
 gt_x, gt_y = np.array(gt_point_trail).T
-plt.scatter(x, y, linewidths=0.001, label="odometry")
+kin_x, kin_y = np.array(kin_point_trail).T
+plt.scatter(x, y, linewidths=0.001, label="NUral odometry")
 plt.scatter(gt_x, gt_y, linewidths=0.001, label="ground truth")
+plt.scatter(kin_x, kin_y, linewidths=0.001, label="kinematic odometry")
 plt.legend()
 plt.savefig("img.png")
 plt.show()

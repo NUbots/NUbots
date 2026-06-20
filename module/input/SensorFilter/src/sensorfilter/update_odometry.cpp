@@ -164,6 +164,13 @@ namespace module::input {
         Eigen::Vector3d rpy_fused(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
         Hwt.linear() = rpy_intrinsic_to_mat(rpy_fused);
 
+        // Store dead-reckoning estimate before any neural correction
+        Eigen::Isometry3d Hwt_dead_reckoning = Eigen::Isometry3d::Identity();
+        Hwt_dead_reckoning.linear()           = rpy_intrinsic_to_mat(
+            Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), mat_to_rpy_intrinsic(Hwt_anchor.linear()).z()));
+        Hwt_dead_reckoning.translation() = Hwt_anchor.translation();
+        sensors->Htw_kinematic           = Hwt_dead_reckoning.inverse();
+
         // Gather features for neural network
         std::vector<float> fv;
         fv.reserve(FEATURE_DIM);
