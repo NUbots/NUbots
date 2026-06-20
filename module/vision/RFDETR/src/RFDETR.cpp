@@ -188,7 +188,7 @@ namespace module::vision {
                 bool have_boxes  = false;
                 bool have_logits = false;
                 for (size_t i = 0; i < compiled_model.outputs().size(); i++) {
-                    ov::Tensor t   = infer_request.get_output_tensor(i);
+                    ov::Tensor t  = infer_request.get_output_tensor(i);
                     ov::Shape shp = t.get_shape();
                     if (shp.size() == 3 && shp[2] == 4) {
                         boxes_tensor = t;
@@ -209,9 +209,8 @@ namespace module::vision {
                 const size_t num_channels = logits_tensor.get_shape()[2];
                 // Determine the class-channel offset. RF-DETR exports an extra background channel
                 // (num_channels == objects + 1); channel 0 is unused so the offset is 1.
-                const int offset = cfg.class_offset >= 0
-                                       ? cfg.class_offset
-                                       : (num_channels == objects.size() + 1 ? 1 : 0);
+                const int offset =
+                    cfg.class_offset >= 0 ? cfg.class_offset : (num_channels == objects.size() + 1 ? 1 : 0);
 
                 const float* box_data   = boxes_tensor.data<float>();
                 const float* logit_data = logits_tensor.data<float>();
@@ -224,8 +223,8 @@ namespace module::vision {
                     const float* logits = logit_data + q * num_channels;
 
                     // Argmax over the class channels (sigmoid is monotonic, so argmax of logits is fine)
-                    int best_channel  = -1;
-                    float best_logit  = -std::numeric_limits<float>::infinity();
+                    int best_channel = -1;
+                    float best_logit = -std::numeric_limits<float>::infinity();
                     for (size_t c = offset; c < num_channels; c++) {
                         if (logits[c] > best_logit) {
                             best_logit   = logits[c];
