@@ -72,7 +72,7 @@ export class VisionNetwork {
             projection: getProjection(projection!),
             focalLength: focalLength!,
             centre: Vector2.from(centre),
-            distortionCoeffecients: Vector2.from(k),
+            distortionCoefficients: Vector2.from(k),
           }),
           Hcw: Matrix4.from(Hcw),
         }),
@@ -132,6 +132,7 @@ export class VisionNetwork {
       timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       rRCc: Vector3.from(robot.rRCc),
+      radius: robot.radius ?? 0.9999,
     }));
   }
 

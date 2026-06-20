@@ -46,12 +46,18 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
-            /// @brief Servo proportional gain used for policy-generated commands
-            float servo_gain;
+            /// @brief Alpha value for the action smoothing filter
+            float action_alpha;
             /// @brief Servo torque value used for policy-generated commands
             float servo_torque;
-            /// @brief Servo proportional gain used for head joints
+            /// @brief Servo proportional gain for leg and hip joints
+            float leg_servo_gain;
+            /// @brief Servo proportional gain for head joints
             float head_servo_gain;
+            /// @brief Servo proportional gain for arm joints
+            float arm_servo_gain;
+            /// @brief Scale factor to convert inference outputs to joint angles
+            double nugus_action_scale;
         } cfg;
 
         /// @brief OpenVINO model and inference request
@@ -81,6 +87,9 @@ namespace module::skill {
         /// @brief Last action taken by the model
         JointVector last_action;
 
+        /// @brief Flag used by the action smoothing filter
+        bool have_last_action = false;
+
         /// @brief Default pose for the robot
         JointVector default_pose;
 
@@ -89,8 +98,6 @@ namespace module::skill {
         bool have_previous_pose = false;
         NUClear::clock::time_point last_update_time;
 
-        /// @brief Scale factor to convert inference outputs to joint angles
-        double NUGUS_ACTION_SCALE;
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.

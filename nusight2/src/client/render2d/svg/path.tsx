@@ -11,8 +11,14 @@ type Props = { model: Shape<PathGeometry> };
 export const Path = observer(({ model: { geometry, appearance, eventHandlers } }: Props) => {
   const transforms = useContext(rendererTransformsContext);
   const start = geometry.points[0];
-  const path = `M${start.x},${start.y}` + geometry.points.map((p) => `L${p.x},${p.y}`);
-
+  const path =
+    geometry.points.length === 0
+      ? ""
+      : `M${start.x},${start.y} ` +
+        geometry.points
+          .slice(1)
+          .map((p) => `L${p.x},${p.y}`)
+          .join(" ");
   return (
     <path d={path} {...toSvgAppearance(appearance)} {...toSvgEventHandlers(eventHandlers, transforms)} fill="none" />
   );

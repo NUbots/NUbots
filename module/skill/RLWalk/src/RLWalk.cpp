@@ -91,18 +91,23 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
-            cfg.model_path      = config["model"]["path"].as<std::string>();
-            cfg.device          = config["model"]["device"].as<std::string>();
-            cfg.input_name      = config["model"]["input_name"].as<std::string>();
-            cfg.output_name     = config["model"]["output_name"].as<std::string>();
-            cfg.num_joints      = config["model"]["num_joints"].as<int>();
-            cfg.obs_size        = config["model"]["obs_size"].as<int>();
-            cfg.servo_gain      = config["servos"]["gain"].as<float>();
-            cfg.servo_torque    = config["servos"]["torque"].as<float>();
-            cfg.head_servo_gain = config["servos"]["head_gains"].as<float>();
+            cfg.model_path         = config["model"]["path"].as<std::string>();
+            cfg.device             = config["model"]["device"].as<std::string>();
+            cfg.input_name         = config["model"]["input_name"].as<std::string>();
+            cfg.output_name        = config["model"]["output_name"].as<std::string>();
+            cfg.num_joints         = config["model"]["num_joints"].as<int>();
+            cfg.obs_size           = config["model"]["obs_size"].as<int>();
+            cfg.action_alpha       = config["model"]["action_alpha"].as<float>();
+            cfg.servo_torque       = config["servos"]["torque"].as<float>();
+            cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
+            cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
+            cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
+            cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
+
 
             // Initialize vectors
-            last_action = JointVector::Zero();
+            last_action      = JointVector::Zero();
+            have_last_action = false;
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
@@ -110,7 +115,6 @@ namespace module::skill {
             have_previous_pose = false;
             last_update_time   = NUClear::clock::now();
 
-            NUGUS_ACTION_SCALE = 0.049445848912000656f;  // Defined in mjlab training.
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -231,11 +235,11 @@ namespace module::skill {
                     };
 
                     // Clip the output here as a safety measure to prevent extremely fast movements.
-                    const double max_joint_offset = 0.2;  // 0.1 radians per update (50 Hz) = ~300 degrees per second.
+                    const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
 
                     // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
                     // against the current measured offsets to limit command rate.
-                    const JointVector desired_joint_offsets_mj = inference_output_raw * NUGUS_ACTION_SCALE;
+                    const JointVector desired_joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
                     JointVector clipped_joint_offsets_mj       = desired_joint_offsets_mj;
 
                     for (int i = 0; i < cfg.num_joints; ++i) {
@@ -245,16 +249,26 @@ namespace module::skill {
                     }
 
                     JointVector clipped_action_raw = inference_output_raw;
-                    if (std::abs(NUGUS_ACTION_SCALE) > 1e-9) {
-                        clipped_action_raw = clipped_joint_offsets_mj / NUGUS_ACTION_SCALE;
+                    if (std::abs(cfg.nugus_action_scale) > 1e-9) {
+                        clipped_action_raw = clipped_joint_offsets_mj / cfg.nugus_action_scale;
                     }
 
+                    // Filter the actions using an exponential moving average
+                    JointVector filtered_action_raw = clipped_action_raw;
+                    if (have_last_action) {
+                        filtered_action_raw =
+                            cfg.action_alpha * clipped_action_raw + (1.0 - cfg.action_alpha) * last_action;
+                    }
 
-                    // Store the last action. Needs raw policy output in tree-traversal order
-                    last_action = clipped_action_raw;
+                    // Store the filtered action in mjlab order without scaling or offsets.
+                    last_action      = filtered_action_raw;
+                    have_last_action = true;
+
+                    const JointVector filtered_joint_offsets_mj = filtered_action_raw * cfg.nugus_action_scale;
+
 
                     // Convert into NUbots order, apply scaling
-                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(clipped_joint_offsets_mj);
+                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
 
                     if (log_level <= DEBUG) {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
@@ -266,8 +280,11 @@ namespace module::skill {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position = default_pose[i] + joint_offsets_scaled_nubots[i];
-                        servo->state    = ServoState((i < 18 ? cfg.servo_gain : cfg.head_servo_gain), cfg.servo_torque);
+                        servo->position                   = default_pose[i] + joint_offsets_scaled_nubots[i];
+                        const float gain                  = i < 6    ? cfg.arm_servo_gain
+                                                            : i < 18 ? cfg.leg_servo_gain
+                                                                     : cfg.head_servo_gain;
+                        servo->state                      = ServoState(gain, cfg.servo_torque);
                         body->servos[joint_map[i].second] = *servo;
                     }
                     emit<Task>(body);

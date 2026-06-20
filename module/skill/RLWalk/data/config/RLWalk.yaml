@@ -8,11 +8,14 @@ model:
   output_name: actions
   num_joints: 20
   obs_size: 69
+  action_alpha: 1.00
+  action_scale: 0.24722924456000328 # 0.049445848912000656 * 5
 
 servos:
-  gain: 30.0
   torque: 100.0
-  head_gains: 6.0
+  leg_gains: 8.0
+  head_gains: 1.0
+  arm_gains: 1.0
 
 default_pose: # Same as in Mujoco.yaml
   - 1.71400e+00 # Right shoulder pitch 0
