@@ -15,13 +15,12 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors
-  input::SensorFilter
   input::K1Camera
+  input::K1Sensors
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::FieldLineDetector
-  vision::BallDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
@@ -34,10 +33,10 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::Walk
+  skill::K1Walk
   skill::KickWalk
-  skill::GetUp
-  skill::Look
+  skill::K1GetUp
+  skill::K1Look
   skill::Say
   skill::GPT
   # Planners

@@ -17,7 +17,7 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors and network (input)
-  input::SensorFilter
+  input::K1Sensors
   input::K1Camera
   input::GameController
   network::RobotCommunication
@@ -38,10 +38,10 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::Walk
+  skill::K1Walk
   skill::KickWalk
-  skill::GetUp
-  skill::Look
+  skill::K1GetUp
+  skill::K1Look
   # Planners
   planning::PlanWalkPath
   planning::PlanLook

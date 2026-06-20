@@ -19,7 +19,7 @@ nuclear_role(
   # Input
   input::K1Camera
   input::NatNet
-  input::SensorFilter
+  input::K1Sensors
   localisation::Mocap
   # Vision
   vision::VisualMesh
@@ -38,10 +38,10 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::Walk
+  skill::K1Walk
   skill::KickWalk
-  skill::GetUp
-  skill::Look
+  skill::K1GetUp
+  skill::K1Look
   # Planners
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
