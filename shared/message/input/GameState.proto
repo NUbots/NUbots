@@ -103,17 +103,6 @@ message GameState {
         repeated Robot players       = 4;
     }
 
-    enum SubMode {
-        REF_PLACE      = 0;
-        ROBOT_POSITION = 1;
-        PRE_EXECUTE    = 2;
-    }
-
-    message SecondaryState {
-        uint32  team_performing = 1;
-        SubMode sub_mode        = 2;
-    }
-
     Phase                     phase            = 1;
     Mode                      mode             = 2;
     bool                      first_half       = 3;
@@ -127,6 +116,5 @@ message GameState {
     Team                      team            = 9;
     Team                      opponent        = 10;
     Robot                     self            = 11;
-    SecondaryState            secondary_state = 12;
-    bool                      stopped         = 13;
+    bool                      stopped         = 12;
 }
