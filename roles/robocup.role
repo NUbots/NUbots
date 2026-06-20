@@ -18,7 +18,7 @@ nuclear_role(
   output::ImageCompressor
   # Sensors and network (input)
   input::SensorFilter
-  input::Camera
+  input::K1Camera
   input::GameController
   network::RobotCommunication
   # Vision
