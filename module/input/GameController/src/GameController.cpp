@@ -219,6 +219,10 @@ namespace module::input {
         std::vector<std::function<void()>> state_changes;
 
         // Stopped play
+        if (old_packet.stopped != new_packet.stopped) {
+            state_changes.emplace_back(
+                [this, new_packet] { log<DEBUG>("Stopped state changed:", uint(new_packet.stopped)); });
+        }
         state->stopped = new_packet.stopped;
 
         // Game score
@@ -594,7 +598,7 @@ namespace module::input {
             case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::LEAVING_THE_FIELD;
             case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::PLAYING_WITH_ARMS_HANDS;
             case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PLAYER_PUSHING;
-            case gamecontroller::PenaltyState::CAUTIONED:      return PenaltyReason::CAUTIONED;
+            case gamecontroller::PenaltyState::CAUTIONED: return PenaltyReason::CAUTIONED;
             case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::SENT_OFF;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");
