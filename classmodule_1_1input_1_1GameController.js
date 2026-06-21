@@ -5,7 +5,6 @@ var classmodule_1_1input_1_1GameController =
     [ "get_own_team", "classmodule_1_1input_1_1GameController.html#a9049d7b653c057621553c0c63852aac9", null ],
     [ "get_penalty_reason", "classmodule_1_1input_1_1GameController.html#a08fa685c12bda08a7599872749ad6a34", null ],
     [ "get_team_colour", "classmodule_1_1input_1_1GameController.html#a374a434269fd08be0524926fba69e400", null ],
-    [ "ip_address_int_to_string", "classmodule_1_1input_1_1GameController.html#a0f6cc7a8c32bfd1f0724e1bd19dba597", null ],
     [ "process", "classmodule_1_1input_1_1GameController.html#a435a4fcef06a22e29f4c51522e562160", null ],
     [ "reset_state", "classmodule_1_1input_1_1GameController.html#a0d18714780a73407222b6992175d0455", null ],
     [ "send_reply_message", "classmodule_1_1input_1_1GameController.html#aefe7e63d86877891299cb36db1e667d6", null ],

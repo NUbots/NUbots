@@ -158,6 +158,7 @@ var namespaces_dup =
             [ "UNPENALISED", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae73408f8b4266198a9118042e5e9e31e", null ],
             [ "ILLEGAL_POSITIONING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da66211db5a0a15b2578fcf3e6d1160873", null ],
             [ "MOTION_IN_SET", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da3d47482d40bd236e93d1968bf4bdcc98", null ],
+            [ "MOTION_IN_STOP", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da0e71bb77ac064eae631b0e400cc8c147", null ],
             [ "LOCAL_GAME_STUCK", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da9d512dabfe2d3c8da266b5fd951c6c5b", null ],
             [ "INCAPABLE_ROBOT", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da42a3dfc26113594a8d422df22782d2fc", null ],
             [ "PICK_UP", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dac9c8152bdc60f34810ab636ce1ca74b9", null ],
@@ -165,6 +166,7 @@ var namespaces_dup =
             [ "LEAVING_THE_FIELD", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da8097d6886ae8fe35e947d016ca16f358", null ],
             [ "PLAYING_WITH_ARMS_HANDS", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da8bda2559a9c1b04bf1b69f619be3587e", null ],
             [ "PLAYER_PUSHING", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dad0c13a6f89d811bc008491ba0f5dae63", null ],
+            [ "CAUTIONED", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da3683ef135ef1017fa587668f06e4eef8", null ],
             [ "SENT_OFF", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dad45b1363a1e4ef62632cc548c344f527", null ],
             [ "SUBSTITUTE", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02da1ecc48d9fd9fb4263803c34de630f01b", null ]
           ] ],
@@ -588,7 +590,6 @@ var namespaces_dup =
         [ "Phase", "FieldPlayer_8cpp.html#ae0412f9163805a4502651d331d8c43ce", null ],
         [ "ReadyAttackTask", "ReadyAttack_8cpp.html#a8c7ae1cfbd84b1e03ab40fa4f3c86d4c", null ],
         [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
-        [ "SubMode", "FieldPlayer_8cpp.html#a1addfb2876a6e437319760e80f805e1a", null ],
         [ "SupportMsg", "Support_8cpp.html#ae74c7b77dd20c445cf5c3e01d36e54c7", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
         [ "LogColours", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
