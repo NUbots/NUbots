@@ -34,6 +34,18 @@ target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
 find_package(Lame REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(CUDAToolkit_ROOT "/l4t/targetfs/usr/local/cuda-12.5")
+endif()
+
+# QUIET suppress the nvcc output
+find_package(CUDAToolkit REQUIRED QUIET)
+target_link_libraries(nuclear_utility PUBLIC CUDA::cudart CUDA::cuda_driver)
+
+# TensorRT is only used by vision modules, link it privately to reduce symbol propagation
+target_link_libraries(nuclear_utility PRIVATE nvinfer nvonnxparser)
+
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})

@@ -2,19 +2,19 @@
 log_level: INFO
 
 # General playing tuning values for walking
-max_x_velocity: 0.175
-max_y_velocity: 0.1
-max_angular_velocity: 0.4
+max_x_velocity: 0.75
+max_y_velocity: 0.6
+max_angular_velocity: 0.6
 
-acceleration: 0.005 # maximum increment in walk command velocity
+acceleration: 0.01 # maximum increment in walk command velocity
 
 # Rotate on the spot tuning values
-rotate_velocity: 0.4
+rotate_velocity: 0.8
 rotate_velocity_x: 0.0
 rotate_velocity_y: 0.0
 
 # Rotate around ball tuning values
-pivot_ball_velocity: 0.5
+pivot_ball_velocity: 0.8
 pivot_ball_velocity_x: 0.0
 pivot_ball_velocity_y: -0.2
 
@@ -28,7 +28,7 @@ strafe_gain: 0.4
 obstacle_radius: 0.8
 
 # Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
-tau: [1.0, 1.0, 3.0]
+tau: [0.0, 0.0, 0.0]
 
 # Initial velocity to use when resetting the smoothed walk command
 starting_velocity: [0.05, 0.0, 0.0]
