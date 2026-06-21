@@ -626,17 +626,6 @@ namespace module::input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-    std::string GameController::ip_address_int_to_string(const uint32_t& ip_addr) {
-        uint32_t ip_addr_n = htonl(ip_addr);
-
-        char c[255];
-        std::memset(c, 0, sizeof(c));
-
-        std::string addr = inet_ntop(AF_INET, &ip_addr_n, c, sizeof(c));
-
-        return addr;
-    }
-
     GameState::TeamColour::Value GameController::get_team_colour(const gamecontroller::TeamColour& colour) {
         switch (colour) {
             case gamecontroller::TeamColour::BLUE: return TeamColour::BLUE;

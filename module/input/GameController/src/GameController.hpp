@@ -113,9 +113,6 @@ namespace module::input {
         [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
             const gamecontroller::PenaltyState& penalty_state);
 
-        /// @brief Converts an integer IP address to a string
-        [[nodiscard]] static std::string ip_address_int_to_string(const uint32_t& ip_addr);
-
     public:
         /// @brief Called by the powerplant to build and setup the GameController reactor
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
