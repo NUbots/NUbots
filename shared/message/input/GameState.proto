@@ -97,10 +97,10 @@ message GameState {
     }
 
     message Team {
-        uint32         team_id       = 1;
-        TeamColour     team_colour   = 2;
-        uint32         score         = 3;
-        repeated Robot players       = 4;
+        uint32         team_id     = 1;
+        TeamColour     team_colour = 2;
+        uint32         score       = 3;
+        repeated Robot players     = 4;
     }
 
     Phase                     phase            = 1;
@@ -112,9 +112,9 @@ message GameState {
     /// Timestamp when the robot thinks the half is due to end
     google.protobuf.Timestamp primary_time = 7;
     /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
-    google.protobuf.Timestamp secondary_time  = 8;
-    Team                      team            = 9;
-    Team                      opponent        = 10;
-    Robot                     self            = 11;
-    bool                      stopped         = 12;
+    google.protobuf.Timestamp secondary_time = 8;
+    Team                      team           = 9;
+    Team                      opponent       = 10;
+    Robot                     self           = 11;
+    bool                      stopped        = 12;
 }
