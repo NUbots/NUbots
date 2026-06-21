@@ -29,9 +29,11 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <cstdint>
 #include <nlopt.hpp>
 #include <nuclear>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "extension/Behaviour.hpp"
@@ -59,8 +61,11 @@ namespace module::tools {
      */
     class ExtrinsicsCalibration : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Number of optimisation variables (del_roll, del_pitch, del_yaw)
-        static constexpr unsigned int n_params = 3;
+        /// @brief Convenience alias for the 6-DOF pose vector [roll, pitch, yaw, tx, ty, tz]
+        using Vector6d = Eigen::Matrix<double, 6, 1>;
+
+        /// @brief Number of optimisation variables (roll, pitch, yaw, tx, ty, tz)
+        static constexpr unsigned int n_params = 6;
 
         /// @brief Stores configuration values
         struct Config {
@@ -84,8 +89,17 @@ namespace module::tools {
             /// of over-sampling whatever pose the head is lingering in.
             double min_head_pose_change = 0.0;
 
-            /// @brief Search bounds (half-width) on each offset delta [rad] (del_roll, del_pitch, del_yaw)
-            Eigen::Vector3d offset_bounds = Eigen::Vector3d::Zero();
+            /// @brief Search bounds (half-width) on the rotation params [rad] (roll, pitch, yaw), about nominal
+            Eigen::Vector3d rotation_bounds = Eigen::Vector3d::Zero();
+
+            /// @brief Search bounds (half-width) on the translation params [m] (tx, ty, tz), about nominal
+            Eigen::Vector3d translation_bounds = Eigen::Vector3d::Zero();
+
+            /// @brief Fraction of detections held out for validation (0 disables held-out evaluation)
+            double split_ratio = 0.0;
+
+            /// @brief RNG seed for the (reproducible) train/validation split
+            uint64_t split_seed = 0;
 
             /// @brief NLopt relative tolerance on the optimisation parameters
             double xtol_rel = 0.0;
@@ -107,6 +121,8 @@ namespace module::tools {
             /// @brief Detection type (X / L / T intersection), used to restrict same-type associations
             message::vision::FieldIntersection::IntersectionType type =
                 message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+            /// @brief Whether this detection is held out for validation (true) or used for fitting (false)
+            bool validation = false;
         };
 
         /// @brief One captured frame: the offset-free transforms plus every detection in that frame.
@@ -131,11 +147,15 @@ namespace module::tools {
             /// @brief Associated ground-truth landmark position in field {f} space
             Eigen::Vector3d rLFf = Eigen::Vector3d::Zero();
         };
-        /// @brief Base (offset-free) head-pitch {p} from camera {c} transform, from URDF forward kinematics
+        /// @brief Base (nominal) head-pitch {p} from camera {c} transform, from URDF forward kinematics.
+        /// Its decomposition (nominal_pose) is the centre of the optimisation search box.
         Eigen::Isometry3d Hpc_base = Eigen::Isometry3d::Identity();
 
-        /// @brief Current extrinsic offsets (roll, pitch, yaw) read from the robot's camera config [rad]
-        Eigen::Vector3d current_offsets = Eigen::Vector3d::Zero();
+        /// @brief URDF nominal pose [roll, pitch, yaw, tx, ty, tz] (decomposed Hpc_base)
+        Vector6d nominal_pose = Vector6d::Zero();
+
+        /// @brief Current best pose [roll, pitch, yaw, tx, ty, tz]; warm-started from the robot's config.
+        Vector6d current_pose = Vector6d::Zero();
 
         /// @brief Head yaw/pitch [rad] of the most recently captured frame, used to gather samples only once the
         /// head has moved far enough (see Config::min_head_pose_change)
@@ -162,21 +182,20 @@ namespace module::tools {
         std::string camera_config_path{};
 
         /**
-         * @brief Build the extrinsic offset rotation matrix from (roll, pitch, yaw), matching the convention
-         * used by the Camera module.
-         * @param offsets The offsets (roll, pitch, yaw) [rad]
-         * @return The offset rotation matrix
+         * @brief Build the camera {c} to head-pitch {p} transform Hpc from a 6-DOF pose, using the same
+         * ZYX-intrinsic rpy convention as the Camera module.
+         * @param pose The pose [roll, pitch, yaw, tx, ty, tz] (rad, rad, rad, m, m, m)
+         * @return The Hpc transform
          */
-        Eigen::Matrix3d offset_rotation(const Eigen::Vector3d& offsets) const;
+        Eigen::Isometry3d pose_to_Hpc(const Vector6d& pose) const;
 
         /**
-         * @brief Re-project a detection ray onto the field ground plane in field {f} space for a given set of
-         * extrinsic offsets.
-         * @param offsets The candidate extrinsic offsets (roll, pitch, yaw) [rad]
+         * @brief Re-project a detection ray onto the field ground plane in field {f} space for a given pose.
+         * @param pose The candidate pose [roll, pitch, yaw, tx, ty, tz]
          * @param sample The sample to re-project
          * @return The projected landmark position in field {f} space
          */
-        Eigen::Vector3d project_to_field(const Eigen::Vector3d& offsets, const Sample& sample) const;
+        Eigen::Vector3d project_to_field(const Vector6d& pose, const Sample& sample) const;
 
         /**
          * @brief Recover the offset-independent camera-frame rays for a frame's detections and store the raw
@@ -190,32 +209,39 @@ namespace module::tools {
                      const Eigen::Isometry3d& Hfw);
 
         /**
-         * @brief (Re-)associate every collected detection with the known landmarks using the Hungarian algorithm,
-         * evaluated at the given offsets. Rebuilds the `samples` buffer used by the optimiser.
-         * @param offsets The extrinsic offsets (roll, pitch, yaw) [rad] at which to project and associate
+         * @brief Associate detections in the requested split with the known landmarks using the Hungarian
+         * algorithm, evaluated at the given pose. Rebuilds the `samples` buffer used by the optimiser.
+         * @param pose The pose [roll, pitch, yaw, tx, ty, tz] at which to project and associate
+         * @param validation Which split to associate: false = training detections, true = held-out validation
          * @return Per-observation signature (frame-major) of assigned landmark indices, -1 where unassociated.
          *         Used to detect ICP convergence (associations no longer changing).
          */
-        std::vector<int> associate(const Eigen::Vector3d& offsets);
+        std::vector<int> associate(const Vector6d& pose, bool validation);
 
         /**
-         * @brief Run the ICP loop: alternate (associate at the current best offsets) and (optimise the offsets
-         * with those associations held fixed), re-centring on the refined offsets each iteration, until the
-         * associations stop changing or the iteration cap is reached. Writes the result and exits on success.
+         * @brief Randomly tag each collected detection as training or validation using a seeded RNG, so the
+         * held-out set is reproducible and independent of the head-sweep gather order.
+         */
+        void partition_observations();
+
+        /**
+         * @brief Run the ICP loop on the training detections: alternate (associate at the current best pose)
+         * and (optimise the pose with those associations held fixed), re-centring on the refined pose each
+         * iteration, until the associations stop changing or the iteration cap is reached. Writes the result.
          */
         void run_calibration();
 
         /**
-         * @brief Total squared re-projection cost over all accumulated samples for a given set of offsets.
-         * @param offsets The candidate extrinsic offsets (roll, pitch, yaw) [rad]
+         * @brief Total squared re-projection cost over the current `samples` buffer for a given pose.
+         * @param pose The candidate pose [roll, pitch, yaw, tx, ty, tz]
          * @return The summed squared distance between each projected detection and its associated landmark
          */
-        double total_cost(const Eigen::Vector3d& offsets) const;
+        double total_cost(const Vector6d& pose) const;
 
         /**
-         * @brief NLopt objective. The optimisation variables are the offset deltas (del_roll, del_pitch,
-         * del_yaw); the cost is evaluated at (current_offsets + delta).
-         * @param x The offset deltas (del_roll, del_pitch, del_yaw) [rad]
+         * @brief NLopt objective. The optimisation variables are the absolute pose params (roll, pitch, yaw,
+         * tx, ty, tz); the cost is evaluated at that pose over the current `samples` buffer.
+         * @param x The pose params [roll, pitch, yaw, tx, ty, tz]
          * @param grad Unused (BOBYQA is derivative-free)
          * @param data Pointer to the owning ExtrinsicsCalibration instance
          * @return The total re-projection cost
@@ -223,17 +249,18 @@ namespace module::tools {
         static double objective(const std::vector<double>& x, std::vector<double>& grad, void* data);
 
         /**
-         * @brief Run the BOBYQA optimisation over the accumulated samples to find the best offsets.
-         * @return Tuple <optimal offsets (roll, pitch, yaw), final cost, optimisation result code>
+         * @brief Run the BOBYQA optimisation over the current `samples` buffer to find the best pose, with a
+         * box bound centred on the URDF nominal pose (rotation_bounds / translation_bounds half-widths).
+         * @return Tuple <optimal pose [roll, pitch, yaw, tx, ty, tz], final cost, optimisation result code>
          */
-        std::tuple<Eigen::Vector3d, double, nlopt::result> optimise();
+        std::tuple<Vector6d, double, nlopt::result> optimise();
 
         /**
-         * @brief Write the optimised offsets back to the robot's camera config file, formatted as
-         * "<degrees> * pi / 180" expression strings.
-         * @param offsets The optimised offsets (roll, pitch, yaw) [rad]
+         * @brief Write the optimised extrinsics back to the robot's camera config file as
+         * `translation: [x, y, z]` [m] and `rpy: [r, p, y]` ("<degrees> * pi / 180" strings).
+         * @param pose The optimised pose [roll, pitch, yaw, tx, ty, tz]
          */
-        void write_offsets(const Eigen::Vector3d& offsets);
+        void write_extrinsics(const Vector6d& pose);
 
     public:
         /// @brief Called by the powerplant to build and setup the ExtrinsicsCalibration reactor.

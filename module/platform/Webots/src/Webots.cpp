@@ -48,6 +48,7 @@
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -311,18 +312,11 @@ namespace module::platform {
             context.name = name;
             context.id   = num_cameras++;
 
-            // Compute Hpc, the transform from the camera to the head pitch space
-            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
-            auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    std::string("left_camera"),
-                                                                    std::string("head"));
-
-            // Apply roll and pitch offsets
-            double roll_offset  = config["roll_offset"].as<Expression>();
-            double pitch_offset = config["pitch_offset"].as<Expression>();
-            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+            // Load the calibrated camera {c} to head-pitch {p} transform Hpc directly from the camera config.
+            // Stored as translation [m] + ZYX-intrinsic rpy [rad] (same schema as the Camera module).
+            Eigen::Vector3d translation = config["translation"].as<Expression>();
+            Eigen::Vector3d rpy         = config["rpy"].as<Expression>();
+            context.Hpc                 = utility::math::euler::pos_rpy_to_transform(translation, rpy);
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();

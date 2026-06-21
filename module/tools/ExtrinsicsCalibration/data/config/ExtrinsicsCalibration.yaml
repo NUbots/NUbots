@@ -27,8 +27,17 @@ min_head_pose_change: 0.5 * pi / 180
 # changing.
 max_icp_iterations: 100
 
-# Search bounds (half-width) on each offset delta [rad]: del_roll, del_pitch, del_yaw
-offset_bounds: [10.0 * pi / 180, 10.0 * pi / 180, 10.0 * pi / 180]
+# Search bounds (half-width) about the URDF nominal pose.
+# Rotation [rad] per axis (roll, pitch, yaw); 15 deg comfortably covers known mounting errors.
+rotation_bounds: [15.0 * pi / 180, 15.0 * pi / 180, 15.0 * pi / 180]
+# Translation [m] per axis (tx, ty, tz); the camera position is trusted from CAD, so keep this tight.
+translation_bounds: [0.03, 0.03, 0.03]
+
+# Held-out validation: randomly hold out a fraction of detections (seeded for reproducibility) to check
+# whether the optimised pose generalises rather than overfitting the data-gathering setup. 0 disables it.
+validation:
+  split_ratio: 0.2
+  seed: 1234
 
 # NLopt BOBYQA optimisation parameters
 opt:

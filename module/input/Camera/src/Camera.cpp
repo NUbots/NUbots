@@ -32,8 +32,6 @@ extern "C" {
 
 #include <cmath>
 #include <fmt/format.h>
-#include <tinyrobotics/kinematics.hpp>
-#include <tinyrobotics/parser.hpp>
 
 #include "aravis_wrap.hpp"
 #include "description_to_fourcc.hpp"
@@ -45,6 +43,7 @@ extern "C" {
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/platform/aliases.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -182,17 +181,6 @@ namespace module::input {
             // Get the fourcc code from the pixel format
             context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
 
-            // Compute Hpc, the transform from the camera to the head pitch space
-            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
-
-            auto camera_frame =
-                config["is_left_camera"].as<bool>() ? std::string("left_camera") : std::string("right_camera");
-
-            auto Hpc = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    camera_frame,
-                                                                    std::string("head"));
-
             // Open the config directory for the robot running this module
             std::string hostname   = utility::support::get_hostname();
             std::string robot_name = utility::platform::get_robot_alias(hostname);
@@ -200,26 +188,21 @@ namespace module::input {
             auto camera_in_use = config["is_left_camera"].as<bool>() ? "Left" : "Right";
             auto robot_config  = YAML::LoadFile(fmt::format("config/{}/Cameras/{}.yaml", robot_name, camera_in_use));
 
-            log<INFO>(fmt::format("Applying camera offsets for {}", robot_name));
+            // Load the calibrated camera {c} to head-pitch {p} transform Hpc directly from the robot's config.
+            // Stored as translation [m] + ZYX-intrinsic rpy [rad] and tuned by the ExtrinsicsCalibration tool.
+            Eigen::Vector3d translation = robot_config["translation"].as<Expression>();
+            Eigen::Vector3d rpy         = robot_config["rpy"].as<Expression>();
+            context.Hpc                 = utility::math::euler::pos_rpy_to_transform(translation, rpy);
 
-            // Apply roll, pitch, and yaw offsets using the name of the robot that's running this code
-            double roll_offset  = robot_config["roll_offset"].as<Expression>();
-            double pitch_offset = robot_config["pitch_offset"].as<Expression>();
-            double yaw_offset   = robot_config["yaw_offset"].as<Expression>();
-
-            // Log all the offsets for debugging to compare against the config files
-            log<DEBUG>(
-                fmt::format("Applying camera offsets for {}: roll offset = {:.2f} deg, pitch offset = {:.2f} deg, yaw "
-                            "offset = {:.2f} deg",
-                            robot_name,
-                            roll_offset * 180.0 / M_PI,
-                            pitch_offset * 180.0 / M_PI,
-                            yaw_offset * 180.0 / M_PI));
-
-
-            context.Hpc = Eigen::AngleAxisd(yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
-                          * Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+            log<INFO>(fmt::format(
+                "Loaded Hpc for {}: translation = [{:.4f}, {:.4f}, {:.4f}] m, rpy = [{:.2f}, {:.2f}, {:.2f}] deg",
+                robot_name,
+                translation.x(),
+                translation.y(),
+                translation.z(),
+                rpy.x() * 180.0 / M_PI,
+                rpy.y() * 180.0 / M_PI,
+                rpy.z() * 180.0 / M_PI));
 
             // Apply image offsets to lens_centre, optical axis:
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
