@@ -10,3 +10,9 @@ Hpk:
     - [0.0753363073, 0.0190046262, 0.996977091]
     - [-0.99715662, -0.000328667404, 0.0753561407]
     - [0.00175978895, -0.999819338, 0.018925827]
+
+# Camera extrinsic offsets applied to Hpc (head-pitch {p} from camera {c}), same convention as the Camera module.
+# Stored in radians but written as "<degrees> * pi / 180" (these are also updated in place by ExtrinsicsCalibration).
+roll_offset: 0.0 * pi / 180
+pitch_offset: 0.0 * pi / 180
+yaw_offset: 0.0 * pi / 180

@@ -1,0 +1,28 @@
+# Per-binary PlanLook override for the k1extrinsicscalibration role. The Configuration system merges this over the
+# default PlanLook.yaml when the binary is launched as "bin/k1extrinsicscalibration" (e.g. via `./b run
+# k1extrinsicscalibration`), so the calibration head sweep uses a dedicated (yaw, pitch) grid without changing the
+# soccer ball-search sweep. See module/tools/ExtrinsicsCalibration.
+
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Time lingering at each position in the sweep (seconds)
+search_fixation_time: 1.0
+
+# Head-scan grid: (yaw, pitch) [rad] positions the head sweeps through so the field landmarks are seen across the
+# whole image. Positive pitch looks down (matches the head-pitch servo convention).
+#
+# Ordered as a diagonal sweep so that most steps change BOTH yaw and pitch at once - the head looks up/down and
+# left/right together rather than doing a flat left-right pass first. The path hits all four image corners
+# (left/right x level/down) plus the centre, keeping yaw and pitch variety balanced across the whole collection.
+search_positions: [
+    [-0.7, 0.0], # left,   level          (top-left corner)
+    [0.0, 0.3], # centre,  mid            (diagonal toward centre)
+    [0.7, 0.6], # right,   look down      (bottom-right corner)
+    [0.7, 0.3], # right,   mid
+    [0.0, 0.0], # centre,  level          (diagonal back up)
+    [-0.7, 0.3], # left,   mid
+    [-0.7, 0.6], # left,   look down      (bottom-left corner)
+    [0.0, 0.6], # centre,  look down
+    [0.7, 0.0], # right,   level          (top-right corner)
+  ]

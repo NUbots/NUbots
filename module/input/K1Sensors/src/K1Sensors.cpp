@@ -5,6 +5,7 @@
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <cmath>
 
 #include "extension/Configuration.hpp"
 
@@ -13,8 +14,11 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/input/FrameID.hpp"
+#include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace bip = boost::interprocess;
 
@@ -29,8 +33,11 @@ namespace module::input {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
+    using utility::input::FrameID;
+    using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::support::Expression;
 
 
     struct SharedPoseHeader {
@@ -150,6 +157,11 @@ namespace module::input {
                 cfg.Hpk.linear() = Rpk;
             }
 
+            // Camera extrinsic offsets (roll, pitch, yaw) [rad] applied to Hpc, same convention as the Camera module
+            cfg.roll_offset  = config["roll_offset"].as<Expression>();
+            cfg.pitch_offset = config["pitch_offset"].as<Expression>();
+            cfg.yaw_offset   = config["yaw_offset"].as<Expression>();
+
             std::lock_guard<std::mutex> lock(pose_mutex);
             pose_shared_memory.reset();
             pose_unavailable_logged = false;
@@ -212,16 +224,28 @@ namespace module::input {
             Hrp.linear() =
                 Eigen::Quaterniond(orientation[3], orientation[0], orientation[1], orientation[2]).toRotationMatrix();
 
-            Eigen::Isometry3d Hrk = Hrp * cfg.Hpk;
-
-
             // TRANSFORM CAMERA TO NUBOTS FRAME
             Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
             // rotate positive 90d about x to convert from camera frame (x forward, y right, z down) to NUbots frame (x
             // forward, y left, z up)
             // Hkc.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(M_PI_2, 0.0, -M_PI_2));
             Hkc.matrix() << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
-            Eigen::Isometry3d Hrc = Hrk * Hkc;
+
+            // Head-pitch {p} from camera {c}
+            Eigen::Isometry3d Hpc = cfg.Hpk * Hkc;
+
+            // Apply roll, pitch, and yaw offsets, same convention as the Camera module
+            log<DEBUG>("Applying camera offsets (deg): roll =",
+                       cfg.roll_offset * 180.0 / M_PI,
+                       "pitch =",
+                       cfg.pitch_offset * 180.0 / M_PI,
+                       "yaw =",
+                       cfg.yaw_offset * 180.0 / M_PI);
+            Hpc = Eigen::AngleAxisd(cfg.yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
+                  * Eigen::AngleAxisd(cfg.pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                  * Eigen::AngleAxisd(cfg.roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+
+            Eigen::Isometry3d Hrc = Hrp * Hpc;
 
             Eigen::Isometry3d Hwc = Hwr * Hrc;
             log<DEBUG>("Computed head pose in world frame: position xyz=",
@@ -241,8 +265,22 @@ namespace module::input {
             sensors->Hcw       = Hwc.inverse();
             sensors->Hrw       = Hwr.inverse();
 
-            // TEMP: Set Htw to Hcw for now until we have a torso pose source
-            sensors->Htw = sensors->Hcw;
+            // For K1 the robot base {r} acts as the torso {t}: publish the (offset-free) robot-from-world
+            // transform so consumers (e.g. ExtrinsicsCalibration) can recover the world<-torso pose.
+            sensors->Htw = sensors->Hrw;
+
+            // Publish the offset-free head-pitch {p} frame in the robot/torso frame so the extrinsics
+            // calibration can build Hwp = Hwt * Htp = Hwr * Hrp.
+            sensors->Htx[FrameID::HEAD_PITCH] = Hrp.matrix();
+
+            // Publish the head servo positions (derived from the head-pose orientation, not joint encoders)
+            // so movement-gated consumers like the extrinsics calibration can tell when the head has swept.
+            const Eigen::Vector3d head_rpy = mat_to_rpy_intrinsic(Hrp.linear());
+            sensors->servo.resize(static_cast<size_t>(ServoID::NUMBER_OF_SERVOS));
+            sensors->servo[ServoID::HEAD_YAW].id                 = static_cast<uint32_t>(ServoID::HEAD_YAW);
+            sensors->servo[ServoID::HEAD_YAW].present_position   = head_rpy.z();
+            sensors->servo[ServoID::HEAD_PITCH].id               = static_cast<uint32_t>(ServoID::HEAD_PITCH);
+            sensors->servo[ServoID::HEAD_PITCH].present_position = head_rpy.y();
 
             // Buttons
             sensors->button.reserve(2);

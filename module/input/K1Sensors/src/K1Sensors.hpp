@@ -18,6 +18,10 @@ namespace module::input {
         struct Config {
             std::string pose_segment;
             Eigen::Isometry3d Hpk = Eigen::Isometry3d::Identity();
+            /// @brief Camera extrinsic offsets (roll, pitch, yaw) [rad] applied to Hpc
+            double roll_offset  = 0.0;
+            double pitch_offset = 0.0;
+            double yaw_offset   = 0.0;
         } cfg;
 
         std::mutex pose_mutex;
