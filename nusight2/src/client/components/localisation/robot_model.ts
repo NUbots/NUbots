@@ -28,6 +28,8 @@ export class ServoMotorSet {
   @observable leftShoulderRoll: ServoMotor;
   @observable rightElbow: ServoMotor;
   @observable leftElbow: ServoMotor;
+  @observable rightElbowYaw: ServoMotor;
+  @observable leftElbowYaw: ServoMotor;
   @observable rightHipYaw: ServoMotor;
   @observable leftHipYaw: ServoMotor;
   @observable rightHipRoll: ServoMotor;
@@ -50,6 +52,8 @@ export class ServoMotorSet {
     leftShoulderRoll,
     rightElbow,
     leftElbow,
+    rightElbowYaw,
+    leftElbowYaw,
     rightHipYaw,
     leftHipYaw,
     rightHipRoll,
@@ -71,6 +75,8 @@ export class ServoMotorSet {
     this.leftShoulderRoll = leftShoulderRoll;
     this.rightElbow = rightElbow;
     this.leftElbow = leftElbow;
+    this.rightElbowYaw = rightElbowYaw;
+    this.leftElbowYaw = leftElbowYaw;
     this.rightHipYaw = rightHipYaw;
     this.leftHipYaw = leftHipYaw;
     this.rightHipRoll = rightHipRoll;
@@ -95,6 +101,8 @@ export class ServoMotorSet {
       leftShoulderRoll: ServoMotor.of(),
       rightElbow: ServoMotor.of(),
       leftElbow: ServoMotor.of(),
+      rightElbowYaw: ServoMotor.of(),
+      leftElbowYaw: ServoMotor.of(),
       rightHipYaw: ServoMotor.of(),
       leftHipYaw: ServoMotor.of(),
       rightHipRoll: ServoMotor.of(),

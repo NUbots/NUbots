@@ -214,6 +214,8 @@ export class LocalisationNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+    robot.motors.rightElbowYaw.angle = sensors.servo[20].presentPosition!;
+    robot.motors.leftElbowYaw.angle = sensors.servo[21].presentPosition!;
   };
 
   @action.bound

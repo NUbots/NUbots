@@ -36,10 +36,12 @@ const updateK1Joints = (joints: any, model: LocalisationRobotModel) => {
   setJointValue(joints, ["ALeft_Shoulder_Pitch", "left_shoulder_pitch"], motors.leftShoulderPitch.angle);
   setJointValue(joints, ["Left_Shoulder_Roll", "left_shoulder_roll"], motors.leftShoulderRoll.angle);
   setJointValue(joints, ["Left_Elbow_Pitch", "left_elbow_pitch"], motors.leftElbow.angle);
+  setJointValue(joints, ["Left_Elbow_Yaw", "left_elbow_yaw"], motors.leftElbowYaw.angle);
 
   setJointValue(joints, ["ARight_Shoulder_Pitch", "right_shoulder_pitch"], motors.rightShoulderPitch.angle);
   setJointValue(joints, ["Right_Shoulder_Roll", "right_shoulder_roll"], motors.rightShoulderRoll.angle);
   setJointValue(joints, ["Right_Elbow_Pitch", "right_elbow_pitch"], motors.rightElbow.angle);
+  setJointValue(joints, ["Right_Elbow_Yaw", "right_elbow_yaw"], motors.rightElbowYaw.angle);
 
   setJointValue(joints, ["Left_Hip_Pitch", "left_hip_pitch"], motors.leftHipPitch.angle);
   setJointValue(joints, ["Left_Hip_Roll", "left_hip_roll"], motors.leftHipRoll.angle);
