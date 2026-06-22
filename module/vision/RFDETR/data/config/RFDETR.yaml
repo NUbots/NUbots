@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Path to the model weights (ONNX, loaded directly by OpenVINO)
-model_path: "rfdetr-s.onnx"
+model_path: "rfdetr.onnx"
 
 # Minimum confidence required for a ball detection to be accepted
 ball_confidence_threshold: 0.5
