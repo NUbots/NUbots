@@ -17,10 +17,6 @@
 #include "utility/platform/RawSensors.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
-#include <tinyrobotics/parser.hpp>
-#include <tinyrobotics/kinematics.hpp>
-
-#include "utility/actuation/tinyrobotics.hpp"
 
 namespace bip = boost::interprocess;
 
@@ -116,8 +112,7 @@ namespace module::input {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Import URDF model and print details to determine joint mapping
-            k1_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
-            k1_model.show_details();
+            k1_kinematics.load(config["urdf_path"].as<std::string>());
 
             cfg.pose_segment = "_head_pose";
 
@@ -284,11 +279,9 @@ namespace module::input {
             //   Htc = Htp * cfg.Hpk * Hkc
             // Then: Htw = Htc * Hcw  (world → camera_optical → Trunk)
             {
-                using utility::actuation::tinyrobotics::sensors_to_configuration;
-                Eigen::Matrix<double, n_servos, 1>  q              = sensors_to_configuration<double, n_servos>(sensors);
-                Eigen::Isometry3d Htp = tinyrobotics::forward_kinematics(k1_model, q, std::string("Head_2"));
-                Eigen::Isometry3d Htc = Htp * cfg.Hpk_offset * cfg.Hpk * Hkc;
-                sensors->Htw          = Htc * sensors->Hcw;
+                const Eigen::Isometry3d Htp = k1_kinematics.compute_Htp(sensors);
+                const Eigen::Isometry3d Htc = Htp * cfg.Hpk_offset * cfg.Hpk * Hkc;
+                sensors->Htw                = Htc * sensors->Hcw;
             }
 
             bool new_left_down   = raw_sensors.buttons.left;

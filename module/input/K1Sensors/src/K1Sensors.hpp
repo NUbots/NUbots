@@ -7,11 +7,11 @@
 #include <mutex>
 #include <nuclear>
 #include <string>
-#include <tinyrobotics/parser.hpp>
-#include <tinyrobotics/kinematics.hpp>
 
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
+
+#include "k1sensors/k1_model.hpp"
 
 namespace module::input {
 
@@ -44,8 +44,8 @@ namespace module::input {
         /// @brief Number of actuatable joints in the K1 robot
         static constexpr int n_servos = 22;
 
-        /// @brief tinyrobotics model of the K1 used for kinematics
-        tinyrobotics::Model<double, n_servos> k1_model;
+        /// @brief Opaque tinyrobotics model — instantiated in k1_model.cpp only
+        K1Model k1_kinematics;
 
         void connect_head_pose();
         bool read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation);
