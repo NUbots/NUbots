@@ -6,6 +6,21 @@ import { LocalisationRobotModel } from "../robot_model";
 
 const k1UrdfPath = "/robot-models/k1/robot.urdf";
 
+/** Renders XYZ axes (red/green/blue) at the camera pose in field space. */
+const CameraAxes = ({ model }: { model: LocalisationRobotModel }) => {
+  const axesRef = React.useRef<THREE.AxesHelper>(null);
+
+  React.useEffect(() => {
+    if (!axesRef.current) return;
+    const Hfc = model.Hfc;
+    const { translation, rotation } = Hfc.decompose();
+    axesRef.current.position.set(translation.x, translation.y, translation.z);
+    axesRef.current.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+  }, [model.Hfc]);
+
+  return <primitive ref={axesRef} object={new THREE.AxesHelper(0.15)} />;
+};
+
 const setJointValue = (joints: any, names: string[], value: number) => {
   for (const name of names) {
     joints?.[name]?.setJointValue(value);
@@ -85,5 +100,10 @@ export const K1 = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }
 
-  return <object3D ref={robotRef} />;
+  return (
+    <>
+      <object3D ref={robotRef} />
+      <CameraAxes model={model} />
+    </>
+  );
 };

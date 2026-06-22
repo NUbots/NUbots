@@ -18,6 +18,9 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 #include <tinyrobotics/parser.hpp>
+#include <tinyrobotics/kinematics.hpp>
+
+#include "utility/actuation/tinyrobotics.hpp"
 
 namespace bip = boost::interprocess;
 
@@ -157,6 +160,30 @@ namespace module::input {
                 cfg.Hpk.linear() = Rpk;
             }
 
+            try {
+                const auto& off         = config["Hrp_offset"];
+                const auto trans        = off["translation"];
+                const auto rpy          = off["rotation_rpy"];
+                cfg.Hrp_offset          = Eigen::Isometry3d::Identity();
+                cfg.Hrp_offset.translation() << trans[0].as<double>(), trans[1].as<double>(), trans[2].as<double>();
+                cfg.Hrp_offset.linear() =
+                    rpy_intrinsic_to_mat(Eigen::Vector3d(rpy[0].as<double>(), rpy[1].as<double>(), rpy[2].as<double>()));
+            }
+            catch (const std::exception&) {
+                cfg.Hrp_offset = Eigen::Isometry3d::Identity();
+            }
+
+            try {
+                const auto& off  = config["Hpk_offset"];
+                const auto rpy   = off["rotation_rpy"];
+                cfg.Hpk_offset   = Eigen::Isometry3d::Identity();
+                cfg.Hpk_offset.linear() =
+                    rpy_intrinsic_to_mat(Eigen::Vector3d(rpy[0].as<double>(), rpy[1].as<double>(), rpy[2].as<double>()));
+            }
+            catch (const std::exception&) {
+                cfg.Hpk_offset = Eigen::Isometry3d::Identity();
+            }
+
             std::lock_guard<std::mutex> lock(pose_mutex);
             pose_shared_memory.reset();
             pose_unavailable_logged = false;
@@ -218,15 +245,15 @@ namespace module::input {
             Hrp.translation() << position[0], position[1], position[2];
             Hrp.linear() =
                 Eigen::Quaterniond(orientation[3], orientation[0], orientation[1], orientation[2]).toRotationMatrix();
+            Hrp = cfg.Hrp_offset * Hrp;
 
-            Eigen::Isometry3d Hrk = Hrp * cfg.Hpk;
+            Eigen::Isometry3d Hrk = Hrp * cfg.Hpk_offset * cfg.Hpk;
 
 
             // TRANSFORM CAMERA TO NUBOTS FRAME
+            // Hkc: camera_optical(c) → camera_NUbots(k)
+            // Converts from camera optical frame (z forward, x right, y down) to NUbots frame (x forward, y left, z up)
             Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
-            // rotate positive 90d about x to convert from camera frame (x forward, y right, z down) to NUbots frame (x
-            // forward, y left, z up)
-            // Hkc.linear()          = rpy_intrinsic_to_mat(Eigen::Vector3d(M_PI_2, 0.0, -M_PI_2));
             Hkc.matrix() << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
             Eigen::Isometry3d Hrc = Hrk * Hkc;
 
@@ -248,11 +275,21 @@ namespace module::input {
             sensors->Hcw       = Hwc.inverse();
             sensors->Hrw       = Hwr.inverse();
 
-            // TEMP: Set Htw to Hcw for now until we have a torso pose source
-            sensors->Htw = sensors->Hcw;
-
             // Update raw sensor data including servo/joint information
             update_raw_sensors(sensors, raw_sensors);
+
+            // Compute Htw using forward kinematics.
+            // FK("Head_2") gives Htp: pitch_link → Trunk (base).
+            // Full chain: camera_optical(c) → camera_NUbots(k) → pitch_link(p) → Trunk(t)
+            //   Htc = Htp * cfg.Hpk * Hkc
+            // Then: Htw = Htc * Hcw  (world → camera_optical → Trunk)
+            {
+                using utility::actuation::tinyrobotics::sensors_to_configuration;
+                Eigen::Matrix<double, n_servos, 1>  q              = sensors_to_configuration<double, n_servos>(sensors);
+                Eigen::Isometry3d Htp = tinyrobotics::forward_kinematics(k1_model, q, std::string("Head_2"));
+                Eigen::Isometry3d Htc = Htp * cfg.Hpk_offset * cfg.Hpk * Hkc;
+                sensors->Htw          = Htc * sensors->Hcw;
+            }
 
             bool new_left_down   = raw_sensors.buttons.left;
             bool new_middle_down = raw_sensors.buttons.middle;

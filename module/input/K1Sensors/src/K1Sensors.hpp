@@ -8,6 +8,7 @@
 #include <nuclear>
 #include <string>
 #include <tinyrobotics/parser.hpp>
+#include <tinyrobotics/kinematics.hpp>
 
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -24,7 +25,9 @@ namespace module::input {
         /// @brief Stores configuration values
         struct Config {
             std::string pose_segment;
-            Eigen::Isometry3d Hpk = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hpk        = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hrp_offset = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hpk_offset = Eigen::Isometry3d::Identity();
         } cfg;
 
         std::mutex pose_mutex;

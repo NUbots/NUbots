@@ -1329,4 +1329,24 @@
     />
   </joint>
 
+  <link
+    name="camera_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+    </inertial>
+  </link>
+  <joint
+    name="camera"
+    type="fixed">
+    <!-- Hpk: transform from camera NUbots frame (k) to Head_2 pitch link (p) -->
+    <!-- Translation and rotation from K1Sensors.yaml Hpk calibration -->
+    <origin
+      xyz="-0.0122268423 0.0440084077 -0.0283811111"
+      rpy="-1.5518693404 -0.0017597899 -1.4953884566" />
+    <parent link="Head_2" />
+    <child link="camera_link" />
+  </joint>
+
 </robot>
