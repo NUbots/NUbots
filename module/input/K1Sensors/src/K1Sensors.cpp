@@ -14,7 +14,10 @@
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/nusight/NUhelpers.hpp"
+
+#include <tinyrobotics/parser.hpp>
 
 namespace bip = boost::interprocess;
 
@@ -108,6 +111,10 @@ namespace module::input {
         on<Configuration>("K1Sensors.yaml").then([this](const Configuration& config) {
             // Use configuration here from file K1Sensors.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            // Import URDF model and print details to determine joint mapping
+            k1_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
+            k1_model.show_details();
 
             cfg.pose_segment = "_head_pose";
 
@@ -244,10 +251,8 @@ namespace module::input {
             // TEMP: Set Htw to Hcw for now until we have a torso pose source
             sensors->Htw = sensors->Hcw;
 
-            // Buttons
-            sensors->button.reserve(2);
-            sensors->button.emplace_back(0, raw_sensors.buttons.left);
-            sensors->button.emplace_back(1, raw_sensors.buttons.middle);
+            // Update raw sensor data including servo/joint information
+            update_raw_sensors(sensors, raw_sensors);
 
             bool new_left_down   = raw_sensors.buttons.left;
             bool new_middle_down = raw_sensors.buttons.middle;

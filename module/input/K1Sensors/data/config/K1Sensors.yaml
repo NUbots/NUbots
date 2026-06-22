@@ -1,6 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
+urdf_path: models/robot.urdf
+
 head_pose:
   - segment: _head_pose
 

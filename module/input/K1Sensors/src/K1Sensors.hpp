@@ -7,10 +7,17 @@
 #include <mutex>
 #include <nuclear>
 #include <string>
+#include <tinyrobotics/parser.hpp>
+
+#include "message/input/Sensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 namespace module::input {
 
     struct PoseSharedMemory;
+
+    using message::input::Sensors;
+    using message::platform::RawSensors;
 
     class K1Sensors : public NUClear::Reactor {
     private:
@@ -31,8 +38,19 @@ namespace module::input {
         bool left_down   = false;
         bool middle_down = false;
 
+        /// @brief Number of actuatable joints in the K1 robot
+        static constexpr int n_servos = 22;
+
+        /// @brief tinyrobotics model of the K1 used for kinematics
+        tinyrobotics::Model<double, n_servos> k1_model;
+
         void connect_head_pose();
         bool read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation);
+
+        /// @brief Updates the sensors message with raw sensor data, including servo joint information
+        /// @param sensors The sensors message to update
+        /// @param raw_sensors The raw sensor data
+        void update_raw_sensors(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     public:
         /// @brief Called by the powerplant to build and setup the K1Sensors reactor.
