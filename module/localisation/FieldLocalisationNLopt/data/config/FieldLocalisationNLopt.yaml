@@ -74,7 +74,7 @@ normal_opt:
   # Relative tolerance on the optimisation function value
   ftol_rel: 1e-12
   # Maximum number of evaluations for the optimisation
-  maxeval: 100
+  maxeval: 1000
 
 uncertainty_opt: # Quicker optimisation, but less accurate.
   algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific >
@@ -89,4 +89,4 @@ exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
   # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
-  alpha: [0.05, 0.05, 0.05]
+  alpha: [0.1, 0.1, 0.5]]
