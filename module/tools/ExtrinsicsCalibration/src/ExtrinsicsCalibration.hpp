@@ -147,6 +147,19 @@ namespace module::tools {
             /// @brief Associated ground-truth landmark position in field {f} space
             Eigen::Vector3d rLFf = Eigen::Vector3d::Zero();
         };
+
+        /// @brief Context for a single optimisation stage. The NLopt objective only varies the `free_indices`
+        /// of the pose; the rest are held at `base_pose`. This lets rotation and translation be optimised as
+        /// separate, well-scaled stages (rad vs m) rather than one mixed-unit 6-DOF problem.
+        struct OptContext {
+            /// @brief Owning instance (so the static objective can reach total_cost / the sample buffer)
+            ExtrinsicsCalibration* self = nullptr;
+            /// @brief Full 6-DOF pose; the non-free components stay frozen at these values for the stage
+            Vector6d base_pose = Vector6d::Zero();
+            /// @brief Indices into the pose [roll, pitch, yaw, tx, ty, tz] that this stage is free to vary
+            std::vector<unsigned int> free_indices{};
+        };
+
         /// @brief Base (nominal) head-pitch {p} from camera {c} transform, from URDF forward kinematics.
         /// Its decomposition (nominal_pose) is the centre of the optimisation search box.
         Eigen::Isometry3d Hpc_base = Eigen::Isometry3d::Identity();
@@ -239,18 +252,31 @@ namespace module::tools {
         double total_cost(const Vector6d& pose) const;
 
         /**
-         * @brief NLopt objective. The optimisation variables are the absolute pose params (roll, pitch, yaw,
-         * tx, ty, tz); the cost is evaluated at that pose over the current `samples` buffer.
-         * @param x The pose params [roll, pitch, yaw, tx, ty, tz]
+         * @brief NLopt objective for a single optimisation stage. `data` points to an OptContext: the free
+         * components of `x` are written into the frozen `base_pose`, and the cost is evaluated at that
+         * reconstructed pose over the current `samples` buffer.
+         * @param x The free pose params for this stage (one per OptContext::free_indices entry)
          * @param grad Unused (BOBYQA is derivative-free)
-         * @param data Pointer to the owning ExtrinsicsCalibration instance
+         * @param data Pointer to the stage's OptContext
          * @return The total re-projection cost
          */
         static double objective(const std::vector<double>& x, std::vector<double>& grad, void* data);
 
         /**
-         * @brief Run the BOBYQA optimisation over the current `samples` buffer to find the best pose, with a
-         * box bound centred on the URDF nominal pose (rotation_bounds / translation_bounds half-widths).
+         * @brief Run BOBYQA over a subset of the pose (the `free_indices`) with the remaining components held at
+         * `start`, box-bounded about the URDF nominal (rotation_bounds / translation_bounds half-widths).
+         * @param start The full pose to start from; non-free components are held at these values
+         * @param free_indices Indices into [roll, pitch, yaw, tx, ty, tz] that this stage may vary
+         * @return Tuple <full pose with the free components optimised, final cost, optimisation result code>
+         */
+        std::tuple<Vector6d, double, nlopt::result> optimise_subset(const Vector6d& start,
+                                                                    const std::vector<unsigned int>& free_indices);
+
+        /**
+         * @brief Staged BOBYQA fit over the current `samples` buffer: first optimise the rotation params with
+         * translation held fixed, then optimise the translation params with the refined rotation held fixed.
+         * Staging keeps each sub-problem single-unit (rad, then m) so the mixed-scale 6-DOF coupling that lets
+         * translation soak up rotation error is avoided.
          * @return Tuple <optimal pose [roll, pitch, yaw, tx, ty, tz], final cost, optimisation result code>
          */
         std::tuple<Vector6d, double, nlopt::result> optimise();

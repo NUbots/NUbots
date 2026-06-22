@@ -470,16 +470,24 @@ namespace module::tools {
 
     double ExtrinsicsCalibration::objective(const std::vector<double>& x, std::vector<double>& grad, void* data) {
         (void) grad;  // BOBYQA is derivative-free
-        auto* self = static_cast<ExtrinsicsCalibration*>(data);
-        // Optimisation variables are the absolute pose params [roll, pitch, yaw, tx, ty, tz]
-        Vector6d pose;
-        pose << x[0], x[1], x[2], x[3], x[4], x[5];
-        return self->total_cost(pose);
+        auto* ctx = static_cast<OptContext*>(data);
+        // Reconstruct the full pose by writing this stage's free params over the frozen base pose.
+        Vector6d pose = ctx->base_pose;
+        for (size_t i = 0; i < ctx->free_indices.size(); ++i) {
+            pose(ctx->free_indices[i]) = x[i];
+        }
+        return ctx->self->total_cost(pose);
     }
 
-    std::tuple<ExtrinsicsCalibration::Vector6d, double, nlopt::result> ExtrinsicsCalibration::optimise() {
-        nlopt::opt opt(nlopt::LN_BOBYQA, n_params);
-        opt.set_min_objective(ExtrinsicsCalibration::objective, this);
+    std::tuple<ExtrinsicsCalibration::Vector6d, double, nlopt::result> ExtrinsicsCalibration::optimise_subset(
+        const Vector6d& start,
+        const std::vector<unsigned int>& free_indices) {
+        const auto n = static_cast<unsigned int>(free_indices.size());
+        nlopt::opt opt(nlopt::LN_BOBYQA, n);
+
+        // The objective varies only the free params; everything else stays frozen at `start`.
+        OptContext ctx{this, start, free_indices};
+        opt.set_min_objective(ExtrinsicsCalibration::objective, &ctx);
         opt.set_xtol_rel(cfg.xtol_rel);
         opt.set_ftol_rel(cfg.ftol_rel);
         opt.set_maxeval(static_cast<int>(cfg.maxeval));
@@ -487,12 +495,13 @@ namespace module::tools {
         // Box bounds centred on the URDF nominal pose: rotation half-widths then translation half-widths.
         Vector6d half;
         half << cfg.rotation_bounds, cfg.translation_bounds;
-        std::vector<double> lb(n_params), ub(n_params), x(n_params);
-        for (unsigned int i = 0; i < n_params; ++i) {
-            lb[i] = nominal_pose(i) - half(i);
-            ub[i] = nominal_pose(i) + half(i);
+        std::vector<double> lb(n), ub(n), x(n);
+        for (unsigned int i = 0; i < n; ++i) {
+            const unsigned int p = free_indices[i];
+            lb[i]                = nominal_pose(p) - half(p);
+            ub[i]                = nominal_pose(p) + half(p);
             // Warm-start from the current best pose, clamped into the search box.
-            x[i] = std::min(std::max(current_pose(i), lb[i]), ub[i]);
+            x[i] = std::min(std::max(start(p), lb[i]), ub[i]);
         }
         opt.set_lower_bounds(lb);
         opt.set_upper_bounds(ub);
@@ -506,9 +515,34 @@ namespace module::tools {
             log<ERROR>(fmt::format("Optimisation failed: {}", e.what()));
         }
 
-        Vector6d pose;
-        pose << x[0], x[1], x[2], x[3], x[4], x[5];
+        // Write the optimised free params back over the start pose.
+        Vector6d pose = start;
+        for (unsigned int i = 0; i < n; ++i) {
+            pose(free_indices[i]) = x[i];
+        }
         return {pose, final_cost, result};
+    }
+
+    std::tuple<ExtrinsicsCalibration::Vector6d, double, nlopt::result> ExtrinsicsCalibration::optimise() {
+        // Stage 1: refine the rotation params [roll, pitch, yaw] with translation held at the current best.
+        auto [rot_pose, rot_cost, rot_result] = optimise_subset(current_pose, {0, 1, 2});
+        log<DEBUG>(fmt::format("  stage 1 (rotation): rpy (deg) = [{:.3f}, {:.3f}, {:.3f}], cost = {:.6f}",
+                               rot_pose(0) * 180.0 / M_PI,
+                               rot_pose(1) * 180.0 / M_PI,
+                               rot_pose(2) * 180.0 / M_PI,
+                               rot_cost));
+        if (rot_result < 0) {
+            return {rot_pose, rot_cost, rot_result};
+        }
+
+        // Stage 2: refine the translation params [tx, ty, tz] with the just-optimised rotation held fixed.
+        auto [pose, cost, result] = optimise_subset(rot_pose, {3, 4, 5});
+        log<DEBUG>(fmt::format("  stage 2 (translation): t (m) = [{:.4f}, {:.4f}, {:.4f}], cost = {:.6f}",
+                               pose(3),
+                               pose(4),
+                               pose(5),
+                               cost));
+        return {pose, cost, result};
     }
 
     void ExtrinsicsCalibration::write_extrinsics(const Vector6d& pose) {
