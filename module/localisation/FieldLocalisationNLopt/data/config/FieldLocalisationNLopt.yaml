@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -89,4 +89,4 @@ exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
   # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
-  alpha: [0.1, 0.1, 0.5]]
+  alpha: [0.1, 0.1, 0.5]
