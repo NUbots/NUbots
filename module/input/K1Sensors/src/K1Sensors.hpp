@@ -25,9 +25,8 @@ namespace module::input {
         /// @brief Stores configuration values
         struct Config {
             std::string pose_segment;
-            Eigen::Isometry3d Hpk        = Eigen::Isometry3d::Identity();
-            Eigen::Isometry3d Hrp_offset = Eigen::Isometry3d::Identity();
-            Eigen::Isometry3d Hpk_offset = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hhp = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hpc = Eigen::Isometry3d::Identity();
         } cfg;
 
         std::mutex pose_mutex;
@@ -43,9 +42,6 @@ namespace module::input {
 
         /// @brief Number of actuatable joints in the K1 robot
         static constexpr int n_servos = 22;
-
-        /// @brief Opaque tinyrobotics model — instantiated in k1_model.cpp only
-        K1Model k1_kinematics;
 
         void connect_head_pose();
         bool read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation);

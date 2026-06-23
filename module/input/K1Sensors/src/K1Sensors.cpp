@@ -111,73 +111,25 @@ namespace module::input {
             // Use configuration here from file K1Sensors.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Import URDF model and print details to determine joint mapping
-            k1_kinematics.load(config["urdf_path"].as<std::string>());
+            cfg.pose_segment = config["head_pose"][0]["segment"].as<std::string>();
 
-            cfg.pose_segment = "_head_pose";
+            // Hpc: pitch frame to camera optical frame
+            const auto& Hpc_config = config["Hpc"];
+            cfg.Hpc                = Eigen::Isometry3d::Identity();
+            const auto Hpc_trans   = Hpc_config["translation"];
+            cfg.Hpc.translation() << Hpc_trans[0].as<double>(), Hpc_trans[1].as<double>(), Hpc_trans[2].as<double>();
+            const auto Hpc_rpy = Hpc_config["rotation_rpy"];
+            cfg.Hpc.linear()   = rpy_intrinsic_to_mat(
+                Eigen::Vector3d(Hpc_rpy[0].as<double>(), Hpc_rpy[1].as<double>(), Hpc_rpy[2].as<double>()));
 
-            try {
-                cfg.pose_segment = config["head_pose"][0]["segment"].as<std::string>();
-            }
-            catch (const std::exception&) {
-                try {
-                    cfg.pose_segment = config["head_pose"]["segment"].as<std::string>();
-                }
-                catch (const std::exception&) {
-                    try {
-                        cfg.pose_segment = config["head_pose"].as<std::string>();
-                    }
-                    catch (const std::exception&) {
-                        log<INFO>("K1Sensors using default head_pose segment", cfg.pose_segment);
-                    }
-                }
-            }
-
-            try {
-                const auto& Hpk_config = config["Hpk"];
-
-                const auto translation = Hpk_config["translation"];
-                cfg.Hpk.translation() << translation[0].as<double>(), translation[1].as<double>(),
-                    translation[2].as<double>();
-
-                const auto rotation = Hpk_config["rotation"];
-                Eigen::Matrix3d Rpk;
-                Rpk << rotation[0][0].as<double>(), rotation[0][1].as<double>(), rotation[0][2].as<double>(),
-                    rotation[1][0].as<double>(), rotation[1][1].as<double>(), rotation[1][2].as<double>(),
-                    rotation[2][0].as<double>(), rotation[2][1].as<double>(), rotation[2][2].as<double>();
-                cfg.Hpk.linear() = Rpk;
-            }
-            catch (const std::exception&) {
-                cfg.Hpk.translation() << -0.0122268423, 0.0440084077, -0.0283811111;
-                Eigen::Matrix3d Rpk;
-                Rpk << 0.0753363073, 0.0190046262, 0.996977091, -0.99715662, -0.000328667404, 0.0753561407,
-                    0.00175978895, -0.999819338, 0.018925827;
-                cfg.Hpk.linear() = Rpk;
-            }
-
-            try {
-                const auto& off         = config["Hrp_offset"];
-                const auto trans        = off["translation"];
-                const auto rpy          = off["rotation_rpy"];
-                cfg.Hrp_offset          = Eigen::Isometry3d::Identity();
-                cfg.Hrp_offset.translation() << trans[0].as<double>(), trans[1].as<double>(), trans[2].as<double>();
-                cfg.Hrp_offset.linear() =
-                    rpy_intrinsic_to_mat(Eigen::Vector3d(rpy[0].as<double>(), rpy[1].as<double>(), rpy[2].as<double>()));
-            }
-            catch (const std::exception&) {
-                cfg.Hrp_offset = Eigen::Isometry3d::Identity();
-            }
-
-            try {
-                const auto& off  = config["Hpk_offset"];
-                const auto rpy   = off["rotation_rpy"];
-                cfg.Hpk_offset   = Eigen::Isometry3d::Identity();
-                cfg.Hpk_offset.linear() =
-                    rpy_intrinsic_to_mat(Eigen::Vector3d(rpy[0].as<double>(), rpy[1].as<double>(), rpy[2].as<double>()));
-            }
-            catch (const std::exception&) {
-                cfg.Hpk_offset = Eigen::Isometry3d::Identity();
-            }
+            // Hhp: head frame to pitch frame
+            const auto& Hhp_config = config["Hhp"];
+            cfg.Hhp                = Eigen::Isometry3d::Identity();
+            const auto Hhp_trans   = Hhp_config["translation"];
+            cfg.Hhp.translation() << Hhp_trans[0].as<double>(), Hhp_trans[1].as<double>(), Hhp_trans[2].as<double>();
+            const auto Hhp_rpy = Hhp_config["rotation_rpy"];
+            cfg.Hhp.linear()   = rpy_intrinsic_to_mat(
+                Eigen::Vector3d(Hhp_rpy[0].as<double>(), Hhp_rpy[1].as<double>(), Hhp_rpy[2].as<double>()));
 
             std::lock_guard<std::mutex> lock(pose_mutex);
             pose_shared_memory.reset();
@@ -236,21 +188,14 @@ namespace module::input {
                            orientation[3]);
             }
 
-            Eigen::Isometry3d Hrp = Eigen::Isometry3d::Identity();
-            Hrp.translation() << position[0], position[1], position[2];
-            Hrp.linear() =
+            // Hrh: head frame in robot base frame (from shared memory head pose)
+            Eigen::Isometry3d Hrh = Eigen::Isometry3d::Identity();
+            Hrh.translation() << position[0], position[1], position[2];
+            Hrh.linear() =
                 Eigen::Quaterniond(orientation[3], orientation[0], orientation[1], orientation[2]).toRotationMatrix();
-            Hrp = cfg.Hrp_offset * Hrp;
 
-            Eigen::Isometry3d Hrk = Hrp * cfg.Hpk_offset * cfg.Hpk;
-
-
-            // TRANSFORM CAMERA TO NUBOTS FRAME
-            // Hkc: camera_optical(c) → camera_NUbots(k)
-            // Converts from camera optical frame (z forward, x right, y down) to NUbots frame (x forward, y left, z up)
-            Eigen::Isometry3d Hkc = Eigen::Isometry3d::Identity();
-            Hkc.matrix() << 0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1;
-            Eigen::Isometry3d Hrc = Hrk * Hkc;
+            // Hrc: camera optical frame in robot base frame = Hrh * Hhp * Hpc
+            Eigen::Isometry3d Hrc = Hrh * cfg.Hhp * cfg.Hpc;
 
             Eigen::Isometry3d Hwc = Hwr * Hrc;
             log<DEBUG>("Computed head pose in world frame: position xyz=",
@@ -274,13 +219,13 @@ namespace module::input {
             update_raw_sensors(sensors, raw_sensors);
 
             // Compute Htw using forward kinematics.
-            // FK("Head_2") gives Htp: pitch_link → Trunk (base).
-            // Full chain: camera_optical(c) → camera_NUbots(k) → pitch_link(p) → Trunk(t)
-            //   Htc = Htp * cfg.Hpk * Hkc
+            // compute_Htp gives Htp: Head_2 pitch_link in Trunk (base) frame.
+            // Full chain: camera_optical(c) → pitch_link(p) → Trunk(t)
+            //   Htc = Htp * Hpc
             // Then: Htw = Htc * Hcw  (world → camera_optical → Trunk)
             {
-                const Eigen::Isometry3d Htp = k1_kinematics.compute_Htp(sensors);
-                const Eigen::Isometry3d Htc = Htp * cfg.Hpk_offset * cfg.Hpk * Hkc;
+                const Eigen::Isometry3d Htp = compute_Htp(sensors);
+                const Eigen::Isometry3d Htc = Htp * cfg.Hpc;
                 sensors->Htw                = Htc * sensors->Hcw;
             }
 

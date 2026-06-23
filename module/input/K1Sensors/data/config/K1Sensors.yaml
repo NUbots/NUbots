@@ -1,26 +1,19 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-urdf_path: models/robot.urdf
-
 head_pose:
   - segment: _head_pose
 
-Hpk:
-  translation: [0.065, 0.035, 0.0915]
-  rotation:
-    - [0.0753363073, 0.0190046262, 0.996977091]
-    - [-0.99715662, -0.000328667404, 0.0753561407]
-    - [0.00175978895, -0.999819338, 0.018925827]
-
-# Additive offset applied to the head pose (Hrp) in the robot base frame.
+# Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians
-Hrp_offset:
+Hhp:
   translation: [0.0, 0.0, -0.08]
   rotation_rpy: [0.0, 0.0, 0.0]
 
-# Rotation offset for the camera, applied relative to the head pitch frame.
+# Transform from pitch frame to camera optical frame
+# translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians
-Hpk_offset:
+Hpc:
+  translation: [0.065, 0.035, 0.0915]
   rotation_rpy: [-0.04, 0.05, -0.07]
