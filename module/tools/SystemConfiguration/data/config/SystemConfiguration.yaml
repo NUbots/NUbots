@@ -13,6 +13,7 @@ permissions:
 apt:
   - linux-headers
   - screen
+  - network-manager
   - wpa_supplicant
   - openssh
   - vim
@@ -26,8 +27,12 @@ apt:
   - fzf
   - git
 
+# The connection profile to set using nmcli (must exist in system folder!)
+connection: wifi-epsilon-x
+
 # Systemd units that should be enabled
 systemd:
+  - NetworkManager.service
   - systemd-resolved.service
   - systemd-timesyncd.service
   - sshd.service
