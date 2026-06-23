@@ -45,3 +45,15 @@ err_x_ok: 0.05
 err_y_ok: 0.09
 # Heading error threshold - robot should be facing the target
 err_z_ok: 15 * pi / 180
+
+# --- DRAFT: single-foot dribble alignment ---
+# Offset the ball so it sits behind the chosen foot (not the torso centre) and keep it on the side
+# away from obstacles so the body shields it. Foot side follows the obstacle-avoidance decision.
+dribble_foot_enabled: true
+# Perpendicular offset [m] from torso centre to the dribbling foot (~half stance width). Sign/magnitude
+# may need an empirical tweak: if the body shields on the wrong side, the offset direction is inverted.
+dribble_foot_offset: 0.075
+# Hysteresis [m]: the obstacle must cross this far past the ball->goal line before the dribble foot switches sides
+dribble_foot_switch_margin: 0.15
+# Time [s] without a fresh ball measurement after which the latched dribble side resets (run ended)
+dribble_run_timeout: 1.0

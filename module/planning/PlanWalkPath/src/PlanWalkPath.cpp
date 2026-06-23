@@ -99,6 +99,14 @@ namespace module::planning {
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
 
+            // Context-aware dynamic speed scaling
+            cfg.dynamic_speed_enabled   = config["dynamic_speed_enabled"].as<bool>();
+            cfg.far_speed_distance      = config["far_speed_distance"].as<double>();
+            cfg.near_speed_factor       = config["near_speed_factor"].as<double>();
+            cfg.congestion_radius       = config["congestion_radius"].as<double>();
+            cfg.congestion_count        = config["congestion_count"].as<double>();
+            cfg.congestion_speed_factor = config["congestion_speed_factor"].as<double>();
+
             // Exponential smoothing configuration
             cfg.tau = config["tau"].as<Expression>();
             // Ensure safety for division by zero if tau is zero
@@ -135,12 +143,20 @@ namespace module::planning {
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading = vector_to_bearing(Hrd.linear().col(0).head(2));
 
+                // Number of robots crowding around us, used for congestion-based speed scaling below
+                int num_close_robots = 0;
+
                 // If there are robots, check if they're in the way
                 if (robots) {
                     // Get the positions of all robots in the world
                     std::vector<Eigen::Vector2d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
-                        all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
+                        const Eigen::Vector2d rRRr = (Hrw * robot.rRWw).head(2);
+                        all_obstacles.emplace_back(rRRr);
+                        // Count robots close to us as congestion (i.e. how much traffic we are in)
+                        if (rRRr.norm() < cfg.congestion_radius) {
+                            num_close_robots++;
+                        }
                     }
                     // Sort obstacles based on distance from the robot
                     std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
@@ -194,6 +210,30 @@ namespace module::planning {
 
                 // Linearly interpolates between start and end by t ∈ [0,1]
                 auto lerp = [&](auto start, auto end, auto t) { return start + (end - start) * t; };
+
+                // Context-aware dynamic speed scaling: sprint when the target is far and the area is clear,
+                // ease off when close to the target or when other robots crowd around us (reduces collisions/falls).
+                // max_x/max_y_velocity act as the far-field "sprint" ceiling. Disable with dynamic_speed_enabled: false.
+                if (cfg.dynamic_speed_enabled) {
+                    // Distance boost: scale from near_speed_factor (at the target) up to full speed at far_speed_distance
+                    const double distance_scale =
+                        cfg.far_speed_distance > 0.0
+                            ? lerp(cfg.near_speed_factor,
+                                   1.0,
+                                   std::clamp(translational_error / cfg.far_speed_distance, 0.0, 1.0))
+                            : 1.0;
+
+                    // Congestion slowdown: scale from 1.0 (clear) down to congestion_speed_factor when crowded
+                    const double congestion_t =
+                        cfg.congestion_count > 0.0
+                            ? std::clamp(double(num_close_robots) / cfg.congestion_count, 0.0, 1.0)
+                            : 0.0;
+                    const double congestion_scale = lerp(1.0, cfg.congestion_speed_factor, congestion_t);
+
+                    desired_magnitude *= distance_scale * congestion_scale;
+
+                    emit(graph("Dynamic speed scale", distance_scale, congestion_scale, double(num_close_robots)));
+                }
 
                 // If we are far from the target point, accelerate and align ourselves towards it
                 if (translational_error > cfg.max_align_radius) {

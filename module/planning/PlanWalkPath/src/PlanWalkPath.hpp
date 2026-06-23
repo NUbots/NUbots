@@ -79,6 +79,19 @@ namespace module::planning {
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
 
+            /// @brief Enable context-aware dynamic speed scaling (distance boost + congestion slowdown)
+            bool dynamic_speed_enabled = false;
+            /// @brief Distance [m] to the navigation target at/above which full (sprint) speed is used
+            double far_speed_distance = 0.0;
+            /// @brief Speed multiplier [0..1] applied when at the target (distance 0)
+            double near_speed_factor = 1.0;
+            /// @brief Radius [m] around the robot within which other robots count as congestion
+            double congestion_radius = 0.0;
+            /// @brief Number of nearby robots at/above which full congestion slowdown applies
+            double congestion_count = 0.0;
+            /// @brief Speed multiplier [0..1] applied at/above congestion_count nearby robots
+            double congestion_speed_factor = 1.0;
+
             /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
             /// @note  Set to [0, 0, 0] to functionally disable smoothing
             Eigen::Vector3d tau = Eigen::Vector3d(0, 0, 0);

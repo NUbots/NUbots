@@ -26,6 +26,8 @@
  */
 #include "WalkToBall.hpp"
 
+#include <chrono>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -90,6 +92,10 @@ namespace module::strategy {
             cfg.err_x_ok               = config["err_x_ok"].as<double>();
             cfg.err_y_ok               = config["err_y_ok"].as<double>();
             cfg.err_z_ok               = config["err_z_ok"].as<Expression>();
+            cfg.dribble_foot_enabled       = config["dribble_foot_enabled"].as<bool>();
+            cfg.dribble_foot_offset        = config["dribble_foot_offset"].as<double>();
+            cfg.dribble_foot_switch_margin = config["dribble_foot_switch_margin"].as<double>();
+            cfg.dribble_run_timeout        = config["dribble_run_timeout"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
@@ -159,6 +165,9 @@ namespace module::strategy {
                 Eigen::Vector3d uTBf = rTBf.normalized();        // Unit vector toward goal
                 Eigen::Vector3d uTBf_p(-uTBf.y(), uTBf.x(), 0);  // perpendicular
 
+                // Signed perpendicular offset [m] of the avoided obstacle from the ball->goal line (for foot choice)
+                std::optional<double> obstacle_perp;
+
                 // If there are robots, check if there are obstacles in the way
                 if (robots) {
                     // Get the positions of all robots in the world
@@ -189,6 +198,11 @@ namespace module::strategy {
                         const bool go_right = obs_in_field_centre ? (rRFf.y() < rBFf.y()) : (rOFf.y() < 0);
 
                         rTFf = go_right ? rArFf : rAlFf;
+
+                        // Shield the ball on the side away from the obstacle by shifting the body toward the obstacle
+                        // side. Store the signed perpendicular distance of the obstacle from the ball->goal line (uTBf_p
+                        // here still points along the ball->goal line, before the avoidance recompute below).
+                        obstacle_perp = (rOFf - rBFf).dot(uTBf_p);
                     }
                 }
 
@@ -197,21 +211,53 @@ namespace module::strategy {
                 uTBf   = rTBf.normalized();  // Unit vector toward goal
                 uTBf_p = Eigen::Vector3d(-uTBf.y(), uTBf.x(), 0);  // perpendicular
 
+                // --- DRAFT: single-foot dribble alignment ---
+                // Offset the ball target perpendicular to the push direction so the chosen foot (not the torso centre)
+                // sits behind the ball and the body screens it from the obstacle. The side is latched with hysteresis
+                // so it doesn't flip-flop cycle to cycle, and reset when the dribble run ends (ball lost).
+                if (cfg.dribble_foot_enabled) {
+                    // Reset the latch when the ball is stale (a dribble run has ended)
+                    const double ball_age = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                                NUClear::clock::now() - ball.time_of_measurement)
+                                                .count();
+                    if (ball_age > cfg.dribble_run_timeout) {
+                        dribble_side = 0;
+                    }
+
+                    // Update the committed side from the obstacle, with a hysteresis dead-band: only switch once the
+                    // obstacle has crossed decisively past the ball->goal line, so noise near the line cannot chatter.
+                    if (obstacle_perp.has_value()) {
+                        if (dribble_side == 0) {
+                            dribble_side = *obstacle_perp >= 0.0 ? +1 : -1;  // first commit: pick the current side
+                        }
+                        else if (*obstacle_perp > cfg.dribble_foot_switch_margin) {
+                            dribble_side = +1;
+                        }
+                        else if (*obstacle_perp < -cfg.dribble_foot_switch_margin) {
+                            dribble_side = -1;
+                        }
+                        // else: obstacle within the dead-band, keep the current side (hysteresis)
+                    }
+                }
+                const Eigen::Vector3d foot_offset = uTBf_p * double(dribble_side) * cfg.dribble_foot_offset;
+                // Ball position shifted so "aligned" means the chosen foot is behind the ball
+                const Eigen::Vector3d rBshift = rBFf + foot_offset;
+
                 // Compute desired heading angle (towards goal from ball)
                 double desired_heading = vector_to_bearing(rTBf.head(2));
 
-                // Compute kick target position (at the ball for now, change later)
-                Eigen::Vector3d target = rBFf;
+                // Walk target starts at the (foot-shifted) ball position
+                Eigen::Vector3d target = rBshift;
 
                 // We want to "back off" from the ball if we are out of alignment. Helper method.
                 auto normalised_misalignment = [](auto val, auto max_val) {
                     return std::clamp(val / max_val, 0.0, 1.0);
                 };
 
-                // Signed distance error along the ball-target position direction
-                const double err_x = (rRFf - rBFf).dot(uTBf);
-                // Signed distance error perpendicular to the ball-target position direction
-                const double err_y = (rRFf - rBFf).dot(uTBf_p);
+                // Signed distance error along the ball-target position direction (relative to the foot-shifted ball)
+                const double err_x = (rRFf - rBshift).dot(uTBf);
+                // Signed distance error perpendicular to the ball-target position direction (relative to foot-shifted ball)
+                const double err_y = (rRFf - rBshift).dot(uTBf_p);
                 // Heading error (difference between robot and desired heading)
                 const double err_z = normalise_angle(desired_heading - robot_heading);
 

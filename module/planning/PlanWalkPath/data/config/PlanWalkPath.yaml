@@ -2,9 +2,11 @@
 log_level: INFO
 
 # General playing tuning values for walking
-max_x_velocity: 0.175
-max_y_velocity: 0.1
-max_angular_velocity: 0.4
+# NOTE: tuning for offensive performance. Gait engine headroom is ~1.56/0.63/1.25 (x/y/theta).
+# Raise in steps and watch stability in Webots. Previous baseline: 0.175 / 0.1 / 0.4
+max_x_velocity: 0.25
+max_y_velocity: 0.12
+max_angular_velocity: 0.6
 
 acceleration: 0.005 # maximum increment in walk command velocity
 
@@ -27,8 +29,26 @@ strafe_gain: 0.4
 # Radius around obstacles to avoid
 obstacle_radius: 0.8
 
+# --- Context-aware dynamic speed scaling ---
+# When enabled, max_x_velocity / max_y_velocity act as the far-field "sprint" ceiling, and the
+# walk speed is scaled DOWN when close to the target or when other robots crowd around the robot.
+# Set dynamic_speed_enabled: false to revert to the fixed-cap behaviour.
+dynamic_speed_enabled: true
+# Distance [m] to the navigation target at/above which full sprint speed is used
+far_speed_distance: 2.0
+# Speed multiplier [0..1] applied right at the target (0.7 * 0.25 = 0.175, i.e. the old cruise speed)
+near_speed_factor: 0.7
+# Count other robots within this radius [m] of the robot as congestion
+congestion_radius: 1.0
+# Number of nearby robots at/above which the full congestion slowdown applies
+congestion_count: 2
+# Speed multiplier [0..1] when at/above congestion_count nearby robots
+congestion_speed_factor: 0.25
+
 # Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
-tau: [1.0, 1.0, 3.0]
+# Lowered theta lag for responsiveness; Walk skill acceleration is the stability backstop.
+# Previous baseline: [1.0, 1.0, 3.0]
+tau: [0.5, 0.5, 1.0]
 
 # Initial velocity to use when resetting the smoothed walk command
 starting_velocity: [0.05, 0.0, 0.0]

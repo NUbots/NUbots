@@ -92,6 +92,15 @@ namespace module::strategy {
             /// @brief Acceptable heading error threshold for kicking
             double err_z_ok = 0.0;
 
+            /// @brief DRAFT: enable single-foot dribble alignment (offset the ball behind the shielding foot)
+            bool dribble_foot_enabled = false;
+            /// @brief DRAFT: perpendicular offset [m] from torso centre to the dribbling foot (~half stance width)
+            double dribble_foot_offset = 0.0;
+            /// @brief Hysteresis margin [m]: obstacle must cross this far past the ball->goal line to switch foot sides
+            double dribble_foot_switch_margin = 0.0;
+            /// @brief Time [s] without a fresh ball after which the latched dribble side resets (run ended)
+            double dribble_run_timeout = 0.0;
+
         } cfg;
 
         std::optional<Eigen::Vector3d> dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
@@ -100,6 +109,10 @@ namespace module::strategy {
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
+
+        /// @brief DRAFT: latched dribble offset side (+1/-1 along the ball->goal perpendicular, 0 = centred).
+        /// Set so the body shields the ball from the obstacle on the path; persists across cycles (latched).
+        int dribble_side = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkToBall reactor.
