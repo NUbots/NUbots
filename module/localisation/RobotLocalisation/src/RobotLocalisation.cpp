@@ -253,12 +253,21 @@ namespace module::localisation {
                 continue;
             }
 
-            // Check if this robot is too close to any kept robot
-            if (std::any_of(new_tracked_robots.begin(), new_tracked_robots.end(), [&](const auto& other_robot) {
-                    return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
-                })) {
-                log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
-                continue;
+            // // Check if this robot is too close to any kept robot
+            // if (std::any_of(new_tracked_robots.begin(), new_tracked_robots.end(), [&](const auto& other_robot) {
+            //         return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
+            //     })) {
+            //     log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
+            //     continue;
+            // }
+
+            for (const auto& other_robot : new_tracked_robots) {
+                if ((tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance) {
+                    log<DEBUG>(fmt::format("Removing robot {} due to proximity to robot {}",
+                                           tracked_robot.id,
+                                           other_robot.id));
+                    continue;
+                }
             }
 
             Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);

@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
-ball_y_offset: 0.0
+ball_y_offset: -0.1
 
 # Goal kick target should be behind line so goal kick position doesn't try position robot to kick ball out of goal when close to line
 goal_target_offset: 0.5

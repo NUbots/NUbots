@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package message.booster;
+
+// Planar odometry reported by the Booster controller (rt/odometer_state).
+// The controller knows its own gait, so this is used in place of NUbots'
+// anchor-foot kinematic odometry on the K1.
+message BoosterOdometry {
+    double x     = 1;  // Position x in the odometry world frame (m)
+    double y     = 2;  // Position y in the odometry world frame (m)
+    double theta = 3;  // Heading (yaw) in the odometry world frame (rad)
+}

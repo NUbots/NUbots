@@ -61,10 +61,25 @@ namespace module::vision {
             cfg.nms_threshold       = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold = config["nms_score_threshold"].as<double>();
 
-            // Compile the model and create inference request object
-            compiled_model =
-                ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
-            infer_request = compiled_model.create_infer_request();
+            // Load and compile the model
+            std::string model_path = config["model_path"].as<std::string>();
+
+            // Try TensorRT first, building the engine from the ONNX model on this device.
+            // The built engine is cached on disk, so this is only slow the first time.
+            try {
+                log<INFO>("Building TensorRT engine from: ", model_path);
+                trt = std::make_unique<utility::vision::TensorRT>(model_path);
+                log<INFO>("TensorRT engine ready");
+            }
+            catch (const std::exception& e) {
+                trt.reset();
+                log<WARN>("TensorRT unavailable: ", e.what());
+                log<INFO>("Falling back to OpenVINO");
+
+                // Compile the model and create inference request object
+                compiled_model = ov::Core().compile_model(model_path, config["device"].as<std::string>());
+                infer_request  = compiled_model.create_infer_request();
+            }
         });
 
         on<Trigger<Image>, Single>().then("Yolo Main Loop", [this](const Image& img) {
@@ -90,32 +105,73 @@ namespace module::vision {
             int max               = MAX(width, height);
             cv::Mat letterbox_img = cv::Mat::zeros(max, max, CV_8UC3);
             img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
-            cv::Mat blob = cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
 
-            // -------- Feed the blob into the input node of the Model -------
-            // Get input port for model with one input
-            auto input_port = compiled_model.input();
-            // Create tensor from external memory
-            ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape(), blob.ptr(0));
-            // Set input tensor for model with one input
-            infer_request.set_input_tensor(input_tensor);
+            // Use the model's expected input size, assuming NCHW format
+            int model_input_size = trt != nullptr ? static_cast<int>(trt->input_shape()[2])
+                                                  : static_cast<int>(compiled_model.input().get_shape()[2]);
+            cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
+                                                  1.0 / 255.0,
+                                                  cv::Size(model_input_size, model_input_size),
+                                                  cv::Scalar(),
+                                                  true);
 
             // -------- Perform Inference --------
-            infer_request.infer();
-            auto output = infer_request.get_output_tensor(0);
+            std::vector<float> output_data;
+            // Output tensor shape [1, channels, detections], where channels is 4 box values + class scores
+            int out_channels   = 0;
+            int out_detections = 0;
+
+            if (trt != nullptr) {
+                // TensorRT inference
+                try {
+                    float* blob_ptr = blob.ptr<float>();
+                    output_data     = trt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
+                    out_channels    = static_cast<int>(trt->output_shape()[1]);
+                    out_detections  = static_cast<int>(trt->output_shape()[2]);
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("TensorRT inference failed: ", e.what());
+                    return;
+                }
+            }
+            else {
+                // OpenVINO inference
+                try {
+                    // Get input port for model with one input
+                    auto input_port = compiled_model.input();
+                    // Create tensor from external memory
+                    ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape(), blob.ptr(0));
+                    // Set input tensor for model with one input
+                    infer_request.set_input_tensor(input_tensor);
+
+                    infer_request.infer();
+                    auto output    = infer_request.get_output_tensor(0);
+                    out_channels   = static_cast<int>(output.get_shape()[1]);
+                    out_detections = static_cast<int>(output.get_shape()[2]);
+
+                    // Copy output data
+                    float* data = output.data<float>();
+                    output_data.assign(data, data + output.get_byte_size() / sizeof(float));
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("OpenVINO inference failed: ", e.what());
+                    return;
+                }
+            }
 
             // -------- Postprocess the result --------
-            float* data = output.data<float>();
-            cv::Mat output_buffer(output.get_shape()[1], output.get_shape()[2], CV_32F, data);
-            transpose(output_buffer, output_buffer);  //[8400,84]
+            // The output tensor is [1, channels, detections] in memory, so wrap it as
+            // [channels, detections] and transpose to get one detection per row
+            cv::Mat output_buffer(out_channels, out_detections, CV_32F, output_data.data());
+            transpose(output_buffer, output_buffer);
             std::vector<int> class_ids;
             std::vector<float> class_confidences;
             std::vector<cv::Rect> boxes;
-            float scale = letterbox_img.size[0] / 640.0;
+            float scale = static_cast<float>(letterbox_img.size[0]) / static_cast<float>(model_input_size);
 
             // Figure out the bbox, class_id and class_score
             for (int i = 0; i < output_buffer.rows; i++) {
-                cv::Mat objects_scores = output_buffer.row(i).colRange(4, 10);
+                cv::Mat objects_scores = output_buffer.row(i).colRange(4, out_channels);
                 cv::Point class_id;
                 double confidence;
                 cv::minMaxLoc(objects_scores, 0, &confidence, 0, &class_id);

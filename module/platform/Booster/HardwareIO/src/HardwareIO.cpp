@@ -18,6 +18,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
+    using message::booster::BoosterOdometry;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
@@ -63,6 +64,10 @@ namespace module::platform::Booster {
                 ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::ButtonEventMsg>(
                     "rt/button_event",
                     [this](const void* msg) { button_event_handler(msg); });
+
+            odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
+                "rt/odometer_state",
+                [this](const void* msg) { odometer_handler(msg); });
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
@@ -162,8 +167,9 @@ namespace module::platform::Booster {
         sensors->gyroscope.y()     = imu.gyro()[1];
         sensors->gyroscope.z()     = imu.gyro()[2];
 
-        // Serial chain motors: head (0-1), arms (2-9), waist (10)
-        // Indices in the serial vector match JointIndex enum values directly.
+        // Read joint-space feedback from the serial chain (the SDK converts the parallel ankle
+        // mechanism for us). Indices match the JointIndex enum directly; the ankles occupy the
+        // slots the enum labels kCrank{Up,Down}{Left,Right}.
         const auto& serial = low_msg->motor_state_serial();
 
         auto fill_serial = [&](RawSensors::Servo& servo, JointIndex idx) {
@@ -182,25 +188,18 @@ namespace module::platform::Booster {
         fill_serial(sensors->servo.r_shoulder_roll, JointIndex::kRightShoulderRoll);
         fill_serial(sensors->servo.r_elbow, JointIndex::kRightElbowPitch);
 
-        // Parallel mechanism motors: legs (indices 11-22 in JointIndex, stored as 0-11 in the vector)
-        const auto& parallel    = low_msg->motor_state_parallel();
-        const size_t leg_offset = static_cast<size_t>(JointIndex::kLeftHipPitch);
-
-        auto fill_parallel = [&](RawSensors::Servo& servo, JointIndex idx) {
-            auto i = static_cast<size_t>(idx) - leg_offset;
-            if (i < parallel.size()) {
-                fill_servo(servo, parallel[i]);
-            }
-        };
-
-        fill_parallel(sensors->servo.l_hip_pitch, JointIndex::kLeftHipPitch);
-        fill_parallel(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
-        fill_parallel(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
-        fill_parallel(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
-        fill_parallel(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
-        fill_parallel(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
-        fill_parallel(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
-        fill_parallel(sensors->servo.r_knee, JointIndex::kRightKneePitch);
+        fill_serial(sensors->servo.l_hip_pitch, JointIndex::kLeftHipPitch);
+        fill_serial(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
+        fill_serial(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
+        fill_serial(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
+        fill_serial(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);   // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);  // L ankle roll
+        fill_serial(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
+        fill_serial(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
+        fill_serial(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
+        fill_serial(sensors->servo.r_knee, JointIndex::kRightKneePitch);
+        fill_serial(sensors->servo.r_ankle_pitch, JointIndex::kCrankUpRight);   // R ankle pitch
+        fill_serial(sensors->servo.r_ankle_roll, JointIndex::kCrankDownRight);  // R ankle roll
 
         // Battery SOC (updated by battery_handler)
         {
@@ -217,6 +216,17 @@ namespace module::platform::Booster {
         }
 
         emit(std::move(sensors));
+    }
+
+    void HardwareIO::odometer_handler(const void* msg) {
+        const auto* odo_msg = static_cast<const booster_interface::msg::Odometer*>(msg);
+        auto out            = std::make_unique<BoosterOdometry>();
+        out->x              = odo_msg->x();
+        out->y              = odo_msg->y();
+        out->theta          = odo_msg->theta();
+        log<DEBUG>("Received odometry: x=" + std::to_string(out->x) + ", y=" + std::to_string(out->y)
+                   + ", theta=" + std::to_string(out->theta));
+        emit(out);
     }
 
     void HardwareIO::battery_handler(const void* msg) {

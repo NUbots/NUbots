@@ -36,6 +36,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/booster/BoosterOdometry.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -50,6 +51,7 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::booster::BoosterOdometry;
     using message::input::Sensors;
     using message::localisation::RobotPoseGroundTruth;
     using message::platform::RawSensors;
@@ -83,6 +85,9 @@ namespace module::input {
             double y_cut_off_frequency = 0.0;
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+            /// @brief Use the Booster controller's planar odometry for x/y/yaw instead of the
+            /// anchor-foot kinematic estimate (the K1 has no NUbots walk engine to drive foot phase)
+            bool use_booster_odometry = false;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -145,7 +150,8 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
                              const message::behaviour::state::Stability& stability,
-                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth);
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                             const std::shared_ptr<const BoosterOdometry>& booster_odometry);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

@@ -46,7 +46,7 @@ namespace module::input {
      */
     class GameController : public NUClear::Reactor {
     private:
-        static constexpr const uint SUPPORTED_VERSION       = 19;
+        static constexpr const uint SUPPORTED_VERSION       = 20;
         static constexpr const uint PLAYERS_PER_TEAM        = 6;
         static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
         static constexpr const uint NUM_TEAMS               = 2;
@@ -112,9 +112,6 @@ namespace module::input {
         /// @brief Converts a gamecontroller::PenaltyState to a GameState::PenaltyReason
         [[nodiscard]] static message::input::GameState::PenaltyReason get_penalty_reason(
             const gamecontroller::PenaltyState& penalty_state);
-
-        /// @brief Converts an integer IP address to a string
-        [[nodiscard]] static std::string ip_address_int_to_string(const uint32_t& ip_addr);
 
     public:
         /// @brief Called by the powerplant to build and setup the GameController reactor

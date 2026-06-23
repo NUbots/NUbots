@@ -34,6 +34,7 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::booster::BoosterOdometry;
     using message::input::Sensors;
     using message::platform::RawSensors;
 
@@ -46,7 +47,8 @@ namespace module::input {
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
                                        const message::behaviour::state::Stability& stability,
-                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                                       const std::shared_ptr<const BoosterOdometry>& booster_odometry) {
         // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
@@ -144,12 +146,28 @@ namespace module::input {
         // Extract yaw from kinematic estimate
         const double kinematic_yaw = mat_to_rpy_intrinsic(Hwt_anchor.linear()).z();
 
-        // Fuse yaw estimates using yaw filter
-        const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), kinematic_yaw, dt);
+        // Select the planar odometry source. On the K1 there is no NUbots walk engine to drive foot
+        // phase, so the Booster controller's own odometry is preferred when available; the anchor-foot
+        // kinematic estimate is the fallback. Torso height (z) always comes from kinematics and
+        // roll/pitch always come from the Mahony filter.
+        double measured_yaw         = kinematic_yaw;
+        Eigen::Vector3d translation = Hwt_anchor.translation();
+        if (cfg.use_booster_odometry && booster_odometry) {
+            // TODO: verify the Booster odometry frame matches NUbots conventions (origin, yaw sign)
+            measured_yaw    = booster_odometry->theta;
+            translation.x() = booster_odometry->x;
+            translation.y() = booster_odometry->y;
+        }
+        else if (cfg.use_booster_odometry && !booster_odometry) {
+            log<WARN>("use_booster_odometry is true but no BoosterOdometry received; using kinematic odometry");
+        }
 
-        // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, anchor translation)
+        // Fuse yaw estimates using yaw filter
+        const double fused_yaw = yaw_filter.update(sensors->gyroscope.z(), measured_yaw, dt);
+
+        // Construct world {w} to torso {t} space transform (mahony roll/pitch, fused yaw, planar translation)
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
-        Hwt.translation()     = Hwt_anchor.translation();
+        Hwt.translation()     = translation;
 
         // Combine Mahony roll/pitch with fused yaw
         Eigen::Vector3d rpy_fused(rpy_mahony.x(), rpy_mahony.y(), fused_yaw);
@@ -159,7 +177,7 @@ namespace module::input {
         // Construct robot {r} to world {w} space transform (just x-y translation and fused yaw rotation)
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         Hwr.linear()          = Eigen::AngleAxisd(fused_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
+        Hwr.translation()     = Eigen::Vector3d(translation.x(), translation.y(), 0.0);
         sensors->Hrw          = Hwr.inverse();
 
         // Low pass filter for torso velocity
