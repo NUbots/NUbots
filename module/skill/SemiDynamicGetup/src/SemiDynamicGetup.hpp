@@ -26,10 +26,22 @@ namespace module::skill {
             double Kp              = 0.3;
             double max_correction  = 0.3;
 
-            // --- Fall detection ---
-            double fall_recovery_tilt  = 1.0;  // rad
-            double fall_gyro_threshold = 2.0;  // rad/s
-            int fall_debounce_ticks    = 3;
+            // --- Fall detection (ported from FallingRelaxPlanner) ---
+            // Settled-state tilt check, used at the end of RISE/STAND to decide
+            // whether the getup ended with the robot upright (high tilt, low motion).
+            double fall_recovery_tilt = 1.0;  // rad
+
+            // Per-signal thresholds for the dynamic falling detector. Each signal is
+            // exponentially smoothed, then classified STABLE / UNSTABLE / FALLING.
+            struct Levels {
+                double mean      = 0.0;  // value subtracted from the raw reading
+                double unstable  = 0.0;  // threshold to be considered unstable
+                double falling   = 0.0;  // threshold to be considered falling
+                double smoothing = 0.0;  // exponential filter factor (weight on the previous value)
+            };
+            Levels gyro_mag{};   // sum of |rotation rate| across the three axes
+            Levels acc_mag{};    // accelerometer magnitude
+            Levels acc_angle{};  // accelerometer angle from upright
 
             // --- Foot polygon geometry (should match KinematicsConfiguration.yaml) ---
             // Origin assumed at ankle joint centre in the foot frame (x-forward, y-left).
@@ -52,13 +64,25 @@ namespace module::skill {
         enum class InternalPhase { EARLY, RISE, STAND, STABILISE };
         InternalPhase internal_phase = InternalPhase::EARLY;
 
+        /// Per-signal stability categorisation for the dynamic falling detector.
+        enum class State { STABLE, UNSTABLE, FALLING };
+
+        /// Current exponentially smoothed value of each falling-detection signal.
+        double gyro_mag_value  = 0.0;
+        double acc_mag_value   = 0.0;
+        double acc_angle_value = 0.0;
+
+        /// Exponential filter: weight `alpha` on the previous value, `1 - alpha` on the new value.
+        template <typename Scalar>
+        Scalar smooth(Scalar value, Scalar new_value, Scalar alpha) {
+            return alpha * value + (1.0 - alpha) * new_value;
+        }
+
         std::vector<utility::skill::Frame> early_frames{};
         std::vector<utility::skill::Frame> rise_frames{};
 
         NUClear::clock::time_point stabilisation_start{};
 
-        /// Consecutive sensor updates the mid-script fall condition has held for
-        int fall_tick_count = 0;
         /// When the last corrective Walk task was emitted (for rate limiting)
         NUClear::clock::time_point last_walk_command{};
 

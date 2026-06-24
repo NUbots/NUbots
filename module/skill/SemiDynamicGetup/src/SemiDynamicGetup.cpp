@@ -18,7 +18,9 @@
 #include "message/skill/Walk.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/skill/Script.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::skill {
 
@@ -31,7 +33,9 @@ namespace module::skill {
     using message::skill::Walk;
     using SemiDynamicGetupTask = message::skill::SemiDynamicGetup;
     using utility::input::ServoID;
+    using utility::nusight::graph;
     using utility::skill::Frame;
+    using utility::support::Expression;
 
     // -------------------------------------------------------------------------
     // Support polygon helpers
@@ -146,9 +150,20 @@ namespace module::skill {
             cfg.Kp               = config["Kp"].as<double>();
             cfg.max_correction   = config["max_correction"].as<double>();
 
-            cfg.fall_recovery_tilt  = config["fall_recovery_tilt"].as<double>();
-            cfg.fall_gyro_threshold = config["fall_gyro_threshold"].as<double>();
-            cfg.fall_debounce_ticks = config["fall_debounce_ticks"].as<int>();
+            cfg.fall_recovery_tilt = config["fall_recovery_tilt"].as<double>();
+
+            // Falling detector (ported from FallingRelaxPlanner)
+            auto load_levels = [](const Configuration& c) {
+                Config::Levels levels{};
+                levels.mean      = c["mean"].as<Expression>();
+                levels.unstable  = c["unstable"].as<Expression>();
+                levels.falling   = c["falling"].as<Expression>();
+                levels.smoothing = c["smoothing"].as<Expression>();
+                return levels;
+            };
+            cfg.gyro_mag  = load_levels(config["gyroscope_magnitude"]);
+            cfg.acc_mag   = load_levels(config["accelerometer_magnitude"]);
+            cfg.acc_angle = load_levels(config["accelerometer_angle"]);
 
             cfg.foot_toe_length  = config["foot_toe_length"].as<double>();
             cfg.foot_heel_length = config["foot_heel_length"].as<double>();
@@ -208,32 +223,69 @@ namespace module::skill {
                     return std::atan2(-Hwt.rotation()(2, 0), Hwt.rotation()(2, 2));
                 };
 
-                // Debounced fall detection for the dynamic phases
+                // Dynamic fall detection, ported from FallingRelaxPlanner. Three
+                // exponentially smoothed signals are each classified STABLE / UNSTABLE /
+                // FALLING, and the robot is declared falling if any two of three (or the
+                // accelerometer angle alone) read FALLING. Call once per sensor cycle so
+                // the filters stay warm across all phases.
+                auto state_str = [](State s) {
+                    return s == State::FALLING ? "FALLING" : s == State::UNSTABLE ? "UNSTABLE" : "STABLE";
+                };
                 auto fall_detected = [&]() -> bool {
-                    const double tilt  = tilt_from_vertical();
-                    const double gyro  = sensors.gyroscope.norm();
-                    const bool falling = tilt > cfg.fall_recovery_tilt && gyro > cfg.fall_gyro_threshold;
-                    fall_tick_count    = falling ? fall_tick_count + 1 : 0;
-                    // Per-tick telemetry for tuning fall_recovery_tilt / fall_gyro_threshold /
-                    // fall_debounce_ticks. Logs every sensor cycle while in a dynamic phase.
-                    log<DEBUG>("fall check: tilt=",
-                               tilt,
-                               "rad (thr",
-                               cfg.fall_recovery_tilt,
-                               ") gyro=",
-                               gyro,
-                               "rad/s (thr",
-                               cfg.fall_gyro_threshold,
-                               ") debounce=",
-                               fall_tick_count,
-                               "/",
-                               cfg.fall_debounce_ticks);
-                    return fall_tick_count >= cfg.fall_debounce_ticks;
+                    const auto& a = sensors.accelerometer;
+                    const auto& g = sensors.gyroscope;
+
+                    // Update the exponential filters
+                    gyro_mag_value =
+                        smooth(gyro_mag_value,
+                               std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
+                               cfg.gyro_mag.smoothing);
+                    acc_mag_value   = smooth(acc_mag_value, std::abs(a.norm()), cfg.acc_mag.smoothing);
+                    acc_angle_value = smooth(acc_angle_value,
+                                             std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                                             cfg.acc_angle.smoothing);
+
+                    // Classify each signal. Note acc_mag is inverted: it drops toward
+                    // free-fall, so a larger value is more stable.
+                    const State gyro_state = gyro_mag_value < cfg.gyro_mag.unstable    ? State::STABLE
+                                             : gyro_mag_value < cfg.gyro_mag.falling   ? State::UNSTABLE
+                                                                                       : State::FALLING;
+                    const State acc_state = acc_mag_value > cfg.acc_mag.unstable    ? State::STABLE
+                                            : acc_mag_value > cfg.acc_mag.falling   ? State::UNSTABLE
+                                                                                    : State::FALLING;
+                    const State angle_state = acc_angle_value < cfg.acc_angle.unstable    ? State::STABLE
+                                              : acc_angle_value < cfg.acc_angle.falling   ? State::UNSTABLE
+                                                                                          : State::FALLING;
+
+                    const bool falling = (gyro_state == State::FALLING && acc_state == State::FALLING)
+                                         || (gyro_state == State::FALLING && angle_state == State::FALLING)
+                                         || (acc_state == State::FALLING && angle_state == State::FALLING)
+                                         || (angle_state == State::FALLING);
+
+                    // NUSight graphs + per-tick log for tuning the thresholds above.
+                    emit(graph("SemiDynamicGetup falling signals (gyro, acc, angle deg)",
+                               gyro_mag_value,
+                               acc_mag_value,
+                               acc_angle_value * 180.0 / 3.14159265358979));
+                    emit(graph("SemiDynamicGetup falling", falling));
+                    log<DEBUG>("fall check: gyro_mag=",
+                               gyro_mag_value,
+                               state_str(gyro_state),
+                               "acc_mag=",
+                               acc_mag_value,
+                               state_str(acc_state),
+                               "acc_angle=",
+                               acc_angle_value,
+                               state_str(angle_state),
+                               "-> falling=",
+                               falling);
+                    return falling;
                 };
 
                 // After a fall, restart the getup only if the robot is still on its back // TODO
                 auto restart_or_escalate = [&]() {
-                    fall_tick_count = 0;
+                    // Reset the falling filters so the next attempt starts from a clean slate.
+                    gyro_mag_value = acc_mag_value = acc_angle_value = 0.0;
                     const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
                     const Eigen::Vector3d uXTw = Hwt.rotation().col(0);
                     // Same cube-face test as GetUp: on the back when torso x is mostly world z
@@ -361,8 +413,8 @@ namespace module::skill {
                 // -----------------------------------------------------------------
                 if (run_reason == RunReason::NEW_TASK) {
                     log<INFO>("SemiDynamicGetup starting");
-                    fall_tick_count = 0;
-                    internal_phase  = InternalPhase::EARLY;
+                    gyro_mag_value = acc_mag_value = acc_angle_value = 0.0;
+                    internal_phase = InternalPhase::EARLY;
                     emit<Task>(make_sequence(early_frames));
                 }
 
@@ -451,11 +503,15 @@ namespace module::skill {
                 // -----------------------------------------------------------------
                 else if (run_reason == RunReason::OTHER_TRIGGER) {
 
+                    // Update the fall-detection filters every sensor cycle (in all phases)
+                    // so they stay warm; only the dynamic phases act on the result.
+                    const bool falling = fall_detected();
+
                     if (internal_phase == InternalPhase::RISE || internal_phase == InternalPhase::STAND) {
                         // Mid-script fall detection: abort and recover immediately.
                         // This is the core of the semi-dynamic behaviour — the BodySequence
                         // is replaced rather than allowed to play out on the ground.
-                        if (fall_detected()) {
+                        if (falling) {
                             log<WARN>("Fall detected mid-", internal_phase == InternalPhase::RISE ? "rise" : "stand");
                             restart_or_escalate();
                         }
@@ -466,7 +522,7 @@ namespace module::skill {
 
                     else if (internal_phase == InternalPhase::STABILISE) {
                         // Fall check
-                        if (fall_detected()) {
+                        if (falling) {
                             log<WARN>("Fall during stabilisation");
                             restart_or_escalate();
                             return;

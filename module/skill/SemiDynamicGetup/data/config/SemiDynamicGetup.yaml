@@ -17,30 +17,50 @@ pitch_reference: 0.7
 Kp: 0.3
 
 # Maximum magnitude of the hip pitch correction (rad).
-max_correction: 0.3
+max_correction: 1.0
 
 # ---------------------------------------------------------------------------
 # Fall detection
 #
-# Mid-script (RISE/STAND) and during stabilisation, a fall is declared when
-# torso tilt exceeds fall_recovery_tilt AND gyroscope magnitude exceeds
-# fall_gyro_threshold for fall_debounce_ticks consecutive sensor updates.
-# The gyro/debounce coupling stops transient orientation-estimate spikes
-# during dynamic motion from triggering spurious restarts.
-# A fall that has already settled (high tilt, low gyro) is caught by the
-# tilt-only check at the end of each phase.
+# Settled-state check: at the end of RISE/STAND, if torso tilt still exceeds
+# fall_recovery_tilt the getup is considered to have failed and is restarted.
+#
+# Dynamic check (mid-script RISE/STAND and during stabilisation): ported from
+# FallingRelaxPlanner. Three signals — gyroscope magnitude, accelerometer
+# magnitude and accelerometer angle from upright — are each exponentially
+# smoothed and classified STABLE / UNSTABLE / FALLING against their thresholds.
+# A fall is declared when any two of the three (or the accelerometer angle
+# alone) read FALLING. The exponential filter replaces the old debounce: the
+# `smoothing` factor is the weight kept on the previous value, so a higher
+# value reacts more slowly and rejects transient spikes.
+# These thresholds are copied from FallingRelaxPlanner.yaml (already tuned);
+# re-tune here if the getup needs to be more or less twitchy than walking.
 # ---------------------------------------------------------------------------
 
-# Torso tilt threshold (rad) for fall detection: 0 = upright, π/2 = horizontal.
+# Torso tilt threshold (rad) for the settled-state check: 0 = upright, π/2 = horizontal.
 # ~57° (1.0 rad) means the robot has clearly re-fallen and is not recovering.
 fall_recovery_tilt: 1.0
 
-# Gyroscope magnitude (rad/s) that must accompany the tilt breach mid-script.
-# FallingRelaxPlanner uses 2.0 rad/s as its "falling" threshold; tune on robot.
-fall_gyro_threshold: 2.0
+# Checks based on the sum of rotation rate for all the axes
+gyroscope_magnitude:
+  smoothing: 0.9 # weight on the previous (smoothed) value
+  mean: 0.0 # value subtracted from the raw reading
+  unstable: 2 # rad/s to consider the robot unstable
+  falling: 2.0 # rad/s to consider the robot falling
 
-# Consecutive sensor updates the fall condition must hold before restarting.
-fall_debounce_ticks: 3
+# Checks based on the magnitude of the acceleration (drops toward free-fall)
+accelerometer_magnitude:
+  smoothing: 0.9
+  mean: 9.8 # subtract gravity
+  unstable: 7.0 # below this magnitude the robot is unstable
+  falling: 5.0 # below this magnitude the robot is falling
+
+# Checks based on the accelerometer angle from upright
+accelerometer_angle:
+  smoothing: 0.9
+  mean: 0.0
+  unstable: 35 * pi / 180.0 # rad from upright to consider the robot unstable
+  falling: 45 * pi / 180.0 # rad from upright to consider the robot falling
 
 # ---------------------------------------------------------------------------
 # Foot polygon geometry
