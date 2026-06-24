@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Username
-user: nubots
+user: booster
 
 # File permissions that need to be set
 permissions:
@@ -10,9 +10,10 @@ permissions:
   /etc/sudoers.d/wheel: 0440
 
 # Pacman packages that should be installed and updated
-pacman:
+apt:
   - linux-headers
   - screen
+  - network-manager
   - wpa_supplicant
   - openssh
   - vim
@@ -24,17 +25,17 @@ pacman:
   - bluez-utils
   - rsync
   - fzf
-  - zsh
-  - zsh-completions
   - git
+
+# The connection profile to set using nmcli (must exist in system folder!)
+connection: wifi-epsilon-x
 
 # Systemd units that should be enabled
 systemd:
-  - systemd-networkd.service
+  - NetworkManager.service
   - systemd-resolved.service
   - systemd-timesyncd.service
   - sshd.service
-  - wpa_supplicant@wlp0s20f3.service
 
 # Groups that should exist and that the user should be a member of
 groups:
@@ -53,5 +54,5 @@ links:
 # Generate locale
 generate_locale: True
 
-# Generate grub config
-generate_grub: True
+# Path to the Booster robot info file
+robot_info_path: /opt/booster/robot_info.txt

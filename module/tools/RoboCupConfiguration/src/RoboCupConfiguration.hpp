@@ -64,7 +64,6 @@ namespace module::tools {
         static const int MAX_PLAYER_ID = 6;
         /// @brief Whether the robot is a goalie or not
         bool is_goalie = false;
-
         /// @brief Display values
         struct Display {
             /// @brief Enum for options in first column

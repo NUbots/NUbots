@@ -136,12 +136,10 @@ namespace module::tools {
                     display.log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
-                    system("systemctl enable --now wpa_supplicant");
-                    system("systemctl enable --now systemd-networkd");
+                    system("nmcli radio all on");
                     break;
                 case 'W':  // disables wifi services
-                    system("systemctl disable --now wpa_supplicant");
-                    system("systemctl disable --now systemd-networkd");
+                    system("nmcli radio all off");
                     break;
                 case 'X':  // shutdown powerplant
                     powerplant.shutdown();
@@ -173,7 +171,7 @@ namespace module::tools {
         wifi_interface = utility::support::get_wireless_interface();
         ip_address     = utility::support::get_ip_address(wifi_interface);
         ssid           = utility::support::get_ssid(wifi_interface);
-        password       = utility::support::get_wifi_password(ssid, wifi_interface);
+        password       = utility::support::get_wifi_password(ssid);
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -186,8 +184,8 @@ namespace module::tools {
         set_config_values();
 
         // Check if we are on a robot
-        if (get_platform() != "nugus") {
-            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
+        if (get_platform() != "booster") {
+            display.log_message = "Configure Error: Network configuration only available on Booster robots!";
             return;
         }
 
@@ -197,19 +195,18 @@ namespace module::tools {
             return;
         }
 
-        // Copy the network files
-        std::filesystem::copy_file(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname),
-                                   "/etc/systemd/network/30-wifi.network",
-                                   std::filesystem::copy_options::overwrite_existing);
-        std::filesystem::copy_file(
-            fmt::format("system/{}/etc/wpa_supplicant/wpa_supplicant-{}.conf", hostname, wifi_interface),
-            fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
-            std::filesystem::copy_options::overwrite_existing);
+        // Copy the nmconnection file and restrict permissions (NetworkManager requires 600)
+        const std::string nm_src =
+            fmt::format("system/{}/etc/NetworkManager/system-connections/wifi-robocup.nmconnection", hostname);
+        const std::string nm_dst = "/etc/NetworkManager/system-connections/wifi-robocup.nmconnection";
+        std::filesystem::copy_file(nm_src, nm_dst, std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::permissions(nm_dst,
+                                     std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+                                     std::filesystem::perm_options::replace);
 
-        // Restart the network
-        system("systemctl restart systemd-networkd");
-        system("systemctl restart wpa_supplicant");
-        system(("systemctl restart wpa_supplicant@" + wifi_interface).c_str());
+        // Reload connections and bring up the new profile
+        system("nmcli connection reload");
+        system(("nmcli connection up wifi-robocup ifname " + wifi_interface).c_str());
 
         display.log_message = "Network configured!";
     }
@@ -236,8 +233,8 @@ namespace module::tools {
         }
 
         // Check if we are on a robot
-        if (get_platform() != "nugus") {
-            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
+        if (get_platform() != "booster") {
+            display.log_message = "Configure Error: Network configuration only available on Booster robots!";
             return;
         }
 
@@ -252,10 +249,7 @@ namespace module::tools {
             return;
         }
 
-        /* WIRELESS NETWORK SYSTEMD CONFIG */
-
-        // Get folder name
-        const std::string systemd_folder = fmt::format("system/{}/etc/systemd/network", hostname);
+        /* NETWORKMANAGER CONFIG */
 
         // Parse the IP address
         std::stringstream ss(ip_address);
@@ -274,34 +268,35 @@ namespace module::tools {
                 "be the player number. ";
         }
 
-        // Write the new ip address to the file
-        std::ofstream(fmt::format("{}/30-wifi.network", systemd_folder))
-            << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
-                           wifi_interface,
-                           ip_address,
-                           ip_parts[0],
-                           ip_parts[1]);
+        // Write the nmconnection file for the RoboCup WiFi network
+        const std::string nm_dir = fmt::format("system/{}/etc/NetworkManager/system-connections", hostname);
+        system(("mkdir -p " + nm_dir).c_str());
 
-
-        /* WPA_SUPPLICANT CONFIG */
-
-        // Make a new wpa_supplicant file in the robot-specific directory
-        // This is so that we don't lose the original if we need it
-        // And so when we append to it with a high priority, we are doing it from fresh
-        // And will not encounter any issues when running multiple times
-        std::string wpa_supplicant_dir  = fmt::format("system/{}/etc/wpa_supplicant", hostname);
-        std::string wpa_supplicant_file = fmt::format("{}/wpa_supplicant-{}.conf", wpa_supplicant_dir, wifi_interface);
-        system(("mkdir -p " + wpa_supplicant_dir).c_str());
-
-        std::filesystem::copy_file(
-            fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
-            wpa_supplicant_file,
-            std::filesystem::copy_options::overwrite_existing);
-
-        // Append to the wpa_supplicant file with a high priority
-        std::string command =
-            "wpa_passphrase " + ssid + " " + password + " | sed 's/}/\tpriority=9999\\n}/' >> " + wpa_supplicant_file;
-        system(command.c_str());
+        std::ofstream(fmt::format("{}/wifi-robocup.nmconnection", nm_dir)) << fmt::format(
+            "[connection]\n"
+            "id=wifi-robocup\n"
+            "uuid=07814fae-fa1d-479b-ac03-30e13717a27c\n"
+            "type=wifi\n"
+            "interface-name={}\n"
+            "autoconnect=true\n\n"
+            "[wifi]\n"
+            "ssid={}\n"
+            "mode=infrastructure\n\n"
+            "[wifi-security]\n"
+            "key-mgmt=wpa-psk\n"
+            "psk={}\n\n"
+            "[ipv4]\n"
+            "method=manual\n"
+            "address1={}/16,{}.{}.3.1\n"
+            "dns=8.8.8.8;\n\n"
+            "[ipv6]\n"
+            "method=ignore\n",
+            wifi_interface,
+            ssid,
+            password,
+            ip_address,
+            ip_parts[0],
+            ip_parts[1]);
 
         display.log_message += "Files have been configured.";
     }
