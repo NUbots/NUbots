@@ -10,11 +10,11 @@ Emit a Kick message when wanting to kick.
 
 ## Consumes
 
-- `message::skill::Kick` the kick information to use when kicking.
+- `message::skill::Kick` a request to kick. The Booster visual kick is autonomous
 
 ## Emits
 
-- `message::booster::BoosterVisualKick` through the Script extension, which populates the requested Script/s into LimbsSequences.
+- `message::booster::BoosterVisualKick` which the Booster `HardwareIO` forwards to the SDK via `booster_client.VisualKick(start, version)`.
 
 ## Dependencies
 

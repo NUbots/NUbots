@@ -1,4 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
-# What version of Booster's visual kick to use
+# What version of Booster's visual kick to use (1 = standard, 2 = hard)
 version: 2
+# How long to let the kick run before reporting the task as done. The SDK gives no
+# completion feedback.
+kick_duration: 3.0
