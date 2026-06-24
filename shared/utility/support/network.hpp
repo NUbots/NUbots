@@ -131,9 +131,9 @@ namespace utility::support {
         return std::string(ssid);
     }
 
-    inline std::string get_wifi_password(const std::string& ssid, const std::string& wifi_interface) {
-        std::string wpa_supplicant_file = fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface);
-        std::ifstream file(wpa_supplicant_file);
+    inline std::string get_wifi_password(const std::string& ssid) {
+        std::string nmconfig = fmt::format("/etc/NetworkManager/system-connections/wifi-{}.conf", ssid);
+        std::ifstream file(nmconfig);
         std::string line;
         bool ssid_found = false;
         char c;
@@ -151,11 +151,8 @@ namespace utility::support {
                 // Skip whitespace and the opening quote
                 while (file.get(c) && isspace(c))
                     ;
-                if (c != '\"')
-                    return "";  // Expected a quote
-
-                // Read the psk value inside the quotes
-                while (file.get(c) && c != '\"') {
+                // Read the psk value
+                while (file.get(c)) {
                     psk.push_back(c);
                 }
 
@@ -167,11 +164,9 @@ namespace utility::support {
                 // Skip whitespace and the equals sign
                 while (file.get(c) && (isspace(c) || c == '='))
                     ;
-                if (c != '\"')
-                    return "";  // Expected a quote
 
-                // Read the ssid value inside the quotes
-                while (file.get(c) && c != '\"') {
+                // Read the ssid value
+                while (file.get(c)) {
                     current_ssid.push_back(c);
                 }
 
