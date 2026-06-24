@@ -12,6 +12,7 @@ nuclear_role(
   network::PlotJuggler
   # Sensors
   input::SensorFilter
+  localisation::Mocap
   input::NatNet
   support::logging::DataLogging
   tools::MocapOdometryBenchmark

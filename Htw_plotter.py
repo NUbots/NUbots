@@ -2,8 +2,9 @@ import json
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 
-json_file = "mocap_htw_3.json"
+json_file = "mocap_htw_6.json"
 
 def HtwMessagetoHtw(HtwMessage):
     def v(row, col):
@@ -34,16 +35,44 @@ with open(json_file) as f:
 def Hwt(rec, key):
     return invert(HtwMessagetoHtw(rec["data"][key]))
 
-point_trail = [HtwtoCoord(Hwt(r, "Htw")) for r in records]
-gt_point_trail = [HtwtoCoord(Hwt(r, "Htw_ground_truth")) for r in records]
-kin_point_trail = [HtwtoCoord(Hwt(r, "Htw_kinematic")) for r in records]
+point_trail    = np.array([HtwtoCoord(Hwt(r, "Htw")) for r in records])
+gt_trail       = np.array([HtwtoCoord(Hwt(r, "Htw_ground_truth")) for r in records])
+kin_trail      = np.array([HtwtoCoord(Hwt(r, "Htw_kinematic")) for r in records])
 
-x, y = np.array(point_trail).T
-gt_x, gt_y = np.array(gt_point_trail).T
-kin_x, kin_y = np.array(kin_point_trail).T
-plt.scatter(x, y, linewidths=0.001, label="NUral odometry")
-plt.scatter(gt_x, gt_y, linewidths=0.001, label="ground truth")
-plt.scatter(kin_x, kin_y, linewidths=0.001, label="kinematic odometry")
-plt.legend()
-plt.savefig("img.png")
+fig, ax = plt.subplots()
+
+all_x = np.concatenate([point_trail[:, 0], gt_trail[:, 0], kin_trail[:, 0]])
+all_y = np.concatenate([point_trail[:, 1], gt_trail[:, 1], kin_trail[:, 1]])
+pad = ((all_x.max() - all_x.min()) + (all_y.max() - all_y.min())) * 0.05 + 0.01
+ax.set_xlim(all_x.min() - pad, all_x.max() + pad)
+ax.set_ylim(all_y.min() - pad, all_y.max() + pad)
+ax.set_aspect("equal")
+
+gt_line,  = ax.plot([], [], ".", markersize=2, label="ground truth")
+kin_line, = ax.plot([], [], ".", markersize=2, label="kinematic odometry")
+nur_line, = ax.plot([], [], ".", markersize=2, label="NUral odometry")
+
+# Current-position markers
+gt_dot,  = ax.plot([], [], "o", markersize=6, color=gt_line.get_color())
+kin_dot, = ax.plot([], [], "o", markersize=6, color=kin_line.get_color())
+nur_dot, = ax.plot([], [], "o", markersize=6, color=nur_line.get_color())
+
+ax.legend()
+
+# How many data points to advance per animation frame
+step = max(1, len(records) // 500)
+
+def update(frame):
+    i = min(frame * step + 1, len(records))
+    gt_line.set_data(gt_trail[:i, 0], gt_trail[:i, 1])
+    kin_line.set_data(kin_trail[:i, 0], kin_trail[:i, 1])
+    nur_line.set_data(point_trail[:i, 0], point_trail[:i, 1])
+    gt_dot.set_data([gt_trail[i - 1, 0]], [gt_trail[i - 1, 1]])
+    kin_dot.set_data([kin_trail[i - 1, 0]], [kin_trail[i - 1, 1]])
+    nur_dot.set_data([point_trail[i - 1, 0]], [point_trail[i - 1, 1]])
+    return gt_line, kin_line, nur_line, gt_dot, kin_dot, nur_dot
+
+n_frames = (len(records) + step - 1) // step
+anim = FuncAnimation(fig, update, frames=n_frames, interval=20, blit=True)
+
 plt.show()

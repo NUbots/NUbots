@@ -9,7 +9,7 @@ import sys
 def get_model_class():
     import torch
     import torch.nn as nn
-    
+
     class ResBlock1D(nn.Module):
         def __init__(self, channels):
             super().__init__()
@@ -18,7 +18,7 @@ def get_model_class():
             self.relu = nn.ReLU()
             self.conv2 = nn.Conv1d(channels, channels, kernel_size=3, padding=1)
             self.bn2 = nn.BatchNorm1d(channels)
-            
+
         def forward(self, x):
             residual = x
             out = self.conv1(x)
@@ -57,10 +57,10 @@ def get_model_class():
             ]
             for _ in range(num_layers):
                 layers.append(ResBlock1D(hidden_dim))
-            
+
             layers.append(nn.AdaptiveAvgPool1d(1)) # Global Average Pooling
             self.net = nn.Sequential(*layers)
-            
+
             self.fc = nn.Sequential(
                 nn.Linear(hidden_dim, 64),
                 nn.ReLU(),
@@ -73,19 +73,19 @@ def get_model_class():
                 x = x.view(x.size(0), -1, self.input_dim)
 
             x_norm = (x - self.mean) / (self.std + 1e-8)
-            
+
             # Conv1D expects [batch, features, seq_len]
             x_norm = x_norm.transpose(1, 2)
-            
+
             features = self.net(x_norm) # [batch, hidden_dim, 1]
             features = features.squeeze(2) # [batch, hidden_dim]
-            
+
             out = self.fc(features)
-            
+
             if not self.training:
                 # Scale back to real-world units during inference/ONNX export
                 out = out * self.target_std + self.target_mean
-                
+
             return out
     return AutoOdomResNet
 
@@ -265,7 +265,7 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
     window_seg_ids = np.array(window_seg_ids)
 
     X = torch.tensor(np.array(X), dtype=torch.float32)
-    
+
     Y_raw = np.array(Y)
     target_mean_val = np.mean(Y_raw, axis=0)
     target_std_val = np.std(Y_raw, axis=0)
@@ -286,9 +286,9 @@ def run(nbs_file, epochs, batch_size, window_size, rollout_length=100, lambda_tr
     AutoOdomModel = get_model_class()
     feature_dim = X.shape[1] // window_size
     model = AutoOdomModel(
-        input_dim=feature_dim, 
-        hidden_dim=256, 
-        mean=mean_val, 
+        input_dim=feature_dim,
+        hidden_dim=256,
+        mean=mean_val,
         std=std_val,
         target_mean=target_mean_val,
         target_std=target_std_val
