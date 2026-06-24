@@ -457,7 +457,6 @@ namespace module::skill {
     void RLWalk::reset_loop_timing() {
         have_timing_sample   = false;
         timing_samples       = 0;
-        timing_out_of_tol    = 0;
         timing_period_sum    = 0.0;
         timing_period_sq_sum = 0.0;
         timing_period_min    = 0.0;
@@ -514,15 +513,12 @@ namespace module::skill {
             const double mean = timing_period_sum / static_cast<double>(timing_samples);
             const double var  = std::max(0.0, timing_period_sq_sum / static_cast<double>(timing_samples) - mean * mean);
             const double jitter = std::sqrt(var);
-            const double off_target_pct =
-                100.0 * static_cast<double>(timing_out_of_tol) / static_cast<double>(timing_samples);
             log<DEBUG>(
                 fmt::format("| ticks: {:>6d} "
                             "| dt: {:7.5f}s ({:6.2f}Hz) "
                             "| jitter: {:7.5f}s "
                             "| min: {:7.5f}s "
                             "| max: {:7.5f}s "
-                            "| off-target: {:>2d} ({:5.1f}%) "
                             "| drift vs nuclear: {:+8.5f}s "
                             "| vs wall: {:+8.5f}s "
                             "| NUClear clock vs Wall clock: {:+8.5f}s |",
@@ -532,8 +528,6 @@ namespace module::skill {
                             jitter,
                             timing_period_min,
                             timing_period_max,
-                            timing_out_of_tol,
-                            off_target_pct,
                             drift_nuclear,
                             drift_steady,
                             drift_nuclear_steady));

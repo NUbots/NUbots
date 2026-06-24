@@ -129,7 +129,6 @@ namespace module::skill {
         NUClear::clock::time_point last_timing_report{};
         /// @brief Running statistics on the NUClear-clock per-tick period (seconds), since the walk started.
         uint64_t timing_samples     = 0;
-        uint64_t timing_out_of_tol  = 0;
         double timing_period_sum    = 0.0;
         double timing_period_sq_sum = 0.0;
         double timing_period_min    = 0.0;
