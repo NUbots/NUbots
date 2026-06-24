@@ -11,7 +11,7 @@ nuclear_role(
   network::NetworkForwarder
   network::PlotJuggler
   # Sensors
-  input::SensorFilter
+  input::K1Sensors
   # Director
   extension::Director
   # Servos

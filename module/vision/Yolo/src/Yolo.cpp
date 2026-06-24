@@ -304,6 +304,11 @@ namespace module::vision {
                     // Get the class id associated with the detected object
                     int class_id = class_ids[idx];
 
+                    // Skip if below per-class confidence threshold
+                    if (class_confidences[idx] <= objects[class_id].confidence_threshold) {
+                        continue;
+                    }
+
                     // Convert the bounding box points to unit vectors (rays) in the camera {c} space
                     Eigen::Vector3d top_left_ray  = pix_to_ray(boxes[idx].x, boxes[idx].y);
                     Eigen::Vector3d top_right_ray = pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y);

@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -17,7 +17,7 @@ save_map: false
 min_field_line_points: 20
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 5
+min_field_line_intersections: 4
 
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 1
@@ -70,15 +70,15 @@ goal_post_error_tolerance: 0.5
 normal_opt:
   algorithm: LN_COBYLA
   # Relative tolerance on the optimisation parameters
-  xtol_rel: 1e-6
+  xtol_rel: 1e-12
   # Relative tolerance on the optimisation function value
-  ftol_rel: 1e-6
+  ftol_rel: 1e-12
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
 uncertainty_opt: # Quicker optimisation, but less accurate.
-  algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific problem (quick and nasty optimisation)
-  # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation parameters at time t. Stop optimising when del_x < xtol_rel.
+  algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific >
+  # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation >
   xtol_rel: 1e-3
   # Relative tolerance on the optimisation function value, del_f = |(f_{t}-f{t-1})/f_{t-1}|.
   ftol_rel: 1e-3
@@ -89,4 +89,4 @@ exponential_filter:
   # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
   # [x, y, theta] - Higher values = more responsive to new measurements
   # Lower values = more smoothed/filtered output
-  alpha: [0.001, 0.001, 0.05]
+  alpha: [0.1, 0.1, 0.5]

@@ -11,7 +11,8 @@ find_package(fmt REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC fmt::fmt)
 
 find_package(zstr REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC zstr::zstr)
+find_package(ZLIB REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC zstr::zstr ZLIB::ZLIB)
 
 find_package(mio REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC mio::mio)

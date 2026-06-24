@@ -11,7 +11,7 @@
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
-    using booster::robot::b1::JointIndex;
+    using booster::robot::b1::JointIndexK1;
     using extension::Configuration;
     using extension::behaviour::RunReason;
     using message::booster::BoosterFallDownState;
@@ -172,34 +172,36 @@ namespace module::platform::Booster {
         // slots the enum labels kCrank{Up,Down}{Left,Right}.
         const auto& serial = low_msg->motor_state_serial();
 
-        auto fill_serial = [&](RawSensors::Servo& servo, JointIndex idx) {
+        auto fill_serial = [&](RawSensors::Servo& servo, JointIndexK1 idx) {
             auto i = static_cast<size_t>(idx);
             if (i < serial.size()) {
                 fill_servo(servo, serial[i]);
             }
         };
 
-        fill_serial(sensors->servo.head_pan, JointIndex::kHeadYaw);
-        fill_serial(sensors->servo.head_tilt, JointIndex::kHeadPitch);
-        fill_serial(sensors->servo.l_shoulder_pitch, JointIndex::kLeftShoulderPitch);
-        fill_serial(sensors->servo.l_shoulder_roll, JointIndex::kLeftShoulderRoll);
-        fill_serial(sensors->servo.l_elbow, JointIndex::kLeftElbowPitch);
-        fill_serial(sensors->servo.r_shoulder_pitch, JointIndex::kRightShoulderPitch);
-        fill_serial(sensors->servo.r_shoulder_roll, JointIndex::kRightShoulderRoll);
-        fill_serial(sensors->servo.r_elbow, JointIndex::kRightElbowPitch);
+        fill_serial(sensors->servo.head_pan,          JointIndexK1::kHeadYaw);
+        fill_serial(sensors->servo.head_tilt,         JointIndexK1::kHeadPitch);
+        fill_serial(sensors->servo.l_shoulder_pitch,  JointIndexK1::kLeftShoulderPitch);
+        fill_serial(sensors->servo.l_shoulder_roll,   JointIndexK1::kLeftShoulderRoll);
+        fill_serial(sensors->servo.l_elbow,           JointIndexK1::kLeftElbowPitch);
+        fill_serial(sensors->servo.l_elbow_yaw,       JointIndexK1::kLeftElbowYaw);
+        fill_serial(sensors->servo.r_shoulder_pitch,  JointIndexK1::kRightShoulderPitch);
+        fill_serial(sensors->servo.r_shoulder_roll,   JointIndexK1::kRightShoulderRoll);
+        fill_serial(sensors->servo.r_elbow,           JointIndexK1::kRightElbowPitch);
+        fill_serial(sensors->servo.r_elbow_yaw,       JointIndexK1::kRightElbowYaw);
 
-        fill_serial(sensors->servo.l_hip_pitch, JointIndex::kLeftHipPitch);
-        fill_serial(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
-        fill_serial(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
-        fill_serial(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
-        fill_serial(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);   // L ankle pitch
-        fill_serial(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);  // L ankle roll
-        fill_serial(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
-        fill_serial(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
-        fill_serial(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
-        fill_serial(sensors->servo.r_knee, JointIndex::kRightKneePitch);
-        fill_serial(sensors->servo.r_ankle_pitch, JointIndex::kCrankUpRight);   // R ankle pitch
-        fill_serial(sensors->servo.r_ankle_roll, JointIndex::kCrankDownRight);  // R ankle roll
+        fill_serial(sensors->servo.l_hip_pitch,       JointIndexK1::kLeftHipPitch);
+        fill_serial(sensors->servo.l_hip_roll,        JointIndexK1::kLeftHipRoll);
+        fill_serial(sensors->servo.l_hip_yaw,         JointIndexK1::kLeftHipYaw);
+        fill_serial(sensors->servo.l_knee,            JointIndexK1::kLeftKneePitch);
+        fill_serial(sensors->servo.l_ankle_pitch,     JointIndexK1::kCrankUpLeft);    // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll,      JointIndexK1::kCrankDownLeft);  // L ankle roll
+        fill_serial(sensors->servo.r_hip_pitch,       JointIndexK1::kRightHipPitch);
+        fill_serial(sensors->servo.r_hip_roll,        JointIndexK1::kRightHipRoll);
+        fill_serial(sensors->servo.r_hip_yaw,         JointIndexK1::kRightHipYaw);
+        fill_serial(sensors->servo.r_knee,            JointIndexK1::kRightKneePitch);
+        fill_serial(sensors->servo.r_ankle_pitch,     JointIndexK1::kCrankUpRight);   // R ankle pitch
+        fill_serial(sensors->servo.r_ankle_roll,      JointIndexK1::kCrankDownRight); // R ankle roll
 
         // Battery SOC (updated by battery_handler)
         {

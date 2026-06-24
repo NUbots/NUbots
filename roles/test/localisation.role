@@ -21,11 +21,7 @@ nuclear_role(
   input::NatNet
   input::K1Sensors
   localisation::Mocap
-  # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::BallDetector
-  vision::FieldLineDetector
+  # Vision vision::VisualMesh vision::GreenHorizonDetector vision::BallDetector vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
@@ -52,4 +48,5 @@ nuclear_role(
   purpose::KeyboardWalk
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
+  support::logging::DataLogging
 )
