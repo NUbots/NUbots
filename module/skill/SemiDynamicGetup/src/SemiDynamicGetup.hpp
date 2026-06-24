@@ -16,15 +16,22 @@ namespace module::skill {
     class SemiDynamicGetup : public ::extension::behaviour::BehaviourReactor {
     private:
         struct Config {
-            // --- Script selection ---
-            std::vector<std::string> getup_back{};
-            std::vector<std::string> getup_stand{};
+            // --- Per-direction getup (front / back) ---
+            // Everything that differs between rising from the front and the back:
+            // the script(s) to play, how many trailing frames form the balance-
+            // corrected rise phase, and the rise-phase tuning.
+            struct DirectionConfig {
+                std::vector<std::string> scripts{};  // getup script(s) for this direction
+                int rise_frame_count   = 3;
+                double pitch_reference = 0.7;
+                double Kp              = 0.3;
+                double max_correction  = 1.0;
+            };
+            DirectionConfig back{};
+            DirectionConfig front{};
 
-            // --- Rise phase ---
-            int rise_frame_count   = 3;
-            double pitch_reference = 0.7;
-            double Kp              = 0.3;
-            double max_correction  = 0.3;
+            // Stand script, shared by both directions (run after the rise phase).
+            std::vector<std::string> getup_stand{};
 
             // --- Fall detection (ported from FallingRelaxPlanner) ---
             // Settled-state tilt check, used at the end of RISE/STAND to decide
@@ -64,6 +71,11 @@ namespace module::skill {
         enum class InternalPhase { EARLY, RISE, STAND, STABILISE };
         InternalPhase internal_phase = InternalPhase::EARLY;
 
+        /// Which orientation this getup started from, set from the task message at NEW_TASK.
+        /// Selects the script frames, rise tuning and the "still in start orientation" test.
+        enum class StartSide { BACK, FRONT };
+        StartSide start_side = StartSide::BACK;
+
         /// Per-signal stability categorisation for the dynamic falling detector.
         enum class State { STABLE, UNSTABLE, FALLING };
 
@@ -78,8 +90,21 @@ namespace module::skill {
             return alpha * value + (1.0 - alpha) * new_value;
         }
 
-        std::vector<utility::skill::Frame> early_frames{};
-        std::vector<utility::skill::Frame> rise_frames{};
+        /// EARLY + RISE frame split for one getup direction, precomputed at config load.
+        struct GetupFrames {
+            std::vector<utility::skill::Frame> early{};
+            std::vector<utility::skill::Frame> rise{};
+        };
+        GetupFrames back_frames{};
+        GetupFrames front_frames{};
+
+        /// The frames / tuning for the currently active getup direction.
+        const GetupFrames& active_frames() const {
+            return start_side == StartSide::FRONT ? front_frames : back_frames;
+        }
+        const Config::DirectionConfig& active_cfg() const {
+            return start_side == StartSide::FRONT ? cfg.front : cfg.back;
+        }
 
         NUClear::clock::time_point stabilisation_start{};
 

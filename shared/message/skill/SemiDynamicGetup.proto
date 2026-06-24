@@ -30,4 +30,12 @@ package message.skill;
 /**
  * Emit a SemiDynamicGetup Task in order to start the new getup process.
  */
-message SemiDynamicGetup {}
+message SemiDynamicGetup {
+    /// Which fallen orientation the getup should start from. This selects the
+    /// script set and per-direction tuning used by the module.
+    enum Direction {
+        BACK  = 0;  // lying on the back (default)
+        FRONT = 1;  // lying on the front
+    }
+    Direction direction = 1;
+}

@@ -143,12 +143,19 @@ namespace module::skill {
         on<Configuration>("SemiDynamicGetup.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.getup_back       = config["scripts"]["getup_back"].as<std::vector<std::string>>();
-            cfg.getup_stand      = config["scripts"]["getup_stand"].as<std::vector<std::string>>();
-            cfg.rise_frame_count = config["rise_frame_count"].as<int>();
-            cfg.pitch_reference  = config["pitch_reference"].as<double>();
-            cfg.Kp               = config["Kp"].as<double>();
-            cfg.max_correction   = config["max_correction"].as<double>();
+            // Per-direction getup config (front / back)
+            auto load_direction = [](const Configuration& c) {
+                Config::DirectionConfig dc{};
+                dc.scripts          = c["scripts"].as<std::vector<std::string>>();
+                dc.rise_frame_count = c["rise_frame_count"].as<int>();
+                dc.pitch_reference  = c["pitch_reference"].as<double>();
+                dc.Kp               = c["Kp"].as<double>();
+                dc.max_correction   = c["max_correction"].as<double>();
+                return dc;
+            };
+            cfg.back        = load_direction(config["back"]);
+            cfg.front       = load_direction(config["front"]);
+            cfg.getup_stand = config["getup_stand"].as<std::vector<std::string>>();
 
             cfg.fall_recovery_tilt = config["fall_recovery_tilt"].as<double>();
 
@@ -175,36 +182,52 @@ namespace module::skill {
             cfg.max_step_velocity      = config["max_step_velocity"].as<double>();
             cfg.walk_command_rate      = config["walk_command_rate"].as<double>();
 
-            // Load all back-getup frames and split into early + rise phases
-            std::vector<Frame> all_frames;
-            for (const auto& name : cfg.getup_back) {
-                auto parsed = utility::skill::load(name).as<std::vector<Frame>>();
-                all_frames.insert(all_frames.end(), parsed.begin(), parsed.end());
-            }
+            // Load each direction's script(s) and split into early + rise phases.
+            auto build_frames = [this](const std::string& label, const Config::DirectionConfig& dc) {
+                std::vector<Frame> all_frames;
+                for (const auto& name : dc.scripts) {
+                    auto parsed = utility::skill::load(name).as<std::vector<Frame>>();
+                    all_frames.insert(all_frames.end(), parsed.begin(), parsed.end());
+                }
 
-            // Clamp to [1, total] so a bad config value can't index out of bounds or
-            // produce an empty rise sequence (which would never signal Done)
-            const int total  = static_cast<int>(all_frames.size());
-            const int n_rise = total > 0 ? std::clamp(cfg.rise_frame_count, 1, total) : 0;
-            const int split  = total - n_rise;
+                // Clamp to [1, total] so a bad config value can't index out of bounds or
+                // produce an empty rise sequence (which would never signal Done)
+                const int total  = static_cast<int>(all_frames.size());
+                const int n_rise = total > 0 ? std::clamp(dc.rise_frame_count, 1, total) : 0;
+                const int split  = total - n_rise;
 
-            early_frames.assign(all_frames.begin(), all_frames.begin() + split);
-            rise_frames.assign(all_frames.begin() + split, all_frames.end());
+                GetupFrames gf{};
+                gf.early.assign(all_frames.begin(), all_frames.begin() + split);
+                gf.rise.assign(all_frames.begin() + split, all_frames.end());
 
-            log<INFO>("Loaded",
-                      all_frames.size(),
-                      "back-getup frames:",
-                      early_frames.size(),
-                      "early,",
-                      rise_frames.size(),
-                      "rise");
+                log<INFO>("Loaded",
+                          all_frames.size(),
+                          label.c_str(),
+                          "getup frames:",
+                          gf.early.size(),
+                          "early,",
+                          gf.rise.size(),
+                          "rise");
+                return gf;
+            };
+            back_frames  = build_frames("back", cfg.back);
+            front_frames = build_frames("front", cfg.front);
         });
 
         // Trigger<Sensors> makes this handler fire on every sensor update, enabling:
         //   - Mid-script fall detection (abort the BodySequence immediately if falling)
         //   - Per-tick capture-point tracking in the STABILISE phase
         on<Provide<SemiDynamicGetupTask>, Needs<BodySequence>, Trigger<Sensors>>().then(
-            [this](const RunReason& run_reason, const Uses<BodySequence>& body, const Sensors& sensors) {
+            [this](const SemiDynamicGetupTask& task,
+                   const RunReason& run_reason,
+                   const Uses<BodySequence>& body,
+                   const Sensors& sensors) {
+                // Latch which orientation we are getting up from. Read only on NEW_TASK;
+                // it must persist across the phase-transition runs that follow.
+                if (run_reason == RunReason::NEW_TASK) {
+                    start_side = task.direction == SemiDynamicGetupTask::Direction::FRONT ? StartSide::FRONT
+                                                                                         : StartSide::BACK;
+                }
                 // -----------------------------------------------------------------
                 // Shared sensor helpers
                 // -----------------------------------------------------------------
@@ -282,20 +305,31 @@ namespace module::skill {
                     return falling;
                 };
 
-                // After a fall, restart the getup only if the robot is still on its back // TODO
+                // True if the robot is still lying in the orientation this getup started from.
+                // Uses the same cube-face tests as GetUp: torso x mostly world +z = on back,
+                // torso x mostly world -z = on front.
+                auto in_start_orientation = [&]() -> bool {
+                    const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
+                    const Eigen::Vector3d uXTw = Hwt.rotation().col(0);
+                    if (start_side == StartSide::FRONT) {
+                        return uXTw.z() <= uXTw.x() && uXTw.z() <= uXTw.y();
+                    }
+                    return uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y();
+                };
+
+                // After a mid-getup fall: if the robot is still in its starting orientation,
+                // restart this getup from the early phase; otherwise escalate (Done) so GetUp
+                // re-classifies and dispatches the correct getup for the new orientation.
                 auto restart_or_escalate = [&]() {
                     // Reset the falling filters so the next attempt starts from a clean slate.
                     gyro_mag_value = acc_mag_value = acc_angle_value = 0.0;
-                    const Eigen::Isometry3d Hwt(sensors.Htw.inverse());
-                    const Eigen::Vector3d uXTw = Hwt.rotation().col(0);
-                    // Same cube-face test as GetUp: on the back when torso x is mostly world z
-                    if (uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y()) {
+                    if (in_start_orientation()) {
                         log<WARN>("Restarting getup from the early phase");
                         internal_phase = InternalPhase::EARLY;
-                        emit<Task>(make_sequence(early_frames));
+                        emit<Task>(make_sequence(active_frames().early));
                     }
                     else {
-                        log<WARN>("No longer on back, escalating so the getup side is re-classified");
+                        log<WARN>("No longer in the start orientation, escalating so the getup side is re-classified");
                         emit<Task>(std::make_unique<Done>());
                     }
                 };
@@ -412,10 +446,10 @@ namespace module::skill {
                 // NEW_TASK — reset and start the early phase
                 // -----------------------------------------------------------------
                 if (run_reason == RunReason::NEW_TASK) {
-                    log<INFO>("SemiDynamicGetup starting");
+                    log<INFO>("SemiDynamicGetup starting from", start_side == StartSide::FRONT ? "front" : "back");
                     gyro_mag_value = acc_mag_value = acc_angle_value = 0.0;
                     internal_phase = InternalPhase::EARLY;
-                    emit<Task>(make_sequence(early_frames));
+                    emit<Task>(make_sequence(active_frames().early));
                 }
 
                 // -----------------------------------------------------------------
@@ -426,26 +460,28 @@ namespace module::skill {
                     switch (internal_phase) {
 
                         case InternalPhase::EARLY: {
-                            // One-shot hip-pitch correction based on current signed forward pitch.
+                            // One-shot hip-pitch correction based on current signed forward pitch,
+                            // using the active direction's tuning.
+                            const auto& dcfg   = active_cfg();
                             const double pitch = forward_pitch();
-                            const double error = pitch - cfg.pitch_reference;
+                            const double error = pitch - dcfg.pitch_reference;
                             const double hip_correction =
-                                std::clamp(cfg.Kp * error, -cfg.max_correction, cfg.max_correction);
+                                std::clamp(dcfg.Kp * error, -dcfg.max_correction, dcfg.max_correction);
                             log<INFO>("Rise phase: pitch=",
                                       pitch,
                                       "rad  reference=",
-                                      cfg.pitch_reference,
+                                      dcfg.pitch_reference,
                                       "rad  error=",
                                       error,
                                       "rad  hip_correction=",
                                       hip_correction,
                                       "rad (clamped=",
-                                      std::abs(cfg.Kp * error) > cfg.max_correction,
+                                      std::abs(dcfg.Kp * error) > dcfg.max_correction,
                                       ", tilt=",
                                       tilt,
                                       "rad)");
                             internal_phase = InternalPhase::RISE;
-                            emit<Task>(make_sequence(rise_frames, hip_correction));
+                            emit<Task>(make_sequence(active_frames().rise, hip_correction));
                             break;
                         }
 

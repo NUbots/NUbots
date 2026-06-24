@@ -104,14 +104,12 @@ namespace module::skill {
                 emit(std::make_unique<Stability>(Stability::FALLEN));
 
                 if (on_front) {
-                    log<INFO>("Getting up from front");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_front));
+                    log<INFO>("Getting up from front (semi-dynamic)");
+                    emit<Task>(std::make_unique<SemiDynamicGetup>(SemiDynamicGetup::Direction::FRONT));
                 }
                 else if (on_back) {
-                    log<INFO>("Getting up from back");
-                    // emit<Task>(load_script<BodySequence>(cfg.getup_back));
-                    log<DEBUG>("Emitting semidynamic getup task");
-                    emit<Task>(std::make_unique<SemiDynamicGetup>());
+                    log<INFO>("Getting up from back (semi-dynamic)");
+                    emit<Task>(std::make_unique<SemiDynamicGetup>(SemiDynamicGetup::Direction::BACK));
                 }
                 else if (on_right || on_left) {
                     log<INFO>("Landed on side, rolling");

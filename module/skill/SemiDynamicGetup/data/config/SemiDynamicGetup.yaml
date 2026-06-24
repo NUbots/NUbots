@@ -1,23 +1,46 @@
 log_level: DEBUG
 
-# Number of trailing frames from getup_back treated as the "rise phase" (balance-corrected).
-# The remaining frames run unmodified as the "early phase".
-rise_frame_count: 3
+# ---------------------------------------------------------------------------
+# Per-direction getup configuration
+#
+# Each block configures the getup for one fallen orientation. GetUp selects the
+# block via the Direction field on the SemiDynamicGetup task (FRONT / BACK).
+#
+#   scripts:          getup keyframe script(s) for this orientation
+#   rise_frame_count: number of trailing frames treated as the balance-corrected
+#                     "rise phase"; the remaining frames run unmodified as "early"
+#   pitch_reference:  expected signed forward pitch of the torso (rad) at the start
+#                     of the rise phase. atan2-based: 0 = upright, positive = leaning
+#                     forward, negative = leaning backward. The robot should be
+#                     crouched leaning forward here, so ~40 deg (0.7 rad) is typical.
+#   Kp / max_correction:
+#                     hip-pitch correction applied across the rise frames:
+#                     correction = clamp(Kp * (measured_pitch - pitch_reference),
+#                                        -max_correction, max_correction)
+#                     Positive Kp: leaning further forward than expected extends the
+#                     hips (raising the torso); leaning back flexes them (pushing the
+#                     CoM forward over the feet). Flip the sign of Kp if the front
+#                     getup needs the opposite correction; tune per direction.
+# ---------------------------------------------------------------------------
+back:
+  scripts:
+    - "StandUpBack.yaml"
+  rise_frame_count: 3
+  pitch_reference: 0.7
+  Kp: 0.3
+  max_correction: 1.0
 
-# Expected signed forward pitch of the torso (rad) at the start of the rise phase.
-# atan2-based: 0 = fully upright, positive = leaning forward, negative = leaning backward
-# (lying flat on the back = -π/2).
-# The robot should be crouched leaning forward here, so ~40° (0.7 rad) is a reasonable default.
-pitch_reference: 0.7
+front:
+  scripts:
+    - "StandUpFront.yaml"
+  rise_frame_count: 3
+  pitch_reference: 0.7
+  Kp: 0.3
+  max_correction: 1.0
 
-# Correction gain applied to both hip pitch joints in the rise frames.
-# correction = clamp(Kp * (measured_pitch - pitch_reference), -max_correction, max_correction)
-# Positive Kp: leaning further forward than expected extends the hips (raising the torso);
-# leaning backward flexes them (pushing the CoM forward over the feet).
-Kp: 0.3
-
-# Maximum magnitude of the hip pitch correction (rad).
-max_correction: 1.0
+# Stand script, shared by both directions (run after the rise phase).
+getup_stand:
+  - "Stand.yaml"
 
 # ---------------------------------------------------------------------------
 # Fall detection
@@ -99,9 +122,3 @@ max_step_velocity: 0.2
 # rate-limits itself internally, so commanding faster than ~10 Hz only adds
 # Director churn.
 walk_command_rate: 10.0
-
-scripts:
-  getup_back:
-    - "StandUpBack.yaml"
-  getup_stand:
-    - "Stand.yaml"
