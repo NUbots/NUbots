@@ -299,7 +299,10 @@ namespace module::purpose {
         });
 
         // When we shutdown end ncurses
-        on<Shutdown>().then(endwin);
+        on<Shutdown>().then([] {
+            curs_set(1);
+            endwin();
+        });
     }
 
     void ScriptTuner::activate_frame(int frame) {
