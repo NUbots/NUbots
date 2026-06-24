@@ -178,9 +178,41 @@ namespace module::localisation {
         particles.reserve(cfg.num_particles);
         double weight = 1.0 / cfg.num_particles;
 
-        if (cfg.starting_side == "CUSTOM") {
+        auto left_middle_side = Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+        auto left_bottom_side = Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+        auto left_top_side = Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (fd.dimensions.field_width / 2), -M_PI_2);
+        auto right_middle_side = Eigen::Vector3d((2 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+        auto right_bottom_side = Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+        auto right_top_side = Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
+
+        std::vector<Eigen::Vector3d> hypotheses;
+
+        if (cfg.starting_side == "LEFT") {
+            hypotheses.push_back(left_middle_side);
+        } else if (cfg.starting_side == "RIGHT") {
+            hypotheses.push_back(right_middle_side);
+        } else if (cfg.starting_side == "EITHER") {
+            hypotheses.push_back(left_middle_side);
+            hypotheses.push_back(left_bottom_side);
+            hypotheses.push_back(left_top_side);
+            hypotheses.push_back(right_middle_side);
+            hypotheses.push_back(right_bottom_side);
+            hypotheses.push_back(right_top_side);
+        } else if (cfg.starting_side == "CUSTOM") {
+            hypotheses.push_back(cfg.initial_state);
+        }
+
+        if (!hypotheses.empty()) {
+            std::normal_distribution<double> noise_x(0, 0.5);
+            std::normal_distribution<double> noise_y(0, 0.5);
+            std::normal_distribution<double> noise_theta(0, 0.2);
+            
             for (int i = 0; i < cfg.num_particles; ++i) {
-                particles.push_back({cfg.initial_state, weight});
+                Eigen::Vector3d base = hypotheses[i % hypotheses.size()];
+                Eigen::Vector3d state(base.x() + noise_x(rng), 
+                                      base.y() + noise_y(rng), 
+                                      utility::math::angle::normalise_angle(base.z() + noise_theta(rng)));
+                particles.push_back({state, weight});
             }
         } else {
             // Distribute across the field uniformly
@@ -192,6 +224,7 @@ namespace module::localisation {
                 particles.push_back({Eigen::Vector3d(x_dist(rng), y_dist(rng), theta_dist(rng)), weight});
             }
         }
+
         last_Hrw_valid = false;
         startup = false;
     }
