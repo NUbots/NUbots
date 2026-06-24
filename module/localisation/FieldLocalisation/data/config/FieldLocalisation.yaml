@@ -1,0 +1,45 @@
+# Log level for this module
+log_level: INFO
+
+# Initial number of particles
+num_particles: 1000
+
+# Minimum number of particles to maintain
+min_particles: 200
+
+# Map resolution (m/pixel)
+grid_size: 0.05
+
+# Whether to save the generated distance map
+save_map: false
+
+# Starting side of the field: LEFT, RIGHT, EITHER, CUSTOM
+starting_side: EITHER
+start_time_delay: 5
+
+# Custom initial state [x, y, theta] if starting_side is CUSTOM
+initial_state: [0.0, 0.0, 0.0]
+
+# Minimum number of field line points to run an update
+min_field_line_points: 30
+
+# Random particle injection for kidnapping recovery
+# Probability of injecting a random particle instead of resampling
+random_particle_injection_rate: 0.05
+
+# Process Noise (Odometry Drift Model)
+# Multipliers for noise proportional to distance travelled
+# [noise_x_per_dist, noise_y_per_dist, noise_theta_per_dist, noise_theta_per_angle]
+process_noise: [0.05, 0.05, 0.02, 0.1]
+# Minimum base noise added every update (x, y, theta)
+base_noise: [0.005, 0.005, 0.01]
+
+# Measurement Model (Likelihood)
+# Standard deviation for field line points distance (meters)
+field_line_sigma: 0.2
+# Probability of random measurement (heavy tail to handle outliers)
+field_line_rand_prob: 0.05
+
+# Intersections and Goals
+intersection_sigma: 0.3
+goal_post_sigma: 0.3
