@@ -39,6 +39,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/platform/aliases.hpp"
+
 namespace module::tools {
 
     using extension::Configuration;
@@ -295,6 +297,45 @@ namespace module::tools {
                 ofs_motd.close();
                 ifs_logo.close();
 
+                /*********************
+                 * BOOSTER ROBOT INFO *
+                 *********************/
+                log<INFO>("Updating Booster robot nickname");
+                {
+                    const fs::path robot_info_path = config["robot_info_path"].as<std::string>();
+                    std::string robot_name         = utility::platform::get_robot_alias(hostname);
+                    if (!robot_name.empty()) {
+                        robot_name[0] = std::toupper(static_cast<unsigned char>(robot_name[0]));
+                    }
+                    else {
+                        robot_name    = hostname;
+                        robot_name[0] = std::toupper(static_cast<unsigned char>(robot_name[0]));
+                        log<WARN>(fmt::format("No alias found for {}, using hostname as nickname", hostname));
+                    }
+                    const std::string nickname_line = fmt::format("Nickname: {} [NUbots]", robot_name);
+
+                    std::ifstream ifs_robot_info(robot_info_path);
+                    std::ostringstream updated;
+                    bool found        = false;
+                    std::string rline = {};
+                    while (std::getline(ifs_robot_info, rline)) {
+                        if (rline.rfind("Nickname:", 0) == 0) {
+                            updated << nickname_line << '\n';
+                            found = true;
+                        }
+                        else {
+                            updated << rline << '\n';
+                        }
+                    }
+                    ifs_robot_info.close();
+                    if (!found) {
+                        updated << nickname_line << '\n';
+                    }
+                    std::ofstream ofs_robot_info(robot_info_path, std::ios::trunc);
+                    ofs_robot_info << updated.str();
+                    ofs_robot_info.close();
+                }
+
                 /*********
                  * HOSTS *
                  *********/
@@ -372,7 +413,7 @@ namespace module::tools {
                 std::system(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
 
                 if (cli && std::find(cli->begin(), cli->end(), "--hostname") != cli->end()) {
-                    log<INFO>("Make sure to reboot to apply hostname change!");
+                    log<WARN>("Hostname change will be reflected next time you SSH into this robot.");
                 }
             });
 

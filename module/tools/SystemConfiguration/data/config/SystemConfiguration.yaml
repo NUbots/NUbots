@@ -53,3 +53,6 @@ links:
 
 # Generate locale
 generate_locale: True
+
+# Path to the Booster robot info file
+robot_info_path: /opt/booster/robot_info.txt
