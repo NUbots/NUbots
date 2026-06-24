@@ -3,6 +3,7 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <vector>
 
@@ -68,16 +69,18 @@ namespace module::skill {
         return hull;
     }
 
-    /// Returns true if p is at least margin metres inside the convex polygon (CCW vertex order).
-    /// A negative margin allows points slightly outside to count as stable.
-    static bool point_in_convex_polygon_2d(const Eigen::Vector2d& p,
-                                           const std::vector<Eigen::Vector2d>& hull,
-                                           double margin = 0.0) {
+    /// Minimum signed distance from p to the polygon edges (CCW vertex order).
+    /// Positive = p is inside by that many metres; negative = p is outside.
+    /// Useful as a tuning signal: it shows the margin by which the capture-point
+    /// test passes or fails, not just the pass/fail result.
+    static double signed_distance_in_polygon_2d(const Eigen::Vector2d& p,
+                                                const std::vector<Eigen::Vector2d>& hull) {
         const int n = static_cast<int>(hull.size());
         if (n == 0)
-            return false;
+            return -std::numeric_limits<double>::infinity();
         if (n == 1)
-            return (p - hull[0]).norm() <= 0.0;
+            return -(p - hull[0]).norm();
+        double min_dist = std::numeric_limits<double>::infinity();
         for (int i = 0; i < n; i++) {
             const Eigen::Vector2d& a = hull[i];
             const Eigen::Vector2d& b = hull[(i + 1) % n];
@@ -88,10 +91,9 @@ namespace module::skill {
                 continue;
             inward /= len;
             // Signed distance from edge to p (positive = inside)
-            if (inward.dot(p - a) < margin)
-                return false;
+            min_dist = std::min(min_dist, inward.dot(p - a));
         }
-        return true;
+        return min_dist;
     }
 
     /// Arithmetic centroid of a polygon's vertices.
@@ -208,9 +210,24 @@ namespace module::skill {
 
                 // Debounced fall detection for the dynamic phases
                 auto fall_detected = [&]() -> bool {
-                    const bool falling = tilt_from_vertical() > cfg.fall_recovery_tilt
-                                         && sensors.gyroscope.norm() > cfg.fall_gyro_threshold;
+                    const double tilt  = tilt_from_vertical();
+                    const double gyro  = sensors.gyroscope.norm();
+                    const bool falling = tilt > cfg.fall_recovery_tilt && gyro > cfg.fall_gyro_threshold;
                     fall_tick_count    = falling ? fall_tick_count + 1 : 0;
+                    // Per-tick telemetry for tuning fall_recovery_tilt / fall_gyro_threshold /
+                    // fall_debounce_ticks. Logs every sensor cycle while in a dynamic phase.
+                    log<DEBUG>("fall check: tilt=",
+                               tilt,
+                               "rad (thr",
+                               cfg.fall_recovery_tilt,
+                               ") gyro=",
+                               gyro,
+                               "rad/s (thr",
+                               cfg.fall_gyro_threshold,
+                               ") debounce=",
+                               fall_tick_count,
+                               "/",
+                               cfg.fall_debounce_ticks);
                     return fall_tick_count >= cfg.fall_debounce_ticks;
                 };
 
@@ -248,6 +265,17 @@ namespace module::skill {
                     // approximation for CoM velocity when the robot is nearly stationary.
                     const Eigen::Vector2d cp = com_world.head<2>() + sensors.vTw.cast<double>().head<2>() / omega;
 
+                    log<DEBUG>("CP calc: com_world=",
+                               com_world.transpose(),
+                               "h_com=",
+                               h_com,
+                               "omega=",
+                               omega,
+                               "vTw=",
+                               sensors.vTw.transpose(),
+                               "cp_xy=",
+                               cp.transpose());
+
                     // Support polygon: convex hull of the four corners of each foot.
                     // Foot frame: x-forward, y-left, origin at ankle joint centre.
                     std::vector<Eigen::Vector2d> corners;
@@ -257,6 +285,9 @@ namespace module::skill {
                         //       foot_toe_length / foot_heel_length offsets accordingly.
                         //       Check against the KinematicsConfiguration.yaml values.
                         const Eigen::Isometry3d Hwf(foot.Hwf);
+                        // Log foot origin so the support polygon geometry can be sanity-checked
+                        // against the real stance (and the ankle-frame assumption above verified).
+                        log<DEBUG>("CP calc: foot origin (world)=", Hwf.translation().transpose());
                         for (double fx : {cfg.foot_toe_length, -cfg.foot_heel_length}) {
                             for (double fy : {cfg.foot_width / 2.0, -cfg.foot_width / 2.0}) {
                                 const Eigen::Vector3d c = Hwf * Eigen::Vector3d(fx, fy, 0.0);
@@ -272,14 +303,30 @@ namespace module::skill {
                 auto stabilisation_command = [&]() -> std::pair<Eigen::Vector3d, bool> {
                     auto [cp, hull] = compute_cp_and_polygon();
 
-                    if (point_in_convex_polygon_2d(cp, hull, cfg.cp_margin)) {
+                    // Signed distance is the tuning signal for cp_margin: positive means the
+                    // CP is inside by that many metres, negative means it is outside.
+                    const double signed_dist     = signed_distance_in_polygon_2d(cp, hull);
+                    const Eigen::Vector2d centroid = polygon_centroid_2d(hull);
+                    const bool stable            = signed_dist >= cfg.cp_margin;
+                    log<DEBUG>("Stabilise: hull_pts=",
+                               hull.size(),
+                               "centroid=",
+                               centroid.transpose(),
+                               "signed_dist=",
+                               signed_dist,
+                               "m (margin",
+                               cfg.cp_margin,
+                               ") stable=",
+                               stable);
+
+                    if (stable) {
                         return {Eigen::Vector3d::Zero(), true};
                     }
 
                     // Step toward the capture point.
                     // cp_err_world points from the support polygon centroid to the CP;
                     // the robot needs to move in that direction.
-                    const Eigen::Vector2d cp_err_world = cp - polygon_centroid_2d(hull);
+                    const Eigen::Vector2d cp_err_world = cp - centroid;
 
                     // Transform into the robot (torso) frame so the Walk task can use it.
                     // Hwt maps torso→world, so its transpose maps world→torso.
@@ -292,6 +339,19 @@ namespace module::skill {
                     const double speed = vel.norm();
                     if (speed > cfg.max_step_velocity)
                         vel *= cfg.max_step_velocity / speed;
+
+                    log<DEBUG>("Stabilise: cp_err_world=",
+                               cp_err_world.transpose(),
+                               "cp_err_robot=",
+                               cp_err_robot.transpose(),
+                               "raw_speed=",
+                               cfg.cp_velocity_gain * cp_err_robot.norm(),
+                               "clamped=",
+                               speed > cfg.max_step_velocity,
+                               "-> vx=",
+                               vel.x(),
+                               "vy=",
+                               vel.y());
 
                     return {Eigen::Vector3d(vel.x(), vel.y(), 0.0), false};
                 };
@@ -319,7 +379,19 @@ namespace module::skill {
                             const double error = pitch - cfg.pitch_reference;
                             const double hip_correction =
                                 std::clamp(cfg.Kp * error, -cfg.max_correction, cfg.max_correction);
-                            log<INFO>("Rise phase: pitch=", pitch, "rad  hip_correction=", hip_correction, "rad");
+                            log<INFO>("Rise phase: pitch=",
+                                      pitch,
+                                      "rad  reference=",
+                                      cfg.pitch_reference,
+                                      "rad  error=",
+                                      error,
+                                      "rad  hip_correction=",
+                                      hip_correction,
+                                      "rad (clamped=",
+                                      std::abs(cfg.Kp * error) > cfg.max_correction,
+                                      ", tilt=",
+                                      tilt,
+                                      "rad)");
                             internal_phase = InternalPhase::RISE;
                             emit<Task>(make_sequence(rise_frames, hip_correction));
                             break;
@@ -331,7 +403,7 @@ namespace module::skill {
                                 restart_or_escalate();
                             }
                             else {
-                                log<INFO>("Rise complete, standing up");
+                                log<INFO>("Rise complete (tilt=", tilt, "rad), standing up");
                                 internal_phase = InternalPhase::STAND;
                                 emit<Task>(utility::skill::load_script<BodySequence>(cfg.getup_stand));
                             }
@@ -343,7 +415,7 @@ namespace module::skill {
                                 restart_or_escalate();
                             }
                             else {
-                                log<INFO>("Stand complete, entering capture-point stabilisation");
+                                log<INFO>("Stand complete (tilt=", tilt, "rad), entering capture-point stabilisation");
                                 internal_phase      = InternalPhase::STABILISE;
                                 stabilisation_start = NUClear::clock::now();
                                 // The walk engine does not update its generator while Stability
