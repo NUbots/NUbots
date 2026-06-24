@@ -116,6 +116,25 @@ namespace module::skill {
         bool have_previous_pose = false;
         NUClear::clock::time_point last_update_time;
 
+        // Control-loop timing diagnostics params
+        /// @brief Whether a previous tick has been sampled (false until the first stable tick).
+        bool have_timing_sample = false;
+        /// @brief Timestamps of the previous tick on each clock, used to compute the per-tick period.
+        NUClear::clock::time_point last_tick_nuclear{};
+        std::chrono::steady_clock::time_point last_tick_steady{};
+        /// @brief Timestamps at the first stable tick, used to compute cumulative gait-clock drift.
+        NUClear::clock::time_point walk_start_nuclear{};
+        std::chrono::steady_clock::time_point walk_start_steady{};
+        /// @brief Time of the last rolling-summary log, used to throttle the summary to timing_report_period.
+        NUClear::clock::time_point last_timing_report{};
+        /// @brief Running statistics on the NUClear-clock per-tick period (seconds), since the walk started.
+        uint64_t timing_samples     = 0;
+        uint64_t timing_out_of_tol  = 0;
+        double timing_period_sum    = 0.0;
+        double timing_period_sq_sum = 0.0;
+        double timing_period_min    = 0.0;
+        double timing_period_max    = 0.0;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.
@@ -129,6 +148,13 @@ namespace module::skill {
         /// @param observation The current observation vector
         /// @return The model's output (joint angles)
         JointVector run_inference(const ObservationVector& observation);
+
+        /// @brief Function to measure the actual control-loop frequency according to the nuclear clock and steady wall
+        /// clock
+        void debug_loop_timing();
+
+        /// @brief Reset all control-loop timing diagnostic state. Called when a walk starts.
+        void reset_loop_timing();
     };
 
 }  // namespace module::skill

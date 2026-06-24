@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
 
@@ -153,6 +154,10 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             // Reset the control step counter so the gait phase starts from zero on each walk start
             control_step = 0;
+            // If debugging, reset the loop-timing diagnostics so each walk is measured from a clean baseline
+            if (log_level <= DEBUG) {
+                reset_loop_timing();
+            }
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -181,6 +186,11 @@ namespace module::skill {
 
                 // Only run if we're in a stable state
                 if (stability >= Stability::DYNAMIC) {
+                    // Debug the actual loop frequency
+                    if (log_level <= DEBUG) {
+                        debug_loop_timing();
+                    }
+
                     // Construct observation vector
                     ObservationVector observation;
                     int idx = 0;
@@ -441,6 +451,93 @@ namespace module::skill {
             invalidate_model_locked();
             next_retry = std::chrono::steady_clock::now() + retry_backoff;
             return JointVector::Zero();
+        }
+    }
+
+    void RLWalk::reset_loop_timing() {
+        have_timing_sample   = false;
+        timing_samples       = 0;
+        timing_out_of_tol    = 0;
+        timing_period_sum    = 0.0;
+        timing_period_sq_sum = 0.0;
+        timing_period_min    = 0.0;
+        timing_period_max    = 0.0;
+    }
+
+    void RLWalk::debug_loop_timing() {
+        // Sample both clocks as close together as possible.
+        const NUClear::clock::time_point now_nuclear           = NUClear::clock::now();
+        const std::chrono::steady_clock::time_point now_steady = std::chrono::steady_clock::now();
+
+        // First stable tick of this walk: establish the baseline, nothing to compare against yet.
+        if (!have_timing_sample) {
+            have_timing_sample = true;
+            last_tick_nuclear  = now_nuclear;
+            last_tick_steady   = now_steady;
+            walk_start_nuclear = now_nuclear;
+            walk_start_steady  = now_steady;
+            last_timing_report = now_nuclear;
+            return;
+        }
+
+        // Per-tick period on each clock (seconds).
+        const double dt_nuclear = std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count();
+        const double dt_steady  = std::chrono::duration<double>(now_steady - last_tick_steady).count();
+        last_tick_nuclear       = now_nuclear;
+        last_tick_steady        = now_steady;
+
+        // Metrics
+        const double model_elapsed        = static_cast<double>(control_step) * STEP_DT;
+        const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
+        const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
+        const double drift_nuclear        = model_elapsed - elapsed_nuclear;
+        const double drift_steady         = model_elapsed - elapsed_steady;
+        const double drift_nuclear_steady = elapsed_nuclear - elapsed_steady;
+
+        // Update running statistics on the NUClear-clock period.
+        ++timing_samples;
+        timing_period_sum += dt_nuclear;
+        timing_period_sq_sum += dt_nuclear * dt_nuclear;
+        timing_period_min = (timing_samples == 1) ? dt_nuclear : std::min(timing_period_min, dt_nuclear);
+        timing_period_max = (timing_samples == 1) ? dt_nuclear : std::max(timing_period_max, dt_nuclear);
+
+        // Emit graphs
+        emit(graph("RLWalk loop period (s)", dt_nuclear, dt_steady));
+        emit(graph("RLWalk loop frequency (Hz)", 1.0 / dt_nuclear, 1.0 / dt_steady));
+        emit(graph("RLWalk gait clock drift (s)", drift_nuclear, drift_steady));
+        emit(graph("NUClear clock drift from steady clock (s)", drift_nuclear_steady));
+
+        // Periodic rolling summary
+        const double timing_report_period = 2.0;  // seconds
+        const double since_report         = std::chrono::duration<double>(now_nuclear - last_timing_report).count();
+        if (since_report >= timing_report_period) {
+            const double mean = timing_period_sum / static_cast<double>(timing_samples);
+            const double var  = std::max(0.0, timing_period_sq_sum / static_cast<double>(timing_samples) - mean * mean);
+            const double jitter = std::sqrt(var);
+            const double off_target_pct =
+                100.0 * static_cast<double>(timing_out_of_tol) / static_cast<double>(timing_samples);
+            log<DEBUG>(
+                fmt::format("| ticks: {:>6d} "
+                            "| dt: {:7.5f}s ({:6.2f}Hz) "
+                            "| jitter: {:7.5f}s "
+                            "| min: {:7.5f}s "
+                            "| max: {:7.5f}s "
+                            "| off-target: {:>2d} ({:5.1f}%) "
+                            "| drift vs nuclear: {:+8.5f}s "
+                            "| vs wall: {:+8.5f}s "
+                            "| NUClear clock vs Wall clock: {:+8.5f}s |",
+                            timing_samples,
+                            mean,
+                            1.0 / mean,
+                            jitter,
+                            timing_period_min,
+                            timing_period_max,
+                            timing_out_of_tol,
+                            off_target_pct,
+                            drift_nuclear,
+                            drift_steady,
+                            drift_nuclear_steady));
+            last_timing_report = now_nuclear;
         }
     }
 
