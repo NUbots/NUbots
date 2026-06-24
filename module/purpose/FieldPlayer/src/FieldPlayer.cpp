@@ -203,6 +203,37 @@ namespace module::purpose {
                 // Only wait if the opponent hasn't kicked off yet
                 bool allowed_to_attack = !kickoff_wait;
 
+                // Furthest back calculation
+                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
+                                                                            field->Hfw,
+                                                                            sensors.Hrw,
+                                                                            cfg.equidistant_threshold,
+                                                                            global_config.player_id,
+                                                                            ignore_ids)
+                                            : true;
+
+                // If it's the opponent's set play, position defensively
+                if (set_play && !game_state.our_kick_off) {
+                    log<DEBUG>("Opponent set play, defending.");
+                    if (furthest_back) {
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                    SoccerPosition::DEFEND,
+                                                    true,
+                                                    true,
+                                                    game_state.team.team_colour));
+                        emit<Task>(std::make_unique<Defend>());
+                    }
+                    else {
+                        emit<Task>(std::make_unique<Support>());
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                    SoccerPosition::SUPPORT,
+                                                    true,
+                                                    true,
+                                                    game_state.team.team_colour));
+                    }
+                    return;
+                }
+
                 // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
                 // penalty set up phase.
                 if (is_closest && allowed_to_attack) {
@@ -244,13 +275,7 @@ namespace module::purpose {
                         }
                     }
                 }
-                bool furthest_back = robots ? utility::strategy::furthest_back(*robots,
-                                                                               field->Hfw,
-                                                                               sensors.Hrw,
-                                                                               cfg.equidistant_threshold,
-                                                                               global_config.player_id,
-                                                                               ignore_ids)
-                                            : true;
+
                 if (furthest_back) {
                     log<DEBUG>("Defend!");
                     emit(std::make_unique<Purpose>(global_config.player_id,
