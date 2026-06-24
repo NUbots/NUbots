@@ -79,7 +79,7 @@
     <position joint="right_ankle_roll" name="right_ankle_roll"/>
     <position joint="left_ankle_roll" name="left_ankle_roll"/>
     <position joint="neck_yaw" name="neck_yaw"/>
-    <position joint="head_pitch" name="head_pitch"/>    
+    <position joint="head_pitch" name="head_pitch"/>
   </actuator>
 
   <sensor>
@@ -222,7 +222,7 @@
                   <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.286275 0.286275 0.286275 1" mesh="right_foot_visual"/>
                   <geom size="0.0284933 0.0657897 0.107911" pos="0.00950672 -0.0109447 0.0211599" type="box" rgba="0.286275 0.286275 0.286275 0"/>
                   <geom pos="0.038 0 0" quat="0.707105 0 -0.707108 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.615686 0.811765 0.929412 1" mesh="right_foot_base_visual"/>
-                  <geom name="right_foot_collision" class="collision" pos="0.02 -0.01 0.02" size="0.02 0.06 0.105" rgba=".2 .6 .2 .3"/>
+                  <geom name="right_foot_collision" class="foot" pos="0.02 -0.01 0.02" size="0.02 0.06 0.105" rgba=".2 .6 .2 .3"/>
                   <site name="right_foot" rgba="1 0 0 1" pos="0.02 0 0"/>
                 </body>
               </body>
