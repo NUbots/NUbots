@@ -106,11 +106,20 @@ namespace module::skill {
             cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
             cfg.gait_period        = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
 
+            // Command velocity magnitude below which the policy joint offsets are zeroed so the
+            // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
+            cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
+
             // Initialize vectors
             last_action      = JointVector::Zero();
             have_last_action = false;
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
+
+            // Per-servo position limits (radians, NUbots joint order) used to clip the final
+            // commanded servo positions as a safety measure against physically infeasible commands.
+            servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
 
             previous_pose      = default_pose;
             have_previous_pose = false;
@@ -142,6 +151,8 @@ namespace module::skill {
 
         // Start - Runs every time the Walk provider starts
         on<Start<WalkTask>>().then([this]() {
+            // Reset the control step counter so the gait phase starts from zero on each walk start
+            control_step = 0;
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -229,15 +240,16 @@ namespace module::skill {
                     }
                     idx += COMMAND_SIZE;
 
-                    // Phase (2). Use a fractional-seconds duration: integral std::chrono::seconds would quantise the
-                    // clock to 1s and make the phase jump once per second instead of advancing smoothly at the control
-                    // rate.
-                    double seconds =
-                        std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
-                    double phase = std::fmod(seconds / cfg.gait_period, 1.0);
+                    // Phase (2). Advance the gait phase from the control-step count and fixed control
+                    // timestep (control_step * STEP_DT) rather than wall-clock time. This is
+                    // deterministic, monotonic, and immune to clock jitter/jumps and scheduling delays.
+                    const double elapsed = static_cast<double>(control_step) * STEP_DT;
+                    const double phase   = std::fmod(elapsed / cfg.gait_period, 1.0);
                     observation.segment<PHASE_SIZE>(idx) =
                         Eigen::Vector2d(std::sin(2 * M_PI * phase), std::cos(2 * M_PI * phase));
                     idx += PHASE_SIZE;
+                    // Advance the gait clock by one control step for the next update
+                    ++control_step;
 
                     // Run inference
                     JointVector inference_output_raw = run_inference(observation);
@@ -281,6 +293,13 @@ namespace module::skill {
                     // Convert into NUbots order, apply scaling
                     JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
 
+                    // Hack: when the command velocity is below a threshold, zero the offsets so the
+                    // robot holds the default pose. This side-steps unwanted policy behaviour at
+                    // ~zero command. TODO: replace with an improved policy trained for zero command.
+                    if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold) {
+                        joint_offsets_scaled_nubots = JointVector::Zero();
+                    }
+
                     if (log_level <= DEBUG) {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
                     }
@@ -290,8 +309,11 @@ namespace module::skill {
                     for (int i = 0; i < cfg.num_joints; ++i) {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-                        // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_offsets_scaled_nubots[i];
+                        // Apply the policy offset to the default pose, then safety-clip the result to
+                        // the physical servo limits so the policy cannot command an infeasible position.
+                        servo->position                   = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
+                                                                       servo_limit_min[i],
+                                                                       servo_limit_max[i]);
                         const float gain                  = i < 6    ? cfg.arm_servo_gain
                                                             : i < 18 ? cfg.leg_servo_gain
                                                                      : cfg.head_servo_gain;

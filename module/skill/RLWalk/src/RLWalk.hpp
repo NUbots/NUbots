@@ -61,6 +61,9 @@ namespace module::skill {
             double nugus_action_scale;
             /// @brief Gait period used in the phase calculation
             double gait_period;
+            /// @brief Command velocity magnitude below which the policy joint offsets are zeroed,
+            /// holding the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
+            double command_velocity_threshold;
         } cfg;
 
         /// @brief OpenVINO model and inference request
@@ -87,6 +90,13 @@ namespace module::skill {
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
 
+        /// @brief Fixed control timestep (seconds) corresponding to UPDATE_FREQUENCY
+        static constexpr double STEP_DT = 1.0 / UPDATE_FREQUENCY;
+
+        /// @brief Number of control steps executed since the walk started. Used to advance the
+        /// gait phase deterministically as control_step * STEP_DT rather than from wall-clock time.
+        uint64_t control_step = 0;
+
         /// @brief Last action taken by the model
         JointVector last_action;
 
@@ -95,6 +105,11 @@ namespace module::skill {
 
         /// @brief Default pose for the robot
         JointVector default_pose;
+
+        /// @brief Lower per-servo position limits used to clip the final commanded servo positions as a safety measure
+        JointVector servo_limit_min;
+        /// @brief Upper per-servo position limits used to clip the final commanded servo positions as a safety measure
+        JointVector servo_limit_max;
 
         /// @brief Last joint positions for velocity estimation
         JointVector previous_pose;
