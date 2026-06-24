@@ -6,15 +6,19 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/math/comparison.hpp"
+
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
-    using booster::robot::b1::JointIndex;
+    using booster::robot::b1::JointIndexK1;
     using extension::Configuration;
     using extension::behaviour::RunReason;
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
+    using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
+    using message::booster::BoosterOdometry;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
@@ -60,6 +64,10 @@ namespace module::platform::Booster {
                 ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::ButtonEventMsg>(
                     "rt/button_event",
                     [this](const void* msg) { button_event_handler(msg); });
+
+            odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
+                "rt/odometer_state",
+                [this](const void* msg) { odometer_handler(msg); });
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
@@ -74,6 +82,30 @@ namespace module::platform::Booster {
             int32_t res = booster_client.Move(move.velocity.x(), move.velocity.y(), move.velocity.z());
             if (res != 0) {
                 log<ERROR>("Failed to move: " + res_code_to_string(res));
+            }
+        });
+
+        on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
+            // Clamp to the Booster SDK RotateHead limits (radians):
+            //   pitch: downward positive, range [-0.3, 1.0]
+            //   yaw:   leftward positive, range [-0.785, 0.785]
+            constexpr double MIN_PITCH = -0.3;
+            constexpr double MAX_PITCH = 1.0;
+            constexpr double MIN_YAW   = -0.785;
+            constexpr double MAX_YAW   = 0.785;
+
+            const Eigen::Vector2d rot(utility::math::clamp(MIN_YAW, head.rot.x(), MAX_YAW),
+                                      utility::math::clamp(MIN_PITCH, head.rot.y(), MAX_PITCH));
+
+            if (rot.isApprox(last_head_rot)) {
+                return;
+            }
+            last_head_rot = rot;
+            log<DEBUG>("Sending head rotation command with yaw=" + std::to_string(rot.x())
+                       + ", pitch=" + std::to_string(rot.y()));
+            int32_t res = booster_client.RotateHead(rot.y(), rot.x());
+            if (res != 0) {
+                log<ERROR>("Failed to rotate head: " + res_code_to_string(res));
             }
         });
 
@@ -135,45 +167,41 @@ namespace module::platform::Booster {
         sensors->gyroscope.y()     = imu.gyro()[1];
         sensors->gyroscope.z()     = imu.gyro()[2];
 
-        // Serial chain motors: head (0-1), arms (2-9), waist (10)
-        // Indices in the serial vector match JointIndex enum values directly.
+        // Read joint-space feedback from the serial chain (the SDK converts the parallel ankle
+        // mechanism for us). Indices match the JointIndex enum directly; the ankles occupy the
+        // slots the enum labels kCrank{Up,Down}{Left,Right}.
         const auto& serial = low_msg->motor_state_serial();
 
-        auto fill_serial = [&](RawSensors::Servo& servo, JointIndex idx) {
+        auto fill_serial = [&](RawSensors::Servo& servo, JointIndexK1 idx) {
             auto i = static_cast<size_t>(idx);
             if (i < serial.size()) {
                 fill_servo(servo, serial[i]);
             }
         };
 
-        fill_serial(sensors->servo.head_pan, JointIndex::kHeadYaw);
-        fill_serial(sensors->servo.head_tilt, JointIndex::kHeadPitch);
-        fill_serial(sensors->servo.l_shoulder_pitch, JointIndex::kLeftShoulderPitch);
-        fill_serial(sensors->servo.l_shoulder_roll, JointIndex::kLeftShoulderRoll);
-        fill_serial(sensors->servo.l_elbow, JointIndex::kLeftElbowPitch);
-        fill_serial(sensors->servo.r_shoulder_pitch, JointIndex::kRightShoulderPitch);
-        fill_serial(sensors->servo.r_shoulder_roll, JointIndex::kRightShoulderRoll);
-        fill_serial(sensors->servo.r_elbow, JointIndex::kRightElbowPitch);
+        fill_serial(sensors->servo.head_pan,          JointIndexK1::kHeadYaw);
+        fill_serial(sensors->servo.head_tilt,         JointIndexK1::kHeadPitch);
+        fill_serial(sensors->servo.l_shoulder_pitch,  JointIndexK1::kLeftShoulderPitch);
+        fill_serial(sensors->servo.l_shoulder_roll,   JointIndexK1::kLeftShoulderRoll);
+        fill_serial(sensors->servo.l_elbow,           JointIndexK1::kLeftElbowPitch);
+        fill_serial(sensors->servo.l_elbow_yaw,       JointIndexK1::kLeftElbowYaw);
+        fill_serial(sensors->servo.r_shoulder_pitch,  JointIndexK1::kRightShoulderPitch);
+        fill_serial(sensors->servo.r_shoulder_roll,   JointIndexK1::kRightShoulderRoll);
+        fill_serial(sensors->servo.r_elbow,           JointIndexK1::kRightElbowPitch);
+        fill_serial(sensors->servo.r_elbow_yaw,       JointIndexK1::kRightElbowYaw);
 
-        // Parallel mechanism motors: legs (indices 11-22 in JointIndex, stored as 0-11 in the vector)
-        const auto& parallel    = low_msg->motor_state_parallel();
-        const size_t leg_offset = static_cast<size_t>(JointIndex::kLeftHipPitch);
-
-        auto fill_parallel = [&](RawSensors::Servo& servo, JointIndex idx) {
-            auto i = static_cast<size_t>(idx) - leg_offset;
-            if (i < parallel.size()) {
-                fill_servo(servo, parallel[i]);
-            }
-        };
-
-        fill_parallel(sensors->servo.l_hip_pitch, JointIndex::kLeftHipPitch);
-        fill_parallel(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
-        fill_parallel(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
-        fill_parallel(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
-        fill_parallel(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
-        fill_parallel(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
-        fill_parallel(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
-        fill_parallel(sensors->servo.r_knee, JointIndex::kRightKneePitch);
+        fill_serial(sensors->servo.l_hip_pitch,       JointIndexK1::kLeftHipPitch);
+        fill_serial(sensors->servo.l_hip_roll,        JointIndexK1::kLeftHipRoll);
+        fill_serial(sensors->servo.l_hip_yaw,         JointIndexK1::kLeftHipYaw);
+        fill_serial(sensors->servo.l_knee,            JointIndexK1::kLeftKneePitch);
+        fill_serial(sensors->servo.l_ankle_pitch,     JointIndexK1::kCrankUpLeft);    // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll,      JointIndexK1::kCrankDownLeft);  // L ankle roll
+        fill_serial(sensors->servo.r_hip_pitch,       JointIndexK1::kRightHipPitch);
+        fill_serial(sensors->servo.r_hip_roll,        JointIndexK1::kRightHipRoll);
+        fill_serial(sensors->servo.r_hip_yaw,         JointIndexK1::kRightHipYaw);
+        fill_serial(sensors->servo.r_knee,            JointIndexK1::kRightKneePitch);
+        fill_serial(sensors->servo.r_ankle_pitch,     JointIndexK1::kCrankUpRight);   // R ankle pitch
+        fill_serial(sensors->servo.r_ankle_roll,      JointIndexK1::kCrankDownRight); // R ankle roll
 
         // Battery SOC (updated by battery_handler)
         {
@@ -190,6 +218,17 @@ namespace module::platform::Booster {
         }
 
         emit(std::move(sensors));
+    }
+
+    void HardwareIO::odometer_handler(const void* msg) {
+        const auto* odo_msg = static_cast<const booster_interface::msg::Odometer*>(msg);
+        auto out            = std::make_unique<BoosterOdometry>();
+        out->x              = odo_msg->x();
+        out->y              = odo_msg->y();
+        out->theta          = odo_msg->theta();
+        log<DEBUG>("Received odometry: x=" + std::to_string(out->x) + ", y=" + std::to_string(out->y)
+                   + ", theta=" + std::to_string(out->theta));
+        emit(out);
     }
 
     void HardwareIO::battery_handler(const void* msg) {

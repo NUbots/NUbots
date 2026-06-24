@@ -99,56 +99,37 @@ namespace module::network {
 
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Optional<With<GameState>>, Single>(cfg.receive_port)
-                            .then([this, &global_config](const UDP::Packet& p,
-                                                         const std::shared_ptr<const GameState>& game_state) {
-                                std::string remote_addr = p.remote.address;
+                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
+                            std::string remote_addr = p.remote.address;
 
-                                // Apply filtering of packets if udp_filter_address is set in config
-                                if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
-                                    if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
-                                        == ignored_ip_addresses.end()) {
-                                        ignored_ip_addresses.insert(remote_addr);
-                                        log<INFO>("Ignoring UDP packet from",
-                                                  remote_addr,
-                                                  "as it doesn't match configured filter address",
-                                                  cfg.udp_filter_address);
-                                    }
-
-                                    return;
+                            // Apply filtering of packets if udp_filter_address is set in config
+                            if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
+                                if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
+                                    == ignored_ip_addresses.end()) {
+                                    ignored_ip_addresses.insert(remote_addr);
+                                    log<INFO>("Ignoring UDP packet from",
+                                              remote_addr,
+                                              "as it doesn't match configured filter address",
+                                              cfg.udp_filter_address);
                                 }
 
-                                // Deserialise the incoming RoboCup message
-                                const std::vector<unsigned char>& payload = p.payload;
-                                RoboCup incoming_msg =
-                                    NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                                return;
+                            }
 
-                                // Check if the incoming message is from the same player
-                                bool own_player_message =
-                                    global_config.player_id == incoming_msg.current_pose.player_id;
+                            // Deserialise the incoming RoboCup message
+                            const std::vector<unsigned char>& payload = p.payload;
+                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                                // If there is game state information, get the colour
-                                message::input::Team team_colour = message::input::Team::UNKNOWN_TEAM;
-                                if (game_state) {
-                                    switch (int(game_state->team.team_colour)) {
-                                        case GameState::TeamColour::BLUE:
-                                            team_colour = message::input::Team::BLUE;
-                                            break;
-                                        case GameState::TeamColour::RED: team_colour = message::input::Team::RED; break;
-                                        default: team_colour = message::input::Team::UNKNOWN_TEAM;
-                                    }
-                                }
+                            // Check if the incoming message is from the same player
+                            bool own_player_message = global_config.player_id == incoming_msg.current_pose.player_id;
 
-                                // Check if the incoming message is from the same team
-                                bool own_team_message = team_colour == incoming_msg.current_pose.team;
-
-                                // Filter out messages from ourselves and from other teams
-                                if (!own_player_message && own_team_message) {
-                                    log<DEBUG>("Message received from teammate ID",
-                                               incoming_msg.current_pose.player_id);
-                                    emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
-                                }
-                            });
+                            // Port-per-team ensures only teammates broadcast on this port
+                            // Filter out messages from ourselves only
+                            if (!own_player_message) {
+                                log<DEBUG>("Message received from teammate ID", incoming_msg.current_pose.player_id);
+                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
+                            }
+                        });
                 }
             });
 
@@ -195,17 +176,32 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->self.penalty_reason;
-                    switch (penalty_reason) {
-                        case 0: msg->state = 0; break;
-                        case 1: msg->state = 1; break;
-                        default: msg->state = 2; break;
+                    // Penalty
+                    if (game_state->self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
+                        msg->state = message::input::State::UNPENALISED;
+                    }
+                    else {
+                        msg->state = message::input::State::PENALISED;
                     }
 
                     // Team colour
                     switch (int(game_state->team.team_colour)) {
                         case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
                         case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
+                        case GameState::TeamColour::YELLOW:
+                            msg->current_pose.team = message::input::Team::YELLOW;
+                            break;
+                        case GameState::TeamColour::BLACK: msg->current_pose.team = message::input::Team::BLACK; break;
+                        case GameState::TeamColour::WHITE: msg->current_pose.team = message::input::Team::WHITE; break;
+                        case GameState::TeamColour::GREEN: msg->current_pose.team = message::input::Team::GREEN; break;
+                        case GameState::TeamColour::ORANGE:
+                            msg->current_pose.team = message::input::Team::ORANGE;
+                            break;
+                        case GameState::TeamColour::PURPLE:
+                            msg->current_pose.team = message::input::Team::PURPLE;
+                            break;
+                        case GameState::TeamColour::BROWN: msg->current_pose.team = message::input::Team::BROWN; break;
+                        case GameState::TeamColour::GRAY: msg->current_pose.team = message::input::Team::GRAY; break;
                         default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
                     }
                 }

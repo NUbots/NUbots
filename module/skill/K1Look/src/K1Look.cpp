@@ -1,0 +1,84 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2026 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "K1Look.hpp"
+
+#include "extension/Behaviour.hpp"
+#include "extension/Configuration.hpp"
+
+#include "message/booster/BoosterHeadRot.hpp"
+#include "message/skill/Look.hpp"
+
+#include "utility/math/coordinates.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+
+namespace module::skill {
+
+    using extension::Configuration;
+    using message::booster::BoosterHeadRot;
+    using utility::math::coordinates::screen_angular_from_object_direction;
+    using utility::nusight::graph;
+    using LookTask = message::skill::Look;
+
+    K1Look::K1Look(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+
+        on<Configuration>("K1Look.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file K1Look.yaml
+            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.smoothing_factor = config["smoothing_factor"].as<float>();
+        });
+
+        on<Provide<LookTask>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
+            // Normalise the look vector
+            Eigen::Vector3d req_uPCt = look.rPCt.normalized();
+
+            // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
+            // locking on to the target
+            if (smooth == false && look.smooth == true) {
+                uPCt = req_uPCt;
+            }
+            smooth = look.smooth;
+
+            // If smoothing requested, smooth requested angles with exponential filter
+            uPCt = smooth ? (cfg.smoothing_factor * req_uPCt + (1 - cfg.smoothing_factor) * uPCt) : req_uPCt;
+
+            // Convert the look direction into head yaw/pitch angles the K1 SDK understands
+            // Returns {atan2(y, x), atan2(z, x)} = {yaw, pitch}
+            Eigen::Vector2d rot = screen_angular_from_object_direction(uPCt);
+            rot.y()             = -rot.y();  // swap signs for SDK
+
+            // Send the head rotation command to the Booster SDK (handled by Booster HardwareIO)
+            auto msg = std::make_unique<BoosterHeadRot>();
+            msg->rot = rot;
+            emit(std::move(msg));
+
+            if (log_level <= NUClear::LogLevel::DEBUG) {
+                emit(graph("K1Look head rot (yaw, pitch)", rot.x(), rot.y()));
+            }
+        });
+    }
+
+}  // namespace module::skill

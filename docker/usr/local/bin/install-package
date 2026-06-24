@@ -58,6 +58,14 @@ else
                 [ -f "$deb" ] && dpkg -x "$deb" /l4t/targetfs
             done
 
+            # dpkg -x extracts absolute symlinks verbatim (e.g. libm.so -> /lib/aarch64-linux-gnu/libm.so.6),
+            # which resolve against the container root instead of the sysroot. Broken .so symlinks make the
+            # cross linker silently fall back to non-PIC static archives, so rewrite them as relative links.
+            find /l4t/targetfs -lname '/*' | while read -r link; do
+                target=$(readlink "$link")
+                ln -sfn "$(realpath -m --relative-to="$(dirname "$link")" "/l4t/targetfs$target")" "$link"
+            done
+
             cd /
             rm -rf /tmp/debs
             rm -rf /var/cache/apt /var/lib/apt/lists/*

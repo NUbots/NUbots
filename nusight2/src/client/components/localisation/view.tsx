@@ -25,7 +25,7 @@ import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
 import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
-import { Nugus } from "./r3f_components/nugus";
+import { K1 } from "./r3f_components/k1";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
@@ -502,7 +502,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
   return (
     <object3D key={robot.id}>
-      <Nugus model={robot} />
+      <K1 model={robot} />
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}

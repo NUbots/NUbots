@@ -218,19 +218,26 @@ namespace module::input {
 
         std::vector<std::function<void()>> state_changes;
 
-        // game score
+        // Stopped play
+        if (old_packet.stopped != new_packet.stopped) {
+            state_changes.emplace_back(
+                [this, new_packet] { log<DEBUG>("Stopped state changed:", uint(new_packet.stopped)); });
+        }
+        state->stopped = new_packet.stopped;
+
+        // Game score
         const auto& old_own_team = get_own_team(old_packet);
         const auto& new_own_team = get_own_team(new_packet);
 
         const auto& old_opponent_team = get_opponent_team(old_packet);
         const auto& new_opponent_team = get_opponent_team(new_packet);
 
-        // Log message budget for cross-checking against local counter
-        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
-
-        // Get colours
+        // Team colours
         state->team.team_colour     = get_team_colour(new_own_team.field_player_colour);
         state->opponent.team_colour = get_team_colour(new_opponent_team.field_player_colour);
+
+        // Log message budget for cross-checking against local counter
+        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
 
         /*******************************************************************************************
          * Process score updates
@@ -579,19 +586,20 @@ namespace module::input {
     }
 
     PenaltyReason GameController::get_penalty_reason(const gamecontroller::PenaltyState& penalty_state) {
-        // ugly incoming
         switch (penalty_state) {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
-            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_DEFENSE;
-            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_MANIPULATION;
-            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::REQUEST_FOR_SERVICE;
-            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::ILLEGAL_ATTACK;
-            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_POSITIONING;
+            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::MOTION_IN_SET;
+            case gamecontroller::PenaltyState::MOTION_IN_STOP: return PenaltyReason::MOTION_IN_STOP;
+            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::LOCAL_GAME_STUCK;
+            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::INCAPABLE_ROBOT;
+            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::PICK_UP;
+            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_HOLDING;
+            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::LEAVING_THE_FIELD;
+            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::PLAYING_WITH_ARMS_HANDS;
+            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PLAYER_PUSHING;
+            case gamecontroller::PenaltyState::CAUTIONED: return PenaltyReason::CAUTIONED;
+            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::SENT_OFF;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");
         }
@@ -618,22 +626,18 @@ namespace module::input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-    std::string GameController::ip_address_int_to_string(const uint32_t& ip_addr) {
-        uint32_t ip_addr_n = htonl(ip_addr);
-
-        char c[255];
-        std::memset(c, 0, sizeof(c));
-
-        std::string addr = inet_ntop(AF_INET, &ip_addr_n, c, sizeof(c));
-
-        return addr;
-    }
-
     GameState::TeamColour::Value GameController::get_team_colour(const gamecontroller::TeamColour& colour) {
         switch (colour) {
             case gamecontroller::TeamColour::BLUE: return TeamColour::BLUE;
             case gamecontroller::TeamColour::RED: return TeamColour::RED;
-            // TODO: update GameState.proto TeamColour enum to support all v3 colours
+            case gamecontroller::TeamColour::YELLOW: return TeamColour::YELLOW;
+            case gamecontroller::TeamColour::BLACK: return TeamColour::BLACK;
+            case gamecontroller::TeamColour::WHITE: return TeamColour::WHITE;
+            case gamecontroller::TeamColour::GREEN: return TeamColour::GREEN;
+            case gamecontroller::TeamColour::ORANGE: return TeamColour::ORANGE;
+            case gamecontroller::TeamColour::PURPLE: return TeamColour::PURPLE;
+            case gamecontroller::TeamColour::BROWN: return TeamColour::BROWN;
+            case gamecontroller::TeamColour::GRAY: return TeamColour::GRAY;
             default: return TeamColour::UNKNOWN;
         }
     }

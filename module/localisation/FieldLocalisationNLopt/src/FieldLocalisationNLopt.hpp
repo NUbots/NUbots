@@ -197,9 +197,6 @@ namespace module::localisation {
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
 
-            /// @brief Minimum number of field line points for an update to run
-            size_t min_field_line_points = 0;
-
             /// @brief Minimum number of field line intersections for an update to run
             size_t min_field_line_intersections = 0;
 
@@ -214,9 +211,6 @@ namespace module::localisation {
 
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
-
-            /// @brief Scalar weighting of cost associated with distance to field lines
-            double field_line_distance_weight = 0.0;
 
             /// @brief Scalar weighting of cost associated with distance to field intersections
             double field_line_intersection_weight = 0.0;
@@ -344,26 +338,17 @@ namespace module::localisation {
         void debug_field_localisation(Eigen::Isometry3d Hfw);
 
         /**
-         * @brief Transform a field line point from world {w} to position in the distance map {m}
-         * @param particle The state of the particle (x,y,theta)
-         * @param rPWw The field point (x, y) in world space {w} [m]
-         * @return Eigen::Vector2i
-         */
-        Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
-
-        /**
          * @brief Run the field line optimisation
-         * @param initial_guess The initial guess for the field line
-         * @param observations The observations of the field line points
+         * @param initial_guess The initial guess for the optimisation
          * @param field_intersections The field intersections
+         * @param goals The detected goals
+         * @param uncertainty_optimisation Whether to use the uncertainty reset optimiser settings
          * @return Pair <optimisation solution (x,y,theta), final cost>
          */
-        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
-            const Eigen::Vector3d& initial_guess,
-            const std::vector<Eigen::Vector3d>& field_lines,
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const std::shared_ptr<const Goals>& goals,
-            bool uncertainty_optimisation = false);
+        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(const Eigen::Vector3d& initial_guess,
+                                                                       const FieldIntersections& field_intersections,
+                                                                       const std::shared_ptr<const Goals>& goals,
+                                                                       bool uncertainty_optimisation = false);
 
         /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
@@ -372,7 +357,7 @@ namespace module::localisation {
          * @return Pairs of landmarks and corresponding field intersections (known landmark, intersection
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> data_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const FieldIntersections& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
         /**
@@ -382,14 +367,12 @@ namespace module::localisation {
          * computation and avoid the mirror field problem.
          *
          * @param fd The field description containing the field dimensions, in particular the field length and width.
-         * @param field_lines Field lines, used to find the cost of hypotheses.
          * @param field_intersections Field intersections, used to find the cost of hypotheses.
          * @param goals Goals, used to find the cost of hypotheses.
          * @param Hrw The homogenous transformation from world {w} to robot {r} space.
          */
         void uncertainty_reset(const FieldDescription& fd,
-                               const FieldLines& field_lines,
-                               const std::shared_ptr<const FieldIntersections>& field_intersections,
+                               const FieldIntersections& field_intersections,
                                const std::shared_ptr<const Goals>& goals,
                                const Eigen::Isometry3d& Hrw);
 
@@ -403,7 +386,7 @@ namespace module::localisation {
          * and landmarks
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const FieldIntersections& field_intersections,
             const Eigen::Isometry3d& Hfw);
 
         /**
@@ -415,7 +398,7 @@ namespace module::localisation {
          * and landmarks
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const FieldIntersections& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };
 }  // namespace module::localisation
