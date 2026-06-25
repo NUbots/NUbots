@@ -26,6 +26,7 @@
  */
 #include "WalkToBall.hpp"
 
+#include <algorithm>
 #include <chrono>
 
 #include "extension/Behaviour.hpp"
@@ -116,10 +117,21 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last Ball was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
+        // --- DEBUG: did the Director ever GRANT this task? Distinguishes "never granted" (Start never
+        // logs -> arbitration/structural block) from "granted but provide reaction not triggered".
+        on<Start<WalkToKickBall>>().then([this] { log<INFO>("[WalkToKickBall] STARTED (Director granted it)"); });
+        on<Stop<WalkToKickBall>>().then([this] { log<INFO>("[WalkToKickBall] STOPPED (Director removed it)"); });
+
+        // Trigger<Sensors> so the Director re-runs this provider every sensor cycle while the task is
+        // granted. A With<>-only Provide runs only on its single grant-time event; if the legs are held
+        // then (startup / FindBall search) that run is blocked and never retried, so the approach never
+        // starts. The continuous trigger lets it re-attempt and run once the legs free up, and then keep
+        // updating the walk target as a proper control loop. (Trigger only added here, not on
+        // WalkToFieldPosition, which segfaulted when triggered.)
         on<Provide<WalkToKickBall>,
            Optional<With<Robots>>,
            With<Ball>,
-           With<Sensors>,
+           Trigger<Sensors>,
            With<Field>,
            With<FieldDescription>>()
             .then([this](const std::shared_ptr<const Robots>& robots,
@@ -140,8 +152,35 @@ namespace module::strategy {
                 // Ball and goal positions in field frame
                 const Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
 
-                // Potentially change the target position from the goal to an avoidance point
-                Eigen::Vector3d rTFf = rGFf;
+                // --- DEBUG: confirm the Director is actually running this provider, and with what inputs.
+                // If these lines never appear, WalkToKickBall lost arbitration (e.g. to FindBall) or its
+                // required inputs (Ball/Field/Sensors) are missing.
+                const double wtkb_ball_age = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                                 NUClear::clock::now() - ball.time_of_measurement)
+                                                 .count();
+                log<DEBUG>("[WalkToKickBall] provider running. ball_age=",
+                           wtkb_ball_age,
+                           "s rBFf=",
+                           rBFf.x(),
+                           rBFf.y(),
+                           "rRFf=",
+                           rRFf.x(),
+                           rRFf.y(),
+                           "robot_heading=",
+                           robot_heading);
+
+                // The goal is modelled as a REGION (the mouth between the posts, inset by the goal-width
+                // margin), not a single point. With no opponents the least-time aim is the closest point of
+                // that region to the ball: straight ahead when the ball is within the mouth, and the near
+                // post from a wide angle. This is the closed-form empty-field precursor to the value-function
+                // direction selector; opponent-aware selection is layered on later.
+                const double goal_half_width = field_description.dimensions.goal_width / 2.0 - cfg.goal_width_margin;
+                const Eigen::Vector3d rGoalAimFf(rGFf.x(),
+                                                 std::clamp(rBFf.y(), -goal_half_width, goal_half_width),
+                                                 0.0);
+
+                // Potentially change the target position from the goal-region aim to an avoidance point
+                Eigen::Vector3d rTFf = rGoalAimFf;
 
                 // If we're aligned with the goal and close, adjust the Goal target
                 if (std::abs(rRFf.y()) < field_description.dimensions.goal_width / 2.0) {
@@ -283,6 +322,26 @@ namespace module::strategy {
 
                 // Final walking target pose
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
+
+                // --- DEBUG: the decision this provider makes. Shows the region aim, the (possibly
+                // avoidance-adjusted) target, the approach errors, and the field pose handed downstream.
+                log<DEBUG>("[WalkToKickBall] region_aim=",
+                           rGoalAimFf.x(),
+                           rGoalAimFf.y(),
+                           "target_rTFf=",
+                           rTFf.x(),
+                           rTFf.y(),
+                           "err_x=",
+                           err_x,
+                           "err_y=",
+                           err_y,
+                           "err_z=",
+                           err_z,
+                           "desired_heading=",
+                           desired_heading,
+                           "-> WalkToFieldPosition pose=",
+                           target.x(),
+                           target.y());
 
                 // Issue walking task toward final position and orientation
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));

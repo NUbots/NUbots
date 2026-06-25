@@ -70,6 +70,10 @@ namespace module::strategy {
         /// @brief Time when current state started (for fallback transitions)
         NUClear::clock::time_point state_start_time = NUClear::clock::now();
 
+        /// @brief DEBUG: latched "currently searching" flag, so we log INFO only on lost<->reacquired
+        /// transitions instead of every cycle (used to diagnose FindBall hijacking the walk).
+        bool searching = false;
+
     public:
         /// @brief Called by the powerplant to build and setup the FindObject reactor.
         explicit FindObject(std::unique_ptr<NUClear::Environment> environment);

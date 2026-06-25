@@ -72,6 +72,19 @@ namespace module::strategy {
                 // Normalize the angle error to be within the range [-pi, pi]
                 angle_error = std::atan2(std::sin(angle_error), std::cos(angle_error));
 
+                // --- DEBUG: confirm this provider runs and show the target/errors driving the walk.
+                log<DEBUG>("[WalkToFieldPosition] provider running. transErr=",
+                           translational_error,
+                           "angErr=",
+                           angle_error,
+                           "threshold=",
+                           current_threshold,
+                           "stop_at_target=",
+                           walk_to_field_position.stop_at_target,
+                           "Hrd=",
+                           Hrd.translation().x(),
+                           Hrd.translation().y());
+
                 // If the robot is close enough to the target and the angle error is small enough, stop the robot
                 if (translational_error < current_threshold && std::abs(angle_error) < current_threshold
                     && walk_to_field_position.stop_at_target) {

@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 stop_threshold: 0.15
 stopped_threshold: 0.4

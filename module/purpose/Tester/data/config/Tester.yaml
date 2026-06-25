@@ -5,10 +5,13 @@ log_level: INFO
 tasks:
   # Strategies
   align_ball_to_goal_priority: 0
-  find_ball_priority: 4
+  # TEST: WalkToKickBall raised above FindBall so the dribble owns the legs (and FindBall's Search can't
+  # hijack the head via LookAround, keeping the ball fresh). Paired with WalkToKickBall's Trigger<Sensors>
+  # so it actually runs (the earlier no-trigger swap just froze). Senior's values: find_ball=4, wtkb=1.
+  find_ball_priority: 1
   look_at_ball_priority: 1
   walk_to_ball_priority: 0
-  walk_to_kick_ball_priority: 1
+  walk_to_kick_ball_priority: 4
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
   stand_still_priority: 0

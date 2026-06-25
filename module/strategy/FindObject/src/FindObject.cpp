@@ -26,6 +26,9 @@
  */
 #include "FindObject.hpp"
 
+#include <chrono>
+#include <limits>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -89,7 +92,35 @@ namespace module::strategy {
                          const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const GlobalConfig>& global_config,
                          const std::shared_ptr<const GameState>& game_state) {
-                if (ball == nullptr || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout) {
+                // --- DEBUG instrumentation: report the ball-freshness decision that gates whether
+                // FindBall (high priority) takes over the legs and starves WalkToKickBall ---
+                const bool no_ball = ball == nullptr;
+                const double ball_age =
+                    no_ball ? std::numeric_limits<double>::infinity()
+                            : std::chrono::duration_cast<std::chrono::duration<double>>(
+                                  NUClear::clock::now() - ball->time_of_measurement)
+                                  .count();
+                const double timeout_s =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(cfg.ball_search_timeout).count();
+                const bool ball_lost = no_ball || ball_age > timeout_s;
+                log<DEBUG>("[FindBall] provider running. no_ball=",
+                           no_ball,
+                           "ball_age=",
+                           ball_age,
+                           "timeout=",
+                           timeout_s,
+                           "ball_lost=",
+                           ball_lost);
+
+                if (ball_lost) {
+                    if (!searching) {
+                        log<INFO>("[FindBall] Ball LOST (age=",
+                                  ball_age,
+                                  "s > timeout=",
+                                  timeout_s,
+                                  "s) -> taking over the legs with Search; this OUTRANKS WalkToKickBall.");
+                        searching = true;
+                    }
                     // Emit purpose information if we are searching for the ball
                     if (global_config) {
                         emit(std::make_unique<Purpose>(global_config->player_id,
@@ -109,6 +140,17 @@ namespace module::strategy {
                     else {
                         emit<Task>(std::make_unique<Continue>());
                     }
+                }
+                else {
+                    // Ball is fresh: FindBall emits no task this cycle, so it yields the legs to
+                    // lower-priority tasks (e.g. WalkToKickBall).
+                    if (searching) {
+                        log<INFO>("[FindBall] Ball REACQUIRED (age=",
+                                  ball_age,
+                                  "s) -> releasing the legs; lower-priority tasks (WalkToKickBall) can run.");
+                        searching = false;
+                    }
+                    log<DEBUG>("[FindBall] ball fresh, not searching this cycle.");
                 }
             });
 
