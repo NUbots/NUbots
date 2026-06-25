@@ -2,9 +2,7 @@
 #define MODULE_SKILL_RLWALK_HPP
 
 #include <Eigen/Core>
-#include <atomic>
 #include <chrono>
-#include <mutex>
 #include <nuclear>
 #include <openvino/openvino.hpp>
 
@@ -66,20 +64,9 @@ namespace module::skill {
             double command_velocity_threshold;
         } cfg;
 
-        /// @brief OpenVINO model and inference request
-        enum class ModelState { UNINITIALISED, READY, FAILED };
-        mutable std::mutex model_mutex{};
-        ov::Core core{};
-
+        /// @brief OpenVINO compiled model and inference request
         ov::CompiledModel compiled_model{};
         ov::InferRequest infer_request{};
-        ModelState model_state = ModelState::UNINITIALISED;
-
-        std::chrono::steady_clock::time_point next_retry{};
-        std::chrono::milliseconds retry_backoff{1000};
-
-        bool initialise_model_locked();
-        void invalidate_model_locked();
 
         /// @brief Current phase of the walk (0-1)
         double phase;

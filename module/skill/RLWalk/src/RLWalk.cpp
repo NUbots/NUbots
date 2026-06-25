@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fmt/format.h>
-#include <fstream>
-#include <iomanip>
 
 #include "extension/Configuration.hpp"
 
@@ -119,9 +117,8 @@ namespace module::skill {
 
             // Per-servo position limits (radians, NUbots joint order) used to clip the final
             // commanded servo positions as a safety measure against physically infeasible commands.
-            servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
-            servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
-
+            servo_limit_min    = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max    = JointVector(config["servo_limits"]["max"].as<Expression>());
             previous_pose      = default_pose;
             have_previous_pose = false;
             last_update_time   = NUClear::clock::now();
@@ -130,24 +127,35 @@ namespace module::skill {
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
-            // Initialize the model
-            initialise_model_locked();
-        });
+            // Compile the model and create inference request object
+            try {
+                log<INFO>("Loading RLWalk model from: ", cfg.model_path);
+                log<INFO>("Using device: ", cfg.device);
 
-        on<Every<1000, Per<std::chrono::milliseconds>>, Single>().then([this] {
-            std::scoped_lock lock(model_mutex);
-            if (model_state == ModelState::READY)
-                return;
+                ov::Core core{};
 
-            const auto now = std::chrono::steady_clock::now();
-            if (now < next_retry) {
-                return;
+                // Try to fallback to CPU if GPU fails
+                try {
+                    compiled_model = core.compile_model(cfg.model_path, cfg.device);
+                }
+                catch (const std::exception& e) {
+                    if (cfg.device == "GPU") {
+                        log<WARN>("Failed to compile model on GPU, falling back to CPU: ", e.what());
+                        compiled_model = core.compile_model(cfg.model_path, "CPU");
+                    }
+                    else {
+                        log<WARN>("Failed to compile RLWalk model: ", e.what());
+                        throw;
+                    }
+                }
+
+                infer_request = compiled_model.create_infer_request();
+                log<INFO>("Model loaded successfully");
             }
-
-            if (initialise_model_locked()) {
-                log<INFO>("RLWalk inference model initialised successfully");
+            catch (const std::exception& e) {
+                log<ERROR>("Failed to load RLWalk model: ", e.what());
+                throw;
             }
-            log<DEBUG>("Model state after retry: ", (model_state == ModelState::READY ? "READY" : "FAILED"));
         });
 
         // Start - Runs every time the Walk provider starts
@@ -174,7 +182,7 @@ namespace module::skill {
            With<Stability>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
-           Priority::REALTIME>()
+           Priority::HIGH>()
             .then([this](const WalkTask& walk_task,
                          const RunReason& run_reason,
                          const Sensors& sensors,
@@ -348,110 +356,44 @@ namespace module::skill {
             });
     }
 
-    void RLWalk::invalidate_model_locked() {
-        compiled_model = ov::CompiledModel{};
-        infer_request  = ov::InferRequest{};
-        model_state    = ModelState::FAILED;
-    }
-
-    bool RLWalk::initialise_model_locked() {
-        try {
-            const std::filesystem::path p(cfg.model_path);
-            const auto abs = std::filesystem::absolute(p).string();
-
-            if (!std::filesystem::exists(p)) {
-                throw std::runtime_error("Model file not found: " + abs);
-            }
-
-            log<INFO>("RLWalk init model_path=",
-                      abs,
-                      " device=",
-                      cfg.device,
-                      " input_name=",
-                      cfg.input_name,
-                      " output_name=",
-                      cfg.output_name);
-
-            std::string last_error = "unknown";
-
-            auto model = core.read_model(abs);
-            auto cm    = core.compile_model(model, cfg.device);
-            auto req   = cm.create_infer_request();
-
-            // Validate configured ports and shapes once
-            const auto in  = cfg.input_name.empty() ? cm.input() : cm.input(cfg.input_name);
-            const auto out = cfg.output_name.empty() ? cm.output() : cm.output(cfg.output_name);
-
-            const auto in_shape  = in.get_shape();
-            const auto out_shape = out.get_shape();
-            if (in_shape.size() != 2 || in_shape[1] != static_cast<size_t>(TOTAL_OBS_SIZE)) {
-                throw std::runtime_error("Unexpected input shape");
-            }
-            if (out_shape.size() != 2 || out_shape[1] != static_cast<size_t>(JOINT_POS_SIZE)) {
-                throw std::runtime_error("Unexpected output shape");
-            }
-
-            // Commit only after full success
-            compiled_model = std::move(cm);
-            infer_request  = std::move(req);
-            model_state    = ModelState::READY;
-            retry_backoff  = std::chrono::milliseconds(1000);
-
-            log<INFO>("Initialisation success");
-
-            return true;
-        }
-        catch (const std::exception& e) {
-            log<ERROR>("RLWalk model init failed: ", e.what());
-            invalidate_model_locked();
-            next_retry    = std::chrono::steady_clock::now() + retry_backoff;
-            retry_backoff = std::min(retry_backoff * 2, std::chrono::milliseconds(5000));
-            return false;
-        }
-    }
-
     JointVector RLWalk::run_inference(const ObservationVector& observation) {
         if (log_level <= DEBUG) {
             emit(graph("Observation", observation.transpose()));
         }
-        std::scoped_lock lock(model_mutex);
 
+        std::vector<float> input_data(TOTAL_OBS_SIZE);
+        for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
+            input_data[i] = static_cast<float>(observation[i]);
+        }
+
+        // Create & set input tensor
+        ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
+        ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
+        infer_request.set_input_tensor(input_tensor);
+
+        // Run inference
         try {
-
-            std::vector<float> input_data(TOTAL_OBS_SIZE);
-            for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(observation[i]);
-            }
-
-            // Create & set input tensor
-            ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
-            ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
-            infer_request.set_input_tensor(input_tensor);
-
-            // Run inference
             infer_request.infer();
-
-            // Get output tensor
-            auto output_tensor = infer_request.get_output_tensor();
-            float* output_data = output_tensor.data<float>();
-
-            JointVector joint_angles_raw;
-            for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                joint_angles_raw[i] = static_cast<double>(output_data[i]);
-            }
-
-            if (log_level <= DEBUG) {
-                emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
-            }
-
-            return joint_angles_raw;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
-            invalidate_model_locked();
-            next_retry = std::chrono::steady_clock::now() + retry_backoff;
             return JointVector::Zero();
         }
+
+        // Get output tensor
+        auto output_tensor = infer_request.get_output_tensor();
+        float* output_data = output_tensor.data<float>();
+
+        JointVector joint_angles_raw;
+        for (int i = 0; i < JOINT_POS_SIZE; ++i) {
+            joint_angles_raw[i] = static_cast<double>(output_data[i]);
+        }
+
+        if (log_level <= DEBUG) {
+            emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
+        }
+
+        return joint_angles_raw;
     }
 
     void RLWalk::reset_loop_timing() {

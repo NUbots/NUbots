@@ -1,9 +1,9 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 model:
   path: model.onnx
-  device: CPU
+  device: GPU
   input_name: obs
   output_name: actions
   num_joints: 20
