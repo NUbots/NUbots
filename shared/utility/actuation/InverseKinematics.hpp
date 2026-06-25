@@ -184,7 +184,7 @@ namespace utility::actuation::kinematics {
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculate_head_joints(
         const Eigen::Matrix<Scalar, 3, 1>& uPCt) {
-        return {std::make_pair(ServoID::HEAD_YAW, std::atan2(uPCt.y(), uPCt.x())),
+        return {std::make_pair(ServoID::NECK_YAW, std::atan2(uPCt.y(), uPCt.x())),
                 std::make_pair(ServoID::HEAD_PITCH,
                                std::atan2(-uPCt.z(), std::sqrt(uPCt.x() * uPCt.x() + uPCt.y() * uPCt.y())))};
     }
