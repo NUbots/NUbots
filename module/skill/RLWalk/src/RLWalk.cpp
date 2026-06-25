@@ -27,7 +27,7 @@ namespace module::skill {
     using extension::Configuration;
 
     using extension::behaviour::RunReason;
-    using message::actuation::Body;
+    using message::actuation::Limbs;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
@@ -174,7 +174,7 @@ namespace module::skill {
            With<Stability>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
-           Priority::HIGH>()
+           Priority::REALTIME>()
             .then([this](const WalkTask& walk_task,
                          const RunReason& run_reason,
                          const Sensors& sensors,
@@ -314,23 +314,23 @@ namespace module::skill {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
                     }
 
-                    // Emit servo commands
-                    auto body = std::make_unique<Body>();
-                    for (int i = 0; i < cfg.num_joints; ++i) {
+                    // Emit servo commands for the limbs only. The policy outputs 20 joints, but the
+                    // head (indices 18, 19) is owned by skill::Look — emitting a full Body task would
+                    // conflict on the Head resource and cause the Director to deny the whole task.
+                    auto limbs = std::make_unique<Limbs>();
+                    for (int i = 0; i < 18; ++i) {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
                         // Apply the policy offset to the default pose, then safety-clip the result to
                         // the physical servo limits so the policy cannot command an infeasible position.
-                        servo->position                   = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
-                                                                       servo_limit_min[i],
-                                                                       servo_limit_max[i]);
-                        const float gain                  = i < 6    ? cfg.arm_servo_gain
-                                                            : i < 18 ? cfg.leg_servo_gain
-                                                                     : cfg.head_servo_gain;
-                        servo->state                      = ServoState(gain, cfg.servo_torque);
-                        body->servos[joint_map[i].second] = *servo;
+                        servo->position  = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
+                                                      servo_limit_min[i],
+                                                      servo_limit_max[i]);
+                        const float gain = i < 6 ? cfg.arm_servo_gain : cfg.leg_servo_gain;
+                        servo->state     = ServoState(gain, cfg.servo_torque);
+                        limbs->servos[joint_map[i].second] = *servo;
                     }
-                    emit<Task>(body);
+                    emit<Task>(limbs);
 
                     // Emit walk state
                     auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,
