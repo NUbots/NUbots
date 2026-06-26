@@ -16,7 +16,16 @@
     "strict": true,
     "outDir": "dist",
     "lib": ["ESNext", "dom", "webworker"],
-    "typeRoots": ["./node_modules/@types", "./typings"]
+    "typeRoots": ["./node_modules/@types", "./typings"],
+    "paths": {
+      "@components/*": ["./src/client/components/*"],
+      "@hooks/*": ["./src/client/hooks/*"],
+      "@client/*": ["./src/client/*"],
+      "@server/*": ["./src/server/*"],
+      "@proto/*": ["./src/shared/proto/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["./src/**/*"],
   "exclude": ["**/tests/**/*", "**/_del/**/*"]
