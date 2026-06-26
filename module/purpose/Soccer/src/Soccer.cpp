@@ -39,6 +39,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/Whistle.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Whistle;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
@@ -76,6 +78,8 @@ namespace module::purpose {
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::support::GlobalConfig;
+
+    using Phase = message::input::GameState::Phase;
 
     struct StartSoccer {};
 
@@ -92,12 +96,18 @@ namespace module::purpose {
             }
         });
 
+        on<Trigger<Whistle>, When<Phase, std::equal_to, Phase::SET>>()
+            .then([this] {
+                log<INFO>("Whistle detected, starting play");
+                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+            });
+
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
             // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
