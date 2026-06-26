@@ -69,23 +69,26 @@ namespace module::input {
                 log<DEBUG>("Suspected encoder error on servo ", id, ": Using last known good position.");
             }
 
-            sensors->servo.emplace_back(
-                hardware_status,
-                id,
-                raw_servo.torque_enabled,
-                raw_servo.position_p_gain,
-                raw_servo.position_i_gain,
-                raw_servo.position_d_gain,
-                raw_servo.goal_position,
-                raw_servo.profile_velocity,
-                current_position,
-                /* If there is an encoder error, then use the last known good velocity */
-                ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
-                    ? previous_sensors->servo[id].present_velocity
-                    : raw_servo.present_velocity,
-                raw_servo.present_current,
-                raw_servo.voltage,
-                static_cast<float>(raw_servo.temperature));
+            // Determine the current velocity with potential fallback to the last know good velocity
+            double current_velocity = raw_servo.present_velocity;
+            if (previous_sensors && (hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
+                current_velocity = previous_sensors->servo[id].present_velocity;
+                log<DEBUG>("Suspected encoder error on servo ", id, ": Using last known good velocity.");
+            }
+
+            sensors->servo.emplace_back(hardware_status,
+                                        id,
+                                        raw_servo.torque_enabled,
+                                        raw_servo.position_p_gain,
+                                        raw_servo.position_i_gain,
+                                        raw_servo.position_d_gain,
+                                        raw_servo.goal_position,
+                                        raw_servo.profile_velocity,
+                                        current_position,
+                                        current_velocity,
+                                        raw_servo.present_current,
+                                        raw_servo.voltage,
+                                        static_cast<float>(raw_servo.temperature));
         }
 
         // **************** Accelerometer and Gyroscope ****************
