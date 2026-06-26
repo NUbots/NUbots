@@ -4,6 +4,7 @@ import React from "react";
 import { configure } from "mobx";
 import { createRoot } from "react-dom/client";
 
+import { installStandaloneAdvancedScrubber } from "./components/advanced_scrubber/install";
 import { setAppContext } from "./components/app/context";
 import { AppController } from "./components/app/controller";
 import { AppModel } from "./components/app/model";
@@ -38,6 +39,7 @@ installVision({ nav, appModel, nusightNetwork, Menu });
 installLogs({ nav, appModel, nusightNetwork, Menu });
 installServos({ nav, appModel, nusightNetwork, Menu });
 installDirector({ nav, appModel, nusightNetwork, Menu });
+installStandaloneAdvancedScrubber({ nav, appModel, nusightNetwork });
 
 configure({ enforceActions: "observed" });
 createRoot(document.getElementById("root")!).render(<AppView nav={nav} />);
