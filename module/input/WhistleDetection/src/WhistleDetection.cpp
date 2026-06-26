@@ -149,11 +149,13 @@ namespace module::input {
             cfg.confirm_frames       = config["confirm_frames"].as<int>();
             cfg.cooldown_ms          = config["cooldown_ms"].as<int>();
 
-            emit(graph("Whistle/cfg/freq_min", cfg.freq_min));
-            emit(graph("Whistle/cfg/freq_max", cfg.freq_max));
-            emit(graph("Whistle/cfg/band_ratio_threshold", cfg.band_ratio_threshold));
-            emit(graph("Whistle/cfg/min_band_energy", cfg.min_band_energy));
-            emit(graph("Whistle/cfg/confirm_frames", static_cast<float>(cfg.confirm_frames)));
+            if (log_level <= NUClear::LogLevel::DEBUG) {
+                emit(graph("Whistle/cfg/freq_min", cfg.freq_min));
+                emit(graph("Whistle/cfg/freq_max", cfg.freq_max));
+                emit(graph("Whistle/cfg/band_ratio_threshold", cfg.band_ratio_threshold));
+                emit(graph("Whistle/cfg/min_band_energy", cfg.min_band_energy));
+                emit(graph("Whistle/cfg/confirm_frames", static_cast<float>(cfg.confirm_frames)));
+            }
 
             setup_audio();
         });
@@ -223,8 +225,10 @@ namespace module::input {
             }
         }
 
-        emit(graph("Whistle/energy/total", total_energy));
-        emit(graph("Whistle/energy/band", band_energy));
+        if (log_level <= NUClear::LogLevel::DEBUG) {
+            emit(graph("Whistle/energy/total", total_energy));
+            emit(graph("Whistle/energy/band", band_energy));
+        }
 
         // Skip frames that are essentially silence
         if (total_energy < 1e-10f) {
@@ -235,8 +239,10 @@ namespace module::input {
         const float band_ratio     = band_energy / total_energy;
         const bool above_threshold = (band_ratio > cfg.band_ratio_threshold) && (band_energy > cfg.min_band_energy);
 
-        emit(graph("Whistle/band_ratio", band_ratio));
-        emit(graph("Whistle/band_ratio_threshold", cfg.band_ratio_threshold));
+        if (log_level <= NUClear::LogLevel::DEBUG) {
+            emit(graph("Whistle/band_ratio", band_ratio));
+            emit(graph("Whistle/band_ratio_threshold", cfg.band_ratio_threshold));
+        }
 
         if (above_threshold) {
             consecutive_detections++;
@@ -267,8 +273,10 @@ namespace module::input {
                 msg->confidence = confidence;
                 emit(std::move(msg));
 
-                emit(graph("Whistle/confidence", confidence));
-                emit(graph("Whistle/detected", 1.0f));
+                if (log_level <= NUClear::LogLevel::DEBUG) {
+                    emit(graph("Whistle/confidence", confidence));
+                    emit(graph("Whistle/detected", 1.0f));
+                }
 
                 log<INFO>("Whistle detected! confidence=", confidence, "band_ratio=", band_ratio);
 
@@ -277,7 +285,9 @@ namespace module::input {
             }
         }
         else {
-            emit(graph("Whistle/detected", 0.0f));
+            if (log_level <= NUClear::LogLevel::DEBUG) {
+                emit(graph("Whistle/confidence", 0.0f));
+            }
         }
     }
 
