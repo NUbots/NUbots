@@ -30,66 +30,67 @@
 
 #include <alsa/asoundlib.h>
 #include <nuclear>
-
 #include <vector>
 
 namespace module::input {
 
-class WhistleDetection : public NUClear::Reactor {
-private:
-    struct Config {
-        /// ALSA device name
-        std::string device{"default"};
-        /// Capture sample rate in Hz
-        unsigned int sample_rate{16000};
-        /// FFT window size (must be a power of two)
-        int fft_size{1024};
-        /// Lower bound of the whistle frequency band in Hz
-        float freq_min{2000.0f};
-        /// Upper bound of the whistle frequency band in Hz
-        float freq_max{4500.0f};
-        /// Fraction of total spectral power that must lie in the whistle band
-        float band_ratio_threshold{0.40f};
-        /// Minimum absolute in-band power (filters near-silence)
-        float min_band_energy{1e-6f};
-        /// Number of consecutive FFT frames above threshold required to confirm a whistle
-        int confirm_frames{3};
-        /// Minimum time between consecutive whistle events in milliseconds
-        int cooldown_ms{1500};
-        /// Milliseconds to suppress detections after startup (avoids triggering on boot beep)
-        int startup_delay{1000};
-    } cfg;
+    class WhistleDetection : public NUClear::Reactor {
+    private:
+        struct Config {
+            /// ALSA device name
+            std::string device{"default"};
+            /// Capture sample rate in Hz
+            unsigned int sample_rate{16000};
+            /// FFT window size (must be a power of two)
+            int fft_size{1024};
+            /// Lower bound of the whistle frequency band in Hz
+            float freq_min{2000.0f};
+            /// Upper bound of the whistle frequency band in Hz
+            float freq_max{4500.0f};
+            /// Fraction of total spectral power that must lie in the whistle band
+            float band_ratio_threshold{0.40f};
+            /// Minimum absolute in-band power (filters near-silence)
+            float min_band_energy{1e-6f};
+            /// Number of consecutive FFT frames above threshold required to confirm a whistle
+            int confirm_frames{3};
+            /// Minimum time between consecutive whistle events in milliseconds
+            int cooldown_ms{1500};
+            /// Milliseconds to suppress detections after startup (avoids triggering on boot beep)
+            int startup_delay{1000};
+            /// Whether to use whistle detection or not
+            bool use_whistle_detection{true};
+        } cfg;
 
-    /// ALSA PCM capture handle
-    snd_pcm_t* pcm_handle{nullptr};
+        /// ALSA PCM capture handle
+        snd_pcm_t* pcm_handle{nullptr};
 
-    /// Rolling audio sample buffer used to accumulate frames for FFT
-    std::vector<float> sample_buffer{};
+        /// Rolling audio sample buffer used to accumulate frames for FFT
+        std::vector<float> sample_buffer{};
 
-    /// Number of consecutive FFT frames that have exceeded the detection threshold
-    int consecutive_detections{0};
+        /// Number of consecutive FFT frames that have exceeded the detection threshold
+        int consecutive_detections{0};
 
-    /// Time of the last emitted Whistle event (used for cooldown)
-    NUClear::clock::time_point last_detection{};
+        /// Time of the last emitted Whistle event (used for cooldown)
+        NUClear::clock::time_point last_detection{};
 
-    /// Time the module was configured (used to suppress detections during startup)
-    NUClear::clock::time_point start_time{};
+        /// Time the module was configured (used to suppress detections during startup)
+        NUClear::clock::time_point start_time{};
 
-    /// Handle for the periodic audio-read reaction (allows disabling during reconfiguration)
-    ReactionHandle audio_handle{};
+        /// Handle for the periodic audio-read reaction (allows disabling during reconfiguration)
+        ReactionHandle audio_handle{};
 
-    /// Opens (or re-opens) the ALSA capture device with the current configuration
-    void setup_audio();
+        /// Opens (or re-opens) the ALSA capture device with the current configuration
+        void setup_audio();
 
-    /// Runs the FFT-based whistle detection pipeline on one window of samples
-    void process_frame(const std::vector<float>& samples);
+        /// Runs the FFT-based whistle detection pipeline on one window of samples
+        void process_frame(const std::vector<float>& samples);
 
-public:
-    /// @brief Called by the powerplant to build and setup the WhistleDetection reactor.
-    explicit WhistleDetection(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        /// @brief Called by the powerplant to build and setup the WhistleDetection reactor.
+        explicit WhistleDetection(std::unique_ptr<NUClear::Environment> environment);
 
-    ~WhistleDetection();
-};
+        ~WhistleDetection();
+    };
 
 }  // namespace module::input
 

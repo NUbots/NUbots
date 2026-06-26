@@ -1,6 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
+use_whistle_detection: true
+
 # ALSA capture device name. Use "default" or a specific device like "hw:0,0".
 device: "plughw:0,0"
 
@@ -35,3 +37,6 @@ confirm_frames: 3
 # Minimum time in milliseconds between successive Whistle events (prevents re-triggering
 # on the tail of the same whistle).
 cooldown_ms: 1500
+
+# it detects the NUsense beep as a whistle, so the first second or two have to be ignored.
+startup_delay: 1000
