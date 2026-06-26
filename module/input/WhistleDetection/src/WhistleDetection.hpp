@@ -56,6 +56,8 @@ private:
         int confirm_frames{3};
         /// Minimum time between consecutive whistle events in milliseconds
         int cooldown_ms{1500};
+        /// Milliseconds to suppress detections after startup (avoids triggering on boot beep)
+        int startup_delay{1000};
     } cfg;
 
     /// ALSA PCM capture handle
@@ -69,6 +71,9 @@ private:
 
     /// Time of the last emitted Whistle event (used for cooldown)
     NUClear::clock::time_point last_detection{};
+
+    /// Time the module was configured (used to suppress detections during startup)
+    NUClear::clock::time_point start_time{};
 
     /// Handle for the periodic audio-read reaction (allows disabling during reconfiguration)
     ReactionHandle audio_handle{};

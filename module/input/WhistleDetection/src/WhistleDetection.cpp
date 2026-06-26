@@ -44,7 +44,6 @@ namespace module::input {
     using message::input::Whistle;
     using utility::nusight::graph;
 
-
     // Radix-2 Cooley-Tukey FFT — in-place, N must be a power of two.
     // Reference: same spectral feature used by NaoDevils' WhistleNet training pipeline.
     static void fft(std::vector<std::complex<float>>& x) {
@@ -139,15 +138,17 @@ namespace module::input {
         on<Configuration>("WhistleDetection.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.device               = config["device"].as<std::string>();
-            cfg.sample_rate          = config["sample_rate"].as<unsigned int>();
-            cfg.fft_size             = config["fft_size"].as<int>();
-            cfg.freq_min             = config["freq_min"].as<float>();
-            cfg.freq_max             = config["freq_max"].as<float>();
-            cfg.band_ratio_threshold = config["band_ratio_threshold"].as<float>();
-            cfg.min_band_energy      = config["min_band_energy"].as<float>();
-            cfg.confirm_frames       = config["confirm_frames"].as<int>();
-            cfg.cooldown_ms          = config["cooldown_ms"].as<int>();
+            cfg.device                = config["device"].as<std::string>();
+            cfg.sample_rate           = config["sample_rate"].as<unsigned int>();
+            cfg.fft_size              = config["fft_size"].as<int>();
+            cfg.freq_min              = config["freq_min"].as<float>();
+            cfg.freq_max              = config["freq_max"].as<float>();
+            cfg.band_ratio_threshold  = config["band_ratio_threshold"].as<float>();
+            cfg.min_band_energy       = config["min_band_energy"].as<float>();
+            cfg.confirm_frames        = config["confirm_frames"].as<int>();
+            cfg.cooldown_ms           = config["cooldown_ms"].as<int>();
+            cfg.startup_delay         = config["startup_delay"].as<int>();
+            cfg.use_whistle_detection = config["use_whistle_detection"].as<bool>();
 
             if (log_level <= NUClear::LogLevel::DEBUG) {
                 emit(graph("Whistle/cfg/freq_min", cfg.freq_min));
@@ -158,6 +159,10 @@ namespace module::input {
             }
 
             setup_audio();
+
+            start_time = NUClear::clock::now();
+            log<DEBUG>("Whistle detection startup delay: ", cfg.startup_delay, " ms");
+            log<DEBUG>("Current time is ", start_time, " ms");
         });
 
         // Poll for audio every 10 ms. Non-blocking reads accumulate into sample_buffer;
@@ -265,7 +270,8 @@ namespace module::input {
             const auto now        = NUClear::clock::now();
             const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_detection).count();
 
-            if (elapsed_ms >= cfg.cooldown_ms) {
+            const auto startup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+            if (elapsed_ms >= cfg.cooldown_ms && startup_ms >= cfg.startup_delay && cfg.use_whistle_detection) {
                 const float confidence = std::min(1.0f, band_ratio / cfg.band_ratio_threshold);
 
                 auto msg        = std::make_unique<Whistle>();
