@@ -107,13 +107,6 @@ namespace module::purpose {
                 bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                 && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                // If it's the opponent's set play, freeze until the ball is free
-                // Ball is free when secondary_time expires or the ball has moved
-                if (set_play && !game_state.our_kick_off) {
-                    log<DEBUG>("Opponent set play, waiting for ball to be free.");
-                    return;
-                }
-
                 bool teammates_exist = std::find_if(robots->robots.begin(),
                                                     robots->robots.end(),
                                                     [](const auto& robot) { return robot.teammate; })
