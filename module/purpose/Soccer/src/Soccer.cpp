@@ -96,18 +96,17 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<Whistle>, When<Phase, std::equal_to, Phase::SET>>()
-            .then([this] {
-                log<INFO>("Whistle detected, starting play");
-                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
-            });
+        on<Trigger<Whistle>, When<Phase, std::equal_to, Phase::SET>>().then([this] {
+            log<INFO>("Whistle detected, starting play");
+            emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+        });
 
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Stand idle
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
