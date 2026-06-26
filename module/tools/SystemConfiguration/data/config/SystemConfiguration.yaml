@@ -42,6 +42,7 @@ groups:
   - lp
   - u3v
   - uucp
+  - audio
 
 # Necessary symlinks
 # target: name

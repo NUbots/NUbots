@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -38,30 +38,30 @@ namespace module::input {
     private:
         struct Config {
             /// ALSA device name
-            std::string device{"default"};
+            std::string device = "";
             /// Capture sample rate in Hz
-            unsigned int sample_rate{16000};
+            unsigned int sample_rate = 0;
             /// FFT window size (must be a power of two)
-            int fft_size{1024};
+            int fft_size = 0;
             /// Lower bound of the whistle frequency band in Hz
-            float freq_min{2000.0f};
+            float freq_min = 0.0;
             /// Upper bound of the whistle frequency band in Hz
-            float freq_max{4500.0f};
+            float freq_max = 0.0;
             /// Fraction of total spectral power that must lie in the whistle band
-            float band_ratio_threshold{0.40f};
+            float band_ratio_threshold = 0.0;
             /// Minimum absolute in-band power (filters near-silence)
-            float min_band_energy{1e-6f};
+            float min_band_energy = 0.0;
             /// Number of consecutive FFT frames above threshold required to confirm a whistle
-            int confirm_frames{3};
+            int confirm_frames = 0;
             /// Minimum time between consecutive whistle events in milliseconds
-            int cooldown_ms{1500};
+            int cooldown_ms = 0;
             /// Milliseconds to suppress detections after startup (avoids triggering on boot beep)
-            int startup_delay{1000};
+            int startup_delay = 0;
             /// Whether to use whistle detection or not
-            bool use_whistle_detection{true};
+            bool use_whistle_detection = false;
         } cfg;
 
-        /// ALSA PCM capture handle
+        /// @brief ALSA PCM capture handle
         snd_pcm_t* pcm_handle{nullptr};
 
         /// Rolling audio sample buffer used to accumulate frames for FFT
@@ -79,14 +79,26 @@ namespace module::input {
         /// Handle for the periodic audio-read reaction (allows disabling during reconfiguration)
         ReactionHandle audio_handle{};
 
-        /// Opens (or re-opens) the ALSA capture device with the current configuration
+        /**
+         * @brief Opens (or re-opens) the ALSA capture device using the current configuration.
+         *        Closes any existing handle first. Sets pcm_handle to nullptr and logs a warning
+         *        if the device cannot be opened, disabling audio capture until reconfigured.
+         */
         void setup_audio();
 
-        /// Runs the FFT-based whistle detection pipeline on one window of samples
+        /**
+         * @brief Runs the FFT-based whistle detection pipeline on one window of audio samples.
+         *        Applies a Hanning window, computes the power spectrum, calculates the in-band
+         *        energy ratio, and emits a Whistle message when the detection criteria are met.
+         * @param samples One full FFT window of normalised float samples (size must equal cfg.fft_size).
+         */
         void process_frame(const std::vector<float>& samples);
 
     public:
-        /// @brief Called by the powerplant to build and setup the WhistleDetection reactor.
+        /**
+         * @brief Called by the powerplant to build and setup the WhistleDetection reactor.
+         * @param environment The NUClear environment provided by the powerplant.
+         */
         explicit WhistleDetection(std::unique_ptr<NUClear::Environment> environment);
 
         ~WhistleDetection();

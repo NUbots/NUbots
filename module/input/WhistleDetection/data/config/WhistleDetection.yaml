@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-use_whistle_detection: true
+use_whistle_detection: true # should this module emit a Whistle message? true: yes, false: no. Note: it will still run and log the whistle detection, but it won't emit a Whistle message to the system.
 
 # ALSA capture device name. Use "default" or a specific device like "hw:0,0".
 device: "plughw:0,0"

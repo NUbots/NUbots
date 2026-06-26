@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -32,6 +32,8 @@
 #include <complex>
 #include <cstdlib>
 
+#include "utils/fft.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/input/Whistle.hpp"
@@ -44,47 +46,13 @@ namespace module::input {
     using message::input::Whistle;
     using utility::nusight::graph;
 
-    // Radix-2 Cooley-Tukey FFT — in-place, N must be a power of two.
-    // Reference: same spectral feature used by NaoDevils' WhistleNet training pipeline.
-    static void fft(std::vector<std::complex<float>>& x) {
-        const size_t N = x.size();
-
-        // Bit-reversal permutation
-        for (size_t i = 1, j = 0; i < N; i++) {
-            size_t bit = N >> 1;
-            for (; j & bit; bit >>= 1) {
-                j ^= bit;
-            }
-            j ^= bit;
-            if (i < j) {
-                std::swap(x[i], x[j]);
-            }
-        }
-
-        // Butterfly stages
-        for (size_t len = 2; len <= N; len <<= 1) {
-            const float ang = -2.0f * static_cast<float>(M_PI) / static_cast<float>(len);
-            const std::complex<float> wlen(std::cos(ang), std::sin(ang));
-            for (size_t i = 0; i < N; i += len) {
-                std::complex<float> w(1.0f, 0.0f);
-                for (size_t j = 0; j < len / 2; j++) {
-                    const auto u       = x[i + j];
-                    const auto v       = x[i + j + len / 2] * w;
-                    x[i + j]           = u + v;
-                    x[i + j + len / 2] = u - v;
-                    w *= wlen;
-                }
-            }
-        }
-    }
-
     void WhistleDetection::setup_audio() {
         if (pcm_handle != nullptr) {
             snd_pcm_close(pcm_handle);
             pcm_handle = nullptr;
         }
 
-        // The NUBots-built ALSA looks for its config at /usr/local/share/alsa/ which isn't
+        // The NUbots-built ALSA looks for its config at /usr/local/share/alsa/ which isn't
         // deployed on the robot. Fall back to the system config so device names resolve.
         setenv("ALSA_CONFIG_PATH", "/usr/share/alsa/alsa.conf", 0);
 
@@ -154,14 +122,6 @@ namespace module::input {
             cfg.cooldown_ms           = config["cooldown_ms"].as<int>();
             cfg.startup_delay         = config["startup_delay"].as<int>();
             cfg.use_whistle_detection = config["use_whistle_detection"].as<bool>();
-
-            if (log_level <= NUClear::LogLevel::DEBUG) {
-                emit(graph("Whistle/cfg/freq_min", cfg.freq_min));
-                emit(graph("Whistle/cfg/freq_max", cfg.freq_max));
-                emit(graph("Whistle/cfg/band_ratio_threshold", cfg.band_ratio_threshold));
-                emit(graph("Whistle/cfg/min_band_energy", cfg.min_band_energy));
-                emit(graph("Whistle/cfg/confirm_frames", static_cast<float>(cfg.confirm_frames)));
-            }
 
             setup_audio();
 
