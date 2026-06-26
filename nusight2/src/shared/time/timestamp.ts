@@ -1,6 +1,5 @@
-import { google } from "../messages";
-
-import ITimestamp = google.protobuf.ITimestamp;
+/** A protobuf timestamp-like value. protobuf-es represents `seconds` as a bigint. */
+type TimestampLike = { seconds?: number | bigint | null; nanos?: number | null };
 
 export type NbsTimestamp = { seconds: number; nanos: number };
 
@@ -12,8 +11,8 @@ function padTo(value: bigint, width: number) {
 /** Simple container with helper methods for converting between NBS/Protobuf timestamps and time units */
 export class TimestampObject {
   /** Convert the given NBS timestamp object to a float value of seconds */
-  static toSeconds(timestamp?: ITimestamp | null): number {
-    return (timestamp?.seconds ?? 0) + (timestamp?.nanos ?? 0) * 1e-9;
+  static toSeconds(timestamp?: TimestampLike | null): number {
+    return Number(timestamp?.seconds ?? 0) + (timestamp?.nanos ?? 0) * 1e-9;
   }
 
   /** Convert a float value of seconds to an NBS timestamp object */
@@ -25,8 +24,8 @@ export class TimestampObject {
   }
 
   /** Convert the given NBS timestamp object to a float value of milliseconds */
-  static toMillis(timestamp?: ITimestamp | null): number {
-    return (timestamp?.seconds ?? 0) * 1e3 + (timestamp?.nanos ?? 0) * 1e-6;
+  static toMillis(timestamp?: TimestampLike | null): number {
+    return Number(timestamp?.seconds ?? 0) * 1e3 + (timestamp?.nanos ?? 0) * 1e-6;
   }
 
   /** Convert a float value of milliseconds to an NBS timestamp object */
@@ -38,7 +37,7 @@ export class TimestampObject {
   }
 
   /** Convert the given NBS timestamp object to a bigint of nanoseconds */
-  static toNanos(timestamp?: ITimestamp | null): bigint {
+  static toNanos(timestamp?: TimestampLike | null): bigint {
     return BigInt(timestamp?.seconds ?? 0) * BigInt(1e9) + BigInt(timestamp?.nanos ?? 0);
   }
 

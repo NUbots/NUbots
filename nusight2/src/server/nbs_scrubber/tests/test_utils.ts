@@ -1,12 +1,10 @@
 import { NbsTimestamp } from "nbsdecoder.js";
 import path from "path";
 
-import { message } from "../../../shared/messages";
+import { ScrubberState, ScrubberState_StateEnum } from "../../../shared/proto/message/eye/Scrubber";
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetPacketMaybeEmpty } from "../../../shared/nuclearnet/nuclearnet_client";
-
-import ScrubberState = message.eye.ScrubberState;
 
 /** A default peer name used for scrubber in tests */
 export const scrubberPeerName = "myScrubber";
@@ -52,10 +50,10 @@ export function makePacket(
 }
 
 const ScrubberStateStringToEnum = {
-  paused: ScrubberState.State.PAUSED,
-  playing: ScrubberState.State.PLAYING,
-  ended: ScrubberState.State.ENDED,
-  unknown: ScrubberState.State.UNKNOWN,
+  paused: ScrubberState_StateEnum.PAUSED,
+  playing: ScrubberState_StateEnum.PLAYING,
+  ended: ScrubberState_StateEnum.ENDED,
+  unknown: ScrubberState_StateEnum.UNKNOWN,
 } as const;
 
 /** Make a NUClearNet packet of type ScrubberState with the given data */
@@ -89,16 +87,16 @@ export function makeScrubberStatePacket(
   const packet = {
     hash: hashType("message.eye.ScrubberState"),
     payload: Buffer.from(
-      ScrubberState.encode({
+      new ScrubberState({
         id,
         name,
-        timestamp,
-        start,
-        end,
+        timestamp: { seconds: BigInt(timestamp.seconds), nanos: timestamp.nanos },
+        start: { seconds: BigInt(start.seconds), nanos: start.nanos },
+        end: { seconds: BigInt(end.seconds), nanos: end.nanos },
         playbackState: ScrubberStateStringToEnum[playbackState],
         playbackRepeat,
         playbackSpeed,
-      }).finish(),
+      }).toBinary(),
     ),
     reliable: true,
     peer,

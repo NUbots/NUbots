@@ -5,7 +5,9 @@ import type {
   RpcErrorCause,
   RpcErrorOptions,
   RpcResult,
-} from "../../shared/messages/rpc_call";
+} from "../../shared/messages/generated/rpc_call";
+import { MessageInstance } from "../../shared/messages/types";
+import { RpcRequestMeta } from "@proto/message/eye/Rpc";
 
 import { Network } from "./network";
 
@@ -120,14 +122,12 @@ export class RpcClient {
       }
 
       // Set the request token
-      request.rpc = {
-        token: requestToken,
-      };
+      request.rpc = new RpcRequestMeta({ token: requestToken });
 
       // Set up a listener for the response
       const removeOn = this.network.on(
         ResponseType,
-        (robotModel, response: { rpc: { token: number; ok: boolean; error?: string } }) => {
+        (robotModel, response: MessageInstance & { rpc: { token: number; ok: boolean; error?: string } }) => {
           // Ignore responses that don't match the request token
           if (response.rpc.token !== requestToken) {
             return;

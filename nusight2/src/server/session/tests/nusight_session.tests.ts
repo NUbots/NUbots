@@ -1,7 +1,8 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { message } from "../../../shared/messages";
+import { ScrubberClosed, ScrubberCloseRequest, ScrubberLoadRequest, ScrubberSeekRequest } from "../../../shared/proto/message/eye/Scrubber";
+import { Test } from "../../../shared/proto/message/network/Test";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";
 import { sampleFileA } from "../../nbs_scrubber/tests/test_utils";
@@ -11,17 +12,12 @@ import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
 
-import Test = message.network.Test;
-import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
-import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
-import ScrubberSeekRequest = message.eye.ScrubberSeekRequest;
-import ScrubberClosed = message.eye.ScrubberClosed;
 import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 
-const testPacketType = "message.network.Test";
+const testPacketType = Test.typeName;
 
 function createTestPacket(opts: { reliable?: boolean } = {}) {
-  const payload = Test.encode({ message: "Test" }).finish();
+  const payload = new Test({ message: "Test" }).toBinary();
 
   const packet: NUClearNetPacket = {
     hash: hashType(testPacketType),

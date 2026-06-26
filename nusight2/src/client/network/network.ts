@@ -1,6 +1,6 @@
 import { NUClearNetSend } from "nuclearnet.js";
 
-import { MessageType } from "../../shared/messages";
+import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { Emit } from "../../shared/messages/emit";
 import { WebSocketClient } from "../nuclearnet/web_socket_client";
 
@@ -40,7 +40,7 @@ export class Network {
    * @param cb The callback to call every time a message is received
    * @returns A unsubscriber function.
    */
-  on<T>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: MessageCallback<T>): () => void {
+  on<T extends MessageInstance>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: MessageCallback<T>): () => void {
     const offNUClearMessage = this.nusightNetwork.onNUClearMessage(type, cb);
     this.offNUClearMessages.add(offNUClearMessage);
     return () => {

@@ -3,7 +3,8 @@ import { action } from "mobx";
 
 import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
-import { message } from "../../../shared/messages";
+import { Sensors, ISensors_Servo } from "@proto/message/input/Sensors";
+import { DataPoint } from "@proto/message/eye/DataPoint";
 import { Clock } from "../../../shared/time/clock";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
@@ -13,8 +14,6 @@ import { ChartModel } from "./model";
 import { DataSeries } from "./model";
 import { TreeData } from "./model";
 
-import Sensors = message.input.Sensors;
-import DataPoint = message.eye.DataPoint;
 import { TimestampObject } from "../../../shared/time/timestamp";
 
 const ServoIds = [
@@ -203,7 +202,7 @@ export class ChartNetwork {
 
     // Servos
     if (servo.length) {
-      servo.forEach((servo: Sensors.IServo, index: number) => {
+      servo.forEach((servo: ISensors_Servo, index: number) => {
         const name = ServoIds[index];
 
         // PID gain

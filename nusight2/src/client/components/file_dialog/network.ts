@@ -1,7 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { action } from "mobx";
 
-import { message } from "../../../shared/messages";
+import {
+  FileEntry_TypeEnum,
+  FilesRequestTypeEnum,
+  ListFilesRequest,
+  ListFilesRequest_Response,
+} from "@proto/message/eye/File";
 import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
@@ -11,10 +16,10 @@ import { FileDialogModel } from "./model";
 
 export type FilesRequestType = "unknown" | "directory" | "nbs";
 
-const FilesRequestTypeToEnum: Record<FilesRequestType, message.eye.FilesRequestType> = {
-  unknown: message.eye.FilesRequestType.UNKNOWN,
-  directory: message.eye.FilesRequestType.DIRECTORY,
-  nbs: message.eye.FilesRequestType.NBS,
+const protoFilesRequestTypeToEnum: Record<FilesRequestType, FilesRequestTypeEnum> = {
+  unknown: FilesRequestTypeEnum.UNKNOWN,
+  directory: FilesRequestTypeEnum.DIRECTORY,
+  nbs: FilesRequestTypeEnum.NBS,
 };
 
 export function useFileDialogNetwork(model: FileDialogModel) {
@@ -44,7 +49,7 @@ export class FileDialogNetwork {
   }
 
   async listFiles({ directory, type }: { directory: string; type: FilesRequestType }) {
-    const request = new message.eye.ListFilesRequest({ directory, type: FilesRequestTypeToEnum[type] });
+    const request = new ListFilesRequest({ directory, type: protoFilesRequestTypeToEnum[type] });
     const result = await this.network.call(request);
 
     if (result.ok) {
@@ -59,15 +64,15 @@ export class FileDialogNetwork {
   }
 
   @action
-  private onListFilesSuccess = (response: message.eye.ListFilesRequest.Response) => {
+  private onListFilesSuccess = (response: ListFilesRequest_Response) => {
     this.model.error = "";
     this.model.currentPath = response.directory!;
     this.model.currentPathEntries = (response.entries ?? []).map((entry) => {
       return {
-        type: entry.type === message.eye.FileEntry.Type.DIRECTORY ? "directory" : "file",
+        type: entry.type === FileEntry_TypeEnum.DIRECTORY ? "directory" : "file",
         name: entry.name!,
         path: entry.path!,
-        size: entry.size!,
+        size: Number(entry.size ?? 0n),
         dateModified: new Date(TimestampObject.toMillis(entry.dateModified)),
       };
     });

@@ -1,14 +1,11 @@
 import { autorun } from "mobx";
 
-import { message } from "../../shared/messages";
+import { DataPoint } from "@proto/message/eye/DataPoint";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { TimestampObject } from "../../shared/time/timestamp";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";
 
 import { periodic } from "./periodic";
-
-import DataPoint = message.eye.DataPoint;
 
 export class ChartSimulator extends Simulator {
   static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): ChartSimulator {
@@ -29,11 +26,11 @@ export class ChartSimulator extends Simulator {
     const sin = Math.sin(theta);
     const cos = Math.cos(theta);
 
-    const buffer = DataPoint.encode({
+    const buffer = new DataPoint({
       label: "Debug Waves",
       value: [sin, cos, 2 * sin, 4 * cos],
-      timestamp: TimestampObject.fromSeconds(time),
-    }).finish();
+      timestamp: { seconds: BigInt(Math.floor(time)), nanos: Math.floor((time * 1e9) % 1e9) },
+    }).toBinary();
 
     const message = { messageType, buffer };
     return message;

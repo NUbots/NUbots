@@ -2,14 +2,10 @@ import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
 import { Vector3 } from "../../../../../shared/math/vector3";
-import { message } from "../../../../../shared/messages";
+import { GameState_ModeEnum, GameState_PhaseEnum, GameState_PenaltyReasonEnum } from "@proto/message/input/GameState";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";
-
-const Mode = message.input.GameState.Mode;
-const PenaltyReason = message.input.GameState.PenaltyReason;
-const Phase = message.input.GameState.Phase;
 
 export class DashboardRobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {}
@@ -45,22 +41,22 @@ export class DashboardRobotPanelViewModel {
 
   @computed
   get mode(): string {
-    return Mode[this.model.gameMode] || Mode[Mode.UNKNOWN_MODE];
+    return GameState_ModeEnum[this.model.gameMode] || GameState_ModeEnum[GameState_ModeEnum.UNKNOWN_MODE];
   }
 
   @computed
   get penalised(): boolean {
-    return this.model.penaltyReason !== PenaltyReason.UNPENALISED;
+    return this.model.penaltyReason !== GameState_PenaltyReasonEnum.UNPENALISED;
   }
 
   @computed
   get penalty(): string {
-    return PenaltyReason[this.model.penaltyReason] || PenaltyReason[PenaltyReason.UNPENALISED];
+    return GameState_PenaltyReasonEnum[this.model.penaltyReason] || GameState_PenaltyReasonEnum[GameState_PenaltyReasonEnum.UNPENALISED];
   }
 
   @computed
   get phase(): string {
-    return Phase[this.model.gamePhase] || Phase[Phase.UNKNOWN_PHASE];
+    return GameState_PhaseEnum[this.model.gamePhase] || GameState_PhaseEnum[GameState_PhaseEnum.UNKNOWN_PHASE];
   }
 
   @computed

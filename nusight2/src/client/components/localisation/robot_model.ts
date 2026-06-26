@@ -5,7 +5,7 @@ import { action } from "mobx";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
-import { message } from "../../../shared/messages";
+import { WalkState_PhaseEnum } from "@proto/message/behaviour/state/WalkState";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -178,13 +178,13 @@ export class LocalisationRobotModel {
   @observable teamColour: "red" | "blue" = "blue";
   @observable torsoTrajectory: Matrix4[];
   @observable swingFootTrajectory: Matrix4[];
-  @observable walkPhase: message.behaviour.state.WalkState.Phase;
+  @observable walkPhase: WalkState_PhaseEnum;
   @observable trajectoryHistory: {
     torso: Matrix4[];
     swingFoot: Matrix4[];
     color: string;
     timestamp: number;
-    phase: message.behaviour.state.WalkState.Phase;
+    phase: WalkState_PhaseEnum;
   }[] = [];
 
   constructor({
@@ -253,13 +253,13 @@ export class LocalisationRobotModel {
     teamColour?: "red" | "blue";
     torsoTrajectory: Matrix4[];
     swingFootTrajectory: Matrix4[];
-    walkPhase: message.behaviour.state.WalkState.Phase;
+    walkPhase: WalkState_PhaseEnum;
     trajectoryHistory: {
       torso: Matrix4[];
       swingFoot: Matrix4[];
       color: string;
       timestamp: number;
-      phase: message.behaviour.state.WalkState.Phase;
+      phase: WalkState_PhaseEnum;
     }[];
   }) {
     this.model = model;
@@ -326,7 +326,7 @@ export class LocalisationRobotModel {
       teamColour: "blue",
       torsoTrajectory: [],
       swingFootTrajectory: [],
-      walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      walkPhase: WalkState_PhaseEnum.DOUBLE,
       trajectoryHistory: [],
     });
   });

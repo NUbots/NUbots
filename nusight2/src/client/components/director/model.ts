@@ -1,12 +1,18 @@
 import { computed, observable } from "mobx";
 
-import { message } from "../../../shared/messages";
+import {
+  DirectorState,
+  DirectorState_Provider_ClassificationEnum,
+  IDirectorState_DirectorTask,
+  IDirectorState_Group,
+  IDirectorState_Provider,
+} from "@proto/message/behaviour/Director";
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
-export type ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
-export const ProviderClassification = message.behaviour.DirectorState.Provider.Classification;
+export type ProviderClassification = DirectorState_Provider_ClassificationEnum;
+export const ProviderClassification = DirectorState_Provider_ClassificationEnum;
 
 /** Local representation of an enum value coming from DirectorState */
 export interface EnumValue {
@@ -53,18 +59,18 @@ export interface DirectorGraph {
 }
 
 function isRootGroup(
-  group: message.behaviour.DirectorState.IGroup,
-  providers: Record<string, message.behaviour.DirectorState.IProvider>,
+  group: IDirectorState_Group,
+  providers: Record<string, IDirectorState_Provider>,
 ): boolean {
   return (
-    group.providerIds?.length === 1 && providers[group.providerIds[0]]?.classification === ProviderClassification.ROOT
+    group.providerIds?.length === 1 && providers[String(group.providerIds[0])]?.classification === ProviderClassification.ROOT
   );
 }
 
 /**
  * Convert a raw protobuf DirectorState into an enriched graph that the UI can work with.
  */
-export function transformDirectorState(state: message.behaviour.DirectorState): DirectorGraph {
+export function transformDirectorState(state: DirectorState): DirectorGraph {
   const groupsById: Record<string, GroupModel> = {};
   const providersById: Record<string, ProviderModel> = {};
 
@@ -80,7 +86,7 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
 
   const rootProvider: ProviderModel = {
     id: "-1",
-    classification: message.behaviour.DirectorState.Provider.Classification.ROOT,
+    classification: DirectorState_Provider_ClassificationEnum.ROOT,
     group: canonicalRoot,
     when: [],
     causing: {},
@@ -96,14 +102,14 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
   // Identify root groups from raw message
   const rootProviderIds = new Set<string>();
   const rootGroupIds = new Set<string>();
-  const rootSubtasks: message.behaviour.DirectorState.IDirectorTask[] = [];
+  const rootSubtasks: IDirectorState_DirectorTask[] = [];
 
   if (state.groups) {
     // Create all the group models/update root group pointers
     for (const [gid, g] of Object.entries(state.groups)) {
       if (isRootGroup(g, state.providers)) {
         rootGroupIds.add(gid);
-        rootProviderIds.add(g.providerIds?.[0] ?? "");
+        rootProviderIds.add(String(g.providerIds?.[0] ?? ""));
         rootSubtasks.push(...(g.subtasks ?? []));
       } else {
         // Create the group model
@@ -124,7 +130,7 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
 
   // Sort collected root subtasks so that highest priority appears first
   // Then sort by name as the javascript uses a hash map which breaks ordering of objects
-  rootSubtasks.sort((a, z) => (z.priority ?? 0) - (a.priority ?? 0) || a.targetGroup - z.targetGroup);
+  rootSubtasks.sort((a, z) => (z.priority ?? 0) - (a.priority ?? 0) || Number(a.targetGroup) - Number(z.targetGroup));
 
   // Make providers for non-root groups
   if (state.providers) {
@@ -156,14 +162,14 @@ export function transformDirectorState(state: message.behaviour.DirectorState): 
 
   // Resolve needs links
   for (const provider of Object.values(providersById).filter((p) => !rootProviderIds.has(p.id))) {
-    provider.needs = (state.providers?.[provider.id]?.needs ?? []).map((gid) => groupsById[gid]).filter(Boolean);
+    provider.needs = (state.providers?.[provider.id]?.needs ?? []).map((gid) => groupsById[String(gid)]).filter(Boolean);
   }
 
   // Resolve the provider pointers
   for (const [gid, g] of Object.entries(groupsById).filter(([gid]) => !rootGroupIds.has(gid))) {
     const { activeProvider, parentProvider } = state.groups[gid]!;
-    g.activeProvider = rootProviderIds.has(activeProvider) ? rootProvider : providersById[activeProvider];
-    g.parentProvider = rootProviderIds.has(parentProvider) ? rootProvider : providersById[parentProvider];
+    g.activeProvider = rootProviderIds.has(String(activeProvider)) ? rootProvider : providersById[String(activeProvider)];
+    g.parentProvider = rootProviderIds.has(String(parentProvider)) ? rootProvider : providersById[String(parentProvider)];
   }
 
   // Resolve the subtasks

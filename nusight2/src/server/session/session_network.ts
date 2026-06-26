@@ -1,16 +1,13 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 
-import { message, MessageType } from "../../shared/messages";
+import { IRpcRequestMeta, IRpcResponseMeta } from "../../shared/proto/message/eye/Rpc";
 import { Emit } from "../../shared/messages/emit";
-import { messageTypeToName } from "../../shared/messages/type_converters";
+import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { hashType } from "../../shared/nuclearnet/hash_type";
 
 import { NUsightSession } from "./session";
 import { NUsightSessionClient } from "./session_client";
-
-import IRpcRequestMeta = message.eye.IRpcRequestMeta;
-import IRpcResponseMeta = message.eye.IRpcResponseMeta;
 
 export type NUClearMessageCallback<T> = (peer: NUClearNetPeer, message: T) => void;
 export type ClientMessageCallback<T> = (client: NUsightSessionClient, message: T) => void;
@@ -45,9 +42,9 @@ export class NUsightSessionNetwork {
    */
   emit: Emit = (message, options = {}) => {
     const messageType = message.constructor as MessageType<any>;
-    const messageTypeName = messageTypeToName(messageType);
+    const messageTypeName = message.$typeName;
 
-    const payload = Buffer.from(messageType.encode(message).finish());
+    const payload = Buffer.from(message.toBinary());
     const hash = hashType(messageTypeName);
     const reliable = options.reliable ?? true;
     const peer = NUSIGHT_SERVER_PEER;
@@ -75,7 +72,7 @@ export class NUsightSessionNetwork {
   };
 
   /** Register a listener for the given message type from NUClearNet */
-  onNUClearMessage<T>(
+  onNUClearMessage<T extends MessageInstance>(
     type: MessageType<T> | { type: MessageType<T>; subtype?: number },
     cb: NUClearMessageCallback<T>,
   ) {
@@ -83,24 +80,24 @@ export class NUsightSessionNetwork {
 
     return this.session.nuclearnetClient.on(event, (packet: NUClearNetPacket) => {
       const buffer = new Uint8Array(packet.payload);
-      const message = MessageType.decode(buffer);
+      const message = MessageType.fromBinary(buffer);
       cb(packet.peer, message);
     });
   }
 
   /** Register a listener for the given message type from a client in the session */
-  onClientMessage<T>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: ClientMessageCallback<T>) {
+  onClientMessage<T extends MessageInstance>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: ClientMessageCallback<T>) {
     const { event, MessageType } = findMessageType(type);
 
     return this.session.onClientPacket(event, (client, packet) => {
       const buffer = new Uint8Array(packet.payload);
-      const message = MessageType.decode(buffer);
+      const message = MessageType.fromBinary(buffer);
       cb(client, message);
     });
   }
 
   /** Register a handler to respond to RPC requests of the given type from a client in the session */
-  onClientRpc<T extends { rpc?: IRpcRequestMeta | null }>(
+  onClientRpc<T extends MessageInstance & { rpc?: IRpcRequestMeta | null }>(
     type: MessageType<T> | { type: MessageType<T>; subtype?: number },
     requestHandler: RpcRequestHandler<T>,
   ) {
@@ -128,7 +125,7 @@ export class NUsightSessionNetwork {
 /** Find the Protobuf message class and event name for the given type */
 function findMessageType(type: MessageType<any> | { type: MessageType<any>; subtype?: number }) {
   const MessageType = typeof type === "object" ? type.type : type;
-  const messageTypeName = messageTypeToName(MessageType);
+  const messageTypeName = MessageType.typeName;
   const subtype = typeof type === "object" ? type.subtype : null;
 
   return {

@@ -2,11 +2,15 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+import { aliasEntries } from "./build_scripts/alias_entries";
 import glslPlugin from "./build_scripts/glsl_plugin";
 
 // See https://vitejs.dev/config/
 export default defineConfig({
   publicDir: "./src/assets",
+  resolve: {
+    alias: aliasEntries,
+  },
   optimizeDeps: {
     // These dependencies are not auto-detected in Vite's initial pre-bundling run.
     // Adding them here includes them in the first run, avoiding a second one.

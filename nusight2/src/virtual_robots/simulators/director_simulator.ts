@@ -1,14 +1,14 @@
 import { autorun } from "mobx";
 
 import { SeededRandom } from "../../shared/base/random/seeded_random";
-import { message } from "../../shared/messages";
+import {
+  DirectorState,
+  DirectorState_Provider_ClassificationEnum,
+} from "@proto/message/behaviour/Director";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
-
-import DirectorState = message.behaviour.DirectorState;
-import Classification = message.behaviour.DirectorState.Provider.Classification;
 
 export class DirectorSimulator extends Simulator {
   constructor(
@@ -75,88 +75,88 @@ export class DirectorSimulator extends Simulator {
     };
 
     // Pick an active provider for playing WalkPlanner
-    const walkActiveProvider = plannersOn ? (plannerOn1 ? providerIds.walkTo : providerIds.turnOnSpot) : 0;
+    const walkActiveProvider = plannersOn ? (plannerOn1 ? BigInt(providerIds.walkTo) : BigInt(providerIds.turnOnSpot)) : 0n;
 
     // Some basic subtasks for the groups
-    const rootSubtasks: DirectorState.DirectorTask[] = [
-      { name: "Soccer", targetGroup: groupIds.purpose, priority: 10, optional: false },
-      { name: "FallRecovery", targetGroup: groupIds.recovery, priority: 5, optional: true },
+    const rootSubtasks = [
+      { name: "Soccer", targetGroup: BigInt(groupIds.purpose), priority: 10, optional: false },
+      { name: "FallRecovery", targetGroup: BigInt(groupIds.recovery), priority: 5, optional: true },
     ];
 
-    const purposeSubtasks: DirectorState.DirectorTask[] = [
-      { name: "Striker", targetGroup: groupIds.strategy, priority: 10, optional: false },
+    const purposeSubtasks = [
+      { name: "Striker", targetGroup: BigInt(groupIds.strategy), priority: 10, optional: false },
       ...(!plannersOn && !kickOn
         ? []
-        : [{ name: "StandStill", targetGroup: groupIds.recovery, priority: 2, optional: true }]),
+        : [{ name: "StandStill", targetGroup: BigInt(groupIds.recovery), priority: 2, optional: true }]),
     ];
 
-    const strategySubtasks: DirectorState.DirectorTask[] = [
-      ...(plannersOn ? [{ name: "WalkToBall", targetGroup: groupIds.walkPlan, priority: 6, optional: false }] : []),
-      ...(plannersOn ? [{ name: "LookAround", targetGroup: groupIds.lookPlan, priority: 6, optional: false }] : []),
+    const strategySubtasks = [
+      ...(plannersOn ? [{ name: "WalkToBall", targetGroup: BigInt(groupIds.walkPlan), priority: 6, optional: false }] : []),
+      ...(plannersOn ? [{ name: "LookAround", targetGroup: BigInt(groupIds.lookPlan), priority: 6, optional: false }] : []),
     ];
 
     // Build core groups map
-    const groups: Record<number, DirectorState.Group> = {
+    const groups: Record<number, Record<string, unknown>> = {
       [groupIds.root]: {
         type: "RootBehaviour",
-        providerIds: [providerIds.root],
-        activeProvider: providerIds.root,
-        parentProvider: 0,
+        providerIds: [BigInt(providerIds.root)],
+        activeProvider: BigInt(providerIds.root),
+        parentProvider: 0n,
         subtasks: rootSubtasks,
       },
       [groupIds.purpose]: {
         type: "FindPurpose",
-        providerIds: [providerIds.purpose],
-        activeProvider: providerIds.purpose,
-        parentProvider: providerIds.root,
+        providerIds: [BigInt(providerIds.purpose)],
+        activeProvider: BigInt(providerIds.purpose),
+        parentProvider: BigInt(providerIds.root),
         subtasks: purposeSubtasks,
       },
       [groupIds.strategy]: {
         type: "FindBall",
-        providerIds: [providerIds.strategy],
-        activeProvider: providerIds.strategy,
-        parentProvider: providerIds.purpose,
+        providerIds: [BigInt(providerIds.strategy)],
+        activeProvider: BigInt(providerIds.strategy),
+        parentProvider: BigInt(providerIds.purpose),
         subtasks: strategySubtasks,
       },
       [groupIds.recovery]: {
         type: "FallRecovery",
-        providerIds: [providerIds.recovery],
-        activeProvider: providerIds.recovery,
-        parentProvider: providerIds.root,
-        subtasks: [{ name: "GetUp", targetGroup: groupIds.recovery, priority: 6, optional: true }],
+        providerIds: [BigInt(providerIds.recovery)],
+        activeProvider: BigInt(providerIds.recovery),
+        parentProvider: BigInt(providerIds.root),
+        subtasks: [{ name: "GetUp", targetGroup: BigInt(groupIds.recovery), priority: 6, optional: true }],
       },
     };
 
     // Build core providers map
-    const providers: Record<number, DirectorState.Provider> = {
+    const providers: Record<number, Record<string, unknown>> = {
       [providerIds.root]: {
-        id: providerIds.root,
-        group: groupIds.root,
-        classification: Classification.ROOT,
+        id: BigInt(providerIds.root),
+        group: BigInt(groupIds.root),
+        classification: DirectorState_Provider_ClassificationEnum.ROOT,
         when: [],
         causing: {},
         needs: [],
       },
       [providerIds.purpose]: {
-        id: providerIds.purpose,
-        group: groupIds.purpose,
-        classification: Classification.PROVIDE,
+        id: BigInt(providerIds.purpose),
+        group: BigInt(groupIds.purpose),
+        classification: DirectorState_Provider_ClassificationEnum.PROVIDE,
         when: [],
         causing: {},
         needs: [],
       },
       [providerIds.strategy]: {
-        id: providerIds.strategy,
-        group: groupIds.strategy,
-        classification: Classification.PROVIDE,
+        id: BigInt(providerIds.strategy),
+        group: BigInt(groupIds.strategy),
+        classification: DirectorState_Provider_ClassificationEnum.PROVIDE,
         when: [],
         causing: {},
-        needs: plannersOn ? [groupIds.lookPlan, groupIds.walkPlan] : [],
+        needs: plannersOn ? [BigInt(groupIds.lookPlan), BigInt(groupIds.walkPlan)] : [],
       },
       [providerIds.recovery]: {
-        id: providerIds.recovery,
-        group: groupIds.recovery,
-        classification: Classification.START,
+        id: BigInt(providerIds.recovery),
+        group: BigInt(groupIds.recovery),
+        classification: DirectorState_Provider_ClassificationEnum.START,
         when: [],
         causing: {},
         needs: [],
@@ -167,42 +167,42 @@ export class DirectorSimulator extends Simulator {
     if (plannersOn) {
       groups[groupIds.walkPlan] = {
         type: "WalkTo",
-        providerIds: [providerIds.walkTo, providerIds.turnOnSpot],
+        providerIds: [BigInt(providerIds.walkTo), BigInt(providerIds.turnOnSpot)],
         activeProvider: walkActiveProvider,
-        parentProvider: providerIds.strategy,
-        subtasks: [{ name: "WalkTo", targetGroup: groupIds.walkPlan, priority: 6, optional: true }],
+        parentProvider: BigInt(providerIds.strategy),
+        subtasks: [{ name: "WalkTo", targetGroup: BigInt(groupIds.walkPlan), priority: 6, optional: true }],
       };
 
       groups[groupIds.lookPlan] = {
         type: "LookAround",
-        providerIds: [providerIds.look],
-        activeProvider: providerIds.look,
-        parentProvider: providerIds.strategy,
-        subtasks: [{ name: "LookAround", targetGroup: groupIds.lookPlan, priority: 6, optional: true }],
+        providerIds: [BigInt(providerIds.look)],
+        activeProvider: BigInt(providerIds.look),
+        parentProvider: BigInt(providerIds.strategy),
+        subtasks: [{ name: "LookAround", targetGroup: BigInt(groupIds.lookPlan), priority: 6, optional: true }],
       };
 
       providers[providerIds.walkTo] = {
-        id: providerIds.walkTo,
-        group: groupIds.walkPlan,
-        classification: Classification.START,
+        id: BigInt(providerIds.walkTo),
+        group: BigInt(groupIds.walkPlan),
+        classification: DirectorState_Provider_ClassificationEnum.START,
         when: [{ type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn1 }],
         causing: {},
-        needs: [groupIds.lookPlan],
+        needs: [BigInt(groupIds.lookPlan)],
       };
 
       providers[providerIds.turnOnSpot] = {
-        id: providerIds.turnOnSpot,
-        group: groupIds.walkPlan,
-        classification: Classification.START,
+        id: BigInt(providerIds.turnOnSpot),
+        group: BigInt(groupIds.walkPlan),
+        classification: DirectorState_Provider_ClassificationEnum.START,
         when: [{ type: "Phase", comparator: "==", expectedState: { name: "PLAYING", value: 1 }, current: plannerOn2 }],
         causing: {},
-        needs: [groupIds.lookPlan],
+        needs: [BigInt(groupIds.lookPlan)],
       };
 
       providers[providerIds.look] = {
-        id: providerIds.look,
-        group: groupIds.lookPlan,
-        classification: Classification.START,
+        id: BigInt(providerIds.look),
+        group: BigInt(groupIds.lookPlan),
+        classification: DirectorState_Provider_ClassificationEnum.START,
         when: [],
         causing: {},
         needs: [],
@@ -213,16 +213,16 @@ export class DirectorSimulator extends Simulator {
     if (kickOn) {
       groups[groupIds.kickPlan] = {
         type: "KickTo",
-        providerIds: [providerIds.kick],
-        activeProvider: providerIds.kick,
-        parentProvider: providerIds.strategy,
-        subtasks: [{ name: "KickTo", targetGroup: groupIds.kickPlan, priority: 6, optional: true }],
+        providerIds: [BigInt(providerIds.kick)],
+        activeProvider: BigInt(providerIds.kick),
+        parentProvider: BigInt(providerIds.strategy),
+        subtasks: [{ name: "KickTo", targetGroup: BigInt(groupIds.kickPlan), priority: 6, optional: true }],
       };
 
       providers[providerIds.kick] = {
-        id: providerIds.kick,
-        group: groupIds.kickPlan,
-        classification: Classification.START,
+        id: BigInt(providerIds.kick),
+        group: BigInt(groupIds.kickPlan),
+        classification: DirectorState_Provider_ClassificationEnum.START,
         when: [],
         causing: {},
         needs: [],
@@ -231,16 +231,16 @@ export class DirectorSimulator extends Simulator {
 
     // Reset to core only
     if (reset) {
-      groups[groupIds.root].activeProvider = providerIds.root;
-      groups[groupIds.purpose].activeProvider = 0;
-      groups[groupIds.strategy].activeProvider = 0;
-      groups[groupIds.recovery].activeProvider = 0;
+      groups[groupIds.root].activeProvider = BigInt(providerIds.root);
+      groups[groupIds.purpose].activeProvider = 0n;
+      groups[groupIds.strategy].activeProvider = 0n;
+      groups[groupIds.recovery].activeProvider = 0n;
     }
 
-    const buffer = DirectorState.encode({
+    const buffer = new DirectorState({
       groups,
       providers,
-    }).finish();
+    }).toBinary();
 
     return { messageType, buffer };
   }

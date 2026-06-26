@@ -19,11 +19,16 @@ function generateTs(schema: Schema) {
     const enumExports: string[] = [];
     const enumConverters: string[] = [];
     const classes: string[] = [];
+    const responseAssignments: string[] = [];
 
     // Generate imports, interface and class for each message
     group.messages.forEach((message) => {
       imports.push(`type ${message.name} as I${message.name}, ${message.name}Schema`);
       interfaceExports.push(`I${message.name}`);
+
+      // RPC request messages with a sibling Response message expose it as a static.
+      const responseName = `${message.name}_Response`;
+      const hasResponse = message.name.endsWith("Request") && group.messages.some((m) => m.name === responseName);
 
       // Generate the class wrapper. The exported interface with the same name is used to make
       // the class inherit the properties and documentation comments from the interface.
@@ -31,7 +36,9 @@ function generateTs(schema: Schema) {
 
 export class ${message.name} {
   static typeName = ${message.name}Schema.typeName as I${message.name}["$typeName"];
-  static schema = ${message.name}Schema;
+  static schema = ${message.name}Schema;${
+    hasResponse ? `\n  declare static Response: typeof ${responseName};` : ""
+  }
 
   constructor(data: MessageInitShape<typeof ${message.name}Schema>) {
     Object.assign(this, create(${message.name}Schema, data));
@@ -46,6 +53,12 @@ export class ${message.name} {
   }
 }`;
       classes.push(wrapperClass);
+
+      // For RPC request messages with a nested Response message, wire up the static
+      // reference so the RPC client and server can resolve it from the request type.
+      if (hasResponse) {
+        responseAssignments.push(`${message.name}.Response = ${responseName};`);
+      }
     });
 
     // Generate imports, a union type, and converters from enum to union type and vice versa
@@ -105,6 +118,12 @@ export const ${enumVar.name + "ToEnum"} : Record<${enumVar.name}, ${enumVar.name
     if (classes.length > 0) {
       f.print();
       f.print(classes.join("\n\n"));
+    }
+
+    // Wire up RPC request -> response static references
+    if (responseAssignments.length > 0) {
+      f.print();
+      f.print(responseAssignments.join("\n"));
     }
   });
 }

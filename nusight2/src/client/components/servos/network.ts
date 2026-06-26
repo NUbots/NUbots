@@ -3,8 +3,8 @@ import * as THREE from "three";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
-import { message } from "../../../shared/messages";
-import { Imat4 } from "../../../shared/messages";
+import { Sensors } from "@proto/message/input/Sensors";
+import { Iiso3 } from "@proto/Transform";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -13,7 +13,7 @@ import { ServosRobotModel } from "./robot_model";
 
 export class ServosNetwork {
   constructor(private network: Network) {
-    this.network.on(message.input.Sensors, this.onSensors);
+    this.network.on(Sensors, this.onSensors);
   }
 
   static of(nusightNetwork: NUsightNetwork): ServosNetwork {
@@ -26,7 +26,7 @@ export class ServosNetwork {
   };
 
   @action
-  private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
+  private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     // Ignore empty Sensors packets which may be emitted by the nbs scrubber
     // when there's no Sensors data at a requested timestamp).
     if (!sensors.Htw) {
@@ -80,7 +80,7 @@ function decompose(m: THREE.Matrix4): {
   return { translation, rotation, scale };
 }
 
-function fromProtoMat44(m: Imat4): THREE.Matrix4 {
+function fromProtoMat44(m: Iiso3): THREE.Matrix4 {
   return new THREE.Matrix4().set(
     m!.x!.x!,
     m!.y!.x!,

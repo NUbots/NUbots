@@ -5,14 +5,10 @@ import { Matrix3 } from "../../../../../shared/math/matrix3";
 import { Transform } from "../../../../../shared/math/transform";
 import { Vector2 } from "../../../../../shared/math/vector2";
 import { Vector3 } from "../../../../../shared/math/vector3";
-import { message } from "../../../../../shared/messages";
+import { GameState_ModeEnum, GameState_PhaseEnum, GameState_PenaltyReasonEnum } from "@proto/message/input/GameState";
 import { memoize } from "../../../../base/memoize";
 import { BrowserSystemClock } from "../../../../time/browser_clock";
 import { RobotModel } from "../../../robot/model";
-
-import Mode = message.input.GameState.Mode;
-import PenaltyReason = message.input.GameState.PenaltyReason;
-import Phase = message.input.GameState.Phase;
 
 export class DashboardRobotModel {
   // Parameters that influence the display
@@ -52,9 +48,9 @@ export class DashboardRobotModel {
   @observable kickTarget: Vector2;
 
   // The game state information
-  @observable gameMode: Mode;
-  @observable gamePhase: Phase;
-  @observable penaltyReason: PenaltyReason;
+  @observable gameMode: GameState_ModeEnum;
+  @observable gamePhase: GameState_PhaseEnum;
+  @observable penaltyReason: GameState_PenaltyReasonEnum;
 
   // The timestamp of when we last had an image, saw the ball and saw a goal
   // Measured in seconds compared to the variable `time`
@@ -127,15 +123,15 @@ export class DashboardRobotModel {
       ballSightColor: "#4db659",
       battery: -1,
       camera: Transform.of(),
-      gameMode: Mode.UNKNOWN_MODE,
-      gamePhase: Phase.UNKNOWN_PHASE,
+      gameMode: GameState_ModeEnum.UNKNOWN_MODE,
+      gamePhase: GameState_PhaseEnum.UNKNOWN_PHASE,
       playerId: -1,
       kickTarget: Vector2.of(),
       kickTargetColor: "#115e2c",
       lastCameraImage: 0,
       lastSeenBall: 0,
       lastSeenGoal: 0,
-      penaltyReason: PenaltyReason.UNPENALISED,
+      penaltyReason: GameState_PenaltyReasonEnum.UNPENALISED,
       robotColor: "#015726",
       robotPosition: Vector3.of(),
       robotPositionCovariance: Matrix3.of(),
@@ -184,9 +180,9 @@ interface DashboardRobotModelOpts {
   ballPosition: Vector2;
   ballCovariance: Matrix2;
   kickTarget: Vector2;
-  gameMode: Mode;
-  gamePhase: Phase;
-  penaltyReason: PenaltyReason;
+  gameMode: GameState_ModeEnum;
+  gamePhase: GameState_PhaseEnum;
+  penaltyReason: GameState_PenaltyReasonEnum;
   playerId: number;
   lastCameraImage: number;
   lastSeenBall: number;

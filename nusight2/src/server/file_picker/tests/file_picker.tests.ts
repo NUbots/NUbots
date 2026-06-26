@@ -1,17 +1,13 @@
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { message } from "../../../shared/messages";
+import { FileEntry, FileEntry_TypeEnum, FilesRequestTypeEnum, ListFilesRequest } from "../../../shared/proto/message/eye/File";
 import { samplesDir } from "../../nbs_scrubber/tests/test_utils";
 import { NUsightSession } from "../../session/session";
 import { createMockNUClearNetClient, findAndDecodePacketFromCalls } from "../../session/tests/test_utils";
 import { createMockWebSocket } from "../../session/tests/test_utils";
 import { createPacketFromServer } from "../../session/tests/test_utils";
 import { createFilePicker } from "../create";
-
-import FileEntry = message.eye.FileEntry;
-import FilesRequestType = message.eye.FilesRequestType;
-import ListFilesRequest = message.eye.ListFilesRequest;
 
 describe("File Picker", () => {
   let session: NUsightSession;
@@ -34,7 +30,7 @@ describe("File Picker", () => {
     const request = new ListFilesRequest({
       rpc: { token: 1 },
       directory: samplesDir,
-      type: FilesRequestType.DIRECTORY,
+      type: FilesRequestTypeEnum.DIRECTORY,
     });
     socket.emitMessage(request);
 
@@ -43,16 +39,16 @@ describe("File Picker", () => {
     const response = findAndDecodePacketFromCalls(socket.connection.send, ListFilesRequest.Response);
 
     // the requested directories should be listed in a response sent back to the client.
-    expect(response?.payload).toEqual({
+    expect(response?.payload).toMatchObject({
       rpc: { ok: true, token: 1 },
       directory: samplesDir,
       entries: [
         {
-          type: FileEntry.Type.DIRECTORY,
+          type: FileEntry_TypeEnum.DIRECTORY,
           name: "sample_folder",
           path: path.join(samplesDir, "sample_folder"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
+          size: expect.any(BigInt),
+          dateModified: { seconds: expect.any(BigInt), nanos: expect.any(Number) },
         },
       ],
     });
@@ -63,7 +59,7 @@ describe("File Picker", () => {
     session.addClient(socket.connection);
 
     // when the client requests to list NBS files...
-    const request = new ListFilesRequest({ rpc: { token: 1 }, directory: samplesDir, type: FilesRequestType.NBS });
+    const request = new ListFilesRequest({ rpc: { token: 1 }, directory: samplesDir, type: FilesRequestTypeEnum.NBS });
     socket.emitMessage(request);
 
     await socket.connection.send.waitForCall();
@@ -71,30 +67,30 @@ describe("File Picker", () => {
     const response = findAndDecodePacketFromCalls(socket.connection.send, ListFilesRequest.Response);
 
     // the requested files should be listed in a response sent back to the client.
-    expect(response?.payload).toEqual({
+    expect(response?.payload).toMatchObject({
       rpc: { ok: true, token: 1 },
       directory: samplesDir,
       entries: [
         {
-          type: FileEntry.Type.DIRECTORY,
+          type: FileEntry_TypeEnum.DIRECTORY,
           name: "sample_folder",
           path: path.join(samplesDir, "sample_folder"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
+          size: expect.any(BigInt),
+          dateModified: { seconds: expect.any(BigInt), nanos: expect.any(Number) },
         },
         {
-          type: FileEntry.Type.FILE,
+          type: FileEntry_TypeEnum.FILE,
           name: "sample-000-300.nbs",
           path: path.join(samplesDir, "sample-000-300.nbs"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
+          size: expect.any(BigInt),
+          dateModified: { seconds: expect.any(BigInt), nanos: expect.any(Number) },
         },
         {
-          type: FileEntry.Type.FILE,
+          type: FileEntry_TypeEnum.FILE,
           name: "sample-300-600.nbs",
           path: path.join(samplesDir, "sample-300-600.nbs"),
-          size: expect.any(Number),
-          dateModified: { seconds: expect.any(Number) },
+          size: expect.any(BigInt),
+          dateModified: { seconds: expect.any(BigInt), nanos: expect.any(Number) },
         },
       ],
     });

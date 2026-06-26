@@ -1,7 +1,7 @@
 import { action } from "mobx";
 
-import { message } from "../../../shared/messages";
-import { RpcResult } from "../../../shared/messages/rpc_call";
+import { ScrubberLoadRequest, ScrubberPauseRequest, ScrubberPlayRequest } from "@proto/message/eye/Scrubber";
+import { RpcResult } from "../../../shared/messages/generated/rpc_call";
 import { RpcNetwork } from "../../hooks/use_rpc_controller";
 import { FileDialogController } from "../file_dialog/controller";
 import { FileDialogModel } from "../file_dialog/model";
@@ -20,12 +20,11 @@ export class NbsScrubbersController {
       return;
     }
 
-    const request =
-      scrubber.playbackState === "playing"
-        ? new message.eye.ScrubberPauseRequest({ id: scrubber.id })
-        : new message.eye.ScrubberPlayRequest({ id: scrubber.id });
-
-    this.network.call(request).then(this.defaultRpcResultHandler);
+    if (scrubber.playbackState === "playing") {
+      this.network.call(new ScrubberPauseRequest({ id: scrubber.id })).then(this.defaultRpcResultHandler);
+    } else {
+      this.network.call(new ScrubberPlayRequest({ id: scrubber.id })).then(this.defaultRpcResultHandler);
+    }
   };
 
   private defaultRpcResultHandler = <T>(result: RpcResult<T>) => {
@@ -58,7 +57,7 @@ export class NbsScrubberDialogController extends FileDialogController {
       return;
     }
 
-    this.network.call(new message.eye.ScrubberLoadRequest({ files })).then((result) => {
+    this.network.call(new ScrubberLoadRequest({ files })).then((result) => {
       if (!result.ok) {
         if (result.error.isRemoteError() || result.error.isTimeout()) {
           // TODO: add toast messages to NUsight to show errors like this without using alert()
