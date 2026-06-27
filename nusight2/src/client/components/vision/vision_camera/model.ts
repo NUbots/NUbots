@@ -75,7 +75,7 @@ export class VisionCameraModel implements CameraModel {
         drawHorizon: true,
         drawVisualMesh: false,
         drawGreenHorizon: true,
-        drawBalls: true,
+        drawBalls: false,
         drawGoals: true,
         drawRobots: true,
         drawBoundingBoxes: true,

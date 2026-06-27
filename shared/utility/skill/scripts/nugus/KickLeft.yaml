@@ -72,7 +72,7 @@
       position: -0.224015892
       gain: 8
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: -0.027618397
       gain: 8
       torque: 100
@@ -450,7 +450,7 @@
       position: -0.224015892
       gain: 8
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: -0.027618397
       gain: 8
       torque: 100
