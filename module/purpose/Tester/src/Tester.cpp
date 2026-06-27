@@ -34,11 +34,11 @@
 #include "message/planning/LookAround.hpp"
 #include "message/skill/GPT.hpp"
 #include "message/skill/Say.hpp"
+#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
-#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/math/euler.hpp"
@@ -54,13 +54,13 @@ namespace module::purpose {
     using message::skill::GPTAudioRequest;
     using message::skill::GPTChatRequest;
     using message::skill::Say;
+    using message::strategy::FallRecovery;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
-    using message::strategy::FallRecovery;
 
     using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
