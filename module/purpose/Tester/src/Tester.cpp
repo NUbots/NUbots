@@ -38,6 +38,7 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
+#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/math/euler.hpp"
@@ -59,6 +60,7 @@ namespace module::purpose {
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
+    using message::strategy::FallRecovery;
 
     using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
@@ -69,6 +71,7 @@ namespace module::purpose {
             // Use configuration here from file Tester.yaml
             this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
             cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
+            cfg.fall_recovery_priority          = config["tasks"]["fall_recovery_priority"].as<int>();
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
             cfg.walk_to_kick_ball_priority      = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
@@ -97,6 +100,9 @@ namespace module::purpose {
                 // Emit all the tasks with priorities higher than 0
                 if (cfg.find_ball_priority > 0) {
                     emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
+                }
+                if (cfg.fall_recovery_priority > 0) {
+                    emit<Task>(std::make_unique<FallRecovery>(), cfg.fall_recovery_priority);
                 }
                 if (cfg.look_at_ball_priority > 0) {
                     emit<Task>(std::make_unique<LookAtBall>(), cfg.look_at_ball_priority);

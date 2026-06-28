@@ -249,12 +249,13 @@ namespace module::skill {
                     idx += JOINT_POS_SIZE;
 
                     // Command (3)
-                    observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
+                    auto vel_targ = walk_task.velocity_target;
+                    observation.segment<COMMAND_SIZE>(idx) = vel_targ;
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target",
-                                   walk_task.velocity_target.x(),
-                                   walk_task.velocity_target.y(),
-                                   walk_task.velocity_target.z()));
+                                   vel_targ.x(),
+                                   vel_targ.y(),
+                                   vel_targ.z()));
                     }
                     idx += COMMAND_SIZE;
 
