@@ -48,7 +48,7 @@ getup_stand:
 # Settled-state check: at the end of RISE/STAND, if torso tilt still exceeds
 # fall_recovery_tilt the getup is considered to have failed and is restarted.
 #
-# Dynamic check (mid-script RISE/STAND and during stabilisation): ported from
+# Dynamic check (mid-script RISE/STAND): ported from
 # FallingRelaxPlanner. Three signals — gyroscope magnitude, accelerometer
 # magnitude and accelerometer angle from upright — are each exponentially
 # smoothed and classified STABLE / UNSTABLE / FALLING against their thresholds.
@@ -84,41 +84,3 @@ accelerometer_angle:
   mean: 0.0
   unstable: 35 * pi / 180.0 # rad from upright to consider the robot unstable
   falling: 45 * pi / 180.0 # rad from upright to consider the robot falling
-
-# ---------------------------------------------------------------------------
-# Foot polygon geometry
-# These values should match KinematicsConfiguration.yaml.
-# Origin is the ankle joint centre, with x-forward and y-left in the foot frame.
-# ---------------------------------------------------------------------------
-foot_toe_length: 0.130 # m — ankle to toe tip     (= KinematicsConfiguration leg.foot.toe_length)
-foot_heel_length: 0.085 # m — ankle to heel         (= KinematicsConfiguration leg.heel_length)
-foot_width: 0.130 # m — total lateral width   (= KinematicsConfiguration leg.foot.width)
-
-# ---------------------------------------------------------------------------
-# Capture-point stabilisation (STABILISE phase)
-#
-# After standing, the robot checks whether the Capture Point (Hof 2008)
-#   CP = CoM_xy + CoM_vel_xy / ω,   ω = sqrt(g / h_com)
-# lies inside the support polygon formed by both foot outlines.
-# If not, it issues a corrective Walk command and re-checks every sensor cycle.
-# ---------------------------------------------------------------------------
-
-# Give up after this many seconds regardless of CP state.
-max_stabilisation_time: 5.0
-
-# CP must be at least this far (m) inside the support polygon to count as stable.
-# Positive margin = conservative (requires CP to be well inside the polygon).
-cp_margin: 0.02
-
-# Walk speed per unit CP offset from the polygon centroid  (m/s per m).
-# Larger values → faster corrective step; too large → overshoot.
-cp_velocity_gain: 1.5
-
-# Maximum speed of the corrective walk command in any direction (m/s).
-max_step_velocity: 0.2
-
-# Maximum rate (Hz) at which corrective Walk tasks are re-emitted.
-# Between emissions the previous command stays active; the walk engine
-# rate-limits itself internally, so commanding faster than ~10 Hz only adds
-# Director churn.
-walk_command_rate: 10.0

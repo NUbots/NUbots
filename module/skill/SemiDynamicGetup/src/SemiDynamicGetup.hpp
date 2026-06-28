@@ -49,26 +49,12 @@ namespace module::skill {
             Levels gyro_mag{};   // sum of |rotation rate| across the three axes
             Levels acc_mag{};    // accelerometer magnitude
             Levels acc_angle{};  // accelerometer angle from upright
-
-            // --- Foot polygon geometry (should match KinematicsConfiguration.yaml) ---
-            // Origin assumed at ankle joint centre in the foot frame (x-forward, y-left).
-            double foot_toe_length  = 0.130;  // m, ankle to toe tip
-            double foot_heel_length = 0.085;  // m, ankle to heel
-            double foot_width       = 0.130;  // m, total foot width
-
-            // --- Capture-point stabilisation ---
-            double max_stabilisation_time = 5.0;   // s
-            double cp_margin              = 0.02;  // m, CP must be this far inside polygon to be stable
-            double cp_velocity_gain       = 1.5;   // (m/s) / m of CP offset
-            double max_step_velocity      = 0.2;   // m/s, clamp on walk command magnitude
-            double walk_command_rate      = 10.0;  // Hz, max rate of corrective Walk task emission
         } cfg;
 
-        // EARLY:     run the first (n - rise_frame_count) frames unmodified
-        // RISE:      run the last rise_frame_count frames with a one-shot pitch correction on hip pitch
-        // STAND:     run Stand.yaml
-        // STABILISE: walk to bring the Capture Point inside the support polygon
-        enum class InternalPhase { EARLY, RISE, STAND, STABILISE };
+        // EARLY: run the first (n - rise_frame_count) frames unmodified
+        // RISE:  run the last rise_frame_count frames with a one-shot pitch correction on hip pitch
+        // STAND: run Stand.yaml
+        enum class InternalPhase { EARLY, RISE, STAND };
         InternalPhase internal_phase = InternalPhase::EARLY;
 
         /// Which orientation this getup started from, set from the task message at NEW_TASK.
@@ -105,11 +91,6 @@ namespace module::skill {
         const Config::DirectionConfig& active_cfg() const {
             return start_side == StartSide::FRONT ? cfg.front : cfg.back;
         }
-
-        NUClear::clock::time_point stabilisation_start{};
-
-        /// When the last corrective Walk task was emitted (for rate limiting)
-        NUClear::clock::time_point last_walk_command{};
 
         /// Build a BodySequence from a frame list, optionally adding hip_correction (rad) to both hip pitch joints.
         std::unique_ptr<message::actuation::BodySequence> make_sequence(
