@@ -1,0 +1,8 @@
+# A test role to check the WhistleDetection works and sends the right stuff to the right places.
+nuclear_role(
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  input::WhistleDetection # this is the module under test
+  input::GameController
+)
