@@ -38,6 +38,7 @@
 #include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
+#include "message/strategy/MaintainBallDistance.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -66,6 +67,7 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
+    using message::strategy::MaintainBallDistance;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -83,6 +85,7 @@ namespace module::purpose {
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
             cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
             cfg.search_when_lost          = config["search_when_lost"].as<bool>();
+            cfg.ball_avoidance_distance   = config["ball_avoidance_distance"].as<double>();
         });
 
         // PLAYING state
@@ -208,21 +211,22 @@ namespace module::purpose {
                 // If it's the opponent's set play, position defensively
                 if (set_play && !game_state.our_kick_off) {
                     log<DEBUG>("Opponent set play, defending.");
+                    emit<Task>(std::make_unique<MaintainBallDistance>(cfg.ball_avoidance_distance), 2);
                     if (furthest_back) {
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::DEFEND,
                                                        true,
                                                        true,
                                                        game_state.team.team_colour));
-                        emit<Task>(std::make_unique<Defend>());
+                        emit<Task>(std::make_unique<Defend>(), 1);
                     }
                     else {
-                        emit<Task>(std::make_unique<Support>());
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::SUPPORT,
                                                        true,
                                                        true,
                                                        game_state.team.team_colour));
+                        emit<Task>(std::make_unique<Support>(), 1);
                     }
                     return;
                 }

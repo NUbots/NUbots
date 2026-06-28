@@ -8,3 +8,5 @@ center_circle_offset: 0.5
 
 max_localisation_cost: 3.0
 search_when_lost: false
+
+ball_avoidance_distance: 0.75
