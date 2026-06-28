@@ -124,7 +124,11 @@ namespace module::localisation {
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
-                auto purpose = std::make_unique<Purpose>(robocup.purpose);
+                auto purpose = std::make_unique<Purpose>();
+                // Set the purpose message with the teammate's player id and whether they are going for the ball
+                purpose->player_id = robocup.current_pose.player_id;
+                purpose->purpose   = robocup.going_for_ball ? SoccerPosition::ATTACK : SoccerPosition::SUPPORT;
+
                 // Run data association step
                 data_association(robots_rRWw, purpose);
             });

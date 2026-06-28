@@ -54,9 +54,12 @@ namespace module::network {
     using message::localisation::Field;
     using message::planning::WalkTo;
     using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
+
     using utility::math::euler::mat_to_rpy_intrinsic;
+
 
     struct StartupDelay {};
 
