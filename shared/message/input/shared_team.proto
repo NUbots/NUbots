@@ -1,10 +1,8 @@
 syntax = "proto3";
 package message.input;
 
-import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
-import "message/purpose/Purpose.proto";
 import "google/protobuf/timestamp.proto";
 
 /// A column vector of two floats
