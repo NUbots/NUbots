@@ -138,8 +138,8 @@ namespace module::skill {
                 // Latch which orientation we are getting up from. Read only on NEW_TASK;
                 // it must persist across the phase-transition runs that follow.
                 if (run_reason == RunReason::NEW_TASK) {
-                    start_side = task.direction == SemiDynamicGetupTask::Direction::FRONT ? StartSide::FRONT
-                                                                                         : StartSide::BACK;
+                    start_side =
+                        task.direction == SemiDynamicGetupTask::Direction::FRONT ? StartSide::FRONT : StartSide::BACK;
                 }
                 // -----------------------------------------------------------------
                 // Shared sensor helpers
@@ -164,7 +164,9 @@ namespace module::skill {
                 // FALLING, and the robot is declared falling if any two of three (or the
                 // accelerometer angle alone) read FALLING. Call once per sensor cycle so
                 // the filters stay warm across all phases.
-                auto state_str = [](State s) {
+                // Only referenced by the (currently muted) per-tick fall-check log below; keep it
+                // paired with that log so re-enabling the log just works.
+                [[maybe_unused]] auto state_str = [](State s) {
                     return s == State::FALLING ? "FALLING" : s == State::UNSTABLE ? "UNSTABLE" : "STABLE";
                 };
                 auto fall_detected = [&]() -> bool {
@@ -176,22 +178,23 @@ namespace module::skill {
                         smooth(gyro_mag_value,
                                std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
                                cfg.gyro_mag.smoothing);
-                    acc_mag_value   = smooth(acc_mag_value, std::abs(a.norm()), cfg.acc_mag.smoothing);
-                    acc_angle_value = smooth(acc_angle_value,
-                                             std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
-                                             cfg.acc_angle.smoothing);
+                    acc_mag_value = smooth(acc_mag_value, std::abs(a.norm()), cfg.acc_mag.smoothing);
+                    acc_angle_value =
+                        smooth(acc_angle_value,
+                               std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                               cfg.acc_angle.smoothing);
 
                     // Classify each signal. Note acc_mag is inverted: it drops toward
                     // free-fall, so a larger value is more stable.
-                    const State gyro_state = gyro_mag_value < cfg.gyro_mag.unstable    ? State::STABLE
-                                             : gyro_mag_value < cfg.gyro_mag.falling   ? State::UNSTABLE
-                                                                                       : State::FALLING;
-                    const State acc_state = acc_mag_value > cfg.acc_mag.unstable    ? State::STABLE
-                                            : acc_mag_value > cfg.acc_mag.falling   ? State::UNSTABLE
+                    const State gyro_state  = gyro_mag_value < cfg.gyro_mag.unstable  ? State::STABLE
+                                              : gyro_mag_value < cfg.gyro_mag.falling ? State::UNSTABLE
+                                                                                      : State::FALLING;
+                    const State acc_state   = acc_mag_value > cfg.acc_mag.unstable  ? State::STABLE
+                                              : acc_mag_value > cfg.acc_mag.falling ? State::UNSTABLE
                                                                                     : State::FALLING;
-                    const State angle_state = acc_angle_value < cfg.acc_angle.unstable    ? State::STABLE
-                                              : acc_angle_value < cfg.acc_angle.falling   ? State::UNSTABLE
-                                                                                          : State::FALLING;
+                    const State angle_state = acc_angle_value < cfg.acc_angle.unstable  ? State::STABLE
+                                              : acc_angle_value < cfg.acc_angle.falling ? State::UNSTABLE
+                                                                                        : State::FALLING;
 
                     const bool falling = (gyro_state == State::FALLING && acc_state == State::FALLING)
                                          || (gyro_state == State::FALLING && angle_state == State::FALLING)
@@ -204,17 +207,17 @@ namespace module::skill {
                                acc_mag_value,
                                acc_angle_value * 180.0 / 3.14159265358979));
                     emit(graph("SemiDynamicGetup falling", falling));
-                    log<DEBUG>("fall check: gyro_mag=",
-                               gyro_mag_value,
-                               state_str(gyro_state),
-                               "acc_mag=",
-                               acc_mag_value,
-                               state_str(acc_state),
-                               "acc_angle=",
-                               acc_angle_value,
-                               state_str(angle_state),
-                               "-> falling=",
-                               falling);
+                    // log<DEBUG>("fall check: gyro_mag=",
+                    //            gyro_mag_value,
+                    //            state_str(gyro_state),
+                    //            "acc_mag=",
+                    //            acc_mag_value,
+                    //            state_str(acc_state),
+                    //            "acc_angle=",
+                    //            acc_angle_value,
+                    //            state_str(angle_state),
+                    //            "-> falling=",
+                    //            falling);
                     return falling;
                 };
 
@@ -247,13 +250,41 @@ namespace module::skill {
                     }
                 };
 
+                auto reason_str = [](const RunReason& r) {
+                    switch (r) {
+                        case RunReason::NEW_TASK: return "NEW_TASK";
+                        case RunReason::SUBTASK_DONE: return "SUBTASK_DONE";
+                        case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER";
+                        case RunReason::STARTED: return "STARTED";
+                        case RunReason::STOPPED: return "STOPPED";
+                        case RunReason::PUSHED: return "PUSHED";
+                        default: return "UNKNOWN";
+                    }
+                };
+                auto phase_str = [](InternalPhase p) {
+                    return p == InternalPhase::EARLY ? "EARLY" : p == InternalPhase::RISE ? "RISE" : "STAND";
+                };
+
+                // Director-event trace: NEW_TASK / SUBTASK_DONE / PUSHED etc. are rare and each marks
+                // real progress, so always log them. The high-rate OTHER_TRIGGER (per sensor tick)
+                // runs are NOT logged here — they are summarised by the throttled heartbeat in the
+                // OTHER_TRIGGER branch, so a freeze reads as the heartbeat stopping, not as spam.
+                if (run_reason != RunReason::OTHER_TRIGGER) {
+                    log<DEBUG>("SemiDynamicGetup: ",
+                               reason_str(run_reason),
+                               " phase=",
+                               phase_str(internal_phase),
+                               " body.done=",
+                               body.done);
+                }
+
                 // -----------------------------------------------------------------
                 // NEW_TASK — reset and start the early phase
                 // -----------------------------------------------------------------
                 if (run_reason == RunReason::NEW_TASK) {
                     log<INFO>("SemiDynamicGetup starting from", start_side == StartSide::FRONT ? "front" : "back");
                     gyro_mag_value = acc_mag_value = acc_angle_value = 0.0;
-                    internal_phase = InternalPhase::EARLY;
+                    internal_phase                                   = InternalPhase::EARLY;
                     emit<Task>(make_sequence(active_frames().early));
                 }
 
@@ -324,6 +355,24 @@ namespace module::skill {
                     // so they stay warm; only the dynamic phases act on the result.
                     const bool falling = fall_detected();
 
+                    // Throttled liveness heartbeat (~1 Hz). OTHER_TRIGGER fires at sensor rate; the
+                    // heartbeat collapses that to one line a second carrying the phase, the tick count
+                    // since the last beat (so a slowdown shows as the count dropping), and the falling
+                    // flag. If the heartbeat STOPS, the Sensors stream or the clock has stalled, and
+                    // its last line names the phase the getup froze in.
+                    ++ticks_since_heartbeat;
+                    const auto now = NUClear::clock::now();
+                    if (now - last_heartbeat >= std::chrono::seconds(1)) {
+                        log<DEBUG>("SemiDynamicGetup alive: phase=",
+                                   phase_str(internal_phase),
+                                   " ticks=",
+                                   ticks_since_heartbeat,
+                                   " falling=",
+                                   falling);
+                        last_heartbeat        = now;
+                        ticks_since_heartbeat = 0;
+                    }
+
                     if (internal_phase == InternalPhase::RISE || internal_phase == InternalPhase::STAND) {
                         // Mid-script fall detection: abort and recover immediately.
                         // This is the core of the semi-dynamic behaviour — the BodySequence
@@ -346,6 +395,11 @@ namespace module::skill {
                 // Everything else (PUSHED, STOPPED, …)
                 // -----------------------------------------------------------------
                 else {
+                    log<DEBUG>("SemiDynamicGetup: run reason ",
+                               reason_str(run_reason),
+                               " in phase ",
+                               phase_str(internal_phase),
+                               ", continue");
                     emit<Task>(std::make_unique<Continue>());
                 }
             });

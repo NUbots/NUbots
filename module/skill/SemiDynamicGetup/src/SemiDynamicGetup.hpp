@@ -92,6 +92,12 @@ namespace module::skill {
             return start_side == StartSide::FRONT ? cfg.front : cfg.back;
         }
 
+        /// Heartbeat throttle for the per-sensor-tick OTHER_TRIGGER reaction: counts ticks and
+        /// limits the "alive" log to ~1 Hz, so a freeze shows up as the heartbeat stopping (and its
+        /// last line names the phase) instead of as a flood of identical per-tick lines.
+        NUClear::clock::time_point last_heartbeat{};
+        int ticks_since_heartbeat = 0;
+
         /// Build a BodySequence from a frame list, optionally adding hip_correction (rad) to both hip pitch joints.
         std::unique_ptr<message::actuation::BodySequence> make_sequence(
             const std::vector<utility::skill::Frame>& frames,

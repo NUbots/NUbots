@@ -75,10 +75,19 @@ namespace module::actuation {
                                                        servo.command.state.torque));
                 }
                 if (servo.command.done_type == ServoCommand::DoneType::TIME) {
-                    if (servo.command.time <= NUClear::clock::now()) {
+                    const auto now = NUClear::clock::now();
+                    if (servo.command.time <= now) {
                         emit<Task>(std::make_unique<Done>());
                     }
                     else {
+                        // Log servo wait time
+                        if (ID == ServoID::R_HIP_PITCH) {
+                            log<DEBUG>("Servo ",
+                                       id_to_joint_name[ID],
+                                       ": waiting ",
+                                       std::chrono::duration<double>(servo.command.time - now).count(),
+                                       "s for frame to finish");
+                        }
                         emit<Task>(std::make_unique<Wait>(servo.command.time));
                     }
                 }
@@ -148,10 +157,12 @@ namespace module::actuation {
                 [this](const Sequence& sequence, const RunReason& run_reason, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {
+                        log<DEBUG>("Sequence: empty frame list, done immediately");
                         emit<Task>(std::make_unique<Done>());
                     }
                     // If this is a new task, run the first pack of servos and increment the counter
                     else if (run_reason == RunReason::NEW_TASK) {
+                        log<DEBUG>("Sequence: starting, ", sequence.frames.size(), " frames");
                         emit<Task>(std::make_unique<Group>(sequence.frames[0]));
                         emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(1));
                     }
@@ -159,15 +170,21 @@ namespace module::actuation {
                     // determine the current frame to emit
                     else if (run_reason == RunReason::SUBTASK_DONE) {
                         if (count.count < sequence.frames.size()) {
+                            // Frame stepping. If a getup freezes part-way through, the last line here
+                            // shows the frame it stalled on; if frames stop advancing while servo Waits
+                            // keep firing, suspect the Count book-keeping rather than the clock.
+                            log<DEBUG>("Sequence: advancing to frame ", count.count, "/", sequence.frames.size());
                             emit<Task>(std::make_unique<Group>(sequence.frames[count.count]));
                             emit<Scope::INLINE>(std::make_unique<Count<Sequence>>(count.count + 1));
                         }
                         else {
+                            log<DEBUG>("Sequence: all ", sequence.frames.size(), " frames done");
                             emit<Task>(std::make_unique<Done>());
                         }
                     }
                     // Any other run reason shouldn't happen
                     else {
+                        log<DEBUG>("Sequence: unexpected run_reason, continue");
                         emit<Task>(std::make_unique<Continue>());
                     }
                 });

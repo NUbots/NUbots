@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Threshold angle for executing getup, between torso z axis and world z axis
 fallen_angle: 0.95

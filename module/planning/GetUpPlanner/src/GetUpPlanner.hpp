@@ -28,6 +28,7 @@
 #define MODULE_PLANNING_GETUPPLANNER_HPP
 
 #include <nuclear>
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
@@ -40,6 +41,10 @@ namespace module::planning {
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
             float fallen_angle = 0.0f;
         } cfg;
+
+        /// @brief Last status string logged. The per-sensor-tick status line is emitted only when
+        /// this changes.
+        std::string last_status{};
 
     public:
         /// @brief Called by the powerplant to build and setup the GetUpPlanner reactor.

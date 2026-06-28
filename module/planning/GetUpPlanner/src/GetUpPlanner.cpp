@@ -53,27 +53,38 @@ namespace module::planning {
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
             [this](const Uses<GetUp>& getup, const Sensors& sensors) {
+                // Orientation of the robot relative to upright (cheap, computed every tick so the
+                // status string below is always current).
+                Eigen::Matrix4d Hwt  = sensors.Htw.inverse().matrix();
+                Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+                const double angle   = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
+                const bool fallen    = angle > cfg.fallen_angle;
+
+                const char* state_str = getup.run_state == RunState::RUNNING  ? "RUNNING"
+                                        : getup.run_state == RunState::QUEUED ? "QUEUED"
+                                                                              : "NO_TASK";
+
+                // Edge-triggered status: log only when the (orientation, GetUp state) situation
+                // changes, not on every sensor tick.
+                std::string status =
+                    std::string(fallen ? "fallen" : "upright") + " getup=" + state_str + (getup.done ? "(done)" : "");
+                if (status != last_status) {
+                    log<DEBUG>("GetUpPlanner: ", status, " angle=", angle, " rad");
+                    last_status = status;
+                }
+
                 if (getup.run_state == RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Continue>());
-                    log<DEBUG>("Idle");
                     return;
                 }
-                // Transform to torso{t} from world{w} space
-                Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-                // Basis Z vector of torso {t} in world {w} space
-                Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
-                // Get the angle of the robot with the world z axis
-                double angle = std::acos(Eigen::Vector3d::UnitZ().dot(uZTw));
-                log<DEBUG>("Angle: ", angle);
-
-                // // Check if angle between torso z axis and world z axis is greater than config value
-                // Only emit if we're not already requesting a getup
-                if (angle > cfg.fallen_angle && getup.run_state == RunState::NO_TASK) {
+                // Only emit if we're fallen and not already requesting a getup
+                if (fallen && getup.run_state == RunState::NO_TASK) {
                     emit<Task>(std::make_unique<GetUp>());
-                    log<DEBUG>("Execute getup");
+                    log<INFO>("GetUpPlanner: dispatching GetUp (angle=", angle, " rad)");
                 }
-                // Otherwise do not need to get up so emit no tasks
+                // Otherwise upright (no task needed) or fallen-but-not-idle — covered by the status
+                // log above, so emit nothing here.
             });
     }
 

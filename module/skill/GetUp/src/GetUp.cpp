@@ -67,6 +67,21 @@ namespace module::skill {
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then([this](const RunReason& run_reason,
                                                                                  const Uses<BodySequence>& body,
                                                                                  const Sensors& sensors) {
+            // Per-invocation trace for freeze isolation: which run reason drove GetUp and the
+            // global BodySequence done-state it is keying its phase transitions off.
+            auto reason_str = [](const RunReason& r) {
+                switch (r) {
+                    case RunReason::NEW_TASK: return "NEW_TASK";
+                    case RunReason::SUBTASK_DONE: return "SUBTASK_DONE";
+                    case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER";
+                    case RunReason::STARTED: return "STARTED";
+                    case RunReason::STOPPED: return "STOPPED";
+                    case RunReason::PUSHED: return "PUSHED";
+                    default: return "UNKNOWN";
+                }
+            };
+            log<DEBUG>("GetUp run: reason=", reason_str(run_reason), " body.done=", body.done);
+
             if (run_reason == RunReason::NEW_TASK) {
                 // Stand still
                 log<INFO>("Standing still...");
@@ -133,6 +148,7 @@ namespace module::skill {
             }
             else {
                 // This shouldn't happen but if it does just continue doing the same thing
+                log<DEBUG>("GetUp: unexpected run reason ", reason_str(run_reason), ", continue");
                 emit<Task>(std::make_unique<Continue>());
             }
         });
