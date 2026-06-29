@@ -1,8 +1,8 @@
 #include "RLWalk.hpp"
 
 #include <algorithm>
-#include <fstream>
-#include <iomanip>
+#include <cmath>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
@@ -25,7 +25,7 @@ namespace module::skill {
     using extension::Configuration;
 
     using extension::behaviour::RunReason;
-    using message::actuation::Body;
+    using message::actuation::Limbs;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
@@ -103,7 +103,11 @@ namespace module::skill {
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
             cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
             cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
+            cfg.gait_period        = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
 
+            // Command velocity magnitude below which the policy joint offsets are zeroed so the
+            // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
+            cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
 
             // Initialize vectors
             last_action      = JointVector::Zero();
@@ -111,6 +115,10 @@ namespace module::skill {
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
+            // Per-servo position limits (radians, NUbots joint order) used to clip the final
+            // commanded servo positions as a safety measure against physically infeasible commands.
+            servo_limit_min    = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max    = JointVector(config["servo_limits"]["max"].as<Expression>());
             previous_pose      = default_pose;
             have_previous_pose = false;
             last_update_time   = NUClear::clock::now();
@@ -119,28 +127,45 @@ namespace module::skill {
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
-            // Initialize the model
-            initialise_model_locked();
-        });
+            // Compile the model and create inference request object
+            try {
+                log<INFO>("Loading RLWalk model from: ", cfg.model_path);
+                log<INFO>("Using device: ", cfg.device);
 
-        on<Every<1000, Per<std::chrono::milliseconds>>, Single>().then([this] {
-            std::scoped_lock lock(model_mutex);
-            if (model_state == ModelState::READY)
-                return;
+                ov::Core core{};
 
-            const auto now = std::chrono::steady_clock::now();
-            if (now < next_retry) {
-                return;
+                // Try to fallback to CPU if GPU fails
+                try {
+                    compiled_model = core.compile_model(cfg.model_path, cfg.device);
+                }
+                catch (const std::exception& e) {
+                    if (cfg.device == "GPU") {
+                        log<WARN>("Failed to compile model on GPU, falling back to CPU: ", e.what());
+                        compiled_model = core.compile_model(cfg.model_path, "CPU");
+                    }
+                    else {
+                        log<WARN>("Failed to compile RLWalk model: ", e.what());
+                        throw;
+                    }
+                }
+
+                infer_request = compiled_model.create_infer_request();
+                log<INFO>("Model loaded successfully");
             }
-
-            if (initialise_model_locked()) {
-                log<INFO>("RLWalk inference model initialised successfully");
+            catch (const std::exception& e) {
+                log<ERROR>("Failed to load RLWalk model: ", e.what());
+                throw;
             }
-            log<DEBUG>("Model state after retry: ", (model_state == ModelState::READY ? "READY" : "FAILED"));
         });
 
         // Start - Runs every time the Walk provider starts
         on<Start<WalkTask>>().then([this]() {
+            // Reset the control step counter so the gait phase starts from zero on each walk start
+            control_step = 0;
+            // If debugging, reset the loop-timing diagnostics so each walk is measured from a clean baseline
+            if (log_level <= DEBUG) {
+                reset_loop_timing();
+            }
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -169,6 +194,11 @@ namespace module::skill {
 
                 // Only run if we're in a stable state
                 if (stability >= Stability::DYNAMIC) {
+                    // Debug the actual loop frequency
+                    if (log_level <= DEBUG) {
+                        debug_loop_timing();
+                    }
+
                     // Construct observation vector
                     ObservationVector observation;
                     int idx = 0;
@@ -228,13 +258,24 @@ namespace module::skill {
                     }
                     idx += COMMAND_SIZE;
 
+                    // Phase (2). Advance the gait phase from the control-step count and fixed control
+                    // timestep (control_step * STEP_DT) rather than wall-clock time. This is
+                    // deterministic, monotonic, and immune to clock jitter/jumps and scheduling delays.
+                    const double elapsed = static_cast<double>(control_step) * STEP_DT;
+                    const double phase   = std::fmod(elapsed / cfg.gait_period, 1.0);
+                    observation.segment<PHASE_SIZE>(idx) =
+                        Eigen::Vector2d(std::sin(2 * M_PI * phase), std::cos(2 * M_PI * phase));
+                    idx += PHASE_SIZE;
+                    // Advance the gait clock by one control step for the next update
+                    ++control_step;
+
                     // Run inference
                     JointVector inference_output_raw = run_inference(observation);
                     if (log_level <= DEBUG) {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Clip the output here as a safety measure to prevent extremely fast movements.
+                    // Clip the output here as a safety measure to prevent extremely fast movements. TODO: FIXME
                     const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
 
                     // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
@@ -270,24 +311,34 @@ namespace module::skill {
                     // Convert into NUbots order, apply scaling
                     JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
 
+                    // Hack: when the command velocity is below a threshold, zero the offsets so the
+                    // robot holds the default pose. This side-steps unwanted policy behaviour at
+                    // ~zero command. TODO: replace with an improved policy trained for zero command.
+                    if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold) {
+                        joint_offsets_scaled_nubots = JointVector::Zero();
+                    }
+
                     if (log_level <= DEBUG) {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
                     }
 
-                    // Emit servo commands
-                    auto body = std::make_unique<Body>();
-                    for (int i = 0; i < cfg.num_joints; ++i) {
+                    // Emit servo commands for the limbs only. The policy outputs 20 joints, but the
+                    // head (indices 18, 19) is owned by skill::Look — emitting a full Body task would
+                    // conflict on the Head resource and cause the Director to deny the whole task.
+                    auto limbs = std::make_unique<Limbs>();
+                    for (int i = 0; i < 18; ++i) {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-                        // Apply the joint angles from the policy as offsets to the default pose
-                        servo->position                   = default_pose[i] + joint_offsets_scaled_nubots[i];
-                        const float gain                  = i < 6    ? cfg.arm_servo_gain
-                                                            : i < 18 ? cfg.leg_servo_gain
-                                                                     : cfg.head_servo_gain;
-                        servo->state                      = ServoState(gain, cfg.servo_torque);
-                        body->servos[joint_map[i].second] = *servo;
+                        // Apply the policy offset to the default pose, then safety-clip the result to
+                        // the physical servo limits so the policy cannot command an infeasible position.
+                        servo->position  = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
+                                                      servo_limit_min[i],
+                                                      servo_limit_max[i]);
+                        const float gain = i < 6 ? cfg.arm_servo_gain : cfg.leg_servo_gain;
+                        servo->state     = ServoState(gain, cfg.servo_torque);
+                        limbs->servos[joint_map[i].second] = *servo;
                     }
-                    emit<Task>(body);
+                    emit<Task>(limbs);
 
                     // Emit walk state
                     auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,
@@ -305,109 +356,124 @@ namespace module::skill {
             });
     }
 
-    void RLWalk::invalidate_model_locked() {
-        compiled_model = ov::CompiledModel{};
-        infer_request  = ov::InferRequest{};
-        model_state    = ModelState::FAILED;
-    }
-
-    bool RLWalk::initialise_model_locked() {
-        try {
-            const std::filesystem::path p(cfg.model_path);
-            const auto abs = std::filesystem::absolute(p).string();
-
-            if (!std::filesystem::exists(p)) {
-                throw std::runtime_error("Model file not found: " + abs);
-            }
-
-            log<INFO>("RLWalk init model_path=",
-                      abs,
-                      " device=",
-                      cfg.device,
-                      " input_name=",
-                      cfg.input_name,
-                      " output_name=",
-                      cfg.output_name);
-
-            std::string last_error = "unknown";
-
-            auto model = core.read_model(abs);
-            auto cm    = core.compile_model(model, cfg.device);
-            auto req   = cm.create_infer_request();
-
-            // Validate configured ports and shapes once
-            const auto in  = cfg.input_name.empty() ? cm.input() : cm.input(cfg.input_name);
-            const auto out = cfg.output_name.empty() ? cm.output() : cm.output(cfg.output_name);
-
-            const auto in_shape  = in.get_shape();
-            const auto out_shape = out.get_shape();
-            if (in_shape.size() != 2 || in_shape[1] != static_cast<size_t>(TOTAL_OBS_SIZE)) {
-                throw std::runtime_error("Unexpected input shape");
-            }
-            if (out_shape.size() != 2 || out_shape[1] != static_cast<size_t>(JOINT_POS_SIZE)) {
-                throw std::runtime_error("Unexpected output shape");
-            }
-
-            // Commit only after full success
-            compiled_model = std::move(cm);
-            infer_request  = std::move(req);
-            model_state    = ModelState::READY;
-            retry_backoff  = std::chrono::milliseconds(1000);
-
-            log<INFO>("Initialisation success");
-
-            return true;
-        }
-        catch (const std::exception& e) {
-            log<ERROR>("RLWalk model init failed: ", e.what());
-            invalidate_model_locked();
-            next_retry    = std::chrono::steady_clock::now() + retry_backoff;
-            retry_backoff = std::min(retry_backoff * 2, std::chrono::milliseconds(5000));
-            return false;
-        }
-    }
-
     JointVector RLWalk::run_inference(const ObservationVector& observation) {
         if (log_level <= DEBUG) {
             emit(graph("Observation", observation.transpose()));
         }
-        std::scoped_lock lock(model_mutex);
 
+        std::vector<float> input_data(TOTAL_OBS_SIZE);
+        for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
+            input_data[i] = static_cast<float>(observation[i]);
+        }
+
+        // Create & set input tensor
+        ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
+        ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
+        infer_request.set_input_tensor(input_tensor);
+
+        // Run inference
         try {
-
-            std::vector<float> input_data(TOTAL_OBS_SIZE);
-            for (int i = 0; i < TOTAL_OBS_SIZE; ++i) {
-                input_data[i] = static_cast<float>(observation[i]);
-            }
-
-            // Create & set input tensor
-            ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
-            ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
-            infer_request.set_input_tensor(input_tensor);
-
-            // Run inference
             infer_request.infer();
-
-            // Get output tensor
-            auto output_tensor = infer_request.get_output_tensor();
-            float* output_data = output_tensor.data<float>();
-
-            JointVector joint_angles_raw;
-            for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-                joint_angles_raw[i] = static_cast<double>(output_data[i]);
-            }
-
-            if (log_level <= DEBUG) {
-                emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
-            }
-
-            return joint_angles_raw;
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
-            invalidate_model_locked();
-            next_retry = std::chrono::steady_clock::now() + retry_backoff;
             return JointVector::Zero();
+        }
+
+        // Get output tensor
+        auto output_tensor = infer_request.get_output_tensor();
+        float* output_data = output_tensor.data<float>();
+
+        JointVector joint_angles_raw;
+        for (int i = 0; i < JOINT_POS_SIZE; ++i) {
+            joint_angles_raw[i] = static_cast<double>(output_data[i]);
+        }
+
+        if (log_level <= DEBUG) {
+            emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
+        }
+
+        return joint_angles_raw;
+    }
+
+    void RLWalk::reset_loop_timing() {
+        have_timing_sample   = false;
+        timing_samples       = 0;
+        timing_period_sum    = 0.0;
+        timing_period_sq_sum = 0.0;
+        timing_period_min    = 0.0;
+        timing_period_max    = 0.0;
+    }
+
+    void RLWalk::debug_loop_timing() {
+        // Sample both clocks as close together as possible.
+        const NUClear::clock::time_point now_nuclear           = NUClear::clock::now();
+        const std::chrono::steady_clock::time_point now_steady = std::chrono::steady_clock::now();
+
+        // First stable tick of this walk: establish the baseline, nothing to compare against yet.
+        if (!have_timing_sample) {
+            have_timing_sample = true;
+            last_tick_nuclear  = now_nuclear;
+            last_tick_steady   = now_steady;
+            walk_start_nuclear = now_nuclear;
+            walk_start_steady  = now_steady;
+            last_timing_report = now_nuclear;
+            return;
+        }
+
+        // Per-tick period on each clock (seconds).
+        const double dt_nuclear = std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count();
+        const double dt_steady  = std::chrono::duration<double>(now_steady - last_tick_steady).count();
+        last_tick_nuclear       = now_nuclear;
+        last_tick_steady        = now_steady;
+
+        // Metrics
+        const double model_elapsed        = static_cast<double>(control_step) * STEP_DT;
+        const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
+        const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
+        const double drift_nuclear        = model_elapsed - elapsed_nuclear;
+        const double drift_steady         = model_elapsed - elapsed_steady;
+        const double drift_nuclear_steady = elapsed_nuclear - elapsed_steady;
+
+        // Update running statistics on the NUClear-clock period.
+        ++timing_samples;
+        timing_period_sum += dt_nuclear;
+        timing_period_sq_sum += dt_nuclear * dt_nuclear;
+        timing_period_min = (timing_samples == 1) ? dt_nuclear : std::min(timing_period_min, dt_nuclear);
+        timing_period_max = (timing_samples == 1) ? dt_nuclear : std::max(timing_period_max, dt_nuclear);
+
+        // Emit graphs
+        emit(graph("RLWalk loop period (s)", dt_nuclear, dt_steady));
+        emit(graph("RLWalk loop frequency (Hz)", 1.0 / dt_nuclear, 1.0 / dt_steady));
+        emit(graph("RLWalk gait clock drift (s)", drift_nuclear, drift_steady));
+        emit(graph("NUClear clock drift from steady clock (s)", drift_nuclear_steady));
+
+        // Periodic rolling summary
+        const double timing_report_period = 2.0;  // seconds
+        const double since_report         = std::chrono::duration<double>(now_nuclear - last_timing_report).count();
+        if (since_report >= timing_report_period) {
+            const double mean = timing_period_sum / static_cast<double>(timing_samples);
+            const double var  = std::max(0.0, timing_period_sq_sum / static_cast<double>(timing_samples) - mean * mean);
+            const double jitter = std::sqrt(var);
+            log<DEBUG>(
+                fmt::format("| ticks: {:>6d} "
+                            "| dt: {:7.5f}s ({:6.2f}Hz) "
+                            "| jitter: {:7.5f}s "
+                            "| min: {:7.5f}s "
+                            "| max: {:7.5f}s "
+                            "| drift vs nuclear: {:+8.5f}s "
+                            "| vs wall: {:+8.5f}s "
+                            "| NUClear clock vs Wall clock: {:+8.5f}s |",
+                            timing_samples,
+                            mean,
+                            1.0 / mean,
+                            jitter,
+                            timing_period_min,
+                            timing_period_max,
+                            drift_nuclear,
+                            drift_steady,
+                            drift_nuclear_steady));
+            last_timing_report = now_nuclear;
         }
     }
 

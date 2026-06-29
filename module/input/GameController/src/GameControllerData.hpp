@@ -71,21 +71,22 @@ namespace module::input::gamecontroller {
         UNPENALISED             = 0,
         ILLEGAL_POSITIONING     = 1,
         MOTION_IN_SET           = 2,
-        LOCAL_GAME_STUCK        = 3,
-        INCAPABLE_ROBOT         = 4,
-        PICK_UP                 = 5,
-        BALL_HOLDING            = 6,
-        LEAVING_THE_FIELD       = 7,
-        PLAYING_WITH_ARMS_HANDS = 8,
-        PLAYER_PUSHING          = 9,
-        SENT_OFF                = 10,
-        SUBSTITUTE              = 11,
+        MOTION_IN_STOP          = 3,
+        LOCAL_GAME_STUCK        = 4,
+        INCAPABLE_ROBOT         = 5,
+        PICK_UP                 = 6,
+        BALL_HOLDING            = 7,
+        LEAVING_THE_FIELD       = 8,
+        PLAYING_WITH_ARMS_HANDS = 9,
+        PLAYER_PUSHING          = 10,
+        CAUTIONED               = 11,
+        SENT_OFF                = 12,
+        SUBSTITUTE              = 13,
     };
 
     struct Robot {
         PenaltyState penalty_state;   // penalty state of the player
         uint8_t penalised_time_left;  // estimate of time till unpenalised (seconds)
-        uint8_t warnings;             // number of warnings
         uint8_t cautions;             // number of cautions (yellow cards)
     };
 
@@ -133,7 +134,6 @@ namespace module::input::gamecontroller {
     inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
         os << "\t\tPenalty state......: " << uint(robot.penalty_state) << std::endl
            << "\t\tPenalised time left: " << uint(robot.penalised_time_left) << std::endl
-           << "\t\tNumber of warnings: " << uint(robot.warnings) << std::endl
            << "\t\tYellow Card Count..: " << uint(robot.cautions) << std::endl;
         return os;
     }
