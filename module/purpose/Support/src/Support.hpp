@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -28,12 +28,33 @@
 #define MODULE_PURPOSE_SUPPORT_HPP
 
 #include <nuclear>
+#include <Eigen/Core>
+#include <map>
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
 namespace module::purpose {
 
     class Support : public ::extension::behaviour::BehaviourReactor {
+
+    private:
+        /// @brief Stores the offset, attraction, and minimum x for a robot's formation slot
+        struct RobotSlot {
+            /// @brief Base position on the field in field coordinates (x, y)
+            Eigen::Vector2d offset{0.0, 0.0};
+            /// @brief How much the position tracks the ball (x, y scale factors)
+            Eigen::Vector2d attraction{0.0, 0.0};
+            /// @brief Minimum x clamp
+            double min_x{-10.0};
+        };
+
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Formation slots per game mode, keyed by mode name then player ID
+            std::map<std::string, std::map<int, RobotSlot>> modes;
+        } cfg;
+
     public:
         /// @brief Called by the powerplant to build and setup the Support reactor.
         explicit Support(std::unique_ptr<NUClear::Environment> environment);
