@@ -93,6 +93,7 @@ namespace module::purpose {
 
                     cfg.modes[mode_name][id] = slot;
                 }
+            }
 
         });
 
@@ -143,6 +144,7 @@ namespace module::purpose {
 
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
                     pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, 0)), true));
+
             });
     }
 
