@@ -102,7 +102,7 @@ namespace module::strategy {
                                                || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
                 const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
-                if ((stale_ball && stale_goals) || poor_localisation) {
+                if ((stale_ball || stale_goals) || poor_localisation) {
                     emit<Task>(std::make_unique<LookAround>());
                 }
             });
