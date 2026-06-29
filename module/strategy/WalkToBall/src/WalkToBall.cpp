@@ -87,6 +87,7 @@ namespace module::strategy {
             cfg.infront_check_distance = config["infront_check_distance"].as<double>();
             cfg.obstacle_radius        = config["obstacle_radius"].as<double>();
             cfg.goal_width_margin      = config["goal_width_margin"].as<double>();
+            cfg.goal_aim_margin        = config["goal_aim_margin"].as<double>();
             cfg.err_x_ok               = config["err_x_ok"].as<double>();
             cfg.err_y_ok               = config["err_y_ok"].as<double>();
             cfg.err_z_ok               = config["err_z_ok"].as<Expression>();
@@ -134,8 +135,10 @@ namespace module::strategy {
                 // Ball and goal positions in field frame
                 const Eigen::Vector3d rBFf = field.Hfw * ball.rBWw;
 
-                // Potentially change the target position from the goal to an avoidance point
-                Eigen::Vector3d rTFf = rGFf;
+                // Treat the goal as a region and aim at the point within it that needs the least heading change
+                // to score. May still be changed to an avoidance point below if an obstacle is in the kick path.
+                Eigen::Vector3d rTFf =
+                    select_goal_target(rBFf, robot_heading, field_description.dimensions.goal_width);
 
                 // If we're aligned with the goal and close, adjust the Goal target
                 if (std::abs(rRFf.y()) < field_description.dimensions.goal_width / 2.0) {
@@ -298,6 +301,35 @@ namespace module::strategy {
                 // Stop when at the target position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, true));
             });
+    }
+
+    Eigen::Vector3d WalkToBall::select_goal_target(const Eigen::Vector3d& rBFf,
+                                                   const double robot_heading,
+                                                   const double goal_width) {
+        // Aim along the same x line as the goal target point (just behind the goal line)
+        const double aim_x = rGFf.x();
+        // Safe half-width of the goal mouth to aim within, keeping clear of the posts
+        const double half_w = std::max(0.0, goal_width / 2.0 - cfg.goal_aim_margin);
+
+        // The reachable kick directions form a cone: every bearing from the ball that lands between the posts.
+        // Work in "offset" space relative to the goal-centre bearing so the cone is a wrap-free interval.
+        const Eigen::Vector2d rBFf2 = rBFf.head<2>();
+        const double a_centre       = vector_to_bearing(Eigen::Vector2d(aim_x, 0.0) - rBFf2);
+        const double o_left         = normalise_angle(vector_to_bearing(Eigen::Vector2d(aim_x, half_w) - rBFf2) - a_centre);
+        const double o_right        = normalise_angle(vector_to_bearing(Eigen::Vector2d(aim_x, -half_w) - rBFf2) - a_centre);
+        const double lo             = std::min(o_left, o_right);
+        const double hi             = std::max(o_left, o_right);
+
+        // Aim at the bearing in the cone closest to the robot's heading, so it needs the smallest turn
+        // (and therefore the least movement) to line up the kick.
+        const double best = std::clamp(normalise_angle(robot_heading - a_centre), lo, hi);
+
+        // Convert the chosen bearing back to a point on the goal aim line
+        const double aim_bearing = normalise_angle(a_centre + best);
+        const double s           = (aim_x - rBFf2.x()) / std::cos(aim_bearing);
+        const double y_aim       = rBFf2.y() + s * std::sin(aim_bearing);
+
+        return Eigen::Vector3d(aim_x, std::clamp(y_aim, -half_w, half_w), 0.0);
     }
 
     std::optional<Eigen::Vector3d> WalkToBall::dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
