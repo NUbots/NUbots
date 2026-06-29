@@ -61,27 +61,26 @@ namespace module::purpose {
         on<Configuration>("Support.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Support.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
         });
 
-        on<Configuration>("formation.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file formation.yaml
+        on<Configuration>("Formation.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file Formation.yaml
             // Read top-level defaults (used when mode or robot doesn't specify their own)
             Eigen::Vector2d default_attraction{config["defaults"]["attraction"]["x"].as<double>(),
-                                            config["defaults"]["attraction"]["y"].as<double>()};
+                                               config["defaults"]["attraction"]["y"].as<double>()};
             double default_min_x = config["defaults"]["minX"].as<double>();
 
             for (auto mode : config["modes"]) {
                 std::string mode_name = mode.first.as<std::string>();
 
                 // Some modes define their own defaults that override the top-level ones
-                Eigen::Vector2d mode_attraction = mode.second["defaults"]["attraction"]
-                    ? Eigen::Vector2d{mode.second["defaults"]["attraction"]["x"].as<double>(),
-                                    mode.second["defaults"]["attraction"]["y"].as<double>()}
-                    : default_attraction;
-                double mode_min_x = mode.second["defaults"]["minX"]
-                    ? mode.second["defaults"]["minX"].as<double>()
-                    : default_min_x;
+                Eigen::Vector2d mode_attraction =
+                    mode.second["defaults"]["attraction"]
+                        ? Eigen::Vector2d{mode.second["defaults"]["attraction"]["x"].as<double>(),
+                                          mode.second["defaults"]["attraction"]["y"].as<double>()}
+                        : default_attraction;
+                double mode_min_x =
+                    mode.second["defaults"]["minX"] ? mode.second["defaults"]["minX"].as<double>() : default_min_x;
 
                 for (auto robot : mode.second["robots"]) {
                     int id  = std::stoi(robot.first.as<std::string>());
@@ -90,31 +89,29 @@ namespace module::purpose {
                     // Robot-level values override mode defaults if present
                     RobotSlot slot;
                     slot.offset     = {n["offset"]["x"].as<double>(), n["offset"]["y"].as<double>()};
-                    slot.attraction = n["attraction"]
-                        ? Eigen::Vector2d{n["attraction"]["x"].as<double>(), n["attraction"]["y"].as<double>()}
-                        : mode_attraction;
-                    slot.min_x = n["minX"] ? n["minX"].as<double>() : mode_min_x;
+                    slot.attraction = n["attraction"] ? Eigen::Vector2d{n["attraction"]["x"].as<double>(),
+                                                                        n["attraction"]["y"].as<double>()}
+                                                      : mode_attraction;
+                    slot.min_x      = n["minX"] ? n["minX"].as<double>() : mode_min_x;
 
                     cfg.modes[mode_name][id] = slot;
                 }
             }
-
         });
 
         on<Provide<SupportMsg>,
-        Optional<With<Ball>>,
-        With<Sensors>,
-        With<Field>,
-        With<GameState>,
-        With<GlobalConfig>,
-        With<FieldDescription>>()
+           Optional<With<Ball>>,
+           With<Sensors>,
+           With<Field>,
+           With<GameState>,
+           With<GlobalConfig>,
+           With<FieldDescription>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
-                        const Sensors& sensors,
-                        const Field& field,
-                        const GameState& game_state,
-                        const GlobalConfig& global_config,
-                        const FieldDescription& fd) {
-
+                         const Sensors& sensors,
+                         const Field& field,
+                         const GameState& game_state,
+                         const GlobalConfig& global_config,
+                         const FieldDescription& fd) {
                 // Select mode
                 std::string mode_name = "normal_play";
                 if (game_state.mode.value == GameState::Mode::THROW_IN)
@@ -126,29 +123,31 @@ namespace module::purpose {
 
                 // Look up this robot's slot
                 auto mode_it = cfg.modes.find(mode_name);
-                if (mode_it == cfg.modes.end()) mode_it = cfg.modes.find("normal_play");
+                if (mode_it == cfg.modes.end())
+                    mode_it = cfg.modes.find("normal_play");
                 auto& robots = mode_it->second;
                 auto slot_it = robots.find(global_config.player_id);
-                if (slot_it == robots.end()) return;  // no slot for this robot
+                if (slot_it == robots.end())
+                    return;  // no slot for this robot
                 const auto& slot = slot_it->second;
 
                 // Calculate target position
                 Eigen::Vector3d position{slot.offset.x(), slot.offset.y(), 0};
                 if (ball) {
                     Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
-                    position.x() = std::max(slot.min_x, slot.offset.x() + slot.attraction.x() * rBFf.x());
-                    position.y() = slot.offset.y() + slot.attraction.y() * rBFf.y();
+                    position.x()         = std::max(slot.min_x, slot.offset.x() + slot.attraction.x() * rBFf.x());
+                    position.y()         = slot.offset.y() + slot.attraction.y() * rBFf.y();
                 }
 
                 // Clamp to field
                 double half_length = fd.dimensions.field_length / 2.0;
                 double half_width  = fd.dimensions.field_width / 2.0;
-                position.x() = std::clamp(position.x(), -half_length, half_length);
-                position.y() = std::clamp(position.y(), -half_width, half_width);
+                position.x()       = std::clamp(position.x(), -half_length, half_length);
+                position.y()       = std::clamp(position.y(), -half_width, half_width);
 
-                emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, 0)), true));
-
+                emit<Task>(
+                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, 0)),
+                                                          true));
             });
     }
 
