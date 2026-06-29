@@ -29,12 +29,14 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
 
@@ -44,11 +46,13 @@ namespace module::purpose {
 
     using SupportMsg = message::purpose::Support;
 
+    using message::input::GameState;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
     using message::support::FieldDescription;
+    using message::support::GlobalConfig;
 
     using utility::math::euler::pos_rpy_to_transform;
 
@@ -117,13 +121,13 @@ namespace module::purpose {
                     mode_name = game_state.our_kick_off ? "throw_in_us" : "throw_in_them";
                 else if (game_state.our_kick_off)
                     mode_name = "kickoff_us";
-                else if (!game_state.our_kick_off && /* secondary time still running */ ...)
+                else if (!game_state.our_kick_off)
                     mode_name = "kickoff_them";
 
                 // Look up this robot's slot
                 auto mode_it = cfg.modes.find(mode_name);
                 if (mode_it == cfg.modes.end()) mode_it = cfg.modes.find("normal_play");
-                auto& robots = mode_it->second.robots;
+                auto& robots = mode_it->second;
                 auto slot_it = robots.find(global_config.player_id);
                 if (slot_it == robots.end()) return;  // no slot for this robot
                 const auto& slot = slot_it->second;
