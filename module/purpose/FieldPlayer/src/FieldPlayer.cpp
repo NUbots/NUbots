@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -203,9 +203,23 @@ namespace module::purpose {
                 // Only wait if the opponent hasn't kicked off yet
                 bool allowed_to_attack = !kickoff_wait;
 
+                // Only attack if teammate with a higher ID is already attacking. ie higher ID teammates have priority
+                bool higher_id_attacking = false;
+                if (robots) {
+                    for (const auto& robot : robots->robots) {
+                        if (robot.teammate
+                            && robot.purpose.purpose == SoccerPosition::ATTACK
+                            && robot.purpose.active
+                            && robot.purpose.player_id > global_config.player_id) {
+                            higher_id_attacking = true;
+                            break;
+                        }
+                    }
+                }
+
                 // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
                 // penalty set up phase.
-                if (is_closest && allowed_to_attack) {
+                if (is_closest && allowed_to_attack && !higher_id_attacking) {
                     log<DEBUG>("Attack!");
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::ATTACK,
