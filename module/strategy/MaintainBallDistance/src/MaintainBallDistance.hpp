@@ -7,7 +7,7 @@
 
 namespace module::strategy {
 
-class MaintainBallDistance : public ::extension::behaviour::BehaviourReactor {
+    class MaintainBallDistance : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -16,7 +16,7 @@ class MaintainBallDistance : public ::extension::behaviour::BehaviourReactor {
     public:
         /// @brief Called by the powerplant to build and setup the MaintainBallDistance reactor.
         explicit MaintainBallDistance(std::unique_ptr<NUClear::Environment> environment);
-};
+    };
 
 }  // namespace module::strategy
 
