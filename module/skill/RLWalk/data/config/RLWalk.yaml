@@ -3,7 +3,7 @@ log_level: DEBUG
 
 model:
   path: model.onnx
-  device: GPU
+  device: CPU
   input_name: obs
   output_name: actions
   num_joints: 20

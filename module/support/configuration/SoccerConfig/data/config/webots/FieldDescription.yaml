@@ -5,7 +5,7 @@ Units: m
 BallRadius: 0.07
 LineWidth: 0.05
 
-FieldLength: 9,0
+FieldLength: 9.0
 FieldWidth: 6.0
 GoalDepth: 0.5
 # Distance between inner edges of goal posts.
