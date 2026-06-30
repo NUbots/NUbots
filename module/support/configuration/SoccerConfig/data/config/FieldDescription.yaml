@@ -6,12 +6,12 @@ BallRadius: 0.07
 LineWidth: 0.06
 
 FieldLength: 9.0
-FieldWidth: 6.00
+FieldWidth: 6.0
 GoalDepth: 0.5
 # Distance between inner edges of goal posts.
-GoalWidth: 1.80
-GoalAreaLength: 0.90
-GoalAreaWidth: 2.90
+GoalWidth: 1.8
+GoalAreaLength: 0.9
+GoalAreaWidth: 2.9
 # Height to the bottom of the crossbar.
 GoalCrossbarHeight: 1.2 # from top of wood to ground
 # What shape the goal is (RECTANGLE,CIRCLE)
@@ -25,7 +25,7 @@ GoalNetHeight: 1.2
 # Measured from the goal line.
 PenaltyMarkDistance: 1.47 # to the middle of the penalty mark
 CenterCircleDiameter: 1.5
-BorderStripMinWidth: 0.38
+BorderStripMinWidth: 1.0
 PenaltyRobotStart: 1.0
 
 # New field markings
