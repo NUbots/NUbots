@@ -49,6 +49,7 @@ namespace module::strategy {
     using message::skill::Look;
     using message::strategy::LookAtBall;
     using message::strategy::LookAtGoals;
+    using message::strategy::LookForStaleFeatures;
     using message::vision::Goals;
     using utility::math::coordinates::sphericalToCartesian;
 
@@ -92,14 +93,18 @@ namespace module::strategy {
             });
 
         // If we haven't seen the ball or goals for a while, or our localisation is poor, look around
-        on<Provide<LookAround>, With<Field>, Optional<With<Ball>>, Optional<With<Goals>>, Sync<StrategiseLook>>().then(
-            [this](const Field& field,
-                   const std::shared_ptr<const Ball>& ball,
-                   const std::shared_ptr<const Goals>& goals) {
+        on<Provide<LookForStaleFeatures>,
+           With<Field>,
+           Optional<With<Ball>>,
+           Optional<With<Goals>>,
+           Sync<StrategiseLook>>()
+            .then([this](const Field& field,
+                         const std::shared_ptr<const Ball>& ball,
+                         const std::shared_ptr<const Goals>& goals) {
                 const bool stale_ball =
                     !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
-                const bool stale_goals       = !goals || goals->goals.empty()
-                                               || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
+                const bool stale_goals = !goals || goals->goals.empty()
+                                         || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
                 const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
                 if ((stale_ball || stale_goals) || poor_localisation) {
