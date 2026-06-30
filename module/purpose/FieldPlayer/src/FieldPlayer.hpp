@@ -50,8 +50,6 @@ namespace module::purpose {
             double max_localisation_cost = 0.0;
             /// @brief Whether to search around the field if the robot's localisation cost is high
             bool search_when_lost = false;
-            /// @brief Minimum distance to maintain from the ball during opponent set plays in meters
-            double ball_avoidance_distance = 0.75;
         } cfg;
 
     public:
