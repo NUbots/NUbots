@@ -48,7 +48,7 @@ namespace module::platform::OpenCR {
         , L_ANKLE_PITCH(uint8_t(ID::L_ANKLE_PITCH))
         , R_ANKLE_ROLL(uint8_t(ID::R_ANKLE_ROLL))
         , L_ANKLE_ROLL(uint8_t(ID::L_ANKLE_ROLL))
-        , HEAD_YAW(uint8_t(ID::HEAD_YAW))
+        , NECK_YAW(uint8_t(ID::NECK_YAW))
         , HEAD_PITCH(uint8_t(ID::HEAD_PITCH)) {}
 
 }  // namespace module::platform::OpenCR
