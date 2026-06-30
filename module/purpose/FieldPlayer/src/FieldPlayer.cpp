@@ -85,6 +85,16 @@ namespace module::purpose {
             cfg.search_when_lost          = config["search_when_lost"].as<bool>();
         });
 
+        on<Configuration>("Formation.yaml").then([this](const Configuration& config) {
+            cfg.formation_player_ids.clear();
+            for (auto mode : config["modes"]) {
+                std::string mode_name = mode.first.as<std::string>();
+                for (auto robot : mode.second["robots"]) {
+                    cfg.formation_player_ids[mode_name].insert(std::stoi(robot.first.as<std::string>()));
+                }
+            }
+        });
+
         // PLAYING state
         on<Provide<FieldPlayerMsg>,
            Optional<With<Ball>>,
@@ -302,25 +312,36 @@ namespace module::purpose {
                          const Sensors& sensors,
                          const GameState& game_state,
                          const GlobalConfig& global_config) {
-                // Collect up teammates; empty if no one is around
-                std::vector<Eigen::Vector3d> teammates{};
-                if (robots) {
-                    // Collect all teammates in a vector, ignore the goalie
-                    for (const auto& robot : robots->robots) {
-                        if (robot.teammate && robot.purpose.purpose != SoccerPosition::GOALIE) {
-                            teammates.push_back(field.Hfw * robot.rRWw);
+                // Use formation if this player has a slot, otherwise fall back to dynamic ready position
+                std::string mode_name = game_state.our_kick_off ? "kickoff_us" : "kickoff_them";
+                auto mode_it          = cfg.formation_player_ids.find(mode_name);
+                bool has_slot = mode_it != cfg.formation_player_ids.end()
+                                && mode_it->second.count(global_config.player_id);
+
+                if (has_slot) {
+                    emit<Task>(std::make_unique<Support>());
+                }
+                else {
+                    // Collect up teammates; empty if no one is around
+                    std::vector<Eigen::Vector3d> teammates{};
+                    if (robots) {
+                        // Collect all teammates in a vector, ignore the goalie
+                        for (const auto& robot : robots->robots) {
+                            if (robot.teammate && robot.purpose.purpose != SoccerPosition::GOALIE) {
+                                teammates.push_back(field.Hfw * robot.rRWw);
+                            }
                         }
                     }
-                }
 
-                // Calculate optimal ready position based on everyone's position
-                Eigen::Isometry3d Hfr = utility::strategy::ready_position(field.Hfw,
-                                                                          sensors.Hrw,
-                                                                          teammates,
-                                                                          field_desc,
-                                                                          game_state.our_kick_off,
-                                                                          cfg.center_circle_offset);
-                emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
+                    // Calculate optimal ready position based on everyone's position
+                    Eigen::Isometry3d Hfr = utility::strategy::ready_position(field.Hfw,
+                                                                              sensors.Hrw,
+                                                                              teammates,
+                                                                              field_desc,
+                                                                              game_state.our_kick_off,
+                                                                              cfg.center_circle_offset);
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
+                }
 
                 // Send purpose
                 emit(std::make_unique<Purpose>(global_config.player_id,

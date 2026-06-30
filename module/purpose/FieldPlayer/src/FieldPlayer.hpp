@@ -27,7 +27,10 @@
 #ifndef MODULE_FIELDPLAYER_HPP
 #define MODULE_FIELDPLAYER_HPP
 
+#include <map>
 #include <nuclear>
+#include <set>
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
@@ -46,6 +49,8 @@ namespace module::purpose {
             /// @brief The offset to the center circle for the ready position.
             /// Avoids being in the center circle during another team's kickoff
             double center_circle_offset = 0.0;
+            /// @brief Player IDs that have a formation slot per mode, used to check if Support can handle READY
+            std::map<std::string, std::set<int>> formation_player_ids{};
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
             /// @brief Whether to search around the field if the robot's localisation cost is high
