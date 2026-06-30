@@ -31,7 +31,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/shared_team.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -116,7 +116,6 @@ namespace module::localisation {
 
         on<Trigger<Message>, With<Field>, Sync<RobotLocalisation>>().then(
             [this](const Message& robocup, const Field& field) {
-
                 // **Run prediction step**
                 prediction();
 

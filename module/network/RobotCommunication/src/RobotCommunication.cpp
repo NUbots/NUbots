@@ -33,7 +33,7 @@
 
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/shared_team.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
@@ -257,9 +257,11 @@ namespace module::network {
                         msg->ball.position = rBFf.cast<float>();
                     }
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-                    // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate guesses)
+                    // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate
+                    // guesses)
                     if (loc_ball->confidence > 0.0) {
-                        msg->ball.age = std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
+                        msg->ball.age =
+                            std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
                     }
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }

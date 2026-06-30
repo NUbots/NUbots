@@ -34,7 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/eye/DataPoint.hpp"
-#include "message/input/shared_team.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
