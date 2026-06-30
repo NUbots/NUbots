@@ -40,6 +40,8 @@ namespace module::tools {
             std::map<std::string, std::string> wifi_networks{};
             /// @brief Common IPs to toggle
             std::vector<std::string> common_ips{};
+            /// @brief Available field preset names, read from FieldDescription.yaml
+            std::vector<std::string> field_preset_names{};
         } cfg;
 
         /// @brief The hostname of the robot
@@ -64,12 +66,14 @@ namespace module::tools {
         static const int MAX_PLAYER_ID = 6;
         /// @brief Whether the robot is a goalie or not
         bool is_goalie = false;
+        /// @brief The selected field type preset
+        std::string field_type = "small";
         /// @brief Display values
         struct Display {
             /// @brief Enum for options in first column
             enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
             /// @brief Enum for options in second column
-            enum class Column2 { PLAYER_ID, TEAM_ID, GOALIE, END };
+            enum class Column2 { PLAYER_ID, TEAM_ID, GOALIE, FIELD_TYPE, END };
             /// @brief Column 1 padding
             static const size_t C1_PAD = 2;
             /// @brief Column 1 selection position
