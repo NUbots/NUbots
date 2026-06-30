@@ -1,3 +1,4 @@
+import { GameState_ModeEnum, GameState_PenaltyReasonEnum, GameState_PhaseEnum } from "@proto/message/input/GameState";
 import { computed, observable } from "mobx";
 
 import { Matrix2 } from "../../../../../shared/math/matrix2";
@@ -5,7 +6,6 @@ import { Matrix3 } from "../../../../../shared/math/matrix3";
 import { Transform } from "../../../../../shared/math/transform";
 import { Vector2 } from "../../../../../shared/math/vector2";
 import { Vector3 } from "../../../../../shared/math/vector3";
-import { GameState_ModeEnum, GameState_PhaseEnum, GameState_PenaltyReasonEnum } from "@proto/message/input/GameState";
 import { memoize } from "../../../../base/memoize";
 import { BrowserSystemClock } from "../../../../time/browser_clock";
 import { RobotModel } from "../../../robot/model";

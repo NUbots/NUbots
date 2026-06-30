@@ -213,10 +213,7 @@ describe("NUsightSessionNetwork", () => {
       target: "nusight",
     };
     mockSocket.emit("packet", clientSend);
-    expect(onScrubberLoadRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ files: request.files }),
-      client,
-    );
+    expect(onScrubberLoadRequest).toHaveBeenCalledWith(expect.objectContaining({ files: request.files }), client);
 
     await tick();
 

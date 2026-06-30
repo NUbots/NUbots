@@ -1,3 +1,6 @@
+import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/message/output/CompressedImage";
+import { Ball_MeasurementTypeEnum, Balls } from "@proto/message/vision/Ball";
+import { Goal_SideEnum, Goals } from "@proto/message/vision/Goal";
 import fs from "fs";
 import { autorun } from "mobx";
 import { computedFn } from "mobx-utils";
@@ -5,9 +8,6 @@ import { Matrix4, Vector3 } from "three";
 
 import { FieldDimensions } from "../../shared/field/dimensions";
 import { fourcc } from "../../shared/image_decoder/fourcc";
-import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/message/output/CompressedImage";
-import { Ball_MeasurementTypeEnum, Balls } from "@proto/message/vision/Ball";
-import { Goal_SideEnum, Goals } from "@proto/message/vision/Goal";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";

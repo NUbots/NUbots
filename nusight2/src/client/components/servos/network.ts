@@ -1,10 +1,10 @@
+import { Sensors } from "@proto/message/input/Sensors";
+import { Iiso3 } from "@proto/Transform";
 import { action } from "mobx";
 import * as THREE from "three";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
-import { Sensors } from "@proto/message/input/Sensors";
-import { Iiso3 } from "@proto/Transform";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";

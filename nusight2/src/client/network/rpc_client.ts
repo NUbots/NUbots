@@ -1,3 +1,5 @@
+import { RpcRequestMeta } from "@proto/message/eye/Rpc";
+
 import type {
   RpcCall,
   RpcCallOptions,
@@ -7,7 +9,6 @@ import type {
   RpcResult,
 } from "../../shared/messages/generated/rpc_call";
 import { MessageInstance } from "../../shared/messages/types";
-import { RpcRequestMeta } from "@proto/message/eye/Rpc";
 
 import { Network } from "./network";
 

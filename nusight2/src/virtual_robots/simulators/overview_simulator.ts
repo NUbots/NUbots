@@ -1,11 +1,11 @@
+import { GameState_ModeEnum, GameState_PenaltyReasonEnum, GameState_PhaseEnum } from "@proto/message/input/GameState";
+import { Overview } from "@proto/message/support/nusight/Overview";
 import { autorun } from "mobx";
 
 import { SeededRandom } from "../../shared/base/random/seeded_random";
 import { FieldDimensions } from "../../shared/field/dimensions";
 import { Vector2 } from "../../shared/math/vector2";
 import { Vector3 } from "../../shared/math/vector3";
-import { GameState_ModeEnum, GameState_PenaltyReasonEnum, GameState_PhaseEnum } from "@proto/message/input/GameState";
-import { Overview } from "@proto/message/support/nusight/Overview";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Message, Simulator } from "../simulator";
 

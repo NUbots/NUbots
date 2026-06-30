@@ -1,9 +1,9 @@
+import { ScrubberLoadRequest, ScrubberLoadRequest_Response } from "@proto/message/eye/Scrubber";
+import { Test } from "@proto/message/network/Test";
 import { NUClearNetPacket } from "nuclearnet.js";
 import { describe, expect, it, vi } from "vitest";
 
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
-import { Test } from "@proto/message/network/Test";
-import { ScrubberLoadRequest, ScrubberLoadRequest_Response } from "@proto/message/eye/Scrubber";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { AppModel } from "../../components/app/model";
 import { RobotModel } from "../../components/robot/model";
@@ -168,10 +168,12 @@ describe("RpcClient", () => {
     const result = await promise;
     if (result.ok) {
       expect(result.ok).toBe(true);
-      expect(result.data).toEqual(expect.objectContaining({
-        robotModel,
-        response: expect.objectContaining({ rpc: expect.objectContaining({ ok: true, token: nextRpcToken - 1 }) }),
-      }));
+      expect(result.data).toEqual(
+        expect.objectContaining({
+          robotModel,
+          response: expect.objectContaining({ rpc: expect.objectContaining({ ok: true, token: nextRpcToken - 1 }) }),
+        }),
+      );
     } else {
       throw new Error("Expected RPC call to succeed");
     }

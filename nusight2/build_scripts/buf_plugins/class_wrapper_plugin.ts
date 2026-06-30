@@ -36,9 +36,7 @@ function generateTs(schema: Schema) {
 
 export class ${message.name} {
   static typeName = ${message.name}Schema.typeName as I${message.name}["$typeName"];
-  static schema = ${message.name}Schema;${
-    hasResponse ? `\n  declare static Response: typeof ${responseName};` : ""
-  }
+  static schema = ${message.name}Schema;${hasResponse ? `\n  declare static Response: typeof ${responseName};` : ""}
 
   constructor(data: MessageInitShape<typeof ${message.name}Schema>) {
     Object.assign(this, create(${message.name}Schema, data));

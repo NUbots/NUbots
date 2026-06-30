@@ -1,10 +1,10 @@
 import { NbsTimestamp } from "nbsdecoder.js";
 import path from "path";
 
-import { ScrubberState, ScrubberState_StateEnum } from "../../../shared/proto/message/eye/Scrubber";
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetPacketMaybeEmpty } from "../../../shared/nuclearnet/nuclearnet_client";
+import { ScrubberState, ScrubberState_StateEnum } from "../../../shared/proto/message/eye/Scrubber";
 
 /** A default peer name used for scrubber in tests */
 export const scrubberPeerName = "myScrubber";

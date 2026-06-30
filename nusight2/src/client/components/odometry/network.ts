@@ -1,9 +1,9 @@
+import { Sensors } from "@proto/message/input/Sensors";
 import { action } from "mobx";
 import * as THREE from "three";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Vector3 } from "../../../shared/math/vector3";
-import { Sensors } from "@proto/message/input/Sensors";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";

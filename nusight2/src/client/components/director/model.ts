@@ -1,5 +1,3 @@
-import { computed, observable } from "mobx";
-
 import {
   DirectorState,
   DirectorState_Provider_ClassificationEnum,
@@ -7,6 +5,8 @@ import {
   IDirectorState_Group,
   IDirectorState_Provider,
 } from "@proto/message/behaviour/Director";
+import { computed, observable } from "mobx";
+
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
@@ -58,12 +58,10 @@ export interface DirectorGraph {
   providersById: Record<string, ProviderModel>;
 }
 
-function isRootGroup(
-  group: IDirectorState_Group,
-  providers: Record<string, IDirectorState_Provider>,
-): boolean {
+function isRootGroup(group: IDirectorState_Group, providers: Record<string, IDirectorState_Provider>): boolean {
   return (
-    group.providerIds?.length === 1 && providers[String(group.providerIds[0])]?.classification === ProviderClassification.ROOT
+    group.providerIds?.length === 1 &&
+    providers[String(group.providerIds[0])]?.classification === ProviderClassification.ROOT
   );
 }
 
@@ -162,14 +160,20 @@ export function transformDirectorState(state: DirectorState): DirectorGraph {
 
   // Resolve needs links
   for (const provider of Object.values(providersById).filter((p) => !rootProviderIds.has(p.id))) {
-    provider.needs = (state.providers?.[provider.id]?.needs ?? []).map((gid) => groupsById[String(gid)]).filter(Boolean);
+    provider.needs = (state.providers?.[provider.id]?.needs ?? [])
+      .map((gid) => groupsById[String(gid)])
+      .filter(Boolean);
   }
 
   // Resolve the provider pointers
   for (const [gid, g] of Object.entries(groupsById).filter(([gid]) => !rootGroupIds.has(gid))) {
     const { activeProvider, parentProvider } = state.groups[gid]!;
-    g.activeProvider = rootProviderIds.has(String(activeProvider)) ? rootProvider : providersById[String(activeProvider)];
-    g.parentProvider = rootProviderIds.has(String(parentProvider)) ? rootProvider : providersById[String(parentProvider)];
+    g.activeProvider = rootProviderIds.has(String(activeProvider))
+      ? rootProvider
+      : providersById[String(activeProvider)];
+    g.parentProvider = rootProviderIds.has(String(parentProvider))
+      ? rootProvider
+      : providersById[String(parentProvider)];
   }
 
   // Resolve the subtasks

@@ -1,9 +1,9 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { describe, expect, it, vi } from "vitest";
 
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { DataPoint } from "../../../shared/proto/message/eye/DataPoint";
 import { Test } from "../../../shared/proto/message/network/Test";
-import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { NodeSystemClock } from "../../time/node_clock";
 import { LruPriorityQueue } from "../lru_priority_queue";

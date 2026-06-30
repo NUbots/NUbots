@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from "react";
-import { action } from "mobx";
-
 import {
   FileEntry_TypeEnum,
   FilesRequestTypeEnum,
   ListFilesRequest,
   ListFilesRequest_Response,
 } from "@proto/message/eye/File";
+import { action } from "mobx";
+
 import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";

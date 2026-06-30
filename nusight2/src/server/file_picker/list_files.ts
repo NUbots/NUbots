@@ -1,8 +1,7 @@
+import { FilesRequestTypeEnum } from "@proto/message/eye/File";
 import fs from "fs";
 import os from "os";
 import path from "path";
-
-import { FilesRequestTypeEnum } from "@proto/message/eye/File";
 
 const RequestTypeToEntryNameFilter: Record<FilesRequestTypeEnum, (entryName: string) => boolean> = {
   [FilesRequestTypeEnum.UNKNOWN]: () => false,

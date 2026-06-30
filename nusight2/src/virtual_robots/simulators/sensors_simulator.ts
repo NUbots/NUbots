@@ -1,9 +1,9 @@
+import { Sensors } from "@proto/message/input/Sensors";
 import { autorun } from "mobx";
 import { Matrix4 } from "three";
 import { Vector3 } from "three";
 import { Quaternion } from "three";
 
-import { Sensors } from "@proto/message/input/Sensors";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Message, Simulator } from "../simulator";
 

@@ -1,9 +1,15 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ScrubberClosed, ScrubberCloseRequest, ScrubberLoadRequest, ScrubberSeekRequest } from "../../../shared/proto/message/eye/Scrubber";
-import { Test } from "../../../shared/proto/message/network/Test";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
+import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
+import {
+  ScrubberClosed,
+  ScrubberCloseRequest,
+  ScrubberLoadRequest,
+  ScrubberSeekRequest,
+} from "../../../shared/proto/message/eye/Scrubber";
+import { Test } from "../../../shared/proto/message/network/Test";
 import { makeScrubberStatePacket, sampleADefaultState } from "../../nbs_scrubber/tests/test_utils";
 import { sampleFileA } from "../../nbs_scrubber/tests/test_utils";
 import { scrubberPeerName } from "../../nbs_scrubber/tests/test_utils";
@@ -11,8 +17,6 @@ import { tick } from "../../nbs_scrubber/tests/test_utils";
 import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
-
-import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 
 const testPacketType = Test.typeName;
 

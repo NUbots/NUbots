@@ -1,5 +1,4 @@
 import { createEcmaScriptPlugin, runNodeJs, Schema } from "@bufbuild/protoplugin";
-
 import { hashType } from "@shared/nuclearnet/hash_type";
 
 import { getAllTypes } from "./get_types";

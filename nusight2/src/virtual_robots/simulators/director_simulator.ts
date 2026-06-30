@@ -1,10 +1,7 @@
+import { DirectorState, DirectorState_Provider_ClassificationEnum } from "@proto/message/behaviour/Director";
 import { autorun } from "mobx";
 
 import { SeededRandom } from "../../shared/base/random/seeded_random";
-import {
-  DirectorState,
-  DirectorState_Provider_ClassificationEnum,
-} from "@proto/message/behaviour/Director";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Message, Simulator } from "../simulator";
 
@@ -75,7 +72,11 @@ export class DirectorSimulator extends Simulator {
     };
 
     // Pick an active provider for playing WalkPlanner
-    const walkActiveProvider = plannersOn ? (plannerOn1 ? BigInt(providerIds.walkTo) : BigInt(providerIds.turnOnSpot)) : 0n;
+    const walkActiveProvider = plannersOn
+      ? plannerOn1
+        ? BigInt(providerIds.walkTo)
+        : BigInt(providerIds.turnOnSpot)
+      : 0n;
 
     // Some basic subtasks for the groups
     const rootSubtasks = [
@@ -91,8 +92,12 @@ export class DirectorSimulator extends Simulator {
     ];
 
     const strategySubtasks = [
-      ...(plannersOn ? [{ name: "WalkToBall", targetGroup: BigInt(groupIds.walkPlan), priority: 6, optional: false }] : []),
-      ...(plannersOn ? [{ name: "LookAround", targetGroup: BigInt(groupIds.lookPlan), priority: 6, optional: false }] : []),
+      ...(plannersOn
+        ? [{ name: "WalkToBall", targetGroup: BigInt(groupIds.walkPlan), priority: 6, optional: false }]
+        : []),
+      ...(plannersOn
+        ? [{ name: "LookAround", targetGroup: BigInt(groupIds.lookPlan), priority: 6, optional: false }]
+        : []),
     ];
 
     // Build core groups map

@@ -1,9 +1,9 @@
+import { Sensors } from "@proto/message/input/Sensors";
+import { Test } from "@proto/message/network/Test";
 import { NUClearNetSend } from "nuclearnet.js";
 import { describe, expect, it, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
-import { Sensors } from "@proto/message/input/Sensors";
-import { Test } from "@proto/message/network/Test";
 import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 

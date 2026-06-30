@@ -1,11 +1,12 @@
+import { DataPoint } from "@proto/message/eye/DataPoint";
+import { ISensors_Servo, Sensors } from "@proto/message/input/Sensors";
 import bounds from "binary-search-bounds";
 import { action } from "mobx";
 
 import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
-import { Sensors, ISensors_Servo } from "@proto/message/input/Sensors";
-import { DataPoint } from "@proto/message/eye/DataPoint";
 import { Clock } from "../../../shared/time/clock";
+import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -13,8 +14,6 @@ import { RobotModel } from "../robot/model";
 import { ChartModel } from "./model";
 import { DataSeries } from "./model";
 import { TreeData } from "./model";
-
-import { TimestampObject } from "../../../shared/time/timestamp";
 
 const ServoIds = [
   "Right Shoulder Pitch",

@@ -1,8 +1,8 @@
+import { GameState_ModeEnum, GameState_PenaltyReasonEnum, GameState_PhaseEnum } from "@proto/message/input/GameState";
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
 import { Vector3 } from "../../../../../shared/math/vector3";
-import { GameState_ModeEnum, GameState_PhaseEnum, GameState_PenaltyReasonEnum } from "@proto/message/input/GameState";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";
@@ -51,7 +51,10 @@ export class DashboardRobotPanelViewModel {
 
   @computed
   get penalty(): string {
-    return GameState_PenaltyReasonEnum[this.model.penaltyReason] || GameState_PenaltyReasonEnum[GameState_PenaltyReasonEnum.UNPENALISED];
+    return (
+      GameState_PenaltyReasonEnum[this.model.penaltyReason] ||
+      GameState_PenaltyReasonEnum[GameState_PenaltyReasonEnum.UNPENALISED]
+    );
   }
 
   @computed

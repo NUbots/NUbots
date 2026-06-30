@@ -1,4 +1,3 @@
-import { compose } from "../../shared/base/compose";
 import {
   ScrubberClosed,
   ScrubberCloseRequest,
@@ -9,6 +8,8 @@ import {
   ScrubberSetPlaybackSpeedRequest,
   ScrubberSetRepeatRequest,
 } from "@proto/message/eye/Scrubber";
+
+import { compose } from "../../shared/base/compose";
 import { NUsightSession } from "../session/session";
 
 /** Handles server-side networking for the NBS scrubber by responding to RPC calls from the scrubber client */

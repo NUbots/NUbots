@@ -1,6 +1,6 @@
+import { ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrubber";
 import { NbsPacket, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
 
-import { ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrubber";
 import { hashType } from "../../shared/nuclearnet/hash_type";
 
 import { Scrubber } from "./scrubber";

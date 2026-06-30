@@ -1,8 +1,8 @@
+import { ITimestamp } from "@proto/google/protobuf/timestamp";
+import { LogLevelEnum } from "@proto/message/nuclear/LogLevel";
+import { LogMessage } from "@proto/message/nuclear/LogMessage";
 import { action } from "mobx";
 
-import { LogMessage } from "@proto/message/nuclear/LogMessage";
-import { LogLevelEnum } from "@proto/message/nuclear/LogLevel";
-import { ITimestamp } from "@proto/google/protobuf/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";

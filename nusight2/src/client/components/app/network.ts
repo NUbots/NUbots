@@ -1,6 +1,6 @@
+import { ScrubberClosed, ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrubber";
 import { action } from "mobx";
 
-import { ScrubberClosed, ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrubber";
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
 import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
 import { TimestampObject } from "../../../shared/time/timestamp";

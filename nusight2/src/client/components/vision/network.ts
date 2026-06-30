@@ -1,3 +1,11 @@
+import { Image, Image_Lens_ProjectionEnum } from "@proto/message/input/Image";
+import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/message/output/CompressedImage";
+import { Balls } from "@proto/message/vision/Ball";
+import { BoundingBoxes } from "@proto/message/vision/BoundingBoxes";
+import { Goal_SideEnum, Goals } from "@proto/message/vision/Goal";
+import { GreenHorizon } from "@proto/message/vision/GreenHorizon";
+import { Robots } from "@proto/message/vision/Robot";
+import { VisualMesh } from "@proto/message/vision/VisualMesh";
 import { action, runInAction } from "mobx";
 
 import { UnreachableError } from "../../../shared/base/unreachable_error";
@@ -7,14 +15,6 @@ import { Projection } from "../../../shared/math/projection";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { Vector4 } from "../../../shared/math/vector4";
-import { Image, Image_Lens_ProjectionEnum } from "@proto/message/input/Image";
-import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/message/output/CompressedImage";
-import { VisualMesh } from "@proto/message/vision/VisualMesh";
-import { Balls } from "@proto/message/vision/Ball";
-import { Goals, Goal_SideEnum } from "@proto/message/vision/Goal";
-import { Robots } from "@proto/message/vision/Robot";
-import { GreenHorizon } from "@proto/message/vision/GreenHorizon";
-import { BoundingBoxes } from "@proto/message/vision/BoundingBoxes";
 import { TimestampObject } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
@@ -154,12 +154,7 @@ export class VisionNetwork {
     camera.goals = goals.map((goal) => ({
       timestamp: TimestampObject.toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
-      side:
-        goal.side === Goal_SideEnum.LEFT
-          ? "left"
-          : goal.side === Goal_SideEnum.RIGHT
-            ? "right"
-            : "unknown",
+      side: goal.side === Goal_SideEnum.LEFT ? "left" : goal.side === Goal_SideEnum.RIGHT ? "right" : "unknown",
       post: {
         top: Vector3.from(goal.post?.top),
         bottom: Vector3.from(goal.post?.bottom),

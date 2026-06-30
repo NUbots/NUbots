@@ -1,5 +1,3 @@
-import { action } from "mobx";
-
 import {
   ScrubberCloseRequest,
   ScrubberPauseRequest,
@@ -9,6 +7,8 @@ import {
   ScrubberSetPlaybackSpeedRequest,
   ScrubberSetRepeatRequest,
 } from "@proto/message/eye/Scrubber";
+import { action } from "mobx";
+
 import { RpcResult } from "../../../../shared/messages/generated/rpc_call";
 import { TimestampObject } from "../../../../shared/time/timestamp";
 import { RpcNetwork } from "../../../hooks/use_rpc_controller";

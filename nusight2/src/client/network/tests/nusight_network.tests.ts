@@ -1,10 +1,10 @@
+import { Test } from "@proto/message/network/Test";
 import { NUClearNetSend } from "nuclearnet.js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { FakeNUClearNetClient } from "../../../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../../server/nuclearnet/fake_nuclearnet_server";
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
-import { Test } from "@proto/message/network/Test";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { AppModel } from "../../components/app/model";
 import { NbsScrubbersModel } from "../../components/nbs_scrubbers/model";

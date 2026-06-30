@@ -1,9 +1,9 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { describe, expect, it } from "vitest";
 
+import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { DataPoint } from "../../../shared/proto/message/eye/DataPoint";
 import { Test } from "../../../shared/proto/message/network/Test";
-import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { decodePacketId } from "../decode_packet_id";
 
 function makePacket(typeName: string, payload: Uint8Array): NUClearNetPacket {

@@ -1,3 +1,4 @@
+import { WalkState_PhaseEnum } from "@proto/message/behaviour/state/WalkState";
 import { observable } from "mobx";
 import { computed } from "mobx";
 import { action } from "mobx";
@@ -5,7 +6,6 @@ import { action } from "mobx";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
-import { WalkState_PhaseEnum } from "@proto/message/behaviour/state/WalkState";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 

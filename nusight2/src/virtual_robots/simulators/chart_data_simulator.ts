@@ -1,6 +1,6 @@
+import { DataPoint } from "@proto/message/eye/DataPoint";
 import { autorun } from "mobx";
 
-import { DataPoint } from "@proto/message/eye/DataPoint";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";

@@ -1,6 +1,6 @@
+import { ScrubberLoadRequest, ScrubberPauseRequest, ScrubberPlayRequest } from "@proto/message/eye/Scrubber";
 import { action } from "mobx";
 
-import { ScrubberLoadRequest, ScrubberPauseRequest, ScrubberPlayRequest } from "@proto/message/eye/Scrubber";
 import { RpcResult } from "../../../shared/messages/generated/rpc_call";
 import { RpcNetwork } from "../../hooks/use_rpc_controller";
 import { FileDialogController } from "../file_dialog/controller";

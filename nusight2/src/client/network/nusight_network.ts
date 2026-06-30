@@ -3,8 +3,8 @@ import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetOptions } from "nuclearnet.js";
 import { NUClearNetSend } from "nuclearnet.js";
 
-import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { Emit } from "../../shared/messages/emit";
+import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { NUClearNetClient, NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
 import { memoize } from "../base/memoize";
 import { AppModel } from "../components/app/model";
@@ -74,7 +74,10 @@ export class NUsightNetwork {
     }
   }
 
-  onNUClearMessage<T extends MessageInstance>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: MessageCallback<T>) {
+  onNUClearMessage<T extends MessageInstance>(
+    type: MessageType<T> | { type: MessageType<T>; subtype?: number },
+    cb: MessageCallback<T>,
+  ) {
     const messageType = typeof type === "object" ? type.type : type;
     const messageTypeName = messageType.typeName;
     const subtype = typeof type === "object" ? type.subtype : null;

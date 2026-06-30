@@ -1,6 +1,6 @@
+import { DirectorState } from "@proto/message/behaviour/Director";
 import { action } from "mobx";
 
-import { DirectorState } from "@proto/message/behaviour/Director";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
