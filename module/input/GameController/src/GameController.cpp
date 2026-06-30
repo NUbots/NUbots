@@ -68,6 +68,11 @@ namespace module::input {
 
                       udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
+                      if (config["use_set_gc_address"].as<bool>(false)) {
+                          game_controller_address = config["gc_address"].as<std::string>("");
+                          log<INFO>("Using configured game controller address", game_controller_address);
+                      }
+
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
                       if (config["receive_port"].as<uint>() != receive_port) {
 
