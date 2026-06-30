@@ -257,10 +257,10 @@ namespace module::network {
                         msg->ball.position = rBFf.cast<float>();
                     }
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-                    // Age of the ball observation in seconds
-                    msg->ball.age = -1.0f;
-                    msg->ball.age = std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
-
+                    // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate guesses)
+                    if (loc_ball->confidence > 0.0) {
+                        msg->ball.age = std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
+                    }
                     msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
