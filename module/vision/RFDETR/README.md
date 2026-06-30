@@ -3,7 +3,7 @@
 ## Description
 
 This module integrates an **RF-DETR** (Roboflow Detection Transformer) model to
-identify and classify objects within images. It detects the follwing classes, in the same order:
+identify and classify objects within images. It detects the following classes, in the same order:
 
 - Balls
 - Goals
