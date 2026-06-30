@@ -249,7 +249,7 @@ namespace module::skill {
                     idx += JOINT_POS_SIZE;
 
                     // Command (3)
-                    auto vel_targ                          = walk_task.velocity_target;
+                    Eigen::Vector3d vel_targ               = walk_task.velocity_target;
                     observation.segment<COMMAND_SIZE>(idx) = vel_targ;
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target", vel_targ.x(), vel_targ.y(), vel_targ.z()));
