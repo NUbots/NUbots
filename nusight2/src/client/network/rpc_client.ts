@@ -8,6 +8,7 @@ import type {
   RpcErrorOptions,
   RpcResult,
 } from "../../shared/messages/generated/rpc_call";
+import { messageNameToType } from "../../shared/messages/generated/type_converters";
 import { MessageInstance } from "../../shared/messages/types";
 
 import { Network } from "./network";
@@ -91,8 +92,13 @@ export class RpcClient {
   private makeCall(request: any, options: RpcCallOptions, requestToken: number): Promise<RpcResult<any>> {
     return new Promise((resolve) => {
       // Get the request and response Protobuf types
-      const RequestType = request ? Object.getPrototypeOf(request)?.constructor : undefined;
-      const ResponseType = RequestType?.Response;
+      const RequestType = request ? messageNameToType(request.$typeName) : undefined;
+      const ResponseType =
+        RequestType && Object.hasOwn(RequestType.schema.field, "rpc")
+          ? messageNameToType<MessageInstance & { rpc: { token: number; ok: boolean; error?: string } }>(
+              request.$typeName + ".Response",
+            )
+          : undefined;
 
       // Ensure that the request type is valid
       if (!RequestType) {
@@ -209,7 +215,7 @@ export class RpcClient {
       );
 
       // Send the request
-      this.network.emit(new RequestType(request), {
+      this.network.emit(request, {
         target: options.target ?? "nusight",
         reliable: true,
       });

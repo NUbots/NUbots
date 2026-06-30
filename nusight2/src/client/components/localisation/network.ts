@@ -9,7 +9,7 @@ import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { Sensors } from "@proto/message/input/Sensors";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
-import { Imat4 } from "@proto/Matrix";
+import { Iiso3 } from "@proto/Transform";
 import { TimestampObject } from "../../../shared/time/timestamp";
 import { Field } from "@proto/message/localisation/Field";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
@@ -198,7 +198,7 @@ export class LocalisationNetwork {
 
     const robot = LocalisationRobotModel.of(robotModel);
 
-    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw! as unknown as Imat4)).invert());
+    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Hrw = Matrix4.from(sensors.Hrw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
@@ -299,7 +299,7 @@ function decompose(m: THREE.Matrix4): {
   return { translation, rotation, scale };
 }
 
-function fromProtoMat44(m: Imat4): THREE.Matrix4 {
+function fromProtoMat44(m: Iiso3): THREE.Matrix4 {
   return new THREE.Matrix4().set(
     m!.x!.x!,
     m!.y!.x!,

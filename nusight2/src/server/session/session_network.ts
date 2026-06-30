@@ -1,10 +1,11 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 
-import { IRpcRequestMeta, IRpcResponseMeta } from "../../shared/proto/message/eye/Rpc";
 import { Emit } from "../../shared/messages/emit";
+import { messageNameToType } from "../../shared/messages/generated/type_converters";
 import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { hashType } from "../../shared/nuclearnet/hash_type";
+import { IRpcRequestMeta, IRpcResponseMeta } from "../../shared/proto/message/eye/Rpc";
 
 import { NUsightSession } from "./session";
 import { NUsightSessionClient } from "./session_client";
@@ -42,9 +43,9 @@ export class NUsightSessionNetwork {
    */
   emit: Emit = (message, options = {}) => {
     const messageType = message.constructor as MessageType<any>;
-    const messageTypeName = message.$typeName;
+    const messageTypeName = messageType.typeName;
 
-    const payload = Buffer.from(message.toBinary());
+    const payload = Buffer.from(message.toBinary().buffer);
     const hash = hashType(messageTypeName);
     const reliable = options.reliable ?? true;
     const peer = NUSIGHT_SERVER_PEER;
@@ -86,7 +87,10 @@ export class NUsightSessionNetwork {
   }
 
   /** Register a listener for the given message type from a client in the session */
-  onClientMessage<T extends MessageInstance>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: ClientMessageCallback<T>) {
+  onClientMessage<T extends MessageInstance>(
+    type: MessageType<T> | { type: MessageType<T>; subtype?: number },
+    cb: ClientMessageCallback<T>,
+  ) {
     const { event, MessageType } = findMessageType(type);
 
     return this.session.onClientPacket(event, (client, packet) => {
@@ -104,9 +108,9 @@ export class NUsightSessionNetwork {
     return this.onClientMessage(type, async (client: NUsightSessionClient, request: T) => {
       try {
         const response = await requestHandler(request, client);
-        this.emit(response as any, { target: `nusight#${client.id}` });
+        this.emit(response as T, { target: `nusight#${client.id}` });
       } catch (error: unknown) {
-        const ResponseType = (request.constructor as any).Response;
+        const ResponseType = messageNameToType(request.$typeName + ".Response");
         this.emit(
           new ResponseType({
             rpc: {
