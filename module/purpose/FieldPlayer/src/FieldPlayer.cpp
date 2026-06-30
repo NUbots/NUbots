@@ -210,23 +210,31 @@ namespace module::purpose {
 
                 // If it's the opponent's set play, position defensively
                 if (set_play && !game_state.our_kick_off) {
-                    log<DEBUG>("Opponent set play, defending.");
-                    emit<Task>(std::make_unique<MaintainBallDistance>(cfg.ball_avoidance_distance), 2);
+                    // Only back away if too close — once at safe distance let Defend/Support drive uncontested
+                    const Eigen::Vector3d rRFf = (field->Hfw * sensors.Hrw.inverse()).translation();
+                    const double ball_distance  = (rRFf - rBFf).head<2>().norm();
+                    if (ball_distance < cfg.ball_avoidance_distance) {
+                        log<DEBUG>("Opponent set play, too close to ball ({} m), backing away.", ball_distance);
+                        emit<Task>(std::make_unique<MaintainBallDistance>(cfg.ball_avoidance_distance));
+                        return;
+                    }
                     if (furthest_back) {
+                        log<DEBUG>("Opponent set play, defending.");
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::DEFEND,
                                                        true,
                                                        true,
                                                        game_state.team.team_colour));
-                        emit<Task>(std::make_unique<Defend>(), 1);
+                        emit<Task>(std::make_unique<Defend>());
                     }
                     else {
+                        log<DEBUG>("Opponent set play, supporting.");
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::SUPPORT,
                                                        true,
                                                        true,
                                                        game_state.team.team_colour));
-                        emit<Task>(std::make_unique<Support>(), 1);
+                        emit<Task>(std::make_unique<Support>());
                     }
                     return;
                 }

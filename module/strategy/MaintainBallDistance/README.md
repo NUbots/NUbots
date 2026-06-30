@@ -6,7 +6,7 @@ Ensures the robot maintains a minimum distance from the ball. If the robot is al
 
 ## Usage
 
-Emit a `MaintainBallDistance` task with the desired `min_distance`. Typically emitted alongside a positioning task (e.g. `Defend` or `Support`) at a higher priority so it overrides the walk when the robot is too close, and yields when the distance is satisfied.
+Emit a `MaintainBallDistance` task with the desired `min_distance`. The caller should check the ball distance first and only emit this task when the robot is too close. This avoids the Director blocking a concurrent positioning task (e.g. `Defend` or `Support`) once the robot reaches a safe distance.
 
 ## Consumes
 
