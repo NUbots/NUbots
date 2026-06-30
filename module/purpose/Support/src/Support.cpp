@@ -63,41 +63,62 @@ namespace module::purpose {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Configuration>("Formation.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file Formation.yaml
-            // Read top-level defaults (used when mode or robot doesn't specify their own)
-            Eigen::Vector2d default_attraction{config["defaults"]["attraction"]["x"].as<double>(),
-                                               config["defaults"]["attraction"]["y"].as<double>()};
-            double default_min_x = config["defaults"]["minX"].as<double>();
+        on<Configuration, With<FieldDescription>>("Formation.yaml")
+            .then([this](const Configuration& config, const FieldDescription& fd) {
+                // Resolves a YAML coord node: scalar, { field, scale }, or { position[, offset] }
+                auto resolve = [&fd](const YAML::Node& n) -> double {
+                    if (n.IsScalar()) return n.as<double>();
+                    if (n["field"]) {
+                        std::string dim = n["field"].as<std::string>();
+                        return (dim == "length" ? fd.dimensions.field_length : fd.dimensions.field_width)
+                               * n["scale"].as<double>();
+                    }
+                    std::string pos = n["position"].as<std::string>();
+                    double off      = n["offset"] ? n["offset"].as<double>() : 0.0;
+                    if (pos == "field_min_x") return -fd.dimensions.field_length / 2.0 + off;
+                    if (pos == "left_goal_area_max_x")
+                        return -fd.dimensions.field_length / 2.0 + fd.dimensions.goal_area_length + off;
+                    if (pos == "goal_area_min_y") return -fd.dimensions.goal_area_width / 2.0 + off;
+                    if (pos == "goal_area_max_y") return fd.dimensions.goal_area_width / 2.0 + off;
+                    return off;
+                };
 
-            for (auto mode : config["modes"]) {
-                std::string mode_name = mode.first.as<std::string>();
+                // Read top-level defaults (used when mode or robot doesn't specify their own)
+                Eigen::Vector2d default_attraction{config["defaults"]["attraction"]["x"].as<double>(),
+                                                   config["defaults"]["attraction"]["y"].as<double>()};
+                double default_min_x = resolve(config["defaults"]["minX"]);
 
-                // Some modes define their own defaults that override the top-level ones
-                Eigen::Vector2d mode_attraction =
-                    mode.second["defaults"]["attraction"]
-                        ? Eigen::Vector2d{mode.second["defaults"]["attraction"]["x"].as<double>(),
-                                          mode.second["defaults"]["attraction"]["y"].as<double>()}
-                        : default_attraction;
-                double mode_min_x =
-                    mode.second["defaults"]["minX"] ? mode.second["defaults"]["minX"].as<double>() : default_min_x;
+                cfg.modes.clear();
 
-                for (auto robot : mode.second["robots"]) {
-                    int id  = std::stoi(robot.first.as<std::string>());
-                    auto& n = robot.second;
+                for (auto mode : config["modes"]) {
+                    std::string mode_name = mode.first.as<std::string>();
 
-                    // Robot-level values override mode defaults if present
-                    RobotSlot slot;
-                    slot.offset     = {n["offset"]["x"].as<double>(), n["offset"]["y"].as<double>()};
-                    slot.attraction = n["attraction"] ? Eigen::Vector2d{n["attraction"]["x"].as<double>(),
-                                                                        n["attraction"]["y"].as<double>()}
-                                                      : mode_attraction;
-                    slot.min_x      = n["minX"] ? n["minX"].as<double>() : mode_min_x;
+                    // Some modes define their own defaults that override the top-level ones
+                    Eigen::Vector2d mode_attraction =
+                        mode.second["defaults"]["attraction"]
+                            ? Eigen::Vector2d{mode.second["defaults"]["attraction"]["x"].as<double>(),
+                                              mode.second["defaults"]["attraction"]["y"].as<double>()}
+                            : default_attraction;
+                    double mode_min_x = mode.second["defaults"]["minX"]
+                                            ? resolve(mode.second["defaults"]["minX"])
+                                            : default_min_x;
 
-                    cfg.modes[mode_name][id] = slot;
+                    for (auto robot : mode.second["robots"]) {
+                        int id  = std::stoi(robot.first.as<std::string>());
+                        auto& n = robot.second;
+
+                        // Robot-level values override mode defaults if present
+                        RobotSlot slot;
+                        slot.offset     = {resolve(n["offset"]["x"]), resolve(n["offset"]["y"])};
+                        slot.attraction = n["attraction"] ? Eigen::Vector2d{n["attraction"]["x"].as<double>(),
+                                                                            n["attraction"]["y"].as<double>()}
+                                                          : mode_attraction;
+                        slot.min_x      = n["minX"] ? resolve(n["minX"]) : mode_min_x;
+
+                        cfg.modes[mode_name][id] = slot;
+                    }
                 }
-            }
-        });
+            });
 
         on<Provide<SupportMsg>,
            Optional<With<Ball>>,
