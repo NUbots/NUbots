@@ -96,9 +96,12 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<Whistle>, When<Phase, std::equal_to, Phase::SET>>().then([this] {
-            log<INFO>("Whistle detected, starting play");
-            emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+        on<Trigger<Whistle>, With<GameState>>().then([this](const GameState& game_state) {
+            log<INFO>("Gamestate is ", game_state.phase);
+            if (game_state.phase == Phase::SET) {
+                log<INFO>("Whistle detected while in SET, starting play");
+                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+            }
         });
 
         // Start the Director graph for the soccer scenario!
