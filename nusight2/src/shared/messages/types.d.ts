@@ -1,4 +1,3 @@
-import { Message } from "@bufbuild/protobuf";
 import { GenMessage } from "@bufbuild/protobuf/codegenv2";
 
 /** An instance of a Protobuf message with a known type name and a method for conversion to binary */

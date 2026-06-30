@@ -1,7 +1,7 @@
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { FileEntry, FileEntry_TypeEnum, FilesRequestTypeEnum, ListFilesRequest } from "../../../shared/proto/message/eye/File";
+import { FileEntry_TypeEnum, FilesRequestTypeEnum, ListFilesRequest } from "../../../shared/proto/message/eye/File";
 import { samplesDir } from "../../nbs_scrubber/tests/test_utils";
 import { NUsightSession } from "../../session/session";
 import { createMockNUClearNetClient, findAndDecodePacketFromCalls } from "../../session/tests/test_utils";

@@ -1,4 +1,5 @@
-import { FileEntry, FileEntry_TypeEnum, ListFilesRequest } from "@proto/message/eye/File";
+import { FileEntry_TypeEnum, ListFilesRequest } from "@proto/message/eye/File";
+
 import { NUsightSession } from "../session/session";
 
 import { listFiles } from "./list_files";
