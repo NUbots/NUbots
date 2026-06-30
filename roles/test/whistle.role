@@ -1,8 +1,20 @@
 # A test role to check the WhistleDetection works and sends the right stuff to the right places.
 nuclear_role(
+  # all the config stuff
   extension::FileWatcher
   support::SignalCatcher
   support::logging::ConsoleLogHandler
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::GlobalConfig
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  # Sensors for button testing
+  input::SensorFilter
   input::WhistleDetection # this is the module under test
   input::GameController
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
 )
