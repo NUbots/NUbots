@@ -210,7 +210,7 @@ namespace module::purpose {
 
                 // If it's the opponent's set play, position defensively
                 if (set_play && !game_state.our_kick_off) {
-                    // Only back away if too close — once at safe distance let Defend/Support drive uncontested
+                    // If already far enough, let the other tasks drive
                     const Eigen::Vector3d rRFf = (field->Hfw * sensors.Hrw.inverse()).translation();
                     const double ball_distance  = (rRFf - rBFf).head<2>().norm();
                     if (ball_distance < cfg.ball_avoidance_distance) {

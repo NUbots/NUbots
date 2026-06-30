@@ -14,7 +14,7 @@ model:
 
 servos:
   torque: 100.0
-  leg_gains: 30.0
+  leg_gains: 7.0
   head_gains: 1.0
   arm_gains: 1.0
 

@@ -30,7 +30,6 @@ namespace module::strategy {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("MaintainBallDistance.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file MaintainBallDistance.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
