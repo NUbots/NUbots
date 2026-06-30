@@ -2,6 +2,7 @@ import { ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrub
 import { NbsPacket, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
 
 import { hashType } from "../../shared/nuclearnet/hash_type";
+import { Timestamp } from "../../shared/time/timestamp";
 
 import { Scrubber } from "./scrubber";
 import { nanosToTimestampObject } from "./utils";
@@ -52,11 +53,11 @@ export function synthesize(typeSubtype: NbsTypeSubtypeBuffer, scrubber: Scrubber
   switch (type.event) {
     case "message.eye.ScrubberState": {
       const scrubberState = new ScrubberState({
-        timestamp: { seconds: BigInt(timestamp.seconds), nanos: timestamp.nanos },
+        timestamp: Timestamp.toMessage(timestamp),
         id: scrubber.data.id,
         name: scrubber.data.name,
-        start: { seconds: BigInt(scrubber.data.start.seconds), nanos: scrubber.data.start.nanos },
-        end: { seconds: BigInt(scrubber.data.end.seconds), nanos: scrubber.data.end.nanos },
+        start: Timestamp.toMessage(scrubber.data.start),
+        end: Timestamp.toMessage(scrubber.data.end),
         playbackState: ScrubberPlaybackStateToEnum[scrubber.data.playbackState],
         playbackSpeed: scrubber.data.playbackSpeed,
         playbackRepeat: scrubber.data.playbackRepeat,

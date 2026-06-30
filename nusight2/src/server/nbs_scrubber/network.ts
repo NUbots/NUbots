@@ -10,6 +10,7 @@ import {
 } from "@proto/message/eye/Scrubber";
 
 import { compose } from "../../shared/base/compose";
+import { Timestamp } from "../../shared/time/timestamp";
 import { NUsightSession } from "../session/session";
 
 /** Handles server-side networking for the NBS scrubber by responding to RPC calls from the scrubber client */
@@ -94,10 +95,7 @@ export class NbsScrubberNetwork {
     this.session.scrubberSet.update({
       type: "seek",
       id: request.id,
-      timestamp: {
-        seconds: Number(request.timestamp!.seconds!),
-        nanos: request.timestamp!.nanos!,
-      },
+      timestamp: new Timestamp(request.timestamp!),
     });
 
     return new ScrubberSeekRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });

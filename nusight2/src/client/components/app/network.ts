@@ -3,7 +3,7 @@ import { action } from "mobx";
 
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
 import { NUClearNetPeerWithType } from "../../../shared/nuclearnet/nuclearnet_client";
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { NbsScrubberModel } from "../nbs_scrubbers/model";
@@ -102,7 +102,7 @@ export class AppNetwork {
 
       // If we're not currently seeking in the UI, update the current timestamp
       if (!scrubber.isSeeking) {
-        scrubber.current = TimestampObject.toNanos(message.timestamp);
+        scrubber.current = Timestamp.toNanos(message.timestamp);
       }
     } else {
       const scrubber = new NbsScrubberModel({
@@ -120,7 +120,7 @@ export class AppNetwork {
         playbackSpeed: message.playbackSpeed,
         playbackState: scrubberPlaybackStateFromEnum[message.playbackState],
       });
-      scrubber.current = TimestampObject.toNanos(message.timestamp);
+      scrubber.current = Timestamp.toNanos(message.timestamp);
 
       this.model.scrubbersModel.scrubbers.set(scrubber.id, scrubber);
     }

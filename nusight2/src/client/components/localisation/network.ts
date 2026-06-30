@@ -10,7 +10,7 @@ import { Vector3 } from "../../../shared/math/vector3";
 import { Sensors } from "@proto/message/input/Sensors";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
 import { Iiso3 } from "@proto/Transform";
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Field } from "@proto/message/localisation/Field";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
@@ -246,7 +246,7 @@ export class LocalisationNetwork {
     const robot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)
-    robot.time = TimestampObject.toSeconds(overview.timestamp);
+    robot.time = Timestamp.toSeconds(overview.timestamp);
 
     // The id number of the robot
     robot.playerId = overview.robotId;
@@ -278,9 +278,9 @@ export class LocalisationNetwork {
     robot.penaltyReason = overview.penaltyReason;
 
     // The last time we had a camera image, saw a ball/goal
-    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
-    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
-    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+    robot.lastCameraImage = Timestamp.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = Timestamp.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = Timestamp.toSeconds(overview.lastSeenGoal);
 
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand);

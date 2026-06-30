@@ -7,7 +7,7 @@ import {
 } from "@proto/message/eye/File";
 import { action } from "mobx";
 
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { useNUsightNetwork } from "../app/context";
@@ -73,7 +73,7 @@ export class FileDialogNetwork {
         name: entry.name!,
         path: entry.path!,
         size: Number(entry.size ?? 0n),
-        dateModified: new Date(TimestampObject.toMillis(entry.dateModified)),
+        dateModified: new Timestamp(entry.dateModified).toDate(),
       };
     });
   };

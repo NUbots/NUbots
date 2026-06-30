@@ -5,6 +5,7 @@ import { NbsScrubber } from "../../../shared/nbs_scrubber";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetPacketMaybeEmpty } from "../../../shared/nuclearnet/nuclearnet_client";
 import { ScrubberState, ScrubberState_StateEnum } from "../../../shared/proto/message/eye/Scrubber";
+import { Timestamp } from "../../../shared/time/timestamp";
 
 /** A default peer name used for scrubber in tests */
 export const scrubberPeerName = "myScrubber";
@@ -90,9 +91,9 @@ export function makeScrubberStatePacket(
       new ScrubberState({
         id,
         name,
-        timestamp: { seconds: BigInt(timestamp.seconds), nanos: timestamp.nanos },
-        start: { seconds: BigInt(start.seconds), nanos: start.nanos },
-        end: { seconds: BigInt(end.seconds), nanos: end.nanos },
+        timestamp: Timestamp.toMessage(timestamp),
+        start: Timestamp.toMessage(start),
+        end: Timestamp.toMessage(end),
         playbackState: ScrubberStateStringToEnum[playbackState],
         playbackRepeat,
         playbackSpeed,

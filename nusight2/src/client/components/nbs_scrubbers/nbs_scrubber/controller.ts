@@ -10,7 +10,7 @@ import {
 import { action } from "mobx";
 
 import { RpcResult } from "../../../../shared/messages/generated/rpc_call";
-import { TimestampObject } from "../../../../shared/time/timestamp";
+import { Timestamp } from "../../../../shared/time/timestamp";
 import { RpcNetwork } from "../../../hooks/use_rpc_controller";
 import { NbsScrubberModel } from "../model";
 import { percentageToTimestamp } from "../util";
@@ -107,10 +107,9 @@ export class NbsScrubberController {
       }
     });
 
-    const nbsTs = TimestampObject.fromNanos(timestamp);
     const request = new ScrubberSeekRequest({
       id: this.scrubber.id,
-      timestamp: { seconds: BigInt(nbsTs.seconds), nanos: nbsTs.nanos },
+      timestamp: Timestamp.toMessage(timestamp),
     });
     this.network.call(request).then(onReceivedResponse);
   };

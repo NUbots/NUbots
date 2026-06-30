@@ -1,8 +1,8 @@
-import { ITimestamp } from "@proto/google/protobuf/timestamp";
 import { LogLevelEnum } from "@proto/message/nuclear/LogLevel";
 import { LogMessage } from "@proto/message/nuclear/LogMessage";
 import { action } from "mobx";
 
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -29,7 +29,7 @@ export class LogsNetwork {
 
     robot.messages.push({
       level: nuclearLogLevelToLogLevel(message.level),
-      timestamp: protobufTimestampToDate(message.timestamp!),
+      timestamp: new Timestamp(message.timestamp!).toDate(),
       message: message.message,
       reactor: message.reactionStatistics!.identifiers!.reactor!,
     });
@@ -54,11 +54,4 @@ function nuclearLogLevelToLogLevel(level: LogLevelEnum): LogLevel {
     default:
       return "unknown";
   }
-}
-
-/** Convert the given protobuf timestamp to a Date object */
-function protobufTimestampToDate(timestamp: ITimestamp) {
-  const seconds = Number(timestamp.seconds ?? 0);
-  const nanos = timestamp.nanos ?? 0;
-  return new Date(seconds * 1000 + nanos / 1000000);
 }

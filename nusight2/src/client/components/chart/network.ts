@@ -6,7 +6,7 @@ import { action } from "mobx";
 import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Clock } from "../../../shared/time/clock";
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -83,7 +83,7 @@ export class ChartNetwork {
 
       if (!node.has(key)) {
         // Create a new series with the start time of this datapoint
-        node.set(key, DataSeries.of(TimestampObject.toSeconds(data.timestamp)));
+        node.set(key, DataSeries.of(Timestamp.toSeconds(data.timestamp)));
       }
 
       const leaf = node.get(key) as DataSeries;
@@ -93,7 +93,7 @@ export class ChartNetwork {
       const chartTime = this.clock.now() - this.model.startTime;
 
       // Now according to the datapoint
-      const pointTime = TimestampObject.toSeconds(data.timestamp) - leaf.startTime;
+      const pointTime = Timestamp.toSeconds(data.timestamp) - leaf.startTime;
 
       // Estimate the drifting distance between the clocks
       leaf.updateDelta(pointTime - chartTime);
