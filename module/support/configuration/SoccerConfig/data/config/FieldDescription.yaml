@@ -13,7 +13,7 @@ GoalWidth: 1.80
 GoalAreaLength: 0.90
 GoalAreaWidth: 2.90
 # Height to the bottom of the crossbar.
-GoalCrossbarHeight: 0.55 # from top of wood to ground
+GoalCrossbarHeight: 1.2 # from top of wood to ground
 # What shape the goal is (RECTANGLE,CIRCLE)
 GoalpostType: CIRCLE
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
@@ -21,10 +21,10 @@ GoalpostWidth: 0.10
 GoalpostDepth: 0.10
 GoalCrossbarWidth: 0.10
 GoalCrossbarDepth: 0.10
-GoalNetHeight: 1.0
+GoalNetHeight: 1.2
 # Measured from the goal line.
-PenaltyMarkDistance: 1.53 # to the middle of the penalty mark
-CenterCircleDiameter: 1.47
+PenaltyMarkDistance: 1.47 # to the middle of the penalty mark
+CenterCircleDiameter: 1.5
 BorderStripMinWidth: 0.38
 PenaltyRobotStart: 1.0
 
