@@ -330,8 +330,8 @@ namespace module::skill {
                         // Apply the policy offset to the default pose, then safety-clip the result to
                         // the physical servo limits so the policy cannot command an infeasible position.
                         servo->position  = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
-                                                      servo_limit_min[i],
-                                                      servo_limit_max[i]);
+                                                     servo_limit_min[i],
+                                                     servo_limit_max[i]);
                         const float gain = i < 6 ? cfg.arm_servo_gain : cfg.leg_servo_gain;
                         servo->state     = ServoState(gain, cfg.servo_torque);
                         limbs->servos[joint_map[i].second] = *servo;
