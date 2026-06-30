@@ -397,12 +397,13 @@ namespace module::skill {
     }
 
     void RLWalk::reset_loop_timing() {
-        have_timing_sample   = false;
-        timing_samples       = 0;
-        timing_period_sum    = 0.0;
-        timing_period_sq_sum = 0.0;
-        timing_period_min    = 0.0;
-        timing_period_max    = 0.0;
+        have_timing_sample        = false;
+        timing_samples            = 0;
+        timing_period_sum         = 0.0;
+        timing_period_sq_sum      = 0.0;
+        timing_period_min         = 0.0;
+        timing_period_max         = 0.0;
+        timing_control_step_start = control_step;
     }
 
     void RLWalk::debug_loop_timing() {
@@ -410,14 +411,30 @@ namespace module::skill {
         const NUClear::clock::time_point now_nuclear           = NUClear::clock::now();
         const std::chrono::steady_clock::time_point now_steady = std::chrono::steady_clock::now();
 
-        // First stable tick of this walk: establish the baseline, nothing to compare against yet.
-        if (!have_timing_sample) {
-            have_timing_sample = true;
-            last_tick_nuclear  = now_nuclear;
-            last_tick_steady   = now_steady;
-            walk_start_nuclear = now_nuclear;
-            walk_start_steady  = now_steady;
-            last_timing_report = now_nuclear;
+        // Detect a discontinuity: this loop only ticks while walking, so if the walk is pre-empted by
+        // another task (e.g. a get-up) the timing baseline freezes and the gap since the previous tick
+        // far exceeds the control period. Measuring period/frequency/drift across that gap would report
+        // broken information, so treat the current tick as a fresh baseline instead.
+        const bool gap_detected =
+            have_timing_sample
+            && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
+
+        // First stable tick of this walk, or the first tick after a pause: (re)establish the baseline,
+        // resetting the running statistics so they describe only the current continuous run. Nothing to
+        // compare against yet, so return without emitting a sample.
+        if (!have_timing_sample || gap_detected) {
+            have_timing_sample        = true;
+            last_tick_nuclear         = now_nuclear;
+            last_tick_steady          = now_steady;
+            walk_start_nuclear        = now_nuclear;
+            walk_start_steady         = now_steady;
+            last_timing_report        = now_nuclear;
+            timing_control_step_start = control_step;
+            timing_samples            = 0;
+            timing_period_sum         = 0.0;
+            timing_period_sq_sum      = 0.0;
+            timing_period_min         = 0.0;
+            timing_period_max         = 0.0;
             return;
         }
 
@@ -427,8 +444,9 @@ namespace module::skill {
         last_tick_nuclear       = now_nuclear;
         last_tick_steady        = now_steady;
 
-        // Metrics
-        const double model_elapsed        = static_cast<double>(control_step) * STEP_DT;
+        // Metrics. Gait-clock elapsed is measured from the control step at the current baseline so it
+        // stays aligned with the wall-clock elapsed below after a re-baseline.
+        const double model_elapsed = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
         const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
         const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
         const double drift_nuclear        = model_elapsed - elapsed_nuclear;

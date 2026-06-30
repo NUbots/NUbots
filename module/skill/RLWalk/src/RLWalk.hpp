@@ -80,6 +80,11 @@ namespace module::skill {
         /// @brief Fixed control timestep (seconds) corresponding to UPDATE_FREQUENCY
         static constexpr double STEP_DT = 1.0 / UPDATE_FREQUENCY;
 
+        /// @brief Gap (seconds) since the previous timing tick beyond which the control loop is treated
+        /// as having paused (e.g. the walk was pre-empted by a get-up). On resume the timing diagnostics
+        /// re-baseline instead of reporting a spurious low frequency / huge drift across the gap.
+        static constexpr double MAX_TICK_GAP = STEP_DT * 5.0;  // 0.1s, i.e. ~5 missed control steps
+
         /// @brief Number of control steps executed since the walk started. Used to advance the
         /// gait phase deterministically as control_step * STEP_DT rather than from wall-clock time.
         uint64_t control_step = 0;
@@ -112,6 +117,9 @@ namespace module::skill {
         /// @brief Timestamps at the first stable tick, used to compute cumulative gait-clock drift.
         NUClear::clock::time_point walk_start_nuclear{};
         std::chrono::steady_clock::time_point walk_start_steady{};
+        /// @brief Value of control_step when the current timing baseline was established. Gait-clock drift
+        /// is measured from here so it stays meaningful after a re-baseline following a pause.
+        uint64_t timing_control_step_start = 0;
         /// @brief Time of the last rolling-summary log, used to throttle the summary to timing_report_period.
         NUClear::clock::time_point last_timing_report{};
         /// @brief Running statistics on the NUClear-clock per-tick period (seconds), since the walk started.
