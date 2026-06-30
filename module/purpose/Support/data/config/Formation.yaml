@@ -1,8 +1,9 @@
 # Shared team formation between UNSW, RMIT, and UoN; see https://github.com/unswei/formation
 version: 1
 meta:
-  name: Normal play 3 scalable
-  notes: Scalable test formation. Player 1 tracks ball y within goal-area bounds. Players 2 and 3 are constrained to stay in the defensive quarter.
+  name: Normal play 5 scalable
+  notes: Scalable test formation. Player 1 tracks ball y within goal-area bounds.
+    Players 2 and 3 are constrained to stay in the defensive quarter.
 defaults:
   attraction:
     x: 0.55
@@ -22,7 +23,7 @@ defaults:
 modes:
   normal_play:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -39,7 +40,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -59,7 +60,7 @@ modes:
         maxY:
           field: width
           scale: 0.35
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -85,7 +86,7 @@ modes:
         x: 0.35
         y: 0.25
     robots:
-      1:
+      "1":
         offset:
           x:
             position: left_goal_area_max_x
@@ -102,7 +103,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -119,7 +120,7 @@ modes:
         minY:
           field: width
           scale: -0.35
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -145,7 +146,7 @@ modes:
         field: length
         scale: -0.45
     robots:
-      1:
+      "1":
         offset:
           x:
             position: left_goal_area_max_x
@@ -162,15 +163,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
-        offset:
-          x:
-            field: length
-            scale: -0.13
-          y:
-            field: width
-            scale: -0.12
-      3:
+      "2":
         offset:
           x:
             field: length
@@ -178,9 +171,17 @@ modes:
           y:
             field: width
             scale: 0.0
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.1
+          y:
+            field: width
+            scale: 0.2
   throw_in_us:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -197,7 +198,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -214,7 +215,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -233,7 +234,7 @@ modes:
           scale: -0.35
   throw_in_them:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -250,7 +251,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -264,7 +265,7 @@ modes:
         minX:
           field: length
           scale: -0.37
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -280,7 +281,7 @@ modes:
           scale: -0.16
   corner_kick_us:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -297,7 +298,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -311,7 +312,7 @@ modes:
         minX:
           field: length
           scale: -0.3
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -324,7 +325,7 @@ modes:
           scale: -0.05
   corner_kick_them:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -341,7 +342,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -358,7 +359,7 @@ modes:
         maxY:
           field: length
           scale: 0.25
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -374,7 +375,7 @@ modes:
           scale: -0.16
   penalty_kick_us:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -391,7 +392,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -402,7 +403,7 @@ modes:
         attraction:
           x: 0.7
           y: 0.65
-      3:
+      "3":
         offset:
           x:
             field: length
@@ -418,7 +419,7 @@ modes:
           scale: -0.16
   penalty_kick_them:
     robots:
-      1:
+      "1":
         offset:
           x:
             field: length
@@ -435,7 +436,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      2:
+      "2":
         offset:
           x:
             field: length
@@ -449,7 +450,7 @@ modes:
         minX:
           field: length
           scale: -0.17
-      3:
+      "3":
         offset:
           x:
             field: length
