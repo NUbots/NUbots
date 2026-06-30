@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2024 NUbots
+// Copyright (c) 2026 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -22,57 +22,57 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-syntax = "proto3";
 
+syntax = "proto3";
 package message.input;
 
-import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
+import "google/protobuf/timestamp.proto";
 
-import "message/purpose/Purpose.proto";
+// fvec2, A column vector of two floats (4 Bytes + 1 tag) * 2 = 10 Bytes
+// fvec3, A column vector of three floats (4 Bytes + 1 tag) * 3 = 15 Bytes
+// fmat3, A vector of three vectors (15 Bytes + 1 tag + 1 length) * 3 = 51 Bytes
 
-/// The detected team of the robot
+/// The team of the robot
 enum Team {
     UNKNOWN_TEAM = 0;
-    BLUE         = 1;
-    RED          = 2;
-    YELLOW       = 3;
-    BLACK        = 4;
-    WHITE        = 5;
-    GREEN        = 6;
-    ORANGE       = 7;
-    PURPLE       = 8;
-    BROWN        = 9;
-    GRAY         = 10;
+    NUBOTS       = 1;
+    RUNSWIFT     = 18;
+    REDBACKBOTS  = 51;
 }
 
+/// 73 - 77 Bytes
 message Robot {
+
     /// ID of the robot, 0 if not known
+    /// 1-5 Bytes
     uint32 player_id = 1;
 
     /// The position of the robot on the field according to the following convention
     /// x meters along the field with 0 at the centre of the field and positive towards opponent goals
     /// y meters across the field with 0 at the centre of the field and positive to the left
     /// θ orientation of the robot (anti-clockwise from the x axis from above the field)
+    /// 15 + 1 tag + 1 length = 17 Bytes
     fvec3 position = 2;
 
     /// The covariance measure of the robots [x, y, θ] values
     /// If this is unavailable leave this unset
+    /// 51 + 1 tag + 1 length = 53 Bytes
     fmat3 covariance = 3;
 
     /// Robot team, if known
+    /// enum Max < 127 = 1 + 1 tag = 2 Bytes
     Team team = 4;
-
-    // Cost of localisation
-    float cost = 5;
 }
 
+/// 92 Bytes
 message Ball {
     /// The position of the ball on the field according to the following convention
     /// x meters along the field with 0 at the centre of the field and positive towards opponent goals
     /// y meters across the field with 0 at the centre of the field and positive to the left
     /// z meters above the field with 0 at the surface of the field and positive up
+    /// 15 + 1 tag + 1 length = 17 Bytes
     fvec3 position = 1;
 
     /// The velocity of the ball
@@ -80,15 +80,19 @@ message Ball {
     /// y m/s across the field with 0 at the centre of the field and positive to the left
     /// z m/s above the field with 0 at the surface of the field and positive up
     /// Set to 0 if not available
+    /// 15 + 1 tag + 1 length = 17 Bytes
     fvec3 velocity = 2;
 
     /// The covariance measure of the balls [x, y, z] values
     /// If this is unavailable leave this unset
+    /// 51 + 1 tag + 1 length = 53 Bytes
     fmat3 covariance = 3;
 
-    /// The confidence of the ball measurement
-    /// 0.0 means no confidence, 1.0 means full confidence
-    double confidence = 4;
+    /// The age of the ball observation in seconds
+    /// -1 if the supplied value is not valid
+    /// and or a ball has not been seen
+    //// 4 + 1 tag = 5 Bytes
+    float age = 4;
 }
 
 /// The current playing state of the robot
@@ -98,37 +102,53 @@ enum State {
     PENALISED     = 2;
 }
 
-message RoboCup {
+/// 280 - 300
+message Message {
     /// Timestamp of message creation
+    /// tag = 1 Byte
+    /// length = 1 Byte
+    /// int64 seconds = 1-10 Bytes
+    /// int32 nanos = 1-5 Bytes
+    /// Total 3 - 17 Bytes
     google.protobuf.Timestamp timestamp = 1;
 
     /// The robots current state
+    /// tag = 1 Byte
+    /// enum Max < 127 = 1 Byte
+    /// Total = 2 Bytes
     State state = 2;
 
     /// Position, orientation, and covariance of the player on the field
+    /// (73 - 77) + 1 tag + 1 length = 75 - 79 Bytes
     Robot current_pose = 3;
 
     /// The current walk speed of the robot in it's local [x, y, θ] coordinates
     /// x and y in m/s and θ in rad/s
     /// positive x being forwards, positive y being strafing to the left, and positive θ being anti-clockwise
+    /// 15 + 1 tag + 1 length = 17 Bytes
     fvec3 walk_command = 4;
 
     /// Position and orientation of the players target on the field specified
+    /// (73 - 77) + 1 tag + 1 length = 75 - 79 Bytes
     Robot target_pose = 5;
 
     /// Position that the robot is aiming to kick the ball to
     /// If no kick is planned set to [0, 0]
     /// Vector has origin on the ground between the robots feet
+    /// 10 + 1 tag + 1 length  = 12 Bytes
     fvec2 kick_target = 6;
 
     /// Position, velocity, and covariance of the ball on the field
+    /// 92 + 1 tag + 1 length = 94 Bytes
     Ball ball = 7;
 
-    /// Position, orientation, and covariance of detected robots on the field
-    repeated Robot others = 8;
+    /// Whether or not the robot is actively going for the ball
+    /// (Attacking)
+    /// 1 + 1 tag = 2 Bytes
+    bool going_for_ball = 8;
 
-    /// IDs 1-100 are reserved for official use
-
-    /// The purpose of the robot
-    purpose.Purpose purpose = 101;
+    // Team specific data to be set in tag number equal to 100 + GC number
+    // This should not exceed 128 Bytes (tag and length will add 2 Bytes of overhead)
+    // eg
+    // bytes rbb_data = 151; /// Expected to be <= 128 Bytes (+ 1 tag + 1 length = 130 Bytes)
 }
