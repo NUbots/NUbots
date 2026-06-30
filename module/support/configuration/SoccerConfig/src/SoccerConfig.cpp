@@ -62,25 +62,27 @@ namespace module::support::configuration {
         desc.ball_radius = config["BallRadius"].as<double>();
 
         FieldDescription::FieldDimensions& d = desc.dimensions;
+        const std::string field_type = config["field_type"].as<std::string>("small");
+        const Configuration preset   = config["presets"][field_type];
         d.line_width                         = config["LineWidth"].as<double>();
-        d.field_length                       = config["FieldLength"].as<double>();
-        d.field_width                        = config["FieldWidth"].as<double>();
-        d.goal_depth                         = config["GoalDepth"].as<double>();
-        d.goal_width                         = config["GoalWidth"].as<double>();
-        d.goal_area_length                   = config["GoalAreaLength"].as<double>();
-        d.goal_area_width                    = config["GoalAreaWidth"].as<double>();
-        d.goal_crossbar_height               = config["GoalCrossbarHeight"].as<double>();
+        d.field_length                       = preset["FieldLength"].as<double>();
+        d.field_width                        = preset["FieldWidth"].as<double>();
+        d.goal_depth                         = preset["GoalDepth"].as<double>();
+        d.goal_width                         = preset["GoalWidth"].as<double>();
+        d.goal_area_length                   = preset["GoalAreaLength"].as<double>();
+        d.goal_area_width                    = preset["GoalAreaWidth"].as<double>();
+        d.goal_crossbar_height               = preset["GoalCrossbarHeight"].as<double>();
         d.goalpost_type                      = config["GoalpostType"].as<std::string>();
         d.goalpost_width                     = config["GoalpostWidth"].as<double>();
         d.goalpost_depth                     = config["GoalpostDepth"].as<double>();
         d.goal_crossbar_width                = config["GoalCrossbarWidth"].as<double>();
         d.goal_crossbar_depth                = config["GoalCrossbarDepth"].as<double>();
         d.goal_net_height                    = config["GoalNetHeight"].as<double>();
-        d.penalty_mark_distance              = config["PenaltyMarkDistance"].as<double>();
-        d.center_circle_diameter             = config["CenterCircleDiameter"].as<double>();
+        d.penalty_mark_distance              = preset["PenaltyMarkDistance"].as<double>();
+        d.center_circle_diameter             = preset["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width             = config["BorderStripMinWidth"].as<double>();
-        d.penalty_area_length                = config["PenaltyAreaLength"].as<double>();
-        d.penalty_area_width                 = config["PenaltyAreaWidth"].as<double>();
+        d.penalty_area_length                = preset["PenaltyAreaLength"].as<double>();
+        d.penalty_area_width                 = preset["PenaltyAreaWidth"].as<double>();
 
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_width;
 

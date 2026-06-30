@@ -55,6 +55,7 @@ namespace module::tools {
 
             cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
             cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
+            cfg.field_preset_names = config["field_presets"].as<std::vector<std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -167,6 +168,10 @@ namespace module::tools {
         YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
         is_goalie                = soccer_config["is_goalie"].as<bool>();
 
+        // Field type
+        YAML::Node fd_config = Configuration("FieldDescription.yaml", hostname, binary, platform).config;
+        field_type           = fd_config["field_type"].as<std::string>("small");
+
         // Network info
         wifi_interface = utility::support::get_wireless_interface();
         ip_address     = utility::support::get_ip_address(wifi_interface);
@@ -229,6 +234,15 @@ namespace module::tools {
             config["team_id"]       = team_id;
             config["player_id"]     = player_id;
             std::ofstream file(global_file);
+            file << config;
+        }
+
+        {
+            // Write selected field type to FieldDescription.yaml
+            std::string fd_file    = get_config_file("FieldDescription.yaml");
+            YAML::Node config      = YAML::LoadFile(fd_file);
+            config["field_type"]   = field_type;
+            std::ofstream file(fd_file);
             file << config;
         }
 
@@ -349,6 +363,13 @@ namespace module::tools {
             case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
             case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
             case Display::Column2::GOALIE: is_goalie = !is_goalie; break;
+            case Display::Column2::FIELD_TYPE: {
+                auto& keys = cfg.field_preset_names;
+                auto it    = std::find(keys.begin(), keys.end(), field_type);
+                auto next  = std::next(it);
+                field_type = (next == keys.end()) ? keys.front() : *next;
+                break;
+            }
             default: break;
         }
     }
@@ -491,6 +512,7 @@ namespace module::tools {
         mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
         mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
         mvprintw(7, display.C2_PAD, ("Goalie? : " + std::string(is_goalie ? "True" : "False")).c_str());
+        mvprintw(8, display.C2_PAD, ("Field Type: " + field_type).c_str());
 
         // Print commands
         // Heading Commands

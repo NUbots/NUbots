@@ -14,3 +14,10 @@ common_ips: [
     "192.168.98.X", # RoboCup Drop-In Team A IP
     "192.168.99.X", # RoboCup Drop-In Team B IP
   ]
+
+# Names of field presets defined in FieldDescription.yaml
+field_presets: [
+    "small", # Small field 9x6m
+    "l1",    # L1 field 12x9m
+    "l3",    # L3 field 14x9m
+  ]
