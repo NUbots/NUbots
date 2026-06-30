@@ -1,10 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { action, computed, IObservableArray, observable } from "mobx";
-
-import { zip } from "@shared/array/zip";
-
 import { bestFitWindowsOnScreen, ChildWindow, ChildWindowOpts, WindowLayout } from "@client/windows/child_window";
 import { CrossWindowMessenger } from "@client/windows/cross_window_messenger";
+import { zip } from "@shared/array/zip";
+import { action, computed, IObservableArray, observable } from "mobx";
 
 import { popoutBroadcastChannel, PopoutChildRendered, PopoutParentRendered } from "./messaging";
 

@@ -1,6 +1,5 @@
-import { zip } from "@shared/array/zip";
-
 import { bestFitColumns } from "@client/base/best_fit_columns";
+import { zip } from "@shared/array/zip";
 
 /** A size value, either in pixels or as a percentage */
 type Size = `${number}px` | `${number}%`;
