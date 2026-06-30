@@ -1,12 +1,11 @@
+import { ScrubberState, ScrubberState_StateEnum } from "@proto/message/eye/Scrubber";
 import { NbsPacket, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
 
-import { message } from "../../shared/messages";
 import { hashType } from "../../shared/nuclearnet/hash_type";
+import { Timestamp } from "../../shared/time/timestamp";
 
 import { Scrubber } from "./scrubber";
 import { nanosToTimestampObject } from "./utils";
-
-import ScrubberState = message.eye.ScrubberState;
 
 interface SyntheticType {
   event: string;
@@ -35,10 +34,10 @@ export function isSynthesizable(type: NbsTypeSubtypeBuffer) {
 }
 
 const ScrubberPlaybackStateToEnum = {
-  paused: message.eye.ScrubberState.State.PAUSED,
-  playing: message.eye.ScrubberState.State.PLAYING,
-  ended: message.eye.ScrubberState.State.ENDED,
-  unknown: message.eye.ScrubberState.State.UNKNOWN,
+  paused: ScrubberState_StateEnum.PAUSED,
+  playing: ScrubberState_StateEnum.PLAYING,
+  ended: ScrubberState_StateEnum.ENDED,
+  unknown: ScrubberState_StateEnum.UNKNOWN,
 } as const;
 
 /** Create an NBS packet of the given synthesizable type */
@@ -53,16 +52,16 @@ export function synthesize(typeSubtype: NbsTypeSubtypeBuffer, scrubber: Scrubber
 
   switch (type.event) {
     case "message.eye.ScrubberState": {
-      const scrubberState = ScrubberState.encode({
-        timestamp,
+      const scrubberState = new ScrubberState({
+        timestamp: Timestamp.toMessage(timestamp),
         id: scrubber.data.id,
         name: scrubber.data.name,
-        start: scrubber.data.start,
-        end: scrubber.data.end,
+        start: Timestamp.toMessage(scrubber.data.start),
+        end: Timestamp.toMessage(scrubber.data.end),
         playbackState: ScrubberPlaybackStateToEnum[scrubber.data.playbackState],
         playbackSpeed: scrubber.data.playbackSpeed,
         playbackRepeat: scrubber.data.playbackRepeat,
-      }).finish();
+      }).toBinary();
 
       return {
         timestamp,
