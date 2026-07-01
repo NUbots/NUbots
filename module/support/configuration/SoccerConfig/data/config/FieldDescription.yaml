@@ -20,8 +20,8 @@ presets:
   small:
     FieldLength: 9.0
     FieldWidth: 6.0
-    GoalWidth: 1.8
-    GoalDepth: 0.5
+    GoalDepth: 0.58
+    GoalWidth: 2.575
     # Height to the bottom of the crossbar.
     GoalCrossbarHeight: 1.2
     GoalAreaLength: 0.9
