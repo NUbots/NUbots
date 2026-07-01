@@ -109,8 +109,12 @@ namespace module::skill {
             // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
             cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
 
+            // Command magnitude below which the policy-owned gait phase is gated off (frozen at zero).
+            cfg.phase_command_threshold = config["phase_command_threshold"].as<double>();
+
             // Initialize vectors
             last_action      = JointVector::Zero();
+            last_action_raw  = JointVector::Zero();
             have_last_action = false;
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
@@ -162,6 +166,12 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             // Reset the control step counter so the gait phase starts from zero on each walk start
             control_step = 0;
+            // Reset the policy-owned gait phase and the last-action feedback (raw joints + phase delta)
+            // so each walk starts from a clean, zeroed history, matching the action-history reset mjlab
+            // performs on episode reset.
+            policy_phase     = 0.0;
+            last_phase_delta = 0.0;
+            last_action_raw  = JointVector::Zero();
             // If debugging, reset the loop-timing diagnostics so each walk is measured from a clean baseline
             if (log_level <= DEBUG) {
                 reset_loop_timing();
@@ -244,9 +254,11 @@ namespace module::skill {
                     };
                     idx += JOINT_POS_SIZE;
 
-                    // Last action (20) in Mujoco's Tree-Traversal order without scaling or offsets applied
-                    observation.segment<JOINT_POS_SIZE>(idx) = last_action;
+                    // Last action (21) (includes the new phase delta)
+                    observation.segment<JOINT_POS_SIZE>(idx) = last_action_raw;
                     idx += JOINT_POS_SIZE;
+                    observation(idx) = last_phase_delta;
+                    idx += PHASE_DELTA_SIZE;
 
                     // Command (3)
                     observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
@@ -258,51 +270,67 @@ namespace module::skill {
                     }
                     idx += COMMAND_SIZE;
 
-                    // Phase (2). Advance the gait phase from the control-step count and fixed control
-                    // timestep (control_step * STEP_DT) rather than wall-clock time. This is
-                    // deterministic, monotonic, and immune to clock jitter/jumps and scheduling delays.
-                    const double elapsed = static_cast<double>(control_step) * STEP_DT;
-                    const double phase   = std::fmod(elapsed / cfg.gait_period, 1.0);
+                    // Phase (2). Policy-owned gait clock (clock_learned variant): the phase is
+                    // accumulated from the per-step phase delta the policy emits as an extra action
+                    // output, not from wall-clock time. Here we only *observe* the phase accumulated
+                    // from previous steps; it is advanced by this step's delta after inference below.
+                    //
+                    // Standing gate: when the commanded velocity magnitude (|linear| + |angular|) is
+                    // below the threshold, the phase is treated as zero and the observation collapses
+                    // to the origin, matching the command gate on gait_clock/PhaseDeltaAction in
+                    // training so standing presents a distinct signal from walking.
+                    const double command_magnitude =
+                        walk_task.velocity_target.head<2>().norm() + std::abs(walk_task.velocity_target.z());
+                    const bool phase_active = command_magnitude > cfg.phase_command_threshold;
                     observation.segment<PHASE_SIZE>(idx) =
-                        Eigen::Vector2d(std::sin(2 * M_PI * phase), std::cos(2 * M_PI * phase));
+                        phase_active
+                            ? Eigen::Vector2d(std::sin(2 * M_PI * policy_phase), std::cos(2 * M_PI * policy_phase))
+                            : Eigen::Vector2d::Zero();
                     idx += PHASE_SIZE;
-                    // Advance the gait clock by one control step for the next update
+                    // Count the control step for the loop-timing diagnostics.
                     ++control_step;
 
                     // Run inference
-                    JointVector inference_output_raw = run_inference(observation);
+                    const InferenceOutput inference  = run_inference(observation);
+                    JointVector inference_output_raw = inference.joint_actions;
                     if (log_level <= DEBUG) {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Clip the output here as a safety measure to prevent extremely fast movements. TODO: FIXME
-                    const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
-
-                    // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
-                    // against the current measured offsets to limit command rate.
-                    const JointVector desired_joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
-                    JointVector clipped_joint_offsets_mj       = desired_joint_offsets_mj;
-
-                    for (int i = 0; i < cfg.num_joints; ++i) {
-                        const double lower          = current_joints_rel_mj[i] - max_joint_offset;
-                        const double upper          = current_joints_rel_mj[i] + max_joint_offset;
-                        clipped_joint_offsets_mj[i] = std::clamp(desired_joint_offsets_mj[i], lower, upper);
+                    // Advance the policy-owned gait phase using the phase delta the policy just emitted.
+                    // delta = (STEP_DT / gait_period) * raw_output, so a raw output of 1 advances one
+                    // nominal step; the accumulated phase is wrapped into [0, 1). When the command is
+                    // below the phase gate the phase is frozen at zero, matching PhaseDeltaAction.
+                    if (phase_active) {
+                        const double phase_delta = (STEP_DT / cfg.gait_period) * inference.phase_delta;
+                        policy_phase             = std::fmod(policy_phase + phase_delta, 1.0);
+                        if (policy_phase < 0.0) {
+                            policy_phase += 1.0;
+                        }
+                    }
+                    else {
+                        policy_phase = 0.0;
+                    }
+                    if (log_level <= DEBUG) {
+                        emit(graph("Policy gait phase", policy_phase, inference.phase_delta));
                     }
 
-                    JointVector clipped_action_raw = inference_output_raw;
-                    if (std::abs(cfg.nugus_action_scale) > 1e-9) {
-                        clipped_action_raw = clipped_joint_offsets_mj / cfg.nugus_action_scale;
-                    }
-
-                    // Filter the actions using an exponential moving average
-                    JointVector filtered_action_raw = clipped_action_raw;
+                    // Filter the raw policy action with an exponential moving average. The mjlab policy
+                    // is trained without a per-step rate limit, so the raw output is used directly here;
+                    // the only safety measure is the final absolute per-servo position-limit clamp below.
+                    JointVector filtered_action_raw = inference_output_raw;
                     if (have_last_action) {
                         filtered_action_raw =
-                            cfg.action_alpha * clipped_action_raw + (1.0 - cfg.action_alpha) * last_action;
+                            cfg.action_alpha * inference_output_raw + (1.0 - cfg.action_alpha) * last_action;
                     }
 
-                    // Store the filtered action in mjlab order without scaling or offsets.
+                    // Store the filtered action (mjlab order, no scaling/offset) as the EMA recurrence
+                    // state for the next step's servo smoothing. Separately store the RAW joint output
+                    // and RAW phase delta, which feed back into the next observation so it matches
+                    // training's unprocessed action echo.
                     last_action      = filtered_action_raw;
+                    last_action_raw  = inference_output_raw;
+                    last_phase_delta = inference.phase_delta;
                     have_last_action = true;
 
                     const JointVector filtered_joint_offsets_mj = filtered_action_raw * cfg.nugus_action_scale;
@@ -356,7 +384,7 @@ namespace module::skill {
             });
     }
 
-    JointVector RLWalk::run_inference(const ObservationVector& observation) {
+    InferenceOutput RLWalk::run_inference(const ObservationVector& observation) {
         if (log_level <= DEBUG) {
             emit(graph("Observation", observation.transpose()));
         }
@@ -377,23 +405,26 @@ namespace module::skill {
         }
         catch (const std::exception& e) {
             log<ERROR>("Inference failed: ", e.what());
-            return JointVector::Zero();
+            return InferenceOutput{JointVector::Zero(), 0.0};
         }
 
-        // Get output tensor
+        // Get output tensor. The policy emits TOTAL_ACTION_SIZE values: the JOINT_POS_SIZE joint
+        // targets followed by the single gait phase delta (clock_learned variant).
         auto output_tensor = infer_request.get_output_tensor();
         float* output_data = output_tensor.data<float>();
 
-        JointVector joint_angles_raw;
+        InferenceOutput result;
         for (int i = 0; i < JOINT_POS_SIZE; ++i) {
-            joint_angles_raw[i] = static_cast<double>(output_data[i]);
+            result.joint_actions[i] = static_cast<double>(output_data[i]);
         }
+        result.phase_delta = static_cast<double>(output_data[JOINT_POS_SIZE]);
 
         if (log_level <= DEBUG) {
-            emit(graph("Raw action output values from inference", joint_angles_raw.transpose()));
+            emit(graph("Raw action output values from inference", result.joint_actions.transpose()));
+            emit(graph("Raw phase delta output from inference", result.phase_delta));
         }
 
-        return joint_angles_raw;
+        return result;
     }
 
     void RLWalk::reset_loop_timing() {
@@ -416,8 +447,7 @@ namespace module::skill {
         // far exceeds the control period. Measuring period/frequency/drift across that gap would report
         // broken information, so treat the current tick as a fresh baseline instead.
         const bool gap_detected =
-            have_timing_sample
-            && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
+            have_timing_sample && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
 
         // First stable tick of this walk, or the first tick after a pause: (re)establish the baseline,
         // resetting the running statistics so they describe only the current continuous run. Nothing to
@@ -446,7 +476,7 @@ namespace module::skill {
 
         // Metrics. Gait-clock elapsed is measured from the control step at the current baseline so it
         // stays aligned with the wall-clock elapsed below after a re-baseline.
-        const double model_elapsed = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
+        const double model_elapsed        = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
         const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
         const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
         const double drift_nuclear        = model_elapsed - elapsed_nuclear;

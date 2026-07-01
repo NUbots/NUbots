@@ -7,7 +7,7 @@ model:
   input_name: obs
   output_name: actions
   num_joints: 20
-  obs_size: 71
+  obs_size: 72 # gyro(3)+gravity(3)+joint_pos(20)+joint_vel(20)+last_action(21)+command(3)+phase(2)
   action_alpha: 1.00 # TODO: remove the filter completely
   action_scale: 0.24722924456 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
   gait_period: 0.7 # seconds, defined in mjlab training
@@ -22,6 +22,11 @@ servos:
 # are zeroed and the robot holds the default pose. Hack to avoid unwanted policy behaviour at
 # ~zero command. TODO: tune this threshold on the real robot.
 command_velocity_threshold: 0.00
+
+# Command magnitude (|linear| + |angular|) below which the policy-owned gait phase is frozen at
+# zero and the phase observation collapses to the origin. Must match the command_threshold on
+# PhaseDeltaAction / gait_clock in mjlab training (clock_learned variant).
+phase_command_threshold: 0.05
 
 default_pose: # Same as in Mujoco.yaml
   - 1.71400e+00 # Right shoulder pitch 0
