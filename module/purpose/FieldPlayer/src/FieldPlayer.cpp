@@ -111,7 +111,8 @@ namespace module::purpose {
                     return;
                 }
 
-                // Determine if the game is in a set play situation where the avoidance distance is a radius from the ball.
+                // Determine if the game is in a set play situation where the avoidance distance is a radius from the
+                // ball.
                 bool set_play = game_state.mode.value == GameState::Mode::DIRECT_FREEKICK
                                 || game_state.mode.value == GameState::Mode::INDIRECT_FREEKICK
                                 || game_state.mode.value == GameState::Mode::CORNER_KICK
@@ -219,7 +220,7 @@ namespace module::purpose {
 
                     // If already far enough, let the other tasks drive
                     const Eigen::Vector3d rRFf = (field->Hfw * sensors.Hrw.inverse()).translation();
-                    const double ball_distance  = (rRFf - rBFf).head<2>().norm();
+                    const double ball_distance = (rRFf - rBFf).head<2>().norm();
                     if (ball_distance < ball_avoidance_distance) {
                         log<DEBUG>("Opponent set play, too close to ball, backing away.");
                         emit<Task>(std::make_unique<MaintainBallDistance>(ball_avoidance_distance));
