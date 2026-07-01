@@ -1,4 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
+import { usePopout } from "@client/popouts/popout";
+import { ChildWindowOpts } from "@client/windows/child_window";
 import { observer } from "mobx-react";
 
 import { useRpcController } from "../../../hooks/use_rpc_controller";
@@ -23,11 +25,35 @@ export const NbsScrubberView = observer(({ model, onFocus }: NbsScrubberViewProp
       <NbsScrubberRangeSlider model={model} controller={controller} />
       {buttonDivider}
       <NbsScrubberRightControls model={model} controller={controller}>
+        <NbsScrubberPopoutButton model={model} />
         <IconButton title="Close scrubber" onClick={controller.close}>
           close
         </IconButton>
       </NbsScrubberRightControls>
     </div>
+  );
+});
+
+const NbsScrubberPopoutButton = observer(({ model }: { model: NbsScrubberModel }) => {
+  const windowOpts = useMemo<ChildWindowOpts>(
+    () => ({
+      name: `scrubber/${model.id}`,
+      url: `/standalone/scrubber?robotName=${encodeURIComponent(model.name)}`,
+      size: { height: `${Math.floor(screen.height / 1.5)}px`, width: "90%" },
+    }),
+    [model.id, model.name],
+  );
+
+  const popout = usePopout(windowOpts);
+
+  return popout.isOpen ? (
+    <IconButton color="primary" title="Focus scrubber window" onClick={popout.focus}>
+      open_in_new
+    </IconButton>
+  ) : (
+    <IconButton title="Pop scrubber out into a standalone window" onClick={() => popout.open()}>
+      open_in_new
+    </IconButton>
   );
 });
 

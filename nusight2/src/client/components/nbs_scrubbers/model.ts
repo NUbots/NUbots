@@ -2,7 +2,7 @@ import { computed, observable } from "mobx";
 
 import { clamp } from "../../../shared/math/clamp";
 import { NbsScrubber } from "../../../shared/nbs_scrubber";
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { RobotModel } from "../robot/model";
 
 import { timestampToPercentage } from "./util";
@@ -55,12 +55,12 @@ export class NbsScrubberModel {
 
   @computed
   get start(): bigint {
-    return TimestampObject.toNanos(this.startTs);
+    return Timestamp.toNanos(this.startTs);
   }
 
   @computed
   get end(): bigint {
-    return TimestampObject.toNanos(this.endTs);
+    return Timestamp.toNanos(this.endTs);
   }
 
   @computed
@@ -75,22 +75,22 @@ export class NbsScrubberModel {
 
   @computed
   get startFormatted(): string {
-    return TimestampObject.formatDate(this.start);
+    return Timestamp.toFormattedDate(this.start);
   }
 
   @computed
   get endFormatted(): string {
-    return TimestampObject.formatDate(this.end);
+    return Timestamp.toFormattedDate(this.end);
   }
 
   @computed
   get durationFormatted(): string {
-    return TimestampObject.formatDuration(this.duration);
+    return Timestamp.toFormattedDuration(this.duration);
   }
 
   @computed
   get currentFormatted(): string {
-    return TimestampObject.formatDate(this.current);
+    return Timestamp.toFormattedDate(this.current);
   }
 
   @computed

@@ -1,0 +1,39 @@
+version: v2
+plugins:
+  # Relative paths automatically work
+  - protoc_builtin: es
+    out: src/shared/proto
+    opt:
+      - target=ts
+    include_imports: true
+  - local: ["tsx", "build_scripts/buf_plugins/class_wrapper_plugin.ts"]
+    out: src/shared/proto
+    strategy: all
+    opt:
+      - target=ts
+  - local: ["tsx", "build_scripts/buf_plugins/rpc_call_types_plugin.ts"]
+    out: src/shared/messages/generated
+    strategy: all
+    opt:
+      - target=ts
+  - local: ["tsx", "build_scripts/buf_plugins/message_fields_index_plugin.ts"]
+    out: src/shared/messages/generated
+    strategy: all
+    opt:
+      - target=ts
+  - local: ["tsx", "build_scripts/buf_plugins/hash_converter_plugin.ts"]
+    out: src/shared/messages/generated
+    strategy: all
+    opt:
+      - target=ts
+  - local: ["tsx", "build_scripts/buf_plugins/types_converter_plugin.ts"]
+    out: src/shared/messages/generated
+    strategy: all
+    opt:
+      - target=ts
+inputs:
+  - directory: ../
+    exclude_paths: [node_modules, "src/shared/messages"]
+
+managed:
+  enabled: true
