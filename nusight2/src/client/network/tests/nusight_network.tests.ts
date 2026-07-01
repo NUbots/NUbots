@@ -1,16 +1,14 @@
+import { Test } from "@proto/message/network/Test";
 import { NUClearNetSend } from "nuclearnet.js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { FakeNUClearNetClient } from "../../../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../../../server/nuclearnet/fake_nuclearnet_server";
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
-import { message } from "../../../shared/messages";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { AppModel } from "../../components/app/model";
 import { NbsScrubbersModel } from "../../components/nbs_scrubbers/model";
 import { NUsightNetwork } from "../nusight_network";
-
-import Test = message.network.Test;
 
 describe("NUsightNetwork", () => {
   let nuclearnetClient: ReturnType<typeof createMockNUClearNetClient>["nuclearnetClient"];
@@ -25,10 +23,10 @@ describe("NUsightNetwork", () => {
   });
 
   it("send() forwards the given packet to NUClearNet", () => {
-    const payload = Test.encode({ message: "hello world" }).finish();
+    const payload = new Test({ message: "hello world" }).toBinary();
     const packet: NUClearNetSend = {
       type: "message.network.Test",
-      payload: payload as Buffer,
+      payload: payload as unknown as Buffer,
       reliable: true,
       target: "nusight",
     };
@@ -40,12 +38,12 @@ describe("NUsightNetwork", () => {
 
   it("emit() creates a packet for the given message and forwards it to NUClearNet", () => {
     const data = { message: "hello world" };
-    const expectedPayload = Test.encode(data).finish();
+    const expectedPayload = new Test(data).toBinary();
 
     nusightNetwork.emit(new Test(data));
     expect(nuclearnetClient.send).toHaveBeenCalledWith({
       type: "message.network.Test",
-      payload: expectedPayload as Buffer,
+      payload: expectedPayload,
       reliable: false,
       target: undefined,
     });
@@ -53,7 +51,7 @@ describe("NUsightNetwork", () => {
     nusightNetwork.emit(new Test(data), { reliable: true, target: "nusight" });
     expect(nuclearnetClient.send).toHaveBeenCalledWith({
       type: "message.network.Test",
-      payload: expectedPayload as Buffer,
+      payload: expectedPayload,
       reliable: true,
       target: "nusight",
     });

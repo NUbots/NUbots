@@ -1,15 +1,12 @@
+import { FilesRequestTypeEnum } from "@proto/message/eye/File";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-import { message } from "../../shared/messages";
-
-import FilesRequestType = message.eye.FilesRequestType;
-
-const RequestTypeToEntryNameFilter: Record<FilesRequestType, (entryName: string) => boolean> = {
-  [FilesRequestType.UNKNOWN]: () => false,
-  [FilesRequestType.DIRECTORY]: () => false,
-  [FilesRequestType.NBS]: (entryName) => /\.nbs$/i.test(entryName),
+const RequestTypeToEntryNameFilter: Record<FilesRequestTypeEnum, (entryName: string) => boolean> = {
+  [FilesRequestTypeEnum.UNKNOWN]: () => false,
+  [FilesRequestTypeEnum.DIRECTORY]: () => false,
+  [FilesRequestTypeEnum.NBS]: (entryName) => /\.nbs$/i.test(entryName),
 };
 
 export interface FileEntry {
@@ -21,7 +18,7 @@ export interface FileEntry {
 }
 
 /** Get a list of matching files and folders in the given directory */
-export async function listFiles(rawDirectory: string, type: FilesRequestType) {
+export async function listFiles(rawDirectory: string, type: FilesRequestTypeEnum) {
   if (rawDirectory.trim().length === 0) {
     throw new Error("Cannot list files for blank path");
   }
