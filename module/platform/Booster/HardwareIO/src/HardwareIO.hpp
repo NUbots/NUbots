@@ -40,6 +40,10 @@ namespace module::platform::Booster {
         /// cancel the deferred switch if another mode is requested in the meantime.
         bool prep_pending = false;
 
+        /// @brief The robot's last known motion mode, refreshed whenever we poll the SDK. Used to drop
+        /// movement/look commands while the robot is in prep mode (where it must not move).
+        booster::robot::RobotMode current_mode = booster::robot::RobotMode::kUnknown;
+
         struct Buttons {
             bool left   = false;
             bool middle = false;

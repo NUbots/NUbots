@@ -88,9 +88,8 @@ namespace module::platform::Booster {
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
-            // While waiting to settle before switching to prep mode, ignore walk commands so the
-            // robot isn't told to move again before it has stopped.
-            if (prep_pending) {
+            // The robot must not move in prep mode, so drop walk commands while in (or entering) prep.
+            if (current_mode == RobotMode::kPrepare || prep_pending) {
                 return;
             }
             if (move.velocity.isApprox(last_walk_velocity)) {
@@ -106,6 +105,12 @@ namespace module::platform::Booster {
         });
 
         on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
+            // The robot must not move in prep mode, so drop head/look commands while in (or entering)
+            // prep.
+            if (current_mode == RobotMode::kPrepare || prep_pending) {
+                return;
+            }
+
             // Clamp to the Booster SDK RotateHead limits (radians):
             //   pitch: downward positive, range [-0.3, 1.0]
             //   yaw:   leftward positive, range [-0.785, 0.785]
@@ -163,9 +168,28 @@ namespace module::platform::Booster {
         });
 
         on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode_msg) {
+            RobotMode robot_mode;
+            switch (static_cast<int>(mode_msg.mode)) {
+                case K1Mode::DAMP: robot_mode = RobotMode::kDamping; break;
+                case K1Mode::PREP: robot_mode = RobotMode::kPrepare; break;
+                case K1Mode::WALK: robot_mode = RobotMode::kWalking; break;
+                case K1Mode::CUSTOM: robot_mode = RobotMode::kCustom; break;
+                case K1Mode::SOCCER: robot_mode = RobotMode::kSoccer; break;
+                default: robot_mode = RobotMode::kSoccer; break;
+            }
+
+            // Skip if the robot is already in the requested mode (avoids re-commanding and the
+            // unnecessary stop-then-prep sequence when we're already in prep).
+            GetModeResponse current_mode{};
+            if (booster_client.GetMode(current_mode) == 0 && current_mode.mode_ == robot_mode) {
+                log<DEBUG>("Booster is already in the requested mode, ignoring request");
+                prep_pending = false;
+                return;
+            }
+
             // Switching into prep mid-stride makes the robot fall, so first command the gait to stop
             // and only switch to prep once it has had time to come to a complete stop.
-            if (static_cast<int>(mode_msg.mode) == K1Mode::PREP) {
+            if (robot_mode == RobotMode::kPrepare) {
                 log<DEBUG>("Stopping the gait before switching to prep mode");
                 if (int32_t res = booster_client.Move(0.0, 0.0, 0.0); res != 0) {
                     log<ERROR>("Failed to stop before prep: " + res_code_to_string(res));
@@ -178,15 +202,6 @@ namespace module::platform::Booster {
 
             // Any other mode request cancels a pending prep switch
             prep_pending = false;
-
-            RobotMode robot_mode;
-            switch (static_cast<int>(mode_msg.mode)) {
-                case K1Mode::DAMP: robot_mode = RobotMode::kDamping; break;
-                case K1Mode::WALK: robot_mode = RobotMode::kWalking; break;
-                case K1Mode::CUSTOM: robot_mode = RobotMode::kCustom; break;
-                case K1Mode::SOCCER: robot_mode = RobotMode::kSoccer; break;
-                default: robot_mode = RobotMode::kSoccer; break;
-            }
             change_mode(robot_mode);
         });
 
@@ -222,6 +237,9 @@ namespace module::platform::Booster {
             log<WARN>("Failed to get current mode: " + res_code_to_string(res));
             return;
         }
+
+        // Cache the mode so movement/look commands can be gated without a per-command SDK round-trip
+        current_mode = mode_response.mode_;
 
         auto state = std::make_unique<BoosterModeState>();
         switch (mode_response.mode_) {
