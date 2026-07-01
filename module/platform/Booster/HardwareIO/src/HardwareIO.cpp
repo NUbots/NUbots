@@ -24,6 +24,7 @@ namespace module::platform::Booster {
     using message::booster::FallDownStateType;
     using message::booster::K1Mode;
     using message::booster::VisualKickVer;
+    using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
 
     static void fill_servo(RawSensors::Servo& servo, const booster_interface::msg::MotorState& motor) {
@@ -47,6 +48,10 @@ namespace module::platform::Booster {
 
             booster_client.Init();
             booster_client.ChangeMode(RobotMode::kSoccer);
+
+            if (int32_t res = booster_client.ResetOdometry(); res != 0) {
+                log<ERROR>("Failed to reset odometry on startup: " + res_code_to_string(res));
+            }
 
             low_state_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::LowState>(
                 "rt/low_state",
@@ -132,6 +137,13 @@ namespace module::platform::Booster {
             int32_t res = booster_client.GetUpWithMode(RobotMode::kSoccer);
             if (res != 0) {
                 log<ERROR>("Failed to get up: " + res_code_to_string(res));
+            }
+        });
+
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            int32_t res = booster_client.ResetOdometry();
+            if (res != 0) {
+                log<ERROR>("Failed to reset odometry: " + res_code_to_string(res));
             }
         });
 
