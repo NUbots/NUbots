@@ -21,6 +21,7 @@
 #include "message/booster/BoosterOdometry.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/booster/BoosterWalk.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
 
