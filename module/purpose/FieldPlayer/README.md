@@ -14,6 +14,8 @@ The closest robot to our own goal that isn't an Attack player will Defend. Any o
 
 If it's the other team's kick off and the kick off time isn't up and ball hasn't moved enough yet, the robot will wait.
 
+During an opponent's set play (free kick, corner kick, etc.), the robot will back away to maintain the HSL-mandated distance from the ball if too close, otherwise it will Defend (if furthest back) or Support.
+
 In penalty positioning, the player will ReadyAttack. This will position the robot either offensively or defensively, ready for when play resumes.
 
 ## Usage
@@ -41,6 +43,7 @@ Use this module by including it in the role and emitting a `message::purpose::Fi
 - `message::strategy::Defend` tells the robot to hang back near the goals to defend.
 - `message::strategy::Support` tells the robot it's not the attacking or defending player, it should instead act as support.
 - `message::strategy::WalkToFieldPosition` task to walk to the calculated ready position.
+- `message::strategy::MaintainBallDistance` tells the robot to back away to a safe distance from the ball during an opponent's set play.
 
 ## Dependencies
 

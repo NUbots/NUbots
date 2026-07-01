@@ -48,6 +48,9 @@ namespace module::purpose {
             double center_circle_offset = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
+            /// @brief Extra margin added to the HSL ball avoidance radius during an opponent's set play,
+            /// to compensate for localisation/sensor data being slightly stale between behaviour ticks
+            double ball_avoidance_margin = 0.0;
             /// @brief Whether to search around the field if the robot's localisation cost is high
             bool search_when_lost = false;
         } cfg;

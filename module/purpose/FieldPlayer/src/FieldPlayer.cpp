@@ -85,6 +85,7 @@ namespace module::purpose {
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
             cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
             cfg.search_when_lost          = config["search_when_lost"].as<bool>();
+            cfg.ball_avoidance_margin     = config["ball_avoidance_margin"].as<double>();
         });
 
         // PLAYING state
@@ -210,17 +211,18 @@ namespace module::purpose {
                 // If it's the opponent's set play, position defensively
                 if (set_play && !game_state.our_kick_off) {
                     // Avoidance distance is the center circle radius, per the HSL rules
-                    const double ball_avoidance_distance = fd.dimensions.center_circle_diameter / 2.0;
+                    // Plus a margin for data being slightly stale between behaviour ticks
+                    const double ball_avoidance_distance =
+                        fd.dimensions.center_circle_diameter / 2.0 + cfg.ball_avoidance_margin;
 
                     // If already far enough, let the other tasks drive
                     const Eigen::Vector3d rRFf = (field->Hfw * sensors.Hrw.inverse()).translation();
                     const double ball_distance  = (rRFf - rBFf).head<2>().norm();
                     if (ball_distance < ball_avoidance_distance) {
-                        log<DEBUG>("Opponent set play, too close to ball ({} m), backing away.", ball_distance);
+                        log<DEBUG>("Opponent set play, too close to ball, backing away.");
                         emit<Task>(std::make_unique<MaintainBallDistance>(ball_avoidance_distance));
-                        return;
                     }
-                    if (furthest_back) {
+                    else if (furthest_back) {
                         log<DEBUG>("Opponent set play, defending.");
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::DEFEND,
