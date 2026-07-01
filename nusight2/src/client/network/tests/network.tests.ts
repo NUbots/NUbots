@@ -1,13 +1,11 @@
+import { Sensors } from "@proto/message/input/Sensors";
+import { Test } from "@proto/message/network/Test";
 import { NUClearNetSend } from "nuclearnet.js";
 import { describe, expect, it, vi } from "vitest";
 
 import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
-import { message } from "../../../shared/messages";
 import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
-
-import Sensors = message.input.Sensors;
-import Test = message.network.Test;
 
 describe("Network", () => {
   it("off() unregisters all callbacks", () => {
@@ -38,7 +36,7 @@ describe("Network", () => {
     const nusightNetwork = createMockInstance(NUsightNetwork);
     const network = new Network(nusightNetwork);
 
-    const payload = Test.encode({ message: "hello world" }).finish();
+    const payload = new Test({ message: "hello world" }).toBinary();
     const packet: NUClearNetSend = {
       type: "message.network.Test",
       payload: payload as Buffer,
@@ -60,9 +58,9 @@ describe("Network", () => {
     const data = { message: "hello world" };
 
     network.emit(new Test(data));
-    expect(nusightNetwork.emit).toHaveBeenCalledWith(data, undefined);
+    expect(nusightNetwork.emit).toHaveBeenCalledWith(new Test(data), undefined);
 
     network.emit(new Test(data), { reliable: true });
-    expect(nusightNetwork.emit).toHaveBeenCalledWith(data, { reliable: true });
+    expect(nusightNetwork.emit).toHaveBeenCalledWith(new Test(data), { reliable: true });
   });
 });

@@ -1,15 +1,13 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { describe, expect, it, vi } from "vitest";
 
-import { message } from "../../../shared/messages";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
+import { DataPoint } from "../../../shared/proto/message/eye/DataPoint";
+import { Test } from "../../../shared/proto/message/network/Test";
 import { FakeClock } from "../../../shared/time/fake_clock";
 import { NodeSystemClock } from "../../time/node_clock";
 import { LruPriorityQueue } from "../lru_priority_queue";
 import { NUClearNetPacketProcessor } from "../packet_processor";
-
-const DataPoint = message.eye.DataPoint;
-const Test = message.network.Test;
 
 function makePacket(typeName: string, opts: { payload: Uint8Array; reliable?: boolean }): NUClearNetPacket {
   return {
@@ -29,7 +27,7 @@ type SendArgs = [event: string, packet: NUClearNetPacket, ack: () => void | unde
 describe("NUClearNetPacketProcessor", () => {
   it("sends reliable packets through immediately without queuing or dropping when queue capacity is exceeded", () => {
     const typeName = "message.network.Test";
-    const payload = Test.encode({ message: "Test" }).finish();
+    const payload = new Test({ message: "Test" }).toBinary();
     const packet = makePacket(typeName, { payload, reliable: true });
 
     const send = vi.fn();
@@ -58,11 +56,11 @@ describe("NUClearNetPacketProcessor", () => {
   it("sends unreliable packets immediately through the queue if the outgoing packet limit is not yet exceeded", () => {
     const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet A" }).finish(),
+      payload: new Test({ message: "Packet A" }).toBinary(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet B" }).finish(),
+      payload: new Test({ message: "Packet B" }).toBinary(),
       reliable: false,
     });
 
@@ -94,15 +92,15 @@ describe("NUClearNetPacketProcessor", () => {
   it("queues unreliable packets and waits for ack before sending more if the outgoing packet limit is exceeded", () => {
     const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet A" }).finish(),
+      payload: new Test({ message: "Packet A" }).toBinary(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet B" }).finish(),
+      payload: new Test({ message: "Packet B" }).toBinary(),
       reliable: false,
     });
     const packetC = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet C" }).finish(),
+      payload: new Test({ message: "Packet C" }).toBinary(),
       reliable: false,
     });
 
@@ -142,15 +140,15 @@ describe("NUClearNetPacketProcessor", () => {
   it("gives up on waiting for ack after the configured timeout", () => {
     const typeName = "message.network.Test";
     const packetA = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet A" }).finish(),
+      payload: new Test({ message: "Packet A" }).toBinary(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet B" }).finish(),
+      payload: new Test({ message: "Packet B" }).toBinary(),
       reliable: false,
     });
     const packetC = makePacket(typeName, {
-      payload: Test.encode({ message: "Packet C" }).finish(),
+      payload: new Test({ message: "Packet C" }).toBinary(),
       reliable: false,
     });
 
@@ -189,28 +187,28 @@ describe("NUClearNetPacketProcessor", () => {
     const testType = "message.network.Test";
 
     const dataPointA = makePacket(dataPointType, {
-      payload: DataPoint.encode({ label: "DataPoint A" }).finish(),
+      payload: new DataPoint({ label: "DataPoint A" }).toBinary(),
       reliable: false,
     });
     const dataPointB = makePacket(dataPointType, {
-      payload: DataPoint.encode({ label: "DataPoint B" }).finish(),
+      payload: new DataPoint({ label: "DataPoint B" }).toBinary(),
       reliable: false,
     });
     const dataPointC = makePacket(dataPointType, {
-      payload: DataPoint.encode({ label: "DataPoint C" }).finish(),
+      payload: new DataPoint({ label: "DataPoint C" }).toBinary(),
       reliable: false,
     });
     const dataPointD = makePacket(dataPointType, {
-      payload: DataPoint.encode({ label: "DataPoint D" }).finish(),
+      payload: new DataPoint({ label: "DataPoint D" }).toBinary(),
       reliable: false,
     });
 
     const testA = makePacket(testType, {
-      payload: Test.encode({ message: "Test A" }).finish(),
+      payload: new Test({ message: "Test A" }).toBinary(),
       reliable: false,
     });
     const testB = makePacket(testType, {
-      payload: Test.encode({ message: "Test B" }).finish(),
+      payload: new Test({ message: "Test B" }).toBinary(),
       reliable: false,
     });
 

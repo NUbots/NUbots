@@ -52,7 +52,6 @@ namespace module::purpose {
 
     using FieldPlayerMsg = message::purpose::FieldPlayer;
     using Phase          = message::input::GameState::Phase;
-    using SubMode        = message::input::GameState::SubMode;
 
     using message::input::GameState;
     using message::input::Sensors;
@@ -67,7 +66,6 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -104,17 +102,20 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
-                // Determine if the game is in a penalty situation
-                // Do this first to ensure the robot freezes if necessary
-                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+                // If play is stopped, do nothing
+                if (game_state.stopped) {
+                    log<DEBUG>("Play is stopped, do nothing.");
+                    return;
+                }
 
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty
-                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
-                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
-                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
+                // Determine if the game is in a set play situation
+                bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                                && game_state.mode.value <= GameState::Mode::THROW_IN;
+
+                // If it's the opponent's set play, freeze until the ball is free
+                // Ball is free when secondary_time expires or the ball has moved
+                if (set_play && !game_state.our_kick_off) {
+                    log<DEBUG>("Opponent set play, waiting for ball to be free.");
                     return;
                 }
 
@@ -198,9 +199,9 @@ namespace module::purpose {
                 bool ball_moved   = (field->Hfw * ball->rBWw).norm() > cfg.ball_off_center_threshold;
                 bool kickoff_wait = !ball_moved && !game_state.our_kick_off
                                     && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
-                // At this point, if a penalty state is in progress, it must be in sub_mode 1,
-                // which is the setup phase where the robot can position to defend or attack.
-                bool allowed_to_attack = !(kickoff_wait || penalty);
+
+                // Only wait if the opponent hasn't kicked off yet
+                bool allowed_to_attack = !kickoff_wait;
 
                 // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
                 // penalty set up phase.
