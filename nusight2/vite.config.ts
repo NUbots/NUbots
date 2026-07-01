@@ -1,4 +1,6 @@
 /* eslint-env node */
+import { fileURLToPath } from "node:url";
+
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
@@ -36,6 +38,10 @@ export default defineConfig({
       // that require geotiff, so we can safely mark these as external for
       // rollup to avoid bundling them.
       external: ["geotiff", "geotiff/src/compression", "fs", "http", "https", "url"],
+      input: {
+        main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        standalone: fileURLToPath(new URL("./standalone.html", import.meta.url)),
+      },
     },
   },
   test: {
