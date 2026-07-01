@@ -534,6 +534,15 @@ namespace module::input {
                     auto end_half  = NUClear::clock::now() + std::chrono::seconds(new_packet.secs_remaining);
                     auto ball_free = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
 
+                    // technically, the game phase being set to PLAYING is done by the whistle detector, but this is a
+                    // backup for when it doesn't detect properly.
+
+                    // if the game state is already PLAYING, don't emit a new PLAYING event.
+
+                    if (state->phase == GameState::Phase::Value::PLAYING) {
+                        break;
+                    }
+
                     state->primary_time   = end_half;
                     state->secondary_time = ball_free;
                     state->phase          = GameState::Phase::Value::PLAYING;
