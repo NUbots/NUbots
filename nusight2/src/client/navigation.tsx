@@ -9,13 +9,21 @@ export type Route = {
 
 export class NavigationConfiguration {
   private routes: Route[] = [];
+  private basePath: string;
 
-  static of() {
-    return new NavigationConfiguration();
+  constructor(basePath: string = "") {
+    // Remove any trailing / from the base path
+    this.basePath = basePath.replace(/\/$/, "");
+  }
+
+  static of(basePath: string = "") {
+    return new NavigationConfiguration(basePath);
   }
 
   addRoute(route: Route) {
-    this.routes.push(route);
+    // Trim any leading / from the route path, then prefix with the base path
+    const routePath = route.path.replace(/^\//, "");
+    this.routes.push({ ...route, path: `${this.basePath}/${routePath}` });
   }
 
   getRoutes() {
