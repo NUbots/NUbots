@@ -152,3 +152,41 @@ message ScrubberClosed {
     /// The ID of the scrubber that was closed
     uint32 id = 1;
 }
+
+message ScrubberIndex {
+    message TypeIndex {
+        /// Hash of the message type
+        string type_hash = 1;
+        /// Name of the message type
+        string type_name = 2;
+        /// Subtype of the message
+        uint32 subtype = 3;
+        /// Timestamps of this (type, subtype) pair in the scrubber's file(s)
+        repeated google.protobuf.Timestamp timestamps = 4;
+    }
+
+    /// Id of the scrubber this index belongs to
+    uint32 id = 1;
+    /// Index for each (type, subtype) pair in the message
+    repeated TypeIndex indices = 2;
+}
+
+message ScrubberPacketRequest {
+    message Response {
+        /// Metadata for the RPC response
+        RpcResponseMeta rpc = 1;
+        /// Payload of the message matching the request
+        bytes data = 2;
+    }
+
+    /// Metadata for the RPC request
+    RpcRequestMeta rpc = 1;
+    /// ID of the scrubber
+    uint32 id = 2;
+    /// Type hash of the message
+    string type_hash = 3;
+    /// Subtype of the message
+    uint32 subtype = 4;
+    /// Offset of the requested packet
+    uint32 offset = 5;
+}

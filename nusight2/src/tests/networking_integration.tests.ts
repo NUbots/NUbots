@@ -1,3 +1,6 @@
+import { Sensors } from "@proto/message/input/Sensors";
+import { CompressedImage } from "@proto/message/output/CompressedImage";
+import { Overview } from "@proto/message/support/nusight/Overview";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AppModel } from "../client/components/app/model";
@@ -6,11 +9,6 @@ import { Network } from "../client/network/network";
 import { NUsightNetwork } from "../client/network/nusight_network";
 import { FakeNUClearNetClient } from "../server/nuclearnet/fake_nuclearnet_client";
 import { FakeNUClearNetServer } from "../server/nuclearnet/fake_nuclearnet_server";
-import { message } from "../shared/messages";
-import Sensors = message.input.Sensors;
-
-import CompressedImage = message.output.CompressedImage;
-import Overview = message.support.nusight.Overview;
 
 describe("Networking Integration", () => {
   let nuclearnetServer: FakeNUClearNetServer;
