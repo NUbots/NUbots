@@ -3,12 +3,3 @@ log_level: INFO
 
 equidistant_threshold: 0.4
 ball_threshold: 0.5
-
-# Distance in front of the goal line the goalie waits at by default
-waiting_distance_from_line: 0.2
-
-# Minimum distance to keep from the goal posts while strafing along the goal line
-goal_post_clearance: 0.35
-
-# How far forward of the goal line the goalie bows at the widest point of its strafe
-strafe_curve_depth: 0.15

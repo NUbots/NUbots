@@ -43,12 +43,6 @@ namespace module::purpose {
             double equidistant_threshold = 0.0;
             /// @brief The distance from the ball to consider it in possession
             double ball_threshold = 0.0;
-            /// @brief The distance in front of the goal line the goalie waits at by default
-            double waiting_distance_from_line = 0.0;
-            /// @brief The minimum distance to keep from the goal posts while strafing along the goal line
-            double goal_post_clearance = 0.0;
-            /// @brief How far forward of the goal line the goalie bows at the widest point of its strafe
-            double strafe_curve_depth = 0.0;
         } cfg;
 
     public:

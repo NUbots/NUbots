@@ -6,7 +6,7 @@ Play soccer in the goalie position.
 
 In the ready state, walks to the goals.
 
-In the playing state, the goalie will typically stay within the goals unless the ball enters our half. In this case, it will either kick it back out (if the closest player) or it will stay between the ball and goals if another player is closer. In penalty states, it will freeze when appropriate and position for attacking if the ball is in our half and it is the closest to the ball.
+In the playing state, the goalie will typically stay within the goals unless the ball enters the defending third. In this case, it will either kick it back out (if the closest player) or it will stay between the ball and goals if another player is closer. In penalty states, it will freeze when appropriate and position for attacking if the ball is in the defending third and it is the closest to the ball.
 
 If there are no teammates, it will act as a normal FieldPlayer.
 
@@ -21,7 +21,7 @@ Add this module to the role and emit a Goalie Task.
 - `message::strategy::Goalie` a Task requesting to play as a Goalie
 - `message::input::GameState` to get information about the state of the game, including penalties
 - `message::input::GameState::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
-- `message::localisation::Ball` for determining if the ball is in our half, and act appropriately.
+- `message::localisation::Ball` for determining if the ball is in the defending third, and act appropriately.
 - `message::localisation::Robots` to determine where team mates are.
 - `message::input::Sensors` to include ourself in possession and distance calculations
 - `message::localisation::Field` to calculate in field space.
