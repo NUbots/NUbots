@@ -2,6 +2,7 @@ import {
   ScrubberClosed,
   ScrubberCloseRequest,
   ScrubberLoadRequest,
+  ScrubberPacketRequest,
   ScrubberPauseRequest,
   ScrubberPlayRequest,
   ScrubberSeekRequest,
@@ -28,6 +29,7 @@ export class NbsScrubberNetwork {
       network.onClientRpc(ScrubberSetPlaybackSpeedRequest, this.onSetPlaybackSpeed),
       network.onClientRpc(ScrubberSetRepeatRequest, this.onSetRepeat),
       network.onClientRpc(ScrubberSeekRequest, this.onSeek),
+      network.onClientRpc(ScrubberPacketRequest, this.onPacketRequest),
     ]);
   }
 
@@ -99,6 +101,21 @@ export class NbsScrubberNetwork {
     });
 
     return new ScrubberSeekRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
+  };
+
+  /** Handle a request from the client for an individual packet */
+  private onPacketRequest = (request: ScrubberPacketRequest) => {
+    const typeSubtype = {
+      type: Buffer.from(request.typeHash, "hex"),
+      subtype: request.subtype,
+    };
+
+    const data = this.session.scrubberSet.getPacketBytes(request.id, typeSubtype, request.offset);
+
+    return new ScrubberPacketRequest.Response({
+      rpc: { ok: true, token: request.rpc?.token },
+      data,
+    });
   };
 
   /** Handle a request from the client to close a scrubber */
