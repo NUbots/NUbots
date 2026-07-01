@@ -66,6 +66,7 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
+    using message::strategy::LookForStaleFeatures;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -142,6 +143,8 @@ namespace module::purpose {
 
                 // General tasks
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
+                // Keep stale-feature recovery low priority so it can look around without overriding scoring behaviour.
+                emit<Task>(std::make_unique<LookForStaleFeatures>(), 0);
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
