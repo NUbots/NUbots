@@ -1,15 +1,18 @@
-import { compose } from "../../shared/base/compose";
-import { message } from "../../shared/messages";
-import { NUsightSession } from "../session/session";
+import {
+  ScrubberClosed,
+  ScrubberCloseRequest,
+  ScrubberLoadRequest,
+  ScrubberPacketRequest,
+  ScrubberPauseRequest,
+  ScrubberPlayRequest,
+  ScrubberSeekRequest,
+  ScrubberSetPlaybackSpeedRequest,
+  ScrubberSetRepeatRequest,
+} from "@proto/message/eye/Scrubber";
 
-import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
-import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
-import ScrubberPlayRequest = message.eye.ScrubberPlayRequest;
-import ScrubberPauseRequest = message.eye.ScrubberPauseRequest;
-import ScrubberSetPlaybackSpeedRequest = message.eye.ScrubberSetPlaybackSpeedRequest;
-import ScrubberSetRepeatRequest = message.eye.ScrubberSetRepeatRequest;
-import ScrubberSeekRequest = message.eye.ScrubberSeekRequest;
-import ScrubberClosed = message.eye.ScrubberClosed;
+import { compose } from "../../shared/base/compose";
+import { Timestamp } from "../../shared/time/timestamp";
+import { NUsightSession } from "../session/session";
 
 /** Handles server-side networking for the NBS scrubber by responding to RPC calls from the scrubber client */
 export class NbsScrubberNetwork {
@@ -26,6 +29,7 @@ export class NbsScrubberNetwork {
       network.onClientRpc(ScrubberSetPlaybackSpeedRequest, this.onSetPlaybackSpeed),
       network.onClientRpc(ScrubberSetRepeatRequest, this.onSetRepeat),
       network.onClientRpc(ScrubberSeekRequest, this.onSeek),
+      network.onClientRpc(ScrubberPacketRequest, this.onPacketRequest),
     ]);
   }
 
@@ -93,13 +97,25 @@ export class NbsScrubberNetwork {
     this.session.scrubberSet.update({
       type: "seek",
       id: request.id,
-      timestamp: {
-        seconds: request.timestamp!.seconds!,
-        nanos: request.timestamp!.nanos!,
-      },
+      timestamp: new Timestamp(request.timestamp!),
     });
 
     return new ScrubberSeekRequest.Response({ rpc: { ok: true, token: request.rpc?.token } });
+  };
+
+  /** Handle a request from the client for an individual packet */
+  private onPacketRequest = (request: ScrubberPacketRequest) => {
+    const typeSubtype = {
+      type: Buffer.from(request.typeHash, "hex"),
+      subtype: request.subtype,
+    };
+
+    const data = this.session.scrubberSet.getPacketBytes(request.id, typeSubtype, request.offset);
+
+    return new ScrubberPacketRequest.Response({
+      rpc: { ok: true, token: request.rpc?.token },
+      data,
+    });
   };
 
   /** Handle a request from the client to close a scrubber */
