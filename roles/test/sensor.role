@@ -13,6 +13,7 @@ nuclear_role(
   output::Overview
   # Sensors
   input::SensorFilter
+  input::WhistleDetection
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
 )
