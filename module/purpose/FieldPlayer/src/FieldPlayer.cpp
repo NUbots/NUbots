@@ -111,9 +111,11 @@ namespace module::purpose {
                     return;
                 }
 
-                // Determine if the game is in a set play situation
-                bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                                && game_state.mode.value <= GameState::Mode::THROW_IN;
+                // Determine if the game is in a set play situation where the avoidance distance is a radius from the ball.
+                bool set_play = game_state.mode.value == GameState::Mode::DIRECT_FREEKICK
+                                || game_state.mode.value == GameState::Mode::INDIRECT_FREEKICK
+                                || game_state.mode.value == GameState::Mode::CORNER_KICK
+                                || game_state.mode.value == GameState::Mode::THROW_IN;
 
                 // Search if no ball or field
                 if (!field || !ball) {

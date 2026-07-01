@@ -14,7 +14,7 @@ The closest robot to our own goal that isn't an Attack player will Defend. Any o
 
 If it's the other team's kick off and the kick off time isn't up and ball hasn't moved enough yet, the robot will wait.
 
-During an opponent's set play (free kick, corner kick, etc.), the robot will back away to maintain the HSL-mandated distance from the ball if too close, otherwise it will Defend (if furthest back) or Support.
+During an opponent's direct free kick, indirect free kick, corner kick, or throw-in, the robot will back away to maintain the HSL-mandated center-circle-radius distance from the ball if too close, otherwise it will Defend (if furthest back) or Support. A margin is added to this distance to account for data being slightly stale between behaviour ticks.
 
 In penalty positioning, the player will ReadyAttack. This will position the robot either offensively or defensively, ready for when play resumes.
 
