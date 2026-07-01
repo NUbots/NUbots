@@ -29,6 +29,9 @@ namespace module::platform::Booster {
     using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
 
+    /// Internal event used to switch into prep mode once the gait has had time to stop.
+    struct EnterPrep {};
+
     static void fill_servo(RawSensors::Servo& servo, const booster_interface::msg::MotorState& motor) {
         servo.present_position = motor.q();
         servo.present_velocity = motor.dq();
@@ -42,6 +45,9 @@ namespace module::platform::Booster {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.prep_settle_time =
+                std::chrono::duration_cast<NUClear::clock::duration>(
+                    std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
         });
 
         on<Startup>().then([this]() {
@@ -82,6 +88,11 @@ namespace module::platform::Booster {
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
+            // While waiting to settle before switching to prep mode, ignore walk commands so the
+            // robot isn't told to move again before it has stopped.
+            if (prep_pending) {
+                return;
+            }
             if (move.velocity.isApprox(last_walk_velocity)) {
                 return;
             }
@@ -152,28 +163,56 @@ namespace module::platform::Booster {
         });
 
         on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode_msg) {
+            // Switching into prep mid-stride makes the robot fall, so first command the gait to stop
+            // and only switch to prep once it has had time to come to a complete stop.
+            if (static_cast<int>(mode_msg.mode) == K1Mode::PREP) {
+                log<DEBUG>("Stopping the gait before switching to prep mode");
+                if (int32_t res = booster_client.Move(0.0, 0.0, 0.0); res != 0) {
+                    log<ERROR>("Failed to stop before prep: " + res_code_to_string(res));
+                }
+                last_walk_velocity = Eigen::Vector3d::Zero();
+                prep_pending       = true;
+                emit<Scope::DELAY>(std::make_unique<EnterPrep>(), cfg.prep_settle_time);
+                return;
+            }
+
+            // Any other mode request cancels a pending prep switch
+            prep_pending = false;
+
             RobotMode robot_mode;
             switch (static_cast<int>(mode_msg.mode)) {
                 case K1Mode::DAMP: robot_mode = RobotMode::kDamping; break;
-                case K1Mode::PREP: robot_mode = RobotMode::kPrepare; break;
                 case K1Mode::WALK: robot_mode = RobotMode::kWalking; break;
                 case K1Mode::CUSTOM: robot_mode = RobotMode::kCustom; break;
                 case K1Mode::SOCCER: robot_mode = RobotMode::kSoccer; break;
                 default: robot_mode = RobotMode::kSoccer; break;
             }
-            int32_t res = booster_client.ChangeMode(robot_mode);
-            if (res != 0) {
-                log<ERROR>("Failed to change mode: " + res_code_to_string(res));
+            change_mode(robot_mode);
+        });
+
+        on<Trigger<EnterPrep>>().then([this] {
+            // The switch may have been cancelled by another mode request while the gait was stopping
+            if (!prep_pending) {
                 return;
             }
-            // Publish the mode the robot is now in so other modules can query the current mode
-            publish_current_mode();
+            prep_pending = false;
+            change_mode(RobotMode::kPrepare);
         });
 
         // Periodically poll the robot for its actual motion mode so the published BoosterModeState
         // stays correct even if the mode changes outside of a BoosterMode command (or a change is
         // still in progress).
         on<Every<2, Per<std::chrono::seconds>>>().then([this] { publish_current_mode(); });
+    }
+
+    void HardwareIO::change_mode(RobotMode robot_mode) {
+        int32_t res = booster_client.ChangeMode(robot_mode);
+        if (res != 0) {
+            log<ERROR>("Failed to change mode: " + res_code_to_string(res));
+            return;
+        }
+        // Publish the mode the robot is now in so other modules can query the current mode
+        publish_current_mode();
     }
 
     void HardwareIO::publish_current_mode() {

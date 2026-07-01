@@ -1,2 +1,6 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Time in seconds to wait after commanding the gait to stop before switching into prep mode, so the
+# robot comes to a complete stop and does not fall from switching mid-stride
+prep_settle_time: 1.0
