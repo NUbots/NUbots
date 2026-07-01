@@ -18,6 +18,7 @@
 #include "message/booster/BoosterGetUp.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
 #include "message/booster/BoosterMode.hpp"
+#include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/booster/BoosterWalk.hpp"
@@ -55,6 +56,10 @@ namespace module::platform::Booster {
         void battery_handler(const void* msg);
         void button_event_handler(const void* msg);
         void odometer_handler(const void* msg);
+
+        /// Query the robot's current motion mode from the SDK and publish it as a BoosterModeState so
+        /// other modules can read the actual mode the robot is in.
+        void publish_current_mode();
 
         static std::string res_code_to_string(int32_t res_code) {
             std::string out;

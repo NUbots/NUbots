@@ -11,6 +11,7 @@
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
+    using booster::robot::b1::GetModeResponse;
     using booster::robot::b1::JointIndexK1;
     using extension::Configuration;
     using extension::behaviour::RunReason;
@@ -18,6 +19,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
+    using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
@@ -47,7 +49,9 @@ namespace module::platform::Booster {
             ChannelFactory::Instance()->Init(0);
 
             booster_client.Init();
-            booster_client.ChangeMode(RobotMode::kSoccer);
+            booster_client.ChangeMode(RobotMode::kPrepare);
+            // Publish the initial mode so other modules can query it before the first poll
+            publish_current_mode();
 
             if (int32_t res = booster_client.ResetOdometry(); res != 0) {
                 log<ERROR>("Failed to reset odometry on startup: " + res_code_to_string(res));
@@ -160,8 +164,36 @@ namespace module::platform::Booster {
             int32_t res = booster_client.ChangeMode(robot_mode);
             if (res != 0) {
                 log<ERROR>("Failed to change mode: " + res_code_to_string(res));
+                return;
             }
+            // Publish the mode the robot is now in so other modules can query the current mode
+            publish_current_mode();
         });
+
+        // Periodically poll the robot for its actual motion mode so the published BoosterModeState
+        // stays correct even if the mode changes outside of a BoosterMode command (or a change is
+        // still in progress).
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] { publish_current_mode(); });
+    }
+
+    void HardwareIO::publish_current_mode() {
+        GetModeResponse mode_response{};
+        int32_t res = booster_client.GetMode(mode_response);
+        if (res != 0) {
+            log<WARN>("Failed to get current mode: " + res_code_to_string(res));
+            return;
+        }
+
+        auto state = std::make_unique<BoosterModeState>();
+        switch (mode_response.mode_) {
+            case RobotMode::kDamping: state->mode = K1Mode::DAMP; break;
+            case RobotMode::kPrepare: state->mode = K1Mode::PREP; break;
+            case RobotMode::kWalking: state->mode = K1Mode::WALK; break;
+            case RobotMode::kCustom: state->mode = K1Mode::CUSTOM; break;
+            case RobotMode::kSoccer: state->mode = K1Mode::SOCCER; break;
+            default: log<WARN>("Booster reported an unknown motion mode"); return;
+        }
+        emit(std::move(state));
     }
 
     void HardwareIO::low_state_handler(const void* msg) {
@@ -191,29 +223,29 @@ namespace module::platform::Booster {
             }
         };
 
-        fill_serial(sensors->servo.head_pan,          JointIndexK1::kHeadYaw);
-        fill_serial(sensors->servo.head_tilt,         JointIndexK1::kHeadPitch);
-        fill_serial(sensors->servo.l_shoulder_pitch,  JointIndexK1::kLeftShoulderPitch);
-        fill_serial(sensors->servo.l_shoulder_roll,   JointIndexK1::kLeftShoulderRoll);
-        fill_serial(sensors->servo.l_elbow,           JointIndexK1::kLeftElbowPitch);
-        fill_serial(sensors->servo.l_elbow_yaw,       JointIndexK1::kLeftElbowYaw);
-        fill_serial(sensors->servo.r_shoulder_pitch,  JointIndexK1::kRightShoulderPitch);
-        fill_serial(sensors->servo.r_shoulder_roll,   JointIndexK1::kRightShoulderRoll);
-        fill_serial(sensors->servo.r_elbow,           JointIndexK1::kRightElbowPitch);
-        fill_serial(sensors->servo.r_elbow_yaw,       JointIndexK1::kRightElbowYaw);
+        fill_serial(sensors->servo.head_pan, JointIndexK1::kHeadYaw);
+        fill_serial(sensors->servo.head_tilt, JointIndexK1::kHeadPitch);
+        fill_serial(sensors->servo.l_shoulder_pitch, JointIndexK1::kLeftShoulderPitch);
+        fill_serial(sensors->servo.l_shoulder_roll, JointIndexK1::kLeftShoulderRoll);
+        fill_serial(sensors->servo.l_elbow, JointIndexK1::kLeftElbowPitch);
+        fill_serial(sensors->servo.l_elbow_yaw, JointIndexK1::kLeftElbowYaw);
+        fill_serial(sensors->servo.r_shoulder_pitch, JointIndexK1::kRightShoulderPitch);
+        fill_serial(sensors->servo.r_shoulder_roll, JointIndexK1::kRightShoulderRoll);
+        fill_serial(sensors->servo.r_elbow, JointIndexK1::kRightElbowPitch);
+        fill_serial(sensors->servo.r_elbow_yaw, JointIndexK1::kRightElbowYaw);
 
-        fill_serial(sensors->servo.l_hip_pitch,       JointIndexK1::kLeftHipPitch);
-        fill_serial(sensors->servo.l_hip_roll,        JointIndexK1::kLeftHipRoll);
-        fill_serial(sensors->servo.l_hip_yaw,         JointIndexK1::kLeftHipYaw);
-        fill_serial(sensors->servo.l_knee,            JointIndexK1::kLeftKneePitch);
-        fill_serial(sensors->servo.l_ankle_pitch,     JointIndexK1::kCrankUpLeft);    // L ankle pitch
-        fill_serial(sensors->servo.l_ankle_roll,      JointIndexK1::kCrankDownLeft);  // L ankle roll
-        fill_serial(sensors->servo.r_hip_pitch,       JointIndexK1::kRightHipPitch);
-        fill_serial(sensors->servo.r_hip_roll,        JointIndexK1::kRightHipRoll);
-        fill_serial(sensors->servo.r_hip_yaw,         JointIndexK1::kRightHipYaw);
-        fill_serial(sensors->servo.r_knee,            JointIndexK1::kRightKneePitch);
-        fill_serial(sensors->servo.r_ankle_pitch,     JointIndexK1::kCrankUpRight);   // R ankle pitch
-        fill_serial(sensors->servo.r_ankle_roll,      JointIndexK1::kCrankDownRight); // R ankle roll
+        fill_serial(sensors->servo.l_hip_pitch, JointIndexK1::kLeftHipPitch);
+        fill_serial(sensors->servo.l_hip_roll, JointIndexK1::kLeftHipRoll);
+        fill_serial(sensors->servo.l_hip_yaw, JointIndexK1::kLeftHipYaw);
+        fill_serial(sensors->servo.l_knee, JointIndexK1::kLeftKneePitch);
+        fill_serial(sensors->servo.l_ankle_pitch, JointIndexK1::kCrankUpLeft);   // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll, JointIndexK1::kCrankDownLeft);  // L ankle roll
+        fill_serial(sensors->servo.r_hip_pitch, JointIndexK1::kRightHipPitch);
+        fill_serial(sensors->servo.r_hip_roll, JointIndexK1::kRightHipRoll);
+        fill_serial(sensors->servo.r_hip_yaw, JointIndexK1::kRightHipYaw);
+        fill_serial(sensors->servo.r_knee, JointIndexK1::kRightKneePitch);
+        fill_serial(sensors->servo.r_ankle_pitch, JointIndexK1::kCrankUpRight);   // R ankle pitch
+        fill_serial(sensors->servo.r_ankle_roll, JointIndexK1::kCrankDownRight);  // R ankle roll
 
         // Battery SOC (updated by battery_handler)
         {
