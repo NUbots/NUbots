@@ -156,8 +156,12 @@ namespace module::purpose {
                 Eigen::Vector3d position{slot.offset.x(), slot.offset.y(), 0};
                 if (ball) {
                     Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
-                    position.x()         = std::max(slot.min_x, slot.offset.x() + slot.attraction.x() * rBFf.x());
-                    position.y()         = slot.offset.y() + slot.attraction.y() * rBFf.y();
+                    // Formation.yaml comes from another team and uses a field x-axis convention that is
+                    // mirrored relative to ours, so express the ball's x in that same convention before
+                    // combining it with the formation coefficients (which are given in that convention)
+                    double ball_x = -rBFf.x();
+                    position.x()  = std::max(slot.min_x, slot.offset.x() + slot.attraction.x() * ball_x);
+                    position.y()  = slot.offset.y() + slot.attraction.y() * rBFf.y();
                 }
 
                 // Clamp to field
@@ -165,6 +169,9 @@ namespace module::purpose {
                 double half_width  = fd.dimensions.field_width / 2.0;
                 position.x()       = std::clamp(position.x(), -half_length, half_length);
                 position.y()       = std::clamp(position.y(), -half_width, half_width);
+
+                // Convert out of Formation.yaml's mirrored x convention and into our own field frame
+                position.x() = -position.x();
 
                 emit<Task>(
                     std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, 0)),

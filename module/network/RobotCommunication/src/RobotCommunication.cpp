@@ -207,7 +207,10 @@ namespace module::network {
                         Eigen::Vector3d rTFf  = Hft.translation();
 
                         // Store our position from field to torso
-                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position = rTFf.cast<float>();
+                        // The mixed-team protocol expects the other team's field x-axis convention, which is
+                        // mirrored relative to ours, so flip x before sending
+                        msg->current_pose.position.x() *= -1.0F;
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
@@ -229,6 +232,9 @@ namespace module::network {
                     Eigen::Vector3d rDFf = Hfd.translation();
                     // Store position
                     msg->target_pose.position = rDFf.cast<float>();
+                    // The mixed-team protocol expects the other team's field x-axis convention, which is
+                    // mirrored relative to ours, so flip x before sending
+                    msg->target_pose.position.x() *= -1.0F;
                     // Extract yaw from rotation matrix
                     msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfd.rotation()).z();
                     // Copy team and player ID to target pose
