@@ -351,6 +351,13 @@ namespace module::localisation {
                                                                        bool uncertainty_optimisation = false);
 
         /**
+         * @brief Compute goal post alignment cost for a proposed starting state.
+         * This is used during startup when there are not enough field line intersections
+         * but two goals are visible.
+         */
+        double goal_post_alignment_cost(const Eigen::Vector3d& state, const std::shared_ptr<const Goals>& goals);
+
+        /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour
          * @param field_intersections The field intersections
          * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
