@@ -253,14 +253,23 @@ namespace module::network {
                 // Check if the ball has been seen recently, if it hasn't the message fields will 0
                 // and the confidence will be 0
                 if (loc_ball && (NUClear::clock::now() - loc_ball->time_of_measurement < cfg.ball_timeout)) {
-                    // Convert position of ball from world to field space
+                    // Convert position and velocity of ball from world to field space
                     if (field) {
-                        Eigen::Vector3d rBWw = loc_ball->rBWw;
-                        // Transform the field state into Hfw
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
-                        Eigen::Vector3d rBFf  = Hfw * rBWw;
+
                         // Store our position from field to ball
-                        msg->ball.position = rBFf.cast<float>();
+                        Eigen::Vector3d rBFf = Hfw * loc_ball->rBWw;
+                        msg->ball.position   = rBFf.cast<float>();
+
+                        // Rotate the ball's velocity from world frame into field frame (translation doesn't
+                        // apply to a velocity, so only use the rotation part of Hfw)
+                        Eigen::Vector3d vBFf = Hfw.linear() * loc_ball->vBw;
+                        msg->ball.velocity   = vBFf.cast<float>();
+
+                        // The mixed-team protocol expects the other team's field x-axis convention, which is
+                        // mirrored relative to ours, so flip x before sending
+                        msg->ball.position.x() *= -1.0F;
+                        msg->ball.velocity.x() *= -1.0F;
                     }
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
                     // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate
@@ -269,7 +278,6 @@ namespace module::network {
                         msg->ball.age =
                             std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
                     }
-                    msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
                 // Purpose information, simple a bool in the new proto
