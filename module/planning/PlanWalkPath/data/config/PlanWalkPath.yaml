@@ -2,9 +2,9 @@
 log_level: INFO
 
 # General playing tuning values for walking
-max_x_velocity: 0.5
+max_x_velocity: 0.25
 max_y_velocity: 0.1
-max_angular_velocity: 0.8
+max_angular_velocity: 0.4
 
 acceleration: 0.005 # maximum increment in walk command velocity
 
