@@ -51,6 +51,7 @@ namespace module::skill {
     struct JointStateVectors {
         Eigen::Matrix<double, 20, 1> position;
         Eigen::Matrix<double, 20, 1> velocity;
+        Eigen::Matrix<double, 20, 1> load;
     };
 
     inline JointStateVectors sensors_to_joint_state(const std::unique_ptr<Sensors>& sensors) {
@@ -58,6 +59,7 @@ namespace module::skill {
         for (const auto& [index, servo_id] : joint_map) {
             state.position(index, 0) = sensors->servo.at(servo_id).present_position;
             state.velocity(index, 0) = sensors->servo.at(servo_id).present_velocity;
+            state.load(index, 0)     = sensors->servo.at(servo_id).load;
         }
         return state;
     }
@@ -269,6 +271,12 @@ namespace module::skill {
                     // Advance the gait clock by one control step for the next update
                     ++control_step;
 
+                    // Motor current
+                    JointVector motor_currents_nubots        = joint_state.load;
+                    JointVector motor_currents_mj            = nubots_to_mjlab(motor_currents_nubots);
+                    observation.segment<JOINT_POS_SIZE>(idx) = motor_currents_mj;
+                    idx += JOINT_POS_SIZE;
+
                     // Run inference
                     JointVector inference_output_raw = run_inference(observation);
                     if (log_level <= DEBUG) {
@@ -416,8 +424,7 @@ namespace module::skill {
         // far exceeds the control period. Measuring period/frequency/drift across that gap would report
         // broken information, so treat the current tick as a fresh baseline instead.
         const bool gap_detected =
-            have_timing_sample
-            && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
+            have_timing_sample && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
 
         // First stable tick of this walk, or the first tick after a pause: (re)establish the baseline,
         // resetting the running statistics so they describe only the current continuous run. Nothing to
@@ -446,7 +453,7 @@ namespace module::skill {
 
         // Metrics. Gait-clock elapsed is measured from the control step at the current baseline so it
         // stays aligned with the wall-clock elapsed below after a re-baseline.
-        const double model_elapsed = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
+        const double model_elapsed        = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
         const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
         const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
         const double drift_nuclear        = model_elapsed - elapsed_nuclear;

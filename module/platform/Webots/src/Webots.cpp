@@ -828,6 +828,14 @@ namespace module::platform {
             log<TRACE>("      value:", sensor.value);
         }
 
+        log<TRACE>("  sm.motor_torques:");
+        for (int i = 0; i < int(sensor_measurements.motor_torques.size()); ++i) {
+            const auto& torque = sensor_measurements.motor_torques[i];
+            log<TRACE>("    sm.motor_torques #", i);
+            log<TRACE>("      name:", torque.name);
+            log<TRACE>("      value:", torque.value);
+        }
+
         if (sensor_measurements.robot_pose_ground_truth.exists) {
             auto robot_pose_ground_truth = std::make_unique<message::localisation::RobotPoseGroundTruth>();
             robot_pose_ground_truth->Hft = sensor_measurements.robot_pose_ground_truth.Hft;
@@ -859,6 +867,13 @@ namespace module::platform {
                 auto& servo            = translate_servo_id(position.name, sensor_data->servo);
                 servo.present_position = position.value;
                 servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
+            }
+
+            // Motor torque feedback, reported by the simulator as a proxy for servo load/present current.
+            // Keyed by the same position sensor name so it maps to the same servo.
+            for (const auto& torque : sensor_measurements.motor_torques) {
+                translate_servo_id(torque.name, sensor_data->servo).present_current =
+                    static_cast<float>(torque.value);
             }
 
             if (!sensor_measurements.accelerometers.empty()) {

@@ -7,7 +7,7 @@ model:
   input_name: obs
   output_name: actions
   num_joints: 20
-  obs_size: 71
+  obs_size: 91
   action_alpha: 1.00 # TODO: remove the filter completely
   action_scale: 0.24722924456 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
   gait_period: 0.7 # seconds, defined in mjlab training

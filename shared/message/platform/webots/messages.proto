@@ -48,6 +48,12 @@ message PositionSensorMeasurement {
     double value = 2;
 }
 
+// NUbots-specific: internal motor torque feedback, used as a proxy for servo load/present current
+message MotorTorqueMeasurement {
+    string name  = 1;
+    double value = 2;  // internal motor torque feedback [N.m]
+}
+
 message AccelerometerMeasurement {
     string  name  = 1;
     Vector3 value = 2;  // [m/sˆ2], x-axis, y-axis, z-axis
@@ -134,6 +140,8 @@ message SensorMeasurements {
     // Walk optimisation data
     support.optimisation.OptimisationRobotPosition robot_position = 102;
     bool                                           reset_done     = 103;
+    // Internal motor torque feedback per servo, used as a proxy for servo load/present current
+    repeated MotorTorqueMeasurement                motor_torques  = 104;
 }
 
 message MotorPosition {
