@@ -103,8 +103,8 @@ namespace module::strategy {
                          const std::shared_ptr<const Goals>& goals) {
                 const bool stale_ball =
                     !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
-                const bool stale_goals       = !goals || goals->goals.empty()
-                                               || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
+                const bool stale_goals = !goals || goals->goals.empty()
+                                         || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
                 const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
                 if (stale_ball || stale_goals || poor_localisation) {
