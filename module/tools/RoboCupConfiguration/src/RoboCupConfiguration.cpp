@@ -53,8 +53,8 @@ namespace module::tools {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
-            cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
+            cfg.wifi_networks      = config["wifi_networks"].as<std::map<std::string, std::string>>();
+            cfg.common_ips         = config["common_ips"].as<std::vector<std::string>>();
             cfg.field_preset_names = config["field_presets"].as<std::vector<std::string>>();
         });
 
@@ -71,7 +71,12 @@ namespace module::tools {
             curs_set(0);
 
             // Set the fields and show them
-            get_config_values();
+            try {
+                get_config_values();
+            }
+            catch (const std::exception& e) {
+                display.log_message = std::string("Startup error: ") + e.what();
+            }
             refresh_view();
         });
 
@@ -161,12 +166,12 @@ namespace module::tools {
 
         // Team ID
         YAML::Node global_config = Configuration("GlobalConfig.yaml", hostname, binary, platform).config;
-        team_id                  = global_config["team_id"].as<int>();
-        player_id                = global_config["player_id"].as<int>();
+        team_id                  = global_config["team_id"].as<int>(1);
+        player_id                = global_config["player_id"].as<int>(1);
 
         // Robot position
         YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
-        is_goalie                = soccer_config["is_goalie"].as<bool>();
+        is_goalie                = soccer_config["is_goalie"].as<bool>(false);
 
         // Field type
         YAML::Node fd_config = Configuration("FieldDescription.yaml", hostname, binary, platform).config;
@@ -239,9 +244,9 @@ namespace module::tools {
 
         {
             // Write selected field type to FieldDescription.yaml
-            std::string fd_file    = get_config_file("FieldDescription.yaml");
-            YAML::Node config      = YAML::LoadFile(fd_file);
-            config["field_type"]   = field_type;
+            std::string fd_file  = get_config_file("FieldDescription.yaml");
+            YAML::Node config    = YAML::LoadFile(fd_file);
+            config["field_type"] = field_type;
             std::ofstream file(fd_file);
             file << config;
         }
