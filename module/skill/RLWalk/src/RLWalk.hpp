@@ -45,9 +45,7 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
-            /// @brief Alpha value for the action smoothing filter
-            float action_alpha;
-            /// @brief Servo torque value used for policy-generated commands
+            /// @brief Servo torque value to send to nusense
             float servo_torque;
             /// @brief Servo proportional gain for leg and hip joints
             float leg_servo_gain;
@@ -92,9 +90,6 @@ namespace module::skill {
         /// @brief Last action taken by the model
         JointVector last_action;
 
-        /// @brief Flag used by the action smoothing filter
-        bool have_last_action = false;
-
         /// @brief Default pose for the robot
         JointVector default_pose;
 
@@ -103,10 +98,8 @@ namespace module::skill {
         /// @brief Upper per-servo position limits used to clip the final commanded servo positions as a safety measure
         JointVector servo_limit_max;
 
-        /// @brief Last joint positions for velocity estimation
+        /// @brief Last joint positions for inference
         JointVector previous_pose;
-        bool have_previous_pose = false;
-        NUClear::clock::time_point last_update_time;
 
         // Control-loop timing diagnostics params
         /// @brief Whether a previous tick has been sampled (false until the first stable tick).

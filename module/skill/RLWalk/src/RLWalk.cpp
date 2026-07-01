@@ -97,7 +97,6 @@ namespace module::skill {
             cfg.output_name        = config["model"]["output_name"].as<std::string>();
             cfg.num_joints         = config["model"]["num_joints"].as<int>();
             cfg.obs_size           = config["model"]["obs_size"].as<int>();
-            cfg.action_alpha       = config["model"]["action_alpha"].as<float>();
             cfg.servo_torque       = config["servos"]["torque"].as<float>();
             cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
@@ -110,19 +109,15 @@ namespace module::skill {
             cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
 
             // Initialize vectors
-            last_action      = JointVector::Zero();
-            have_last_action = false;
+            last_action = JointVector::Zero();
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
             // Per-servo position limits (radians, NUbots joint order) used to clip the final
             // commanded servo positions as a safety measure against physically infeasible commands.
-            servo_limit_min    = JointVector(config["servo_limits"]["min"].as<Expression>());
-            servo_limit_max    = JointVector(config["servo_limits"]["max"].as<Expression>());
-            previous_pose      = default_pose;
-            have_previous_pose = false;
-            last_update_time   = NUClear::clock::now();
-
+            servo_limit_min  = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max  = JointVector(config["servo_limits"]["max"].as<Expression>());
+            previous_pose    = default_pose;
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -275,41 +270,13 @@ namespace module::skill {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Clip the output here as a safety measure to prevent extremely fast movements. TODO: FIXME
-                    const double max_joint_offset = 0.2;  // 0.2 radians per update (50 Hz) = ~600 degrees per second.
+                    // Store the action in mjlab order without scaling or offsets.
+                    last_action = inference_output_raw;
 
-                    // Convert raw action to physical joint offsets (mjlab order), then clip per-joint
-                    // against the current measured offsets to limit command rate.
-                    const JointVector desired_joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
-                    JointVector clipped_joint_offsets_mj       = desired_joint_offsets_mj;
-
-                    for (int i = 0; i < cfg.num_joints; ++i) {
-                        const double lower          = current_joints_rel_mj[i] - max_joint_offset;
-                        const double upper          = current_joints_rel_mj[i] + max_joint_offset;
-                        clipped_joint_offsets_mj[i] = std::clamp(desired_joint_offsets_mj[i], lower, upper);
-                    }
-
-                    JointVector clipped_action_raw = inference_output_raw;
-                    if (std::abs(cfg.nugus_action_scale) > 1e-9) {
-                        clipped_action_raw = clipped_joint_offsets_mj / cfg.nugus_action_scale;
-                    }
-
-                    // Filter the actions using an exponential moving average
-                    JointVector filtered_action_raw = clipped_action_raw;
-                    if (have_last_action) {
-                        filtered_action_raw =
-                            cfg.action_alpha * clipped_action_raw + (1.0 - cfg.action_alpha) * last_action;
-                    }
-
-                    // Store the filtered action in mjlab order without scaling or offsets.
-                    last_action      = filtered_action_raw;
-                    have_last_action = true;
-
-                    const JointVector filtered_joint_offsets_mj = filtered_action_raw * cfg.nugus_action_scale;
-
+                    const JointVector joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
 
                     // Convert into NUbots order, apply scaling
-                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
+                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(joint_offsets_mj);
 
                     // Hack: when the command velocity is below a threshold, zero the offsets so the
                     // robot holds the default pose. This side-steps unwanted policy behaviour at
@@ -416,8 +383,7 @@ namespace module::skill {
         // far exceeds the control period. Measuring period/frequency/drift across that gap would report
         // broken information, so treat the current tick as a fresh baseline instead.
         const bool gap_detected =
-            have_timing_sample
-            && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
+            have_timing_sample && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
 
         // First stable tick of this walk, or the first tick after a pause: (re)establish the baseline,
         // resetting the running statistics so they describe only the current continuous run. Nothing to
@@ -446,7 +412,7 @@ namespace module::skill {
 
         // Metrics. Gait-clock elapsed is measured from the control step at the current baseline so it
         // stays aligned with the wall-clock elapsed below after a re-baseline.
-        const double model_elapsed = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
+        const double model_elapsed        = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
         const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
         const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
         const double drift_nuclear        = model_elapsed - elapsed_nuclear;
