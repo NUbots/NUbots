@@ -27,6 +27,9 @@ namespace module::input {
             std::string pose_segment;
             Eigen::Isometry3d Hhp = Eigen::Isometry3d::Identity();
             Eigen::Isometry3d Hpc = Eigen::Isometry3d::Identity();
+            /// @brief Deadband below which normalized odometry components are snapped to zero, to
+            /// avoid tiny floating-point residuals (e.g. ~1e-10) being treated as real motion
+            double odometry_deadband = 0.0;
         } cfg;
 
         std::mutex pose_mutex;

@@ -1,5 +1,7 @@
 #include "K1Sensors.hpp"
 
+#include <cmath>
+
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
@@ -113,6 +115,8 @@ namespace module::input {
 
             cfg.pose_segment = config["head_pose"][0]["segment"].as<std::string>();
 
+            cfg.odometry_deadband = config["odometry_deadband"].as<double>();
+
             // Hpc: pitch frame to camera optical frame
             const auto& Hpc_config = config["Hpc"];
             cfg.Hpc                = Eigen::Isometry3d::Identity();
@@ -161,6 +165,13 @@ namespace module::input {
                     odo.y - booster_odometry_offset[1],
                     odo.theta - booster_odometry_offset[2],
                 };
+            }
+
+            // Snap tiny residuals (e.g. ~1e-10) to zero so they aren't treated as real motion
+            for (double& v : normalized_odometry) {
+                if (std::abs(v) < cfg.odometry_deadband) {
+                    v = 0.0;
+                }
             }
 
             log<DEBUG>("Received odometry: x=" + std::to_string(odo.x) + ", y=" + std::to_string(odo.y) + ", theta="

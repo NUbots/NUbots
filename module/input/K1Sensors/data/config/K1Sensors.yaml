@@ -4,6 +4,10 @@ log_level: INFO
 head_pose:
   - segment: _head_pose
 
+# Deadband (metres for x/y, radians for theta) below which normalized odometry components are
+# snapped to zero, avoiding tiny floating-point residuals (~1e-10) being treated as real motion
+odometry_deadband: 1.0e-6
+
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians
