@@ -55,7 +55,7 @@ export class DashboardRobotPanelViewModel {
 
   @computed
   get penalty(): string {
-    return PenaltyReason[this.model.penaltyReason] || PenaltyReason[PenaltyReason.UNKNOWN_PENALTY_REASON];
+    return PenaltyReason[this.model.penaltyReason] || PenaltyReason[PenaltyReason.UNPENALISED];
   }
 
   @computed
