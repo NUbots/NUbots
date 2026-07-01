@@ -39,6 +39,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/Whistle.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Whistle;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
@@ -77,6 +79,8 @@ namespace module::purpose {
     using message::strategy::FallRecovery;
     using message::support::GlobalConfig;
 
+    using Phase = message::input::GameState::Phase;
+
     struct StartSoccer {};
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -88,6 +92,14 @@ namespace module::purpose {
             cfg.startup_delay      = config["startup_delay"].as<int>();
 
             if (cfg.force_playing) {
+                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+            }
+        });
+
+        on<Trigger<Whistle>, With<GameState>>().then([this](const GameState& game_state) {
+            log<INFO>("Gamestate is ", game_state.phase);
+            if (game_state.phase == Phase::SET) {
+                log<INFO>("Whistle detected while in SET, starting play");
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
             }
         });
