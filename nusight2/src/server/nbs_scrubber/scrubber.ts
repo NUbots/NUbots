@@ -44,7 +44,12 @@ export class Scrubber {
     // Create a decoder for the files and set the available types to what's
     // in the files and what we can synthesize
     this.decoder = new NbsDecoder(files);
-    this.availableTypes = [...this.decoder.getAvailableTypes(), ...availableSyntheticTypes()];
+    this.availableTypes = [
+      ...this.decoder.getAvailableTypes(),
+      // Present synthetic types per-scrubber, using the scrubber's id as the subtype so that
+      // clients can subscribe to a specific scrubber's synthetic messages (e.g. its index).
+      ...availableSyntheticTypes().map((type) => ({ ...type, subtype: opts.id })),
+    ];
 
     // Get the timestamp range and set our playback start in NBS time
     const timestampRange = this.decoder.getTimestampRange();
@@ -188,6 +193,15 @@ export class Scrubber {
     this.resetPlaybackStart(this.timestamp());
     this.data.playbackSpeed = speed;
   };
+
+  /** Get the raw bytes of the packet of the given type at the given index/offset in the scrubber's file(s) */
+  getPacketBytes(typeSubtype: NbsTypeSubtypeBuffer, offset: number): Uint8Array {
+    const packet = this.decoder.getPacketByIndex(offset, typeSubtype);
+    if (packet && packet.payload) {
+      return Uint8Array.from(packet.payload);
+    }
+    return new Uint8Array();
+  }
 
   /** Destroy the scrubber and prevent further interaction */
   destroy() {
