@@ -22,10 +22,10 @@ nuclear_role(
   input::GameController
   network::RobotCommunication
   # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
+  # vision::VisualMesh
+  # vision::GreenHorizonDetector
   # vision::BallDetector
-  vision::FieldLineDetector
+  # vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
