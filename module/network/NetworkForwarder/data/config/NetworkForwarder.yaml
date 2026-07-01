@@ -10,7 +10,7 @@ targets:
   nusight:
     # Overview packets for the overview screen
     message.support.nusight.Overview: false
-    message.suppo`rt.nuclear.ReactionProfiles: false
+    message.support.nuclear.ReactionProfiles: false
 
     # DataPoints power the chart view
     message.eye.DataPoint: false
