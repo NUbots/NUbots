@@ -113,6 +113,17 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
+        // Keep FindPurpose active during game phases (READY, SET, PLAYING)
+        on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
+            [this](const GameState& game_state) {
+                // Maintain FindPurpose task during active game phases
+                if (!cfg.force_playing && !idle
+                    && (game_state.phase == GameState::Phase::READY || game_state.phase == GameState::Phase::SET
+                        || game_state.phase == GameState::Phase::PLAYING)) {
+                    emit<Task>(std::make_unique<FindPurpose>(), 1);
+                }
+            });
+
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
             [this](const GameState& game_state) {
                 if (game_state.self.goalie) {
