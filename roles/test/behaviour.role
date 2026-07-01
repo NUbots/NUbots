@@ -22,8 +22,8 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::FieldLineDetector
   vision::BallDetector
-  # vision::Yolo
-  vision::RFDETR
+  vision::Yolo
+  # vision::RFDETR
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
@@ -35,7 +35,7 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::RLWalk
+  skill::Walk
   skill::KickWalk
   skill::GetUp
   skill::Look
