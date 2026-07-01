@@ -71,7 +71,10 @@ export function useImageTexture(image: Image, opts?: { filtering?: THREE.Magnifi
     return texture;
   };
 
-  const update = (texture: THREE.Texture, [image, filtering]: [Image, THREE.MagnificationTextureFilter | undefined]) => {
+  const update = (
+    texture: THREE.Texture,
+    [image, filtering]: [Image, THREE.MagnificationTextureFilter | undefined],
+  ) => {
     // Close the previous bitmap to avoid GPU memory leaks
     if (texture.image instanceof ImageBitmap) {
       texture.image.close();
@@ -87,7 +90,10 @@ export function useImageTexture(image: Image, opts?: { filtering?: THREE.Magnifi
     texture.flipY = false;
   };
 
-  return useUpdatable(create, update, [image, opts?.filtering] as [Image, THREE.MagnificationTextureFilter | undefined]);
+  return useUpdatable(create, update, [image, opts?.filtering] as [
+    Image,
+    THREE.MagnificationTextureFilter | undefined,
+  ]);
 }
 
 /** Material for images with a non-bayer pixel format */
