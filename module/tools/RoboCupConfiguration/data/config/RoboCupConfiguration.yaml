@@ -3,14 +3,15 @@ log_level: INFO
 
 # Map of possible ssid and passwords
 wifi_networks:
-  Humanoid_A: "rc2024humanoid"
-  Humanoid_B: "rc2024humanoid"
-  Humanoid_C: "rc2024humanoid"
-  Humanoid_D: "rc2024humanoid"
+  HSL_E: "HSL?!HSL?!"
+  HSL_F: "HSL?!HSL?!"
+  HSL_G: "HSL?!HSL?!"
+  HSL_H: "HSL?!HSL?!"
 
 common_ips: [
     "10.1.2.X", # Typical ethernet/lab IP
-    "192.168.1.X", # RoboCup NUbots IP
+    "10.0.1.X", # RoboCup NUbots IP
+    "10.0.18.X", # RoboCup rUNSWift IP
     "192.168.98.X", # RoboCup Drop-In Team A IP
     "192.168.99.X", # RoboCup Drop-In Team B IP
   ]
@@ -18,6 +19,6 @@ common_ips: [
 # Names of field presets defined in FieldDescription.yaml
 field_presets: [
     "small", # Small field 9x6m
-    "l1",    # L1 field 12x9m
-    "l3",    # L3 field 14x9m
+    "l1", # L1 field 12x9m
+    "l3", # L3 field 14x9m
   ]
