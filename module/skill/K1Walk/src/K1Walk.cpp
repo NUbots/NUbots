@@ -30,6 +30,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterWalk.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/skill/Walk.hpp"
@@ -42,7 +43,9 @@ namespace module::skill {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::booster::BoosterMode;
     using message::booster::BoosterWalk;
+    using message::booster::K1Mode;
     using WalkTask = message::skill::Walk;
 
     using utility::nusight::graph;
@@ -55,6 +58,10 @@ namespace module::skill {
         });
 
         on<Start<WalkTask>>().then([this]() {
+            // Walking requires movement, so request soccer mode from the Booster hardware.
+            auto mode  = std::make_unique<BoosterMode>();
+            mode->mode = K1Mode::SOCCER;
+            emit(std::move(mode));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 

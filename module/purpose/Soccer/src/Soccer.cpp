@@ -35,6 +35,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/booster/BoosterMode.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
@@ -59,6 +60,8 @@ namespace module::purpose {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::booster::BoosterMode;
+    using message::booster::K1Mode;
     using message::input::ButtonLeftDown;
     using message::input::ButtonLeftUp;
     using message::input::ButtonMiddleDown;
@@ -94,7 +97,8 @@ namespace module::purpose {
 
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
-            // At the start of the program, we should be standing
+            // At the start of the program, we should be standing, so put the Booster into prep mode
+            emit(std::make_unique<BoosterMode>(K1Mode::PREP));
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
@@ -124,6 +128,15 @@ namespace module::purpose {
                 }
             });
 
+        // Track game phase transitions to drive the Booster movement mode. The robot stands in prep
+        // mode until it leaves the READY phase, at which point it needs to move so we switch to soccer.
+        on<Trigger<GameState>>().then([this](const GameState& game_state) {
+            if (previous_phase == GameState::Phase::READY && game_state.phase != GameState::Phase::READY) {
+                emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
+            }
+            previous_phase = game_state.phase;
+        });
+
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
             [this](const GameState& game_state) {
                 if (game_state.self.goalie) {
@@ -142,6 +155,9 @@ namespace module::purpose {
                    const GameState& game_state) {
                 // If the robot is penalised, it must stand still
                 if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
+                    // Once penalised the robot is not allowed to move in any fashion (RoboCup rules
+                    // §12.2), so return the Booster to prep (standing) mode regardless of the reason
+                    emit(std::make_unique<BoosterMode>(K1Mode::PREP));
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    message::purpose::SoccerPosition::UNKNOWN,
                                                    false,
@@ -157,6 +173,8 @@ namespace module::purpose {
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
+                // The robot autonomously re-enters the game, so it needs to move again: back to soccer
+                emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
                 emit<Task>(std::make_unique<FallRecovery>(), 2);
             }

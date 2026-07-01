@@ -29,12 +29,15 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/skill/Kick.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
+    using message::booster::BoosterMode;
+    using message::booster::K1Mode;
     using message::skill::Kick;
     using VisualKick = message::booster::BoosterVisualKick;
     using KickVer    = message::booster::VisualKickVer;
@@ -55,6 +58,10 @@ namespace module::skill {
                 // The SDK kick is autonomous, so the Kick task's leg/target/direction are unused
                 if (run_reason == RunReason::NEW_TASK) {
                     log<INFO>("Starting visual kick");
+                    // Kicking requires movement, so request soccer mode from the Booster hardware.
+                    auto mode  = std::make_unique<BoosterMode>();
+                    mode->mode = K1Mode::SOCCER;
+                    emit(std::move(mode));
                     auto vk     = std::make_unique<VisualKick>();
                     vk->start   = true;
                     vk->version = cfg.version;
