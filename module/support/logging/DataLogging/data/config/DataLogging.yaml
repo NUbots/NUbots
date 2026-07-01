@@ -2,7 +2,7 @@ log_level: INFO
 
 output:
   directory: recordings
-  split_size: 5 * GiB
+  split_size: 0.9 * GiB
 
 # You can put any messages that is emitted in the system here and it will be logged
 # The below ones are just the most common and here as an example
@@ -17,6 +17,7 @@ messages:
   message.vision.Goals: true
   message.vision.GreenHorizon: true
   message.vision.FieldLines: true
+  message.vision.FieldIntersections: true
   message.vision.VisualMesh: true
   message.vision.BoundingBoxes: true
   # Odometry and Localisation

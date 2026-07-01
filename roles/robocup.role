@@ -20,6 +20,7 @@ nuclear_role(
   input::SensorFilter
   input::Camera
   input::GameController
+  input::WhistleDetection
   network::RobotCommunication
   # Vision
   vision::VisualMesh
@@ -38,7 +39,7 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::RLWalk
+  skill::Walk
   skill::KickWalk
   skill::GetUp
   skill::Look

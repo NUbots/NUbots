@@ -9,7 +9,7 @@ tasks:
   find_ball_priority: 4
   look_at_ball_priority: 1
   walk_to_ball_priority: 0
-  walk_to_kick_ball_priority: 2
+  walk_to_kick_ball_priority: 1
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
   stand_still_priority: 0
@@ -41,4 +41,4 @@ chatgpt_prompt: "Hello!"
 audiogpt_listen_duration: 5
 
 # Delay in seconds before creating director tree
-start_delay: 5
+start_delay: 10
