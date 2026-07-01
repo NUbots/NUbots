@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -35,6 +36,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/output/CompressedImage.hpp"
 #include "message/vision/FieldLines.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
@@ -50,6 +52,7 @@ namespace module::vision {
     using extension::Configuration;
 
     using message::input::Image;
+    using message::output::CompressedImage;
     using message::vision::FieldLines;
     using message::vision::GreenHorizon;
 
@@ -108,6 +111,11 @@ namespace module::vision {
         });
 
         on<Trigger<Image>, Single>().then("Segmentation Main Loop", [this](const Image& img) {
+            using clock = std::chrono::steady_clock;
+
+            const bool debug_enabled  = log_level <= NUClear::LogLevel::DEBUG;
+            const auto pipeline_start = clock::now();
+
             // -------- Convert image to cv::Mat -------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
@@ -130,6 +138,8 @@ namespace module::vision {
                     break;
                 default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
             }
+            const auto after_convert = clock::now();
+
             // -------- Preprocess the image -------
             cv::Mat resized_img;
             cv::resize(img_cv, resized_img, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
@@ -172,10 +182,12 @@ namespace module::vision {
 
             // Set input tensor for model with one input
             infer_request.set_input_tensor(input_tensor);
+            const auto after_preprocess = clock::now();
 
             // -------- Perform Inference --------
             infer_request.infer();
-            auto output = infer_request.get_output_tensor(0);
+            auto output                = infer_request.get_output_tensor(0);
+            const auto after_inference = clock::now();
 
             // -------- Postprocess the result --------
             // Get raw output data and tensor information
@@ -189,8 +201,7 @@ namespace module::vision {
             }
 
             // We know the model should output [batch_size, num_classes, height, width]
-            // For most image models, batch_size is 1, height/width should match our IMAGE_SIZE
-            int batch_size   = output_shape[0];
+            // For most image models, height/width should match our IMAGE_SIZE
             int out_channels = output_shape[1];  // Should match num_classes
             int out_height   = output_shape[2];  // Should match IMAGE_SIZE
             int out_width    = output_shape[3];  // Should match IMAGE_SIZE
@@ -242,6 +253,46 @@ namespace module::vision {
                            0,
                            cv::INTER_NEAREST);
             }
+
+            // In debug mode, emit a JPEG-compressed visualization of the segmentation mask so it
+            // can be inspected in NUsight. Use the configured class colours rather than raw class
+            // indices to keep the output legible.
+            if (debug_enabled) {
+                cv::Mat debug_mask(IMAGE_SIZE, IMAGE_SIZE, CV_8UC3);
+                for (int y = 0; y < IMAGE_SIZE; ++y) {
+                    const uchar* seg_row = segmentation_result.ptr<uchar>(y);
+                    cv::Vec3b* debug_row = debug_mask.ptr<cv::Vec3b>(y);
+                    for (int x = 0; x < IMAGE_SIZE; ++x) {
+                        const int class_index = seg_row[x];
+                        debug_row[x]          = class_index >= 0 && class_index < static_cast<int>(classes.size())
+                                                    ? classes[class_index].colour
+                                                    : cv::Vec3b(0, 0, 255);
+                    }
+                }
+
+                std::vector<uchar> compressed_mask;
+                if (cv::imencode(".jpg", debug_mask, compressed_mask, {cv::IMWRITE_JPEG_QUALITY, 90})) {
+                    auto debug_image        = std::make_unique<CompressedImage>();
+                    debug_image->format     = utility::vision::fourcc("JPEG");
+                    debug_image->dimensions = {static_cast<uint32_t>(IMAGE_SIZE), static_cast<uint32_t>(IMAGE_SIZE)};
+                    debug_image->data.assign(compressed_mask.begin(), compressed_mask.end());
+                    debug_image->id                = img.id + 1;
+                    debug_image->name              = img.name + "_segmentation";
+                    debug_image->timestamp         = img.timestamp;
+                    debug_image->Hcw               = img.Hcw;
+                    debug_image->lens.projection   = int(img.lens.projection);
+                    debug_image->lens.focal_length = img.lens.focal_length;
+                    debug_image->lens.fov          = img.lens.fov;
+                    debug_image->lens.centre       = img.lens.centre;
+                    debug_image->lens.k            = img.lens.k;
+                    emit<Scope::NETWORK>(debug_image, "nusight");
+                }
+                else {
+                    log<WARN>("Failed to JPEG-encode segmentation debug mask");
+                }
+            }
+            const auto after_mask = clock::now();
+
             // Run the entire field-line CV pipeline (connected components, convex hull,
             // field-line extraction) at the model's native IMAGE_SIZE x IMAGE_SIZE resolution
             // rather than the full camera resolution. This is roughly (width*height)/
@@ -391,6 +442,7 @@ namespace module::vision {
                     emit(std::move(green_horizon));
                 }
             }
+            const auto after_horizon = clock::now();
 
             // Create a field lines message
             auto field_lines       = std::make_unique<FieldLines>();
@@ -442,6 +494,28 @@ namespace module::vision {
                     cell_occupied[cell_index] = true;
                 }
             }
+            const auto after_field_lines = clock::now();
+
+            if (debug_enabled) {
+                const auto ms = [](const auto& start, const auto& end) {
+                    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                };
+                log<DEBUG>("Segmentation pipeline profile (ms): convert=",
+                           ms(pipeline_start, after_convert),
+                           ", preprocess=",
+                           ms(after_convert, after_preprocess),
+                           ", infer=",
+                           ms(after_preprocess, after_inference),
+                           ", postprocess+debug_mask=",
+                           ms(after_inference, after_mask),
+                           ", horizon=",
+                           ms(after_mask, after_horizon),
+                           ", field_lines=",
+                           ms(after_horizon, after_field_lines),
+                           ", total=",
+                           ms(pipeline_start, after_field_lines));
+            }
+
             // Only emit field lines if we found any
             if (!field_lines->points.empty()) {
                 log<DEBUG>("Found ", field_lines->points.size(), " field line points");

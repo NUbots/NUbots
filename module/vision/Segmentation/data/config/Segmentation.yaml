@@ -24,10 +24,10 @@ filter_by_distance: true
 max_field_line_distance: 15.0 # Maximum distance in meters to consider field line points valid
 
 # Field point clustering parameters
-min_cluster_size: 200 # Minimum number of pixels in a field cluster to be considered valid (measured at the 512x512 segmentation resolution)
+min_cluster_size: 50 # Minimum number of pixels in a field cluster to be considered valid (measured at the 512x512 segmentation resolution)
 
 # Field line point downsampling
-field_line_grid_size: 1 # Keep at most one field line point per NxN pixel cell (<=1 disables downsampling)
+field_line_grid_size: 2 # Keep at most one field line point per NxN pixel cell (<=1 disables downsampling)
 
 # Green horizon
 max_horizon_distance: 15.0 # Maximum distance in meters for a green horizon convex hull point
