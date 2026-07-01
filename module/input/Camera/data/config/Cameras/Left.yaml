@@ -14,7 +14,7 @@ settings:
 
   BalanceWhiteAuto: Off # Options: Off, Once, Continuous
   BalanceRatioSelector: Red
-  BalanceRatio: 1.85
+  BalanceRatio: 1.65
 
   GainAuto: Continuous # Options: Off, Once, Continuous
 
