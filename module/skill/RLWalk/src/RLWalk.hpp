@@ -55,6 +55,11 @@ namespace module::skill {
             float head_servo_gain;
             /// @brief Servo proportional gain for arm joints
             float arm_servo_gain;
+            /// @brief Motor torque constant (Nm/A) used to convert joint torque feedback into an equivalent
+            /// motor current. In Webots the servo load is reported as a torque (Nm), so it is divided by this
+            /// constant to obtain a current (A). On real hardware the load is already a current, so this is
+            /// configured to 1.0 to leave the value unchanged.
+            double motor_torque_constant;
             /// @brief Scale factor to convert inference outputs to joint angles
             double nugus_action_scale;
             /// @brief Gait period used in the phase calculation

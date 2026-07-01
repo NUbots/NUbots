@@ -17,6 +17,9 @@ servos:
   leg_gains: 30.0
   head_gains: 1.0
   arm_gains: 1.0
+  # Webots reports servo load as a joint torque (Nm). Divide by this motor torque constant (Nm/A)
+  # to convert it into an equivalent motor current (A) for the policy observation.
+  torque_constant: 1.983
 
 # Command velocity magnitude (m/s and rad/s combined) below which the policy joint offsets
 # are zeroed and the robot holds the default pose. Hack to avoid unwanted policy behaviour at

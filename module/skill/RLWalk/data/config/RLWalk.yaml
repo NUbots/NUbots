@@ -17,6 +17,10 @@ servos:
   leg_gains: 7.0
   head_gains: 1.0
   arm_gains: 1.0
+  # On real hardware the servo load is already reported as a current (A), so no conversion is
+  # applied. Kept as 1.0 for parity with the Webots config, which divides torque (Nm) by this
+  # motor torque constant (Nm/A) to obtain a current.
+  torque_constant: 1.0
 
 # Command velocity magnitude (m/s and rad/s combined) below which the policy joint offsets
 # are zeroed and the robot holds the default pose. Hack to avoid unwanted policy behaviour at

@@ -93,19 +93,20 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
-            cfg.model_path         = config["model"]["path"].as<std::string>();
-            cfg.device             = config["model"]["device"].as<std::string>();
-            cfg.input_name         = config["model"]["input_name"].as<std::string>();
-            cfg.output_name        = config["model"]["output_name"].as<std::string>();
-            cfg.num_joints         = config["model"]["num_joints"].as<int>();
-            cfg.obs_size           = config["model"]["obs_size"].as<int>();
-            cfg.action_alpha       = config["model"]["action_alpha"].as<float>();
-            cfg.servo_torque       = config["servos"]["torque"].as<float>();
-            cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
-            cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
-            cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
-            cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
-            cfg.gait_period        = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
+            cfg.model_path            = config["model"]["path"].as<std::string>();
+            cfg.device                = config["model"]["device"].as<std::string>();
+            cfg.input_name            = config["model"]["input_name"].as<std::string>();
+            cfg.output_name           = config["model"]["output_name"].as<std::string>();
+            cfg.num_joints            = config["model"]["num_joints"].as<int>();
+            cfg.obs_size              = config["model"]["obs_size"].as<int>();
+            cfg.action_alpha          = config["model"]["action_alpha"].as<float>();
+            cfg.servo_torque          = config["servos"]["torque"].as<float>();
+            cfg.motor_torque_constant = config["servos"]["torque_constant"].as<double>();
+            cfg.head_servo_gain       = config["servos"]["head_gains"].as<float>();
+            cfg.leg_servo_gain        = config["servos"]["leg_gains"].as<float>();
+            cfg.arm_servo_gain        = config["servos"]["arm_gains"].as<float>();
+            cfg.nugus_action_scale    = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
+            cfg.gait_period           = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
 
             // Command velocity magnitude below which the policy joint offsets are zeroed so the
             // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
@@ -271,11 +272,18 @@ namespace module::skill {
                     // Advance the gait clock by one control step for the next update
                     ++control_step;
 
-                    // Motor current
-                    JointVector motor_currents_nubots        = joint_state.load;
+                    // Motor current. Webots reports the servo load as a joint torque (Nm), so divide by the
+                    // motor torque constant (Nm/A) to obtain an equivalent motor current (A), matching the
+                    // units the policy was trained on. On real hardware the load is already a current and the
+                    // torque constant is configured to 1.0, leaving the value unchanged.
+                    JointVector motor_currents_nubots        = joint_state.load / cfg.motor_torque_constant;
                     JointVector motor_currents_mj            = nubots_to_mjlab(motor_currents_nubots);
                     observation.segment<JOINT_POS_SIZE>(idx) = motor_currents_mj;
                     idx += JOINT_POS_SIZE;
+
+                    if (log_level <= DEBUG) {
+                        emit(graph("Motor currents", motor_currents_nubots.transpose()));
+                    }
 
                     // Run inference
                     JointVector inference_output_raw = run_inference(observation);
