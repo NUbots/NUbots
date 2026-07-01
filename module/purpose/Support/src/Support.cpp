@@ -173,8 +173,9 @@ namespace module::purpose {
                 // Convert out of Formation.yaml's mirrored x convention and into our own field frame
                 position.x() = -position.x();
 
+                // Flip yaw axis to work with other teams formation rules
                 emit<Task>(
-                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, 0)),
+                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(position, Eigen::Vector3d(0, 0, M_PI)),
                                                           true));
             });
     }
