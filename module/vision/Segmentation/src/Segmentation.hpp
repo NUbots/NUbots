@@ -48,6 +48,15 @@ namespace module::vision {
 
             /// @brief Minimum number of pixels in a field cluster to be considered valid
             int min_cluster_size = 100;
+
+            /// @brief Grid cell size (in pixels) for spatial downsampling of field line points.
+            /// At most one field line point is emitted per cell. A value <= 1 disables downsampling.
+            int field_line_grid_size = 4;
+
+            /// @brief Maximum distance (in meters) from the camera for a green horizon hull point.
+            /// Field-boundary points near the visual horizon project to very large ground
+            /// distances, so cap them to keep the horizon convex hull sensible.
+            float max_horizon_distance = 2.0f;
         } cfg;
 
         /// @brief OpenVINO compiled model, used to create inference request object
@@ -72,7 +81,7 @@ namespace module::vision {
         };
 
         /// @brief Image size
-        static const int IMAGE_SIZE = 512;
+        static constexpr int IMAGE_SIZE = 512;
 
     public:
         /// @brief Called by the powerplant to build and setup the Segmentation reactor.

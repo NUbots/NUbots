@@ -26,7 +26,9 @@
  */
 #include "Segmentation.hpp"
 
-#include <chrono>
+#include <algorithm>
+#include <array>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -37,6 +39,7 @@
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -61,17 +64,50 @@ namespace module::vision {
             cfg.filter_by_distance      = config["filter_by_distance"].as<bool>();
             cfg.max_field_line_distance = config["max_field_line_distance"].as<float>();
             cfg.min_cluster_size        = config["min_cluster_size"].as<int>();
+            cfg.field_line_grid_size    = config["field_line_grid_size"].as<int>();
+            cfg.max_horizon_distance    = config["max_horizon_distance"].as<float>();
 
             // Compile the model and create inference request object
-            compiled_model =
-                ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
-            infer_request = compiled_model.create_infer_request();
+            ov::Core core;
+
+            // Enable model caching if a cache directory is configured. OpenVINO stores the
+            // compiled device kernels there so that after the first run the expensive kernel
+            // compilation (several seconds on the GPU) is skipped on subsequent startups.
+            const std::string cache_dir = config["cache_dir"].as<std::string>();
+            if (!cache_dir.empty()) {
+                core.set_property(ov::cache_dir(cache_dir));
+            }
+
+            // Optionally run inference in FP16. The segmentation network is memory-bandwidth
+            // bound on the integrated GPU (many high-resolution feature maps), so halving the
+            // activation precision from FP32 to FP16 reduces the memory traffic and can
+            // noticeably lower latency with negligible accuracy impact for this task.
+            ov::AnyMap compile_config;
+            if (config["inference_precision_fp16"].as<bool>()) {
+                compile_config[ov::hint::inference_precision.name()] = ov::element::f16;
+            }
+
+            compiled_model = core.compile_model(config["model_path"].as<std::string>(),
+                                                config["device"].as<std::string>(),
+                                                compile_config);
+            infer_request  = compiled_model.create_infer_request();
+
+            // Warm up the model. OpenVINO compiles the device-specific kernels and uploads the
+            // weights lazily on the first infer() call, which for the GPU can take several
+            // seconds. Run one dummy inference here at startup with a zeroed input so that the
+            // first real camera frame is not hit with that one-time cost.
+            {
+                auto input_port = compiled_model.input();
+                ov::Shape warmup_shape{1, 3, IMAGE_SIZE, IMAGE_SIZE};
+                std::vector<float> warmup_data(3ul * IMAGE_SIZE * IMAGE_SIZE, 0.0f);
+                ov::Tensor warmup_tensor(input_port.get_element_type(), warmup_shape, warmup_data.data());
+                infer_request.set_input_tensor(warmup_tensor);
+                infer_request.infer();
+                log<INFO>("Segmentation model warmed up");
+            }
         });
 
         on<Trigger<Image>, Single>().then("Segmentation Main Loop", [this](const Image& img) {
-            // Start timer for benchmarking
-            auto start = std::chrono::high_resolution_clock::now();
-
             // -------- Convert image to cv::Mat -------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
@@ -82,7 +118,10 @@ namespace module::vision {
                     break;
                 case utility::vision::FOURCC::RGGB:
                     img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
-                    cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
+                    // Convert to BGR (not RGB) so every format path produces a consistent BGR mat.
+                    // The preprocessing below assumes BGR ordering and blobFromImage(..., swapRB=true)
+                    // then converts to the RGB the model expects.
+                    cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2BGR);
                     break;
                 case utility::vision::fourcc("RGBA"):
                     img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
@@ -91,36 +130,36 @@ namespace module::vision {
                     break;
                 default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
             }
-
             // -------- Preprocess the image -------
             cv::Mat resized_img;
             cv::resize(img_cv, resized_img, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
 
-            cv::imwrite("recordings/segmentation_original.png", resized_img);
-
-            // Convert to float and normalize using ImageNet mean and std
-            cv::Mat normalized_img;
-            resized_img.convertTo(normalized_img, CV_32F, 1.0 / 255.0);
-
-            // Apply normalization with same values as in Python code
-            // Python uses: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-            std::vector<cv::Mat> channels(3);
-            cv::split(normalized_img, channels);
-
-            // Normalize each channel
-            channels[0] = (channels[0] - 0.406) / 0.225;  // B channel
-            channels[1] = (channels[1] - 0.456) / 0.224;  // G channel
-            channels[2] = (channels[2] - 0.485) / 0.229;  // R channel
-
-            cv::merge(channels, normalized_img);
-
-            // Convert to blob format
-            cv::Mat blob = cv::dnn::blobFromImage(normalized_img,
-                                                  1.0,  // scale factor
+            // Build the CHW blob in one pass: blobFromImage scales by 1/255, swaps BGR->RGB and
+            // lays the data out as [1, 3, H, W]. We then apply the per-channel ImageNet mean/std
+            // normalisation directly on each (contiguous) colour plane. This replaces the old
+            // convertTo + split + per-channel arithmetic + merge round-trip, which allocated
+            // several full-image float temporaries every frame.
+            cv::Mat blob = cv::dnn::blobFromImage(resized_img,
+                                                  1.0 / 255.0,  // scale factor
                                                   cv::Size(IMAGE_SIZE, IMAGE_SIZE),
                                                   cv::Scalar(),
-                                                  true);  // Swap to RGB
+                                                  true,   // Swap BGR -> RGB
+                                                  false,  // no crop
+                                                  CV_32F);
 
+            // Planes are in RGB order after swapRB. Apply (x - mean) / std as a single fused
+            // affine transform per plane: alpha = 1/std, beta = -mean/std.
+            // Python uses: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225] (RGB order).
+            {
+                const int plane_area   = IMAGE_SIZE * IMAGE_SIZE;
+                float* const blob_data = blob.ptr<float>();
+                const std::array<float, 3> mean{0.485f, 0.456f, 0.406f};
+                const std::array<float, 3> stdv{0.229f, 0.224f, 0.225f};
+                for (int c = 0; c < 3; ++c) {
+                    cv::Mat plane(IMAGE_SIZE, IMAGE_SIZE, CV_32F, blob_data + c * plane_area);
+                    plane.convertTo(plane, CV_32F, 1.0f / stdv[c], -mean[c] / stdv[c]);
+                }
+            }
             // -------- Feed the blob into the input node of the Model -------
             // Get input port for model with one input
             auto input_port = compiled_model.input();
@@ -139,9 +178,6 @@ namespace module::vision {
             auto output = infer_request.get_output_tensor(0);
 
             // -------- Postprocess the result --------
-            // The output is a [1, num_classes, height, width] tensor
-            cv::Mat segmentation_result(IMAGE_SIZE, IMAGE_SIZE, CV_8UC1);
-
             // Get raw output data and tensor information
             float* data = output.data<float>();
 
@@ -159,8 +195,6 @@ namespace module::vision {
             int out_height   = output_shape[2];  // Should match IMAGE_SIZE
             int out_width    = output_shape[3];  // Should match IMAGE_SIZE
 
-            log<DEBUG>("Output shape: [", batch_size, ", ", out_channels, ", ", out_height, ", ", out_width, "]");
-
             // Verify we have the expected dimensions
             if (out_height != IMAGE_SIZE || out_width != IMAGE_SIZE) {
                 log<WARN>("Output dimensions don't match expected size: ",
@@ -174,51 +208,47 @@ namespace module::vision {
                           ")");
             }
 
-            // Find the class with highest probability for each pixel
-            for (int y = 0; y < out_height; y++) {
-                for (int x = 0; x < out_width; x++) {
-                    // Find the class with maximum probability for this pixel
+            // Argmax across the class planes. The output is laid out as [1, C, H, W] so each
+            // class plane is contiguous; walk every pixel once and compare the C planes by a
+            // simple pointer offset (data[c * plane_area + i]). Building the result at the
+            // network's own output size lets us use a flat pointer loop with no bounds checks.
+            cv::Mat segmentation_result(out_height, out_width, CV_8UC1);
+            {
+                const int plane_area = out_height * out_width;
+                uchar* seg           = segmentation_result.ptr<uchar>();
+                for (int i = 0; i < plane_area; ++i) {
                     int max_class  = 0;
-                    float max_prob = -std::numeric_limits<float>::max();
-
-                    for (int c = 0; c < out_channels; c++) {
-                        // Calculate the index in the flattened tensor: [b,c,y,x]
-                        // For batch_size=1: index = c*H*W + y*W + x
-                        float prob = data[c * out_height * out_width + y * out_width + x];
+                    float max_prob = data[i];
+                    for (int c = 1; c < out_channels; ++c) {
+                        const float prob = data[c * plane_area + i];
                         if (prob > max_prob) {
                             max_prob  = prob;
                             max_class = c;
                         }
                     }
-
-                    // Make sure we're not writing outside our segmentation result
-                    if (y < IMAGE_SIZE && x < IMAGE_SIZE) {
-                        segmentation_result.at<uchar>(y, x) = static_cast<uchar>(max_class);
-                    }
+                    seg[i] = static_cast<uchar>(max_class);
                 }
             }
 
-            // If output dimensions don't match IMAGE_SIZE, resize the segmentation result
+            // If output dimensions don't match IMAGE_SIZE, resize the segmentation result.
+            // Use nearest-neighbour: this is a class-index map, so interpolating between
+            // labels (e.g. field=0 and background=2) would fabricate intermediate classes
+            // (field line=1).
             if (out_height != IMAGE_SIZE || out_width != IMAGE_SIZE) {
-                cv::resize(segmentation_result, segmentation_result, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
+                cv::resize(segmentation_result,
+                           segmentation_result,
+                           cv::Size(IMAGE_SIZE, IMAGE_SIZE),
+                           0,
+                           0,
+                           cv::INTER_NEAREST);
             }
-
-            // -------- Create visualization image --------
-            cv::Mat visualization(IMAGE_SIZE, IMAGE_SIZE, CV_8UC3);
-
-            // Map each class to its color
-            for (int y = 0; y < IMAGE_SIZE; y++) {
-                for (int x = 0; x < IMAGE_SIZE; x++) {
-                    int class_id = segmentation_result.at<uchar>(y, x);
-                    if (static_cast<size_t>(class_id) < classes.size()) {
-                        visualization.at<cv::Vec3b>(y, x) = classes[class_id].colour;
-                    }
-                }
-            }
-
-            // Resize back to original dimensions
-            cv::resize(visualization, visualization, cv::Size(width, height));
-            cv::resize(segmentation_result, segmentation_result, cv::Size(width, height));
+            // Run the entire field-line CV pipeline (connected components, convex hull,
+            // field-line extraction) at the model's native IMAGE_SIZE x IMAGE_SIZE resolution
+            // rather than the full camera resolution. This is roughly (width*height)/
+            // (IMAGE_SIZE*IMAGE_SIZE) times cheaper. Pixel coordinates are mapped back to
+            // full-resolution image space only when unprojecting rays (see pix_to_ray call).
+            const double scale_x = static_cast<double>(width) / IMAGE_SIZE;
+            const double scale_y = static_cast<double>(height) / IMAGE_SIZE;
 
             // -------- Create field lines from segmentation result --------
             // Field lines are class index 1 in our segmentation
@@ -227,43 +257,38 @@ namespace module::vision {
 
             // Create binary mask for field pixels
             cv::Mat field_mask = (segmentation_result == FIELD_CLASS);
-            field_mask.convertTo(field_mask, CV_8UC1);
 
             // Perform connected components analysis
             cv::Mat labels, stats, centroids;
             int num_labels = cv::connectedComponentsWithStats(field_mask, labels, stats, centroids);
 
-            // Create a mask for valid clusters
-            cv::Mat valid_cluster_mask = cv::Mat::zeros(height, width, CV_8UC1);
-            for (int i = 1; i < num_labels; i++) {  // Start from 1 to skip background
-                if (stats.at<int>(i, cv::CC_STAT_AREA) >= cfg.min_cluster_size) {
-                    // Add this cluster to the valid mask
-                    valid_cluster_mask |= (labels == i);
-                }
-            }
-
-            // First, collect all field pixels for convex hull from valid clusters only
-            std::vector<cv::Point> field_points;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    if (valid_cluster_mask.at<uchar>(y, x) > 0) {
-                        field_points.push_back(cv::Point(x, y));
+            // Build the valid-cluster mask in a single pass. Precompute which label ids clear
+            // the minimum-area threshold, then map the entire label image through that lookup
+            // once. (The previous per-label `mask |= (labels == i)` did one full-image pass and
+            // allocated a temporary mask for every cluster.)
+            cv::Mat valid_cluster_mask(IMAGE_SIZE, IMAGE_SIZE, CV_8UC1);
+            {
+                std::vector<uchar> label_valid(static_cast<size_t>(num_labels), 0);
+                for (int i = 1; i < num_labels; ++i) {  // Start from 1 to skip background
+                    if (stats.at<int>(i, cv::CC_STAT_AREA) >= cfg.min_cluster_size) {
+                        label_valid[i] = 255;
                     }
                 }
+                const int* lbl = labels.ptr<int>();
+                uchar* vcm     = valid_cluster_mask.ptr<uchar>();
+                for (int i = 0; i < IMAGE_SIZE * IMAGE_SIZE; ++i) {
+                    vcm[i] = label_valid[lbl[i]];
+                }
             }
-
-            // Create convex hull if we have field points
-            std::vector<cv::Point> hull_points;
-            if (!field_points.empty()) {
-                cv::convexHull(field_points, hull_points);
+            // Extract boundary contours from the valid field mask. The GreenHorizon should be
+            // derived from the observed field boundary, not from an image-space convex hull of
+            // the entire field mask. Starting from the actual contours keeps the world-space hull
+            // local to visible field edges and avoids fisheye border artefacts dominating it.
+            std::vector<std::vector<cv::Point>> field_contours;
+            if (cv::countNonZero(valid_cluster_mask) > 0) {
+                cv::Mat contour_mask = valid_cluster_mask.clone();
+                cv::findContours(contour_mask, field_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
             }
-
-            // Helper function to check if a point is inside the convex hull
-            auto is_point_in_hull = [&hull_points](const cv::Point& pt) -> bool {
-                if (hull_points.empty())
-                    return false;
-                return cv::pointPolygonTest(hull_points, pt, false) >= 0;
-            };
 
             // Helper function to simplify unprojection calls
             auto pix_to_ray = [&](double x, double y) {
@@ -275,13 +300,97 @@ namespace module::vision {
                     norm_dim);
             };
 
+            // Precompute the camera-to-world transform once per frame. Hcw.inverse() is a
+            // full homogeneous-transform inversion; computing it per field-line point (as was
+            // previously done inside the lambdas and the distance filter) cost thousands of
+            // inversions per frame.
+            const Eigen::Isometry3d Hwc = img.Hcw.inverse();
+
             // Helper function to simplify projecting rays onto the field plane then transforming into world space
             auto ray_to_world_space = [&](const Eigen::Matrix<double, 3, 1>& uFCc) {
-                const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
-                Eigen::Vector3d uFCw         = Hwc.rotation() * uFCc;
-                Eigen::Vector3d rFCw         = uFCw * std::abs(Hwc.translation().z() / uFCw.z()) + Hwc.translation();
-                return rFCw;
+                Eigen::Vector3d uFCw = Hwc.rotation() * uFCc;
+                Eigen::Vector3d rFWw = uFCw * std::abs(Hwc.translation().z() / uFCw.z()) + Hwc.translation();
+                return rFWw;
             };
+
+            // -------- Build the green horizon --------
+            // This module replaces the visual mesh and green horizon detector, so we produce the
+            // GreenHorizon ourselves. The horizon is the convex hull of the field region on the
+            // ground plane in world space. Downstream consumers (e.g. Yolo) use these hull points
+            // to test whether a detection lies within the field, so the mesh/class_map fields are
+            // intentionally left empty.
+            std::vector<Eigen::Vector3d> green_horizon_hull;
+            if (!field_contours.empty()) {
+                // Project field-boundary contour points onto the ground plane (z = 0) in world
+                // space. Discard rays that point at or above the horizon (they never meet the
+                // ground) and points beyond the maximum horizon distance: vertices near the visual
+                // horizon otherwise project to enormous ground distances that produce a wildly
+                // distorted hull.
+                std::vector<Eigen::Vector2d> ground_pts;
+                for (const auto& contour : field_contours) {
+                    ground_pts.reserve(ground_pts.size() + contour.size());
+                    for (const auto& point : contour) {
+                        const Eigen::Vector3d uFCc = pix_to_ray(point.x * scale_x, point.y * scale_y);
+                        const Eigen::Vector3d uFCw = Hwc.rotation() * uFCc;
+                        const double t             = -Hwc.translation().z() / uFCw.z();
+                        if (!std::isfinite(t) || t <= 0.0) {
+                            continue;
+                        }
+                        const Eigen::Vector3d rFWw = uFCw * t + Hwc.translation();
+                        if ((rFWw - Hwc.translation()).norm() > cfg.max_horizon_distance) {
+                            continue;
+                        }
+                        ground_pts.emplace_back(rFWw.x(), rFWw.y());
+                    }
+                }
+
+                // The image-space boundary is not convex once projected through the fisheye lens
+                // onto the ground, so compute the convex hull in the ground plane to get a
+                // correctly ordered, convex world-space polygon (Andrew's monotone chain).
+                std::vector<Eigen::Vector2d> world_hull;
+                if (ground_pts.size() >= 3) {
+                    std::sort(ground_pts.begin(), ground_pts.end(), [](const auto& a, const auto& b) {
+                        return a.x() < b.x() || (a.x() == b.x() && a.y() < b.y());
+                    });
+                    const auto cross =
+                        [](const Eigen::Vector2d& o, const Eigen::Vector2d& a, const Eigen::Vector2d& b) {
+                            return (a.x() - o.x()) * (b.y() - o.y()) - (a.y() - o.y()) * (b.x() - o.x());
+                        };
+                    const size_t n = ground_pts.size();
+                    std::vector<Eigen::Vector2d> hull(2 * n);
+                    size_t k = 0;
+                    // Lower hull
+                    for (size_t i = 0; i < n; ++i) {
+                        while (k >= 2 && cross(hull[k - 2], hull[k - 1], ground_pts[i]) <= 0) {
+                            k--;
+                        }
+                        hull[k++] = ground_pts[i];
+                    }
+                    // Upper hull
+                    for (size_t i = n - 1, lower = k + 1; i-- > 0;) {
+                        while (k >= lower && cross(hull[k - 2], hull[k - 1], ground_pts[i]) <= 0) {
+                            k--;
+                        }
+                        hull[k++] = ground_pts[i];
+                    }
+                    hull.resize(k - 1);  // last point == first point
+                    world_hull = std::move(hull);
+                }
+
+                if (world_hull.size() >= 3) {
+                    green_horizon_hull.reserve(world_hull.size());
+                    auto green_horizon       = std::make_unique<GreenHorizon>();
+                    green_horizon->id        = img.id;
+                    green_horizon->timestamp = img.timestamp;
+                    green_horizon->Hcw       = img.Hcw;
+                    green_horizon->horizon.reserve(world_hull.size());
+                    for (const auto& p : world_hull) {
+                        green_horizon_hull.emplace_back(p.x(), p.y(), 0.0);
+                        green_horizon->horizon.emplace_back(p.x(), p.y(), 0.0);
+                    }
+                    emit(std::move(green_horizon));
+                }
+            }
 
             // Create a field lines message
             auto field_lines       = std::make_unique<FieldLines>();
@@ -289,43 +398,50 @@ namespace module::vision {
             field_lines->timestamp = img.timestamp;
             field_lines->Hcw       = img.Hcw;
 
-            // Extract field line points from the segmentation result
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int class_id = segmentation_result.at<uchar>(y, x);
-                    if (class_id == FIELD_LINE_CLASS) {
-                        // Check if the point is within the field convex hull
-                        if (!is_point_in_hull(cv::Point(x, y))) {
-                            continue;  // Skip points outside the hull
-                        }
+            // Spatial downsampling grid: at most one field line point is kept per grid cell.
+            // This keeps the point cloud a manageable size for downstream algorithms while
+            // maintaining a roughly uniform density along the lines. A cell size <= 1 keeps
+            // every point (downsampling disabled).
+            const int grid_size = std::max(1, cfg.field_line_grid_size);
+            const int cells_x   = (IMAGE_SIZE + grid_size - 1) / grid_size;
+            const int cells_y   = (IMAGE_SIZE + grid_size - 1) / grid_size;
+            std::vector<bool> cell_occupied(static_cast<size_t>(cells_x) * cells_y, false);
 
-                        // Convert pixel to ray in camera space
-                        Eigen::Vector3d uFCc = pix_to_ray(x, y);
-
-                        // Project ray onto field plane in world space
-                        Eigen::Vector3d rFWw = ray_to_world_space(uFCc);
-
-                        // Check if the point is within the maximum distance
-                        bool is_valid = true;
-                        if (cfg.filter_by_distance) {
-                            // Calculate distance from camera origin to the field point
-                            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
-                            double distance              = (rFWw - Hwc.translation()).norm();
-
-                            if (distance > cfg.max_field_line_distance || rFWw.z() != 0) {
-                                is_valid = false;
-                            }
-                        }
-
-                        // Only add the ray if it's valid
-                        if (is_valid) {
-                            field_lines->points.push_back(uFCc);
-                            field_lines->rPWw.push_back(rFWw);
-                        }
+            // Extract field line points from the segmentation result. Filter them by the emitted
+            // GreenHorizon polygon in world space rather than by an image-space hull or a simple
+            // radial distance threshold.
+            for (int y = 0; y < IMAGE_SIZE; y++) {
+                const uchar* seg_row = segmentation_result.ptr<uchar>(y);
+                for (int x = 0; x < IMAGE_SIZE; x++) {
+                    if (seg_row[x] != FIELD_LINE_CLASS) {
+                        continue;
                     }
+
+                    const size_t cell_index = static_cast<size_t>(y / grid_size) * cells_x + (x / grid_size);
+                    if (cell_occupied[cell_index]) {
+                        continue;
+                    }
+
+                    // Convert pixel to ray in camera space. Map the 512x512 pixel back to
+                    // full-resolution image coordinates so the lens unprojection is correct.
+                    Eigen::Vector3d uFCc = pix_to_ray(x * scale_x, y * scale_y);
+                    Eigen::Vector3d rFWw = ray_to_world_space(uFCc);
+
+                    // Reject rays that do not intersect the ground plane in front of the camera.
+                    if (std::abs(rFWw.z()) > 1e-6) {
+                        continue;
+                    }
+
+                    if (green_horizon_hull.size() >= 3
+                        && !utility::math::geometry::point_in_convex_hull(green_horizon_hull, rFWw)) {
+                        continue;
+                    }
+
+                    field_lines->points.push_back(uFCc);
+                    field_lines->rPWw.push_back(rFWw);
+                    cell_occupied[cell_index] = true;
                 }
             }
-
             // Only emit field lines if we found any
             if (!field_lines->points.empty()) {
                 log<DEBUG>("Found ", field_lines->points.size(), " field line points");
@@ -335,117 +451,6 @@ namespace module::vision {
             }
             else {
                 log<DEBUG>("No field lines found in segmentation");
-            }
-
-            // -------- Create and emit visualization image --------
-            auto visualization_image            = std::make_unique<message::input::Image>();
-            visualization_image->timestamp      = NUClear::clock::now();
-            visualization_image->dimensions.x() = width;
-            visualization_image->dimensions.y() = height;
-            visualization_image->Hcw            = img.Hcw;  // Keep the same camera transform
-
-            // Create a properly sized data vector first
-            visualization_image->data.resize(width * height * 3);
-
-            // Fill the data vector directly without temporary storage
-            // This approach minimizes memory operations
-            size_t index = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    cv::Vec3b color                    = visualization.at<cv::Vec3b>(y, x);
-                    visualization_image->data[index++] = color[2];  // R (OpenCV uses BGR)
-                    visualization_image->data[index++] = color[1];  // G
-                    visualization_image->data[index++] = color[0];  // B
-                }
-            }
-
-            visualization_image->format = utility::vision::fourcc("RGB3");
-            visualization_image->name   = "Segmentation";
-
-            // Make sure to use std::move when emitting the unique_ptr
-            // emit(std::move(visualization_image));
-
-            if (log_level <= DEBUG) {
-                // -------- Benchmark --------
-                auto end      = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                log<DEBUG>("Segmentation took: ", duration, "ms");
-                log<DEBUG>("FPS: ", 1000.0 / duration);
-
-                // -------- Save images --------
-                // Save the colored visualization
-                cv::imwrite("recordings/segmentation_visualization.png", visualization);
-
-                // Create a more informative colored version of the class map for debugging
-                cv::Mat colored_segmentation_map(height, width, CV_8UC3);
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        int class_id = segmentation_result.at<uchar>(y, x);
-                        if (static_cast<size_t>(class_id) < classes.size()) {
-                            colored_segmentation_map.at<cv::Vec3b>(y, x) = classes[class_id].colour;
-                        }
-                        else {
-                            // Use a distinctive color for unexpected class ids
-                            colored_segmentation_map.at<cv::Vec3b>(y, x) = cv::Vec3b(0, 0, 255);  // Red
-                        }
-                    }
-                }
-                cv::imwrite("recordings/segmentation_colored_map.png", colored_segmentation_map);
-
-                // Save the raw class indices as well (but scale to make it more visible)
-                cv::Mat scaled_class_map;
-                // Scale to 0-255 range to make it more visible
-                segmentation_result.convertTo(scaled_class_map, CV_8UC1, 255.0 / (cfg.num_classes - 1));
-                cv::imwrite("recordings/segmentation_class_indices.png", scaled_class_map);
-
-                // Save a side-by-side comparison of original and segmentation
-                cv::Mat comparison(height, width * 2, CV_8UC3);
-                // Resize the original image to the output dimensions
-                cv::Mat resized_original;
-                cv::resize(img_cv, resized_original, cv::Size(width, height));
-                // Copy images side by side
-                resized_original.copyTo(comparison(cv::Rect(0, 0, width, height)));
-                colored_segmentation_map.copyTo(comparison(cv::Rect(width, 0, width, height)));
-                cv::imwrite("recordings/segmentation_comparison.png", comparison);
-
-                // Add visualization of the convex hull
-                if (!hull_points.empty()) {
-                    // Draw the convex hull on the visualization
-                    for (size_t i = 0; i < hull_points.size(); i++) {
-                        cv::line(visualization,
-                                 hull_points[i],
-                                 hull_points[(i + 1) % hull_points.size()],
-                                 cv::Scalar(0, 255, 0),  // Green color
-                                 2);                     // Line thickness
-                    }
-                }
-                cv::imwrite("recordings/segmentation_with_hull.png", visualization);
-
-                // Add visualization of clusters and hull
-                cv::Mat cluster_visualization = visualization.clone();
-
-                // Draw different clusters in random colors
-                cv::RNG rng(12345);  // Random number generator with seed
-                for (int i = 1; i < num_labels; i++) {
-                    if (stats.at<int>(i, cv::CC_STAT_AREA) >= cfg.min_cluster_size) {
-                        cv::Scalar color(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-                        cv::Mat cluster_mask = (labels == i);
-                        cluster_visualization.setTo(color, cluster_mask);
-                    }
-                }
-
-                // Draw the convex hull on top
-                if (!hull_points.empty()) {
-                    for (size_t i = 0; i < hull_points.size(); i++) {
-                        cv::line(cluster_visualization,
-                                 hull_points[i],
-                                 hull_points[(i + 1) % hull_points.size()],
-                                 cv::Scalar(0, 255, 0),  // Green color
-                                 2);                     // Line thickness
-                    }
-                }
-
-                cv::imwrite("recordings/segmentation_clusters.png", cluster_visualization);
             }
         });
     }
