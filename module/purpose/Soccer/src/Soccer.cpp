@@ -121,7 +121,10 @@ namespace module::purpose {
         on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
             [this](const GameState& game_state) {
                 // Maintain FindPurpose task during active game phases, unless a brief stop is in effect
+                // or we are penalised, otherwise this loop would re-add the task the moment the
+                // Penalisation handler removes it and the robot would play on while penalised
                 if (!cfg.force_playing && !idle && !game_state.stopped
+                    && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED
                     && (game_state.phase == GameState::Phase::READY || game_state.phase == GameState::Phase::SET
                         || game_state.phase == GameState::Phase::PLAYING)) {
                     emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -197,8 +200,11 @@ namespace module::purpose {
             if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 // The robot autonomously re-enters the game, so it needs to move again: back to soccer
                 emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
-                emit<Task>(std::make_unique<FindPurpose>(), 1);
-                emit<Task>(std::make_unique<FallRecovery>(), 2);
+                // If a brief stop is in effect, stay still - the stop-clear handler resumes play instead
+                if (!stopped) {
+                    emit<Task>(std::make_unique<FindPurpose>(), 1);
+                    emit<Task>(std::make_unique<FallRecovery>(), 2);
+                }
             }
         });
 
