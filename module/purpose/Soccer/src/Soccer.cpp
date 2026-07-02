@@ -120,8 +120,8 @@ namespace module::purpose {
         // Keep FindPurpose active during game phases (READY, SET, PLAYING)
         on<Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
             [this](const GameState& game_state) {
-                // Maintain FindPurpose task during active game phases
-                if (!cfg.force_playing && !idle
+                // Maintain FindPurpose task during active game phases, unless a brief stop is in effect
+                if (!cfg.force_playing && !idle && !game_state.stopped
                     && (game_state.phase == GameState::Phase::READY || game_state.phase == GameState::Phase::SET
                         || game_state.phase == GameState::Phase::PLAYING)) {
                     emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -135,6 +135,28 @@ namespace module::purpose {
                 emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
             }
             previous_phase = game_state.phase;
+
+            // Handle a brief stop ("Stop Play"). RoboCup rules require the robot to cease ALL motion
+            // immediately and remain still as if in the SET state, with no locomotion permitted - not even
+            // getting up. Play resumes in the same state (ball and robots stay in place), so localisation is
+            // deliberately NOT reset.
+            if (game_state.stopped != stopped) {
+                stopped = game_state.stopped;
+                if (stopped) {
+                    log<INFO>("Brief stop called: standing still");
+                    // Tear down the behaviour tree, including fall recovery so the robot does not get up,
+                    // and fall back to the low-priority idle stand so the robot stays still in place.
+                    emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
+                    emit<Task>(std::unique_ptr<FallRecovery>(nullptr));
+                    emit(std::make_unique<Stability>(Stability::UNKNOWN));
+                }
+                // Resume play in the same state, unless paused (idle) or penalised
+                else if (!idle && game_state.self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
+                    log<INFO>("Brief stop cleared: resuming play");
+                    emit<Task>(std::make_unique<FindPurpose>(), 1);
+                    emit<Task>(std::make_unique<FallRecovery>(), 2);
+                }
+            }
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
