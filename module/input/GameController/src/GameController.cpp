@@ -32,6 +32,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
@@ -44,6 +45,7 @@ namespace module::input {
 
     using extension::Configuration;
     using gamecontroller::GameControllerPacket;
+    using message::behaviour::state::Stability;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::Team;
     using message::input::GameEvents;
@@ -156,6 +158,9 @@ namespace module::input {
             latest_ball_time = ball.time_of_measurement;
             have_ball        = true;
         });
+
+        on<Trigger<Stability>>().then(
+            [this](const Stability& stability) { is_fallen = stability <= Stability::FALLING; });
     }
 
     void GameController::send_reply_message() {
@@ -168,9 +173,8 @@ namespace module::input {
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
 
-        // fallen, ball_age and ball should be optional to be sent to the GameController
-        // TODO: wire up from localisation if required in the future
-        packet->fallen = self_penalised ? 1 : 0;
+        // 1 = fallen, 0 = upright; drawn as lying down / standing in the visualiser
+        packet->fallen = is_fallen ? 1 : 0;
 
         if (have_sensors && have_field) {
             // Robot's torso pose in field space

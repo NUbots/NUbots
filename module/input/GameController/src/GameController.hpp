@@ -99,6 +99,9 @@ namespace module::input {
         /// @brief Whether latest_rBWw has been populated by a Ball message yet
         bool have_ball{false};
 
+        /// @brief Whether the robot is currently fallen or falling, for the reply packet's fallen field
+        bool is_fallen{false};
+
         /// @brief Handle for our registered UDP receive callback
         ReactionHandle listen_handle;
 
