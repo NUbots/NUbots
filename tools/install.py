@@ -29,6 +29,7 @@
 import glob
 import os
 import subprocess
+import tempfile
 import fabric
 import getpass
 from invoke import Responder
@@ -91,10 +92,50 @@ def run(target, local, user, config, toolchain, **kwargs):
     # Build directory on the robot
     build_dir = b.binary_dir
 
-    # Setup connection via Fabric
-    pw = getpass.getpass("Enter SSH password to use: ")
-    conn = fabric.Connection(user=user, host=target, connect_kwargs={"password": pw})
-    sudo_responder = Responder(pattern=r"\[sudo\] password", response=pw + "\n")
+    # Setup connection via Fabric and a shared SSH ControlMaster connection so that
+    # every rsync/scp call reuses one authenticated session instead of prompting
+    # for the password each time
+    ssh_cmd = "ssh"
+    scp_options = []
+    if not local:
+        pw = getpass.getpass("Enter SSH password to use: ")
+        conn = fabric.Connection(user=user, host=target, connect_kwargs={"password": pw})
+        sudo_responder = Responder(pattern=r"\[sudo\] password", response=pw + "\n")
+
+        control_path = os.path.join(tempfile.gettempdir(), "install-ssh-{}-{}".format(user, target))
+        ssh_cmd = "ssh -o ControlPath={}".format(control_path)
+        scp_options = ["-o", "ControlPath={}".format(control_path)]
+
+        # Feed the password to the master connection via SSH_ASKPASS so it is only typed once
+        with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as askpass:
+            askpass.write('#!/bin/sh\necho "$SSH_PASSWORD"\n')
+        os.chmod(askpass.name, 0o700)
+        try:
+            subprocess.run(
+                [
+                    "ssh",
+                    "-o",
+                    "ControlMaster=auto",
+                    "-o",
+                    "ControlPath={}".format(control_path),
+                    "-o",
+                    "ControlPersist=10m",
+                    "-fN",
+                    "{}@{}".format(user, target),
+                ],
+                env=dict(
+                    os.environ,
+                    SSH_ASKPASS=askpass.name,
+                    SSH_ASKPASS_REQUIRE="force",
+                    SSH_PASSWORD=pw,
+                    DISPLAY=os.environ.get("DISPLAY", "none"),
+                ),
+                stdin=subprocess.DEVNULL,
+                start_new_session=True,
+                check=True,
+            )
+        finally:
+            os.unlink(askpass.name)
 
     # Recursively gather all files under build/bin
     cprint("Installing binaries to " + target_binaries_dir, "blue", attrs=["bold"])
@@ -112,7 +153,7 @@ def run(target, local, user, config, toolchain, **kwargs):
     # For example, /home/NUbots/build/bin/binary will become /home/NUbots/build/bin/./binary
     common_path = os.path.commonpath(files)
     files = [os.path.join(common_path, f.replace(common_path, ".")) for f in files]
-    subprocess.call(["rsync", "-avPlR", "--checksum", "-e ssh"] + files + [target_binaries_dir])
+    subprocess.call(["rsync", "-avPlR", "--checksum", "-e " + ssh_cmd] + files + [target_binaries_dir])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
@@ -149,7 +190,7 @@ def run(target, local, user, config, toolchain, **kwargs):
                 "--exclude=*",
                 "--checksum",
                 "--prune-empty-dirs",
-                "-e ssh",
+                "-e " + ssh_cmd,
                 source_dir,
                 target_toolchain_dir,
             ]
@@ -182,16 +223,16 @@ def run(target, local, user, config, toolchain, **kwargs):
 
     if config in ["overwrite", "o"]:
         cprint("Overwriting configuration files on target", "blue", attrs=["bold"])
-        subprocess.run(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_binaries_dir])
+        subprocess.run(["rsync", "-avPLR", "--checksum", "-e " + ssh_cmd] + config_files + [target_binaries_dir])
 
     if config in ["update", "u"]:
         cprint("Updating configuration files that are older on target", "blue", attrs=["bold"])
-        subprocess.run(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_binaries_dir])
+        subprocess.run(["rsync", "-avuPLR", "--checksum", "-e " + ssh_cmd] + config_files + [target_binaries_dir])
 
     if config in ["new", "n"]:
         cprint("Adding new configuration files to the target", "blue", attrs=["bold"])
         subprocess.run(
-            ["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_binaries_dir]
+            ["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e " + ssh_cmd] + config_files + [target_binaries_dir]
         )
 
     if config in ["ignore", "i"]:
@@ -203,4 +244,4 @@ def run(target, local, user, config, toolchain, **kwargs):
         os.chdir(b.project_dir)
         subprocess.run(["git", "log", "-1", "--pretty=format:'%H'"], stdout=f)
 
-    subprocess.run(["scp", version_file, target_binaries_dir])
+    subprocess.run(["scp"] + scp_options + [version_file, target_binaries_dir])
