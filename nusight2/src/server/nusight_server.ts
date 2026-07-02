@@ -3,7 +3,6 @@ import { NUClearNetOptions, NUClearNetPeer } from "nuclearnet.js";
 import { compose } from "../shared/base/compose";
 import { NUClearNetClient } from "../shared/nuclearnet/nuclearnet_client";
 
-import { CompositeNUClearNetClient } from "./nuclearnet/composite_nuclearnet_client";
 import { DirectNUClearNetClient } from "./nuclearnet/direct_nuclearnet_client";
 import { FakeNUClearNetClient } from "./nuclearnet/fake_nuclearnet_client";
 import { RoboCupUDPClient, RoboCupUDPClientOptions } from "./nuclearnet/robocup_udp_client";
@@ -16,16 +15,17 @@ interface NUsightServerOpts {
   connectionOpts: NUClearNetOptions;
   /**
    * When provided, an additional receive-only UDP side channel is opened that presents robots
-   * (or other teams) sending serialised RoboCup team communication packets as their own peers,
-   * separate from the main NUClearNet connection.
+   * (or other teams) sending serialised RoboCup team communication packets as their own peers.
    */
   robocupUDP?: RoboCupUDPClientOptions;
 }
 
 /**
  * The server component of a running NUsight instance. Provides the following services for NUsight browser clients connected via websocket:
- *   - Acts as a gateway to the NUClear network. All clients currently share a single NUClearNet connection, mostly for
- *     performance reasons. Could potentially be improved to have more intelligent multiplexing.
+ *   - Acts as a gateway to one or more independent network sources (the real NUClearNet connection, plus any UDP side
+ *     channels such as RoboCup team communication). Each source is a separate `NUClearNetClient` in its own right —
+ *     none of them are "the main one" — and every peer they report keeps its own identity, so e.g. a robot connected
+ *     over NUClearNet and a robot only visible via the RoboCup UDP side channel show up as distinct peers.
  *   - Provides NBS playback and scrubbing for clients connected in a "session". A session is a group of related clients
  *     that share a common set of NBS scrubbers.
  */
@@ -41,17 +41,16 @@ export class NUsightServer {
 
   constructor(
     readonly websocketServer: WebSocketServer,
-    private readonly nuclearnetClient: NUClearNetClient,
+    private readonly nuclearnetClients: NUClearNetClient[],
     private readonly connectionOpts: NUClearNetOptions,
   ) {
     // Listen for websocket connections to add new clients when they connect
     websocketServer.onConnection(this.onClientConnection);
 
-    // Connect to NUClearNet
+    // Connect every network source and track peers joining/leaving across all of them
     this.destroy = compose([
-      this.nuclearnetClient.onJoin(this.onPeerJoin),
-      this.nuclearnetClient.onLeave(this.onPeerLeave),
-      this.nuclearnetClient.connect(this.connectionOpts),
+      ...this.nuclearnetClients.flatMap((client) => [client.onJoin(this.onPeerJoin), client.onLeave(this.onPeerLeave)]),
+      ...this.nuclearnetClients.map((client) => client.connect(this.connectionOpts)),
       () => {
         // Close all sessions when this server is destroyed
         for (const session of this.sessions.values()) {
@@ -63,16 +62,18 @@ export class NUsightServer {
   }
 
   static of(server: WebSocketServer, { fakeNetworking, connectionOpts, robocupUDP }: NUsightServerOpts): NUsightServer {
-    const primaryClient: NUClearNetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of();
+    // Every network source NUsight combines together. There's no single "main" client here — each
+    // is an independent connection whose peers and packets are surfaced as their own distinct
+    // peers (see robocup_udp_client.ts for how the RoboCup UDP side channel identifies itself).
+    const nuclearnetClients: NUClearNetClient[] = [
+      fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of(),
+    ];
 
-    // Optionally add the RoboCup UDP side channel as an additional receive-only source. It is
-    // presented to clients as its own peer (see robocup_udp_client.ts), separate from the main
-    // NUClearNet peers.
-    const nuclearnetClient: NUClearNetClient = robocupUDP
-      ? CompositeNUClearNetClient.of(primaryClient, [RoboCupUDPClient.of(robocupUDP)])
-      : primaryClient;
+    if (robocupUDP) {
+      nuclearnetClients.push(RoboCupUDPClient.of(robocupUDP));
+    }
 
-    return new NUsightServer(server, nuclearnetClient, connectionOpts);
+    return new NUsightServer(server, nuclearnetClients, connectionOpts);
   }
 
   /** Handle a new client connection */
@@ -82,7 +83,7 @@ export class NUsightServer {
     const sessionId = "todo-replace-with-clients-session-id";
 
     // Get the session or create a new one if it doesn't exist
-    const session = this.sessions.get(sessionId) ?? NUsightSession.of(this.nuclearnetClient);
+    const session = this.sessions.get(sessionId) ?? NUsightSession.of(this.nuclearnetClients);
     this.sessions.set(sessionId, session);
 
     // Add a client to the session, with the new connection

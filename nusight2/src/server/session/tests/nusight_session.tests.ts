@@ -47,7 +47,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("forwards outgoing packets from a browser client to NUClearNet", () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -64,7 +64,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("listens for incoming NUClearNet packets on behalf of a browser client", () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -87,7 +87,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("stops listening for incoming NUClearNet packets on request from browser client", () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -109,7 +109,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("loads an nbs scrubber on valid scrubber load request from browser client", async () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -148,7 +148,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("sends loaded scrubbers to all clients in the session", async () => {
     // Given we have a session...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
 
     // and a client A connected to the session...
     const mockSocketA = createMockWebSocket();
@@ -201,7 +201,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("sends all currently loaded scrubbers to a new browser client when it connects", async () => {
     // Given we have a session...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
 
     // and a client A connected to the session...
     const mockSocketA = createMockWebSocket();
@@ -254,7 +254,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("responds with error on invalid scrubber load request from browser client", async () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -282,7 +282,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("handles scrubber seek requests from a browser client", async () => {
     // Given we have a session with a mock client connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
@@ -329,7 +329,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
 
   it("closes a loaded scrubber on request from browser client", async () => {
     // Given we have a session with a mock clients A and B connected, ...
-    const session = NUsightSession.of(nuclearnetClient);
+    const session = NUsightSession.of([nuclearnetClient]);
     const mockSocketA = createMockWebSocket();
     const mockSocketB = createMockWebSocket();
     session.addClient(mockSocketA.connection);

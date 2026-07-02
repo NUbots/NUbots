@@ -15,7 +15,7 @@ describe("File Picker", () => {
   beforeEach(() => {
     // Setup a session with the file picker network and a socket to send messages through
     const { nuclearnetClient } = createMockNUClearNetClient();
-    session = new NUsightSession(nuclearnetClient, [createFilePicker]);
+    session = new NUsightSession([nuclearnetClient], [createFilePicker]);
   });
 
   afterEach(() => {

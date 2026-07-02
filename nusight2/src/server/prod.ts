@@ -20,9 +20,13 @@ const nuclearnetPort = args.port || "7447";
 
 // Optional RoboCup UDP side channel: presents robots (or other teams) sending serialised RoboCup
 // team communication packets to this port as additional NUsight peers. This is typically pointed
-// at the same port configured for team communication in the RobotCommunication module (defaults
-// to 10000 + team_id). Disabled unless a port is provided.
-const robocupUDPPort = args["robocup-udp-port"] ? Number(args["robocup-udp-port"]) : undefined;
+// at the same port configured for team communication in the RobotCommunication module, which
+// defaults to 10000 + team_id. We're team 1, so default to that port here too; override with
+// --robocup-team-id if playing under a different team number, or --robocup-udp-port directly.
+// Pass --robocup-udp-port=0 to disable the side channel entirely.
+const robocupTeamId = args["robocup-team-id"] !== undefined ? Number(args["robocup-team-id"]) : 1;
+const robocupUDPPort =
+  args["robocup-udp-port"] !== undefined ? Number(args["robocup-udp-port"]) : 10000 + robocupTeamId;
 const robocupUDPAllowedAddresses: string[] | undefined = args["robocup-udp-allowed-addresses"]
   ? String(args["robocup-udp-allowed-addresses"])
       .split(",")
