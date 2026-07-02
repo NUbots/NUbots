@@ -275,6 +275,9 @@ namespace module::localisation {
             /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
             /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
             Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+
+            /// @brief Number of accepted measurements since the last reset before the pose is trusted
+            int min_localised_measurements = 0;
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
@@ -301,6 +304,12 @@ namespace module::localisation {
 
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
+
+        /// @brief Bool indicating the pose estimate is trusted (enough accepted measurements since the last reset)
+        bool localised = false;
+
+        /// @brief Number of accepted measurements since the last reset
+        int num_accepted = 0;
 
         /// @brief Bool indicating ground truth localisation (Hfw) computed
         bool ground_truth_initialised = false;

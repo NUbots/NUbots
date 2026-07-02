@@ -46,6 +46,9 @@ window_size: 2.0
 # Number of angles to check during localisation reset search
 num_angles: 8
 
+# Number of accepted measurements after a reset before the pose estimate is trusted (Field.localised)
+min_localised_measurements: 5
+
 # Weighting associated with field line distance error cost term
 field_line_distance_weight: 0.0
 

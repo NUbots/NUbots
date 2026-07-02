@@ -122,6 +122,9 @@ namespace module::localisation {
 
             // Exponential filter parameters
             cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
+
+            // Number of accepted measurements after a reset before the pose estimate is trusted
+            cfg.min_localised_measurements = config["min_localised_measurements"].as<int>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -190,6 +193,14 @@ namespace module::localisation {
             first_measurement = true;
             startup           = true;
             last_reset        = NUClear::clock::now();
+            localised         = false;
+            num_accepted      = 0;
+            // Emit an unlocalised Field immediately so consumers don't act on the stale pre-reset pose
+            auto field       = std::make_unique<Field>();
+            field->Hfw       = compute_Hfw(filtered_state);
+            field->cost      = std::numeric_limits<double>::max();
+            field->localised = false;
+            emit(field);
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
@@ -199,6 +210,9 @@ namespace module::localisation {
             first_measurement  = true;
             last_reset         = NUClear::clock::now();
             last_certain_state = state;  // Update the last certain state
+            // The penalty kick position is known exactly, so the pose can be trusted straight away
+            localised    = true;
+            num_accepted = cfg.min_localised_measurements;
         });
 
         on<Trigger<FieldIntersections>,
@@ -229,7 +243,8 @@ namespace module::localisation {
                               ground_truth_Hfw.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
                               ground_truth_initialised  = true;
                           }
-                          field->Hfw = ground_truth_Hfw;
+                          field->Hfw       = ground_truth_Hfw;
+                          field->localised = true;
                           emit(field);
                           return;
                       }
@@ -273,6 +288,7 @@ namespace module::localisation {
                           filtered_state     = state;
                           first_measurement  = true;
                           startup            = false;
+                          num_accepted++;
                       }
                       else {
                           // Run the optimisation routine
@@ -299,6 +315,7 @@ namespace module::localisation {
                               // Update the last certain state and reset counter
                               last_certain_state = filtered_state;
                               num_over_cost      = 0;
+                              num_accepted++;
                           }
                           else {
                               // Reject the update, keep previous filtered state
@@ -331,6 +348,7 @@ namespace module::localisation {
                           log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
                           // Reset variables
                           num_over_cost = 0;
+                          num_accepted  = 0;
                           last_reset    = NUClear::clock::now();
                           // Let other modules know that localisation has finished resetting
                           emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
@@ -352,6 +370,10 @@ namespace module::localisation {
 
                       // Add cost, covariance, and uncertainty to the field message
                       field->cost = chosen_state_cost;
+
+                      // The pose is trusted once enough measurements have been accepted since the last reset
+                      localised        = num_accepted >= cfg.min_localised_measurements;
+                      field->localised = localised;
 
                       emit(field);
                   });
