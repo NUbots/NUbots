@@ -128,6 +128,7 @@ namespace module::purpose {
                 // the robot doesn't run out with a wrong or unconverged pose.
                 if (!field || !field->localised) {
                     log<DEBUG>("Not localised, standing still and looking around to localise.");
+                    supporting = false;
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
                                                    true,
@@ -152,6 +153,7 @@ namespace module::purpose {
                 // If the robot is uncertain about its position, it should not play
                 if (cfg.search_when_lost && field->cost > cfg.max_localisation_cost) {
                     log<DEBUG>("Field cost is too high, not playing.");
+                    supporting = false;
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::UNKNOWN,
                                                    true,
@@ -251,6 +253,7 @@ namespace module::purpose {
                 if (set_play && !game_state.our_kick_off) {
                     log<DEBUG>("Opponent set play, defending.");
                     if (furthest_back) {
+                        supporting = false;
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::DEFEND,
                                                        true,
@@ -259,6 +262,10 @@ namespace module::purpose {
                         emit<Task>(std::make_unique<Defend>());
                     }
                     else {
+                        if (!supporting) {
+                            log<INFO>("Opponent set play, switching to support.");
+                            supporting = true;
+                        }
                         emit<Task>(std::make_unique<Support>());
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::SUPPORT,
@@ -273,6 +280,7 @@ namespace module::purpose {
                 if (set_play && game_state.our_kick_off) {
                     if (is_closest) {
                         log<DEBUG>("Our set play, taking the kick.");
+                        supporting = false;
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::ATTACK,
                                                        true,
@@ -281,7 +289,10 @@ namespace module::purpose {
                         emit<Task>(std::make_unique<Attack>(ball_pos));
                     }
                     else {
-                        log<DEBUG>("Our set play, supporting.");
+                        if (!supporting) {
+                            log<INFO>("Our set play, switching to support.");
+                            supporting = true;
+                        }
                         emit<Task>(std::make_unique<Support>());
                         emit(std::make_unique<Purpose>(global_config.player_id,
                                                        SoccerPosition::SUPPORT,
@@ -296,6 +307,7 @@ namespace module::purpose {
                 // penalty set up phase.
                 if (is_closest && allowed_to_attack && !higher_id_attacking) {
                     log<DEBUG>("Attack!");
+                    supporting = false;
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::ATTACK,
                                                    true,
@@ -310,6 +322,7 @@ namespace module::purpose {
                 // positioning or opponent kickoff, then we should stick to a good spot and be ready to attack
                 if (is_closest && !allowed_to_attack) {
                     log<DEBUG>("Ready attack!");
+                    supporting = false;
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::ATTACK,
                                                    true,
@@ -336,6 +349,7 @@ namespace module::purpose {
 
                 if (furthest_back) {
                     log<DEBUG>("Defend!");
+                    supporting = false;
                     emit(std::make_unique<Purpose>(global_config.player_id,
                                                    SoccerPosition::DEFEND,
                                                    true,
@@ -347,7 +361,10 @@ namespace module::purpose {
 
                 // If we're not the attacker, nor are we the robot hanging back to protect in case the opponent takes
                 // the ball up towards our goal, we should help out the attacker however makes sense in the situation
-                log<DEBUG>("Support!");
+                if (!supporting) {
+                    log<INFO>("Switching to support.");
+                    supporting = true;
+                }
                 emit<Task>(std::make_unique<Support>());
                 emit(std::make_unique<Purpose>(global_config.player_id,
                                                SoccerPosition::SUPPORT,

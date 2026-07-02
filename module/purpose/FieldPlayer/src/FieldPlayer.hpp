@@ -57,6 +57,9 @@ namespace module::purpose {
             bool search_when_lost = false;
         } cfg;
 
+        /// @brief Whether the last purpose decision was support, so switching to support is only logged once
+        bool supporting = false;
+
     public:
         /// @brief Called by the powerplant to build and setup the FieldPlayer reactor.
         explicit FieldPlayer(std::unique_ptr<NUClear::Environment> environment);
