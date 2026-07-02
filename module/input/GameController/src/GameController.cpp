@@ -33,6 +33,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/GlobalConfig.hpp"
 
@@ -48,6 +49,7 @@ namespace module::input {
     using message::input::GameEvents;
     using message::input::GameState;
     using message::input::Sensors;
+    using message::localisation::Ball;
     using message::localisation::Field;
     using message::support::GlobalConfig;
     using utility::math::angle::normalise_angle;
@@ -148,6 +150,12 @@ namespace module::input {
             latest_Hfw = Eigen::Isometry3d(field.Hfw);
             have_field = true;
         });
+
+        on<Trigger<Ball>>().then([this](const Ball& ball) {
+            latest_rBWw      = ball.rBWw;
+            latest_ball_time = ball.time_of_measurement;
+            have_ball        = true;
+        });
     }
 
     void GameController::send_reply_message() {
@@ -171,12 +179,12 @@ namespace module::input {
             const double yaw            = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
             // GameController convention: 0,0 is the centre of the field and +ve x-axis points towards the goal
-            // we are attempting to score on. This is mirrored relative to our internal field frame (same
-            // convention used for the mixed-team broadcast in RobotCommunication), so mirror x and correct
-            // the yaw for the reflection accordingly. Convert metres to the millimetres GameController expects.
+            // we are attempting to score on. This is our internal field frame rotated 180 degrees about the
+            // centre, so negate x and y and rotate the yaw by pi. Convert metres to the millimetres
+            // GameController expects.
             packet->pose[0] = static_cast<float>(-rTFf.x() * 1000.0);
-            packet->pose[1] = static_cast<float>(rTFf.y() * 1000.0);
-            packet->pose[2] = static_cast<float>(normalise_angle(M_PI - yaw));
+            packet->pose[1] = static_cast<float>(-rTFf.y() * 1000.0);
+            packet->pose[2] = static_cast<float>(normalise_angle(yaw + M_PI));
         }
         else {
             packet->pose[0] = 0.f;
@@ -184,9 +192,18 @@ namespace module::input {
             packet->pose[2] = 0.f;
         }
 
-        packet->ball_age = -1.f;
-        packet->ball[0]  = 0.f;
-        packet->ball[1]  = 0.f;
+        if (have_ball && have_sensors) {
+            // Ball position relative to the robot in millimetres: +x forward, +y to the robot's left
+            const Eigen::Vector3d rBTt = latest_Htw * latest_rBWw;
+            packet->ball_age = std::chrono::duration<float>(NUClear::clock::now() - latest_ball_time).count();
+            packet->ball[0]  = static_cast<float>(rBTt.x() * 1000.0);
+            packet->ball[1]  = static_cast<float>(rBTt.y() * 1000.0);
+        }
+        else {
+            packet->ball_age = -1.f;
+            packet->ball[0]  = 0.f;
+            packet->ball[1]  = 0.f;
+        }
 
         if (game_controller_address != "") {
             emit<Scope::UDP>(packet, game_controller_address, send_port);

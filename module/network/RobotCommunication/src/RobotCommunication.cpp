@@ -52,7 +52,7 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::WalkTo;
+    using message::planning::WalkToDebug;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
@@ -160,7 +160,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
-           Optional<With<WalkTo>>,
+           Optional<With<WalkToDebug>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -169,7 +169,7 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
-                         const std::shared_ptr<const WalkTo>& walk_to,
+                         const std::shared_ptr<const WalkToDebug>& walk_to,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<Message>();
 
@@ -311,7 +311,10 @@ namespace module::network {
 
                 // Purpose information, simple a bool in the new proto
                 msg->going_for_ball = (purpose && purpose->purpose.value == SoccerPosition::ATTACK);
-                log<INFO>("msg->going_for_ball:", msg->going_for_ball);
+                log<INFO>("msg->going_for_ball:",
+                          msg->going_for_ball,
+                          "sampled purpose:",
+                          purpose ? static_cast<int>(purpose->purpose.value) : -1);
 
                 // Check serialised size before sending
                 auto payload = NUClear::util::serialise::Serialise<Message>::serialise(*msg);

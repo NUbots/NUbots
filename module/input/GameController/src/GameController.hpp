@@ -90,6 +90,15 @@ namespace module::input {
         /// @brief Whether latest_Hfw has been populated by a Field message yet
         bool have_field{false};
 
+        /// @brief Latest ball position in world space, cached for the reply packet's ball fields
+        Eigen::Vector3d latest_rBWw{Eigen::Vector3d::Zero()};
+
+        /// @brief Time the cached ball estimate was measured
+        NUClear::clock::time_point latest_ball_time{};
+
+        /// @brief Whether latest_rBWw has been populated by a Ball message yet
+        bool have_ball{false};
+
         /// @brief Handle for our registered UDP receive callback
         ReactionHandle listen_handle;
 
