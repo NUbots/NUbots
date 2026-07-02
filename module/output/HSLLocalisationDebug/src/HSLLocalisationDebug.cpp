@@ -49,9 +49,7 @@ namespace module::output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("HSLLocalisationDebug.yaml").then([this](const Configuration& cfg) {
-            log_level                   = cfg["log_level"].as<NUClear::LogLevel>();
-            max_field_association_lines = cfg["max_field_association_lines"].as<size_t>();
-            max_field_particles         = cfg["max_field_particles"].as<size_t>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
 
         on<Every<1, Per<std::chrono::seconds>>,
@@ -84,12 +82,6 @@ namespace module::output {
                 }
                 if (field) {
                     msg->field = *field;
-                    if (msg->field.association_lines.size() > max_field_association_lines) {
-                        msg->field.association_lines.resize(max_field_association_lines);
-                    }
-                    if (msg->field.particles.size() > max_field_particles) {
-                        msg->field.particles.resize(max_field_particles);
-                    }
                 }
 
                 emit(msg);

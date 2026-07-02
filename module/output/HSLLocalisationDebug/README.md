@@ -20,12 +20,7 @@ The module:
 - Reduces each `message::localisation::Robot` down to a `RobotSummary` (`id`/`rRWw`/`teammate` only), dropping
   `covariance`/`Hcw`/`Purpose`/timestamp: `Robots` was the single biggest contributor to packet size, and
   those extra fields aren't needed to plot a robot on the field
-- Truncates `Field`'s `association_lines` and `particles` lists to `max_field_association_lines` /
-  `max_field_particles` (configured in `HSLLocalisationDebug.yaml`) since they are unbounded in principle and
-  `Field` is the lowest debugging priority of the four
 - Emits the message locally; `NetworkForwarder` is responsible for actually sending it to NUsight
-
-Fields are ordered by debugging priority: field intersections, robots, ball, field.
 
 ## Consumes
 

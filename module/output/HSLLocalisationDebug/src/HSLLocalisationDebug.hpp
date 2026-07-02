@@ -27,7 +27,6 @@
 #ifndef MODULE_OUTPUT_HSLLOCALISATIONDEBUG_HPP
 #define MODULE_OUTPUT_HSLLOCALISATIONDEBUG_HPP
 
-#include <cstddef>
 #include <nuclear>
 
 namespace module::output {
@@ -37,12 +36,6 @@ namespace module::output {
     public:
         /// @brief Called by the powerplant to build and setup the HSLLocalisationDebug reactor.
         explicit HSLLocalisationDebug(std::unique_ptr<NUClear::Environment> environment);
-
-    private:
-        /// Maximum number of Field association lines to include, to bound packet size
-        size_t max_field_association_lines = 0;
-        /// Maximum number of Field particles to include, to bound packet size
-        size_t max_field_particles = 0;
     };
 
 }  // namespace module::output
