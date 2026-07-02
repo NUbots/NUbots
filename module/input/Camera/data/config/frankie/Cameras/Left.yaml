@@ -28,6 +28,6 @@ urdf_path: "models/nugus/robot.urdf"
 
 is_left_camera: true
 
-roll_offset: -0.07453254059985023 * pi / 180
-pitch_offset: -2.5037419973259287 * pi / 180
-yaw_offset: 4.012514377928829 * pi / 180
+roll_offset: 1.2174104888990922 * pi / 180
+pitch_offset: -3.218061822631629 * pi / 180
+yaw_offset: 0.5114542745949138 * pi / 180
