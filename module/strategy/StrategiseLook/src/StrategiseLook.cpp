@@ -103,12 +103,24 @@ namespace module::strategy {
                          const std::shared_ptr<const Goals>& goals) {
                 const bool stale_ball =
                     !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
-                const bool stale_goals = !goals || goals->goals.empty()
-                                         || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
+                const bool stale_goals       = !goals || goals->goals.empty()
+                                               || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
                 const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
+                if (stale_ball) {
+                    log<DEBUG>(ball ? "Ball reading is stale." : "No ball reading available.");
+                }
+                if (stale_goals) {
+                    log<DEBUG>(goals ? "Goal reading is stale or empty." : "No goal reading available.");
+                }
+                if (poor_localisation) {
+                    log<DEBUG>(
+                        fmt::format("Localisation cost too high: {} (max {}).", field.cost, cfg.max_localisation_cost));
+                }
+
                 if (stale_ball || stale_goals || poor_localisation) {
-                    emit<Task>(std::make_unique<LookAround>());
+                    log<DEBUG>("Stale features detected, looking around.");
+                    emit < Tt<Task>(std::make_unique<LookAround>());
                 }
             });
     }
