@@ -297,27 +297,74 @@ export class LocalisationNetwork {
    */
   @action
   private onRoboCup = (robotModel: RobotModel, robocup: RoboCup) => {
-    const robot = DashboardRobotModel.of(robotModel);
+    const dashboardRobot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)
-    robot.time = Timestamp.toSeconds(robocup.timestamp);
+    dashboardRobot.time = Timestamp.toSeconds(robocup.timestamp);
 
     // The id number of the robot
-    robot.playerId = robocup.currentPose?.playerId ?? 0;
+    dashboardRobot.playerId = robocup.currentPose?.playerId ?? 0;
 
     // The position of the robot on the field in field coordinates
-    robot.robotPosition = Vector3.from(robocup.currentPose?.position);
-    robot.robotPositionCovariance = Matrix3.from(robocup.currentPose?.covariance);
+    dashboardRobot.robotPosition = Vector3.from(robocup.currentPose?.position);
+    dashboardRobot.robotPositionCovariance = Matrix3.from(robocup.currentPose?.covariance);
 
     // The position of the ball in field coordinates
-    robot.ballPosition = Vector2.from(robocup.ball?.position);
-    robot.ballCovariance = Matrix2.from(robocup.ball?.covariance);
+    dashboardRobot.ballPosition = Vector2.from(robocup.ball?.position);
+    dashboardRobot.ballCovariance = Matrix2.from(robocup.ball?.covariance);
 
     // The location on the field the robot wants to kick in field coordinates
-    robot.kickTarget = Vector2.from(robocup.kickTarget);
+    dashboardRobot.kickTarget = Vector2.from(robocup.kickTarget);
 
     // The current walk command
-    robot.walkCommand = Vector3.from(robocup.walkCommand);
+    dashboardRobot.walkCommand = Vector3.from(robocup.walkCommand);
+
+    // Also populate the full 3D localisation view, so this robot can be seen alongside the rest.
+    // Prefer the NUbots extension's richer information when the sender provides it, falling back
+    // to the flattened [x, y, θ] position that every RoboCup sender provides.
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    if (robocup.nubots?.Hft) {
+      // Hft (= Hfw * Htw⁻¹) is already precombined by the sender, so there's no separate world
+      // frame to account for here - treat "world" as being the field itself.
+      robot.Hfw = Matrix4.from(robocup.nubots.Hft);
+      robot.Htw = Matrix4.of();
+      robot.Hrw = Matrix4.of();
+    } else if (robocup.currentPose?.position) {
+      // Fall back to a flat pose (standing upright at ground level) built from the position
+      // and heading every RoboCup sender provides, even without the NUbots extension.
+      const { x, y, z: heading } = robocup.currentPose.position;
+      robot.Hfw = Matrix4.fromThree(new THREE.Matrix4().makeRotationZ(heading).setPosition(x, y, 0));
+      robot.Htw = Matrix4.of();
+      robot.Hrw = Matrix4.of();
+    }
+
+    // Servo angles, so this robot's actual posture (e.g. bent knees, raised arms) can be
+    // rendered. Only available from senders that provide the NUbots extension; otherwise the
+    // model just keeps its default/last known pose.
+    const servos = robocup.nubots?.servos;
+    if (servos && servos.length === 20) {
+      robot.motors.rightShoulderPitch.angle = servos[0];
+      robot.motors.leftShoulderPitch.angle = servos[1];
+      robot.motors.rightShoulderRoll.angle = servos[2];
+      robot.motors.leftShoulderRoll.angle = servos[3];
+      robot.motors.rightElbow.angle = servos[4];
+      robot.motors.leftElbow.angle = servos[5];
+      robot.motors.rightHipYaw.angle = servos[6];
+      robot.motors.leftHipYaw.angle = servos[7];
+      robot.motors.rightHipRoll.angle = servos[8];
+      robot.motors.leftHipRoll.angle = servos[9];
+      robot.motors.rightHipPitch.angle = servos[10];
+      robot.motors.leftHipPitch.angle = servos[11];
+      robot.motors.rightKnee.angle = servos[12];
+      robot.motors.leftKnee.angle = servos[13];
+      robot.motors.rightAnklePitch.angle = servos[14];
+      robot.motors.leftAnklePitch.angle = servos[15];
+      robot.motors.rightAnkleRoll.angle = servos[16];
+      robot.motors.leftAnkleRoll.angle = servos[17];
+      robot.motors.headPan.angle = servos[18];
+      robot.motors.headTilt.angle = servos[19];
+    }
   };
 }
 
