@@ -39,7 +39,12 @@ namespace module::input {
     using utility::math::euler::rpy_intrinsic_to_mat;
 
 
+    // Must match the writer-side layout in NUbridge exactly (binary compatibility).
     struct SharedPoseHeader {
+        static constexpr uint32_t MAGIC   = 0x4E42504F;  // "NBPO"
+        static constexpr uint32_t VERSION = 1;
+        uint32_t magic{MAGIC};
+        uint32_t version{VERSION};
         bip::interprocess_mutex mutex;
         bip::interprocess_condition has_new_data;
         uint64_t sequence{0};
@@ -64,7 +69,21 @@ namespace module::input {
         }
 
         try {
-            pose_shared_memory      = std::make_unique<PoseSharedMemory>(cfg.pose_segment);
+            pose_shared_memory = std::make_unique<PoseSharedMemory>(cfg.pose_segment);
+
+            // Reject segments whose layout tag doesn't match ours (stale or mismatched
+            // NUbridge version, or a segment NUbridge hasn't initialised yet)
+            if (pose_shared_memory->header->magic != SharedPoseHeader::MAGIC
+                || pose_shared_memory->header->version != SharedPoseHeader::VERSION) {
+                pose_shared_memory.reset();
+                if (!pose_unavailable_logged) {
+                    log<WARN>("K1Sensors head_pose segment has unexpected magic/version (is NUbridge up to date?)",
+                              cfg.pose_segment);
+                    pose_unavailable_logged = true;
+                }
+                return;
+            }
+
             pose_unavailable_logged = false;
             log<INFO>("K1Sensors mapped head_pose segment", cfg.pose_segment);
         }

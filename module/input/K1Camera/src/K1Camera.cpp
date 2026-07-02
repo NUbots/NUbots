@@ -65,6 +65,10 @@ namespace module::input {
 
     // Must match the writer-side layout in NUbridge exactly (binary compatibility).
     struct SharedImageHeader {
+        static constexpr uint32_t MAGIC   = 0x4E42494D;  // "NBIM"
+        static constexpr uint32_t VERSION = 1;
+        uint32_t magic{MAGIC};
+        uint32_t version{VERSION};
         bip::interprocess_mutex mutex;
         bip::interprocess_condition has_new_frame;
         uint64_t sequence{0};
@@ -129,6 +133,17 @@ namespace module::input {
 
                 auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
+
+                // Reject segments whose layout tag doesn't match ours (stale or mismatched
+                // NUbridge version, or a segment NUbridge hasn't initialised yet)
+                if (header->magic != SharedImageHeader::MAGIC || header->version != SharedImageHeader::VERSION) {
+                    log<WARN>(fmt::format(
+                        "K1Camera: segment '{}' has unexpected magic/version (is NUbridge up to date?) — "
+                        "retrying in 500 ms",
+                        ctx.segment_name));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    continue;
+                }
 
                 uint64_t last_sequence = 0;
 
