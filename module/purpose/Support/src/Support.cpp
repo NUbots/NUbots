@@ -30,7 +30,6 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Player.hpp"
@@ -47,7 +46,6 @@ namespace module::purpose {
     using SupportMsg = message::purpose::Support;
 
     using message::input::GameState;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
@@ -122,13 +120,11 @@ namespace module::purpose {
 
         on<Provide<SupportMsg>,
            Optional<With<Ball>>,
-           With<Sensors>,
            With<Field>,
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
-                         const Sensors& sensors,
                          const Field& field,
                          const GameState& game_state,
                          const GlobalConfig& global_config,
