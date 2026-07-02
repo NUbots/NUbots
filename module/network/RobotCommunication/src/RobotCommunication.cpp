@@ -129,7 +129,14 @@ namespace module::network {
                             // Port-per-team ensures only teammates broadcast on this port
                             // Filter out messages from ourselves only
                             if (!own_player_message) {
-                                log<DEBUG>("Message received from teammate ID", incoming_msg.current_pose.player_id);
+                                log<INFO>("Message received from teammate ID",
+                                          incoming_msg.current_pose.player_id,
+                                          "position:",
+                                          incoming_msg.current_pose.position.x(),
+                                          incoming_msg.current_pose.position.y(),
+                                          incoming_msg.current_pose.position.z(),
+                                          "going for ball:",
+                                          incoming_msg.going_for_ball);
                                 emit(std::make_unique<Message>(std::move(incoming_msg)));
                             }
                         });
