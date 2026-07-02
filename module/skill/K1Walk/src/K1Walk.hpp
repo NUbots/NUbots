@@ -27,6 +27,7 @@
 #ifndef MODULE_SKILL_K1WALK_HPP
 #define MODULE_SKILL_K1WALK_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -41,7 +42,14 @@ namespace module::skill {
 
     private:
         struct Config {
+            /// @brief Velocity command applied while performing an in-walk kick (x forward, y lateral, theta)
+            Eigen::Vector3d kick_velocity = Eigen::Vector3d::Zero();
+            /// @brief How long to drive the kick velocity before reporting the kick as done
+            NUClear::clock::duration kick_duration{};
         } cfg;
+
+        /// @brief Time the current in-walk kick started
+        NUClear::clock::time_point kick_start_time{};
     };
 
 }  // namespace module::skill

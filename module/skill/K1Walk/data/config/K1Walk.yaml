@@ -3,3 +3,10 @@ log_level: INFO
 walk:
   # Maximum acceleration for smoothing walk commands
   acceleration: [0.2, 0.2, 0.5]
+
+kick:
+  # Velocity burst driven while performing an in-walk kick [x forward, y lateral, theta] (m/s, rad/s).
+  # The Booster SDK has no in-walk kick primitive, so the kick is emulated as a forward velocity burst.
+  velocity: [0.75, 0.0, 0.0]
+  # How long to hold the kick velocity before reporting the kick as done (seconds)
+  duration: 0.5
