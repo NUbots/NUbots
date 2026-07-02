@@ -630,11 +630,7 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
 
     {/* Goal labels in field frame: own goal (+x), opponent goal (-x). */}
     {model.goalsVisible && (
-      <GoalLabels
-        fieldModel={model.field}
-        cameraPitch={model.camera.pitch}
-        cameraYaw={model.camera.yaw}
-      />
+      <GoalLabels fieldModel={model.field} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
     )}
 
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}

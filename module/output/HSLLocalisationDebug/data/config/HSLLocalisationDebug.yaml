@@ -1,0 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Cap field's particle/association-line lists
+max_field_association_lines: 30
+max_field_particles: 30
