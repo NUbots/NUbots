@@ -58,6 +58,7 @@ nuclear_role(
   strategy::WalkToFieldPosition
   strategy::FindObject
   strategy::DiveToBall
+  strategy::MaintainBallDistance
   # Purposes
   purpose::Soccer
   purpose::Attack

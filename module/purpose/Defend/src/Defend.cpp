@@ -77,7 +77,10 @@ namespace module::purpose {
                 double goal_ball_angle = std::atan2(-uGBf.y(), -uGBf.x());
 
                 // Position is the intersection of the penalty line and the line from the ball to the goal
-                double y_position = rBFf.y() + ((uGBf.y() / uGBf.x()) * (penalty_line_x - rBFf.x()));
+                // Clamped to the field width so the robot doesn't try to walk outside the field
+                double y_position = std::clamp(rBFf.y() + ((uGBf.y() / uGBf.x()) * (penalty_line_x - rBFf.x())),
+                                               -fd.dimensions.field_width / 2.0,
+                                               fd.dimensions.field_width / 2.0);
 
                 // Walk to the optimal position
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
