@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace module::planning::walk_path {
 
@@ -69,6 +70,11 @@ namespace module::planning::walk_path {
         return start + (end - start) * t;
     }
 
+    /// @brief Interpolates between two angles by t in [0,1] along the shortest arc, wrapping the result to [-pi, pi]
+    inline double lerp_angle(const double start, const double end, const double t) {
+        return std::remainder(start + std::remainder(end - start, 2.0 * M_PI) * t, 2.0 * M_PI);
+    }
+
     /// @brief Two-regime proportional velocity controller for walking to a pose. Far from the target the robot faces
     /// it and drives forward only, slowing while turning; near the target it approaches omnidirectionally while
     /// blending its heading toward the final desired heading. Speed is proportional to distance in both regimes so
@@ -95,7 +101,7 @@ namespace module::planning::walk_path {
         else {
             // Blend from facing the target to the final heading as we close in
             const double align_progress = prog(distance, p.min_align_radius, p.max_align_radius);
-            result.desired_heading      = lerp(angle_to_target, angle_to_final_heading, align_progress);
+            result.desired_heading      = lerp_angle(angle_to_target, angle_to_final_heading, align_progress);
 
             // Omnidirectional approach, decelerating to zero at the target
             const double speed = std::min(p.k_translation * distance, p.max_velocity.x());
