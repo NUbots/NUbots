@@ -133,14 +133,23 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
-                // Select mode
-                std::string mode_name = "normal_play";
-                if (game_state.mode.value == GameState::Mode::THROW_IN)
-                    mode_name = game_state.our_kick_off ? "throw_in_us" : "throw_in_them";
-                else if (game_state.our_kick_off)
-                    mode_name = "kickoff_us";
-                else if (!game_state.our_kick_off)
-                    mode_name = "kickoff_them";
+                // Select the formation mode matching the current set play, with the kicking team
+                // (our_kick_off tracks the GameController's kicking_team) picking the us/them variant
+                const std::string suffix = game_state.our_kick_off ? "_us" : "_them";
+                std::string mode_name;
+                switch (game_state.mode.value) {
+                    case GameState::Mode::DIRECT_FREEKICK: mode_name = "direct_free_kick" + suffix; break;
+                    case GameState::Mode::INDIRECT_FREEKICK: mode_name = "indirect_free_kick" + suffix; break;
+                    case GameState::Mode::PENALTYKICK: mode_name = "penalty_kick" + suffix; break;
+                    case GameState::Mode::CORNER_KICK: mode_name = "corner_kick" + suffix; break;
+                    case GameState::Mode::GOAL_KICK: mode_name = "goal_kick" + suffix; break;
+                    case GameState::Mode::THROW_IN: mode_name = "throw_in" + suffix; break;
+                    default:
+                        // No set play: kickoff formation while positioning in ready, normal play otherwise
+                        mode_name =
+                            game_state.phase.value == GameState::Phase::READY ? "kickoff" + suffix : "normal_play";
+                        break;
+                }
 
                 // Look up this robot's slot
                 auto mode_it = cfg.modes.find(mode_name);
