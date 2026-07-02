@@ -60,33 +60,24 @@ namespace module::output {
     using VisionGoals      = message::vision::Goals;
     using OverviewMsg      = message::support::nusight::Overview;
 
-    /// @brief Message used to schedule the next Overview emission
-    struct SendOverview {};
-
     Overview::Overview(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("Overview.yaml").then([this](const Configuration& config) {
+        on<Configuration>("Overview.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file Overview.yaml
-            log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // The rate at which we emit the Overview message
-            const double send_rate = config["send_rate"].as<double>();
-            cfg.send_period        = std::chrono::duration<double>(send_rate > 0.0 ? 1.0 / send_rate : 0.5);
-
-            // UDP side channel configuration
-            cfg.udp_enabled    = config["udp"]["enabled"].as<bool>();
-            cfg.udp_ip_address = config["udp"]["ip_address"].as<std::string>();
-            cfg.udp_port       = config["udp"]["port"].as<uint16_t>();
-
-            // Kick off the periodic send loop the first time we are configured
-            if (!send_loop_started) {
-                send_loop_started = true;
-                emit<Scope::DELAY>(std::make_unique<SendOverview>(), cfg.send_period);
-            }
+            // clang-format off
+            auto lvl = cfg["log_level"].as<std::string>();
+            if (lvl == "TRACE") { this->log_level = TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = DEBUG; }
+            else if (lvl == "INFO") { this->log_level = INFO; }
+            else if (lvl == "WARN") { this->log_level = WARN; }
+            else if (lvl == "ERROR") { this->log_level = ERROR; }
+            else if (lvl == "FATAL") { this->log_level = FATAL; }
+            // clang-format on
         });
 
 
-        on<Trigger<SendOverview>,
+        on<Every<2, Per<std::chrono::seconds>>,
            Optional<With<GlobalConfig>>,
            Optional<With<CommandLineArguments>>,
            Optional<With<Sensors>>,
@@ -155,8 +146,8 @@ namespace module::output {
 
                 // Set our last seen times
                 msg->last_camera_image = last_camera_image;
-                msg->last_seen_ball    = last_seen_ball;
-                msg->last_seen_goal    = last_seen_goal;
+                msg->last_camera_image = last_seen_ball;
+                msg->last_camera_image = last_seen_goal;
 
                 // Set our walk command
                 if (walk) {
@@ -166,16 +157,7 @@ namespace module::output {
                     msg->walk_command = Eigen::Vector3f::Zero();
                 }
 
-                // Send the serialised Overview message over UDP as a side channel if enabled
-                if (cfg.udp_enabled && !cfg.udp_ip_address.empty() && cfg.udp_port != 0) {
-                    emit<Scope::UDP>(std::make_unique<OverviewMsg>(*msg), cfg.udp_ip_address, cfg.udp_port);
-                }
-
-                // Emit locally so the NetworkForwarder can pass it to NUsight over NUClearNet
                 emit(msg);
-
-                // Schedule the next emission
-                emit<Scope::DELAY>(std::make_unique<SendOverview>(), cfg.send_period);
             });
 
 

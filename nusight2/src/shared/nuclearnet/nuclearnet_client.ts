@@ -46,8 +46,6 @@ export type NUClearNetPeerWithType = NUClearNetPeer & {
     | "nbs-scrubber"
     | "nuclearnet-peer"
     | "nusight-server"
-    // A peer received via the Overview UDP side channel, see server/nuclearnet/overview_udp_client.ts
-    | "overview-udp-peer"
     // A peer received via the RoboCup UDP side channel, see server/nuclearnet/robocup_udp_client.ts
     | "robocup-udp-peer";
 };

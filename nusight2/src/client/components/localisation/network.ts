@@ -1,5 +1,6 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
+import { RoboCup } from "@proto/message/input/RoboCup";
 import { Sensors } from "@proto/message/input/Sensors";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
@@ -49,6 +50,7 @@ export class LocalisationNetwork {
     this.network.on(Purpose, this.onPurpose);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
+    this.network.on(RoboCup, this.onRoboCup);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -284,6 +286,38 @@ export class LocalisationNetwork {
 
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand);
+  };
+
+  /**
+   * Handle a RoboCup team communication packet, e.g. received via the RoboCup UDP side channel
+   * (see server/nuclearnet/robocup_udp_client.ts). This is the official RoboCup Standard Message
+   * format, so it doesn't carry everything an Overview message does (e.g. no battery/voltage or
+   * game state) — only the fields the two formats share are populated here, on the same
+   * DashboardRobotModel used for Overview, so both sources are displayed the same way.
+   */
+  @action
+  private onRoboCup = (robotModel: RobotModel, robocup: RoboCup) => {
+    const robot = DashboardRobotModel.of(robotModel);
+
+    // Timestamp this message was sent (for comparison with last seen)
+    robot.time = Timestamp.toSeconds(robocup.timestamp);
+
+    // The id number of the robot
+    robot.playerId = robocup.currentPose?.playerId ?? 0;
+
+    // The position of the robot on the field in field coordinates
+    robot.robotPosition = Vector3.from(robocup.currentPose?.position);
+    robot.robotPositionCovariance = Matrix3.from(robocup.currentPose?.covariance);
+
+    // The position of the ball in field coordinates
+    robot.ballPosition = Vector2.from(robocup.ball?.position);
+    robot.ballCovariance = Matrix2.from(robocup.ball?.covariance);
+
+    // The location on the field the robot wants to kick in field coordinates
+    robot.kickTarget = Vector2.from(robocup.kickTarget);
+
+    // The current walk command
+    robot.walkCommand = Vector3.from(robocup.walkCommand);
   };
 }
 

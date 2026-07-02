@@ -24,7 +24,6 @@ export type RobotLabelProps = {
  * separate connection rather than a robot that has joined the NUClear network.
  */
 const udpSourceLabels: Partial<Record<RobotModel["type"], string>> = {
-  "overview-udp-peer": "Overview UDP",
   "robocup-udp-peer": "RoboCup UDP",
 };
 

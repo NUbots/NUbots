@@ -22,19 +22,6 @@ const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
 const nuclearnetPort = args.port || "7447";
 
-// Optional Overview UDP side channel: presents robots sending serialised Overview packets to this
-// port as additional NUsight peers. Disabled unless a port is provided.
-const overviewUDPPort = args["overview-udp-port"] ? Number(args["overview-udp-port"]) : undefined;
-const overviewUDPAllowedAddresses: string[] | undefined = args["overview-udp-allowed-addresses"]
-  ? String(args["overview-udp-allowed-addresses"])
-      .split(",")
-      .map((address) => address.trim())
-      .filter(Boolean)
-  : undefined;
-const overviewUDP = overviewUDPPort
-  ? { port: overviewUDPPort, allowedAddresses: overviewUDPAllowedAddresses }
-  : undefined;
-
 // Optional RoboCup UDP side channel: presents robots (or other teams) sending serialised RoboCup
 // team communication packets to this port as additional NUsight peers. This is typically pointed
 // at the same port configured for team communication in the RobotCommunication module (defaults
@@ -59,7 +46,6 @@ async function main() {
   NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
     fakeNetworking: withVirtualRobots,
     connectionOpts: { name: "nusight", address: nuclearnetAddress, port: nuclearnetPort },
-    overviewUDP,
     robocupUDP,
   });
 

@@ -12,7 +12,7 @@ import { NUClearPacketListener } from "../../shared/nuclearnet/nuclearnet_client
  * came from a single client.
  *
  * This is used to combine the real NUClearNet connection with additional receive-only sources such
- * as the {@link ./overview_udp_client.OverviewUDPClient Overview UDP side channel}.
+ * as the {@link ./robocup_udp_client.RoboCupUDPClient RoboCup UDP side channel}.
  *
  * Sending is delegated to the primary client only, since the secondary clients are receive-only.
  */

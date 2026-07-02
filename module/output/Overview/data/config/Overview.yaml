@@ -1,17 +1,2 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
-
-# The rate (in Hz) at which the Overview message is emitted (both locally and, if enabled, over UDP)
-send_rate: 2.0
-
-# UDP side channel: sends just the serialised Overview message to a specific IP address and port.
-# NUsight can listen on this port and present the sender as an additional robot.
-udp:
-  # Whether to enable the UDP side channel
-  enabled: false
-  # The IP address to send the serialised Overview packet to.
-  # Defaults to the lab/RoboCup subnet broadcast address so that a single NUsight instance can
-  # pick up every robot on the network without needing to know each robot's individual IP address.
-  ip_address: "10.1.255.255"
-  # The port to send the serialised Overview packet to
-  port: 22345
