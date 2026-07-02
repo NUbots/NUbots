@@ -107,10 +107,11 @@ namespace module::purpose {
                 bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                 && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                bool teammates_exist = std::find_if(robots->robots.begin(),
-                                                    robots->robots.end(),
-                                                    [](const auto& robot) { return robot.teammate; })
-                                       != robots->robots.end();
+                bool teammates_exist = robots
+                                       && std::find_if(robots->robots.begin(),
+                                                       robots->robots.end(),
+                                                       [](const auto& robot) { return robot.teammate; })
+                                              != robots->robots.end();
 
                 // Act like a field player
                 if (!teammates_exist) {
