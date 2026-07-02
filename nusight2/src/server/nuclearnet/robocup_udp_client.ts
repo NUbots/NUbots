@@ -135,7 +135,7 @@ export class RoboCupUDPClient implements NUClearNetClient {
   }
 
   /** Handle an incoming UDP datagram containing a serialised RoboCup message. */
-  private onMessage(payload: Buffer, address: string, port: number): void {
+  private onMessage(payload: Buffer, address: string, remotePort: number): void {
     // Filter out packets from addresses that aren't allowed, if a filter is configured
     if (this.allowedAddresses.size > 0 && !this.allowedAddresses.has(address)) {
       return;
@@ -147,13 +147,17 @@ export class RoboCupUDPClient implements NUClearNetClient {
       const robocup = RoboCup.fromBinary(new Uint8Array(payload));
       playerId = robocup.currentPose?.playerId ?? 0;
     } catch (error) {
-      console.warn(`RoboCup UDP side channel: failed to decode packet from ${address}:${port}`, error);
+      console.warn(`RoboCup UDP side channel: failed to decode packet from ${address}:${remotePort}`, error);
       return;
     }
 
     const key = `${address}:${playerId}`;
     const name = `robocup-${playerId}`;
-    const peer: NUClearNetPeerWithType = { name, address, port, type: ROBOCUP_UDP_PEER_TYPE };
+    // Use our own listening port rather than the sender's ephemeral source port for the peer's
+    // identity. NUsight matches packets to a peer by (name, address, port), and the source port
+    // a robot sends from is not guaranteed to stay the same between packets, which would otherwise
+    // cause packets to stop being attributed to the robot after the first one.
+    const peer: NUClearNetPeerWithType = { name, address, port: this.options.port, type: ROBOCUP_UDP_PEER_TYPE };
 
     // Announce the peer joining the first time we see it
     const existing = this.peers.get(key);
@@ -169,8 +173,11 @@ export class RoboCupUDPClient implements NUClearNetClient {
     const timer = setTimeout(() => this.onPeerTimeout(key), this.timeout);
     this.peers.set(key, { peer, timer });
 
-    // Deliver the packet to any listeners registered for the RoboCup type
-    const packet: NUClearNetPacket = { hash: this.hash, payload, reliable: true, peer };
+    // Deliver the packet to any listeners registered for the RoboCup type. These packets are
+    // marked unreliable (unlike the real NUClearNet connection's packets) since they arrive over
+    // UDP with no delivery guarantee, and so that they go through the same throttling/queueing as
+    // other unreliable packets rather than being sent to browser clients immediately.
+    const packet: NUClearNetPacket = { hash: this.hash, payload, reliable: false, peer };
     for (const cb of this.packetListeners.get(ROBOCUP_TYPE) ?? []) {
       cb(packet);
     }

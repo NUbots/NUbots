@@ -11,6 +11,7 @@ import * as NUClearNetProxyParser from "../shared/nuclearnet/nuclearnet_proxy_pa
 import { VirtualRobots } from "../virtual_robots/virtual_robots";
 
 import { NUsightServer } from "./nusight_server";
+import { parseNonNegativeIntArg } from "./parse_non_negative_int_arg";
 import { WebSocketServer } from "./web_socket/web_socket_server";
 
 const args = minimist(process.argv.slice(2));
@@ -24,9 +25,11 @@ const nuclearnetPort = args.port || "7447";
 // defaults to 10000 + team_id. We're team 1, so default to that port here too; override with
 // --robocup-team-id if playing under a different team number, or --robocup-udp-port directly.
 // Pass --robocup-udp-port=0 to disable the side channel entirely.
-const robocupTeamId = args["robocup-team-id"] !== undefined ? Number(args["robocup-team-id"]) : 1;
+const robocupTeamId = parseNonNegativeIntArg(args["robocup-team-id"], "--robocup-team-id") ?? 1;
 const robocupUDPPort =
-  args["robocup-udp-port"] !== undefined ? Number(args["robocup-udp-port"]) : 10000 + robocupTeamId;
+  args["robocup-udp-port"] !== undefined
+    ? parseNonNegativeIntArg(args["robocup-udp-port"], "--robocup-udp-port")
+    : 10000 + robocupTeamId;
 const robocupUDPAllowedAddresses: string[] | undefined = args["robocup-udp-allowed-addresses"]
   ? String(args["robocup-udp-allowed-addresses"])
       .split(",")
