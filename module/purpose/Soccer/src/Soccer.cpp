@@ -118,11 +118,20 @@ namespace module::purpose {
             emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
         });
 
-        on<Trigger<StartSoccer>>().then([this] {
-            // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>(), 1);
+        on<Trigger<StartSoccer>, With<GameState>>().then([this](const GameState& game_state) {
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
+
+            // If we are penalised at startup (eg the binary restarted mid-penalty), stand still until the
+            // GameController unpenalises us. The Penalisation event may have fired during the startup delay,
+            // before the FindPurpose task existed, so it cannot be relied on to stop us here.
+            if (!cfg.force_playing && game_state.self.penalty_reason != GameState::PenaltyReason::UNPENALISED) {
+                log<INFO>("Penalised at startup, waiting for unpenalisation before playing");
+                return;
+            }
+
+            // This emit starts the tree to play soccer
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
