@@ -109,6 +109,21 @@ namespace module::purpose {
                     return;
                 }
 
+                // Do not play until localisation has converged, e.g. when re-entering an already-playing
+                // game after being unpenalised or restarted. Stand still and scan for field features so
+                // the goalie doesn't walk to the wrong goal with a wrong or unconverged pose.
+                if (!field.localised) {
+                    log<DEBUG>("Not localised, standing still and looking around to localise.");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::UNKNOWN,
+                                                   true,
+                                                   false,
+                                                   game_state.team.team_colour));
+                    emit<Task>(std::make_unique<LookAround>(), 1);
+                    emit<Task>(std::make_unique<StandStill>(), 1);
+                    return;
+                }
+
                 // Determine if the game is in a set play situation
                 bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                 && game_state.mode.value <= GameState::Mode::THROW_IN;
