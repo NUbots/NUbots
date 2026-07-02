@@ -1,13 +1,11 @@
 # Shared team formation between UNSW, RMIT, and UoN; see https://github.com/unswei/formation
 version: 1
 meta:
-  name: Normal play 5 scalable
-  notes: Scalable test formation. Player 1 tracks ball y within goal-area bounds.
-    Players 2 and 3 are constrained to stay in the defensive quarter.
+  name: Complete scaling play 3 players
 defaults:
   attraction:
-    x: 0.55
-    y: 0.95
+    x: 0.45
+    y: 0.45
   minX:
     field: length
     scale: -0.45
@@ -16,10 +14,10 @@ defaults:
     scale: 0.45
   minY:
     field: width
-    scale: -0.45
+    scale: -0.42
   maxY:
     field: width
-    scale: 0.45
+    scale: 0.42
 modes:
   normal_play:
     robots:
@@ -27,64 +25,107 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.3
-          y: 0.0
+            scale: -0.286
+          y:
+            field: width
+            scale: 0.016
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.1935
+          y: 0.4916
         minX:
-          position: field_min_x
+          field: length
+          scale: -0.38
         maxX:
-          position: left_goal_area_max_x
+          field: length
+          scale: -0.005
         minY:
-          position: goal_area_min_y
+          field: width
+          scale: -0.226
         maxY:
-          position: goal_area_max_y
+          field: width
+          scale: 0.228
       "2":
         offset:
           x:
             field: length
-            scale: 0.0
+            scale: -0.134
           y:
             field: width
-            scale: -0.3
+            scale: -0.134
         attraction:
-          x: 1.0
-          y: 0.4
+          x: 0.5742
+          y: 0.5229
         minX:
           field: length
-          scale: -0.16
+          scale: -0.351
         maxX:
           field: length
-          scale: 0.3
+          scale: 0.238
+        minY:
+          field: width
+          scale: -0.379
         maxY:
           field: width
-          scale: 0.35
+          scale: 0.373
       "3":
         offset:
           x:
             field: length
-            scale: 0.0
+            scale: 0.057
           y:
             field: width
-            scale: 0.3
+            scale: 0.28
         attraction:
-          x: 1.0
-          y: 0.4
+          x: 0.7146
+          y: 0.2121
         minX:
           field: length
-          scale: -0.14
+          scale: -0.205
         maxX:
           field: length
-          scale: 0.3
+          scale: 0.37
         minY:
           field: width
-          scale: -0.35
+          scale: -0.417
+        maxY:
+          field: width
+          scale: 0.417
+  advertised__phase_normal__state_playing__set_play_none__kicking_none:
+    robots:
+      "1":
+        attraction:
+          x: 0.1935
+          y: 0.4916
+        maxX: -0.0402
+        maxY: 1.3696
+        minX: -3.4
+        minY: -1.3574
+        offset:
+          x: -2.578
+          y: 0.0947
+      "2":
+        attraction:
+          x: 0.5742
+          y: 0.5229
+        maxX: 2.1404
+        maxY: 2.2371
+        minX: -3.1565
+        minY: -2.2735
+        offset:
+          x: -1.2032
+          y: -0.8022
+      "3":
+        attraction:
+          x: 0.7146
+          y: 0.2121
+        maxX: 3.3335
+        maxY: 2.5
+        minX: -1.8496
+        minY: -2.5
+        offset:
+          x: 0.513
+          y: 1.6776
   kickoff_us:
-    defaults:
-      attraction:
-        x: 0.35
-        y: 0.25
     robots:
       "1":
         offset:
@@ -93,8 +134,8 @@ modes:
             offset: -0.2
           y: 0.0
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.12
+          y: 0.45
         minX:
           position: field_min_x
         maxX:
@@ -107,189 +148,94 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.05
+            scale: -0.03
           y:
             field: width
-            scale: -0.1
-        minX:
-          field: length
-          scale: -0.16
-        maxY:
-          field: width
-          scale: 0.2
-        minY:
-          field: width
-          scale: -0.35
-      "3":
-        offset:
-          x:
-            field: length
-            scale: -0.08
-          y:
-            field: width
-            scale: 0.3
+            scale: -0.07
+        attraction:
+          x: 0.15
+          y: 0.1
         minX:
           field: length
           scale: -0.14
-        maxY:
-          field: width
-          scale: 0.35
-        minY:
-          field: width
-          scale: -0.2
-  kickoff_them:
-    defaults:
-      attraction:
-        x: 0.45
-        y: 0.3
-      minX:
-        field: length
-        scale: -0.45
-    robots:
-      "1":
-        offset:
-          x:
-            position: left_goal_area_max_x
-            offset: -0.2
-          y: 0.0
-        attraction:
-          x: 0.45
-          y: 1.0
-        minX:
-          position: field_min_x
         maxX:
-          position: left_goal_area_max_x
+          field: length
+          scale: 0.08
         minY:
-          position: goal_area_min_y
+          field: width
+          scale: -0.28
         maxY:
-          position: goal_area_max_y
-      "2":
-        offset:
-          x:
-            field: length
-            scale: -0.2
-          y:
-            field: width
-            scale: 0.0
+          field: width
+          scale: 0.12
       "3":
         offset:
           x:
             field: length
-            scale: -0.1
+            scale: -0.15
           y:
             field: width
-            scale: 0.2
-  throw_in_us:
-    robots:
-      "1":
-        offset:
-          x:
-            field: length
-            scale: -0.3
-          y: 0.0
+            scale: 0.22
         attraction:
-          x: 0.45
-          y: 1.0
-        minX:
-          position: field_min_x
-        maxX:
-          position: left_goal_area_max_x
-        minY:
-          position: goal_area_min_y
-        maxY:
-          position: goal_area_max_y
-      "2":
-        offset:
-          x:
-            field: length
-            scale: 0.08
-          y:
-            field: width
-            scale: 0.3
-        minX:
-          field: length
-          scale: -0.14
-        maxY:
-          field: width
-          scale: 0.35
-        minY:
-          field: width
-          scale: -0.2
-      "3":
-        offset:
-          x:
-            field: length
-            scale: 0.05
-          y:
-            field: width
-            scale: -0.1
-        minX:
-          field: length
-          scale: -0.16
-        maxY:
-          field: width
-          scale: 0.2
-        minY:
-          field: width
-          scale: -0.35
-  throw_in_them:
-    robots:
-      "1":
-        offset:
-          x:
-            field: length
-            scale: -0.3
+          x: 0.05
           y: 0.05
-        attraction:
-          x: 0.45
-          y: 1.0
         minX:
-          position: field_min_x
+          field: length
+          scale: -0.28
         maxX:
-          position: left_goal_area_max_x
+          field: length
+          scale: 0.05
         minY:
-          position: goal_area_min_y
+          field: width
+          scale: 0.05
         maxY:
-          position: goal_area_max_y
+          field: width
+          scale: 0.35
+  advertised__phase_normal__state_ready__set_play_none__kicking_us:
+    robots:
+      "1":
+        attraction:
+          x: -0.1698
+          y: 0.5788
+        maxX: 0.0124
+        maxY: 1.3169
+        minX: -3.4
+        minY: -1.3137
+        offset:
+          x: -2.9675
+          y: -0.0378
       "2":
-        offset:
-          x:
-            field: length
-            scale: -0.08
-          y:
-            field: width
-            scale: 0.08
         attraction:
-          x: 0.7
-          y: 0.4
-        minX:
-          field: length
-          scale: -0.37
+          x: -0.0041
+          y: -0.1931
+        maxX: 0.0371
+        maxY: 2.0417
+        minX: -1.845
+        minY: -2.0615
+        offset:
+          x: -0.3228
+          y: -0.1334
       "3":
-        offset:
-          x:
-            field: length
-            scale: -0.05
-          y:
-            field: width
-            scale: -0.1
         attraction:
-          x: 0.7
-          y: 0.4
-        minX:
-          field: length
-          scale: -0.16
-  corner_kick_us:
+          x: 0.0159
+          y: 0.5997
+        maxX: 0.0753
+        maxY: 2.0657
+        minX: -2.3384
+        minY: -2.0518
+        offset:
+          x: -1.364
+          y: 0.6752
+  kickoff_them:
     robots:
       "1":
         offset:
           x:
-            field: length
-            scale: -0.3
+            position: left_goal_area_max_x
+            offset: -0.2
           y: 0.0
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.1
+          y: 0.45
         minX:
           position: field_min_x
         maxX:
@@ -302,38 +248,59 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.08
+            scale: -0.16
+          y:
+            field: width
+            scale: -0.1
+        attraction:
+          x: 0.1
+          y: 0.1
+        minX:
+          field: length
+          scale: -0.32
+        maxX:
+          field: length
+          scale: -0.04
+        minY:
+          field: width
+          scale: -0.25
+        maxY:
+          field: width
+          scale: 0.08
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.24
           y:
             field: width
             scale: 0.1
         attraction:
-          x: 0.9
-          y: 0.55
+          x: 0.05
+          y: 0.05
         minX:
           field: length
-          scale: -0.3
-      "3":
-        offset:
-          x:
-            field: length
-            scale: -0.05
-          y:
-            field: width
-            scale: -0.1
-        minX:
+          scale: -0.38
+        maxX:
           field: length
-          scale: -0.05
-  corner_kick_them:
+          scale: -0.08
+        minY:
+          field: width
+          scale: -0.08
+        maxY:
+          field: width
+          scale: 0.28
+  direct_free_kick_us:
     robots:
       "1":
         offset:
           x:
-            field: length
-            scale: -0.3
+            position: left_goal_area_max_x
+            offset: -0.2
           y: 0.0
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.12
+          y: 0.5
         minX:
           position: field_min_x
         maxX:
@@ -346,44 +313,636 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.2
+            scale: -0.03
           y:
             field: width
-            scale: 0.16
-        maxX:
-          field: length
-          scale: -0.15
+            scale: -0.08
+        attraction:
+          x: 0.85
+          y: 0.65
         minX:
           field: length
-          scale: -0.25
-        maxY:
+          scale: -0.2
+        maxX:
           field: length
+          scale: 0.36
+        minY:
+          field: width
+          scale: -0.4
+        maxY:
+          field: width
           scale: 0.25
       "3":
         offset:
           x:
             field: length
-            scale: -0.05
+            scale: 0.1
+          y:
+            field: width
+            scale: 0.18
+        attraction:
+          x: 0.55
+          y: 0.35
+        minX:
+          field: length
+          scale: -0.12
+        maxX:
+          field: length
+          scale: 0.4
+        minY:
+          field: width
+          scale: -0.15
+        maxY:
+          field: width
+          scale: 0.38
+  direct_free_kick_them:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.1
+          y: 0.55
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.12
+          y:
+            field: width
+            scale: -0.04
+        attraction:
+          x: 0.5
+          y: 0.35
+        minX:
+          field: length
+          scale: -0.36
+        maxX:
+          field: length
+          scale: 0.06
+        minY:
+          field: width
+          scale: -0.28
+        maxY:
+          field: width
+          scale: 0.18
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.24
+          y:
+            field: width
+            scale: 0.1
+        attraction:
+          x: 0.3
+          y: 0.25
+        minX:
+          field: length
+          scale: -0.42
+        maxX:
+          field: length
+          scale: -0.08
+        minY:
+          field: width
+          scale: -0.22
+        maxY:
+          field: width
+          scale: 0.28
+  indirect_free_kick_us:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.12
+          y: 0.5
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.04
+          y:
+            field: width
+            scale: 0.1
+        attraction:
+          x: 0.8
+          y: 0.55
+        minX:
+          field: length
+          scale: -0.18
+        maxX:
+          field: length
+          scale: 0.32
+        minY:
+          field: width
+          scale: -0.12
+        maxY:
+          field: width
+          scale: 0.35
+      "3":
+        offset:
+          x:
+            field: length
+            scale: 0.06
+          y:
+            field: width
+            scale: -0.18
+        attraction:
+          x: 0.5
+          y: 0.3
+        minX:
+          field: length
+          scale: -0.14
+        maxX:
+          field: length
+          scale: 0.36
+        minY:
+          field: width
+          scale: -0.38
+        maxY:
+          field: width
+          scale: 0.08
+  indirect_free_kick_them:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.1
+          y: 0.55
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.1
+          y:
+            field: width
+            scale: 0.07
+        attraction:
+          x: 0.45
+          y: 0.35
+        minX:
+          field: length
+          scale: -0.34
+        maxX:
+          field: length
+          scale: 0.04
+        minY:
+          field: width
+          scale: -0.14
+        maxY:
+          field: width
+          scale: 0.3
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.22
           y:
             field: width
             scale: -0.1
         attraction:
-          x: 0.7
-          y: 0.65
+          x: 0.25
+          y: 0.25
         minX:
           field: length
-          scale: -0.16
+          scale: -0.42
+        maxX:
+          field: length
+          scale: -0.08
+        minY:
+          field: width
+          scale: -0.3
+        maxY:
+          field: width
+          scale: 0.14
+  throw_in_us:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.12
+          y: 0.5
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: 0.04
+          y: 0.0
+        attraction:
+          x: 0.75
+          y: 0.55
+        minX:
+          field: length
+          scale: -0.14
+        maxX:
+          field: length
+          scale: 0.38
+        minY:
+          field: width
+          scale: -0.36
+        maxY:
+          field: width
+          scale: 0.36
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.05
+          y:
+            field: width
+            scale: -0.16
+        attraction:
+          x: 0.35
+          y: 0.2
+        minX:
+          field: length
+          scale: -0.25
+        maxX:
+          field: length
+          scale: 0.24
+        minY:
+          field: width
+          scale: -0.35
+        maxY:
+          field: width
+          scale: 0.1
+  throw_in_them:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.1
+          y: 0.55
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.08
+          y: 0.0
+        attraction:
+          x: 0.55
+          y: 0.5
+        minX:
+          field: length
+          scale: -0.36
+        maxX:
+          field: length
+          scale: 0.08
+        minY:
+          field: width
+          scale: -0.35
+        maxY:
+          field: width
+          scale: 0.35
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.2
+          y:
+            field: width
+            scale: -0.12
+        attraction:
+          x: 0.2
+          y: 0.2
+        minX:
+          field: length
+          scale: -0.42
+        maxX:
+          field: length
+          scale: -0.06
+        minY:
+          field: width
+          scale: -0.3
+        maxY:
+          field: width
+          scale: 0.14
+  goal_kick_us:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.0
+          y: 0.0
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.24
+          y:
+            field: width
+            scale: -0.22
+        attraction:
+          x: 0.1
+          y: 0.05
+        minX:
+          field: length
+          scale: -0.34
+        maxX:
+          field: length
+          scale: -0.08
+        minY:
+          field: width
+          scale: -0.34
+        maxY:
+          field: width
+          scale: -0.08
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.08
+          y:
+            field: width
+            scale: 0.24
+        attraction:
+          x: 0.1
+          y: 0.05
+        minX:
+          field: length
+          scale: -0.2
+        maxX:
+          field: length
+          scale: 0.12
+        minY:
+          field: width
+          scale: 0.08
+        maxY:
+          field: width
+          scale: 0.36
+  goal_kick_them:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.08
+          y: 0.45
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.06
+          y:
+            field: width
+            scale: -0.12
+        attraction:
+          x: 0.35
+          y: 0.2
+        minX:
+          field: length
+          scale: -0.18
+        maxX:
+          field: length
+          scale: 0.2
+        minY:
+          field: width
+          scale: -0.3
+        maxY:
+          field: width
+          scale: 0.06
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.22
+          y:
+            field: width
+            scale: 0.08
+        attraction:
+          x: 0.15
+          y: 0.15
+        minX:
+          field: length
+          scale: -0.38
+        maxX:
+          field: length
+          scale: -0.06
+        minY:
+          field: width
+          scale: -0.08
+        maxY:
+          field: width
+          scale: 0.28
+  corner_kick_us:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.12
+          y: 0.5
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.05
+          y: 0.0
+        attraction:
+          x: 0.8
+          y: 0.6
+        minX:
+          field: length
+          scale: -0.1
+        maxX:
+          field: length
+          scale: 0.44
+        minY:
+          field: width
+          scale: -0.4
+        maxY:
+          field: width
+          scale: 0.4
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.18
+          y:
+            field: width
+            scale: -0.05
+        attraction:
+          x: 0.25
+          y: 0.15
+        minX:
+          field: length
+          scale: -0.26
+        maxX:
+          field: length
+          scale: 0.18
+        minY:
+          field: width
+          scale: -0.2
+        maxY:
+          field: width
+          scale: 0.2
+  corner_kick_them:
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.2
+          y: 0.0
+        attraction:
+          x: 0.1
+          y: 0.6
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.28
+          y: 0.0
+        attraction:
+          x: 0.2
+          y: 0.45
+        minX:
+          field: length
+          scale: -0.45
+        maxX:
+          field: length
+          scale: -0.14
+        minY:
+          field: width
+          scale: -0.34
+        maxY:
+          field: width
+          scale: 0.34
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.14
+          y:
+            field: width
+            scale: -0.1
+        attraction:
+          x: 0.35
+          y: 0.25
+        minX:
+          field: length
+          scale: -0.28
+        maxX:
+          field: length
+          scale: 0.1
+        minY:
+          field: width
+          scale: -0.3
+        maxY:
+          field: width
+          scale: 0.14
   penalty_kick_us:
     robots:
       "1":
         offset:
           x:
-            field: length
-            scale: -0.3
+            position: left_goal_area_max_x
+            offset: -0.2
           y: 0.0
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.05
+          y: 0.45
         minX:
           position: field_min_x
         maxX:
@@ -396,38 +955,59 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.08
+            scale: 0.02
           y:
             field: width
-            scale: 0.1
+            scale: -0.08
         attraction:
-          x: 0.7
-          y: 0.65
+          x: 0.25
+          y: 0.1
+        minX:
+          field: length
+          scale: -0.06
+        maxX:
+          field: length
+          scale: 0.18
+        minY:
+          field: width
+          scale: -0.18
+        maxY:
+          field: width
+          scale: 0.04
       "3":
         offset:
           x:
             field: length
-            scale: -0.05
+            scale: -0.16
           y:
             field: width
-            scale: -0.1
+            scale: 0.18
         attraction:
-          x: 0.7
-          y: 0.65
+          x: 0.1
+          y: 0.05
         minX:
           field: length
-          scale: -0.16
+          scale: -0.28
+        maxX:
+          field: length
+          scale: 0.04
+        minY:
+          field: width
+          scale: 0.08
+        maxY:
+          field: width
+          scale: 0.32
   penalty_kick_them:
     robots:
       "1":
         offset:
           x:
-            field: length
-            scale: -0.4
+            position: left_goal_area_max_x
+            offset: -0.2
           y: 0.0
         attraction:
-          x: 0.45
-          y: 1.0
+          x: 0.05
+          y: 0.55
         minX:
           position: field_min_x
         maxX:
@@ -440,27 +1020,108 @@ modes:
         offset:
           x:
             field: length
-            scale: -0.08
+            scale: -0.18
           y:
             field: width
-            scale: 0.1
+            scale: 0.18
         attraction:
-          x: 0.7
-          y: 0.65
+          x: 0.05
+          y: 0.05
         minX:
           field: length
-          scale: -0.17
+          scale: -0.3
+        maxX:
+          field: length
+          scale: -0.08
+        minY:
+          field: width
+          scale: 0.08
+        maxY:
+          field: width
+          scale: 0.32
       "3":
         offset:
           x:
             field: length
-            scale: -0.05
+            scale: -0.18
           y:
             field: width
-            scale: -0.1
+            scale: -0.18
         attraction:
-          x: 0.7
-          y: 0.65
+          x: 0.05
+          y: 0.05
         minX:
           field: length
-          scale: -0.16
+          scale: -0.3
+        maxX:
+          field: length
+          scale: -0.08
+        minY:
+          field: width
+          scale: -0.32
+        maxY:
+          field: width
+          scale: -0.08
+  timeout:
+    defaults:
+      attraction:
+        x: 0.05
+        y: 0.05
+    robots:
+      "1":
+        offset:
+          x:
+            position: left_goal_area_max_x
+            offset: -0.25
+          y: 0.0
+        attraction:
+          x: 0.0
+          y: 0.0
+        minX:
+          position: field_min_x
+        maxX:
+          position: left_goal_area_max_x
+        minY:
+          position: goal_area_min_y
+        maxY:
+          position: goal_area_max_y
+      "2":
+        offset:
+          x:
+            field: length
+            scale: -0.2
+          y:
+            field: width
+            scale: -0.16
+        minX:
+          field: length
+          scale: -0.32
+        maxX:
+          field: length
+          scale: -0.06
+        minY:
+          field: width
+          scale: -0.3
+        maxY:
+          field: width
+          scale: -0.04
+      "3":
+        offset:
+          x:
+            field: length
+            scale: -0.12
+          y:
+            field: width
+            scale: 0.16
+        minX:
+          field: length
+          scale: -0.28
+        maxX:
+          field: length
+          scale: 0.02
+        minY:
+          field: width
+          scale: 0.04
+        maxY:
+          field: width
+          scale: 0.3
