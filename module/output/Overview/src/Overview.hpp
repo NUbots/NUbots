@@ -27,7 +27,9 @@
 #ifndef MODULE_OUTPUT_OVERVIEW_HPP
 #define MODULE_OUTPUT_OVERVIEW_HPP
 
+#include <chrono>
 #include <nuclear>
+#include <string>
 
 namespace module::output {
 
@@ -38,6 +40,20 @@ namespace module::output {
         explicit Overview(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        struct Config {
+            /// @brief The period between Overview emissions
+            std::chrono::duration<double> send_period{0.5};
+            /// @brief Whether to also send the serialised Overview message as a UDP packet
+            bool udp_enabled = false;
+            /// @brief The IP address to send the UDP Overview packet to
+            std::string udp_ip_address = "";
+            /// @brief The port to send the UDP Overview packet to
+            uint16_t udp_port = 0;
+        } cfg;
+
+        /// @brief Whether the periodic send loop has been started yet
+        bool send_loop_started = false;
+
         NUClear::clock::time_point last_camera_image;
         NUClear::clock::time_point last_seen_ball;
         NUClear::clock::time_point last_seen_goal;

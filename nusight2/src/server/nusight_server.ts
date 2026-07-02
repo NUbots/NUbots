@@ -3,8 +3,10 @@ import { NUClearNetOptions, NUClearNetPeer } from "nuclearnet.js";
 import { compose } from "../shared/base/compose";
 import { NUClearNetClient } from "../shared/nuclearnet/nuclearnet_client";
 
+import { CompositeNUClearNetClient } from "./nuclearnet/composite_nuclearnet_client";
 import { DirectNUClearNetClient } from "./nuclearnet/direct_nuclearnet_client";
 import { FakeNUClearNetClient } from "./nuclearnet/fake_nuclearnet_client";
+import { OverviewUDPClient, OverviewUDPClientOptions } from "./nuclearnet/overview_udp_client";
 import { NUsightSession } from "./session/session";
 import { ClientConnection } from "./web_socket/client_connection";
 import { WebSocketServer } from "./web_socket/web_socket_server";
@@ -12,6 +14,11 @@ import { WebSocketServer } from "./web_socket/web_socket_server";
 interface NUsightServerOpts {
   fakeNetworking: boolean;
   connectionOpts: NUClearNetOptions;
+  /**
+   * When provided, an additional receive-only UDP side channel is opened that presents robots
+   * sending serialised Overview packets as if they were regular NUClearNet peers.
+   */
+  overviewUDP?: OverviewUDPClientOptions;
 }
 
 /**
@@ -54,8 +61,17 @@ export class NUsightServer {
     ]);
   }
 
-  static of(server: WebSocketServer, { fakeNetworking, connectionOpts }: NUsightServerOpts): NUsightServer {
-    const nuclearnetClient: NUClearNetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of();
+  static of(
+    server: WebSocketServer,
+    { fakeNetworking, connectionOpts, overviewUDP }: NUsightServerOpts,
+  ): NUsightServer {
+    const primaryClient: NUClearNetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of();
+
+    // Optionally add the Overview UDP side channel as an additional receive-only source
+    const nuclearnetClient: NUClearNetClient = overviewUDP
+      ? CompositeNUClearNetClient.of(primaryClient, [OverviewUDPClient.of(overviewUDP)])
+      : primaryClient;
+
     return new NUsightServer(server, nuclearnetClient, connectionOpts);
   }
 
