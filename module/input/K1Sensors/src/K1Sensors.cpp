@@ -13,6 +13,7 @@
 #include "message/booster/BoosterOdometry.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
@@ -31,6 +32,7 @@ namespace module::input {
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
     using message::input::Sensors;
+    using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
 
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -143,6 +145,16 @@ namespace module::input {
             std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
             booster_odometry_has_offset = false;
             booster_odometry_offset     = {};
+        });
+
+
+        // When field localisation is reset, re-capture the BoosterOdometry zero offset so that odometry is
+        // reported relative to the robot's new post-reset pose.
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
+            booster_odometry_has_offset = false;
+            booster_odometry_offset     = {};
+            log<INFO>("K1Sensors clearing BoosterOdometry offset after field localisation reset");
         });
 
 
