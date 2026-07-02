@@ -101,6 +101,11 @@ namespace module::tools {
         /// @brief Displays the screen with any updated values to the user
         void refresh_view();
 
+        /// @brief Draws a centred popup box with a message (eg "Connecting...") over the current view.
+        /// The popup remains on screen until the next refresh_view() call.
+        /// @param message The message to display in the popup
+        void draw_popup(const std::string& message);
+
         /// @brief Functionality for the user to edit a field in the display
         void edit_selection();
 

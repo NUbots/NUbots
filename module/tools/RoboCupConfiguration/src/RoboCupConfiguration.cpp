@@ -214,9 +214,13 @@ namespace module::tools {
                                      std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
                                      std::filesystem::perm_options::replace);
 
+        // Show a popup while nmcli connects, as it can take a few seconds. nmcli's own output is
+        // redirected to /dev/null so it doesn't corrupt the curses display.
+        draw_popup("Connecting...");
+
         // Reload connections and bring up the new profile
-        system("nmcli connection reload");
-        system(("nmcli connection up wifi-robocup ifname " + wifi_interface).c_str());
+        system("nmcli connection reload > /dev/null 2>&1");
+        system(("nmcli connection up wifi-robocup ifname " + wifi_interface + " > /dev/null 2>&1").c_str());
 
         display.log_message = "Network configured!";
     }
@@ -578,6 +582,21 @@ namespace module::tools {
         mvchgat(display.row_selection + 5, col_pos, display.SELECT_WIDTH, A_STANDOUT, 0, nullptr);
 
         refresh();
+    }
+
+    void RoboCupConfiguration::draw_popup(const std::string& message) {
+        const int width  = std::max(int(message.size()) + 4, 20);
+        const int height = 5;
+        const int y      = (LINES - height) / 2;
+        const int x      = (COLS - width) / 2;
+
+        WINDOW* popup = newwin(height, width, y, x);
+        box(popup, 0, 0);
+        wattron(popup, A_BOLD);
+        mvwprintw(popup, height / 2, (width - int(message.size())) / 2, "%s", message.c_str());
+        wattroff(popup, A_BOLD);
+        wrefresh(popup);
+        delwin(popup);
     }
 
 }  // namespace module::tools
