@@ -28,11 +28,11 @@ use_ground_truth_localisation: false
 # Bool to use the Hungarian algorithm for data association
 use_hungarian: true
 
-# Cost for a point outside the field
+# Cost for an intersection detection that cannot be associated with any landmark
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
-reset_on_cost: false
+reset_on_cost: true
 # Cost threshold for the optimisation to trigger a reset
 cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
@@ -53,13 +53,13 @@ field_line_distance_weight: 0.0
 field_line_intersection_weight: 5.0
 
 # Weighting associated with change between last solution result
-state_change_weight: 0.0
+state_change_weight: 2.0
 
 # Minimum distance an associated landmark needs to be for measurement update
-max_association_distance: 5.0
+max_association_distance: 2.0
 
 # Weighting associated with goal post distance error
-goal_post_distance_weight: 0.0
+goal_post_distance_weight: 1.0
 
 # Box constraints on change in state (x, y, theta)
 change_limit: [0.5, 0.5, 0.5]

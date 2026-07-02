@@ -421,8 +421,13 @@ namespace module::localisation {
                 double distance = (association.first - association.second).norm();
                 cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
             }
-            // Average the cost by the number of associations
-            cost /= associations.size() > 0 ? associations.size() : 1;
+            // Penalise intersections that could not be associated with any landmark, so that a pose
+            // which explains fewer of the observations cannot achieve a lower cost than one which
+            // explains more of them
+            size_t n_unassociated = field_intersections.intersections.size() - associations.size();
+            cost += cfg.out_of_field_cost * n_unassociated;
+            // Average the cost by the number of intersections
+            cost /= field_intersections.intersections.empty() ? 1 : field_intersections.intersections.size();
 
             // --- Goal post cost ---
             // Only consider goal post cost if there are two goals
