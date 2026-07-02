@@ -252,6 +252,29 @@ namespace module::purpose {
                     return;
                 }
 
+                // If it's our set play, the closest robot takes the kick and everyone else supports
+                if (set_play && game_state.our_kick_off) {
+                    if (is_closest) {
+                        log<DEBUG>("Our set play, taking the kick.");
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                       SoccerPosition::ATTACK,
+                                                       true,
+                                                       true,
+                                                       game_state.team.team_colour));
+                        emit<Task>(std::make_unique<Attack>(ball_pos));
+                    }
+                    else {
+                        log<DEBUG>("Our set play, supporting.");
+                        emit<Task>(std::make_unique<Support>());
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                       SoccerPosition::SUPPORT,
+                                                       true,
+                                                       true,
+                                                       game_state.team.team_colour));
+                    }
+                    return;
+                }
+
                 // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
                 // penalty set up phase.
                 if (is_closest && allowed_to_attack && !higher_id_attacking) {
@@ -331,6 +354,13 @@ namespace module::purpose {
                          const Sensors& sensors,
                          const GameState& game_state,
                          const GlobalConfig& global_config) {
+                // A penalty kick also uses the READY state, but the kick-off formation doesn't apply.
+                // Stand still as a minimal rule-safe behaviour until proper penalty positioning exists.
+                if (game_state.mode == GameState::Mode::PENALTYKICK) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+
                 // Use formation if this player has a slot, otherwise fall back to dynamic ready position
                 std::string mode_name = game_state.our_kick_off ? "kickoff_us" : "kickoff_them";
                 auto mode_it          = cfg.formation_player_ids.find(mode_name);

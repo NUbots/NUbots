@@ -206,9 +206,11 @@ namespace module::purpose {
                     return;
                 }
 
-                if (is_closest && set_play) {
-                    log<DEBUG>("Goalie is in the best position to take the set play, readying attack.");
+                // Only ready to take the set play if it is ours, otherwise fall through and defend the goals
+                if (is_closest && set_play && game_state.our_kick_off) {
+                    log<DEBUG>("Goalie is in the best position to take our set play, readying attack.");
                     emit<Task>(std::make_unique<ReadyAttack>());
+                    return;
                 }
 
                 // We are not the closest, but the ball is in our half, so we should defend the goals.
