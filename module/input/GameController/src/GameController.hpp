@@ -28,12 +28,15 @@
 #ifndef MODULES_INPUT_GAMECONTROLLER_HPP
 #define MODULES_INPUT_GAMECONTROLLER_HPP
 
+#include <Eigen/Geometry>
 #include <nuclear>
 
 #include "GameControllerData.hpp"
 
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 
 namespace module::input {
 
@@ -74,6 +77,18 @@ namespace module::input {
 
         /// @brief Indicates if the current player is penalised
         bool self_penalised{true};
+
+        /// @brief Latest torso-to-world transform, cached for the reply packet's pose field
+        Eigen::Isometry3d latest_Htw{Eigen::Isometry3d::Identity()};
+
+        /// @brief Latest world-to-field transform, cached for the reply packet's pose field
+        Eigen::Isometry3d latest_Hfw{Eigen::Isometry3d::Identity()};
+
+        /// @brief Whether latest_Htw has been populated by a Sensors message yet
+        bool have_sensors{false};
+
+        /// @brief Whether latest_Hfw has been populated by a Field message yet
+        bool have_field{false};
 
         /// @brief Handle for our registered UDP receive callback
         ReactionHandle listen_handle;

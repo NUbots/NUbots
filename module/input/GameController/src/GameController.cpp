@@ -28,10 +28,16 @@
 #include "GameController.hpp"
 
 #include <atomic>
+#include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
 
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/support/GlobalConfig.hpp"
+
+#include "utility/math/angle.hpp"
+#include "utility/math/euler.hpp"
 
 namespace module::input {
 
@@ -41,7 +47,11 @@ namespace module::input {
     using gamecontroller::Team;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Sensors;
+    using message::localisation::Field;
     using message::support::GlobalConfig;
+    using utility::math::angle::normalise_angle;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using Score          = GameEvents::Score;
     using GoalScored     = GameEvents::GoalScored;
     using Penalisation   = GameEvents::Penalisation;
@@ -128,6 +138,16 @@ namespace module::input {
                   });
 
         on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply", [this] { send_reply_message(); });
+
+        on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+            latest_Htw   = Eigen::Isometry3d(sensors.Htw);
+            have_sensors = true;
+        });
+
+        on<Trigger<Field>>().then([this](const Field& field) {
+            latest_Hfw = Eigen::Isometry3d(field.Hfw);
+            have_field = true;
+        });
     }
 
     void GameController::send_reply_message() {
@@ -140,12 +160,30 @@ namespace module::input {
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
 
-        // fallen, pose, ball_age and ball should be optional to be sent to the GameController
+        // fallen, ball_age and ball should be optional to be sent to the GameController
         // TODO: wire up from localisation if required in the future
-        packet->fallen   = self_penalised ? 1 : 0;
-        packet->pose[0]  = 0.f;
-        packet->pose[1]  = 0.f;
-        packet->pose[2]  = 0.f;
+        packet->fallen = self_penalised ? 1 : 0;
+
+        if (have_sensors && have_field) {
+            // Robot's torso pose in field space
+            const Eigen::Isometry3d Hft = latest_Hfw * latest_Htw.inverse();
+            const Eigen::Vector3d rTFf  = Hft.translation();
+            const double yaw            = mat_to_rpy_intrinsic(Hft.rotation()).z();
+
+            // GameController convention: 0,0 is the centre of the field and +ve x-axis points towards the goal
+            // we are attempting to score on. This is mirrored relative to our internal field frame (same
+            // convention used for the mixed-team broadcast in RobotCommunication), so mirror x and correct
+            // the yaw for the reflection accordingly. Convert metres to the millimetres GameController expects.
+            packet->pose[0] = static_cast<float>(-rTFf.x() * 1000.0);
+            packet->pose[1] = static_cast<float>(rTFf.y() * 1000.0);
+            packet->pose[2] = static_cast<float>(normalise_angle(M_PI - yaw));
+        }
+        else {
+            packet->pose[0] = 0.f;
+            packet->pose[1] = 0.f;
+            packet->pose[2] = 0.f;
+        }
+
         packet->ball_age = -1.f;
         packet->ball[0]  = 0.f;
         packet->ball[1]  = 0.f;
