@@ -28,6 +28,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
@@ -193,15 +194,12 @@ namespace module::network {
                     else {
                         msg->state = message::input::State::PENALISED;
                     }
-                    log<INFO>("msg->state:", static_cast<int>(msg->state));
                     // Team
                     msg->current_pose.team = message::input::Team::NUBOTS;
-                    log<INFO>("msg->current_pose.team:", static_cast<int>(msg->current_pose.team));
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
                 msg->current_pose.player_id = config.player_id;
-                log<INFO>("msg->current_pose.player_id:", msg->current_pose.player_id);
 
                 if (sensors) {
                     // Get our world transform
@@ -224,11 +222,6 @@ namespace module::network {
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
-                        log<INFO>("msg->current_pose.position:",
-                                  msg->current_pose.position.x(),
-                                  msg->current_pose.position.y(),
-                                  msg->current_pose.position.z());
-                        log<INFO>("msg->current_pose.covariance set");
                     }
                 }
 
@@ -236,10 +229,6 @@ namespace module::network {
                 // Walk command
                 if (walk_state != nullptr) {
                     msg->walk_command = walk_state->velocity_target.cast<float>();
-                    log<INFO>("msg->walk_command:",
-                              msg->walk_command.x(),
-                              msg->walk_command.y(),
-                              msg->walk_command.z());
                 }
 
                 // Target pose (Position and orientation of the players target on the field specified)
@@ -259,12 +248,6 @@ namespace module::network {
                     // Copy team and player ID to target pose
                     msg->target_pose.team      = msg->current_pose.team;
                     msg->target_pose.player_id = config.player_id;
-                    log<INFO>("msg->target_pose.position:",
-                              msg->target_pose.position.x(),
-                              msg->target_pose.position.y(),
-                              msg->target_pose.position.z());
-                    log<INFO>("msg->target_pose.team:", static_cast<int>(msg->target_pose.team));
-                    log<INFO>("msg->target_pose.player_id:", msg->target_pose.player_id);
                 }
 
                 // Kick target
@@ -272,7 +255,6 @@ namespace module::network {
                     // take x and y components of vec3 to convert to fvec2
                     msg->kick_target.x() = kick->target.x();
                     msg->kick_target.y() = kick->target.y();
-                    log<INFO>("msg->kick_target:", msg->kick_target.x(), msg->kick_target.y());
                 }
 
                 // Ball information
@@ -296,32 +278,41 @@ namespace module::network {
                         // mirrored relative to ours, so flip x before sending
                         msg->ball.position.x() *= -1.0F;
                         msg->ball.velocity.x() *= -1.0F;
-                        log<INFO>("msg->ball.position:",
-                                  msg->ball.position.x(),
-                                  msg->ball.position.y(),
-                                  msg->ball.position.z());
-                        log<INFO>("msg->ball.velocity:",
-                                  msg->ball.velocity.x(),
-                                  msg->ball.velocity.y(),
-                                  msg->ball.velocity.z());
                     }
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-                    log<INFO>("msg->ball.covariance set");
                     // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate
                     // guesses)
                     if (loc_ball->confidence > 0.0) {
                         msg->ball.age =
                             std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
-                        log<INFO>("msg->ball.age:", msg->ball.age);
                     }
                 }
 
                 // Purpose information, simple a bool in the new proto
                 msg->going_for_ball = (purpose && purpose->purpose.value == SoccerPosition::ATTACK);
-                log<INFO>("msg->going_for_ball:",
-                          msg->going_for_ball,
-                          "sampled purpose:",
-                          purpose ? static_cast<int>(purpose->purpose.value) : -1);
+
+                // Single-line summary of the outgoing broadcast
+                log<INFO>(fmt::format(
+                    "Broadcast: id={} {} pose=({:.2f}, {:.2f}, {:.2f}) walk=({:.2f}, {:.2f}, {:.2f}) "
+                    "target=({:.2f}, {:.2f}, {:.2f}) kick=({:.2f}, {:.2f}) ball=({:.2f}, {:.2f}) age={:.1f}s "
+                    "going_for_ball={}",
+                    msg->current_pose.player_id,
+                    msg->state == message::input::State::PENALISED ? "PENALISED" : "UNPENALISED",
+                    msg->current_pose.position.x(),
+                    msg->current_pose.position.y(),
+                    msg->current_pose.position.z(),
+                    msg->walk_command.x(),
+                    msg->walk_command.y(),
+                    msg->walk_command.z(),
+                    msg->target_pose.position.x(),
+                    msg->target_pose.position.y(),
+                    msg->target_pose.position.z(),
+                    msg->kick_target.x(),
+                    msg->kick_target.y(),
+                    msg->ball.position.x(),
+                    msg->ball.position.y(),
+                    msg->ball.age,
+                    msg->going_for_ball));
 
                 // Check serialised size before sending
                 auto payload = NUClear::util::serialise::Serialise<Message>::serialise(*msg);
