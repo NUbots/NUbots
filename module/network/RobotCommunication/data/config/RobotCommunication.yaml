@@ -1,12 +1,12 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 startup_delay: 3
 ball_timeout: 3
 
 # Team message port. Set to 0 to auto-compute as 10000 + team_id from GlobalConfig
 # Override with a specific value if TC assigns a different team number at competition
-send_port: 3838
-receive_port: 3939
+send_port: 0
+receive_port: 0
 broadcast_ip: "10.0.255.255"
 udp_filter_address: ""
 
