@@ -34,6 +34,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
+#include "message/planning/LookAround.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
@@ -59,6 +60,7 @@ namespace module::purpose {
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::Robots;
+    using message::planning::LookAround;
     using message::purpose::Attack;
     using message::purpose::Defend;
     using message::purpose::Purpose;
@@ -118,6 +120,21 @@ namespace module::purpose {
                 if (game_state.stopped) {
                     log<DEBUG>("Play is stopped, standing still.");
                     emit<Task>(std::make_unique<StandStill>());
+                    return;
+                }
+
+                // Do not play until localisation has converged, e.g. when re-entering an already-playing
+                // game after being unpenalised or restarted. Stand still and scan for field features so
+                // the robot doesn't run out with a wrong or unconverged pose.
+                if (!field || !field->localised) {
+                    log<DEBUG>("Not localised, standing still and looking around to localise.");
+                    emit(std::make_unique<Purpose>(global_config.player_id,
+                                                   SoccerPosition::UNKNOWN,
+                                                   true,
+                                                   false,
+                                                   game_state.team.team_colour));
+                    emit<Task>(std::make_unique<LookAround>(), 1);
+                    emit<Task>(std::make_unique<StandStill>(), 1);
                     return;
                 }
 
