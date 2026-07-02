@@ -17,6 +17,17 @@ export type RobotLabelProps = {
   selectRobot(robot: RobotModel): void;
 };
 
+/**
+ * A human readable label for peers that are received via a UDP side channel rather than the main
+ * NUClearNet connection, keyed by `RobotModel.type`. These peers are visually distinguished from
+ * regular NUClearNet peers and show the address they were received from, since they are a
+ * separate connection rather than a robot that has joined the NUClear network.
+ */
+const udpSourceLabels: Partial<Record<RobotModel["type"], string>> = {
+  "overview-udp-peer": "Overview UDP",
+  "robocup-udp-peer": "RoboCup UDP",
+};
+
 export const RobotLabel = observer((props: RobotLabelProps) => {
   const { robot, selectRobot } = props;
   const model = RobotLabelModel.of(props.robot);
@@ -31,12 +42,21 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
     },
   );
 
+  const udpSourceLabel = udpSourceLabels[robot.type];
+
   return (
     <>
       <div className="flex min-w-64 hover:bg-auto-contrast-1 pr-4">
         <label className="flex items-center flex-grow h-12 px-4 cursor-pointer">
           <StatusIndicator className="mr-3" connected={robot.connected} />
-          <span className="mr-auto whitespace-nowrap">{robot.name}</span>
+          <span className="mr-auto flex flex-col overflow-hidden">
+            <span className="whitespace-nowrap truncate">{robot.name}</span>
+            {udpSourceLabel && (
+              <span className="text-xs text-auto-secondary whitespace-nowrap truncate">
+                {udpSourceLabel} · {robot.address}
+              </span>
+            )}
+          </span>
           <span className="px-2 mr-1">
             <Switch on={robot.enabled} onChange={toggleRobot(robot)} />
           </span>

@@ -7,6 +7,7 @@ import { CompositeNUClearNetClient } from "./nuclearnet/composite_nuclearnet_cli
 import { DirectNUClearNetClient } from "./nuclearnet/direct_nuclearnet_client";
 import { FakeNUClearNetClient } from "./nuclearnet/fake_nuclearnet_client";
 import { OverviewUDPClient, OverviewUDPClientOptions } from "./nuclearnet/overview_udp_client";
+import { RoboCupUDPClient, RoboCupUDPClientOptions } from "./nuclearnet/robocup_udp_client";
 import { NUsightSession } from "./session/session";
 import { ClientConnection } from "./web_socket/client_connection";
 import { WebSocketServer } from "./web_socket/web_socket_server";
@@ -16,9 +17,16 @@ interface NUsightServerOpts {
   connectionOpts: NUClearNetOptions;
   /**
    * When provided, an additional receive-only UDP side channel is opened that presents robots
-   * sending serialised Overview packets as if they were regular NUClearNet peers.
+   * sending serialised Overview packets as their own peers, separate from the main NUClearNet
+   * connection.
    */
   overviewUDP?: OverviewUDPClientOptions;
+  /**
+   * When provided, an additional receive-only UDP side channel is opened that presents robots
+   * (or other teams) sending serialised RoboCup team communication packets as their own peers,
+   * translating the fields they share with Overview so they can be displayed the same way.
+   */
+  robocupUDP?: RoboCupUDPClientOptions;
 }
 
 /**
@@ -63,14 +71,23 @@ export class NUsightServer {
 
   static of(
     server: WebSocketServer,
-    { fakeNetworking, connectionOpts, overviewUDP }: NUsightServerOpts,
+    { fakeNetworking, connectionOpts, overviewUDP, robocupUDP }: NUsightServerOpts,
   ): NUsightServer {
     const primaryClient: NUClearNetClient = fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of();
 
-    // Optionally add the Overview UDP side channel as an additional receive-only source
-    const nuclearnetClient: NUClearNetClient = overviewUDP
-      ? CompositeNUClearNetClient.of(primaryClient, [OverviewUDPClient.of(overviewUDP)])
-      : primaryClient;
+    // Optionally add the UDP side channels as additional receive-only sources. Each is presented
+    // to clients as its own peer (see overview_udp_client.ts and robocup_udp_client.ts), separate
+    // from the main NUClearNet peers.
+    const secondaryClients: NUClearNetClient[] = [];
+    if (overviewUDP) {
+      secondaryClients.push(OverviewUDPClient.of(overviewUDP));
+    }
+    if (robocupUDP) {
+      secondaryClients.push(RoboCupUDPClient.of(robocupUDP));
+    }
+
+    const nuclearnetClient: NUClearNetClient =
+      secondaryClients.length > 0 ? CompositeNUClearNetClient.of(primaryClient, secondaryClients) : primaryClient;
 
     return new NUsightServer(server, nuclearnetClient, connectionOpts);
   }

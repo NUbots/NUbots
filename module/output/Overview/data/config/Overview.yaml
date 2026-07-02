@@ -9,7 +9,9 @@ send_rate: 2.0
 udp:
   # Whether to enable the UDP side channel
   enabled: false
-  # The IP address to send the serialised Overview packet to
-  ip_address: "127.0.0.1"
+  # The IP address to send the serialised Overview packet to.
+  # Defaults to the lab/RoboCup subnet broadcast address so that a single NUsight instance can
+  # pick up every robot on the network without needing to know each robot's individual IP address.
+  ip_address: "10.1.255.255"
   # The port to send the serialised Overview packet to
   port: 22345
