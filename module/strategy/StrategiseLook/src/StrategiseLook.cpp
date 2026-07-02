@@ -26,6 +26,8 @@
  */
 #include "StrategiseLook.hpp"
 
+#include <fmt/format.h>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -92,35 +94,30 @@ namespace module::strategy {
                 }
             });
 
-        // If we haven't seen the ball or goals for a while, or our localisation is poor, look around
-        on<Provide<LookForStaleFeatures>,
-           With<Field>,
-           Optional<With<Ball>>,
-           Optional<With<Goals>>,
-           Sync<StrategiseLook>>()
-            .then([this](const Field& field,
-                         const std::shared_ptr<const Ball>& ball,
-                         const std::shared_ptr<const Goals>& goals) {
+        // If we haven't seen the ball for a while, or our localisation is poor, look around.
+        // Goal staleness on its own is not a reason to look away from the ball, since goal observations only matter
+        // for localisation and the field cost already measures localisation quality directly.
+        on<Provide<LookForStaleFeatures>, With<Field>, Optional<With<Ball>>>().then(
+            [this](const Field& field, const std::shared_ptr<const Ball>& ball) {
                 const bool stale_ball =
                     !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
-                const bool stale_goals = !goals || goals->goals.empty()
-                                         || (NUClear::clock::now() - goals->timestamp) > cfg.goal_search_timeout;
                 const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
-                if (stale_ball) {
-                    log<DEBUG>(ball ? "Ball reading is stale." : "No ball reading available.");
+                if (stale_ball || poor_localisation) {
+                    if (!looking_around) {
+                        log<DEBUG>(fmt::format("Looking around: ball {}, localisation cost {} (max {}).",
+                                               stale_ball ? "stale" : "fresh",
+                                               field.cost,
+                                               cfg.max_localisation_cost));
+                    }
+                    looking_around = true;
+                    emit<Task>(std::make_unique<LookAround>());
                 }
-                if (stale_goals) {
-                    log<DEBUG>(goals ? "Goal reading is stale or empty." : "No goal reading available.");
-                }
-                if (poor_localisation) {
-                    log<DEBUG>(
-                        fmt::format("Localisation cost too high: {} (max {}).", field.cost, cfg.max_localisation_cost));
-                }
-
-                if (stale_ball || stale_goals || poor_localisation) {
-                    log<DEBUG>("Stale features detected, looking around.");
-                    emit < Tt<Task>(std::make_unique<LookAround>());
+                else {
+                    if (looking_around) {
+                        log<DEBUG>("Ball fresh and localisation good, stopping look around.");
+                    }
+                    looking_around = false;
                 }
             });
     }

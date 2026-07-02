@@ -11,7 +11,7 @@ center_yaw: &center_yaw 0.0
 high_pitch: &high_pitch 0.1 # note that the pitch servo rotates down for positive
 mid_pitch: &mid_pitch 0.35
 low_pitch: &low_pitch 0.63
-max_pitch: &max_pitch 0.0
+level_pitch: &level_pitch 0.0
 search_positions:
   [
     [*min_yaw, *mid_pitch],
@@ -19,6 +19,6 @@ search_positions:
     [*center_yaw, *high_pitch],
     [0.5, *high_pitch],
     [*max_yaw, *mid_pitch],
-    [*center_yaw, *max_pitch],
+    [*center_yaw, *level_pitch],
     [*center_yaw, *low_pitch],
   ]

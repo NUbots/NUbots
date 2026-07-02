@@ -45,6 +45,9 @@ namespace module::strategy {
             double max_localisation_cost = 0.0;
         } cfg;
 
+        /// @brief Whether we are currently looking around due to stale features, used to log only on transitions
+        bool looking_around = false;
+
     public:
         /// @brief Called by the powerplant to build and setup the StrategiseLook reactor.
         explicit StrategiseLook(std::unique_ptr<NUClear::Environment> environment);

@@ -143,8 +143,10 @@ namespace module::purpose {
 
                 // General tasks
                 emit<Task>(std::make_unique<LookAtBall>(), 1);  // Track the ball
-                // Keep stale-feature recovery low priority so it can look around without overriding scoring behaviour.
-                emit<Task>(std::make_unique<LookForStaleFeatures>(), 0);
+                // Higher priority than LookAtBall so it can take the head to re-localise when needed.
+                // It only emits a LookAround when the ball is stale or localisation cost is too high, so it
+                // releases the head back to ball tracking as soon as features are fresh again.
+                emit<Task>(std::make_unique<LookForStaleFeatures>(), 2);
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
