@@ -21,11 +21,13 @@ mahony:
     - 0.21
     - 0
 
-# Yaw complementary filter for fusing gyroscope and kinematic estimates
+# Yaw complementary filter for fusing gyroscope and kinematic estimates.
+# The RL gait turns partly by pivoting the stance foot, which the kinematic yaw cannot see,
+# so the kinematic measurement and bias learning are disabled and yaw comes from the gyro alone
 yaw_filter:
   # Complementary filter coefficient (0-1)
   # Higher values give more weight to kinematic measurement, lower values to gyroscope prediction
-  alpha: 0.01
+  alpha: 0.001
   # Bias learning rate (0-1)
   # Higher values allow faster bias adaptation, lower values provide more stability
   # The filter automatically estimates and corrects for gyroscope bias drift
