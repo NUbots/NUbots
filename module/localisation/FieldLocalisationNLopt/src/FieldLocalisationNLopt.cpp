@@ -142,6 +142,11 @@ namespace module::localisation {
 
             // Mirror hygiene
             cfg.mirror_auto_flip = config["mirror"]["auto_flip"].as<bool>();
+
+            // Automatic local-minimum escape
+            cfg.recovery_enabled            = config["recovery"]["enabled"].as<bool>();
+            cfg.recovery_probe_period       = config["recovery"]["probe_period"].as<int>();
+            cfg.recovery_improvement_margin = config["recovery"]["improvement_margin"].as<double>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -379,6 +384,26 @@ namespace module::localisation {
                                        " below threshold ",
                                        cfg.validity_min_validity);
                             num_invalid_frames++;
+                        }
+
+                        // Automatic local-minimum escape: the optimiser is local and re-converges to the same
+                        // basin every frame, and a biased pose can keep validity above the accept threshold
+                        // indefinitely (most points still land near *some* line). Once per window, probe the
+                        // analytic reset candidates (global, association-free) unconditionally and jump only
+                        // if one is decisively better and nearby. No stuckness detection is needed: when
+                        // well-localised the best candidate matches the current pose and the improvement
+                        // margin is never met, so the probe is a no-op.
+                        recovery_validity_sum += validity;
+                        recovery_frame_count++;
+                        if (cfg.recovery_enabled && recovery_frame_count >= cfg.recovery_probe_period) {
+                            const double mean_validity = recovery_validity_sum / recovery_frame_count;
+                            recovery_validity_sum      = 0.0;
+                            recovery_frame_count       = 0;
+                            if ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay)
+                                && try_local_minimum_escape(field_lines, field_intersections, goals, mean_validity)) {
+                                num_invalid_frames = 0;
+                                last_reset         = NUClear::clock::now();
+                            }
                         }
                     }
 

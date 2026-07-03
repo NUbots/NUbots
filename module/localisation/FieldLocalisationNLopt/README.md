@@ -152,6 +152,30 @@ the half of the field the robot was last on during the grid-search fallback (and
 candidates in stage 1), avoiding the mirror field problem structurally. See "Mirror Symmetry Limitation" below
 for why this is a structural constraint rather than a per-frame evidence check.
 
+### Automatic Local-Minimum Escape
+
+The per-frame optimiser is local (seeded from the filter mean), so it re-converges to the same basin every
+frame. The cost landscape has many local minima from parallel-line aliasing: a pose offset that puts most
+observed line points near the *wrong* line still keeps validity above `validity.min_validity`, so the
+invalid-frames reset never triggers, and the filter keeps fusing the same self-consistent biased measurement.
+Symptoms: the estimated field keeps its shape but sits slightly offset from the true field, and a manual
+uncertainty reset instantly fixes it.
+
+The `recovery` block automates that manual reset. Per-frame validity is averaged over windows of
+`recovery.probe_period` frames; once per window the analytic candidate probe (stages 1-2 of the reset, no
+grid search - typically tens of milliseconds) is run unconditionally. The filter jumps to the best candidate
+only if it beats the window's mean validity by `recovery.improvement_margin` **and** lies within
+`window_size` (position + wrapped heading) of the current estimate. The locality gate keeps escapes local
+and rejects mirror flips, which are always at least pi away in heading.
+
+There is deliberately no "stuckness detection" (validity level or oscillation heuristics): the probe
+*compares* against the global candidate alternatives instead of trying to *detect* a bad fit. When
+well-localised, the best candidate refines to (approximately) the current pose, the improvement margin is
+never met, and the probe is a no-op - the margin acts as the sole jump decision. A stable local minimum
+often shows constant mediocre validity rather than oscillation, and validity naturally fluctuates with head
+pose and viewpoint on a well-localised robot, so neither level nor oscillation is a reliable trigger; a
+direct comparison is.
+
 ### Mirror Symmetry Limitation
 
 The field localisation cost function is **exactly invariant** under the mirror transform

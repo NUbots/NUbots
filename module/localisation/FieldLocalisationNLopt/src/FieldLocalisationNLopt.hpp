@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <nlopt.hpp>
+#include <optional>
 #include <nuclear>
 
 #include "message/eye/DataPoint.hpp"
@@ -332,6 +333,16 @@ namespace module::localisation {
             /// @brief Act automatically on detected mirror-flip cues (e.g. PenaltyReset) rather than only
             /// logging a warning
             bool mirror_auto_flip = false;
+
+            /// @brief Continuously probe reset candidates to escape local minima of the cost function
+            bool recovery_enabled = true;
+            /// @brief Number of frames of validity averaged per local-minimum escape probe window; the probe
+            /// runs once per window
+            int recovery_probe_period = 30;
+            /// @brief A probe candidate must beat the window's mean validity by this margin for the escape to
+            /// be accepted. This margin is the sole jump decision (together with the window_size locality
+            /// bound); when well-localised the best candidate matches the current pose and no jump occurs.
+            double recovery_improvement_margin = 0.1;
         } cfg;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform, the raw (unfiltered) optimisation result. Kept
@@ -352,6 +363,12 @@ namespace module::localisation {
 
         /// @brief Number of consecutive frames rejected by the validity gate
         int num_invalid_frames = 0;
+
+        /// @brief Running sum of per-frame validity over the current local-minimum escape probe window
+        double recovery_validity_sum = 0.0;
+
+        /// @brief Number of frames accumulated in the current local-minimum escape probe window
+        int recovery_frame_count = 0;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
@@ -539,6 +556,43 @@ namespace module::localisation {
                                const std::shared_ptr<const FieldIntersections>& field_intersections,
                                const std::shared_ptr<const Goals>& goals,
                                const Eigen::Isometry3d& Hrw);
+
+        /**
+         * @brief Generate analytic pose candidates (goal pairs, intersection pairs, last certain state and
+         * mirrors when not constrained to a half), refine each with the uncertainty optimiser, and return the
+         * candidate with the highest validity. Shared by uncertainty_reset (stage 1-2) and the automatic
+         * local-minimum escape.
+         *
+         * @param field_lines Field lines, used to refine and score candidates.
+         * @param field_intersections Field intersections, used to generate and score candidates.
+         * @param goals Goals, used to generate candidates.
+         * @return Best (refined state, validity) pair, or nullopt if no candidates could be generated.
+         */
+        std::optional<std::pair<Eigen::Vector3d, double>> candidate_probe(
+            const FieldLines& field_lines,
+            const std::shared_ptr<const FieldIntersections>& field_intersections,
+            const std::shared_ptr<const Goals>& goals);
+
+        /**
+         * @brief Attempt to escape a local minimum of the cost function by probing the analytic reset
+         * candidates. The optimiser is local (seeded from the filter mean each frame), so a biased pose that
+         * still explains most percepts (validity above the accept threshold but mediocre) is self-reinforcing
+         * and never triggers the invalid-frames reset. The probe candidates are global and association-free,
+         * so they can land in the true basin. The escape is accepted only if the best candidate beats the
+         * probe window's mean validity by cfg.recovery_improvement_margin AND is within cfg.window_size
+         * (position + wrapped angle) of the current estimate - the latter keeps escapes local and, in
+         * particular, rejects mirror flips (a mirror twin is always at least pi away in heading).
+         *
+         * @param field_lines Field lines, used to refine and score candidates.
+         * @param field_intersections Field intersections, used to generate and score candidates.
+         * @param goals Goals, used to generate candidates.
+         * @param mean_validity Mean validity over the probe window, the baseline the candidate must beat.
+         * @return Whether an escape was performed (the filter has been reset to the new pose).
+         */
+        bool try_local_minimum_escape(const FieldLines& field_lines,
+                                      const std::shared_ptr<const FieldIntersections>& field_intersections,
+                                      const std::shared_ptr<const Goals>& goals,
+                                      double mean_validity);
 
 
         /**

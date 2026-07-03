@@ -94,7 +94,7 @@ validity:
   # Field-line point registered as an inlier below this map distance [m]
   line_inlier_distance: 0.2
   # Minimum matched-percept validity fraction to accept an optimisation result
-  min_validity: 0.5
+  min_validity: 0.67
   # Maximum number of consecutive invalid frames before triggering an uncertainty reset
   max_invalid_frames: 100
   # Trigger an uncertainty reset after max_invalid_frames consecutive invalid frames
@@ -113,3 +113,17 @@ reset:
 mirror:
   # Act automatically on detected mirror-flip cues (e.g. PenaltyReset); false = log a warning only
   auto_flip: false
+
+recovery:
+  # Continuously probe the analytic reset candidates to escape local minima of the cost function. The
+  # optimiser is local, so a slightly-offset pose that still explains most percepts is self-reinforcing;
+  # once per window this checks whether a decisively better nearby pose exists and jumps to it (equivalent
+  # to a manual uncertainty reset, but cheap: candidates only, no grid search). No stuckness detection is
+  # needed: when well-localised the best candidate matches the current pose and no jump occurs.
+  enabled: true
+  # Number of frames of validity averaged per probe window; the probe runs once per window
+  probe_period: 30
+  # A candidate must beat the window's mean validity by this margin to accept the escape. The escape must
+  # also be within window_size (position + wrapped heading) of the current estimate, which keeps it local
+  # and rejects mirror flips.
+  improvement_margin: 0.1

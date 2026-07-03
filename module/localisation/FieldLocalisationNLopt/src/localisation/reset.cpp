@@ -54,12 +54,11 @@ namespace module::localisation {
         }
     }  // namespace
 
-    void FieldLocalisationNLopt::uncertainty_reset(const FieldDescription& fd,
-                                                   const FieldLines& field_lines,
-                                                   const std::shared_ptr<const FieldIntersections>& field_intersections,
-                                                   const std::shared_ptr<const Goals>& goals,
-                                                   const Eigen::Isometry3d& Hrw) {
-        // --- Stage 1: gather one-shot analytic candidates ---
+    std::optional<std::pair<Eigen::Vector3d, double>> FieldLocalisationNLopt::candidate_probe(
+        const FieldLines& field_lines,
+        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const std::shared_ptr<const Goals>& goals) {
+        // Gather one-shot analytic candidates
         std::vector<Eigen::Vector3d> candidates;
         if (cfg.reset_use_candidates) {
             auto goal_candidates         = goal_pair_candidates(goals);
@@ -80,22 +79,64 @@ namespace module::localisation {
             candidates.insert(candidates.end(), mirrored.begin(), mirrored.end());
         }
 
-        // --- Stage 2: short SBPLX refine per candidate, rank by validity ---
-        if (!candidates.empty()) {
-            std::vector<std::pair<Eigen::Vector3d, double>> refined;  // (refined state, validity)
-            refined.reserve(candidates.size());
-            for (const auto& candidate : candidates) {
-                auto [refined_state, cost] =
-                    run_field_line_optimisation(candidate, field_lines.rPWw, field_intersections, goals, true);
-                (void) cost;
-                double validity = compute_validity(refined_state, field_lines.rPWw, field_intersections);
-                refined.emplace_back(refined_state, validity);
+        if (candidates.empty()) {
+            return std::nullopt;
+        }
+
+        // Short SBPLX refine per candidate, keep the highest validity
+        std::optional<std::pair<Eigen::Vector3d, double>> best;
+        for (const auto& candidate : candidates) {
+            auto [refined_state, cost] =
+                run_field_line_optimisation(candidate, field_lines.rPWw, field_intersections, goals, true);
+            (void) cost;
+            double validity = compute_validity(refined_state, field_lines.rPWw, field_intersections);
+            if (!best || validity > best->second) {
+                best = std::make_pair(refined_state, validity);
             }
+        }
+        return best;
+    }
 
-            auto best = std::max_element(refined.begin(), refined.end(), [](const auto& a, const auto& b) {
-                return a.second < b.second;
-            });
+    bool FieldLocalisationNLopt::try_local_minimum_escape(
+        const FieldLines& field_lines,
+        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const std::shared_ptr<const Goals>& goals,
+        double mean_validity) {
+        auto best = candidate_probe(field_lines, field_intersections, goals);
+        if (!best) {
+            return false;
+        }
 
+        // Only escape to a decisively better pose that is local to the current estimate. The locality gate
+        // (position + wrapped angle) also rejects mirror flips, which are always at least pi away in heading.
+        bool decisively_better = best->second >= mean_validity + cfg.recovery_improvement_margin;
+        bool local             = pose_distance(best->first, filter.mean) <= cfg.window_size;
+        if (!decisively_better || !local) {
+            return false;
+        }
+
+        log<INFO>("Local-minimum escape: candidate validity ",
+                  best->second,
+                  " beats window mean ",
+                  mean_validity,
+                  ", jumping from (",
+                  filter.mean.transpose(),
+                  ") to (",
+                  best->first.transpose(),
+                  ")");
+        state = best->first;
+        filter.reset(state, cfg.change_limit);
+        last_certain_state = state;
+        return true;
+    }
+
+    void FieldLocalisationNLopt::uncertainty_reset(const FieldDescription& fd,
+                                                   const FieldLines& field_lines,
+                                                   const std::shared_ptr<const FieldIntersections>& field_intersections,
+                                                   const std::shared_ptr<const Goals>& goals,
+                                                   const Eigen::Isometry3d& Hrw) {
+        // --- Stage 1 + 2: analytic candidates, refined and ranked by validity ---
+        if (auto best = candidate_probe(field_lines, field_intersections, goals)) {
             if (best->second >= cfg.validity_min_validity) {
                 log<INFO>("Uncertainty reset (candidates): accepted with validity ", best->second);
                 state = best->first;
