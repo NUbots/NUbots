@@ -127,6 +127,8 @@ namespace module::localisation {
                 // Set the purpose message with the teammate's player id and whether they are going for the ball
                 purpose->player_id = robocup.current_pose.player_id;
                 purpose->purpose   = robocup.going_for_ball ? SoccerPosition::ATTACK : SoccerPosition::SUPPORT;
+                // Teammates only count in strategy decisions if active, so mark them active unless penalised
+                purpose->active    = robocup.state != PenaltyState::PENALISED;
 
                 // Run data association step
                 data_association(robots_rRWw, purpose);
