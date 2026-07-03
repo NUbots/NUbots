@@ -104,6 +104,18 @@ TEST_CASE("Near target approaches omnidirectionally with proportional speed", "[
             && result.desired_heading < std::max(angle_to_target, final_heading))));
 }
 
+TEST_CASE("Near target heading blend takes the shortest arc across the +-pi wrap", "[walk_to_velocity]") {
+    const auto p = test_params();
+    // Angle to target ~ +179 degrees and final heading -179 degrees are only 2 degrees apart across
+    // the wrap, so the blended heading must stay near +-pi rather than pass through zero
+    const double bearing = 179.0 * M_PI / 180.0;
+    const Eigen::Vector2d target(0.5 * std::cos(bearing), 0.5 * std::sin(bearing));
+    const auto result = walk_to_velocity(target, -179.0 * M_PI / 180.0, p);
+
+    CHECK(std::abs(result.desired_heading) > 3.1);
+    CHECK(result.velocity.z() == Approx(p.max_velocity.z() * (result.desired_heading > 0 ? 1.0 : -1.0)));
+}
+
 TEST_CASE("Inside min align radius the final heading is used exactly", "[walk_to_velocity]") {
     const auto p               = test_params();
     const double final_heading = -0.7;
