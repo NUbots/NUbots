@@ -20,6 +20,7 @@ nuclear_role(
   input::K1Sensors
   input::K1Camera
   input::GameController
+  input::WhistleDetection
   network::RobotCommunication
   # Vision
   # vision::VisualMesh
