@@ -87,6 +87,7 @@ namespace module::purpose {
             cfg.center_circle_offset      = config["center_circle_offset"].as<double>();
             cfg.max_localisation_cost     = config["max_localisation_cost"].as<double>();
             cfg.search_when_lost          = config["search_when_lost"].as<bool>();
+            cfg.localise_timeout          = std::chrono::seconds(config["localise_timeout"].as<int>());
         });
 
         on<Configuration>("Formation.yaml").then([this](const Configuration& config) {
@@ -127,16 +128,28 @@ namespace module::purpose {
                 // game after being unpenalised or restarted. Stand still and scan for field features so
                 // the robot doesn't run out with a wrong or unconverged pose.
                 if (!field || !field->localised) {
-                    log<DEBUG>("Not localised, standing still and looking around to localise.");
-                    supporting = false;
-                    emit(std::make_unique<Purpose>(global_config.player_id,
-                                                   SoccerPosition::UNKNOWN,
-                                                   true,
-                                                   false,
-                                                   game_state.team.team_colour));
-                    emit<Task>(std::make_unique<LookAround>(), 1);
-                    emit<Task>(std::make_unique<StandStill>(), 1);
-                    return;
+                    // Start the timer the first time we notice we are not localised
+                    if (!look_around_start) {
+                        look_around_start = NUClear::clock::now();
+                    }
+                    // Only stand and look around for a limited time, then give up and play anyway
+                    if (NUClear::clock::now() - *look_around_start < cfg.localise_timeout) {
+                        log<DEBUG>("Not localised, standing still and looking around to localise.");
+                        supporting = false;
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                       SoccerPosition::UNKNOWN,
+                                                       true,
+                                                       false,
+                                                       game_state.team.team_colour));
+                        emit<Task>(std::make_unique<LookAround>(), 1);
+                        emit<Task>(std::make_unique<StandStill>(), 1);
+                        return;
+                    }
+                    log<DEBUG>("Look around timed out without localising, playing anyway.");
+                }
+                else {
+                    // Localised, reset the timer for the next time localisation is lost
+                    look_around_start.reset();
                 }
 
                 // Determine if the game is in a set play situation

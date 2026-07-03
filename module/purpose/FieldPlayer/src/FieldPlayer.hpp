@@ -29,6 +29,7 @@
 
 #include <map>
 #include <nuclear>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -55,10 +56,15 @@ namespace module::purpose {
             double max_localisation_cost = 0.0;
             /// @brief Whether to search around the field if the robot's localisation cost is high
             bool search_when_lost = false;
+            /// @brief Maximum time to stand still and look around waiting for localisation to converge
+            std::chrono::seconds localise_timeout{0};
         } cfg;
 
         /// @brief Whether the last purpose decision was support, so switching to support is only logged once
         bool supporting = false;
+
+        /// @brief When the robot started standing still and looking around to localise, unset when localised
+        std::optional<NUClear::clock::time_point> look_around_start{};
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldPlayer reactor.
