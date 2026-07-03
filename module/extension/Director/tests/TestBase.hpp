@@ -28,8 +28,11 @@
 #ifndef MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 #define MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 
+#include <condition_variable>
 #include <iostream>
+#include <mutex>
 #include <nuclear>
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
@@ -70,12 +73,35 @@ public:
         // Advance to the next step when the system is idle
         on<Idle<>>().then([this, auto_shutdown] { next_step<NSteps>(++step, auto_shutdown); });
 
+        // Note when the system shuts down cleanly so the timeout thread can stop waiting
+        on<Shutdown>().then([this] {
+            const std::lock_guard<std::mutex> lock(timeout_mutex);
+            clean_shutdown = true;
+            timeout_cv.notify_all();
+        });
+
+        // Timeout if the test doesn't complete in time.
+        // A watchdog (emit<Scope::DELAY>) cannot be used here because it rides NUClear::clock, which
+        // these tests freeze and manipulate via Time Travel, so the deadline would never be reached.
+        // Instead spawn a real thread that waits on a steady_clock timeout and fails the test if the
+        // system has not shut down cleanly by then.
+        on<Always>().then("Test Timeout", [this, timeout] {
+            if (clean_shutdown) {
+                return;
+            }
+            std::unique_lock<std::mutex> lock(timeout_mutex);
+            timeout_cv.wait_for(lock, timeout);
+
+            if (!clean_shutdown) {
+                emit<Scope::INLINE>(std::make_unique<Fail>("Test did not complete successfully"));
+                powerplant.shutdown(true);
+            }
+        });
+
         on<Trigger<Fail>, MainThread>().then([this](const Fail& f) {
             INFO(f.message);
             CHECK(false);
-            powerplant.shutdown(true);
         });
-        emit<Scope::DELAY>(std::make_unique<Fail>("Test did not complete successfully"), timeout);
     }
 
 private:
@@ -111,6 +137,13 @@ private:
 
     /// The current step of the test
     int step = 0;
+
+    /// Mutex to wait on for the test timeout
+    std::mutex timeout_mutex;
+    /// Condition variable to wait on for the test timeout
+    std::condition_variable timeout_cv;
+    /// If the system shut down cleanly (used to stop the timeout thread from failing the test)
+    bool clean_shutdown = false;
 };
 
 #endif  // MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
