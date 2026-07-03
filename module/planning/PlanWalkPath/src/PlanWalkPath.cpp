@@ -223,6 +223,13 @@ namespace module::planning {
                 // Emit the walk task with the calculated velocities
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
 
+                if (log_level <= DEBUG) {
+                    emit(graph("WalkTo errors (dist, angle to target, angle to final heading)",
+                               translational_error,
+                               angle_to_target,
+                               angle_to_final_heading));
+                }
+
                 // Emit debugging information for visualisation and monitoring
                 auto debug_information                       = std::make_unique<WalkToDebug>();
                 debug_information->Hrd.translation().head(2) = rDRr;

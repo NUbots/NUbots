@@ -41,6 +41,7 @@
 #include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/geometry/intersection.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::strategy {
@@ -63,6 +64,7 @@ namespace module::strategy {
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::pos_rpy_to_transform;
     using utility::math::geometry::intersection_line_and_circle;
+    using utility::nusight::graph;
 
     using utility::support::Expression;
 
@@ -237,6 +239,16 @@ namespace module::strategy {
 
                 // Final walking target pose
                 Eigen::Isometry3d Hfk = pos_rpy_to_transform(target, Eigen::Vector3d(0, 0, desired_heading));
+
+                if (log_level <= DEBUG) {
+                    // Alignment errors relative to the ball->goal line and whether we're in the "walk into ball" state
+                    const bool ready_to_kick = std::max(err_x, 0.0) < cfg.err_x_ok && std::abs(err_y) < cfg.err_y_ok
+                                               && std::abs(err_z) < cfg.err_z_ok;
+                    emit(graph("WalkToKickBall errors (x, y, z)", err_x, err_y, err_z));
+                    emit(graph("WalkToKickBall ready to kick", ready_to_kick ? 1 : 0));
+                    emit(graph("WalkToKickBall target (field)", target.x(), target.y(), desired_heading));
+                    emit(graph("WalkToKickBall ball distance", rBRr.head<2>().norm()));
+                }
 
                 // Issue walking task toward final position and orientation
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfk, false));
