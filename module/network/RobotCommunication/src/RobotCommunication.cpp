@@ -111,7 +111,7 @@ namespace module::network {
                                 if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
                                     == ignored_ip_addresses.end()) {
                                     ignored_ip_addresses.insert(remote_addr);
-                                    log<INFO>("Ignoring UDP packet from",
+                                    log<DEBUG>("Ignoring UDP packet from",
                                               remote_addr,
                                               "as it doesn't match configured filter address",
                                               cfg.udp_filter_address);
@@ -130,7 +130,7 @@ namespace module::network {
                             // Port-per-team ensures only teammates broadcast on this port
                             // Filter out messages from ourselves only
                             if (!own_player_message) {
-                                log<INFO>("Message received from teammate ID",
+                                log<DEBUG>("Message received from teammate ID",
                                           incoming_msg.current_pose.player_id,
                                           "position:",
                                           incoming_msg.current_pose.position.x(),
@@ -292,7 +292,7 @@ namespace module::network {
                 msg->going_for_ball = (purpose && purpose->purpose.value == SoccerPosition::ATTACK);
 
                 // Single-line summary of the outgoing broadcast
-                log<INFO>(fmt::format(
+                log<DEBUG>(fmt::format(
                     "Broadcast: id={} {} pose=({:.2f}, {:.2f}, {:.2f}) walk=({:.2f}, {:.2f}, {:.2f}) "
                     "target=({:.2f}, {:.2f}, {:.2f}) kick=({:.2f}, {:.2f}) ball=({:.2f}, {:.2f}) age={:.1f}s "
                     "going_for_ball={}",
