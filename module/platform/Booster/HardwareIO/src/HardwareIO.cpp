@@ -238,6 +238,15 @@ namespace module::platform::Booster {
             return;
         }
 
+        // Any mode transition invalidates the odometry track, so zero the odometry whenever the mode
+        // changes, regardless of which mode it changed to. Skip the first observation (kUnknown) as
+        // startup already resets odometry explicitly.
+        if (current_mode != mode_response.mode_ && current_mode != RobotMode::kUnknown) {
+            if (int32_t reset_res = booster_client.ResetOdometry(); reset_res != 0) {
+                log<ERROR>("Failed to reset odometry on mode change: " + res_code_to_string(reset_res));
+            }
+        }
+
         // Cache the mode so movement/look commands can be gated without a per-command SDK round-trip
         current_mode = mode_response.mode_;
 

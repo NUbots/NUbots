@@ -10,6 +10,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
@@ -26,6 +27,7 @@ namespace bip = boost::interprocess;
 namespace module::input {
 
     using extension::Configuration;
+    using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
     using message::input::ButtonLeftDown;
     using message::input::ButtonLeftUp;
@@ -174,6 +176,20 @@ namespace module::input {
             booster_odometry_has_offset = false;
             booster_odometry_offset     = {};
             log<INFO>("K1Sensors clearing BoosterOdometry offset after field localisation reset");
+        });
+
+
+        // Any motion mode change causes HardwareIO to reset the Booster odometry, so re-capture the
+        // zero offset from the first sample after the change, regardless of which mode was entered.
+        on<Trigger<BoosterModeState>>().then([this](const BoosterModeState& mode_state) {
+            std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
+            const int mode = static_cast<int>(mode_state.mode);
+            if (last_booster_mode != -1 && mode != last_booster_mode) {
+                booster_odometry_has_offset = false;
+                booster_odometry_offset     = {};
+                log<INFO>("K1Sensors clearing BoosterOdometry offset after mode change");
+            }
+            last_booster_mode = mode;
         });
 
 

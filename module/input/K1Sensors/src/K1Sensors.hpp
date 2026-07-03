@@ -39,6 +39,9 @@ namespace module::input {
         std::mutex odometry_mutex;
         bool booster_odometry_has_offset = false;
         std::array<double, 3> booster_odometry_offset{};
+        /// @brief Last Booster motion mode seen, used to clear the odometry offset whenever the mode
+        /// changes (-1 = no mode seen yet)
+        int last_booster_mode = -1;
 
         bool left_down   = false;
         bool middle_down = false;
