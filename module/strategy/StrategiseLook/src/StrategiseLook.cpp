@@ -51,7 +51,7 @@ namespace module::strategy {
     using message::skill::Look;
     using message::strategy::LookAtBall;
     using message::strategy::LookAtGoals;
-    using message::strategy::LookForStaleFeatures;
+    // using message::strategy::LookForStaleFeatures;
     using message::vision::Goals;
     using utility::math::coordinates::sphericalToCartesian;
 
@@ -94,32 +94,32 @@ namespace module::strategy {
                 }
             });
 
-        // If we haven't seen the ball for a while, or our localisation is poor, look around.
-        // Goal staleness on its own is not a reason to look away from the ball, since goal observations only matter
-        // for localisation and the field cost already measures localisation quality directly.
-        on<Provide<LookForStaleFeatures>, With<Field>, Optional<With<Ball>>>().then(
-            [this](const Field& field, const std::shared_ptr<const Ball>& ball) {
-                const bool stale_ball =
-                    !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
-                const bool poor_localisation = field.cost > cfg.max_localisation_cost;
+        // // If we haven't seen the ball for a while, or our localisation is poor, look around.
+        // // Goal staleness on its own is not a reason to look away from the ball, since goal observations only matter
+        // // for localisation and the field cost already measures localisation quality directly.
+        // on<Provide<LookForStaleFeatures>, With<Field>, Optional<With<Ball>>>().then(
+        //     [this](const Field& field, const std::shared_ptr<const Ball>& ball) {
+        //         const bool stale_ball =
+        //             !ball || (NUClear::clock::now() - ball->time_of_measurement) > cfg.ball_search_timeout;
+        //         const bool poor_localisation = field.cost > cfg.max_localisation_cost;
 
-                if (stale_ball || poor_localisation) {
-                    if (!looking_around) {
-                        log<DEBUG>(fmt::format("Looking around: ball {}, localisation cost {} (max {}).",
-                                               stale_ball ? "stale" : "fresh",
-                                               field.cost,
-                                               cfg.max_localisation_cost));
-                    }
-                    looking_around = true;
-                    emit<Task>(std::make_unique<LookAround>());
-                }
-                else {
-                    if (looking_around) {
-                        log<DEBUG>("Ball fresh and localisation good, stopping look around.");
-                    }
-                    looking_around = false;
-                }
-            });
+        //         if (stale_ball || poor_localisation) {
+        //             if (!looking_around) {
+        //                 log<DEBUG>(fmt::format("Looking around: ball {}, localisation cost {} (max {}).",
+        //                                        stale_ball ? "stale" : "fresh",
+        //                                        field.cost,
+        //                                        cfg.max_localisation_cost));
+        //             }
+        //             looking_around = true;
+        //             emit<Task>(std::make_unique<LookAround>());
+        //         }
+        //         else {
+        //             if (looking_around) {
+        //                 log<DEBUG>("Ball fresh and localisation good, stopping look around.");
+        //             }
+        //             looking_around = false;
+        //         }
+        //     });
     }
 
 }  // namespace module::strategy

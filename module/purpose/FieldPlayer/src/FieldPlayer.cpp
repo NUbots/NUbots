@@ -66,7 +66,7 @@ namespace module::purpose {
     using message::purpose::Support;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
-    using message::strategy::LookForStaleFeatures;
+    // using message::strategy::LookForStaleFeatures;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -139,7 +139,7 @@ namespace module::purpose {
                 // Higher priority than LookAtBall so it can take the head to re-localise when needed.
                 // It only emits a LookAround when the ball is stale or localisation cost is too high, so it
                 // releases the head back to ball tracking as soon as features are fresh again.
-                emit<Task>(std::make_unique<LookForStaleFeatures>(), 2);
+                // emit<Task>(std::make_unique<LookForStaleFeatures>(), 2);
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
