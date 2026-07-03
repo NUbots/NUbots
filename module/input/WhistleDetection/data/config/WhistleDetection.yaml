@@ -17,13 +17,13 @@ fft_size: 1024
 # Whistle frequency band bounds in Hz.
 # Referee whistles typically fall in the 2.5-4 kHz range; we use slightly wider bounds
 # to tolerate acoustic variation and room reflections.
-freq_min: 2500.0
-freq_max: 3500.0
+freq_min: 2000.0
+freq_max: 4000.0
 
 # Fraction of total spectral power that must lie in [freq_min, freq_max] to flag a frame
 # as whistle-like.  For broadband noise the in-band fraction is ~0.31 (2.5 kHz / 8 kHz
 # Nyquist); a clear whistle pushes this well above 0.5.
-band_ratio_threshold: 0.85
+band_ratio_threshold: 0.80
 
 # Minimum absolute in-band power (linear, not dB) to avoid triggering on near-silence.
 # Tune this for the robot's microphone gain.

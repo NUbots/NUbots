@@ -76,7 +76,12 @@ namespace module::input {
         snd_pcm_hw_params_any(pcm_handle, hw_params);
         snd_pcm_hw_params_set_access(pcm_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
         snd_pcm_hw_params_set_format(pcm_handle, hw_params, SND_PCM_FORMAT_S16_LE);
-        snd_pcm_hw_params_set_channels(pcm_handle, hw_params, 1);
+
+        // The hardware may not support mono capture; take whatever channel count it gives us
+        // (closest to 1) and de-interleave in the read loop. Reading with a mismatched channel
+        // count overflows the read buffer since snd_pcm_readi works in frames, not samples.
+        channels = 1;
+        snd_pcm_hw_params_set_channels_near(pcm_handle, hw_params, &channels);
 
         unsigned int actual_rate = cfg.sample_rate;
         snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &actual_rate, nullptr);
@@ -102,13 +107,22 @@ namespace module::input {
 
         sample_buffer.clear();
         consecutive_detections = 0;
-        log<INFO>("ALSA capture opened: device=", cfg.device, "rate=", actual_rate, "Hz fft_size=", cfg.fft_size);
+        log<INFO>("ALSA capture opened: device=",
+                  cfg.device,
+                  "rate=",
+                  actual_rate,
+                  "Hz channels=",
+                  channels,
+                  "fft_size=",
+                  cfg.fft_size);
     }
 
     WhistleDetection::WhistleDetection(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("WhistleDetection.yaml").then([this](const Configuration& config) {
+        // Sync with the audio reaction: setup_audio() closes and reopens pcm_handle, which must
+        // never happen while a read on the old handle is in flight on another thread
+        on<Configuration, Sync<WhistleDetection>>("WhistleDetection.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             cfg.device                = config["device"].as<std::string>();
@@ -134,14 +148,14 @@ namespace module::input {
 
         // Poll for audio every 10 ms. Non-blocking reads accumulate into sample_buffer;
         // once a full FFT window is ready, process_frame is called with 50% overlap.
-        audio_handle = on<Every<10, std::chrono::milliseconds>>().then([this] {
+        audio_handle = on<Every<10, std::chrono::milliseconds>, Sync<WhistleDetection>>().then([this] {
             if (pcm_handle == nullptr) {
                 return;
             }
 
-            // Read up to half a window of samples at a time
+            // Read up to half a window of frames at a time (each frame is `channels` samples)
             const int read_size = cfg.fft_size / 2;
-            std::vector<int16_t> raw(read_size);
+            std::vector<int16_t> raw(static_cast<size_t>(read_size) * channels);
             const snd_pcm_sframes_t n = snd_pcm_readi(pcm_handle, raw.data(), read_size);
 
             if (n == -EAGAIN) {
@@ -155,9 +169,9 @@ namespace module::input {
                 return;
             }
 
-            // Convert S16_LE to normalised float [-1, 1]
+            // Convert S16_LE to normalised float [-1, 1], taking channel 0 of each frame
             for (snd_pcm_sframes_t i = 0; i < n; i++) {
-                sample_buffer.push_back(static_cast<float>(raw[i]) / 32768.0f);
+                sample_buffer.push_back(static_cast<float>(raw[i * channels]) / 32768.0f);
             }
 
             // Process all available complete windows (50% overlap → hop = fft_size/2)

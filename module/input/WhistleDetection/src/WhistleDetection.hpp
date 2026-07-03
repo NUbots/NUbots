@@ -64,6 +64,9 @@ namespace module::input {
         /// @brief ALSA PCM capture handle
         snd_pcm_t* pcm_handle{nullptr};
 
+        /// Channel count negotiated with the hardware (may be more than the 1 we ask for)
+        unsigned int channels{1};
+
         /// Rolling audio sample buffer used to accumulate frames for FFT
         std::vector<float> sample_buffer{};
 
