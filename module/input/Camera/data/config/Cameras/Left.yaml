@@ -14,10 +14,10 @@ settings:
 
   BalanceWhiteAuto: Off # Options: Off, Once, Continuous
   BalanceRatioSelector: Red
-  BalanceRatio: 0.9
+  BalanceRatio: 1.65
 
   GainAuto: Continuous # Options: Off, Once, Continuous
 
   AcquisitionFrameRateEnable: true
-  AcquisitionFrameRate: 25.00 # Adjusting frame rate can help remove flickering from lighting
+  AcquisitionFrameRate: 10.00 # Adjusting frame rate can help remove flickering from lighting
   DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate

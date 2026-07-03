@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -14,10 +14,10 @@ initial_state: [0.0, 0.0, 0.0]
 save_map: false
 
 # Minimum number of field line points for a measurement update
-min_field_line_points: 20
+min_field_line_points: 15
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 3
+min_field_line_intersections: 4
 
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 1
@@ -56,7 +56,7 @@ field_line_intersection_weight: 5.0
 state_change_weight: 2.0
 
 # Minimum distance an associated landmark needs to be for measurement update
-max_association_distance: 2.0
+max_association_distance: 1.0
 
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 1.0

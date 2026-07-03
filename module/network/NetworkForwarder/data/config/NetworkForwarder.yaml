@@ -10,39 +10,38 @@ targets:
   nusight:
     # Overview packets for the overview screen
     message.support.nusight.Overview: false
-    message.support.FieldDescription: false
     message.support.nuclear.ReactionProfiles: false
 
     # DataPoints power the chart view
     message.eye.DataPoint: false
 
     # Sensor data
-    message.input.Sensors: true
+    message.input.Sensors: false
 
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
-    message.output.CompressedImage: 10
-    message.vision.Balls: true
-    message.vision.Goals: true
-    message.vision.Robots: true
-    message.vision.GreenHorizon: true
-    message.vision.FieldLines: true
+    message.output.CompressedImage: false
+    message.vision.Balls: false
+    message.vision.Goals: false
+    message.vision.Robots: false
+    message.vision.GreenHorizon: false
+    message.vision.FieldLines: false
     message.vision.VisualMesh: false
-    message.vision.FieldIntersections: true
-    message.vision.BoundingBoxes: true
+    message.vision.FieldIntersections: 0.75
+    message.vision.BoundingBoxes: false
 
     # Localisation Messages
-    message.localisation.Ball: true
-    message.localisation.Field: true
-    message.localisation.Robots: true
+    message.localisation.Ball: false
+    message.localisation.Field: false
+    message.localisation.Robots: false
 
     # Log messages
     message.nuclear.LogMessage: false
     message.nuclear.ReactionStatistics: false
 
     # Behaviour
-    message.purpose.Purpose: true
-    message.planning.WalkToDebug: true
-    message.strategy.WalkInsideBoundedBox: true
-    message.behaviour.state.WalkState: true
+    message.purpose.Purpose: false
+    message.planning.WalkToDebug: false
+    message.strategy.WalkInsideBoundedBox: false
+    message.behaviour.state.WalkState: false
     message.behaviour.DirectorState: false

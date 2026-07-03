@@ -1,0 +1,92 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+model:
+  path: model.onnx
+  device: CPU
+  input_name: obs
+  output_name: actions
+  num_joints: 20
+  obs_size: 71
+  action_alpha: 1.00 # TODO: remove the filter completely
+  action_scale: 0.24722924456 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
+  gait_period: 0.7 # seconds, defined in mjlab training
+
+servos:
+  torque: 100.0
+  leg_gains: 7.0
+  head_gains: 1.0
+  arm_gains: 1.0
+
+# Command velocity magnitude (m/s and rad/s combined) below which the policy joint offsets
+# are zeroed and the robot holds the default pose. Hack to avoid unwanted policy behaviour at
+# ~zero command. TODO: tune this threshold on the real robot.
+command_velocity_threshold: 0.02
+
+default_pose: # Same as in Mujoco.yaml
+  - 1.71400e+00 # Right shoulder pitch 0
+  - 1.71600e+00 # Left shoulder pitch 1
+  - -1.98000e-01 # Right shoulder roll 2
+  - 1.98000e-01 # Left shoulder roll 3
+  - -7.20000e-01 # Right elbow pitch 4
+  - -7.15000e-01 # Left elbow pitch 5
+  - -3.30000e-02 # Right hip yaw 6
+  - 3.40000e-02 # Left hip yaw 7
+  - -1.62000e-01 # Right hip roll 8
+  - 1.63000e-01 # Left hip roll 9
+  - -9.05000e-01 # Right hip pitch 10
+  - -9.05000e-01 # Left hip pitch 11
+  - 1.20600e+00 # Right knee pitch 12
+  - 1.20600e+00 # Left knee pitch 13
+  - -5.10000e-01 # Right ankle pitch 14
+  - -5.12000e-01 # Left ankle pitch 15
+  - 1.68000e-01 # Right ankle roll 16
+  - -1.67000e-01 # Left ankle roll 17
+  - 0.00000e+00 # Neck yaw 18
+  - 0.00000e+00 # Head pitch 19
+
+# Per-servo position limits (radians). The final commanded servo
+# position is clipped to [min, max] as a safety measure although not strictly necessary for webots. Here for consistency.
+servo_limits:
+  min:
+    - 0.4 # Right shoulder pitch 0
+    - 0.4 # Left shoulder pitch 1
+    - -1.2 # Right shoulder roll 2
+    - 0.1 # Left shoulder roll 3
+    - -2.3 # Right elbow pitch 4
+    - -2.3 # Left elbow pitch 5
+    - -0.5 # Right hip yaw 6
+    - -0.5 # Left hip yaw 7
+    - -0.6 # Right hip roll 8
+    - 0.0 # Left hip roll 9
+    - -1.1 # Right hip pitch 10
+    - -1.1 # Left hip pitch 11
+    - -1.1 # Right knee pitch 12
+    - -1.1 # Left knee pitch 13
+    - -0.6 # Right ankle pitch 14
+    - -0.6 # Left ankle pitch 15
+    - -0.6 # Right ankle roll 16
+    - -0.6 # Left ankle roll 17
+    - -0.5 # Neck yaw 18
+    - -0.5 # Head pitch 19
+  max:
+    - 2.6 # Right shoulder pitch 0
+    - 2.6 # Left shoulder pitch 1
+    - -0.1 # Right shoulder roll 2
+    - 1.1 # Left shoulder roll 3
+    - 0.0 # Right elbow pitch 4
+    - 0.0 # Left elbow pitch 5
+    - 0.5 # Right hip yaw 6
+    - 0.5 # Left hip yaw 7
+    - 0.0 # Right hip roll 8
+    - 0.6 # Left hip roll 9
+    - 0.5 # Right hip pitch 10
+    - 0.5 # Left hip pitch 11
+    - 2.6 # Right knee pitch 12
+    - 2.6 # Left knee pitch 13
+    - 1.0 # Right ankle pitch 14
+    - 1.0 # Left ankle pitch 15
+    - 0.6 # Right ankle roll 16
+    - 0.6 # Left ankle roll 17
+    - 0.5 # Neck yaw 18
+    - 0.5 # Head pitch 19

@@ -164,13 +164,13 @@ namespace module::tools {
 
                 // Only gather a sample once the head has swept far enough since the last capture, so the data
                 // spans distinct viewpoints (the head sweeps automatically) rather than over-sampling one pose.
-                const double head_yaw   = sensors.servo[ServoID::HEAD_YAW].present_position;
+                const double neck_yaw   = sensors.servo[ServoID::NECK_YAW].present_position;
                 const double head_pitch = sensors.servo[ServoID::HEAD_PITCH].present_position;
-                if (!frames.empty() && std::abs(head_yaw - last_head_yaw) < cfg.min_head_pose_change
+                if (!frames.empty() && std::abs(neck_yaw - last_head_yaw) < cfg.min_head_pose_change
                     && std::abs(head_pitch - last_head_pitch) < cfg.min_head_pose_change) {
                     return;
                 }
-                last_head_yaw   = head_yaw;
+                last_head_yaw   = neck_yaw;
                 last_head_pitch = head_pitch;
 
                 // --- Build the known transforms for this frame ---

@@ -20,13 +20,15 @@ nuclear_role(
   input::SensorFilter
   input::Camera
   input::GameController
+  input::WhistleDetection
   network::RobotCommunication
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
   # vision::BallDetector
   vision::FieldLineDetector
-  vision::Yolo
+  #vision::Yolo
+  vision::RFDETR
   # Localisation
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation

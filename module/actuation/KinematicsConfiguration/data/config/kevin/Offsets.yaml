@@ -53,7 +53,7 @@ servos:
     simulated: false
   - # [13] L_KNEE
     direction: 1
-    offset: pi / 4 - 0.038
+    offset: pi / 4 - 0.038 +0.067
     simulated: false
   - # [14] R_ANKLE_PITCH
     direction: -1
@@ -71,7 +71,7 @@ servos:
     direction: -1
     offset: 0.0
     simulated: false
-  - # [18] HEAD_YAW
+  - # [18] NECK_YAW
     direction: 1
     offset: 0.0
     simulated: false

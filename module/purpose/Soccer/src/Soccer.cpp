@@ -39,6 +39,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/Whistle.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::input::ButtonMiddleUp;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Whistle;
     using message::localisation::ResetFieldLocalisation;
     using message::output::Buzzer;
     using message::platform::ResetWebotsServos;
@@ -77,6 +79,8 @@ namespace module::purpose {
     using message::strategy::FallRecovery;
     using message::support::GlobalConfig;
 
+    using Phase = message::input::GameState::Phase;
+
     struct StartSoccer {};
 
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -88,6 +92,14 @@ namespace module::purpose {
             cfg.startup_delay      = config["startup_delay"].as<int>();
 
             if (cfg.force_playing) {
+                emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
+            }
+        });
+
+        on<Trigger<Whistle>, With<GameState>>().then([this](const GameState& game_state) {
+            log<INFO>("Gamestate is ", game_state.phase);
+            if (game_state.phase == Phase::SET) {
+                log<INFO>("Whistle detected while in SET, starting play");
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
             }
         });
@@ -106,11 +118,20 @@ namespace module::purpose {
             emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
         });
 
-        on<Trigger<StartSoccer>>().then([this] {
-            // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>(), 1);
+        on<Trigger<StartSoccer>, With<GameState>>().then([this](const GameState& game_state) {
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
+
+            // If we are penalised at startup (eg the binary restarted mid-penalty), stand still until the
+            // GameController unpenalises us. The Penalisation event may have fired during the startup delay,
+            // before the FindPurpose task existed, so it cannot be relied on to stop us here.
+            if (!cfg.force_playing && game_state.self.penalty_reason != GameState::PenaltyReason::UNPENALISED) {
+                log<INFO>("Penalised at startup, waiting for unpenalisation before playing");
+                return;
+            }
+
+            // This emit starts the tree to play soccer
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
         });
 
         on<Provide<FindPurpose>, Every<BEHAVIOUR_UPDATE_RATE, Per<std::chrono::seconds>>, With<GameState>>().then(
