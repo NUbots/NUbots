@@ -144,13 +144,12 @@ namespace module::localisation {
             // Data association: ensure the ball is within the acceptance radius
             bool low_confidence = false;
             bool accept_ball    = true;
-
-            if (lowest_distance > cfg.acceptance_radius) {
+            if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
                 low_confidence = true;
-                accept_ball    = false;
                 rejection_count++;
             }
             else {
+                first_ball_seen = true;
                 rejection_count = 0;
             }
             log<DEBUG>("Rejection count: ", rejection_count);
@@ -235,7 +234,7 @@ namespace module::localisation {
             Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
 
             // Resize the vector of guesses if it is not large enough
-            if (team_guesses.size() < robocup.current_pose.player_id) {
+            if (team_guesses.capacity() < robocup.current_pose.player_id) {
                 team_guesses.resize(robocup.current_pose.player_id);
             }
 
