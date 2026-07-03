@@ -82,6 +82,7 @@ namespace module::output {
                 }
                 if (field) {
                     msg->field = *field;
+                    msg->field.association_lines.clear();
                 }
 
                 emit(msg);
