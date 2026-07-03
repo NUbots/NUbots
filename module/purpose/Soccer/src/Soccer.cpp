@@ -118,8 +118,6 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
-            // Startup delay to prevent issues with low servo gains at the start
-            emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(cfg.startup_delay));
         });
 
         on<Trigger<StartSoccer>, With<GameState>>().then([this](const GameState& game_state) {
