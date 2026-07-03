@@ -4,13 +4,14 @@ log_level: INFO
 # Tasks to emit on startup. Note: 0 priority will not emit the task.
 tasks:
   # Strategies
+  fall_recovery_priority: 10
   align_ball_to_goal_priority: 0
   find_ball_priority: 4
   look_at_ball_priority: 1
   walk_to_ball_priority: 0
   walk_to_kick_ball_priority: 1
   walk_to_field_position_priority: 0
-  kick_to_goal_priority: 0
+  kick_to_goal_priority: 1
   stand_still_priority: 0
   walk_inside_bounded_box: 0
 

@@ -40,6 +40,8 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Priority of FallRecovery task
+            int fall_recovery_priority = 0;
             /// @brief Priority of FindBall task
             int find_ball_priority = 0;
             /// @brief Priority of LookAtBall task
