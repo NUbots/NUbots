@@ -36,10 +36,8 @@
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
-#include "message/strategy/StandStill.hpp"
 
 #include "utility/math/angle.hpp"
-#include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/geometry/intersection.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -58,9 +56,6 @@ namespace module::planning {
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
-    using message::strategy::StandStill;
-
-    using message::strategy::StandStill;
 
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -74,18 +69,19 @@ namespace module::planning {
         on<Configuration>("PlanWalkPath.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // WalkTo tuning
-            cfg.max_x_velocity         = config["max_x_velocity"].as<double>();
-            cfg.max_y_velocity         = config["max_y_velocity"].as<double>();
-            cfg.max_velocity_magnitude = std::max(cfg.max_x_velocity, cfg.max_y_velocity);
-            cfg.max_angular_velocity   = config["max_angular_velocity"].as<double>();
-            cfg.acceleration           = config["acceleration"].as<double>();
+            // WalkTo controller tuning
+            cfg.walk_to.max_velocity          = config["max_velocity"].as<Expression>();
+            cfg.walk_to.max_backward_velocity = config["max_backward_velocity"].as<double>();
+            cfg.walk_to.k_translation         = config["k_translation"].as<double>();
+            cfg.walk_to.k_theta               = config["k_theta"].as<double>();
+            cfg.walk_to.max_align_radius      = config["max_align_radius"].as<double>();
+            cfg.walk_to.min_align_radius      = config["min_align_radius"].as<double>();
+            cfg.walk_to.max_angle_error       = config["max_angle_error"].as<Expression>();
+            cfg.walk_to.min_angle_error       = config["min_angle_error"].as<Expression>();
 
-            cfg.max_align_radius = config["max_align_radius"].as<double>();
-            cfg.min_align_radius = config["min_align_radius"].as<double>();
-            cfg.max_angle_error  = config["max_angle_error"].as<Expression>();
-            cfg.min_angle_error  = config["min_angle_error"].as<Expression>();
-            cfg.strafe_gain      = config["strafe_gain"].as<double>();
+            // RL policy command dead-zone
+            cfg.min_velocity   = config["min_velocity"].as<Expression>();
+            cfg.zero_tolerance = config["zero_tolerance"].as<Expression>();
 
             // TurnOnSpot tuning
             cfg.rotate_velocity   = config["rotate_velocity"].as<double>();
@@ -93,9 +89,9 @@ namespace module::planning {
             cfg.rotate_velocity_y = config["rotate_velocity_y"].as<double>();
 
             // PivotAroundPoint tuning
-            cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
-            cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
-            cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+            cfg.pivot_angular_velocity = config["pivot_angular_velocity"].as<double>();
+            cfg.pivot_radius           = config["pivot_radius"].as<double>();
+            cfg.pivot_forward_velocity = config["pivot_forward_velocity"].as<double>();
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
 
@@ -106,17 +102,14 @@ namespace module::planning {
                             .select((1.0 - (-1.0 / (UPDATE_FREQUENCY * cfg.tau.array())).exp()).matrix(),
                                     Eigen::Vector3d::Ones());
             cfg.one_minus_alpha = Eigen::Vector3d::Ones() - cfg.alpha;
-
-            // Starting velocity
-            cfg.starting_velocity = config["starting_velocity"].as<Expression>();
         });
 
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
-            // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
+            // If transitioning from FALLEN/STANDING to DYNAMIC, reset the smoothed walk command
             if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
                 || (stability == Stability::STANDING && new_stability == Stability::DYNAMIC)) {
-                previous_walk_command = cfg.starting_velocity;
-                log<DEBUG>("Resetting walk command to starting velocity");
+                previous_walk_command = Eigen::Vector3d::Zero();
+                log<DEBUG>("Resetting smoothed walk command");
             }
 
             stability = new_stability;
@@ -179,46 +172,14 @@ namespace module::planning {
                     }
                 }
 
-                // Straight to max magnitude, smoother handles ramping up
-                double desired_magnitude = cfg.max_velocity_magnitude;
-                // Face toward the target by default
-                double desired_heading = angle_to_target;
-
-                // Calculate the translational error between the robot and the target point (x, y)
-                const double translational_error = rDRr.norm();
-
-                // Computes a clamped progress [0,1] based on an error value and its min/max thresholds
-                auto prog = [&](auto error, auto lo, auto hi) {
-                    return std::clamp((hi - std::abs(error)) / (hi - lo), 0.0, 1.0);
-                };
-
-                // Linearly interpolates between start and end by t ∈ [0,1]
-                auto lerp = [&](auto start, auto end, auto t) { return start + (end - start) * t; };
-
-                // If we are far from the target point, accelerate and align ourselves towards it
-                if (translational_error > cfg.max_align_radius) {
-                    // Scale by angle error so we rotate on the spot when far away and not facing target
-                    const double angle_error_gain = prog(desired_heading, cfg.min_angle_error, cfg.max_angle_error);
-                    desired_magnitude *= angle_error_gain;
-                }
-                else {
-                    // Interpolate between the full velocity and the strafe velocity based on the translational error
-                    const double approach_progress = prog(translational_error, 0.0, cfg.max_align_radius);
-                    desired_magnitude *= lerp(1.0, 0.0, approach_progress * cfg.strafe_gain);
-
-                    // Interpolate between angle to the target and desired heading when inside the alignment region
-                    const double align_progress = prog(translational_error, cfg.min_align_radius, cfg.max_align_radius);
-                    desired_heading             = lerp(angle_to_target, angle_to_final_heading, align_progress);
-                }
-
                 // Calculate the target velocity
-                const Eigen::Vector2d desired_translational_velocity = desired_magnitude * rDRr.normalized();
-                Eigen::Vector3d velocity_target(desired_translational_velocity.x(),
-                                                desired_translational_velocity.y(),
-                                                desired_heading);
+                const auto result = walk_path::walk_to_velocity(rDRr, angle_to_final_heading, cfg.walk_to);
 
                 // Limit the velocity to the maximum translational and angular velocity
-                velocity_target = constrain_velocity(velocity_target);
+                const Eigen::Vector3d velocity_target =
+                    walk_path::constrain_velocity(result.velocity,
+                                                  cfg.walk_to.max_velocity,
+                                                  cfg.walk_to.max_backward_velocity);
 
                 // Emit the walk task with the calculated velocities
                 emit<Task>(std::make_unique<WalkProposal>(velocity_target));
@@ -226,15 +187,16 @@ namespace module::planning {
                 // Emit debugging information for visualisation and monitoring
                 auto debug_information                       = std::make_unique<WalkToDebug>();
                 debug_information->Hrd.translation().head(2) = rDRr;
-                debug_information->Hrd.linear()     = rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, desired_heading));
-                debug_information->min_align_radius = cfg.min_align_radius;
-                debug_information->max_align_radius = cfg.max_align_radius;
-                debug_information->min_angle_error  = cfg.min_angle_error;
-                debug_information->max_angle_error  = cfg.max_angle_error;
-                debug_information->angle_to_target  = angle_to_target;
-                debug_information->angle_to_final_heading = angle_to_final_heading;
-                debug_information->translational_error    = translational_error;
-                debug_information->velocity_target        = velocity_target;
+                debug_information->Hrd.linear() =
+                    rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, result.desired_heading));
+                debug_information->min_align_radius        = cfg.walk_to.min_align_radius;
+                debug_information->max_align_radius        = cfg.walk_to.max_align_radius;
+                debug_information->min_angle_error         = cfg.walk_to.min_angle_error;
+                debug_information->max_angle_error         = cfg.walk_to.max_angle_error;
+                debug_information->angle_to_target         = angle_to_target;
+                debug_information->angle_to_final_heading  = angle_to_final_heading;
+                debug_information->translational_error     = rDRr.norm();
+                debug_information->velocity_target         = velocity_target;
                 emit(debug_information);
             });
 
@@ -252,14 +214,15 @@ namespace module::planning {
         on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {
             // Determine the direction of rotation
             int sign = pivot_around_point.clockwise ? -1 : 1;
-            // Turn around the ball
-            const Eigen::Vector3d pivot_vector(cfg.pivot_ball_velocity_x,
-                                               sign * cfg.pivot_ball_velocity_y,
-                                               sign * cfg.pivot_ball_velocity);
+            // Orbit a point at pivot_radius directly ahead while facing it: vy = -vtheta * radius
+            const double angular_velocity = sign * cfg.pivot_angular_velocity;
+            const Eigen::Vector3d pivot_vector(cfg.pivot_forward_velocity,
+                                               -angular_velocity * cfg.pivot_radius,
+                                               angular_velocity);
             emit<Task>(std::make_unique<WalkProposal>(pivot_vector));
         });
 
-        // Intercept Walk commands and apply smoothing
+        // Intercept Walk commands, apply smoothing and dead-zone compensation
         on<Provide<WalkProposal>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this](const WalkProposal&
                                                                                                         walk) {
             // Apply exponential smoothing to the walk command
@@ -268,31 +231,24 @@ namespace module::planning {
 
             Eigen::Vector3d smooth_diff = smoothed_command - walk.velocity_target;
 
+            // Apply the dead-zone after smoothing so the command sent is never in the unresponsive band
+            const Eigen::Vector3d walk_command = walk_path::apply_dead_zone(smoothed_command,
+                                                                            cfg.min_velocity,
+                                                                            cfg.zero_tolerance,
+                                                                            cfg.walk_to.max_velocity);
+
             // Visualise the walk path in NUsight
             emit(graph("Walk Proposal", walk.velocity_target.x(), walk.velocity_target.y(), walk.velocity_target.z()));
             emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
             emit(graph("Walk Smoothing Difference", smooth_diff.x(), smooth_diff.y(), smooth_diff.z()));
+            emit(graph("Walk Command", walk_command.x(), walk_command.y(), walk_command.z()));
 
-            // Store for next iteration
+            // Store the pre-dead-zone command so the smoother dynamics stay clean
             previous_walk_command = smoothed_command;
 
             // Forward the smoothed command to the actual Walk skill
-            emit<Task>(std::make_unique<Walk>(smoothed_command));
+            emit<Task>(std::make_unique<Walk>(walk_command));
         });
-    }
-
-    Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {
-        // Scale factors in each translational axis (∞ if the component is 0)
-        const auto inf = std::numeric_limits<double>::infinity();
-        const auto sx  = v.x() ? cfg.max_x_velocity / std::abs(v.x()) : inf;
-        const auto sy  = v.y() ? cfg.max_y_velocity / std::abs(v.y()) : inf;
-
-        // no scaling (s=1) unless either axis exceeds the limit
-        const auto s = std::min({1.0, sx, sy});
-
-        const auto angular = std::clamp(v.z(), -cfg.max_angular_velocity, cfg.max_angular_velocity);
-
-        return {v.x() * s, v.y() * s, angular};
     }
 
     const std::vector<Eigen::Vector2d> PlanWalkPath::get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
