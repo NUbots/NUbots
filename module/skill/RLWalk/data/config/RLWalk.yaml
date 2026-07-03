@@ -23,6 +23,16 @@ servos:
 # ~zero command. TODO: tune this threshold on the real robot.
 command_velocity_threshold: 0.00
 
+# Command dead-zone compensation, per axis (vx m/s, vy m/s, wz rad/s).
+# The policy doesn't respond to commands below min_command (measured in webots with
+# rl_keyboardwalk, TODO: measure on the real robot). Commands below zero_threshold are zeroed
+# so the robot stands still, commands between the two are lifted up to min_command, and
+# commands above max_command (the trained range) are clamped.
+deadzone:
+  zero_threshold: [0.02, 0.02, 0.10]
+  min_command: [0.10, 0.09, 0.30]
+  max_command: [0.50, 0.20, 0.40]
+
 default_pose: # Same as in Mujoco.yaml
   - 1.71400e+00 # Right shoulder pitch 0
   - 1.71600e+00 # Left shoulder pitch 1

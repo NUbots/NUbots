@@ -2,6 +2,7 @@
 #define MODULE_SKILL_RLWALK_HPP
 
 #include <Eigen/Core>
+#include <array>
 #include <chrono>
 #include <nuclear>
 #include <openvino/openvino.hpp>
@@ -60,6 +61,12 @@ namespace module::skill {
             /// @brief Command velocity magnitude below which the policy joint offsets are zeroed,
             /// holding the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
             double command_velocity_threshold;
+            /// @brief Per-axis (vx, vy, wz) command magnitude below which the command is zeroed
+            CommandVector deadzone_zero_threshold;
+            /// @brief Per-axis minimum command the policy responds to, smaller commands are lifted to this
+            CommandVector deadzone_min_command;
+            /// @brief Per-axis maximum command the policy was trained on, commands are clamped to this
+            CommandVector max_command;
         } cfg;
 
         /// @brief OpenVINO compiled model and inference request
@@ -89,6 +96,9 @@ namespace module::skill {
 
         /// @brief Last action taken by the model
         JointVector last_action;
+
+        /// @brief Dead-zone hysteresis state, whether each command axis is currently active
+        std::array<bool, COMMAND_SIZE> deadzone_axis_active{};
 
         /// @brief Default pose for the robot
         JointVector default_pose;

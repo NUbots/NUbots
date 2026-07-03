@@ -108,6 +108,11 @@ namespace module::skill {
             // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
             cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
 
+            // Dead-zone compensation thresholds, see RLWalk.yaml for details
+            cfg.deadzone_zero_threshold = CommandVector(config["deadzone"]["zero_threshold"].as<Expression>());
+            cfg.deadzone_min_command    = CommandVector(config["deadzone"]["min_command"].as<Expression>());
+            cfg.max_command             = CommandVector(config["deadzone"]["max_command"].as<Expression>());
+
             // Initialize vectors
             last_action = JointVector::Zero();
 
@@ -243,13 +248,43 @@ namespace module::skill {
                     observation.segment<JOINT_POS_SIZE>(idx) = last_action;
                     idx += JOINT_POS_SIZE;
 
-                    // Command (3)
-                    observation.segment<COMMAND_SIZE>(idx) = walk_task.velocity_target;
+                    // Command (3). The policy ignores commands below a per-axis minimum, so zero
+                    // out negligible commands, lift small ones up to the minimum it responds to,
+                    // and clamp to the range it was trained on
+                    CommandVector command = walk_task.velocity_target;
+                    for (int i = 0; i < COMMAND_SIZE; ++i) {
+                        const double magnitude = std::abs(command[i]);
+                        // Hysteresis: an active axis only switches off below half the zero
+                        // threshold, so the boosted command doesn't chatter at the boundary
+                        const double off_threshold = deadzone_axis_active[i]
+                                                         ? 0.5 * cfg.deadzone_zero_threshold[i]
+                                                         : cfg.deadzone_zero_threshold[i];
+                        if (magnitude < off_threshold) {
+                            command[i]              = 0.0;
+                            deadzone_axis_active[i] = false;
+                        }
+                        else {
+                            deadzone_axis_active[i] = true;
+                            if (magnitude < cfg.deadzone_min_command[i]) {
+                                command[i] = std::copysign(cfg.deadzone_min_command[i], command[i]);
+                            }
+                            else if (magnitude > cfg.max_command[i]) {
+                                command[i] = std::copysign(cfg.max_command[i], command[i]);
+                            }
+                        }
+                    }
+                    observation.segment<COMMAND_SIZE>(idx) = command;
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target",
                                    walk_task.velocity_target.x(),
                                    walk_task.velocity_target.y(),
                                    walk_task.velocity_target.z()));
+                        emit(graph("Walk command (compensated)", command.x(), command.y(), command.z()));
+                        // Commanded vs measured velocity, for checking command tracking in PlotJuggler
+                        const Eigen::Vector3d vTr = sensors.Hrw.rotation() * sensors.vTw;
+                        emit(graph("RLWalk vx (cmd, actual)", command.x(), vTr.x()));
+                        emit(graph("RLWalk vy (cmd, actual)", command.y(), vTr.y()));
+                        emit(graph("RLWalk wz (cmd, actual)", command.z(), sensors.gyroscope.z()));
                     }
                     idx += COMMAND_SIZE;
 
@@ -278,10 +313,11 @@ namespace module::skill {
                     // Convert into NUbots order, apply scaling
                     JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(joint_offsets_mj);
 
-                    // Hack: when the command velocity is below a threshold, zero the offsets so the
-                    // robot holds the default pose. This side-steps unwanted policy behaviour at
-                    // ~zero command. TODO: replace with an improved policy trained for zero command.
-                    if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold) {
+                    // Hack: when the command velocity is below a threshold, or every axis of the
+                    // command was zeroed above, zero the offsets so the robot holds the default
+                    // pose. This side-steps unwanted policy behaviour at ~zero command.
+                    // TODO: replace with an improved policy trained for zero command.
+                    if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold || command.isZero()) {
                         joint_offsets_scaled_nubots = JointVector::Zero();
                     }
 
