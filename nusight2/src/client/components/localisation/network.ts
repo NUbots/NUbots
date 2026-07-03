@@ -37,6 +37,7 @@ export class LocalisationNetwork {
     this.network.on(message.purpose.Purpose, this.onPurpose);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);
     this.network.on(message.support.nusight.Overview, this.onOverview);
+    this.network.on(message.support.nusight.HSLLocalisationDebug, this.onHSLLocalisationDebug);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -131,7 +132,10 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
+  private onRobots(
+    robotModel: RobotModel,
+    localisation_robots: message.localisation.Robots | message.support.nusight.RobotSummaries,
+  ) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.robots = localisation_robots.robots.map((localisation_robot) => {
       return {
@@ -270,6 +274,14 @@ export class LocalisationNetwork {
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand);
   };
+
+  @action.bound
+  private onHSLLocalisationDebug(robotModel: RobotModel, debug: message.support.nusight.HSLLocalisationDebug) {
+    this.onFieldIntersections(robotModel, debug.fieldIntersections! as message.vision.FieldIntersections);
+    this.onRobots(robotModel, debug.robots! as message.support.nusight.RobotSummaries);
+    this.onBall(robotModel, debug.ball! as message.localisation.Ball);
+    this.onField(robotModel, debug.field! as message.localisation.Field);
+  }
 }
 
 function decompose(m: THREE.Matrix4): {

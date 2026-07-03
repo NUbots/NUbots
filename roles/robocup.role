@@ -15,6 +15,7 @@ nuclear_role(
   network::NetworkForwarder
   network::PlotJuggler
   output::Overview
+  output::HSLLocalisationDebug
   output::ImageCompressor
   # Sensors and network (input)
   input::SensorFilter
