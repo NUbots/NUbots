@@ -134,16 +134,17 @@ namespace module::input {
                 auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
 
-                // Reject segments whose layout tag doesn't match ours (stale or mismatched
-                // NUbridge version, or a segment NUbridge hasn't initialised yet)
-                if (header->magic != SharedImageHeader::MAGIC || header->version != SharedImageHeader::VERSION) {
-                    log<WARN>(fmt::format(
-                        "K1Camera: segment '{}' has unexpected magic/version (is NUbridge up to date?) — "
-                        "retrying in 500 ms",
-                        ctx.segment_name));
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    continue;
-                }
+                // // Reject segments whose layout tag doesn't match ours (stale or mismatched
+                // // NUbridge version, or a segment NUbridge hasn't initialised yet)
+                // if (header->magic != SharedImageHeader::MAGIC || header->version != SharedImageHeader::VERSION) {
+                //     log<WARN>(
+                //         fmt::format("K1Camera: segment '{}' has unexpected magic/version (is NUbridge up to date?) —
+                //         "
+                //                     "retrying in 500 ms",
+                //                     ctx.segment_name));
+                //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                //     continue;
+                // }
 
                 uint64_t last_sequence = 0;
 
