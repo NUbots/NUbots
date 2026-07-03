@@ -27,13 +27,16 @@ targets:
     message.vision.GreenHorizon: false
     message.vision.FieldLines: false
     message.vision.VisualMesh: false
-    message.vision.FieldIntersections: 0.75
+    message.vision.FieldIntersections: false
     message.vision.BoundingBoxes: false
 
-    # Localisation Messages
+    # Localisation messages
     message.localisation.Ball: false
     message.localisation.Field: false
     message.localisation.Robots: false
+
+    # Localisation Debug compact packet
+    message.support.nusight.HSLLocalisationDebug: 1
 
     # Log messages
     message.nuclear.LogMessage: false
