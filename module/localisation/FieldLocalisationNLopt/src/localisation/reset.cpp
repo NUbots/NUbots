@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -36,11 +36,84 @@ namespace module::localisation {
     using message::vision::FieldLines;
     using message::vision::Goals;
 
+    namespace {
+        /// @brief Combined position + wrapped-angle distance between two poses, used for the mirror-twin
+        /// tie-break (an explicit, documented tie-break rather than the implicit search-boundary one that
+        /// constrain_to_half normally provides).
+        double pose_distance(const Eigen::Vector3d& a, const Eigen::Vector3d& b) {
+            double position_distance = (a.head<2>() - b.head<2>()).norm();
+            double angle_distance    = std::abs(utility::math::angle::signedDifference(a.z(), b.z()));
+            return position_distance + angle_distance;
+        }
+
+        /// @brief Whether pose b is approximately the mirror image of pose a (position within 0.5 m, heading
+        /// within 0.3 rad of the exact mirror).
+        bool is_mirror_twin(const Eigen::Vector3d& a, const Eigen::Vector3d& b) {
+            Eigen::Vector3d mirrored = mirror_pose(a);
+            return pose_distance(mirrored, b) < 0.8;
+        }
+    }  // namespace
+
     void FieldLocalisationNLopt::uncertainty_reset(const FieldDescription& fd,
                                                    const FieldLines& field_lines,
                                                    const std::shared_ptr<const FieldIntersections>& field_intersections,
                                                    const std::shared_ptr<const Goals>& goals,
                                                    const Eigen::Isometry3d& Hrw) {
+        // --- Stage 1: gather one-shot analytic candidates ---
+        std::vector<Eigen::Vector3d> candidates;
+        if (cfg.reset_use_candidates) {
+            auto goal_candidates         = goal_pair_candidates(goals);
+            auto intersection_candidates = intersection_pair_candidates(field_intersections);
+            candidates.insert(candidates.end(), goal_candidates.begin(), goal_candidates.end());
+            candidates.insert(candidates.end(), intersection_candidates.begin(), intersection_candidates.end());
+        }
+        candidates.push_back(last_certain_state);
+
+        // When not constraining to the robot's current half, also consider the mirror image of every
+        // candidate so far - mirror twins compete on validity like any other candidate.
+        if (!cfg.reset_constrain_to_half) {
+            std::vector<Eigen::Vector3d> mirrored;
+            mirrored.reserve(candidates.size());
+            for (const auto& candidate : candidates) {
+                mirrored.push_back(mirror_pose(candidate));
+            }
+            candidates.insert(candidates.end(), mirrored.begin(), mirrored.end());
+        }
+
+        // --- Stage 2: short SBPLX refine per candidate, rank by validity ---
+        if (!candidates.empty()) {
+            std::vector<std::pair<Eigen::Vector3d, double>> refined;  // (refined state, validity)
+            refined.reserve(candidates.size());
+            for (const auto& candidate : candidates) {
+                auto [refined_state, cost] =
+                    run_field_line_optimisation(candidate, field_lines.rPWw, field_intersections, goals, true);
+                (void) cost;
+                double validity = compute_validity(refined_state, field_lines.rPWw, field_intersections);
+                refined.emplace_back(refined_state, validity);
+            }
+
+            auto best = std::max_element(refined.begin(), refined.end(), [](const auto& a, const auto& b) {
+                return a.second < b.second;
+            });
+
+            if (best->second >= cfg.validity_min_validity) {
+                log<INFO>("Uncertainty reset (candidates): accepted with validity ", best->second);
+                state = best->first;
+                filter.reset(state, cfg.change_limit);
+                last_certain_state = state;
+                return;
+            }
+            log<INFO>("Uncertainty reset (candidates): best validity ",
+                      best->second,
+                      " below threshold ",
+                      cfg.validity_min_validity,
+                      ", falling back to grid search");
+        }
+        else {
+            log<INFO>("Uncertainty reset (candidates): no candidates generated, falling back to grid search");
+        }
+
+        // --- Stage 3: grid-search fallback (local window around last_certain_state, then a wider search) ---
         // Get robot position in field space
         Eigen::Isometry3d Hrf = Hrw * compute_Hfw(last_certain_state).inverse();
         Eigen::Vector3d rRFf  = Hrf.inverse().translation();
@@ -54,10 +127,14 @@ namespace module::localisation {
         double y_min = -(fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
         double y_max = (fd.dimensions.field_width / 2 + 0.2) + rRWf.y();
 
-        // Handle the mirror field problem by halving the x boundary to the robot's current side
-        // This also avoids unnecessary computations
-        x_max = rRFf.x() < 0 ? rRWf.x() : x_max;
-        x_min = rRFf.x() > 0 ? rRWf.x() : x_min;
+        // Handle the mirror field problem by halving the x boundary to the robot's current side. This also
+        // avoids unnecessary computations. Only applied when reset.constrain_to_half is true (the default);
+        // when false, the search covers the whole field and mirror twins are disambiguated by the tie-break
+        // below instead of by never considering the other half.
+        if (cfg.reset_constrain_to_half) {
+            x_max = rRFf.x() < 0 ? rRWf.x() : x_max;
+            x_min = rRFf.x() > 0 ? rRWf.x() : x_min;
+        }
 
         std::vector<double> angles{};
         for (int i = 0; i < cfg.num_angles; ++i) {
@@ -93,13 +170,24 @@ namespace module::localisation {
             return a.second < b.second;
         });
 
-        // If local search is valid, use the lowest cost hypothesis
-        if (!hypotheses.empty() && hypotheses[0].second < cfg.cost_threshold) {
-            log<INFO>("Uncertainty reset (local): using best hypothesis", hypotheses[0].second);
+        // Mirror-twin tie-break: if the best two hypotheses are mirror images of each other, prefer whichever
+        // is closer (position + wrapped angle) to last_certain_state - an explicit, documented tie-break
+        // instead of the implicit one that constrain_to_half normally provides by never searching the other
+        // half at all.
+        if (!cfg.reset_constrain_to_half && hypotheses.size() >= 2
+            && is_mirror_twin(hypotheses[0].first, hypotheses[1].first)
+            && pose_distance(hypotheses[1].first, last_certain_state)
+                   < pose_distance(hypotheses[0].first, last_certain_state)) {
+            std::swap(hypotheses[0], hypotheses[1]);
+        }
+
+        // If local search is valid, use the best hypothesis
+        if (!hypotheses.empty()
+            && compute_validity(hypotheses[0].first, field_lines.rPWw, field_intersections) >= cfg.validity_min_validity) {
+            log<INFO>("Uncertainty reset (local): using best hypothesis, cost ", hypotheses[0].second);
             // Set the state to the best hypothesis
-            state              = hypotheses[0].first;
-            filtered_state     = state;
-            first_measurement  = true;
+            state = hypotheses[0].first;
+            filter.reset(state, cfg.change_limit);
             last_certain_state = state;  // Update the last certain state
             return;
         }
@@ -109,7 +197,7 @@ namespace module::localisation {
             log<INFO>("Uncertainty reset (global): No hypotheses found, searching whole field");
         }
         else {
-            log<INFO>("Uncertainty reset (global): Cost too high, searching whole field", hypotheses[0].second);
+            log<INFO>("Uncertainty reset (global): Validity too low, searching whole field");
         }
 
         // Iterate over the entire field area with a grid search
@@ -133,10 +221,17 @@ namespace module::localisation {
             return a.second < b.second;
         });
 
+        // Mirror-twin tie-break, as above.
+        if (!cfg.reset_constrain_to_half && hypotheses.size() >= 2
+            && is_mirror_twin(hypotheses[0].first, hypotheses[1].first)
+            && pose_distance(hypotheses[1].first, last_certain_state)
+                   < pose_distance(hypotheses[0].first, last_certain_state)) {
+            std::swap(hypotheses[0], hypotheses[1]);
+        }
+
         // Set the state to the best hypothesis
-        state              = hypotheses[0].first;
-        filtered_state     = state;
-        first_measurement  = true;
+        state = hypotheses[0].first;
+        filter.reset(state, cfg.change_limit);
         last_certain_state = state;  // Update the last certain state
     }
 

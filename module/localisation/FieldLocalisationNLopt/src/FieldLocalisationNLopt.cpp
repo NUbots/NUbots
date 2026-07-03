@@ -26,6 +26,7 @@
  */
 #include "FieldLocalisationNLopt.hpp"
 
+#include <algorithm>
 #include <fstream>
 
 #include "extension/Configuration.hpp"
@@ -71,14 +72,11 @@ namespace module::localisation {
             cfg.use_hungarian                 = config["use_hungarian"].as<bool>();
             cfg.out_of_field_cost             = config["out_of_field_cost"].as<double>();
 
-            // Uncertainty reset parameters
-            cfg.reset_on_cost  = config["reset_on_cost"].as<bool>();
-            cfg.cost_threshold = config["cost_threshold"].as<double>();
-            cfg.reset_delay    = config["reset_delay"].as<int>();
-            cfg.max_over_cost  = config["max_over_cost"].as<int>();
-            cfg.step_size      = config["step_size"].as<double>();
-            cfg.window_size    = config["window_size"].as<double>();
-            cfg.num_angles     = config["num_angles"].as<int>();
+            // Uncertainty reset parameters (grid-search fallback)
+            cfg.reset_delay = config["reset_delay"].as<int>();
+            cfg.step_size   = config["step_size"].as<double>();
+            cfg.window_size = config["window_size"].as<double>();
+            cfg.num_angles  = config["num_angles"].as<int>();
 
             // Field line optimisation parameters
             cfg.field_line_distance_weight = config["field_line_distance_weight"].as<double>();
@@ -125,8 +123,25 @@ namespace module::localisation {
                           "', using default");
             }
 
-            // Exponential filter parameters
-            cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
+            // Kalman filter tuning
+            cfg.kalman_process_noise     = Eigen::Vector3d(config["kalman"]["process_noise"].as<Expression>());
+            cfg.kalman_measurement_scale = config["kalman"]["measurement_scale"].as<double>();
+            cfg.kalman_hessian_step      = Eigen::Vector3d(config["kalman"]["hessian_step"].as<Expression>());
+
+            // Validity-gated acceptance
+            cfg.validity_line_inlier_distance = config["validity"]["line_inlier_distance"].as<double>();
+            cfg.validity_min_validity         = config["validity"]["min_validity"].as<double>();
+            cfg.validity_max_invalid_frames   = config["validity"]["max_invalid_frames"].as<int>();
+            cfg.validity_reset_on_invalid     = config["validity"]["reset_on_invalid"].as<bool>();
+
+            // Reset candidate generation
+            cfg.reset_use_candidates            = config["reset"]["use_candidates"].as<bool>();
+            cfg.reset_pair_separation_tolerance = config["reset"]["pair_separation_tolerance"].as<double>();
+            cfg.reset_max_candidates            = config["reset"]["max_candidates"].as<int>();
+            cfg.reset_constrain_to_half         = config["reset"]["constrain_to_half"].as<bool>();
+
+            // Mirror hygiene
+            cfg.mirror_auto_flip = config["mirror"]["auto_flip"].as<bool>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -184,26 +199,47 @@ namespace module::localisation {
                 default: log<ERROR>("Invalid starting_side specified"); break;
             }
             state = cfg.initial_hypotheses[0];
+            filter.reset(state, cfg.change_limit);
             emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            state             = cfg.initial_hypotheses[0];
-            filtered_state    = state;
-            first_measurement = true;
-            startup           = true;
-            last_reset        = NUClear::clock::now();
+            state = cfg.initial_hypotheses[0];
+            filter.reset(state, cfg.change_limit);
+            startup        = true;
+            last_reset     = NUClear::clock::now();
+            last_Hrw_valid = false;  // Motion delta across a hard reset is not meaningful
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
             log<INFO>("Resetting field localisation for penalty kick");
-            state              = reset.penalty_kick_position;
-            filtered_state     = state;
-            first_measurement  = true;
-            last_reset         = NUClear::clock::now();
-            last_certain_state = state;  // Update the last certain state
+            Eigen::Vector3d penalty_state = reset.penalty_kick_position;
+
+            // Mirror-flip detection: PenaltyReset is one of the few moments we get an external positional cue,
+            // so use it to check whether our current estimate has likely flipped to the wrong half of the
+            // field. This is a structural check only (see README for why a per-frame vision-based evidence
+            // ratio is not implemented: the cost function is exactly mirror-symmetric).
+            Eigen::Vector3d mirrored          = mirror_pose(filter.mean);
+            double current_distance_to_reset  = (filter.mean.head<2>() - penalty_state.head<2>()).norm();
+            double mirrored_distance_to_reset = (mirrored.head<2>() - penalty_state.head<2>()).norm();
+            if (mirrored_distance_to_reset < current_distance_to_reset) {
+                log<WARN>("Mirror flip detected via penalty reset (current estimate ",
+                          current_distance_to_reset,
+                          "m from penalty position, mirrored estimate ",
+                          mirrored_distance_to_reset,
+                          "m)");
+                if (cfg.mirror_auto_flip) {
+                    filter.mean = mirrored;
+                }
+            }
+
+            state = penalty_state;
+            filter.reset(state, cfg.change_limit);
+            last_reset          = NUClear::clock::now();
+            last_certain_state  = state;  // Update the last certain state
+            last_Hrw_valid      = false;
         });
 
         on<Trigger<FieldLines>,
@@ -250,6 +286,21 @@ namespace module::localisation {
                         return;
                     }
 
+                    // Predict step: grow the filter's covariance in proportion to the odometry motion since the
+                    // last frame. The state (x,y,theta) parameterises Hfw, which is constant under perfect
+                    // odometry, so there is no motion model beyond this noise injection.
+                    double motion = 0.0;
+                    if (last_Hrw_valid) {
+                        Eigen::Isometry3d delta_Hrw = sensors.Hrw * last_Hrw.inverse();
+                        double dtranslation         = delta_Hrw.translation().head<2>().norm();
+                        double dyaw = std::abs(
+                            utility::math::angle::normalise_angle(mat_to_rpy_intrinsic(delta_Hrw.rotation()).z()));
+                        motion = dtranslation + dyaw;
+                    }
+                    filter.predict(motion, cfg.kalman_process_noise);
+                    last_Hrw       = sensors.Hrw;
+                    last_Hrw_valid = true;
+
                     double chosen_state_cost = 0.0;
                     Eigen::Vector3d proposed_state;
 
@@ -270,58 +321,78 @@ namespace module::localisation {
                         // For startup, always accept the best hypothesis
                         state              = proposed_state;
                         last_certain_state = state;
-                        filtered_state     = state;
-                        first_measurement  = true;
-                        startup            = false;
+                        filter.reset(state, cfg.change_limit);
+                        startup = false;
                     }
                     else {
-                        // Run the optimisation routine
-                        std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
+                        // Size the search box from the filter's current uncertainty: 3-sigma of (cov + a
+                        // nominal representative measurement covariance), clamped per axis to
+                        // [0.1, change_limit]. This box only bounds *this* optimisation call; the actual
+                        // measurement covariance used for the filter update below is derived from this
+                        // frame's Hessian, not this nominal value.
+                        Eigen::Matrix3d nominal_R_for_bounds = Eigen::Matrix3d::Identity() * cfg.kalman_measurement_scale;
+                        Eigen::Vector3d sigma3 = 3.0 * (filter.cov + nominal_R_for_bounds).diagonal().cwiseSqrt();
+                        Eigen::Vector3d box;
+                        for (int i = 0; i < 3; ++i) {
+                            box(i) = std::clamp(sigma3(i), 0.1, cfg.change_limit(i));
+                        }
+
+                        // Run the optimisation routine, seeded from the filter's current mean
+                        std::pair<Eigen::Vector3d, double> opt_results = run_field_line_optimisation(filter.mean,
+                                                                                                      field_lines.rPWw,
+                                                                                                      field_intersections,
+                                                                                                      goals,
+                                                                                                      false,
+                                                                                                      box);
                         proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
 
-                        // Only accept the optimisation result if the cost is below the threshold
-                        if (chosen_state_cost < cfg.cost_threshold) {
+                        // Gate acceptance on the matched-percept validity fraction, not raw cost, since cost
+                        // magnitudes are not directly comparable across differing numbers/mixes of
+                        // observations.
+                        double validity = compute_validity(proposed_state, field_lines.rPWw, field_intersections);
+                        emit(graph("Validity", validity));
+
+                        if (validity >= cfg.validity_min_validity) {
                             state = proposed_state;
 
-                            // Apply exponential filter to smooth the state estimate unless it is the first measurement.
-                            filtered_state =
-                                first_measurement
-                                    ? state
-                                    : cfg.alpha.cwiseProduct(state)
-                                          + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+                            // Derive a measurement covariance from the curvature of the cost function at the
+                            // optimum, and fuse it into the filter.
+                            Eigen::Vector3d h = cfg.kalman_hessian_step.cwiseMax(2.0 * cfg.grid_size);
+                            Eigen::Matrix3d H =
+                                finite_difference_hessian(proposed_state, field_lines.rPWw, field_intersections, goals, h);
+                            double r_max = cfg.change_limit.squaredNorm();
+                            double r_min = std::pow(2.0 * cfg.grid_size, 2);
+                            Eigen::Matrix3d R =
+                                covariance_from_hessian(H, cfg.kalman_measurement_scale, r_min, r_max);
 
-                            // Reset the flag.
-                            first_measurement = false;
+                            filter.update(proposed_state, R);
 
                             // Update the last certain state and reset counter
-                            last_certain_state = filtered_state;
-                            num_over_cost      = 0;
+                            last_certain_state = filter.mean;
+                            num_invalid_frames = 0;
                         }
                         else {
-                            // Reject the update, keep previous filtered state
-                            log<DEBUG>("Rejecting optimisation result: cost ",
-                                       chosen_state_cost,
-                                       " exceeds threshold ",
-                                       cfg.cost_threshold);
-                            // Keep the current filtered_state unchanged
-                            // Increment the over-cost counter for potential reset
-                            num_over_cost++;
+                            // Reject the update, keep the current filter estimate (predict step already ran)
+                            log<DEBUG>("Rejecting optimisation result: validity ",
+                                       validity,
+                                       " below threshold ",
+                                       cfg.validity_min_validity);
+                            num_invalid_frames++;
                         }
                     }
 
                     // Check if uncertainty is too high and trigger reset if needed
                     emit(graph("Cost", chosen_state_cost));
-                    if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
+                    if (cfg.validity_reset_on_invalid && (num_invalid_frames > cfg.validity_max_invalid_frames)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
-                        // Cost has been high too many times, reset the localisation
-                        log<WARN>("Cost exceeded threshold ",
-                                  cfg.max_over_cost,
+                        // Validity has been below threshold too many times, reset the localisation
+                        log<WARN>("Validity below threshold ",
+                                  cfg.validity_max_invalid_frames,
                                   " times, triggering uncertainty reset");
                         // Emit that we are resetting, eg for behaviour
                         emit(std::make_unique<UncertaintyResetFieldLocalisation>());
-                        // Reset localisation by finding a new low cost state
+                        // Reset localisation by finding a new valid state
                         const auto reset_start = NUClear::clock::now();
                         uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
                         const auto reset_end = NUClear::clock::now();
@@ -329,15 +400,15 @@ namespace module::localisation {
                             std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
                         log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
                         // Reset variables
-                        num_over_cost = 0;
-                        last_reset    = NUClear::clock::now();
+                        num_invalid_frames = 0;
+                        last_reset          = NUClear::clock::now();
                         // Let other modules know that localisation has finished resetting
                         emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
                     }
 
                     // Emit the field message
                     auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(filtered_state);
+                    field->Hfw = compute_Hfw(filter.mean);
 
                     // Debugging
                     if (log_level <= DEBUG) {
@@ -350,7 +421,9 @@ namespace module::localisation {
                     }
 
                     // Add cost, covariance, and uncertainty to the field message
-                    field->cost = chosen_state_cost;
+                    field->cost        = chosen_state_cost;
+                    field->covariance  = filter.cov;
+                    field->uncertainty = filter.cov.trace();
 
                     emit(field);
                 });
@@ -358,7 +431,7 @@ namespace module::localisation {
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
-        emit(graph("filtered state", filtered_state.x(), filtered_state.y(), filtered_state.z()));
+        emit(graph("filtered state", filter.mean.x(), filter.mean.y(), filter.mean.z()));
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();
         Eigen::Vector3d rFWw       = (Hfw.translation());
@@ -407,77 +480,85 @@ namespace module::localisation {
                                  : greedy_association(field_intersections, Hfw);
     }
 
+    double FieldLocalisationNLopt::evaluate_cost(const Eigen::Vector3d& x,
+                                                 const std::vector<Eigen::Vector3d>& field_lines,
+                                                 const std::shared_ptr<const FieldIntersections>& field_intersections,
+                                                 const std::shared_ptr<const Goals>& goals) {
+        // --- Field line point cost ---
+        double cost = 0.0;
+        for (auto rORr : field_lines) {
+            // Get the position [x, y] of the observation in the map for this particle
+            Eigen::Vector2i map_position = position_in_map(x, rORr);
+            double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
+            occupancy_value =
+                occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
+            cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
+        }
+        // Average the cost by the number of field lines
+        cost /= field_lines.size() > 0 ? field_lines.size() : 1;
+
+        // Compute the cost and gradient
+        auto Hfw = compute_Hfw(x);
+
+        // --- Field line intersection cost ---
+        if (field_intersections) {
+            auto associations = data_association(field_intersections, Hfw);
+            for (const auto& association : associations) {
+                // Calculate the distance between the observed intersection and the closest landmark
+                double distance = (association.first - association.second).norm();
+                cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
+            }
+            // Average the cost by the number of associations
+            cost /= associations.size() > 0 ? associations.size() : 1;
+        }
+
+        // --- Goal post cost ---
+        // Only consider goal post cost if there are two goals
+        if (goals && goals->goals.size() == 2) {
+            // Ensure the goal posts are roughly correct distance apart
+            auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
+            auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
+            auto rGWw_2           = Hwc * (goals->goals[1].post.bottom * goals->goals[1].post.distance);
+            double distance_apart = (rGWw_1 - rGWw_2).norm();
+            if (std::abs(distance_apart - expected_goal_post_distance) < cfg.goal_post_error_tolerance) {
+
+                auto rGFf_left  = Hfw * rGWw_1;
+                auto rGFf_right = Hfw * rGWw_2;
+                if (rGFf_left.y() < rGFf_right.y()) {
+                    std::swap(rGFf_left, rGFf_right);
+                }
+                auto expected_goal_post_postions = rGFf_left.x() > 0 ? own_goal_posts : opp_goal_posts;
+
+                // Calculate the distance between the goal posts
+                double left_distance  = (rGFf_left - expected_goal_post_postions.left).norm();
+                double right_distance = (rGFf_right - expected_goal_post_postions.right).norm();
+
+                // Add the cost of the distance between the goal posts
+                cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);
+                cost += cfg.goal_post_distance_weight * std::pow(right_distance, 2);
+            }
+        }
+
+        return cost;
+    }
+
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const std::shared_ptr<const Goals>& goals,
-        bool uncertainty_optimisation) {
-        // Wrap the objective function in a lambda function
+        bool uncertainty_optimisation,
+        const Eigen::Vector3d& box_bounds) {
+        // Wrap the objective function in a lambda function. The state-change regulariser is added here, on
+        // top of the perception-only evaluate_cost, so that the Hessian and validity metric (which both call
+        // evaluate_cost directly) never see the artificial curvature it would inject in otherwise-unobservable
+        // directions.
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
             (void) data;  // Unused in this case
             (void) grad;  // Unused in this case
-
-            // --- Field line point cost ---
-            double cost = 0.0;
-            for (auto rORr : field_lines) {
-                // Get the position [x, y] of the observation in the map for this particle
-                Eigen::Vector2i map_position = position_in_map(x, rORr);
-                double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
-                occupancy_value =
-                    occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
-                cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
-            }
-            // Average the cost by the number of field lines
-            cost /= field_lines.size() > 0 ? field_lines.size() : 1;
-
-            // Compute the cost and gradient
-            auto Hfw = compute_Hfw(x);
-
-            // --- Field line intersection cost ---
-            if (field_intersections) {
-                auto associations = data_association(field_intersections, Hfw);
-                for (const auto& association : associations) {
-                    // Calculate the distance between the observed intersection and the closest landmark
-                    double distance = (association.first - association.second).norm();
-                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
-                }
-                // Average the cost by the number of associations
-                cost /= associations.size() > 0 ? associations.size() : 1;
-            }
-
-            // --- Goal post cost ---
-            // Only consider goal post cost if there are two goals
-            if (goals && goals->goals.size() == 2) {
-                // Ensure the goal posts are roughly correct distance apart
-                auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
-                auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
-                auto rGWw_2           = Hwc * (goals->goals[1].post.bottom * goals->goals[1].post.distance);
-                double distance_apart = (rGWw_1 - rGWw_2).norm();
-                if (std::abs(distance_apart - expected_goal_post_distance) < cfg.goal_post_error_tolerance) {
-
-                    auto rGFf_left  = Hfw * rGWw_1;
-                    auto rGFf_right = Hfw * rGWw_2;
-                    if (rGFf_left.y() < rGFf_right.y()) {
-                        std::swap(rGFf_left, rGFf_right);
-                    }
-                    auto expected_goal_post_postions = rGFf_left.x() > 0 ? own_goal_posts : opp_goal_posts;
-
-                    // Calculate the distance between the goal posts
-                    double left_distance  = (rGFf_left - expected_goal_post_postions.left).norm();
-                    double right_distance = (rGFf_right - expected_goal_post_postions.right).norm();
-
-                    // Add the cost of the distance between the goal posts
-                    cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);
-                    cost += cfg.goal_post_distance_weight * std::pow(right_distance, 2);
-                }
-            }
-
-            // --- State change cost ---
-            cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
-
-            return cost;
+            return evaluate_cost(x, field_lines, field_intersections, goals)
+                   + cfg.state_change_weight * (x - initial_guess).squaredNorm();
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
         constexpr unsigned int n   = 3;
@@ -498,9 +579,12 @@ namespace module::localisation {
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
 
-        // Define the upper and lower bounds for the change in state
-        Eigen::Vector3d lower_bounds = initial_guess - cfg.change_limit;
-        Eigen::Vector3d upper_bounds = initial_guess + cfg.change_limit;
+        // Define the upper and lower bounds for the change in state. A zero box_bounds is the sentinel for
+        // "use the configured change_limit" (the common case); callers with a covariance-derived box (see the
+        // main loop) pass a non-zero per-axis bound instead.
+        const Eigen::Vector3d& bounds = box_bounds.isZero() ? cfg.change_limit : box_bounds;
+        Eigen::Vector3d lower_bounds  = initial_guess - bounds;
+        Eigen::Vector3d upper_bounds  = initial_guess + bounds;
 
         // Convert bounds to std::vector for NLopt
         std::vector<double> lb(n), ub(n);

@@ -39,8 +39,11 @@
 #include "message/vision/FieldLines.hpp"
 #include "message/vision/Goal.hpp"
 
+#include "localisation/PoseFilter.hpp"
+
 #include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
+#include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -178,6 +181,30 @@ namespace module::localisation {
         Eigen::Vector3d right;
     };
 
+    /**
+     * @brief Compute the rigid 2D transform (x, y, theta) that maps an observed world-space point pair
+     * (p1w, p2w) onto a model field-space point pair (q1f, q2f). Pure geometry, used to turn a matched pair
+     * of landmarks/observations directly into a candidate pose without any search.
+     * @param p1w First observed point in world space (x, y)
+     * @param p2w Second observed point in world space (x, y)
+     * @param q1f Field-space model point corresponding to p1w
+     * @param q2f Field-space model point corresponding to p2w
+     * @return The candidate state (x, y, theta) of Hfw
+     */
+    Eigen::Vector3d pose_from_point_pair(const Eigen::Vector2d& p1w,
+                                         const Eigen::Vector2d& p2w,
+                                         const Eigen::Vector2d& q1f,
+                                         const Eigen::Vector2d& q2f);
+
+    /**
+     * @brief Mirror a state across the field's central symmetry: (x,y,theta) -> (-x,-y,theta+pi). The field
+     * localisation cost function is exactly invariant under this transform (see README), so mirrored states
+     * are indistinguishable from vision alone and must be disambiguated structurally.
+     * @param s The state to mirror
+     * @return The mirrored state
+     */
+    Eigen::Vector3d mirror_pose(const Eigen::Vector3d& s);
+
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
         // Define the model dimensions
@@ -263,14 +290,8 @@ namespace module::localisation {
             /// @brief Cost for a point being outside of the field
             double out_of_field_cost = 0.0;
 
-            /// @brief When this is enabled, the field localisation will reset if the cost is too high
-            bool reset_on_cost = false;
-            /// @brief Cost threshold for resetting the filter
-            double cost_threshold = 0.0;
             /// @brief Reset delay in seconds
             int reset_delay = 0;
-            /// @brief Maximum number of times the cost can be over the threshold before resetting
-            int max_over_cost = 0;
             /// @brief Step size for the grid search during uncertainty reset
             double step_size = 0.0;
             /// @brief The window size for the local search during uncertainty reset
@@ -278,19 +299,59 @@ namespace module::localisation {
             /// @brief Number of yaw angles to try during uncertainty reset
             int num_angles = 0;
 
-            /// @brief Exponential filter smoothing factor for each state component (0 < alpha <= 1)
-            /// @brief [x, y, theta] - Higher values = more responsive, Lower values = more smoothed
-            Eigen::Vector3d alpha = Eigen::Vector3d(0.1, 0.1, 0.1);
+            /// @brief Process noise variance rate (x^2, y^2, theta^2) per unit odometry motion [m + rad] applied
+            /// to the pose filter's covariance each frame, scaled by observed motion
+            Eigen::Vector3d kalman_process_noise = Eigen::Vector3d::Zero();
+            /// @brief Scalar mapping inverse Hessian curvature to measurement variance
+            double kalman_measurement_scale = 1.0;
+            /// @brief Finite-difference step size per axis for the Hessian [m, m, rad], clamped to
+            /// >= 2*grid_size at use time to ride over grid quantisation and optimiser inexactness
+            Eigen::Vector3d kalman_hessian_step = Eigen::Vector3d::Zero();
+
+            /// @brief Field-line point registered as an inlier below this map distance [m]
+            double validity_line_inlier_distance = 0.0;
+            /// @brief Minimum matched-percept validity fraction to accept an optimisation result
+            double validity_min_validity = 0.0;
+            /// @brief Maximum number of consecutive invalid frames before triggering an uncertainty reset
+            int validity_max_invalid_frames = 0;
+            /// @brief Whether to trigger an uncertainty reset after validity_max_invalid_frames consecutive
+            /// invalid frames
+            bool validity_reset_on_invalid = false;
+
+            /// @brief Use analytic goal/intersection-pair candidates before falling back to grid search
+            bool reset_use_candidates = true;
+            /// @brief Tolerance [m] on pair separation when matching observed intersection pairs to landmark
+            /// pairs
+            double reset_pair_separation_tolerance = 0.0;
+            /// @brief Maximum number of reset candidates kept after deduplication
+            int reset_max_candidates = 0;
+            /// @brief Constrain resets/searches to the robot's current half of the field (avoids the mirror
+            /// field problem)
+            bool reset_constrain_to_half = true;
+
+            /// @brief Act automatically on detected mirror-flip cues (e.g. PenaltyReset) rather than only
+            /// logging a warning
+            bool mirror_auto_flip = false;
         } cfg;
 
-        /// @brief State vector (x,y,yaw) of the Hfw transform
+        /// @brief State vector (x,y,yaw) of the Hfw transform, the raw (unfiltered) optimisation result. Kept
+        /// separately from the filter's mean for debugging/graphing purposes.
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
 
-        /// @brief Filtered state vector using exponential filter
-        Eigen::Vector3d filtered_state = Eigen::Vector3d::Zero();
+        /// @brief Probabilistic pose filter over (x,y,theta) of Hfw. The optimisation result is treated as a
+        /// measurement with covariance derived from the cost function's curvature (Hessian) at the optimum.
+        PoseFilter filter{};
 
-        /// @brief Bool indicating if this is the first measurement
-        bool first_measurement = true;
+        /// @brief The last robot-to-world transform (Sensors::Hrw), used to compute the odometry motion delta
+        /// consumed by the filter's predict step
+        Eigen::Isometry3d last_Hrw = Eigen::Isometry3d::Identity();
+
+        /// @brief Whether last_Hrw currently holds a valid previous value (false immediately after a hard
+        /// reset, since the motion delta across a reset is not meaningful)
+        bool last_Hrw_valid = false;
+
+        /// @brief Number of consecutive frames rejected by the validity gate
+        int num_invalid_frames = 0;
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
@@ -326,10 +387,6 @@ namespace module::localisation {
         /// @brief The last certain state of the robot (used for uncertainty reset)
         Eigen::Vector3d last_certain_state = Eigen::Vector3d::Zero();
 
-        /// @brief Number of times the cost has been over the threshold
-        int num_over_cost = 0;
-
-
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
          * @param state The state vector (x,y,theta)
@@ -352,10 +409,32 @@ namespace module::localisation {
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
         /**
+         * @brief Evaluate the perception-only cost (field-line, field-line intersection and goal-post terms)
+         * of a hypothesised state. Deliberately excludes the state-change regulariser: this function is
+         * shared by the optimiser objective, the finite-difference Hessian and the validity metric, none of
+         * which should see the artificial curvature the regulariser would inject in otherwise-unobservable
+         * directions.
+         * @param x The hypothesised state (x,y,theta)
+         * @param field_lines The observations of the field line points
+         * @param field_intersections The field intersections
+         * @param goals The observed goals
+         * @return The perception-only cost of the hypothesis
+         */
+        double evaluate_cost(const Eigen::Vector3d& x,
+                             const std::vector<Eigen::Vector3d>& field_lines,
+                             const std::shared_ptr<const FieldIntersections>& field_intersections,
+                             const std::shared_ptr<const Goals>& goals);
+
+        /**
          * @brief Run the field line optimisation
          * @param initial_guess The initial guess for the field line
          * @param observations The observations of the field line points
          * @param field_intersections The field intersections
+         * @param goals The observed goals
+         * @param uncertainty_optimisation Whether to use the (faster, less accurate) uncertainty optimisation
+         * settings
+         * @param box_bounds Optional per-axis box half-width around initial_guess to bound the optimisation.
+         * If zero (default), falls back to cfg.change_limit.
          * @return Pair <optimisation solution (x,y,theta), final cost>
          */
         std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
@@ -363,7 +442,75 @@ namespace module::localisation {
             const std::vector<Eigen::Vector3d>& field_lines,
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const std::shared_ptr<const Goals>& goals,
-            bool uncertainty_optimisation = false);
+            bool uncertainty_optimisation                = false,
+            const Eigen::Vector3d& box_bounds             = Eigen::Vector3d::Zero());
+
+        /**
+         * @brief Compute a validity metric in [0, 1] for a hypothesised state: the fraction of matched
+         * percepts (field-line points registered within validity.line_inlier_distance of the field-line map,
+         * blended 50/50 with the fraction of field intersections successfully associated with a landmark
+         * within max_association_distance). Used to gate acceptance instead of raw optimisation cost, since
+         * cost magnitudes are not directly comparable across differing numbers/mixes of observations.
+         * @param state The hypothesised state (x,y,theta)
+         * @param field_lines The observations of the field line points
+         * @param field_intersections The field intersections
+         * @return The validity of the hypothesis in [0, 1]
+         */
+        double compute_validity(const Eigen::Vector3d& state,
+                                const std::vector<Eigen::Vector3d>& field_lines,
+                                const std::shared_ptr<const FieldIntersections>& field_intersections);
+
+        /**
+         * @brief Central-difference Hessian of evaluate_cost at x (perception terms only, no state-change
+         * regulariser). Used to derive a measurement covariance for the pose filter update.
+         * @param x The point at which to evaluate the Hessian
+         * @param field_lines The observations of the field line points
+         * @param field_intersections The field intersections
+         * @param goals The observed goals
+         * @param h Per-axis finite-difference step size
+         * @return The 3x3 Hessian matrix of evaluate_cost at x
+         */
+        Eigen::Matrix3d finite_difference_hessian(const Eigen::Vector3d& x,
+                                                  const std::vector<Eigen::Vector3d>& field_lines,
+                                                  const std::shared_ptr<const FieldIntersections>& field_intersections,
+                                                  const std::shared_ptr<const Goals>& goals,
+                                                  const Eigen::Vector3d& h);
+
+        /**
+         * @brief Map a cost-function Hessian to a measurement covariance. Eigen-decomposes H and maps each
+         * eigenvalue lambda_i to a variance clamp(scale/lambda_i, r_min, r_max); non-positive or
+         * near-singular eigenvalues (unobserved/unreliable directions) are clamped to r_max rather than
+         * triggering a wholesale fallback. Pure/static: needs no reactor state, so it is directly unit
+         * testable.
+         * @param H The Hessian matrix (assumed symmetric)
+         * @param scale Scalar mapping inverse curvature to variance
+         * @param r_min Minimum variance per eigen-direction
+         * @param r_max Maximum variance per eigen-direction (also used for non-positive/tiny eigenvalues)
+         * @return The 3x3 measurement covariance matrix
+         */
+        static Eigen::Matrix3d covariance_from_hessian(const Eigen::Matrix3d& H,
+                                                       double scale,
+                                                       double r_min,
+                                                       double r_max);
+
+        /**
+         * @brief Generate candidate poses from the two observed goal posts, tried against both assignment
+         * orders and both field ends, gated by the expected goal post distance +- tolerance.
+         * @param goals The observed goals
+         * @return Up to 4 candidate states (x,y,theta)
+         */
+        std::vector<Eigen::Vector3d> goal_pair_candidates(const std::shared_ptr<const Goals>& goals);
+
+        /**
+         * @brief Generate candidate poses from pairs of observed field intersections matched against pairs of
+         * model landmarks of matching type and similar separation. Mirror twins arise naturally from the
+         * symmetric landmark layout. Deduplicated and capped at cfg.reset_max_candidates, preferring
+         * widely-separated pairs (better angular conditioning).
+         * @param field_intersections The field intersections
+         * @return The candidate states (x,y,theta)
+         */
+        std::vector<Eigen::Vector3d> intersection_pair_candidates(
+            const std::shared_ptr<const FieldIntersections>& field_intersections);
 
         /**
          * @brief Perform data association between intersection observations and landmarks using nearest neighbour

@@ -20,20 +20,20 @@ targets:
 
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
-    message.output.CompressedImage: false
-    message.vision.Balls: false
-    message.vision.Goals: false
-    message.vision.Robots: false
-    message.vision.GreenHorizon: false
-    message.vision.FieldLines: false
-    message.vision.VisualMesh: false
+    message.output.CompressedImage: true
+    message.vision.Balls: true
+    message.vision.Goals: true
+    message.vision.Robots: true
+    message.vision.GreenHorizon: true
+    message.vision.FieldLines: true
+    message.vision.VisualMesh: true
     message.vision.FieldIntersections: 0.75
-    message.vision.BoundingBoxes: false
+    message.vision.BoundingBoxes: true
 
     # Localisation Messages
-    message.localisation.Ball: false
-    message.localisation.Field: false
-    message.localisation.Robots: false
+    message.localisation.Ball: true
+    message.localisation.Field: true
+    message.localisation.Robots: true
 
     # Log messages
     message.nuclear.LogMessage: false

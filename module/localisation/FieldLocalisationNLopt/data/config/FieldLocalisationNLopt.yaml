@@ -31,14 +31,8 @@ use_hungarian: true
 # Cost for a point outside the field
 out_of_field_cost: 3.0
 
-# Reset localisation if the cost is above a threshold
-reset_on_cost: true
-# Cost threshold for the optimisation to trigger a reset
-cost_threshold: 2.0
 # Time (s) to wait before allowing a localisation reset again
 reset_delay: 3
-# Maximum number of times the cost can be over threshold before a reset is triggered
-max_over_cost: 100
 # Step size for localisation reset search (m)
 step_size: 0.25
 # Local search window size for localisation reset (m)
@@ -52,11 +46,13 @@ field_line_distance_weight: 1.0
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 5.0
 
-# Weighting associated with change between last solution result
-state_change_weight: 2.0
+# Weighting associated with change between last solution result. Default 0.0: the Kalman filter's covariance
+# prior replaces this as the mechanism for temporal consistency; kept as an escape hatch for degenerate
+# geometry (e.g. sliding along a single visible line) where the flat-direction covariance clamp isn't enough.
+state_change_weight: 0.0
 
 # Minimum distance an associated landmark needs to be for measurement update
-max_association_distance: 1.0
+max_association_distance: 0.5
 
 # Weighting associated with goal post distance error
 goal_post_distance_weight: 1.0
@@ -85,8 +81,35 @@ uncertainty_opt: # Quicker optimisation, but less accurate.
   # Maximum number of evaluations for the optimisation
   maxeval: 100
 
-exponential_filter:
-  # Smoothing factor for exponential filter for each state component (0 < alpha <= 1)
-  # [x, y, theta] - Higher values = more responsive to new measurements
-  # Lower values = more smoothed/filtered output
-  alpha: [0.1, 0.1, 0.5]
+kalman:
+  # Process noise variance rate (x^2, y^2, theta^2) per unit odometry motion [m + rad], applied to the pose
+  # filter's covariance each frame, scaled by how much the robot moved since the last frame
+  process_noise: [0.01, 0.01, 0.005]
+  # Scalar mapping inverse Hessian curvature to measurement variance
+  measurement_scale: 1.0
+  # Finite-difference step for the Hessian [m, m, rad] (clamped to >= 2*grid_size in code)
+  hessian_step: [0.05, 0.05, 0.05]
+
+validity:
+  # Field-line point registered as an inlier below this map distance [m]
+  line_inlier_distance: 0.2
+  # Minimum matched-percept validity fraction to accept an optimisation result
+  min_validity: 0.5
+  # Maximum number of consecutive invalid frames before triggering an uncertainty reset
+  max_invalid_frames: 100
+  # Trigger an uncertainty reset after max_invalid_frames consecutive invalid frames
+  reset_on_invalid: true
+
+reset:
+  # Use analytic goal/intersection-pair candidates before falling back to grid search
+  use_candidates: true
+  # Tolerance [m] on pair separation when matching observed intersection pairs to landmark pairs
+  pair_separation_tolerance: 0.3
+  # Maximum number of reset candidates kept after deduplication
+  max_candidates: 30
+  # Constrain resets/searches to the robot's current half of the field (avoids the mirror field problem)
+  constrain_to_half: true
+
+mirror:
+  # Act automatically on detected mirror-flip cues (e.g. PenaltyReset); false = log a warning only
+  auto_flip: false
