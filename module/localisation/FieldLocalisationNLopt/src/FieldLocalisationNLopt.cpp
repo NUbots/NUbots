@@ -178,15 +178,8 @@ namespace module::localisation {
             state              = reset.penalty_kick_position;
             filtered_state     = state;
             first_measurement  = true;
-            last_certain_state = state;  // Update the last certain state
-        });
-
-        on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
-            log<INFO>("Resetting field localisation for penalty kick");
-            state = reset.penalty_kick_position;
-            kf.set_state(state);
             last_reset         = NUClear::clock::now();
-            last_certain_state = state;
+            last_certain_state = state;  // Update the last certain state
         });
 
         on<Trigger<FieldLines>,

@@ -182,11 +182,12 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->self.penalty_reason;
-                    switch (penalty_reason) {
-                        case 0: msg->state = 0; break;
-                        case 1: msg->state = 1; break;
-                        default: msg->state = 2; break;
+                    // Penalty
+                    if (game_state->self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
+                        msg->state = message::input::State::UNPENALISED;
+                    }
+                    else {
+                        msg->state = message::input::State::PENALISED;
                     }
 
                     // Team colour

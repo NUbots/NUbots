@@ -51,7 +51,6 @@ namespace module::purpose {
     using extension::Configuration;
 
     using Phase      = message::input::GameState::Phase;
-    using SubMode    = message::input::GameState::SubMode;
     using GoalieTask = message::purpose::Goalie;
 
     using message::input::GameState;
@@ -104,11 +103,9 @@ namespace module::purpose {
                 bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty
-                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
-                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
+                // If play is stopped, the robot must freeze (referee ball repositioning or
+                // waiting for the referee to call execute)
+                if (game_state.stopped) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }

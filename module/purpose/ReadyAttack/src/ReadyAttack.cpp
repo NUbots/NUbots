@@ -82,7 +82,7 @@ namespace module::purpose {
 
                 // If we are not waiting for kick off, it is the penalty positioning phase
                 // Determine if we are the attacker or not
-                bool attacker = game_state.secondary_state.team_performing == game_state.team.team_id;
+                bool attacker = game_state.our_kick_off;
 
                 // If we are defending, position between the ball and our goal at the distance specified in the rules
                 if (!attacker) {

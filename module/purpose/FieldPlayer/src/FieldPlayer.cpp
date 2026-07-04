@@ -52,7 +52,6 @@ namespace module::purpose {
 
     using FieldPlayerMsg = message::purpose::FieldPlayer;
     using Phase          = message::input::GameState::Phase;
-    using SubMode        = message::input::GameState::SubMode;
 
     using message::input::GameState;
     using message::input::Sensors;
@@ -108,11 +107,9 @@ namespace module::purpose {
                 bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty
-                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
-                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
+                // If play is stopped, the robot must freeze (referee ball repositioning or
+                // waiting for the referee to call execute)
+                if (game_state.stopped) {
                     log<DEBUG>("We are in a freeze penalty situation, do nothing.");
                     return;
                 }
@@ -190,8 +187,8 @@ namespace module::purpose {
                 // Determine if we need to wait for the other team to kick off
                 bool kickoff_wait =
                     !game_state.our_kick_off && (game_state.secondary_time - NUClear::clock::now()).count() > 0;
-                // At this point, if a penalty state is in progress, it must be in sub_mode 1,
-                // which is the setup phase where the robot can position to defend or attack.
+                // At this point, if a penalty state is in progress, play is not stopped, so we are
+                // in the setup phase where the robot can position to defend or attack.
                 bool allowed_to_attack = !(kickoff_wait || penalty);
 
                 // Attack if we are closest BUT we have to be in a situation where we are allowed to attack, eg not in
