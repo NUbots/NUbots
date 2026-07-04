@@ -100,7 +100,7 @@ namespace module::purpose {
 
         on<Trigger<Whistle>, With<GameState>>().then([this](const GameState& game_state) {
             log<INFO>("Gamestate is ", game_state.phase);
-            if (game_state.phase == Phase::SET) {
+            if (game_state.phase == Phase::SET && game_state.our_kick_off) {
                 log<INFO>("Whistle detected while in SET, starting play");
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
             }
