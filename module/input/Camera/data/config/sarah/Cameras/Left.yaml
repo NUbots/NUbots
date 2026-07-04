@@ -24,10 +24,10 @@ lens:
   fov: auto
 
 # Camera kinematics
-urdf_path: "models/robot.urdf"
+urdf_path: "models/nugus/robot.urdf"
 
 is_left_camera: true
 
-roll_offset: -0.5 * pi / 180
-pitch_offset: -3.5 * pi / 180
-yaw_offset: -8 * pi / 180
+roll_offset: 1.87075987444220496 * pi / 180
+pitch_offset: 1.5114826867230916 * pi / 180
+yaw_offset: -1.8876037057518957 * pi / 180
