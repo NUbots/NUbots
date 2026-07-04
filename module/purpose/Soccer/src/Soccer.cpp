@@ -92,7 +92,6 @@ namespace module::purpose {
             this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             cfg.force_playing      = config["force_playing"].as<bool>();
             cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
-            cfg.startup_delay      = config["startup_delay"].as<int>();
 
             if (cfg.force_playing) {
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
