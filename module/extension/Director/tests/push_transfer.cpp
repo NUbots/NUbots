@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -39,18 +39,15 @@ namespace {
     struct Helper {};
 
     struct Condition {
-        enum Value { LEVEL_0, LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4 } value;
+        enum Value { BLOCK, ALLOW } value;
         Condition(const Value& v) : value(v) {}
         operator int() const {
             return value;
         }
         operator std::string() const {
             switch (value) {
-                case LEVEL_0: return "LEVEL_0";
-                case LEVEL_1: return "LEVEL_1";
-                case LEVEL_2: return "LEVEL_2";
-                case LEVEL_3: return "LEVEL_3";
-                case LEVEL_4: return "LEVEL_4";
+                case BLOCK: return "BLOCK";
+                case ALLOW: return "ALLOW";
                 default: return "UNKNOWN";
             }
         }
@@ -58,58 +55,45 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 3> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
-            on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::LEVEL_4>>().then([this] {  //
+            on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::ALLOW>>().then([this] {  //
                 events.push_back("task executed");
             });
 
             on<Provide<Helper>>().then([this] {  //
                 events.push_back("helper waiting");
             });
-            on<Provide<Helper>,
-               Causing<Condition, Condition::LEVEL_4>,
-               When<Condition, std::equal_to, Condition::LEVEL_3>>()
-                .then([this] {
-                    events.push_back("helper causing level 4");
-                    emit(std::make_unique<Condition>(Condition::LEVEL_4));
-                });
-            on<Provide<Helper>,
-               Causing<Condition, Condition::LEVEL_3>,
-               When<Condition, std::equal_to, Condition::LEVEL_2>>()
-                .then([this] {
-                    events.push_back("helper causing level 3");
-                    emit(std::make_unique<Condition>(Condition::LEVEL_3));
-                });
-            on<Provide<Helper>,
-               Causing<Condition, Condition::LEVEL_2>,
-               When<Condition, std::equal_to, Condition::LEVEL_1>>()
-                .then([this] {
-                    events.push_back("helper causing level 2");
-                    emit(std::make_unique<Condition>(Condition::LEVEL_2));
-                });
-            on<Provide<Helper>, Causing<Condition, Condition::LEVEL_1>>().then([this] {
-                events.push_back("helper causing level 1");
-                emit(std::make_unique<Condition>(Condition::LEVEL_1));
+            on<Provide<Helper>, Causing<Condition, Condition::ALLOW>>().then([this] {
+                events.push_back("helper causing allow");
+                emit(std::make_unique<Condition>(Condition::ALLOW));
             });
 
             /**************
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Start up the helper
                 events.push_back("emitting helper task");
                 emit<Task>(std::make_unique<Helper>(), 10);
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit the task
-                events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>(), 50);
+                events.push_back("emitting blocked condition");
+                emit(std::make_unique<Condition>(Condition::BLOCK));
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                // Remove the task, the push should be released and the helper reverts to its preferred provider
+                events.push_back("emitting task at high priority");
+                emit<Task>(std::make_unique<SimpleTask>(), 100);
+            });
+            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+                // Re-emit the task at a different priority. The task instance is replaced, so the push must be
+                // transferred to the new instance for its eventual removal to release the push.
+                events.push_back("re-emitting task at lower priority");
+                emit<Task>(std::make_unique<SimpleTask>(), 90);
+            });
+            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+                // Removing the task must release the push held by the re-emitted instance
                 events.push_back("removing task");
                 emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
@@ -117,7 +101,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that when/causing relationships can be cascaded", "[director][when][causing][ladder]") {
+TEST_CASE("Test that a push follows its task when the task is re-emitted", "[director][causing][push]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -129,13 +113,12 @@ TEST_CASE("Test that when/causing relationships can be cascaded", "[director][wh
     std::vector<std::string> expected = {
         "emitting helper task",
         "helper waiting",
-        "emitting task",
-        "helper causing level 1",
-        "helper causing level 2",
-        "helper causing level 3",
-        "helper causing level 4",
+        "emitting blocked condition",
+        "emitting task at high priority",
+        "helper causing allow",
         "task executed",
-        // The push holds while the pushing task exists, the helper only reverts once it is removed
+        "re-emitting task at lower priority",
+        "task executed",
         "removing task",
         "helper waiting",
     };

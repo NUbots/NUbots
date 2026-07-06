@@ -34,7 +34,54 @@ namespace module::extension {
     using component::Provider;
     using ::extension::behaviour::RunReason;
 
-    void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
+    void Director::transfer_pushes(const std::shared_ptr<DirectorTask>& from, const std::shared_ptr<DirectorTask>& to) {
+        for (auto& [type, g] : groups) {
+            if (g.pushing_task == from) {
+                g.pushing_task = to;
+            }
+        }
+    }
+
+    void Director::release_pushes(const std::shared_ptr<DirectorTask>& task) {
+
+        // Find and clear every push held by this task before any reevaluation can see half cleared state
+        std::vector<std::type_index> released;
+        for (auto& [type, g] : groups) {
+            if (g.pushing_task == task) {
+                g.pushing_task    = nullptr;
+                g.pushed_provider = nullptr;
+                if (g.active_task != nullptr) {
+                    released.push_back(type);
+                }
+            }
+        }
+
+        // Sort so that the released groups with the highest priority tasks react first
+        std::stable_sort(released.begin(), released.end(), [this](const auto& a, const auto& b) {
+            // If b wins against a, then we swap
+            return challenge_priority(groups.at(b).active_task, groups.at(a).active_task);
+        });
+
+        // Reevaluating the group lets its queued watchers take over the push, and failing that the group's own
+        // task re-runs and reverts to its preferred provider. Each group is rechecked before reevaluating since an
+        // earlier reevaluation may have re-pushed, retasked or torn it down.
+        for (const auto& type : released) {
+            if (groups.contains(type)) {
+                auto& g = groups.at(type);
+                if (!g.zombie && g.pushing_task == nullptr && g.active_task != nullptr) {
+                    reevaluate_group(g);
+                }
+            }
+        }
+    }
+
+    void Director::remove_task(const std::shared_ptr<DirectorTask>& task, const bool& release) {
+
+        // If this task is going away for good it can't push anything anymore, release its pushes even if it never
+        // got to run itself. A task that is merely stopping execution but staying queued keeps its pushes.
+        if (release) {
+            release_pushes(task);
+        }
 
         // Get the group for this task
         auto& group = groups.at(task->type);
@@ -75,10 +122,16 @@ namespace module::extension {
                 // Update the group information to reflect that this provider group is no longer running
                 group.update_data();
 
-                // If anyone was pushing this group they can't push anymore since we are not active
+                // If anyone was pushing this group they can't push anymore since we are not active.
+                // Release the push before reevaluating so the pusher's re-solve sees consistent state, it will
+                // either find another way to push or queue up blocked.
                 if (group.pushing_task != nullptr) {
+                    auto pusher_task      = group.pushing_task;
+                    group.pushing_task    = nullptr;
+                    group.pushed_provider = nullptr;
+
                     // Reevaluate whoever pushed us
-                    auto& pusher = providers.at(group.pushing_task->requester_id)->group;
+                    auto& pusher = providers.at(pusher_task->requester_id)->group;
                     reevaluate_group(pusher);
                 }
 

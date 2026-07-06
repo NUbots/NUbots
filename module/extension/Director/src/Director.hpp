@@ -159,9 +159,12 @@ namespace module::extension {
          * This function also deals with all the consequences of removing the task including looking to see if a queued
          * task can now be run.
          *
-         * @param task the task to remove from the Director
+         * @param task    the task to remove from the Director
+         * @param release whether the pushes held by this task should be released. True when the task is going away
+         *                for good, false when only its execution is being stopped and it remains queued (e.g. its
+         *                pack can no longer run as a whole), in which case its pushes keep holding.
          */
-        void remove_task(const std::shared_ptr<component::DirectorTask>& task);
+        void remove_task(const std::shared_ptr<component::DirectorTask>& task, const bool& release = true);
 
         /**
          * Reevaluates all of the tasks that are queued to execute on a provider group.
@@ -224,8 +227,8 @@ namespace module::extension {
             /// When multiple when conditions chain through Causing providers (a ladder), only the deepest level can
             /// be pushed first, then once its state change propagates the next level becomes pushable.
             int push_depth = 0;
-            /// The providers that need to be pushed before this evaluation can run
-            std::set<std::shared_ptr<component::Provider>> pushes;
+            /// The providers that need to be pushed before this evaluation can run, in evaluation order
+            std::vector<std::shared_ptr<component::Provider>> pushes;
         };
 
         /**
@@ -266,14 +269,17 @@ namespace module::extension {
          *
          * @param type      the provider group to evaluate
          * @param authority the task used as the authority token for permission checks
-         * @param visited   the provider groups already visited on this path, to prevent loops
+         * @param pusher    the task that would hold any pushes this evaluation discovers, used for out-pushing
+         *                  checks (stays the original task while authority swaps at causing boundaries)
+         * @param visited   the providers already visited on this path, to prevent loops
          * @param used      the provider groups already used elsewhere in the solution which we cannot reuse
          *
          * @return the evaluation for the best provider in this group
          */
         Evaluation evaluate_group(const std::type_index& type,
                                   const std::shared_ptr<component::DirectorTask>& authority,
-                                  const std::set<std::type_index>& visited,
+                                  const std::shared_ptr<component::DirectorTask>& pusher,
+                                  const std::set<std::shared_ptr<component::Provider>>& visited,
                                   const std::set<std::type_index>& used);
 
         /**
@@ -286,14 +292,17 @@ namespace module::extension {
          *
          * @param provider  the provider to evaluate
          * @param authority the task used as the authority token for permission checks
-         * @param visited   the provider groups already visited on this path, to prevent loops
+         * @param pusher    the task that would hold any pushes this evaluation discovers, used for out-pushing
+         *                  checks (stays the original task while authority swaps at causing boundaries)
+         * @param visited   the providers already visited on this path, to prevent loops
          * @param used      the provider groups already used elsewhere in the solution which we cannot reuse
          *
          * @return the evaluation for this provider
          */
         Evaluation evaluate_provider(const std::shared_ptr<component::Provider>& provider,
                                      const std::shared_ptr<component::DirectorTask>& authority,
-                                     std::set<std::type_index> visited,
+                                     const std::shared_ptr<component::DirectorTask>& pusher,
+                                     std::set<std::shared_ptr<component::Provider>> visited,
                                      std::set<std::type_index> used);
 
         /**
@@ -304,15 +313,41 @@ namespace module::extension {
          * its deeper pushes instead of itself; pushing those first starts the chain. Among viable candidates the
          * ones fewest pushes away from running are chosen.
          *
-         * @param when      the unmet when condition to satisfy
-         * @param authority the task used as the authority token for permission checks
-         * @param visited   the provider groups already visited on this path, to prevent loops
+         * @param when    the unmet when condition to satisfy
+         * @param pusher  the task that would hold the push, its priority decides if existing pushes can be taken over
+         * @param visited the providers already visited on this path, to prevent loops
          *
          * @return a PUSHABLE evaluation holding the providers to push, or BLOCKED if there are no viable candidates
          */
         Evaluation evaluate_causing(const component::Provider::WhenCondition& when,
-                                    const std::shared_ptr<component::DirectorTask>& authority,
-                                    const std::set<std::type_index>& visited);
+                                    const std::shared_ptr<component::DirectorTask>& pusher,
+                                    const std::set<std::shared_ptr<component::Provider>>& visited);
+
+        /**
+         * Releases every push held by the passed task and lets the pushed groups react.
+         *
+         * Each pushed group is reevaluated after its push is cleared: a queued watcher may take the push over, and
+         * otherwise the group's own task re-runs and reverts to its preferred provider.
+         *
+         * Called when a task is removed. Tasks that are replaced by a re-emission instead transfer their pushes to
+         * the new task instance via transfer_pushes.
+         *
+         * @param task the task whose pushes should be released
+         */
+        void release_pushes(const std::shared_ptr<component::DirectorTask>& task);
+
+        /**
+         * Moves any pushes held by one task instance to another.
+         *
+         * When a provider re-emits a task of a type it already has, the old DirectorTask instance is replaced in
+         * place rather than removed. Any group pushed by the old instance must follow to the new instance, both so
+         * the push keeps the correct priority and so removing the new instance releases it.
+         *
+         * @param from the task instance being replaced
+         * @param to   the task instance replacing it
+         */
+        void transfer_pushes(const std::shared_ptr<component::DirectorTask>& from,
+                             const std::shared_ptr<component::DirectorTask>& to);
 
         /**
          * Runs the passed task on the passed provider.

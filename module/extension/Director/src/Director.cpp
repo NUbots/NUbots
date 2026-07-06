@@ -116,6 +116,17 @@ namespace module::extension {
             group.providers.erase(std::remove(group.providers.begin(), group.providers.end(), provider),
                                   group.providers.end());
 
+            // If this provider was the target of a push it can no longer be pushed, release the push and let the
+            // pusher look for another way
+            if (provider == group.pushed_provider) {
+                auto pusher_task      = group.pushing_task;
+                group.pushing_task    = nullptr;
+                group.pushed_provider = nullptr;
+                if (pusher_task != nullptr && providers.contains(pusher_task->requester_id)) {
+                    reevaluate_group(providers.at(pusher_task->requester_id)->group);
+                }
+            }
+
             // Now we need to deal with the cases where this Providers was in use when it was unbound
             if (provider == group.active_provider) {
                 if (group.providers.empty()) {

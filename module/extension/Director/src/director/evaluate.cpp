@@ -34,53 +34,54 @@ namespace module::extension {
     using component::DirectorTask;
     using component::Provider;
 
+    namespace {
+        /// Checks if the list of providers contains this exact provider
+        bool contains(const std::vector<std::shared_ptr<Provider>>& v, const std::shared_ptr<Provider>& p) {
+            return std::find(v.begin(), v.end(), p) != v.end();
+        }
+        /// Checks if the list of providers contains any provider from this group
+        bool has_group(const std::vector<std::shared_ptr<Provider>>& v, const std::type_index& type) {
+            return std::any_of(v.begin(), v.end(), [&](const auto& c) { return c->type == type; });
+        }
+    }  // namespace
+
     bool Director::merge_pushes(Evaluation& parent, const Evaluation& child) {
-            // First pushes to arrive are taken as is
-            if (parent.pushes.empty()) {
-                parent.push_depth = child.push_depth;
-                parent.pushes     = child.pushes;
-                return true;
-            }
+        // First pushes to arrive are taken as is
+        if (parent.pushes.empty()) {
+            parent.push_depth = child.push_depth;
+            parent.pushes     = child.pushes;
+            return true;
+        }
 
-            // Only the deepest pushes matter, shallower ones are dropped and rediscovered on later evaluations
-            if (child.push_depth > parent.push_depth) {
-                parent.push_depth = child.push_depth;
-                parent.pushes     = child.pushes;
-                return true;
-            }
-            if (child.push_depth < parent.push_depth) {
-                return true;
-            }
+        // Only the deepest pushes matter, shallower ones are dropped and rediscovered on later evaluations
+        if (child.push_depth > parent.push_depth) {
+            parent.push_depth = child.push_depth;
+            parent.pushes     = child.pushes;
+            return true;
+        }
+        if (child.push_depth < parent.push_depth) {
+            return true;
+        }
 
-            // Equal depth, intersect within groups and union across groups
-            std::set<std::shared_ptr<Provider>> merged;
-            for (const auto& p : parent.pushes) {
-                // Providers whose group the child doesn't care about pass straight through
-                auto same_group = [&](const auto& c) { return c->type == p->type; };
-                if (std::none_of(child.pushes.begin(), child.pushes.end(), same_group)) {
-                    merged.insert(p);
-                }
-                // Otherwise only keep providers both sides can use
-                else if (child.pushes.contains(p)) {
-                    merged.insert(p);
-                }
+        // Equal depth, intersect within groups and union across groups
+        std::vector<std::shared_ptr<Provider>> merged;
+        for (const auto& p : parent.pushes) {
+            // Groups the child doesn't care about pass straight through, otherwise both sides must want the provider
+            if (!has_group(child.pushes, p->type) || contains(child.pushes, p)) {
+                merged.push_back(p);
             }
-            for (const auto& p : child.pushes) {
-                auto same_group = [&](const auto& c) { return c->type == p->type; };
-                if (std::none_of(parent.pushes.begin(), parent.pushes.end(), same_group)) {
-                    merged.insert(p);
-                }
+            // If both sides want this group pushed but they share no provider for it at all we can't push
+            else if (!std::any_of(parent.pushes.begin(), parent.pushes.end(), [&](const auto& q) {
+                         return q->type == p->type && contains(child.pushes, q);
+                     })) {
+                return false;
             }
-
-            // If two requirements needed the same group pushed but had no provider in common we can't push at all
-            for (const auto& p : parent.pushes) {
-                auto same_group = [&](const auto& c) { return c->type == p->type; };
-                if (child.pushes.contains(p) || std::any_of(child.pushes.begin(), child.pushes.end(), same_group)) {
-                    if (std::none_of(merged.begin(), merged.end(), same_group)) {
-                        return false;
-                    }
-                }
+        }
+        for (const auto& p : child.pushes) {
+            if (!has_group(parent.pushes, p->type) && !contains(merged, p)) {
+                merged.push_back(p);
             }
+        }
 
         parent.pushes = std::move(merged);
         return true;
@@ -88,12 +89,13 @@ namespace module::extension {
 
     Director::Evaluation Director::evaluate_task(const std::shared_ptr<DirectorTask>& task,
                                                  const std::set<std::type_index>& used) {
-        return evaluate_group(task->type, task, {}, used);
+        return evaluate_group(task->type, task, task, {}, used);
     }
 
     Director::Evaluation Director::evaluate_group(const std::type_index& type,
                                                   const std::shared_ptr<DirectorTask>& authority,
-                                                  const std::set<std::type_index>& visited,
+                                                  const std::shared_ptr<DirectorTask>& pusher,
+                                                  const std::set<std::shared_ptr<Provider>>& visited,
                                                   const std::set<std::type_index>& used) {
 
         // A group that doesn't exist can never run and there is nothing to watch that would change that
@@ -122,7 +124,7 @@ namespace module::extension {
         // can reevaluate, the blocked providers may be earlier in the list and therefore preferred.
         Evaluation best;
         for (const auto& p : options) {
-            Evaluation e = evaluate_provider(p, authority, visited, used);
+            Evaluation e = evaluate_provider(p, authority, pusher, visited, used);
 
             if (e.state == Evaluation::RUNNABLE) {
                 e.watching.insert(best.watching.begin(), best.watching.end());
@@ -143,15 +145,18 @@ namespace module::extension {
 
     Director::Evaluation Director::evaluate_provider(const std::shared_ptr<Provider>& provider,
                                                      const std::shared_ptr<DirectorTask>& authority,
-                                                     std::set<std::type_index> visited,
+                                                     const std::shared_ptr<DirectorTask>& pusher,
+                                                     std::set<std::shared_ptr<Provider>> visited,
                                                      std::set<std::type_index> used) {
 
         Evaluation e;
         e.provider = provider;
         e.watching = {provider->type};
 
-        // This prevents us going in a loop, if we have already looked at this group on this path stop
-        if (!visited.insert(provider->type).second) {
+        // This prevents us going in a loop, if we have already looked at this provider on this path stop.
+        // This is per provider rather than per group so that sibling Causing providers of one group can chain their
+        // when conditions into a ladder, reusing a whole group is caught by the used set below.
+        if (!visited.insert(provider).second) {
             return e;
         }
 
@@ -171,14 +176,23 @@ namespace module::extension {
         e.state = Evaluation::RUNNABLE;
         e.used  = std::move(used);
 
+        // While this provider is the target of a push its own when conditions are waived. Pushing exists to move a
+        // group through when gated providers, and a causing provider usually invalidates its own when the moment it
+        // acts (e.g. Causing LEVEL_2 with When LEVEL_1 stops being at LEVEL_1 once it works). Re-blocking on that
+        // would tear the chain down as it climbs.
+        const bool pushed_here = provider->group.pushed_provider == provider;
+
         // Each unmet when condition needs a causing provider pushed before we could run
         for (const auto& w : provider->when) {
-            if (!w->current) {
-                Evaluation c = evaluate_causing(*w, authority, visited);
+            if (!w->current && !pushed_here) {
+                Evaluation c = evaluate_causing(*w, pusher, visited);
 
                 // Whether or not it can be pushed, we are blocked on our own group's state so watch ourselves.
                 // The when condition's own state monitor will reevaluate us when the state changes.
+                // We also watch the groups that could cause the state for us, so that when a ladder rung runs or a
+                // competing pusher lets go we notice and push the next step.
                 e.watching.insert(provider->type);
+                e.watching.insert(c.watching.begin(), c.watching.end());
 
                 if (c.state == Evaluation::PUSHABLE) {
                     e.state = e.state == Evaluation::BLOCKED ? Evaluation::BLOCKED : Evaluation::PUSHABLE;
@@ -194,7 +208,7 @@ namespace module::extension {
 
         // Each needs relationship requires its group to be available to us
         for (const auto& n : provider->needs) {
-            Evaluation r = evaluate_group(n, authority, visited, e.used);
+            Evaluation r = evaluate_group(n, authority, pusher, visited, e.used);
 
             e.watching.insert(r.watching.begin(), r.watching.end());
 
@@ -231,8 +245,8 @@ namespace module::extension {
     }
 
     Director::Evaluation Director::evaluate_causing(const component::Provider::WhenCondition& when,
-                                                    const std::shared_ptr<DirectorTask>& authority,
-                                                    const std::set<std::type_index>& visited) {
+                                                    const std::shared_ptr<DirectorTask>& pusher,
+                                                    const std::set<std::shared_ptr<Provider>>& visited) {
         Evaluation e;
 
         // Look through every running group for Provide providers whose Causing statement satisfies this when.
@@ -250,14 +264,20 @@ namespace module::extension {
                     continue;
                 }
 
-                // If we can't beat the priority of whoever is already pushing this group we can't push it
-                if (!challenge_priority(group.pushing_task, authority)) {
+                // This group could cause our state so we watch it whether we can use it or not, if it changes
+                // (a ladder rung ran, a competing pusher let go) our situation may have improved
+                e.watching.insert(group.type);
+
+                // If we can't beat the priority of whoever is already pushing this group we can't push it.
+                // This is checked against the task that would hold the push (the original pusher), not the local
+                // authority, otherwise a pusher would block its own chain once its first push is in place.
+                if (!challenge_priority(group.pushing_task, pusher)) {
                     continue;
                 }
 
                 // Evaluate the candidate using the running task's own authority, since if it is pushed it is the
                 // group's own task that will be running on it, not ours
-                Evaluation c = evaluate_provider(p, group.active_task, visited, {});
+                Evaluation c = evaluate_provider(p, group.active_task, pusher, visited, {});
 
                 // A candidate that could run right now is a direct push.
                 // A candidate that is itself pushable needs its own pushes done first, so it contributes those at a
@@ -285,7 +305,11 @@ namespace module::extension {
                     e.pushes     = candidate.pushes;
                 }
                 else if (candidate.push_depth == e.push_depth) {
-                    e.pushes.insert(candidate.pushes.begin(), candidate.pushes.end());
+                    for (const auto& cp : candidate.pushes) {
+                        if (!contains(e.pushes, cp)) {
+                            e.pushes.push_back(cp);
+                        }
+                    }
                 }
             }
         }

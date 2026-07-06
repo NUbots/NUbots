@@ -61,7 +61,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 4> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
@@ -76,7 +76,7 @@ namespace {
                 events.push_back("subtask 1 executed");
             });
             on<Provide<Subtask<2>>, When<Condition<2>, std::equal_to, Condition<2>::ALLOW>>().then([this] {  //
-                events.push_back("subtask 1 executed");
+                events.push_back("subtask 2 executed");
             });
 
 
@@ -117,11 +117,17 @@ namespace {
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
             });
+            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+                // Remove the task, both pushes should be released and the helpers revert to their preferred providers
+                events.push_back("removing task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
+            });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail][.]") {
+TEST_CASE("Test that if multiple things that are needed have when+causings all will run",
+          "[director][when][causing][multiple]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -142,6 +148,8 @@ TEST_CASE("Test that if multiple things that are needed have when+causings all w
         "task executed",
         "subtask 1 executed",
         "subtask 2 executed",
+        // The pushes hold while the pushing task exists, the helpers only revert once it is removed
+        "removing task",
         "helper 1 waiting",
         "helper 2 waiting",
     };

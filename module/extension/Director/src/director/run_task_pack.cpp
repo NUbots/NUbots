@@ -81,15 +81,21 @@ namespace module::extension {
                 const auto& new_task      = tasks[i];
                 auto& current_task        = main_group.active_task;
 
-                // If this is the same task we are already running we skip it
-                if (new_task != current_task) {
+                // If this is the same task on the same provider it is already running, skip it
+                if (new_task != current_task || main_provider != main_group.active_provider) {
+
+                    // When the task is unchanged but the group is redirected to the provider a push asked for, the
+                    // provider is told it is running because it was pushed
+                    const RunReason reason = new_task == current_task && main_group.pushed_provider == main_provider
+                                                 ? RunReason::PUSHED
+                                                 : RunReason::NEW_TASK;
 
                     // If we emitted the last task that went here we can just run and do a replacement
                     // No need to check any lower down providers as they'll already be handled from last time
                     if (current_task != nullptr
                         && providers.at(current_task->requester_id)->type
                                == providers.at(new_task->requester_id)->type) {
-                        run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
+                        run_task_on_provider(new_task, main_provider, reason);
                     }
                     else {
                         if (current_task != nullptr) {
@@ -102,7 +108,7 @@ namespace module::extension {
                         // followed by a reevaluation pass, and a way to clean the reservations up later.
 
                         // Run this specific task using this specific provider
-                        run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
+                        run_task_on_provider(new_task, main_provider, reason);
                     }
                 }
             }
@@ -120,9 +126,64 @@ namespace module::extension {
             return RunResult{RunLevel::OK, used_types};
         }
 
-        // We are able to push others
-        if (run_level <= RunLevel::PUSH) {
-            // TODO Queue everywhere, setup push providers
+        // We couldn't run for real, but if we are allowed to push we can force Causing providers to run for us.
+        // A push only takes hold if it beats the group's current pusher. Priority against the pushed group's own
+        // task is enforced when that group is reevaluated, so a push that is too weak to act now stays recorded
+        // and takes effect if the group's task ever drops below the pusher.
+        if (run_level <= RunLevel::PUSH && std::any_of(evaluations.begin(), evaluations.end(), [](const auto& e) {
+                return e.state == Evaluation::PUSHABLE;
+            })) {
+
+            // The active tasks of the groups whose pushes changed, they need to be reevaluated to act on the push
+            TaskList reevaluation;
+
+            // Tasks are in pack order which is priority order, so higher priority siblings push first
+            for (int i = 0; i < int(tasks.size()); ++i) {
+                const auto& e    = evaluations[i];
+                const auto& task = tasks[i];
+                if (e.state != Evaluation::PUSHABLE) {
+                    continue;
+                }
+
+                // Only push one provider per group, the first as the evaluation found it in preference order
+                std::set<std::type_index> pushed_here;
+                for (const auto& p : e.pushes) {
+                    auto& g = p->group;
+                    if (!pushed_here.insert(p->type).second) {
+                        continue;
+                    }
+
+                    // Higher priority siblings in this pack already pushed this group, leave their push alone
+                    if (g.pushing_task != nullptr
+                        && std::find(tasks.begin(), tasks.begin() + i, g.pushing_task) != tasks.begin() + i) {
+                        continue;
+                    }
+
+                    // Take the push over if we beat the current pusher.
+                    // The group is reevaluated when the push changed, and also when it is not obeying the push yet:
+                    // our authority may have grown since the push was recorded, e.g. the task was re-emitted with a
+                    // higher priority.
+                    if (challenge_priority(g.pushing_task, task)) {
+                        const bool changed = g.pushing_task != task || g.pushed_provider != p;
+                        g.pushing_task     = task;
+                        g.pushed_provider  = p;
+                        if (g.active_task != nullptr && (changed || g.active_provider != p)) {
+                            reevaluation.push_back(g.active_task);
+                        }
+                    }
+                }
+            }
+
+            // Reevaluate the groups we pushed in priority order so they act on their new pushes
+            std::stable_sort(reevaluation.begin(), reevaluation.end(), [this](const auto& a, const auto& b) {
+                // If b wins against a, then we swap
+                return challenge_priority(b, a);
+            });
+            for (const auto& t : reevaluation) {
+                reevaluate_group(providers.at(t->requester_id)->group);
+            }
+
+            return RunResult{RunLevel::PUSH, {}};
         }
 
         // If we reach here, we have already queued into everything that could possibly change our state
@@ -252,11 +313,16 @@ namespace module::extension {
                 return subtask->type == t->type;
             });
 
-            // Update the old tasks priority
-            if (it != tasks.end() && direct_priority(*it, subtask)) {
-                lowered_tasks.push_back(subtask);
-                subtask->priority = (*it)->priority;
-                subtask->optional = (*it)->optional;
+            if (it != tasks.end()) {
+                // The new task instance replaces this subtask, so any pushes it holds move to the new instance
+                transfer_pushes(subtask, *it);
+
+                // Update the old tasks priority
+                if (direct_priority(*it, subtask)) {
+                    lowered_tasks.push_back(subtask);
+                    subtask->priority = (*it)->priority;
+                    subtask->optional = (*it)->optional;
+                }
             }
         }
         for (const auto& t : lowered_tasks) {
@@ -265,6 +331,22 @@ namespace module::extension {
             auto& g = groups.at(t->type);
             if (t == g.active_task) {
                 reevaluate_children(g);
+            }
+
+            // Any group this task pushes lost priority with it, a queued competitor may now beat the push
+            std::vector<std::type_index> pushed_types;
+            const auto& new_task = *std::find_if(tasks.begin(), tasks.end(), [&](const auto& t2) {  //
+                return t->type == t2->type;
+            });
+            for (const auto& [type, g2] : groups) {
+                if (g2.pushing_task == new_task) {
+                    pushed_types.push_back(type);
+                }
+            }
+            for (const auto& type : pushed_types) {
+                if (groups.contains(type) && !groups.at(type).zombie && groups.at(type).active_task != nullptr) {
+                    reevaluate_group(groups.at(type));
+                }
             }
         }
 
@@ -296,10 +378,11 @@ namespace module::extension {
         used.insert(result.used.begin(), result.used.end());
 
         // If we are not running normally now and were previously we might still have active tasks that need
-        // removing
+        // removing. Tasks that stay in the new pack are only stopping execution while they queue (and keep any
+        // pushes they hold), tasks that are dying are gone for good.
         if (result.run_level != RunLevel::OK) {
             for (auto& t : group.subtasks) {
-                remove_task(t);
+                remove_task(t, t->dying);
             }
         }
 

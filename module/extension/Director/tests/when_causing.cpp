@@ -55,7 +55,7 @@ namespace {
 
     std::vector<std::string> events;
 
-    class TestReactor : public TestBase<TestReactor, 4> {
+    class TestReactor : public TestBase<TestReactor, 5> {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : TestBase(std::move(environment)) {
 
@@ -68,11 +68,14 @@ namespace {
                 // Task has been executed!
                 events.push_back("helper waiting");
             });
-            on<Provide<Helper>, Causing<Condition, Condition::ALLOW>>().then([this] {
-                // Task has been executed!
-                events.push_back("helper causing allow");
-                emit(std::make_unique<Condition>(Condition::ALLOW));
-            });
+            on<Provide<Helper>, Causing<Condition, Condition::ALLOW>>().then(
+                [this](const extension::behaviour::RunReason& run_reason) {
+                    // Task has been executed! When it was forced to run by another task it runs as PUSHED
+                    events.push_back(run_reason == extension::behaviour::RunReason::PUSHED
+                                         ? "helper causing allow (pushed)"
+                                         : "helper causing allow");
+                    emit(std::make_unique<Condition>(Condition::ALLOW));
+                });
 
             /**************
              * TEST STEPS *
@@ -97,11 +100,16 @@ namespace {
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
             });
+            on<Trigger<Step<5>>>().then([this] {
+                // Remove the task, the push should be released and the helper reverts to its preferred provider
+                events.push_back("removing task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
+            });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail][.]") {
+TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][when][causing]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -116,8 +124,9 @@ TEST_CASE("Test that the causing keyword can provide what another module needs",
         "emitting blocked condition",
         "emitting task at low priority",
         "emitting task at high priority",
-        "helper causing allow",
+        "helper causing allow (pushed)",
         "task executed",
+        "removing task",
         "helper waiting",
     };
 
