@@ -342,8 +342,8 @@ namespace module::extension {
                 TaskPack pack;
 
                 // Root providers are identified by being declared root and their requester type will be RootProvider<T>
-                pack.provider = p.root ? get_root_provider(p.requester_type)
-                                       : pack.provider = providers.at(p.requester_reaction_id);
+                pack.provider =
+                    p.root ? get_root_provider(p.requester_type) : providers.at(p.requester_reaction_id);
 
                 // Convert the Behaviour tasks to Director tasks
                 for (auto& task : p.tasks) {

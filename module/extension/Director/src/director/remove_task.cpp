@@ -72,13 +72,13 @@ namespace module::extension {
                 group.active_task     = nullptr;
                 group.active_provider = nullptr;
 
-                // Updatae the group information to reflect that this provider group is no longer running
+                // Update the group information to reflect that this provider group is no longer running
                 group.update_data();
 
                 // If anyone was pushing this group they can't push anymore since we are not active
                 if (group.pushing_task != nullptr) {
                     // Reevaluate whoever pushed us
-                    auto pusher = providers.at(group.pushing_task->requester_id)->group;
+                    auto& pusher = providers.at(group.pushing_task->requester_id)->group;
                     reevaluate_group(pusher);
                 }
 
