@@ -11,7 +11,7 @@ namespace {
     // This test is testing for the case when
 
     // Task is emitted
-    // Emit a task and a wiat
+    // Emit a task and a wait
     // Emit the task again
     // Emit a continue from the task
     // At this point parentage is broken
