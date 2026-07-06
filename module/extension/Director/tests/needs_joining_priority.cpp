@@ -91,7 +91,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
-          "[director][needs][joining][priority][!mayfail][.]") {
+          "[director][needs][joining][priority]") {
 
     NUClear::Configuration config;
     config.default_pool_concurrency = 1;
@@ -107,7 +107,13 @@ TEST_CASE("Test that when the needs a higher task is blocked on are released, th
         "emitting very complex task",
         "lowering priority of complex task 1",
         "emitting tasks from very complex task",
+        // Re-emitting complex task 1 to lower its priority re-runs its provider like any other re-emission, and at
+        // the moment it re-runs it still holds SimpleTask: the very complex task's claim on SimpleTask only takes
+        // effect once its subtask pack (emitted by the reaction above) executes. So complex task 1 and its subtask
+        // legitimately run one more time before being displaced.
+        "emitting tasks from complex task 1",
         "emitting tasks from complex task 2",
+        "simple task - complex task 1",
         "simple task - complex task 2",
     };
 
