@@ -69,12 +69,12 @@ namespace module::extension {
                 }
             }
             update(proto_group.subtasks, subtasks);
+        }
 
-            // If we updated the state, emit it
-            if (state_changed) {
-                state_changed = false;
-                emit(std::make_unique<DirectorState>(director_state));
-            }
+        // If any group changed, emit the state once now that every group has been updated
+        if (state_changed) {
+            state_changed = false;
+            emit(std::make_unique<DirectorState>(director_state));
         }
     }
 
