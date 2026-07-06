@@ -189,167 +189,130 @@ namespace module::extension {
         void reevaluate_children(component::ProviderGroup& group);
 
         /**
-         * An object which holds the possible solutions to running a task.
-         * Each solution represents how a single task could be executed. As each provider group can have more than one
-         * provider, there can be more than one option for how to run the task. For each option that we can choose, they
-         * can themselves have their own requirements for provider groups they need to execute. Therefore each of these
-         * requirements is themselves a solution to another task that could be emitted.
+         * The result of evaluating how (and if) a task or provider could be executed right now.
+         *
+         * An evaluation collapses the whole tree of providers, needs, and when/causing relationships below a task
+         * into a single answer:
+         *  - RUNNABLE: everything below is available, `provider` (plus `providers`) can be executed immediately
+         *  - PUSHABLE: it can't run yet, but running the providers in `pushes` would cause the when conditions it
+         *              is missing to be met (see Causing), after which it could run
+         *  - BLOCKED:  it can't run and there is nothing we can push to change that, all we can do is watch the
+         *              groups in `watching` and try again when one of them changes
          */
-        struct Solution {
-
-            /**
-             * A single option for how a provider could be executed
-             */
-            struct Option {
-                /// The state of this provider if it is blocked along with a description of why it is blocked
-                enum State {
-                    /// This option is not blocked to us
-                    OK,
-                    /// This provider is blocked as the task given didn't have enough authority to run it
-                    BLOCKED_PRIORITY,
-                    /// This provider is blocked due to a when condition that cannot be met
-                    BLOCKED_WHEN,
-                    /// This provider is blocked as executing it would cause a loop of providers
-                    BLOCKED_LOOP,
-                };
-
-                /// The provider we are executing in this
-                std::shared_ptr<component::Provider> provider;
-                /// The set of solutions needed for this option to be executed
-                std::vector<Solution> requirements;
-                /// The state of this option, holds if it is blocked and if so why
-                State state;
+        struct Evaluation {
+            /// How far this evaluation got towards being executable
+            enum State {
+                /// Everything needed is available, this can be executed now
+                RUNNABLE,
+                /// Blocked on when conditions, but pushing the providers in `pushes` would unblock it
+                PUSHABLE,
+                /// Cannot run and cannot push, wait for one of `watching` to change
+                BLOCKED,
             };
 
-            /// This value is true if this solution is a pushing solution. Meaning that the main solution cannot run but
-            /// running solution can enable a when condition to be met
-            bool pushed;
-            /// The list of options for this solution
-            std::vector<Option> options;
-        };
-
-        /**
-         * Return the passed provider as an option for a solution along with its requirements.
-         * It will recursively find Solutions for each of the requirements of the provider including its unmet when
-         * conditions and needs relationships.
-         *
-         * @param provider  the provider that we are trying to find a solution for
-         * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of provider groups that have already been visited to prevent loops
-         *
-         * @return
-         */
-        Solution::Option solve_provider(const std::shared_ptr<component::Provider>& provider,
-                                        const std::shared_ptr<component::DirectorTask>& authority,
-                                        std::set<std::type_index> visited);
-
-        /**
-         * Finds the providers that can cause the passed when condition to be met.
-         * It will then recursively find Solutions for each of the requirements of the provider potentially including
-         * more when conditions that need to be met. The final solution for a task could end up with several steps
-         * removed from the original task.
-         *
-         * @param when      the when condition we want to meet by finding causings that will allow a provider to run
-         * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of provider groups that have already been visited to prevent loops
-         *
-         * @return         the set of providers that when run can meet the provided when condition
-         */
-        Solution solve_when(const component::Provider::WhenCondition& when,
-                            const std::shared_ptr<component::DirectorTask>& authority,
-                            const std::set<std::type_index>& visited);
-
-        /**
-         * Creates options for each provider in a provider group specified by the passed type.
-         * This function will check each provider in the group and make an option for it.
-         *
-         * @param type      the type of task we are trying to run
-         * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of provider groups that have already been visited to prevent loops
-         *
-         * @return the set of possible solution options for the provider group of the passed type
-         */
-        Solution solve_group(const std::type_index& type,
-                             const std::shared_ptr<component::DirectorTask>& authority,
-                             const std::set<std::type_index>& visited);
-
-        /**
-         * Finds a solution for a given task. It will start with the provider group for the given task and recursively
-         * work its way down to find all possible solutions. It will use the passed task as an authority token for the
-         * permission checks on providers that it needs to run.
-         *
-         * @param task      the task we are finding solutions for, also used for authority checks
-         *
-         * @return the set of possible solution options for this task
-         */
-        Solution solve_task(const std::shared_ptr<component::DirectorTask>& task);
-
-        /**
-         * Represents a solution that we can run now, i.e. we can run all of the providers in this solution.
-         *
-         * Or if there is no solution that can be run now, it will return that it is blocked and which groups we wanted
-         * to run but weren't able to.
-         */
-        struct OkSolution {
-            OkSolution(const bool& blocked_, std::set<std::type_index>&& blocking_groups_)
-                : blocked(blocked_), blocking_groups(blocking_groups_) {}
-            OkSolution(const bool& blocked_,
-                       const std::shared_ptr<component::Provider>& provider_,
-                       std::vector<std::shared_ptr<component::Provider>>&& requirements_,
-                       std::set<std::type_index>&& used_,
-                       std::set<std::type_index>&& blocking_groups_)
-                : blocked(blocked_)
-                , provider(provider_)
-                , requirements(requirements_)
-                , used(used_)
-                , blocking_groups(blocking_groups_) {}
-
-            /// If this entire path is blocked and unusable
-            bool blocked;
-            /// The main provider that this solution is for
+            /// How far this evaluation got towards being executable
+            State state = BLOCKED;
+            /// The provider that this evaluation would execute
             std::shared_ptr<component::Provider> provider;
-            /// The list of providers that are needed for each of the requirements
-            std::vector<std::shared_ptr<component::Provider>> requirements;
-            /// Which groups have been used in this solution
+            /// The providers needed by the requirements below `provider`, flattened
+            std::vector<std::shared_ptr<component::Provider>> providers;
+            /// The provider groups this evaluation would occupy if executed
             std::set<std::type_index> used;
-            /// Groups which we wanted to use but were blocked to us
-            std::set<std::type_index> blocking_groups;
+            /// The provider groups that stopped us from running, to watch for changes
+            std::set<std::type_index> watching;
+            /// How many pushes removed from being runnable the providers in `pushes` are.
+            /// When multiple when conditions chain through Causing providers (a ladder), only the deepest level can
+            /// be pushed first, then once its state change propagates the next level becomes pushable.
+            int push_depth = 0;
+            /// The providers that need to be pushed before this evaluation can run
+            std::set<std::shared_ptr<component::Provider>> pushes;
         };
 
         /**
-         * Joins all of the requirements of an option into a single OkSolution instance.
+         * Merges the pushes of a child evaluation into its parent.
          *
-         * @param option        the option we are joining the requirements of
-         * @param used_types    the set of provider groups that have been used in this solution
+         * All of a provider's requirements must be met for it to run, so when several of them need pushes only the
+         * deepest ones can be pushed first (the shallower ones can't act until the deeper state changes propagate).
+         * Within a single provider group the pushes are intersected, as only a provider that satisfies every
+         * requirement that wants to push that group will work for all of them.
          *
-         * @return the OkSolution that represents the requirements of the passed option fused together
+         * @param parent the evaluation accumulating the pushes
+         * @param child  the child evaluation whose pushes are being merged in
+         *
+         * @return false if an intersection came up empty meaning the requirements need conflicting pushes
          */
-        OkSolution find_ok_solution(const Solution::Option& option, std::set<std::type_index> used_types);
+        static bool merge_pushes(Evaluation& parent, const Evaluation& child);
 
         /**
-         * Finds the first available option for a solution that we can run now for this solution. Or if there is no
-         * option that can be run now, it will return that it is blocked and which groups we wanted to run but wasn't
-         * able to.
+         * Evaluates how a task could be executed by evaluating the provider group it targets.
          *
-         * @param requirement the requirement that we are searching for options we can execute
-         * @param used_types  types that have already been used higher in the solution tree that are blocked to us
+         * @param task the task to evaluate, also used as the authority token for permission checks
+         * @param used the provider groups already used by earlier tasks in the pack which we cannot reuse
          *
-         * @return An OKSolution instance that represents a solution we can run now or a blocked solution
+         * @return the evaluation for the best way to run this task
          */
-        OkSolution find_ok_solution(const Solution& requirement, const std::set<std::type_index>& used_types);
+        Evaluation evaluate_task(const std::shared_ptr<component::DirectorTask>& task,
+                                 const std::set<std::type_index>& used);
 
         /**
-         * Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution
-         * that can execute, or a blocked solution if none of the solutions can execute.
+         * Evaluates the providers of a group in declaration order and selects the first that can run.
          *
-         * @param solutions  the set of solutions that we are trying to find an OkSolution for
-         * @param used_types types that have already been used higher in the solution tree that are blocked to us
+         * If no provider is runnable but one is pushable the first pushable one is selected instead. The groups that
+         * blocked every rejected provider are accumulated into `watching` so the caller can watch all of them, not
+         * just the ones from the selected provider.
          *
-         * @return a list of OkSolutions that represents the first solution that can execute, or a blocked solution if
-         *         none of the solutions can execute.
+         * If the group is currently being pushed and the authority cannot outrank the pushing task, only the pushed
+         * provider is considered.
+         *
+         * @param type      the provider group to evaluate
+         * @param authority the task used as the authority token for permission checks
+         * @param visited   the provider groups already visited on this path, to prevent loops
+         * @param used      the provider groups already used elsewhere in the solution which we cannot reuse
+         *
+         * @return the evaluation for the best provider in this group
          */
-        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& solutions,
-                                                  const std::set<std::type_index>& used_types);
+        Evaluation evaluate_group(const std::type_index& type,
+                                  const std::shared_ptr<component::DirectorTask>& authority,
+                                  const std::set<std::type_index>& visited,
+                                  const std::set<std::type_index>& used);
+
+        /**
+         * Evaluates a single provider by recursively evaluating its unmet when conditions and its needs.
+         *
+         * The provider is BLOCKED if it would form a loop, if the authority cannot outrank the group's active task,
+         * if its group was already used elsewhere in the solution, or if any of its requirements are BLOCKED.
+         * It is PUSHABLE if all requirements are met except when conditions that could be pushed via Causing
+         * providers. Otherwise it is RUNNABLE.
+         *
+         * @param provider  the provider to evaluate
+         * @param authority the task used as the authority token for permission checks
+         * @param visited   the provider groups already visited on this path, to prevent loops
+         * @param used      the provider groups already used elsewhere in the solution which we cannot reuse
+         *
+         * @return the evaluation for this provider
+         */
+        Evaluation evaluate_provider(const std::shared_ptr<component::Provider>& provider,
+                                     const std::shared_ptr<component::DirectorTask>& authority,
+                                     std::set<std::type_index> visited,
+                                     std::set<std::type_index> used);
+
+        /**
+         * Evaluates which providers could be pushed to make an unmet when condition become true.
+         *
+         * Candidates are Provide providers in currently running groups whose Causing statement satisfies the when
+         * condition. A candidate that is itself pushable (its own when conditions unmet but pushable) contributes
+         * its deeper pushes instead of itself; pushing those first starts the chain. Among viable candidates the
+         * ones fewest pushes away from running are chosen.
+         *
+         * @param when      the unmet when condition to satisfy
+         * @param authority the task used as the authority token for permission checks
+         * @param visited   the provider groups already visited on this path, to prevent loops
+         *
+         * @return a PUSHABLE evaluation holding the providers to push, or BLOCKED if there are no viable candidates
+         */
+        Evaluation evaluate_causing(const component::Provider::WhenCondition& when,
+                                    const std::shared_ptr<component::DirectorTask>& authority,
+                                    const std::set<std::type_index>& visited);
 
         /**
          * Runs the passed task on the passed provider.
@@ -363,7 +326,11 @@ namespace module::extension {
                                   const ::extension::behaviour::RunReason& run_reason);
 
         /**
-         * The level of solution that we can run at
+         * The level of execution that a set of tasks was able to achieve, lower levels are better.
+         *
+         * When passed as an argument to run_tasks it is the worst level that the tasks are allowed to operate at.
+         * For example, if a non optional pack could only achieve PUSH, the optional tasks that follow it are limited
+         * to PUSH as well so they cannot execute for real while their non optional siblings are still queued.
          */
         enum RunLevel {
             /// We can run all our tasks on providers now

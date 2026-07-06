@@ -44,124 +44,89 @@ namespace module::extension {
             return RunResult{RunLevel::OK, {}};
         }
 
-        // Create solutions in a limited scope to ensure they're destroyed before any potential task removal
-        auto run_level_result = [&]() -> RunResult {
-            // Create the solution tree for each of the tasks in the pack
-            // This Solution::Option would be the option that was executed by the parent of this task
-            std::vector<Solution> solutions;
-            solutions.reserve(tasks.size());
-            for (const auto& task : tasks) {
-                solutions.push_back(solve_task(task));
+        // Evaluate how each task in the pack could run, threading the used groups through so that sibling tasks
+        // can't reserve the same provider group twice
+        std::vector<Evaluation> evaluations;
+        evaluations.reserve(tasks.size());
+        std::set<std::type_index> used_types = used;
+        for (const auto& task : tasks) {
+            evaluations.push_back(evaluate_task(task, used_types));
+            used_types.insert(evaluations.back().used.begin(), evaluations.back().used.end());
+        }
+
+        // Watch every group we used and every group that blocked us, if any of them change our evaluation may too
+        for (int i = 0; i < int(tasks.size()); ++i) {
+            const auto& e               = evaluations[i];
+            std::set<std::type_index> w = e.used;
+            w.insert(e.watching.begin(), e.watching.end());
+
+            for (const auto& type : w) {
+                our_group.watch_handles.push_back(groups.at(type).add_watcher(tasks[i]));
             }
+        }
 
-            if (run_level >= RunLevel::OK) {
-                // Try to find an ok solution for the pack
-                auto ok_solutions = find_ok_solutions(solutions, used);
+        // If every task can run right now, run them all
+        if (run_level <= RunLevel::OK && std::all_of(evaluations.begin(), evaluations.end(), [](const auto& e) {
+                return e.state == Evaluation::RUNNABLE;
+            })) {
 
-                // Loop through the solutions and add watches for the things we want
-                for (int i = 0; i < int(tasks.size()); ++i) {
-                    auto& task = tasks[i];
-                    auto& sol  = ok_solutions[i];
+            // Tasks that we have kicked out replacing them with our own tasks
+            // We need to reevaluate the group that emitted these tasks when we are done
+            TaskList displaced_tasks;
 
-                    // Both the types we used and types we were blocked by are things we want to watch
-                    std::set<std::type_index> w = sol.used;
-                    w.insert(sol.blocking_groups.begin(), sol.blocking_groups.end());
+            // Loop through each pair of evaluations and tasks
+            for (int i = 0; i < int(tasks.size()); ++i) {
+                const auto& main_provider = evaluations[i].provider;
+                auto& main_group          = main_provider->group;
+                const auto& new_task      = tasks[i];
+                auto& current_task        = main_group.active_task;
 
-                    for (const auto& type : w) {
-                        our_group.watch_handles.push_back(groups.at(type).add_watcher(task));
+                // If this is the same task we are already running we skip it
+                if (new_task != current_task) {
+
+                    // If we emitted the last task that went here we can just run and do a replacement
+                    // No need to check any lower down providers as they'll already be handled from last time
+                    if (current_task != nullptr
+                        && providers.at(current_task->requester_id)->type
+                               == providers.at(new_task->requester_id)->type) {
+                        run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                     }
-                }
-
-                // Check if any of the solutions are blocked, in which case we can't run
-                bool blocked =
-                    std::any_of(ok_solutions.begin(), ok_solutions.end(), [](const auto& s) { return s.blocked; });
-
-                // If we found an OK solution, run it
-                if (!blocked) {
-
-                    // Tasks that we have kicked out replacing them with our own tasks
-                    // We need to reevaluate the group that emitted these tasks when we are done
-                    TaskList displaced_tasks;
-
-                    // Loop through each pair of solutions and task
-                    for (int i = 0; i < int(tasks.size()); ++i) {
-                        auto& sol                    = ok_solutions[i];
-                        const auto& needed_providers = sol.requirements;
-                        const auto& main_provider    = sol.provider;
-                        auto& main_group             = main_provider->group;
-                        const auto& new_task         = tasks[i];
-                        auto& current_task           = main_group.active_task;
-
-                        // If this is the same task we are already running we skip it
-                        if (new_task != current_task) {
-
-                            // If we emitted the last task that went here we can just run and do a replacement
-                            // No need to check any lower down providers as they'll already be handled from last time
-                            if (current_task != nullptr
-                                && providers.at(current_task->requester_id)->type
-                                       == providers.at(new_task->requester_id)->type) {
-                                run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
-                            }
-                            else {
-                                if (current_task != nullptr) {
-                                    displaced_tasks.push_back(current_task);
-                                }
-
-                                // Loop through all but the first needed provider and set their task to this task
-                                // This is to reserve those tasks for when our child task executes
-                                // We skip this step however if we are a parent of the currently running task
-                                // That can happen if we just change providers within the same group (pushed etc)
-                                for (int j = 1; j < int(needed_providers.size()); ++j) {
-                                    // TODO this happens after displacement?
-                                    // TODO this also influences displacement in that if we displace a parent and a
-                                    // child then we need to reevaluate them differently since challenge priority
-                                    // doesn't work properly anymore
-                                    // TODO probably need to do a displacement pass, followed by a reevaluation pass
-
-                                    // TODO if we do this there is no way to clean it up later currently?
-
-                                    // const auto& provider = needed_providers[j];
-                                    // auto& g              = provider->group;
-
-                                    // TODO if we are a parent of the currently running task, we can skip this
-                                    // TODO what if the provider changes from active provider? (it shouldn't?)
-                                }
-
-                                // Run this specific task using this specific provider
-                                run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
-                            }
+                    else {
+                        if (current_task != nullptr) {
+                            displaced_tasks.push_back(current_task);
                         }
-                    }
 
-                    // Sort the tasks so we reevaluate them in priority order
-                    std::sort(displaced_tasks.begin(), displaced_tasks.end(), [this](const auto& a, const auto& b) {
-                        return !challenge_priority(a, b);
-                    });
+                        // TODO(reservation) the providers below the first in evaluations[i].providers are not
+                        // reserved for this task, so a needs chain can still be stolen between now and when the
+                        // subtasks below this task execute. Reserving them properly needs a displacement pass
+                        // followed by a reevaluation pass, and a way to clean the reservations up later.
 
-                    for (const auto& t : displaced_tasks) {
-                        // Everyone we displaced needs to be reevaluated
-                        reevaluate_group(providers.at(t->requester_id)->group);
+                        // Run this specific task using this specific provider
+                        run_task_on_provider(new_task, main_provider, RunReason::NEW_TASK);
                     }
-
-                    // Accumulate all the used types
-                    std::set<std::type_index> used_types;
-                    for (const auto& s : ok_solutions) {
-                        used_types.insert(s.used.begin(), s.used.end());
-                    }
-                    return RunResult{RunLevel::OK, used_types};
                 }
             }
 
-            // We are able to push others
-            if (run_level >= RunLevel::PUSH) {
-                // TODO Queue everywhere, setup push providers
+            // Sort the tasks so we reevaluate them in priority order
+            std::sort(displaced_tasks.begin(), displaced_tasks.end(), [this](const auto& a, const auto& b) {
+                return !challenge_priority(a, b);
+            });
+
+            for (const auto& t : displaced_tasks) {
+                // Everyone we displaced needs to be reevaluated
+                reevaluate_group(providers.at(t->requester_id)->group);
             }
 
-            // If we reach here, we have already queued into everything that could possibly change our state
-            return RunResult{RunLevel::BLOCKED, {}};
-        }();
+            return RunResult{RunLevel::OK, used_types};
+        }
 
-        return run_level_result;
+        // We are able to push others
+        if (run_level <= RunLevel::PUSH) {
+            // TODO Queue everywhere, setup push providers
+        }
+
+        // If we reach here, we have already queued into everything that could possibly change our state
+        return RunResult{RunLevel::BLOCKED, {}};
     }
 
     void Director::run_task_pack(const TaskPack& pack) {
