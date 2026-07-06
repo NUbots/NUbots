@@ -83,16 +83,15 @@ public:
         // Timeout if the test doesn't complete in time.
         // A watchdog (emit<Scope::DELAY>) cannot be used here because it rides NUClear::clock, which
         // these tests freeze and manipulate via Time Travel, so the deadline would never be reached.
-        // Instead spawn a real thread that waits on a steady_clock timeout and fails the test if the
-        // system has not shut down cleanly by then.
+        // Instead use an on<Always> reaction, which NUClear runs on its own dedicated thread (so this
+        // blocking wait never stalls the default pool), to wait on a steady_clock timeout and fail the
+        // test if the system has not shut down cleanly by then.
         on<Always>().then("Test Timeout", [this, timeout] {
-            if (clean_shutdown) {
-                return;
-            }
             std::unique_lock<std::mutex> lock(timeout_mutex);
-            timeout_cv.wait_for(lock, timeout);
-
-            if (!clean_shutdown) {
+            // Wait until a clean shutdown is signalled or the timeout elapses. Checking clean_shutdown
+            // through the predicate keeps the read under timeout_mutex, avoiding a race with the
+            // on<Shutdown> handler that writes it.
+            if (!timeout_cv.wait_for(lock, timeout, [this] { return clean_shutdown; })) {
                 emit<Scope::INLINE>(std::make_unique<Fail>("Test did not complete successfully"));
                 powerplant.shutdown(true);
             }
@@ -101,6 +100,7 @@ public:
         on<Trigger<Fail>, MainThread>().then([this](const Fail& f) {
             INFO(f.message);
             CHECK(false);
+            powerplant.shutdown(true);
         });
     }
 
