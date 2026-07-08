@@ -57,7 +57,7 @@ def register(command):
         "--encoder",
         "-e",
         default="h264_nvenc",
-        choices=["libx264", "h264_nvenc"],
+        choices=["libx264", "libopenh264", "h264_nvenc"],
         help="The encoder to use when encoding video",
     )
 
