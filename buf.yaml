@@ -1,0 +1,8 @@
+version: v2
+
+modules:
+  - path: nuclear/message/proto
+  - path: shared
+    excludes:
+      - shared/utility/platform/models
+  - path: nusight2/src/shared/messages/proto

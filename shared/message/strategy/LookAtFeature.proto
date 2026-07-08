@@ -32,3 +32,6 @@ message LookAtBall {}
 
 /// Task requesting to look at the goal
 message LookAtGoals {}
+
+/// Task requesting the robot to look around when features are stale
+message LookForStaleFeatures {}

@@ -1,8 +1,16 @@
+import {
+  ScrubberCloseRequest,
+  ScrubberPauseRequest,
+  ScrubberPlayRequest,
+  ScrubberSeekRequest,
+  ScrubberSeekRequest_Response,
+  ScrubberSetPlaybackSpeedRequest,
+  ScrubberSetRepeatRequest,
+} from "@proto/message/eye/Scrubber";
 import { action } from "mobx";
 
-import { message } from "../../../../shared/messages";
-import { RpcResult } from "../../../../shared/messages/rpc_call";
-import { TimestampObject } from "../../../../shared/time/timestamp";
+import { RpcResult } from "../../../../shared/messages/generated/rpc_call";
+import { Timestamp } from "../../../../shared/time/timestamp";
 import { RpcNetwork } from "../../../hooks/use_rpc_controller";
 import { NbsScrubberModel } from "../model";
 import { percentageToTimestamp } from "../util";
@@ -14,7 +22,7 @@ export class NbsScrubberController {
   ) {}
 
   close = () => {
-    this.network.call(new message.eye.ScrubberCloseRequest({ id: this.scrubber.id })).then((result) => {
+    this.network.call(new ScrubberCloseRequest({ id: this.scrubber.id })).then((result) => {
       if (!result.ok) {
         if (result.error.isRemoteError() || result.error.isTimeout()) {
           this.onScrubberError(result.error.message, "Scrubber close error");
@@ -28,16 +36,15 @@ export class NbsScrubberController {
   };
 
   togglePlayback = () => {
-    const request =
-      this.scrubber.playbackState === "playing"
-        ? new message.eye.ScrubberPauseRequest({ id: this.scrubber.id })
-        : new message.eye.ScrubberPlayRequest({ id: this.scrubber.id });
-
-    this.network.call(request).then(this.defaultRpcResultHandler);
+    if (this.scrubber.playbackState === "playing") {
+      this.network.call(new ScrubberPauseRequest({ id: this.scrubber.id })).then(this.defaultRpcResultHandler);
+    } else {
+      this.network.call(new ScrubberPlayRequest({ id: this.scrubber.id })).then(this.defaultRpcResultHandler);
+    }
   };
 
   playFaster = () => {
-    const request = new message.eye.ScrubberSetPlaybackSpeedRequest({
+    const request = new ScrubberSetPlaybackSpeedRequest({
       id: this.scrubber.id,
       playbackSpeed: this.scrubber.playbackSpeed + 1,
     });
@@ -45,7 +52,7 @@ export class NbsScrubberController {
   };
 
   playSlower = () => {
-    const request = new message.eye.ScrubberSetPlaybackSpeedRequest({
+    const request = new ScrubberSetPlaybackSpeedRequest({
       id: this.scrubber.id,
       playbackSpeed: this.scrubber.playbackSpeed - 1,
     });
@@ -53,7 +60,7 @@ export class NbsScrubberController {
   };
 
   toggleRepeat = () => {
-    const request = new message.eye.ScrubberSetRepeatRequest({
+    const request = new ScrubberSetRepeatRequest({
       id: this.scrubber.id,
       repeat: !this.scrubber.playbackRepeat,
     });
@@ -89,7 +96,7 @@ export class NbsScrubberController {
     const timestamp = this.scrubber.current;
 
     // This checks if we need to send another seek request once the current request gets a response
-    const onReceivedResponse = action((result: RpcResult<message.eye.ScrubberSeekRequest.Response>) => {
+    const onReceivedResponse = action((result: RpcResult<ScrubberSeekRequest_Response>) => {
       this.scrubber.isSeeking = false;
 
       // If the scrubber moved since sending the last request, send another for the new time
@@ -100,9 +107,9 @@ export class NbsScrubberController {
       }
     });
 
-    const request = new message.eye.ScrubberSeekRequest({
+    const request = new ScrubberSeekRequest({
       id: this.scrubber.id,
-      timestamp: TimestampObject.fromNanos(timestamp),
+      timestamp: Timestamp.toMessage(timestamp),
     });
     this.network.call(request).then(onReceivedResponse);
   };
