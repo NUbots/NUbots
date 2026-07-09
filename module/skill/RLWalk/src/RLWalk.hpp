@@ -27,8 +27,8 @@ namespace module::skill {
     /// @brief Total observation width. The `actions` (last-action) term feeds back the *full* policy
     /// output — the joint targets plus the phase delta — so it is TOTAL_ACTION_SIZE wide, not
     /// JOINT_POS_SIZE. Layout: gyro, gravity, joint pos, joint vel, last action, command, phase.
-    static constexpr int TOTAL_OBS_SIZE = GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE
-                                          + TOTAL_ACTION_SIZE + COMMAND_SIZE + PHASE_SIZE;  // 72
+    static constexpr int TOTAL_OBS_SIZE = GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + TOTAL_ACTION_SIZE
+                                          + COMMAND_SIZE + PHASE_SIZE;  // 72
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
@@ -64,9 +64,7 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
-            /// @brief Alpha value for the action smoothing filter
-            float action_alpha;
-            /// @brief Servo torque value used for policy-generated commands
+            /// @brief Servo torque value to send to nusense
             float servo_torque;
             /// @brief Servo proportional gain for leg and hip joints
             float leg_servo_gain;
@@ -119,19 +117,10 @@ namespace module::skill {
         /// in the observation (see last_action_raw).
         JointVector last_action;
 
-        /// @brief Previous raw joint action straight from the policy (mjlab order, no scaling, offset,
-        /// rate-clip, or smoothing). This is fed back as the joint part of the last-action observation
-        /// so it matches training, where the `actions` observation echoes env.action_manager.action —
-        /// the unprocessed policy output — rather than the post-processed servo command.
-        JointVector last_action_raw;
-
         /// @brief Last raw gait phase delta emitted by the policy. Fed back as the final element of the
         /// last-action observation, matching the phase_delta action term appended in training. Like the
         /// raw joint actions it is echoed unprocessed, mirroring the raw action stored by the action manager.
         double last_phase_delta = 0.0;
-
-        /// @brief Flag used by the action smoothing filter
-        bool have_last_action = false;
 
         /// @brief Default pose for the robot
         JointVector default_pose;
@@ -141,10 +130,8 @@ namespace module::skill {
         /// @brief Upper per-servo position limits used to clip the final commanded servo positions as a safety measure
         JointVector servo_limit_max;
 
-        /// @brief Last joint positions for velocity estimation
+        /// @brief Last joint positions for inference
         JointVector previous_pose;
-        bool have_previous_pose = false;
-        NUClear::clock::time_point last_update_time;
 
         // Control-loop timing diagnostics params
         /// @brief Whether a previous tick has been sampled (false until the first stable tick).

@@ -97,7 +97,6 @@ namespace module::skill {
             cfg.output_name        = config["model"]["output_name"].as<std::string>();
             cfg.num_joints         = config["model"]["num_joints"].as<int>();
             cfg.obs_size           = config["model"]["obs_size"].as<int>();
-            cfg.action_alpha       = config["model"]["action_alpha"].as<float>();
             cfg.servo_torque       = config["servos"]["torque"].as<float>();
             cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
@@ -113,20 +112,15 @@ namespace module::skill {
             cfg.phase_command_threshold = config["phase_command_threshold"].as<double>();
 
             // Initialize vectors
-            last_action      = JointVector::Zero();
-            last_action_raw  = JointVector::Zero();
-            have_last_action = false;
+            last_action = JointVector::Zero();
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
             // Per-servo position limits (radians, NUbots joint order) used to clip the final
             // commanded servo positions as a safety measure against physically infeasible commands.
-            servo_limit_min    = JointVector(config["servo_limits"]["min"].as<Expression>());
-            servo_limit_max    = JointVector(config["servo_limits"]["max"].as<Expression>());
-            previous_pose      = default_pose;
-            have_previous_pose = false;
-            last_update_time   = NUClear::clock::now();
-
+            servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
+            previous_pose   = default_pose;
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -315,29 +309,13 @@ namespace module::skill {
                         emit(graph("Policy gait phase", policy_phase, inference.phase_delta));
                     }
 
-                    // Filter the raw policy action with an exponential moving average. The mjlab policy
-                    // is trained without a per-step rate limit, so the raw output is used directly here;
-                    // the only safety measure is the final absolute per-servo position-limit clamp below.
-                    JointVector filtered_action_raw = inference_output_raw;
-                    if (have_last_action) {
-                        filtered_action_raw =
-                            cfg.action_alpha * inference_output_raw + (1.0 - cfg.action_alpha) * last_action;
-                    }
+                    // Store the action in mjlab order without scaling or offsets.
+                    last_action = inference_output_raw;
 
-                    // Store the filtered action (mjlab order, no scaling/offset) as the EMA recurrence
-                    // state for the next step's servo smoothing. Separately store the RAW joint output
-                    // and RAW phase delta, which feed back into the next observation so it matches
-                    // training's unprocessed action echo.
-                    last_action      = filtered_action_raw;
-                    last_action_raw  = inference_output_raw;
-                    last_phase_delta = inference.phase_delta;
-                    have_last_action = true;
-
-                    const JointVector filtered_joint_offsets_mj = filtered_action_raw * cfg.nugus_action_scale;
-
+                    const JointVector joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
 
                     // Convert into NUbots order, apply scaling
-                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(filtered_joint_offsets_mj);
+                    JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(joint_offsets_mj);
 
                     // Hack: when the command velocity is below a threshold, zero the offsets so the
                     // robot holds the default pose. This side-steps unwanted policy behaviour at

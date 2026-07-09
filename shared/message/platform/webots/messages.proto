@@ -53,6 +53,13 @@ message AccelerometerMeasurement {
     Vector3 value = 2;  // [m/sˆ2], x-axis, y-axis, z-axis
 }
 
+// NUbots-specific: joint velocity finite-differenced from the position sensor by our nugus_controller.
+// Field number/type must stay in lock-step with messages.proto in the NUWebots repo.
+message MotorVelocityMeasurement {
+    string name  = 1;
+    double value = 2;  // joint angular velocity [rad/s]
+}
+
 message GyroMeasurement {
     string  name  = 1;
     Vector3 value = 2;  // [rad/s], x-axis, y-axis, z-axis
@@ -134,6 +141,9 @@ message SensorMeasurements {
     // Walk optimisation data
     support.optimisation.OptimisationRobotPosition robot_position = 102;
     bool                                           reset_done     = 103;
+    // Joint velocity per servo, finite-differenced from the position sensor by our nugus_controller.
+    // Field 104 (motor_torques) is sent by NUWebots but not consumed here yet.
+    repeated MotorVelocityMeasurement motor_velocities = 105;
 }
 
 message MotorPosition {
