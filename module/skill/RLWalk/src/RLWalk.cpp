@@ -322,8 +322,10 @@ namespace module::skill {
                         emit(graph("Policy gait phase", policy_phase, inference.phase_delta));
                     }
 
-                    // Store the action in mjlab order without scaling or offsets.
-                    last_action = inference_output_raw;
+                    // Store the action in mjlab order without scaling or offsets, for next step's
+                    // last-action observation. Don't forget phase_delta
+                    last_action      = inference_output_raw;
+                    last_phase_delta = inference.phase_delta;
 
                     const JointVector joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
 
