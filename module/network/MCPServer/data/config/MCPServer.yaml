@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Address the MCP Streamable HTTP endpoint binds to
 host: "0.0.0.0"
