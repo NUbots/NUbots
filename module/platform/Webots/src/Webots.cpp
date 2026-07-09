@@ -868,6 +868,13 @@ namespace module::platform {
                 servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
             }
 
+            // Joint velocity, finite-differenced from the position sensor by our nugus_controller.
+            // Keyed by the same position sensor name, so it maps to the same servo as above.
+            for (const auto& velocity : sensor_measurements.motor_velocities) {
+                auto& servo            = translate_servo_id(velocity.name, sensor_data->servo);
+                servo.present_velocity = velocity.value;
+            }
+
             if (!sensor_measurements.accelerometers.empty()) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
