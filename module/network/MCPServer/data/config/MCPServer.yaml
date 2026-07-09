@@ -1,2 +1,16 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Address the MCP Streamable HTTP endpoint binds to
+host: "0.0.0.0"
+
+# Port the MCP endpoint listens on
+port: 8080
+
+# URL path of the MCP endpoint
+path: "/mcp"
+
+# Origin allowlist (DNS-rebinding protection). Empty list rejects every
+# cross-origin request that sets an Origin header.
+allowed_origins:
+  - "https://claude.ai"

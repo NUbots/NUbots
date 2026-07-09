@@ -1,0 +1,520 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "mcp/session.hpp"
+
+#include "mcp/error.hpp"
+#include "mcp/log.hpp"
+#include "mcp/protocol.hpp"
+#include "mcp/transport.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include <chrono>
+#include <exception>
+#include <future>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <system_error>
+#include <utility>
+
+namespace mcp {
+
+using std::chrono::steady_clock;
+
+// =====================================================================
+// Construction / destruction
+// =====================================================================
+
+Session::Session(std::unique_ptr<Transport> transport)
+    : Session(std::move(transport), Options{}) {}
+
+Session::Session(std::unique_ptr<Transport> transport, Options opts)
+    : transport_(std::move(transport)), opts_(opts) {
+    if (!transport_) {
+        throw Error{error_code::internal_error, "Session: transport is null"};
+    }
+    transport_->on_message([this](std::string raw) { this->handle_frame(std::move(raw)); });
+    transport_->on_error([](std::error_code ec) {
+        MCP_LOG_WARN(std::string{"transport error: "} + ec.message());
+    });
+    transport_->on_close([this]() {
+        ErrorObject reason{
+            error_code::internal_error,
+            "transport closed",
+            {},
+        };
+        cancel_all_pending(reason);
+        // Mark the session closed so is_open() flips, and notify any
+        // user code waiting on the close hook (e.g. Server::run).
+        closed_.store(true, std::memory_order_release);
+        ClosedCallback cb;
+        {
+            std::lock_guard<std::mutex> lk(closed_cb_mu_);
+            if (!closed_cb_fired_.exchange(true, std::memory_order_acq_rel)) {
+                cb = on_closed_;
+            }
+        }
+        if (cb) {
+            try { cb(); }
+            catch (const std::exception& e) {
+                MCP_LOG_ERROR(std::string{"on_closed threw: "} + e.what());
+            }
+        }
+    });
+}
+
+Session::~Session() {
+    close();
+}
+
+// =====================================================================
+// Handlers
+// =====================================================================
+
+void Session::set_request_handler(std::string method, RequestHandler h) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    req_handlers_[std::move(method)] = std::move(h);
+}
+
+void Session::set_notification_handler(std::string method, NotificationHandler h) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    note_handlers_[std::move(method)] = std::move(h);
+}
+
+void Session::clear_request_handler(const std::string& method) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    req_handlers_.erase(method);
+}
+
+void Session::clear_notification_handler(const std::string& method) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    note_handlers_.erase(method);
+}
+
+void Session::set_fallback_request_handler(RequestHandler h) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    fallback_req_ = std::move(h);
+}
+
+void Session::set_fallback_notification_handler(NotificationHandler h) {
+    std::lock_guard<std::mutex> lk(handlers_mu_);
+    fallback_note_ = std::move(h);
+}
+
+void Session::set_on_closed(ClosedCallback cb) {
+    std::lock_guard<std::mutex> lk(closed_cb_mu_);
+    on_closed_ = std::move(cb);
+}
+
+// =====================================================================
+// Lifecycle
+// =====================================================================
+
+void Session::start() {
+    bool expected = false;
+    if (!started_.compare_exchange_strong(expected, true,
+                                          std::memory_order_acq_rel)) {
+        return;
+    }
+    closed_.store(false, std::memory_order_release);
+    timeout_thread_ = std::thread([this] { this->timeout_loop(); });
+    transport_->start();
+}
+
+void Session::close() {
+    // Two callers can land here: (1) the application calling close()
+    // directly, (2) the Session destructor. Whichever arrives first
+    // tears down the transport; both must run the rest so that
+    // double-destruction can't leave the timeout thread joinable
+    // (which would call std::terminate from ~thread).
+    bool expected = false;
+    const bool first = closed_.compare_exchange_strong(expected, true,
+                                                       std::memory_order_acq_rel);
+
+    // Cancel pending request promises so any worker awaiting a future
+    // (e.g. server.sample()) unblocks and the worker can return.
+    cancel_all_pending(ErrorObject{
+        error_code::internal_error, "session closed", {},
+    });
+
+    // Wait for in-flight request workers to finish before we close
+    // the transport. Workers may still be writing their final
+    // responses to stdout, and closing the transport here would turn
+    // those writes into "not_connected" errors.
+    {
+        std::unique_lock<std::mutex> lk(workers_mu_);
+        workers_cv_.wait(lk, [this] { return workers_running_ == 0; });
+    }
+
+    // Now actually shut down the transport. Only the first close()
+    // does this; subsequent calls (e.g. from ~Session) ride through
+    // the join-and-fire path the transport already provides.
+    if (first && transport_) transport_->close();
+
+    {
+        std::lock_guard<std::mutex> lk(pending_mu_);
+        timeout_cv_.notify_all();
+    }
+    if (timeout_thread_.joinable()) timeout_thread_.join();
+}
+
+// =====================================================================
+// Send paths
+// =====================================================================
+
+RequestId Session::next_id() noexcept {
+    return RequestId{next_id_.fetch_add(1, std::memory_order_relaxed)};
+}
+
+std::future<nlohmann::json>
+Session::send_request(std::string method,
+                      nlohmann::json params,
+                      std::chrono::milliseconds timeout) {
+    return send_request_for<nlohmann::json>(
+        std::move(method), std::move(params),
+        [](nlohmann::json j) { return j; }, timeout);
+}
+
+std::future<void>
+Session::send_request_void(std::string method,
+                           nlohmann::json params,
+                           std::chrono::milliseconds timeout) {
+    auto pr  = std::make_shared<std::promise<void>>();
+    auto fut = pr->get_future();
+    Pending pending;
+    pending.resolve = [pr](nlohmann::json) { pr->set_value(); };
+    pending.reject  = [pr](std::exception_ptr e) { pr->set_exception(e); };
+    register_pending(std::move(method), std::move(params),
+                     std::move(pending), timeout);
+    return fut;
+}
+
+void Session::register_pending(std::string    method,
+                               nlohmann::json params,
+                               Pending        pending,
+                               std::chrono::milliseconds timeout) {
+    auto id = next_id();
+
+    JsonRpcRequest req;
+    req.id     = id;
+    req.method = std::move(method);
+    if (!params.is_null()) req.params = std::move(params);
+
+    const auto effective_timeout =
+        timeout == std::chrono::milliseconds{0} ? opts_.default_request_timeout : timeout;
+    pending.deadline = steady_clock::now() + effective_timeout;
+
+    // Keep a copy of the reject callback for the error paths below, which
+    // must fire *after* releasing pending_mu_ (resolving the caller's
+    // future can wake a waiter that re-enters the Session).
+    auto reject = pending.reject;
+
+    enum class Parked { kOk, kClosed, kDuplicate };
+    Parked state;
+    {
+        std::lock_guard<std::mutex> lk(pending_mu_);
+        if (closed_.load(std::memory_order_acquire)) {
+            // Don't park a new entry on a closed session — its future
+            // would never resolve, since cancel_all_pending already
+            // drained the map.
+            state = Parked::kClosed;
+        } else {
+            auto [it, inserted] = pending_.try_emplace(id, std::move(pending));
+            (void)it;
+            if (inserted) {
+                state = Parked::kOk;
+                timeout_cv_.notify_all();
+            } else {
+                // The id space is monotonic per Session, so this is a
+                // sign of corruption (e.g. a Session reused across
+                // logical connections). Fail fast.
+                state = Parked::kDuplicate;
+            }
+        }
+    }
+
+    if (state == Parked::kClosed) {
+        reject(std::make_exception_ptr(
+            Error{error_code::internal_error, "session closed"}));
+        return;
+    }
+    if (state == Parked::kDuplicate) {
+        reject(std::make_exception_ptr(
+            Error{error_code::internal_error,
+                  "internal: duplicate request id " + id.canonical()}));
+        return;
+    }
+
+    try {
+        send_message(req);
+    } catch (...) {
+        // The transport refused. Pull the pending entry back out and
+        // surface the error through its future — unless a response or
+        // timeout raced us to it first.
+        Pending parked;
+        bool found = false;
+        {
+            std::lock_guard<std::mutex> lk(pending_mu_);
+            auto it = pending_.find(id);
+            if (it != pending_.end()) {
+                parked = std::move(it->second);
+                pending_.erase(it);
+                found = true;
+            }
+        }
+        if (found && parked.reject) parked.reject(std::current_exception());
+    }
+}
+
+std::error_code
+Session::send_notification(std::string method, nlohmann::json params) {
+    JsonRpcNotification note;
+    note.method = std::move(method);
+    if (!params.is_null()) note.params = std::move(params);
+    try {
+        send_message(note);
+    } catch (const std::system_error& e) {
+        return e.code();
+    } catch (...) {
+        return std::make_error_code(std::errc::io_error);
+    }
+    return {};
+}
+
+void Session::send_message(const JsonRpcMessage& msg) {
+    const auto j   = serialize_message(msg);
+    const auto str = j.dump();
+    auto ec = transport_->send(str);
+    if (ec) {
+        throw std::system_error{ec, "Session::send_message: transport->send failed"};
+    }
+}
+
+// =====================================================================
+// Inbound dispatch
+// =====================================================================
+
+void Session::handle_frame(std::string raw) {
+    nlohmann::json j;
+    try {
+        j = nlohmann::json::parse(raw);
+    } catch (const nlohmann::json::exception& e) {
+        MCP_LOG_WARN(std::string{"rejecting non-JSON frame: "} + e.what());
+        return;  // JSON-RPC says we send a parse error response, but per the
+                 // spec we cannot when there is no id; simplest is to drop.
+    }
+
+    JsonRpcMessage msg;
+    try {
+        msg = parse_message(j);
+    } catch (const Error& e) {
+        MCP_LOG_WARN(std::string{"rejecting malformed JSON-RPC frame: "} + e.what());
+        return;
+    } catch (const nlohmann::json::exception& e) {
+        // A from_json deeper in parse_message can throw a json type_error
+        // or out_of_range when fields are mistyped or missing. Treat
+        // those identically to a parse error and drop the frame.
+        MCP_LOG_WARN(std::string{"rejecting malformed JSON-RPC frame: "} + e.what());
+        return;
+    }
+
+    std::visit([&](auto&& m) {
+        using T = std::decay_t<decltype(m)>;
+        if constexpr (std::is_same_v<T, JsonRpcRequest>) {
+            // Dispatch requests to a detached worker so user handlers
+            // can themselves issue further requests on this Session
+            // (e.g. server.sample() inside a tool handler) without
+            // deadlocking the read thread.
+            //
+            // close() waits for `workers_running_` to drain before
+            // returning so the dispatched worker can never outlive
+            // members it touches (transport_, handlers).
+            {
+                std::lock_guard<std::mutex> lk(workers_mu_);
+                ++workers_running_;
+            }
+            std::thread([this, req = std::move(m)]() mutable {
+                handle_request(std::move(req));
+                // Decrement and notify under the same lock. If the
+                // unlock happened first, close() could observe
+                // workers_running_==0, return, and destroy the cv
+                // before this thread reaches notify_all — TSan
+                // catches that race against pthread_cond_destroy.
+                std::lock_guard<std::mutex> lk(workers_mu_);
+                --workers_running_;
+                workers_cv_.notify_all();
+            }).detach();
+        } else if constexpr (std::is_same_v<T, JsonRpcNotification>) {
+            handle_notification(std::move(m));
+        } else {
+            handle_response(std::move(m));
+        }
+    }, msg);
+}
+
+void Session::handle_request(JsonRpcRequest req) {
+    RequestHandler handler;
+    {
+        std::lock_guard<std::mutex> lk(handlers_mu_);
+        auto it = req_handlers_.find(req.method);
+        if (it != req_handlers_.end()) handler = it->second;
+        else                            handler = fallback_req_;
+    }
+
+    JsonRpcResponse resp;
+    resp.id = req.id;
+
+    if (!handler) {
+        resp.outcome = ErrorObject{
+            error_code::method_not_found,
+            "method not found: " + req.method,
+            {},
+        };
+    } else {
+        try {
+            const auto& params_in = req.params.value_or(nullptr);
+            resp.outcome = handler(params_in);
+        } catch (const Error& e) {
+            resp.outcome = e.object();
+        } catch (const nlohmann::json::exception& e) {
+            // A nlohmann json type/range error escaping a handler almost
+            // always means the inbound params were the wrong shape;
+            // map to invalid_params rather than internal_error so
+            // clients can fix their request.
+            resp.outcome = ErrorObject{
+                error_code::invalid_params,
+                std::string{"invalid params: "} + e.what(),
+                {},
+            };
+        } catch (const std::exception& e) {
+            resp.outcome = ErrorObject{
+                error_code::internal_error,
+                std::string{"handler threw: "} + e.what(),
+                {},
+            };
+        } catch (...) {
+            resp.outcome = ErrorObject{
+                error_code::internal_error,
+                "handler threw a non-std exception",
+                {},
+            };
+        }
+    }
+
+    try {
+        send_message(resp);
+    } catch (const std::exception& e) {
+        MCP_LOG_ERROR(std::string{"failed to send response: "} + e.what());
+    }
+}
+
+void Session::handle_notification(JsonRpcNotification note) {
+    NotificationHandler handler;
+    {
+        std::lock_guard<std::mutex> lk(handlers_mu_);
+        auto it = note_handlers_.find(note.method);
+        if (it != note_handlers_.end()) handler = it->second;
+        else                             handler = fallback_note_;
+    }
+    if (!handler) return;
+    try {
+        handler(note.params.value_or(nullptr));
+    } catch (const std::exception& e) {
+        MCP_LOG_ERROR(std::string{"notification handler threw: "} + e.what());
+    } catch (...) {
+        MCP_LOG_ERROR("notification handler threw a non-std exception");
+    }
+}
+
+void Session::handle_response(JsonRpcResponse resp) {
+    if (!resp.id.has_value()) {
+        // Per spec, an error response with no id can occur on parse errors
+        // we issued; nothing to correlate against.
+        if (resp.is_error()) {
+            MCP_LOG_WARN(std::string{"received untargeted error: "} + resp.error().message);
+        }
+        return;
+    }
+
+    Pending pending;
+    {
+        std::lock_guard<std::mutex> lk(pending_mu_);
+        auto it = pending_.find(*resp.id);
+        if (it == pending_.end()) {
+            MCP_LOG_WARN("received response for unknown id: " + resp.id->canonical());
+            return;
+        }
+        pending = std::move(it->second);
+        pending_.erase(it);
+        timeout_cv_.notify_all();
+    }
+
+    // Resolve outside pending_mu_ (released above): the conversion +
+    // promise resolution can wake a waiter that re-enters the Session.
+    if (resp.is_success()) {
+        if (pending.resolve) pending.resolve(std::move(resp).result());
+    } else {
+        if (pending.reject)
+            pending.reject(std::make_exception_ptr(Error{resp.error()}));
+    }
+}
+
+// =====================================================================
+// Timeout
+// =====================================================================
+
+void Session::timeout_loop() {
+    std::unique_lock<std::mutex> lk(pending_mu_);
+    while (!closed_.load(std::memory_order_acquire)) {
+        if (pending_.empty()) {
+            timeout_cv_.wait(lk);
+            continue;
+        }
+
+        auto soonest = steady_clock::time_point::max();
+        for (const auto& [id, p] : pending_) {
+            if (p.deadline < soonest) soonest = p.deadline;
+        }
+        if (timeout_cv_.wait_until(lk, soonest) == std::cv_status::timeout) {
+            const auto now = steady_clock::now();
+            // Snapshot the expired entries under the lock, drop them
+            // out of the pending map, then release the lock before
+            // rejecting. Resolving a future can run user continuations,
+            // which we never want to do while holding our own mutex;
+            // snapshotting into a local vector also means we don't have
+            // to keep an iterator valid across cancel_all_pending
+            // swapping the map under us.
+            std::vector<std::function<void(std::exception_ptr)>> expired;
+            for (auto it = pending_.begin(); it != pending_.end(); ) {
+                if (it->second.deadline <= now) {
+                    if (it->second.reject)
+                        expired.push_back(std::move(it->second.reject));
+                    it = pending_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            lk.unlock();
+            for (auto& reject : expired) {
+                reject(std::make_exception_ptr(
+                    Error{error_code::internal_error, "request timed out"}));
+            }
+            lk.lock();
+        }
+    }
+}
+
+void Session::cancel_all_pending(const ErrorObject& reason) {
+    std::unordered_map<RequestId, Pending> drained;
+    {
+        std::lock_guard<std::mutex> lk(pending_mu_);
+        drained.swap(pending_);
+        timeout_cv_.notify_all();
+    }
+    for (auto& [id, p] : drained) {
+        (void)id;
+        if (p.reject) p.reject(std::make_exception_ptr(Error{reason}));
+    }
+}
+
+}  // namespace mcp

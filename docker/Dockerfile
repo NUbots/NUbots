@@ -472,3 +472,5 @@ RUN install -d -m 0755 /home/nubots/NUbots \
 ENV CCACHE_DIR=/home/nubots/build/ccache
 
 WORKDIR /home/nubots/NUbots
+
+EXPOSE 8080
