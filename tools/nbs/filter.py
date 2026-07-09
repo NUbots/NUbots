@@ -53,7 +53,13 @@ def register(command):
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to filter")
     command.add_argument("-k", "--keep", action="append", help="A message pattern to keep")
     command.add_argument("-r", "--remove", action="append", help="A message pattern to remove")
-    command.add_argument("-o", "--output", help="The output file to store the filtered nbs in")
+    command.add_argument(
+        "-o",
+        "--output",
+        help="The output file to store the filtered nbs in. If a directory is given, each "
+        "input file is filtered separately into that directory, keeping its original filename."
+        " Default is a 'filtered' subfolder.",
+    )
 
 
 def _filter_to(input_files, output, keep, remove):
@@ -101,8 +107,15 @@ def run(files, keep, remove, output, **kwargs):
         exit(1)
 
     if output is not None:
-        # Explicit output path: merge all inputs into one output
-        _filter_to(nbs_files, output, keep, remove)
+        if output.endswith(os.sep) or output.endswith("/") or os.path.isdir(output):
+            # Directory output: filter each input file separately, keeping its name
+            os.makedirs(output, exist_ok=True)
+            for f in nbs_files:
+                out_path = os.path.join(output, os.path.basename(f))
+                _filter_to([f], out_path, keep, remove)
+        else:
+            # Explicit output file path: merge all inputs into one output
+            _filter_to(nbs_files, output, keep, remove)
     else:
         # Default: write each input to a "filtered" subfolder alongside it
         for f in nbs_files:

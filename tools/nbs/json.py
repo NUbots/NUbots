@@ -41,8 +41,8 @@ def register(command):
     command.add_argument(
         "--keep-zeros",
         action="store_true",
-        default=False,
-        help="Include fields whose value is zero/default in the JSON output (proto3 normally omits them)",
+        default=True,
+        help="Include fields whose value is zero in the JSON output (true by default)",
     )
 
 
