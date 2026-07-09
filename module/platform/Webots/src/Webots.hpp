@@ -102,6 +102,7 @@ namespace module::platform {
         /// @brief The maximum velocity allowed by the NUgus motors in webots
         double max_velocity_mx64;
         double max_velocity_mx106;
+        double max_velocity_xh540;
 
         /// @brief Current state of a servo
         struct ServoState {
