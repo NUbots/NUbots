@@ -270,6 +270,14 @@ namespace module::platform {
                 max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
                 max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
                 max_velocity_xh540   = config["max_velocity_xh540"].as<double>();
+                torque_constant_mx64  = config["torque_constant_mx64"].as<double>();
+                torque_constant_mx106 = config["torque_constant_mx106"].as<double>();
+                torque_constant_xh540 = config["torque_constant_xh540"].as<double>();
+                open_circuit_voltage   = config["open_circuit_voltage"].as<double>();
+                battery_resistance     = config["battery_resistance"].as<double>();
+                local_resistance_mx64  = config["local_resistance_mx64"].as<double>();
+                local_resistance_mx106 = config["local_resistance_mx106"].as<double>();
+                local_resistance_xh540 = config["local_resistance_xh540"].as<double>();
                 max_fsr_value        = config["max_fsr_value"].as<float>();
 
                 log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -873,6 +881,48 @@ namespace module::platform {
             for (const auto& velocity : sensor_measurements.motor_velocities) {
                 auto& servo            = translate_servo_id(velocity.name, sensor_data->servo);
                 servo.present_velocity = velocity.value;
+            }
+
+            // Per-servo constants by motor class, matching the mjlab training model
+            // (bus_voltage.py / _NUGUS_CURRENT_KT). Kt [N.m/A] recovers current from torque;
+            // R_local [ohm] is the servo's own daisy-chain drop (from sys id: XH540 ~0.22,
+            // MX106 ~0.10, MX64 ~0.02 -- the arms are barely excited so their value is near zero).
+            const auto is_hip_yaw = [](const uint32_t id) {
+                return id == uint32_t(ServoID::R_HIP_YAW) || id == uint32_t(ServoID::L_HIP_YAW);
+            };
+            const auto is_leg = [](const uint32_t id) {
+                return id >= uint32_t(ServoID::R_HIP_ROLL) && id <= uint32_t(ServoID::L_ANKLE_ROLL);
+            };
+            const auto kt_for = [&](const uint32_t id) -> double {
+                return is_hip_yaw(id) ? torque_constant_mx106 : is_leg(id) ? torque_constant_xh540 : torque_constant_mx64;
+            };
+            const auto rlocal_for = [&](const uint32_t id) -> double {
+                return is_hip_yaw(id) ? local_resistance_mx106
+                                      : is_leg(id) ? local_resistance_xh540 : local_resistance_mx64;
+            };
+
+            // Motor current: I = torque / Kt (signed, mirroring the Dynamixel present-current
+            // register). Guard against a non-finite torque feedback (Webots can report NaN on the
+            // first step or a stalled joint), which would otherwise poison the policy observation
+            // and produce NaN servo commands. Accumulate the total fleet draw for the sag below.
+            double total_current = 0.0;
+            for (const auto& torque : sensor_measurements.motor_torques) {
+                auto& servo          = translate_servo_id(torque.name, sensor_data->servo);
+                const double kt      = kt_for(sensor_name_to_id[torque.name]);
+                const double current = (std::isfinite(torque.value) && kt != 0.0) ? torque.value / kt : 0.0;
+                servo.present_current = static_cast<float>(current);
+                total_current += std::abs(current);
+            }
+
+            // Bus voltage. Webots does not model supply voltage, so reproduce the shared-bus battery
+            // model from mjlab training (bus_voltage.py): each servo sags with the total fleet draw
+            // AND its own daisy-chain drop, so per-servo voltages differ like the currents do:
+            //   V_i = V_oc - R_src * sum(|I|) - R_local_i * |I_i|   (~1.5 V shared drop at ~22 A)
+            const double v_shared = open_circuit_voltage - battery_resistance * total_current;
+            for (const auto& torque : sensor_measurements.motor_torques) {
+                auto& servo        = translate_servo_id(torque.name, sensor_data->servo);
+                const double abs_i = std::abs(servo.present_current);  // finite (guarded above)
+                servo.voltage      = static_cast<float>(v_shared - rlocal_for(sensor_name_to_id[torque.name]) * abs_i);
             }
 
             if (!sensor_measurements.accelerometers.empty()) {

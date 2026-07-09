@@ -51,6 +51,8 @@ namespace module::skill {
     struct JointStateVectors {
         Eigen::Matrix<double, 20, 1> position;
         Eigen::Matrix<double, 20, 1> velocity;
+        Eigen::Matrix<double, 20, 1> load;
+        Eigen::Matrix<double, 20, 1> voltage;
     };
 
     inline JointStateVectors sensors_to_joint_state(const std::unique_ptr<Sensors>& sensors) {
@@ -58,6 +60,8 @@ namespace module::skill {
         for (const auto& [index, servo_id] : joint_map) {
             state.position(index, 0) = sensors->servo.at(servo_id).present_position;
             state.velocity(index, 0) = sensors->servo.at(servo_id).present_velocity;
+            state.load(index, 0)     = sensors->servo.at(servo_id).load;
+            state.voltage(index, 0)  = sensors->servo.at(servo_id).voltage;
         }
         return state;
     }
@@ -165,7 +169,7 @@ namespace module::skill {
             // performs on episode reset.
             policy_phase     = 0.0;
             last_phase_delta = 0.0;
-            last_action_raw  = JointVector::Zero();
+            last_action      = JointVector::Zero();  // TODO: is this needed here as well as in on<configuration> ??
             // If debugging, reset the loop-timing diagnostics so each walk is measured from a clean baseline
             if (log_level <= DEBUG) {
                 reset_loop_timing();
@@ -249,7 +253,7 @@ namespace module::skill {
                     idx += JOINT_POS_SIZE;
 
                     // Last action (21) (includes the new phase delta)
-                    observation.segment<JOINT_POS_SIZE>(idx) = last_action_raw;
+                    observation.segment<JOINT_POS_SIZE>(idx) = last_action;
                     idx += JOINT_POS_SIZE;
                     observation(idx) = last_phase_delta;
                     idx += PHASE_DELTA_SIZE;
@@ -281,6 +285,15 @@ namespace module::skill {
                             ? Eigen::Vector2d(std::sin(2 * M_PI * policy_phase), std::cos(2 * M_PI * policy_phase))
                             : Eigen::Vector2d::Zero();
                     idx += PHASE_SIZE;
+
+                    // Joint currents
+                    observation.segment<JOINT_POS_SIZE>(idx) = joint_state.load;
+                    idx += JOINT_POS_SIZE;
+
+                    // Joint voltages
+                    observation.segment<JOINT_POS_SIZE>(idx) = joint_state.voltage;
+                    idx += JOINT_POS_SIZE;
+
                     // Count the control step for the loop-timing diagnostics.
                     ++control_step;
 

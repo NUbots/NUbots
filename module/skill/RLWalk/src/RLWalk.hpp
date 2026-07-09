@@ -26,9 +26,9 @@ namespace module::skill {
 
     /// @brief Total observation width. The `actions` (last-action) term feeds back the *full* policy
     /// output — the joint targets plus the phase delta — so it is TOTAL_ACTION_SIZE wide, not
-    /// JOINT_POS_SIZE. Layout: gyro, gravity, joint pos, joint vel, last action, command, phase.
+    /// JOINT_POS_SIZE. Layout: gyro, gravity, joint pos, joint vel, last action, command, phase, current, voltage.
     static constexpr int TOTAL_OBS_SIZE = GYRO_SIZE + GRAVITY_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE + TOTAL_ACTION_SIZE
-                                          + COMMAND_SIZE + PHASE_SIZE;  // 72
+                                          + COMMAND_SIZE + PHASE_SIZE + JOINT_POS_SIZE + JOINT_POS_SIZE;  // 112
 
     /// @brief Fixed-size observation vector type
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;

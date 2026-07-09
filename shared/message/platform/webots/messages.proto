@@ -60,6 +60,13 @@ message MotorVelocityMeasurement {
     double value = 2;  // joint angular velocity [rad/s]
 }
 
+// Internal motor torque feedback, reported per servo by our nugus_controller (getTorqueFeedback).
+// Field number/type must stay in lock-step with messages.proto in the NUWebots repo.
+message MotorTorqueMeasurement {
+    string name  = 1;
+    double value = 2;  // internal motor torque feedback [N.m]
+}
+
 message GyroMeasurement {
     string  name  = 1;
     Vector3 value = 2;  // [rad/s], x-axis, y-axis, z-axis
@@ -141,8 +148,9 @@ message SensorMeasurements {
     // Walk optimisation data
     support.optimisation.OptimisationRobotPosition robot_position = 102;
     bool                                           reset_done     = 103;
+    // Internal motor torque feedback per servo (used to derive present_current in simulation).
+    repeated MotorTorqueMeasurement motor_torques = 104;
     // Joint velocity per servo, finite-differenced from the position sensor by our nugus_controller.
-    // Field 104 (motor_torques) is sent by NUWebots but not consumed here yet.
     repeated MotorVelocityMeasurement motor_velocities = 105;
 }
 

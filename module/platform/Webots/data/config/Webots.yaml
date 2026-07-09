@@ -9,6 +9,24 @@ max_fsr_value: 65.535
 max_velocity_mx64: 8.17
 max_velocity_mx106: 4.87
 max_velocity_xh540: 5.40
+# Motor torque constants Kt [N.m/A] used to recover present_current = torque / Kt (Webots has
+# no current sensor). These must match the mjlab training model (bus_voltage.py / _NUGUS_CURRENT_KT):
+# arms/head 1.5, all legs (hip yaw + XH540) 2.68 -- the electrical constant, not the geared spec.
+torque_constant_mx64: 1.5
+torque_constant_mx106: 2.68
+torque_constant_xh540: 2.68
+# Shared-bus battery model, mirroring the mjlab training model (bus_voltage.py). Per servo:
+#   V_i = open_circuit_voltage - battery_resistance * sum(|I|) - local_resistance * |I_i|
+# The shared term sags every servo together with total draw (~1.5 V at ~22 A); the local term
+# is each servo's own daisy-chain drop, so voltages differ per servo like the current does.
+open_circuit_voltage: 15.0      # V_oc; training nominal 14.8, DR U(12.5, 16.5)
+battery_resistance: 0.069       # R_src [ohm], shared bus; training default 0.069, DR U(0.04, 0.15)
+# R_local [ohm], each servo's own daisy-chain drop, per motor class. Fitted from sys-id data
+# (V_i = V_oc - R_src*sum(|I|) - R_local*|I_i|). XH540 anchored by the well-excited knees; MX106
+# weakly excited; MX64 (arms/head) barely draws current so its value is ~0 and unreliable.
+local_resistance_mx64: 0.02
+local_resistance_mx106: 0.10
+local_resistance_xh540: 0.22
 # Requested time step between sensors
 time_step: 8
 # Minimum time step allowed between camera sensors

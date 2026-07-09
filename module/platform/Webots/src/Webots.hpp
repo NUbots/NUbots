@@ -103,6 +103,23 @@ namespace module::platform {
         double max_velocity_mx64;
         double max_velocity_mx106;
         double max_velocity_xh540;
+        /// @brief Motor torque constants Kt [N.m/A]. Webots has no current sensor, so servo
+        /// present_current is derived from the torque feedback: I = torque / Kt. Values match the
+        /// mjlab training model (arms/head 1.5, all legs 2.68). Defaulted so an unset config can
+        /// never divide by zero before the Configuration reaction runs.
+        double torque_constant_mx64  = 1.5;
+        double torque_constant_mx106 = 2.68;
+        double torque_constant_xh540 = 2.68;
+        /// @brief Shared-bus battery model (Webots models neither current nor voltage), mirroring
+        /// the mjlab training model. Per servo: V_i = open_circuit_voltage - battery_resistance *
+        /// sum(|I|) - local_resistance_<class> * |I_i|. The shared term sags all servos with total
+        /// draw; the per-class local term is each servo's own daisy-chain drop (from sys id), so
+        /// per-servo voltages differ.
+        double open_circuit_voltage    = 15.0;
+        double battery_resistance      = 0.069;
+        double local_resistance_mx64   = 0.02;
+        double local_resistance_mx106  = 0.10;
+        double local_resistance_xh540  = 0.22;
 
         /// @brief Current state of a servo
         struct ServoState {
