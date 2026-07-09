@@ -269,6 +269,7 @@ namespace module::platform {
                 min_sensor_time_step = config["min_sensor_time_step"].as<int>();
                 max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
                 max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+                max_velocity_xh540   = config["max_velocity_xh540"].as<double>();
                 max_fsr_value        = config["max_fsr_value"].as<float>();
 
                 log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -393,10 +394,16 @@ namespace module::platform {
                 // fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
                 double max_velocity = 0.0;
-                if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
+                if (target.id == ServoID::R_HIP_YAW || target.id == ServoID::L_HIP_YAW) {
+                    // Hip yaw is the only MX106 servo
                     max_velocity = max_velocity_mx106;
                 }
+                else if (target.id >= ServoID::R_HIP_ROLL && target.id <= ServoID::L_ANKLE_ROLL) {
+                    // The rest of the legs (hip roll/pitch, knee, ankle pitch/roll) are XH540
+                    max_velocity = max_velocity_xh540;
+                }
                 else {
+                    // Arms and head (shoulders, elbows, neck yaw, head pitch) are MX64
                     max_velocity = max_velocity_mx64;
                 }
                 double speed = duration.count() > 0
