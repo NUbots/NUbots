@@ -38,6 +38,10 @@ obstacle_radius: 0.9
 # Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
 goal_width_margin: 0.2
 
+# Safety margin subtracted from each side of the goal mouth when choosing where to aim within the goal,
+# so the aim point (and therefore the kick) stays clear of the posts
+goal_aim_margin: 0.25
+
 # Error thresholds for determining when robot is ready to kick the ball
 # X error threshold (parallel to ball-target vector) - robot should be behind ball
 err_x_ok: 0.05

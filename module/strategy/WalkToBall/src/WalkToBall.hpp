@@ -72,7 +72,7 @@ namespace module::strategy {
             /// @brief Maximum sideways offset when approaching from in front of the ball
             double max_offset_y = 0.0;
 
-            /// @brief Radius of circle around ball where an opponent robot is considered to be in front of the ball
+            /// @brief Radius of circle around ball where a robot is considered to be in front of the ball
             double infront_of_ball_radius = 0.0;
             /// @brief Distance in front of the ball to check for obstacles
             double infront_check_distance = 0.0;
@@ -82,6 +82,10 @@ namespace module::strategy {
 
             /// @brief Margin to subtract from goal width when calculating goal boundaries for obstacle avoidance
             double goal_width_margin = 0.0;
+
+            /// @brief Safety margin subtracted from each side of the goal mouth when choosing an aim point,
+            /// so the chosen target stays clear of the posts
+            double goal_aim_margin = 0.0;
 
             /// @brief Acceptable error threshold in x direction (parallel to ball-target vector) for kicking
             double err_x_ok = 0.0;
@@ -97,6 +101,19 @@ namespace module::strategy {
         std::optional<Eigen::Vector3d> dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,
                                                              const Eigen::Vector3d& rBFf,
                                                              const Eigen::Vector3d& rGFf);
+
+        /// @brief Choose an aim point within the goal mouth that requires the least heading change to score.
+        ///
+        /// Treats the goal as a region rather than a single point. The reachable kick directions form a cone:
+        /// the bearings from the ball that land between the posts. The aim point is the bearing in that cone
+        /// closest to the robot's current heading (a 1D projection onto the allowed set), so the robot needs
+        /// the smallest possible turn to line up the kick. As the ball moves away from the goal the cone
+        /// narrows, so this naturally collapses back to aiming at the goal centre.
+        /// @param rBFf Ball position in field space {f}
+        /// @param robot_heading Robot heading (bearing of its forward axis) in field space {f}
+        /// @param goal_width Width of the goal mouth (from the field description)
+        /// @return Target aim point in field space {f}
+        Eigen::Vector3d select_goal_target(const Eigen::Vector3d& rBFf, double robot_heading, double goal_width);
 
         /// @brief The position of the goal {g} in field {f} space
         Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
