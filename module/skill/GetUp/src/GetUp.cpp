@@ -35,6 +35,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
+#include "message/skill/SemiDynamicGetup.hpp"
 #include "message/strategy/StandStill.hpp"
 
 #include "utility/skill/Script.hpp"
@@ -46,6 +47,7 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
+    using message::skill::SemiDynamicGetup;
     using message::strategy::StandStill;
     using utility::skill::load_script;
 
@@ -65,6 +67,21 @@ namespace module::skill {
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then([this](const RunReason& run_reason,
                                                                                  const Uses<BodySequence>& body,
                                                                                  const Sensors& sensors) {
+            // Per-invocation trace for freeze isolation: which run reason drove GetUp and the
+            // global BodySequence done-state it is keying its phase transitions off.
+            auto reason_str = [](const RunReason& r) {
+                switch (r) {
+                    case RunReason::NEW_TASK: return "NEW_TASK";
+                    case RunReason::SUBTASK_DONE: return "SUBTASK_DONE";
+                    case RunReason::OTHER_TRIGGER: return "OTHER_TRIGGER";
+                    case RunReason::STARTED: return "STARTED";
+                    case RunReason::STOPPED: return "STOPPED";
+                    case RunReason::PUSHED: return "PUSHED";
+                    default: return "UNKNOWN";
+                }
+            };
+            log<DEBUG>("GetUp run: reason=", reason_str(run_reason), " body.done=", body.done);
+
             if (run_reason == RunReason::NEW_TASK) {
                 // Stand still
                 log<INFO>("Standing still...");
@@ -102,12 +119,12 @@ namespace module::skill {
                 emit(std::make_unique<Stability>(Stability::FALLEN));
 
                 if (on_front) {
-                    log<INFO>("Getting up from front");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_front));
+                    log<INFO>("Getting up from front (semi-dynamic)");
+                    emit<Task>(std::make_unique<SemiDynamicGetup>(SemiDynamicGetup::Direction::FRONT));
                 }
                 else if (on_back) {
-                    log<INFO>("Getting up from back");
-                    emit<Task>(load_script<BodySequence>(cfg.getup_back));
+                    log<INFO>("Getting up from back (semi-dynamic)");
+                    emit<Task>(std::make_unique<SemiDynamicGetup>(SemiDynamicGetup::Direction::BACK));
                 }
                 else if (on_right || on_left) {
                     log<INFO>("Landed on side, rolling");
@@ -131,6 +148,7 @@ namespace module::skill {
             }
             else {
                 // This shouldn't happen but if it does just continue doing the same thing
+                log<DEBUG>("GetUp: unexpected run reason ", reason_str(run_reason), ", continue");
                 emit<Task>(std::make_unique<Continue>());
             }
         });

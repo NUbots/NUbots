@@ -44,6 +44,7 @@ nuclear_role(
   skill::Walk
   skill::KickWalk
   skill::GetUp
+  skill::SemiDynamicGetup
   skill::Look
   # Planners
   planning::PlanWalkPath
