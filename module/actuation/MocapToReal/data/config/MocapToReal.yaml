@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Do you actually want to output this to the robot? This may result in the robot doing unexpected stuff.
+output_to_servos: true
