@@ -32,6 +32,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/GameState.hpp"
 
 #include "utility/algorithm/assignment.hpp"
 #include "utility/math/euler.hpp"
@@ -42,6 +43,7 @@ namespace module::localisation {
 
     using message::behaviour::state::Stability;
     using message::input::Sensors;
+    using message::input::GameState;
     using message::localisation::Field;
     using message::localisation::FinishReset;
     using message::localisation::Line;
@@ -64,11 +66,8 @@ namespace module::localisation {
             this->log_level                   = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size                     = config["grid_size"].as<double>();
             cfg.save_map                      = config["save_map"].as<bool>();
-            cfg.starting_side                 = config["starting_side"].as<std::string>();
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
-            cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
-            cfg.use_hungarian                 = config["use_hungarian"].as<bool>();
             cfg.out_of_field_cost             = config["out_of_field_cost"].as<double>();
 
             // Uncertainty reset parameters
@@ -169,21 +168,21 @@ namespace module::localisation {
                 Eigen::Vector3d((1 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
             auto right_top_side =
                 Eigen::Vector3d((3 * fd.dimensions.field_length / 8), (-fd.dimensions.field_width / 2), M_PI_2);
-            switch (cfg.starting_side) {
-                case StartingSide::LEFT: cfg.initial_hypotheses.emplace_back(left_middle_side); break;
-                case StartingSide::RIGHT: cfg.initial_hypotheses.emplace_back(right_middle_side); break;
-                case StartingSide::EITHER:
-                    cfg.initial_hypotheses.emplace_back(left_middle_side);
-                    cfg.initial_hypotheses.emplace_back(left_bottom_side);
-                    cfg.initial_hypotheses.emplace_back(left_top_side);
-                    cfg.initial_hypotheses.emplace_back(right_middle_side);
-                    cfg.initial_hypotheses.emplace_back(right_bottom_side);
-                    cfg.initial_hypotheses.emplace_back(right_top_side);
-                    break;
-                case StartingSide::CUSTOM: cfg.initial_hypotheses.emplace_back(cfg.initial_state); break;
-                default: log<ERROR>("Invalid starting_side specified"); break;
-            }
+
+            // Seed templates for starting-side hypotheses: robot on each touchline facing infield. Stored so
+            // they can be recomposed through odometry when READY begins.
+            seed_templates = {left_bottom_side,
+                              left_middle_side,
+                              left_top_side,
+                              right_bottom_side,
+                              right_middle_side,
+                              right_top_side};
+
+            // Startup hypotheses for the one-shot initial side estimate
+            cfg.initial_hypotheses = seed_templates;
+
             state = cfg.initial_hypotheses[0];
+
             emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
@@ -212,6 +211,7 @@ namespace module::localisation {
            With<Stability>,
            Optional<With<RobotPoseGroundTruth>>,
            With<FieldDescription>,
+           Optional<With<GameState>>,
            With<Sensors>,
            Single>()
             .then(
@@ -222,6 +222,7 @@ namespace module::localisation {
                        const Stability& stability,
                        const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                        const FieldDescription& fd,
+                       const std::shared_ptr<const GameState>& game_state,
                        const Sensors& sensors) {
                     // Emit field message using ground truth if available
                     if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
@@ -250,10 +251,98 @@ namespace module::localisation {
                         return;
                     }
 
+                    // Detect GameState phase transitions to drive multi-hypothesis starting-side inference.
+                    // Without a GameController connected, game_state is null and we fall back to the existing
+                    // single-hypothesis behaviour.
+                    if (game_state) {
+                        const bool is_ready = game_state->phase == GameState::Phase::READY;
+                        if (is_ready && !was_ready) {
+                            // INITIAL -> READY: (re)build the seed hypotheses in the current world frame and
+                            // start accumulating evidence per hypothesis.
+                            build_side_hypotheses(sensors.Hrw);
+                            side_resolved = false;
+                            startup       = false;
+                            log<INFO>("Entered READY: resolving starting side across ",
+                                      hypotheses.size(),
+                                      " hypotheses");
+                        }
+                        else if (!is_ready && was_ready) {
+                            // Leaving READY (READY -> SET): commit to the lowest accumulated-cost hypothesis and
+                            // resume normal single-hypothesis operation.
+                            if (!hypotheses.empty()) {
+                                auto best = std::min_element(hypotheses.begin(),
+                                                             hypotheses.end(),
+                                                             [](const Hypothesis& a, const Hypothesis& b) {
+                                                                 return a.accumulated_cost < b.accumulated_cost;
+                                                             });
+                                state              = best->state;
+                                filtered_state     = best->state;
+                                last_certain_state = best->state;
+                                first_measurement  = true;
+                                num_over_cost      = 0;
+                                log<INFO>("Committed starting side at (",
+                                          best->state.x(),
+                                          ", ",
+                                          best->state.y(),
+                                          ", ",
+                                          best->state.z(),
+                                          ") with accumulated cost ",
+                                          best->accumulated_cost);
+                            }
+                            side_resolved = true;
+                        }
+                        was_ready = is_ready;
+                    }
+
                     double chosen_state_cost = 0.0;
                     Eigen::Vector3d proposed_state;
 
-                    if (startup && cfg.starting_side == StartingSide::EITHER) {
+                    if (!side_resolved && !hypotheses.empty()) {
+                        // --- READY multi-hypothesis starting-side inference ---
+                        // Refine each hypothesis from its own previous pose and accumulate its normalised cost so
+                        // the correct side wins as the walk-in generates disambiguating viewpoints.
+                        log<DEBUG>("READY starting-side inference over ", hypotheses.size(), " hypotheses:");
+                        for (std::size_t i = 0; i < hypotheses.size(); ++i) {
+                            auto& hyp = hypotheses[i];
+                            auto [refined, frame_cost] =
+                                run_field_line_optimisation(hyp.state, field_lines.rPWw, field_intersections, goals);
+                            hyp.state = refined;
+                            hyp.accumulated_cost += frame_cost;
+                            log<DEBUG>("  hyp ",
+                                       i,
+                                       " state (",
+                                       refined.x(),
+                                       ", ",
+                                       refined.y(),
+                                       ", ",
+                                       refined.z(),
+                                       ") frame cost ",
+                                       frame_cost,
+                                       " accumulated ",
+                                       hyp.accumulated_cost);
+                        }
+                        // Publish the running argmin every frame so behaviour always has a pose to walk with.
+                        auto best = std::min_element(hypotheses.begin(),
+                                                     hypotheses.end(),
+                                                     [](const Hypothesis& a, const Hypothesis& b) {
+                                                         return a.accumulated_cost < b.accumulated_cost;
+                                                     });
+                        state             = best->state;
+                        filtered_state    = best->state;
+                        proposed_state    = best->state;
+                        chosen_state_cost = best->accumulated_cost;
+                        log<DEBUG>("  best hyp ",
+                                   std::distance(hypotheses.begin(), best),
+                                   " state (",
+                                   best->state.x(),
+                                   ", ",
+                                   best->state.y(),
+                                   ", ",
+                                   best->state.z(),
+                                   ") accumulated cost ",
+                                   best->accumulated_cost);
+                    }
+                    else if (startup) {
                         // Find the best initial state to use based on the optimisation results of each
                         // hypothesis
                         std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
@@ -313,7 +402,7 @@ namespace module::localisation {
 
                     // Check if uncertainty is too high and trigger reset if needed
                     emit(graph("Cost", chosen_state_cost));
-                    if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
+                    if (side_resolved && cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
                         && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
                         // Cost has been high too many times, reset the localisation
                         log<WARN>("Cost exceeded threshold ",
@@ -403,8 +492,70 @@ namespace module::localisation {
         }
 
         // Field intersection measurement associated with a landmark (known landmark, intersection detection)
-        return cfg.use_hungarian ? hungarian_association(field_intersections, Hfw)
-                                 : greedy_association(field_intersections, Hfw);
+        return hungarian_association(field_intersections, Hfw);
+    }
+
+    void FieldLocalisationNLopt::build_side_hypotheses(const Eigen::Isometry3d& Hrw) {
+        hypotheses.clear();
+        hypotheses.reserve(seed_templates.size());
+        for (const auto& seed : seed_templates) {
+            // Recompose the seed (the robot's field pose assuming world == robot at startup) through the current
+            // odometry so it represents the robot at its touchline pose in the current world frame:
+            //   Hfw = compute_Hfw(seed) * Hrw
+            // The hypothesis is then world-fixed and stays valid as the robot walks (no per-frame propagation).
+            Eigen::Isometry3d Hfw = compute_Hfw(seed) * Hrw;
+            Eigen::Vector3d hyp_state;
+            hyp_state.head<2>() = Hfw.translation().head<2>();
+            hyp_state.z()       = mat_to_rpy_intrinsic(Hfw.rotation()).z();
+            hypotheses.push_back(Hypothesis{hyp_state, 0.0});
+            log<DEBUG>("Built hypothesis ",
+                       hypotheses.size() - 1,
+                       ": seed (",
+                       seed.x(),
+                       ", ",
+                       seed.y(),
+                       ", ",
+                       seed.z(),
+                       ") -> state (",
+                       hyp_state.x(),
+                       ", ",
+                       hyp_state.y(),
+                       ", ",
+                       hyp_state.z(),
+                       ")");
+        }
+    }
+
+    double FieldLocalisationNLopt::field_line_point_cost(const Eigen::Vector3d& x, const std::vector<Eigen::Vector3d>& field_lines) {
+        double cost = 0.0;
+        for (auto rORr : field_lines) {
+            // Get the position [x, y] of the observation in the map for this particle
+            Eigen::Vector2i map_position = position_in_map(x, rORr);
+            double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
+            occupancy_value =
+                occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
+            cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
+        }
+        // Average the cost by the number of field lines
+        cost /= field_lines.size() > 0 ? field_lines.size() : 1;
+        return cost;
+    }
+
+    double FieldLocalisationNLopt::field_line_intersection_cost(
+        const Eigen::Vector3d& x,
+        const std::shared_ptr<const FieldIntersections>& field_intersections) {
+        double cost = 0.0;
+        auto Hfw         = compute_Hfw(x);
+        auto associations = data_association(field_intersections, Hfw);
+        for (const auto& association : associations) {
+            // Calculate the distance between the observed intersection and the closest landmark
+            double distance = (association.first - association.second).norm();
+            cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
+        }
+        // Average the cost by the number of associations
+        cost /= associations.size() > 0 ? associations.size() : 1;
+
+        return cost;
     }
 
     std::pair<Eigen::Vector3d, double> FieldLocalisationNLopt::run_field_line_optimisation(
@@ -413,67 +564,17 @@ namespace module::localisation {
         const std::shared_ptr<const FieldIntersections>& field_intersections,
         const std::shared_ptr<const Goals>& goals,
         bool uncertainty_optimisation) {
+        (void) goals;  // Goals are no longer used in the localisation cost
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
             (void) data;  // Unused in this case
             (void) grad;  // Unused in this case
 
-            // --- Field line point cost ---
-            double cost = 0.0;
-            for (auto rORr : field_lines) {
-                // Get the position [x, y] of the observation in the map for this particle
-                Eigen::Vector2i map_position = position_in_map(x, rORr);
-                double occupancy_value = fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y());
-                occupancy_value =
-                    occupancy_value == -1 ? cfg.out_of_field_cost : occupancy_value;  // If no value, set to 3.0
-                cost += cfg.field_line_distance_weight * std::pow(occupancy_value, 2);
-            }
-            // Average the cost by the number of field lines
-            cost /= field_lines.size() > 0 ? field_lines.size() : 1;
-
-            // Compute the cost and gradient
-            auto Hfw = compute_Hfw(x);
-
-            // --- Field line intersection cost ---
-            if (field_intersections) {
-                auto associations = data_association(field_intersections, Hfw);
-                for (const auto& association : associations) {
-                    // Calculate the distance between the observed intersection and the closest landmark
-                    double distance = (association.first - association.second).norm();
-                    cost += cfg.field_line_intersection_weight * std::pow(distance, 2);
-                }
-                // Average the cost by the number of associations
-                cost /= associations.size() > 0 ? associations.size() : 1;
-            }
-
-            // --- Goal post cost ---
-            // Only consider goal post cost if there are two goals
-            if (goals && goals->goals.size() == 2) {
-                // Ensure the goal posts are roughly correct distance apart
-                auto Hwc              = Eigen::Isometry3d(goals->Hcw).inverse();
-                auto rGWw_1           = Hwc * (goals->goals[0].post.bottom * goals->goals[0].post.distance);
-                auto rGWw_2           = Hwc * (goals->goals[1].post.bottom * goals->goals[1].post.distance);
-                double distance_apart = (rGWw_1 - rGWw_2).norm();
-                if (std::abs(distance_apart - expected_goal_post_distance) < cfg.goal_post_error_tolerance) {
-
-                    auto rGFf_left  = Hfw * rGWw_1;
-                    auto rGFf_right = Hfw * rGWw_2;
-                    if (rGFf_left.y() < rGFf_right.y()) {
-                        std::swap(rGFf_left, rGFf_right);
-                    }
-                    auto expected_goal_post_postions = rGFf_left.x() > 0 ? own_goal_posts : opp_goal_posts;
-
-                    // Calculate the distance between the goal posts
-                    double left_distance  = (rGFf_left - expected_goal_post_postions.left).norm();
-                    double right_distance = (rGFf_right - expected_goal_post_postions.right).norm();
-
-                    // Add the cost of the distance between the goal posts
-                    cost += cfg.goal_post_distance_weight * std::pow(left_distance, 2);
-                    cost += cfg.goal_post_distance_weight * std::pow(right_distance, 2);
-                }
-            }
-
+            // Calculate field line point cost
+            double cost = field_line_point_cost(x, field_lines);
+            // Calculate field line intersection cost if there are any intersections
+            cost = field_intersections ? cost + field_line_intersection_cost(x, field_intersections) : cost;
             // --- State change cost ---
             cost += cfg.state_change_weight * (x - initial_guess).squaredNorm();
 
@@ -519,7 +620,7 @@ namespace module::localisation {
         double final_cost;
         nlopt::result result = opt.optimize(x, final_cost);
 
-        log<DEBUG>("Ran optimisation with algorithm ",
+        log<TRACE>("Ran optimisation with algorithm ",
                    algorithm,
                    " and initial guess (",
                    initial_guess.x(),
@@ -537,13 +638,13 @@ namespace module::localisation {
                    final_cost);
 
         // Debug information about the optimization result
-        log<DEBUG>("Final Cost: ", final_cost);
+        log<TRACE>("Final Cost: ", final_cost);
         switch (result) {
-            case nlopt::SUCCESS: log<DEBUG>("Optimization succeeded"); break;
-            case nlopt::FTOL_REACHED: log<DEBUG>("Optimization stopped: function tolerance reached"); break;
-            case nlopt::XTOL_REACHED: log<DEBUG>("Optimization stopped: variable tolerance reached"); break;
+            case nlopt::SUCCESS: log<TRACE>("Optimization succeeded"); break;
+            case nlopt::FTOL_REACHED: log<TRACE>("Optimization stopped: function tolerance reached"); break;
+            case nlopt::XTOL_REACHED: log<TRACE>("Optimization stopped: variable tolerance reached"); break;
             case nlopt::MAXEVAL_REACHED:
-                log<DEBUG>("Optimization stopped: maximum evaluations reached (ftol_rel=",
+                log<TRACE>("Optimization stopped: maximum evaluations reached (ftol_rel=",
                            uncertainty_optimisation ? cfg.uncertainty_ftol_rel : cfg.normal_ftol_rel,
                            ", xtol_rel=",
                            uncertainty_optimisation ? cfg.uncertainty_xtol_rel : cfg.normal_xtol_rel,
@@ -551,7 +652,7 @@ namespace module::localisation {
                 break;
             default: log<ERROR>("Optimization failed with code ", result); break;
         }
-        log<DEBUG>("Number of evaluations: ", opt.get_numevals());
+        log<TRACE>("Number of evaluations: ", opt.get_numevals());
 
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);

@@ -4,12 +4,6 @@ log_level: INFO
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
 
-# Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: EITHER
-
-# Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
-initial_state: [0.0, 0.0, 0.0]
-
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false
 
@@ -24,9 +18,6 @@ start_time_delay: 1
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
-
-# Bool to use the Hungarian algorithm for data association
-use_hungarian: true
 
 # Cost for a point outside the field
 out_of_field_cost: 3.0

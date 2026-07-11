@@ -62,42 +62,6 @@ namespace module::localisation {
                                                                                 {"LN_NELDERMEAD", nlopt::LN_NELDERMEAD},
                                                                                 {"LN_SBPLX", nlopt::LN_SBPLX}};
 
-    struct StartingSide {
-        enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
-        Value value = Value::UNKNOWN;
-
-        // Constructors
-        StartingSide() = default;
-        StartingSide(int const& v) : value(static_cast<Value>(v)) {}
-        StartingSide(Value const& v) : value(v) {}
-        StartingSide(std::string const& str) {
-            // clang-format off
-            if      (str == "LEFT") { value = Value::LEFT; }
-            else if (str == "RIGHT") { value = Value::RIGHT; }
-            else if (str == "EITHER")  { value = Value::EITHER; }
-            else if (str == "CUSTOM") { value = Value::CUSTOM; }
-            else {
-                value = Value::UNKNOWN;
-                throw std::runtime_error("String " + str + " did not match any enum for StartingSide");
-            }
-            // clang-format on
-        }
-
-        // Conversions
-        [[nodiscard]] operator Value() const {
-            return value;
-        }
-        [[nodiscard]] operator std::string() const {
-            switch (value) {
-                case Value::LEFT: return "LEFT";
-                case Value::RIGHT: return "RIGHT";
-                case Value::EITHER: return "EITHER";
-                case Value::CUSTOM: return "CUSTOM";
-                default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
-            }
-        }
-    };
-
     /**
      * @brief Converts an Eigen vector to an std::vector.
      * @param eigen_vec The Eigen vector to convert.
@@ -191,9 +155,6 @@ namespace module::localisation {
             /// @brief Initial hypothesis of the robot's state (x,y,theta), saved for resetting
             std::vector<Eigen::Vector3d> initial_hypotheses{};
 
-            /// @brief Initial state (x,y,theta) of the robot, saved for resetting
-            Eigen::Vector3d initial_state{};
-
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
 
@@ -208,12 +169,6 @@ namespace module::localisation {
 
             /// @brief Bool to enable/disable using ground truth for localisation
             bool use_ground_truth_localisation;
-
-            /// @brief Bool to enable the use of Hungarian algorithm for landmark association
-            bool use_hungarian = false;
-
-            /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
-            StartingSide starting_side = StartingSide::UNKNOWN;
 
             /// @brief Scalar weighting of cost associated with distance to field lines
             double field_line_distance_weight = 0.0;
@@ -292,6 +247,26 @@ namespace module::localisation {
         /// @brief Bool indicating if this is the first measurement
         bool first_measurement = true;
 
+        /// @brief A localisation hypothesis tracked while resolving the starting side during READY
+        struct Hypothesis {
+            /// @brief Current refined state (x,y,theta) parameterising Hfw
+            Eigen::Vector3d state = Eigen::Vector3d::Zero();
+            /// @brief Cost accumulated across READY frames (running sum of normalised per-frame cost)
+            double accumulated_cost = 0.0;
+        };
+
+        /// @brief Seed templates (robot field poses on each touchline) used to build READY hypotheses
+        std::vector<Eigen::Vector3d> seed_templates{};
+
+        /// @brief Hypotheses tracked while resolving the starting side during READY
+        std::vector<Hypothesis> hypotheses{};
+
+        /// @brief True when the starting side is resolved and we run normal single-hypothesis operation
+        bool side_resolved = true;
+
+        /// @brief Whether the previously processed GameState phase was READY (for transition detection)
+        bool was_ready = false;
+
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map{};
 
@@ -352,6 +327,31 @@ namespace module::localisation {
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
         /**
+         * @brief (Re)build the starting-side hypotheses from the seed templates, recomposed through the current
+         * odometry so each seed represents the robot at its touchline pose in the current world frame. All
+         * accumulated costs are reset to zero.
+         * @param Hrw The homogenous transformation from world {w} to robot {r} space (current odometry)
+         */
+        void build_side_hypotheses(const Eigen::Isometry3d& Hrw);
+
+        /**
+         * @brief Compute the averaged field line point cost for a given state
+         * @param x The state vector (x,y,theta) parameterising Hfw
+         * @param field_lines The observed field line points in world space {w}
+         * @return The averaged field line distance cost
+         */
+        double field_line_point_cost(const Eigen::Vector3d& x, const std::vector<Eigen::Vector3d>& field_lines);
+
+        /**
+         * @brief Compute the averaged field line intersection (landmark) cost for a given state
+         * @param x The state vector (x,y,theta) parameterising Hfw
+         * @param field_intersections The observed field intersections
+         * @return The averaged field intersection cost
+         */
+        double field_line_intersection_cost(const Eigen::Vector3d& x,
+                                            const std::shared_ptr<const FieldIntersections>& field_intersections);
+
+        /**
          * @brief Run the field line optimisation
          * @param initial_guess The initial guess for the field line
          * @param observations The observations of the field line points
@@ -403,18 +403,6 @@ namespace module::localisation {
          * and landmarks
          */
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> hungarian_association(
-            const std::shared_ptr<const FieldIntersections>& field_intersections,
-            const Eigen::Isometry3d& Hfw);
-
-        /**
-         * @brief Perform data association between intersection observations and landmarks using nearest neighbour
-         *
-         * @param field_intersections The field intersections
-         * @param Hfw The homogenous transformation matrix from world {w} to field {f} space
-         * @return std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> The associated pairs of field intersections
-         * and landmarks
-         */
-        std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> greedy_association(
             const std::shared_ptr<const FieldIntersections>& field_intersections,
             const Eigen::Isometry3d& Hfw);
     };
