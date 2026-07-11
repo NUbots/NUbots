@@ -7,14 +7,24 @@ namespace module::actuation {
 
     class MocapToReal : public NUClear::Reactor {
     private:
-        /// @brief Stores configuration values
         struct Config {
             bool output_to_servos = true;
         } cfg;
 
     public:
-        /// @brief Called by the powerplant to build and setup the MocapToReal reactor.
         explicit MocapToReal(std::unique_ptr<NUClear::Environment> environment);
+
+        typedef struct {
+            float x;
+            float y;
+            float z;
+            float t;
+        } qRot;
+
+        // Quaternion helpers
+        qRot qInvert(qRot);
+        qRot qMultiply(qRot, qRot);
+        float angleBetween(qRot, qRot);
     };
 
 }  // namespace module::actuation
