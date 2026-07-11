@@ -1,0 +1,4 @@
+# Webots override: run as a field player (player 2), not the goalie (player 1).
+# Change to 3 or 4 to simulate a different field player.
+player_id: 2
+team_id: 1
