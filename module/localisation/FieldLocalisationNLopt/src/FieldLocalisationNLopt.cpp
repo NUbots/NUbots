@@ -360,10 +360,10 @@ namespace module::localisation {
     void FieldLocalisationNLopt::debug_field_localisation(const Eigen::Isometry3d& Hfw, const Eigen::Isometry3d& Htw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
         emit(graph("filtered state", filtered_state.x(), filtered_state.y(), filtered_state.z()));
-        Eigen::Isometry3d Htf = Hfw * Htw.inverse();
-        emit(graph("Htf position (x, y)",
-                   Htf.translation().x(),
-                   Htf.translation().y()));  // to view this in PlotJuggler as an XY plot, control click the x and y
+        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+        emit(graph("Hft position (x, y)",
+                   Hft.translation().x(),
+                   Hft.translation().y()));  // to view this in PlotJuggler as an XY plot, control click the x and y
                                              // dataseries, drag the two points into the plot with the Right Mouse
                                              // Button held down. It should prompt you to configure the plot as an XY.
                                              // Now you can see the localisation in an XY plot in PJ!
