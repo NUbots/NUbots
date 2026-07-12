@@ -31,8 +31,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
 
 #include "utility/algorithm/assignment.hpp"
 #include "utility/math/euler.hpp"
@@ -42,8 +42,8 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
-    using message::input::Sensors;
     using message::input::GameState;
+    using message::input::Sensors;
     using message::localisation::Field;
     using message::localisation::FinishReset;
     using message::localisation::Line;
@@ -270,7 +270,7 @@ namespace module::localisation {
                             // Leaving READY (READY -> SET): commit to the lowest accumulated-cost hypothesis and
                             // resume normal single-hypothesis operation.
                             if (!hypotheses.empty()) {
-                                auto best = std::min_element(hypotheses.begin(),
+                                auto best          = std::min_element(hypotheses.begin(),
                                                              hypotheses.end(),
                                                              [](const Hypothesis& a, const Hypothesis& b) {
                                                                  return a.accumulated_cost < b.accumulated_cost;
@@ -322,7 +322,7 @@ namespace module::localisation {
                                        hyp.accumulated_cost);
                         }
                         // Publish the running argmin every frame so behaviour always has a pose to walk with.
-                        auto best = std::min_element(hypotheses.begin(),
+                        auto best         = std::min_element(hypotheses.begin(),
                                                      hypotheses.end(),
                                                      [](const Hypothesis& a, const Hypothesis& b) {
                                                          return a.accumulated_cost < b.accumulated_cost;
@@ -526,7 +526,8 @@ namespace module::localisation {
         }
     }
 
-    double FieldLocalisationNLopt::field_line_point_cost(const Eigen::Vector3d& x, const std::vector<Eigen::Vector3d>& field_lines) {
+    double FieldLocalisationNLopt::field_line_point_cost(const Eigen::Vector3d& x,
+                                                         const std::vector<Eigen::Vector3d>& field_lines) {
         double cost = 0.0;
         for (auto rORr : field_lines) {
             // Get the position [x, y] of the observation in the map for this particle
@@ -544,8 +545,8 @@ namespace module::localisation {
     double FieldLocalisationNLopt::field_line_intersection_cost(
         const Eigen::Vector3d& x,
         const std::shared_ptr<const FieldIntersections>& field_intersections) {
-        double cost = 0.0;
-        auto Hfw         = compute_Hfw(x);
+        double cost       = 0.0;
+        auto Hfw          = compute_Hfw(x);
         auto associations = data_association(field_intersections, Hfw);
         for (const auto& association : associations) {
             // Calculate the distance between the observed intersection and the closest landmark
