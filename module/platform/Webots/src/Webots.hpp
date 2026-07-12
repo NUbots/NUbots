@@ -32,8 +32,10 @@
 #include <Eigen/Geometry>
 #include <array>
 #include <atomic>
+#include <deque>
 #include <map>
 #include <mutex>
+#include <utility>
 #include <nuclear>
 #include <string>
 #include <tinyrobotics/kinematics.hpp>
@@ -92,6 +94,10 @@ namespace module::platform {
         double clock_smoothing = 0.0;
         /// @brief Real time factor of the simulation clock
         double rtf = 1.0;
+
+        /// @brief Sliding window of (sim time ticks, real time ms) pairs used to estimate the real
+        /// time factor as a time-weighted slope rather than a per-message average
+        std::deque<std::pair<uint32_t, uint64_t>> clock_window;
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
