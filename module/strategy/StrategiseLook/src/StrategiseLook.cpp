@@ -111,7 +111,7 @@ namespace module::strategy {
                                                cfg.max_localisation_cost));
                     }
                     looking_around = true;
-                    // emit<Task>(std::make_unique<LookAround>());
+                    emit<Task>(std::make_unique<LookAround>());
                 }
                 else {
                     if (looking_around) {
