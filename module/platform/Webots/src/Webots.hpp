@@ -35,11 +35,11 @@
 #include <deque>
 #include <map>
 #include <mutex>
-#include <utility>
 #include <nuclear>
 #include <string>
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
+#include <utility>
 #include <vector>
 
 #include "message/input/Image.hpp"
