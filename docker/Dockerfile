@@ -401,12 +401,13 @@ RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz \
     -DBUILD_SHARED_LIBS=ON
 
-# The alsa-lib layer above installs to the Jetson targetfs prefix even for generic builds
-# (the binaries are host-arch; only the path is wrong), so FindALSA fails for generic.
-# Copy the dev files into /usr/local where the generic toolchain actually looks.
+# Several layers above (alsa-lib, lame, libbacktrace, gperftools, the OpenCL loader)
+# install to the Jetson targetfs prefix even for generic builds; the binaries are
+# host-arch, only the install path is wrong, so find_package fails for generic.
+# Copy everything across without clobbering what /usr/local already has.
 RUN if [ "${platform}" != "orinnx" ]; then \
-        cp -a /l4t/targetfs/usr/local/include/alsa /usr/local/include/ && \
-        cp -a /l4t/targetfs/usr/local/lib/libasound.* /usr/local/lib/ && \
+        cp -an /l4t/targetfs/usr/local/include/. /usr/local/include/ && \
+        cp -an /l4t/targetfs/usr/local/lib/. /usr/local/lib/ && \
         ldconfig; \
     fi
 
