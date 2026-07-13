@@ -47,15 +47,25 @@ namespace module::skill {
 
         on<Configuration>("K1GetUp.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.retry_delay = config["retry_delay"].as<double>();
         });
 
         on<Provide<GetUpTask>, With<BoosterFallDownState>>().then(
             [this](const RunReason& run_reason, const BoosterFallDownState& fall_state) {
-                if (run_reason == RunReason::NEW_TASK
-                    && fall_state.fall_down_state == FallDownStateType::HAS_FALLEN
-                    && fall_state.is_recovery_available) {
+                // Re-request on a cooldown, not just NEW_TASK: if the get-up fails (or the robot
+                // falls again straight after), fall_down_state returns to HAS_FALLEN while this
+                // task is still running — waiting for IS_READY alone deadlocks with no retry.
+                // The cooldown guards against spamming the RPC while the firmware/sim is mid
+                // get-up (which reports IS_GETTING_UP, not HAS_FALLEN, so it never retriggers).
+                if (fall_state.fall_down_state == FallDownStateType::HAS_FALLEN
+                    && fall_state.is_recovery_available
+                    && (run_reason == RunReason::NEW_TASK
+                        || NUClear::clock::now() - last_request
+                               > std::chrono::duration_cast<NUClear::clock::duration>(
+                                   std::chrono::duration<double>(cfg.retry_delay)))) {
                     log<INFO>("Getting up...");
                     emit(std::make_unique<BoosterGetUp>());
+                    last_request = NUClear::clock::now();
                 }
 
                 if (fall_state.fall_down_state == FallDownStateType::IS_READY) {

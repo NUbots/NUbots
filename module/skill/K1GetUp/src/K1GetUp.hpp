@@ -35,6 +35,14 @@ namespace module::skill {
 
     class K1GetUp : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Seconds to wait after a GetUp request before re-requesting if still fallen
+            double retry_delay = 5.0;
+        } cfg;
+
+        /// @brief When the last BoosterGetUp request was sent, for the retry cooldown
+        NUClear::clock::time_point last_request = NUClear::clock::time_point::min();
 
     public:
         /// @brief Called by the powerplant to build and setup the K1GetUp reactor.

@@ -1,2 +1,6 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Seconds to wait after a GetUp request before re-requesting if the robot is still
+# HAS_FALLEN (covers failed get-ups and immediate re-falls; IS_GETTING_UP never retriggers)
+retry_delay: 5.0
