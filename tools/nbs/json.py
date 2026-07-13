@@ -39,10 +39,10 @@ def register(command):
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
     command.add_argument(
-        "--keep-zeros",
+        "--no-zeros",
         action="store_true",
         default=True,
-        help="Include fields whose value is zero in the JSON output (true by default)",
+        help="Don't include fields whose value is zero in the JSON output (includes zeros by default)",
     )
 
 
