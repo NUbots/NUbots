@@ -341,6 +341,15 @@ RUN INCLUDE_PREFIX=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/loc
     --prefix ${INCLUDE_PREFIX} --no-toolchain \
     --header-path include/zstr
 
+# Make the OpenCL headers/loader visible at the standard prefix for generic builds before
+# VisualMesh, which probes OpenCL at build time and otherwise bakes VISUALMESH_DISABLE_OPENCL
+# into its exported cmake config (they were installed to the Jetson targetfs prefix above).
+RUN if [ "${platform}" != "orinnx" ]; then \
+        cp -an /l4t/targetfs/usr/local/include/CL /usr/local/include/ && \
+        cp -an /l4t/targetfs/usr/local/lib/libOpenCL.* /usr/local/lib/ && \
+        ldconfig; \
+    fi
+
 # Visual Mesh
 RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a17bbee73339eaee556f47a80b93c40.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
