@@ -109,6 +109,9 @@ namespace module::planning {
         /// @return Constrained velocity vector
         Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
 
+        /// @brief Exponentially smooth a proposed walk command (stores state).
+        Eigen::Vector3d smooth_walk_command(const Eigen::Vector3d& velocity_target);
+
         /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
         /// @param all_obstacles vector of all obstacles in the world
         /// @param rDRr vector from robot to final target

@@ -32,7 +32,7 @@ def check_architecture(filepath: str) -> dict:
     if "ARM" in file_output:
         bin_arch = "aarch64"
     elif "x86-64" in file_output:
-        bin_arch = "x86-64"
+        bin_arch = "x86_64"  # normalize to platform.machine() spelling
     else:
         bin_arch = "unknown"
     cpu_arch = machine()

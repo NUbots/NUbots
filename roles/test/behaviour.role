@@ -34,7 +34,7 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::Walk
+  skill::K1Walk
   skill::KickWalk
   skill::GetUp
   skill::Look

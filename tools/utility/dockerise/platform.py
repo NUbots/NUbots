@@ -87,9 +87,12 @@ def build(image, platform, username, uid, reset):
     _selected = platform == "selected_k1"
     platform = selected(image) if _selected else platform
 
-    # Temporary workaround to prevent conflict with NUgus
+    # Temporary workaround to prevent conflict with NUgus. Only the image *tag* gets
+    # the _k1 suffix; the docker build arg must stay the real platform name, since the
+    # Dockerfile resolves /usr/local/toolchain/generate_${platform}_toolchain.py.
     if platform == "generic":
         platform += "_k1"
+    build_platform = platform[: -len("_k1")] if platform.endswith("_k1") else platform
 
     local_tag = defaults.image_name(platform, image, username)
     dockerdir = os.path.join(b.project_dir, "docker")
@@ -150,11 +153,13 @@ def build(image, platform, username, uid, reset):
             local_tag,
             "--pull",
             "--build-arg",
-            f"platform={platform}",
+            f"platform={build_platform}",
             "--build-arg",
             f"user_uid={uid}",
             "--output=type=docker",
-            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
+            # NOTE: do NOT cache-from {image}:{platform} (the fork's generic_k1 registry
+            # manifest is polluted with orin/l4t layers — pulls a franken image).
+            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{build_platform}",
             f"--cache-to=type=inline",
             dockerdir,
         ]

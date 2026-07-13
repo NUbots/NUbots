@@ -1,9 +1,16 @@
-log_level: INFO
-# When making a visualmesh config file for a new platform, specify the cameras as follows:
-# The settings for each camera
-# CameraName:
-#   concurrent: How many engines to make available to concurrently execute networks
-#   engine: Which engine to use (opencl, cpu)
-#   spotlight:
-#     distance: the distance range for the spotlight mesh to be generated for
-#     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
+log_level: DEBUG
+
+# The settings for each camera. Keys must match Image.name as published by the camera
+# module (K1Camera.yaml `name:` — "Left Camera" / "Right Camera").
+cameras:
+  Left Camera:
+    concurrent: 2
+    # Synthetic-render network: closest match for the NUSim/MuJoCo camera. Swap to
+    # RobocupNetwork.yaml for real-robot imagery.
+    network: config/networks/WebotsNetwork.yaml
+    engine: cpu
+    cache_directory: "./vision_cache/"
+    classifier:
+      height: [0.5, 1.0]
+      max_distance: 11
+      intersection_tolerance: 0.05

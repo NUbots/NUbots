@@ -65,11 +65,16 @@ namespace module::skill {
             emit(std::move(msg));
         });
 
-        on<Provide<WalkTask>>().then([this](const WalkTask& walk, const RunReason& run_reason) {
-            if (run_reason != RunReason::NEW_TASK) {
-                return;
-            }
-
+        on<Provide<WalkTask>>().then([this](const WalkTask& walk, const RunReason& /*run_reason*/) {
+            // Run on every task update, not just NEW_TASK: the walk-path planner
+            // re-emits Walk with a fresh smoothed velocity each tick, and only the
+            // first one is NEW_TASK — gating on it froze the very first (zero)
+            // command forever. Duplicate suppression happens in HardwareIO
+            // (isApprox on the last sent velocity).
+            log<DEBUG>("K1Walk tick, velocity:",
+                       walk.velocity_target.x(),
+                       walk.velocity_target.y(),
+                       walk.velocity_target.z());
             auto msg      = std::make_unique<BoosterWalk>();
             msg->velocity = walk.velocity_target;
             emit(std::move(msg));

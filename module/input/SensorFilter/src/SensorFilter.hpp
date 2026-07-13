@@ -86,7 +86,7 @@ namespace module::input {
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
-        static const int n_servos = 20;
+        static const int n_servos = 22;  // K1: 22 actuated joints (was 20, NUgus)
 
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;

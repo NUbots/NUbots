@@ -64,55 +64,63 @@ namespace utility::actuation::tinyrobotics {
     }
 
     // clang-format off
-    /// @brief Maps the ServoID to the joint index in the tinyrobotics model joint configuration vector
+    /// @brief Maps the ServoID to the joint index in the tinyrobotics model joint configuration vector.
+    /// K1 (models/k1/robot.urdf) — tinyrobotics q order follows the URDF tree: head (0-1),
+    /// left arm (2-5), right arm (6-9), left leg (10-15), right leg (16-21). The elbow-yaw
+    /// joints (q5, q9) have no ServoID (the 20-servo message drops them) and stay 0.
     inline std::vector<std::pair<int, ServoID>> joint_map =
-                                                     {{0, ServoID::L_ANKLE_ROLL},
-                                                      {1, ServoID::L_ANKLE_PITCH},
-                                                      {2, ServoID::L_KNEE},
-                                                      {3, ServoID::L_HIP_PITCH},
-                                                      {4, ServoID::L_HIP_ROLL},
-                                                      {5, ServoID::L_HIP_YAW},
-                                                      {6, ServoID::R_ANKLE_ROLL},
-                                                      {7, ServoID::R_ANKLE_PITCH},
-                                                      {8, ServoID::R_KNEE},
-                                                      {9, ServoID::R_HIP_PITCH},
-                                                      {10, ServoID::R_HIP_ROLL},
-                                                      {11, ServoID::R_HIP_YAW},
-                                                      {12, ServoID::HEAD_PITCH},
-                                                      {13, ServoID::HEAD_YAW},
-                                                      {14, ServoID::L_ELBOW},
-                                                      {15, ServoID::L_SHOULDER_ROLL},
-                                                      {16, ServoID::L_SHOULDER_PITCH},
-                                                      {17, ServoID::R_ELBOW},
-                                                      {18, ServoID::R_SHOULDER_ROLL},
-                                                      {19, ServoID::R_SHOULDER_PITCH}};
+                                                     {{0, ServoID::HEAD_YAW},
+                                                      {1, ServoID::HEAD_PITCH},
+                                                      {2, ServoID::L_SHOULDER_PITCH},
+                                                      {3, ServoID::L_SHOULDER_ROLL},
+                                                      {4, ServoID::L_ELBOW},
+                                                      {6, ServoID::R_SHOULDER_PITCH},
+                                                      {7, ServoID::R_SHOULDER_ROLL},
+                                                      {8, ServoID::R_ELBOW},
+                                                      {10, ServoID::L_HIP_PITCH},
+                                                      {11, ServoID::L_HIP_ROLL},
+                                                      {12, ServoID::L_HIP_YAW},
+                                                      {13, ServoID::L_KNEE},
+                                                      {14, ServoID::L_ANKLE_PITCH},
+                                                      {15, ServoID::L_ANKLE_ROLL},
+                                                      {16, ServoID::R_HIP_PITCH},
+                                                      {17, ServoID::R_HIP_ROLL},
+                                                      {18, ServoID::R_HIP_YAW},
+                                                      {19, ServoID::R_KNEE},
+                                                      {20, ServoID::R_ANKLE_PITCH},
+                                                      {21, ServoID::R_ANKLE_ROLL}};
 
-    /// @brief Maps the FrameID to the associated link index in the tinyrobotics model
+    /// @brief Maps the FrameID to the associated link index in the tinyrobotics model.
+    /// K1 link order (models/k1/robot.urdf): 0 Trunk, 1-2 head, 3-6 left arm, 7-10 right
+    /// arm, 11-16 left leg (16 = left_foot_link), 17-22 right leg (22 = right_foot_link).
+    /// The URDF has no separate foot-base or camera links: FOOT_BASE maps to the foot
+    /// link (= ankle-roll child) and both cameras map to Head_2 (lens offsets, if needed,
+    /// belong in the camera extrinsics, not here).
     inline std::vector<std::pair<int, FrameID>> link_map = {
-                                                      {1, FrameID::L_HIP_YAW},
-                                                      {2, FrameID::L_HIP_ROLL},
-                                                      {3, FrameID::L_HIP_PITCH},
-                                                      {4, FrameID::L_KNEE},
-                                                      {5, FrameID::L_ANKLE_PITCH},
-                                                      {6, FrameID::L_ANKLE_ROLL},
-                                                      {7, FrameID::L_FOOT_BASE},
-                                                      {8, FrameID::R_HIP_YAW},
-                                                      {9, FrameID::R_HIP_ROLL},
-                                                      {10, FrameID::R_HIP_PITCH},
-                                                      {11, FrameID::R_KNEE},
-                                                      {12, FrameID::R_ANKLE_PITCH},
-                                                      {13, FrameID::R_ANKLE_ROLL},
-                                                      {14, FrameID::R_FOOT_BASE},
-                                                      {15, FrameID::HEAD_YAW},
-                                                      {16, FrameID::HEAD_PITCH},
-                                                      {17, FrameID::L_CAMERA},
-                                                      {18, FrameID::R_CAMERA},
-                                                      {19, FrameID::L_SHOULDER_PITCH},
-                                                      {20, FrameID::L_SHOULDER_ROLL},
-                                                      {21, FrameID::L_ELBOW},
-                                                      {22, FrameID::R_SHOULDER_PITCH},
-                                                      {23, FrameID::R_SHOULDER_ROLL},
-                                                      {24, FrameID::R_ELBOW}};
+                                                      {1, FrameID::HEAD_YAW},
+                                                      {2, FrameID::HEAD_PITCH},
+                                                      {2, FrameID::L_CAMERA},
+                                                      {2, FrameID::R_CAMERA},
+                                                      {3, FrameID::L_SHOULDER_PITCH},
+                                                      {4, FrameID::L_SHOULDER_ROLL},
+                                                      {5, FrameID::L_ELBOW},
+                                                      {7, FrameID::R_SHOULDER_PITCH},
+                                                      {8, FrameID::R_SHOULDER_ROLL},
+                                                      {9, FrameID::R_ELBOW},
+                                                      {11, FrameID::L_HIP_PITCH},
+                                                      {12, FrameID::L_HIP_ROLL},
+                                                      {13, FrameID::L_HIP_YAW},
+                                                      {14, FrameID::L_KNEE},
+                                                      {15, FrameID::L_ANKLE_PITCH},
+                                                      {16, FrameID::L_ANKLE_ROLL},
+                                                      {16, FrameID::L_FOOT_BASE},
+                                                      {17, FrameID::R_HIP_PITCH},
+                                                      {18, FrameID::R_HIP_ROLL},
+                                                      {19, FrameID::R_HIP_YAW},
+                                                      {20, FrameID::R_KNEE},
+                                                      {21, FrameID::R_ANKLE_PITCH},
+                                                      {22, FrameID::R_ANKLE_ROLL},
+                                                      {22, FrameID::R_FOOT_BASE}};
     // clang-format on
 
     /**
@@ -154,8 +162,10 @@ namespace utility::actuation::tinyrobotics {
      */
     template <typename Scalar, int nq>
     inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
+        // Stay nq-sized (the model's configuration dimension): joints without a ServoID
+        // (K1's elbow yaws) keep 0. Do NOT resize to sensors->servo.size() — the servo
+        // message (20) is smaller than the model (22), and joint_map indexes up to nq-1.
         Eigen::Matrix<Scalar, nq, 1> q = Eigen::Matrix<Scalar, nq, 1>::Zero();
-        q.resize(sensors->servo.size(), 1);
         for (const auto& [index, servo_id] : joint_map) {
             q(index, 0) = sensors->servo.at(servo_id).present_position;
         }

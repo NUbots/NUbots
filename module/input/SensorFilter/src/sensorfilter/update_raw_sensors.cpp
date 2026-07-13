@@ -27,6 +27,7 @@
 #include "SensorFilter.hpp"
 
 #include "utility/input/FrameID.hpp"
+#include "utility/input/ServoID.hpp"
 #include "utility/platform/RawSensors.hpp"
 
 namespace module::input {
@@ -53,7 +54,9 @@ namespace module::input {
         }
 
         // **************** Servos ****************
-        for (uint32_t id = 0; id < n_servos; ++id) {
+        // Iterate the 20-entry ServoID message space, not n_servos (= the 22-joint K1
+        // model dimension — the two elbow-yaw joints have no ServoID).
+        for (uint32_t id = 0; id < utility::input::ServoID::NUMBER_OF_SERVOS; ++id) {
             const auto& raw_servo       = get_raw_servo(id, raw_sensors);
             const auto& hardware_status = raw_servo.hardware_error;
 

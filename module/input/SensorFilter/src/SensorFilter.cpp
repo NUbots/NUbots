@@ -81,7 +81,7 @@ namespace module::input {
             // Initialise the anchor frame (left foot base)
             Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
                                                                                        nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
+                                                                                       std::string("left_foot_link"))
                                         .translation()
                                         .y();
 
@@ -137,7 +137,7 @@ namespace module::input {
             Hwp                   = Eigen::Isometry3d::Identity();
             Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
                                                                                        nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
+                                                                                       std::string("left_foot_link"))
                                         .translation()
                                         .y();
 

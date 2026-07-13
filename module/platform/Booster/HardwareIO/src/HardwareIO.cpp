@@ -11,7 +11,9 @@
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
-    using booster::robot::b1::JointIndex;
+    // K1 joint layout (22 joints, no waist; crank slots = ankle pitch/roll) — NOT the
+    // T1 `JointIndex`, whose waist entry shifts every leg index up by one.
+    using JointIndex = booster::robot::b1::JointIndexK1;
     using extension::Configuration;
     using extension::behaviour::RunReason;
     using message::booster::BoosterFallDownState;
@@ -162,7 +164,7 @@ namespace module::platform::Booster {
         sensors->gyroscope.y()     = imu.gyro()[1];
         sensors->gyroscope.z()     = imu.gyro()[2];
 
-        // Serial chain motors: head (0-1), arms (2-9), waist (10)
+        // Serial chain motors: head (0-1), arms (2-9) — K1 has no waist
         // Indices in the serial vector match JointIndex enum values directly.
         const auto& serial = low_msg->motor_state_serial();
 
@@ -197,10 +199,15 @@ namespace module::platform::Booster {
         fill_parallel(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
         fill_parallel(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
         fill_parallel(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
+        // Crank slots carry the serial-equivalent ankle pitch/roll values.
+        fill_parallel(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);
+        fill_parallel(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);
         fill_parallel(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
         fill_parallel(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
         fill_parallel(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
         fill_parallel(sensors->servo.r_knee, JointIndex::kRightKneePitch);
+        fill_parallel(sensors->servo.r_ankle_pitch, JointIndex::kCrankUpRight);
+        fill_parallel(sensors->servo.r_ankle_roll, JointIndex::kCrankDownRight);
 
         // Battery SOC (updated by battery_handler)
         {

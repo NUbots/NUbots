@@ -140,6 +140,10 @@ namespace module::vision {
                         img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
                         break;
+                    case utility::vision::fourcc("RGB8"):  // packed 8-bit RGB (e.g. the NUSim camera bridge)
+                        img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                        cv::cvtColor(img_cv, img_cv, cv::COLOR_RGB2BGR);
+                        break;
                     default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
                 }
 

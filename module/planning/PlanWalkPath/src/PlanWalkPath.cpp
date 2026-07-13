@@ -221,7 +221,7 @@ namespace module::planning {
                 velocity_target = constrain_velocity(velocity_target);
 
                 // Emit the walk task with the calculated velocities
-                emit<Task>(std::make_unique<WalkProposal>(velocity_target));
+                emit<Task>(std::make_unique<Walk>(smooth_walk_command(velocity_target)));
 
                 // Emit debugging information for visualisation and monitoring
                 auto debug_information                       = std::make_unique<WalkToDebug>();
@@ -246,7 +246,7 @@ namespace module::planning {
             const Eigen::Vector3d turn_vector(cfg.rotate_velocity_x,
                                               sign * cfg.rotate_velocity_y,
                                               sign * cfg.rotate_velocity);
-            emit<Task>(std::make_unique<WalkProposal>(turn_vector));
+            emit<Task>(std::make_unique<Walk>(smooth_walk_command(turn_vector)));
         });
 
         on<Provide<PivotAroundPoint>>().then([this](const PivotAroundPoint& pivot_around_point) {
@@ -256,29 +256,22 @@ namespace module::planning {
             const Eigen::Vector3d pivot_vector(cfg.pivot_ball_velocity_x,
                                                sign * cfg.pivot_ball_velocity_y,
                                                sign * cfg.pivot_ball_velocity);
-            emit<Task>(std::make_unique<WalkProposal>(pivot_vector));
+            emit<Task>(std::make_unique<Walk>(smooth_walk_command(pivot_vector)));
         });
 
-        // Intercept Walk commands and apply smoothing
-        on<Provide<WalkProposal>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this](const WalkProposal&
-                                                                                                        walk) {
-            // Apply exponential smoothing to the walk command
-            Eigen::Vector3d smoothed_command =
-                walk.velocity_target.cwiseProduct(cfg.alpha) + previous_walk_command.cwiseProduct(cfg.one_minus_alpha);
+    }
 
-            Eigen::Vector3d smooth_diff = smoothed_command - walk.velocity_target;
-
-            // Visualise the walk path in NUsight
-            emit(graph("Walk Proposal", walk.velocity_target.x(), walk.velocity_target.y(), walk.velocity_target.z()));
-            emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
-            emit(graph("Walk Smoothing Difference", smooth_diff.x(), smooth_diff.y(), smooth_diff.z()));
-
-            // Store for next iteration
-            previous_walk_command = smoothed_command;
-
-            // Forward the smoothed command to the actual Walk skill
-            emit<Task>(std::make_unique<Walk>(smoothed_command));
-        });
+    // Exponential smoothing of the walk command, applied inline at every proposal
+    // emission. (This used to live in an on<Provide<WalkProposal>, Every<>> reaction,
+    // but that provider never ran under the Director and the whole walk chain was
+    // dead — the smoothing is paced by the proposal stream instead.)
+    Eigen::Vector3d PlanWalkPath::smooth_walk_command(const Eigen::Vector3d& velocity_target) {
+        Eigen::Vector3d smoothed_command =
+            velocity_target.cwiseProduct(cfg.alpha) + previous_walk_command.cwiseProduct(cfg.one_minus_alpha);
+        emit(graph("Walk Proposal", velocity_target.x(), velocity_target.y(), velocity_target.z()));
+        emit(graph("Smoothed Walk Command", smoothed_command.x(), smoothed_command.y(), smoothed_command.z()));
+        previous_walk_command = smoothed_command;
+        return smoothed_command;
     }
 
     Eigen::Vector3d PlanWalkPath::constrain_velocity(const Eigen::Vector3d& v) {

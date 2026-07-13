@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 # How confident do we need to be that this is a green horizon point
 confidence_threshold: 0.9

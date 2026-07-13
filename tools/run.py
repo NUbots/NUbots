@@ -34,7 +34,7 @@ import subprocess
 from termcolor import cprint
 
 import b
-from tools.utility import processor_check
+from utility import processor_check
 from utility.dockerise import run_on_docker
 from utility.roles import all_role_names
 from utility.shell import WrapPty

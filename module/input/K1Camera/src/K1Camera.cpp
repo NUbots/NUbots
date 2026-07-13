@@ -45,7 +45,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/vision/fourcc.hpp"
 
 namespace bip = boost::interprocess;
@@ -234,7 +236,10 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
-                    msg->Hcw               = ctx.Hcw;
+                    {
+                        std::lock_guard<std::mutex> lock(Hcw_mutex);
+                        msg->Hcw = latest_Hcw;
+                    }
 
                     emit(msg);
                 }
@@ -260,9 +265,23 @@ namespace module::input {
                 ctx->camera_name  = entry["name"].as<std::string>();
                 ctx->id           = entry["id"].as<uint32_t>();
                 ctx->running      = true;
-                ctx->Hcw          = Eigen::Isometry3d::Identity();  // TODO: load from config when available
                 ctx->thread       = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
                 cameras.push_back(std::move(ctx));
+            }
+        });
+
+        // Camera-to-world from the sensor filter's head kinematics: Hcw = Htc⁻¹ · Htw,
+        // with Htc = Sensors.Htx[L_CAMERA] (torso→camera) and Htw = world→torso. Without
+        // this the Image carries an identity Hcw and every vision world-projection
+        // (mesh geometry, ball convex-hull check) is computed from a camera at the
+        // world origin — silently discarding all detections.
+        on<Trigger<message::input::Sensors>>().then([this](const message::input::Sensors& sensors) {
+            const auto l_camera = static_cast<size_t>(utility::input::FrameID::L_CAMERA);
+            if (l_camera < sensors.Htx.size()) {
+                const Eigen::Isometry3d Htc(sensors.Htx[l_camera].matrix());
+                const Eigen::Isometry3d Htw(sensors.Htw.matrix());
+                std::lock_guard<std::mutex> lock(Hcw_mutex);
+                latest_Hcw = Htc.inverse() * Htw;
             }
         });
 

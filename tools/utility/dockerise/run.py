@@ -286,6 +286,14 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         docker_args.extend(["--network", network])
 
+        # Share the host IPC namespace so FastDDS shared-memory transport (SHM +
+        # data-sharing segments in /dev/shm) reaches other host-IPC containers,
+        # e.g. the NUSim K1 simulator. Without this, DDS discovery succeeds over
+        # UDP but segment opens fail ("Failed to open segment ... -> Function
+        # open_and_init_shared_segment_notification") and RPCs time out.
+        if _is_linux():
+            docker_args.extend(["--ipc", "host"])
+
         # Environment variables
         # This should be specified as VAR1=VALUE1,VAR2=VALUE2
         if kwargs["environment"] is not None:
