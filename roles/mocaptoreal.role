@@ -33,6 +33,4 @@ nuclear_role(
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
-  # Purpose
-  purpose::KeyboardWalk
 )

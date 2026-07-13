@@ -28,6 +28,15 @@ namespace module::actuation {
             cfg.servo_gain       = config["servo_gain"].as<float>();
             cfg.servo_torque     = config["servo_torque"].as<float>();
             cfg.time_horizon     = std::chrono::milliseconds(config["time_horizon_ms"].as<int>());
+            cfg.hinge_axis[0]    = config["hinge_axis"][0].as<float>();
+            cfg.hinge_axis[1]    = config["hinge_axis"][1].as<float>();
+            cfg.hinge_axis[2]    = config["hinge_axis"][2].as<float>();
+            cfg.r_elbow_sign     = config["joint_signs"]["r_elbow"].as<float>();
+            cfg.l_elbow_sign     = config["joint_signs"]["l_elbow"].as<float>();
+            cfg.r_knee_sign      = config["joint_signs"]["r_knee"].as<float>();
+            cfg.l_knee_sign      = config["joint_signs"]["l_knee"].as<float>();
+            cfg.r_ankle_sign     = config["joint_signs"]["r_ankle"].as<float>();
+            cfg.l_ankle_sign     = config["joint_signs"]["l_ankle"].as<float>();
         });
 
         on<Trigger<MotionCapture>>().then([this](const MotionCapture& mocap) {
@@ -51,7 +60,7 @@ namespace module::actuation {
                                                 skeleton.bones[11].rotation(2),
                                                 skeleton.bones[11].rotation(3)};
 
-                float r_elbow_angle = angleBetween(qRUpperArm, qRForeArm);
+                float r_elbow_angle = cfg.r_elbow_sign * signedAngleBetween(qRUpperArm, qRForeArm, cfg.hinge_axis);
 
 
                 // Left elbow
@@ -64,7 +73,7 @@ namespace module::actuation {
                                                 skeleton.bones[7].rotation(2),
                                                 skeleton.bones[7].rotation(3)};
 
-                float l_elbow_angle = angleBetween(qLUpperArm, qLForeArm);
+                float l_elbow_angle = cfg.l_elbow_sign * signedAngleBetween(qLUpperArm, qLForeArm, cfg.hinge_axis);
 
 
                 // Right knee
@@ -77,7 +86,7 @@ namespace module::actuation {
                                              skeleton.bones[18].rotation(2),
                                              skeleton.bones[18].rotation(3)};
 
-                float r_knee_angle = angleBetween(qRThigh, qRShin);
+                float r_knee_angle = cfg.r_knee_sign * signedAngleBetween(qRThigh, qRShin, cfg.hinge_axis);
 
 
                 // Left knee
@@ -90,7 +99,7 @@ namespace module::actuation {
                                              skeleton.bones[14].rotation(2),
                                              skeleton.bones[14].rotation(3)};
 
-                float l_knee_angle = angleBetween(qLThigh, qLShin);
+                float l_knee_angle = cfg.l_knee_sign * signedAngleBetween(qLThigh, qLShin, cfg.hinge_axis);
 
 
                 // Right ankle
@@ -99,7 +108,7 @@ namespace module::actuation {
                                             skeleton.bones[19].rotation(2),
                                             skeleton.bones[19].rotation(3)};
 
-                float r_ankle_angle = angleBetween(qRShin, qRFoot);
+                float r_ankle_angle = cfg.r_ankle_sign * signedAngleBetween(qRShin, qRFoot, cfg.hinge_axis);
 
 
                 // Left ankle
@@ -108,7 +117,7 @@ namespace module::actuation {
                                             skeleton.bones[15].rotation(2),
                                             skeleton.bones[15].rotation(3)};
 
-                float l_ankle_angle = angleBetween(qLShin, qLFoot);
+                float l_ankle_angle = cfg.l_ankle_sign * signedAngleBetween(qLShin, qLFoot, cfg.hinge_axis);
 
                 constexpr float rad_to_deg = 180.0f / 3.14159265358979323846f;
                 emit(graph("MocapToReal",
@@ -168,5 +177,24 @@ namespace module::actuation {
     float MocapToReal::angleBetween(MocapToReal::qRot qRotationA, MocapToReal::qRot qRotationB) {
         MocapToReal::qRot qResult = qMultiply(qInvert(qRotationA), qRotationB);
         return 2 * std::acos(qResult.t);
+    }
+
+    float MocapToReal::signedAngleBetween(MocapToReal::qRot qRotationA,
+                                          MocapToReal::qRot qRotationB,
+                                          const std::array<float, 3>& axis) {
+        MocapToReal::qRot qResult = qMultiply(qInvert(qRotationA), qRotationB);
+        // Twist (swing-twist decomposition) of the relative rotation about the hinge axis. The
+        // projection onto the axis carries the sign that 2*acos(t) throws away.
+        float projection = qResult.x * axis[0] + qResult.y * axis[1] + qResult.z * axis[2];
+        float angle      = 2.0f * std::atan2(projection, qResult.t);
+        // atan2 gives (-2pi, 2pi]; wrap to [-pi, pi] so opposite bend directions keep opposite signs
+        constexpr float pi = 3.14159265358979323846f;
+        if (angle > pi) {
+            angle -= 2.0f * pi;
+        }
+        else if (angle < -pi) {
+            angle += 2.0f * pi;
+        }
+        return angle;
     }
 }  // namespace module::actuation

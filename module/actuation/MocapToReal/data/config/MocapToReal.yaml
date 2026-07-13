@@ -13,3 +13,20 @@ servo_torque: 100
 # How far in the future each servo target's arrival time is set (ms). Smaller = snappier tracking,
 # larger = smoother but laggier motion
 time_horizon_ms: 50
+
+# Hinge axis, in the parent bone's local frame, used to extract a signed bend angle from the
+# relative bone rotation. If bend shows up on the wrong axis for this skeleton, change this,
+# not the joint signs.
+hinge_axis: [1, 0, 0]
+
+# Per-joint sign mapping the mocap bend angle onto message-space servo direction.
+# Message-space convention (post Offsets.yaml direction/offset, see Stand.yaml): knee bent = +,
+# elbow bent = -, ankle dorsiflexed = -. Left and right may need different values here if the
+# mocap skeleton mirrors its left/right bone frames.
+joint_signs:
+  r_elbow: -1
+  l_elbow: -1
+  r_knee: 1
+  l_knee: 1
+  r_ankle: -1
+  l_ankle: -1
