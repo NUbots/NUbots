@@ -56,11 +56,6 @@ namespace module::input {
         std::vector<std::unique_ptr<CameraContext>> cameras;
         std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hcws;
 
-        /// @brief Latest camera-to-world transform (from Sensors head kinematics),
-        /// shared by the camera threads. Guarded by Hcw_mutex.
-        std::mutex Hcw_mutex;
-        Eigen::Isometry3d latest_Hcw{Eigen::Isometry3d::Identity()};
-
         void camera_thread(CameraContext& ctx);
         void stop_cameras();
 
