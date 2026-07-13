@@ -245,7 +245,9 @@ namespace module::skill {
                     idx += JOINT_POS_SIZE;
 
                     // Velocities
-                    JointVector current_velocities_mj        = nubots_to_mjlab(joint_state.velocity);
+                    JointVector joint_velocities = joint_state.velocity * 2 * M_PI;  // Convert from rev/s to rad/s
+
+                    JointVector current_velocities_mj        = nubots_to_mjlab(joint_velocities);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_velocities_mj;
                     if (log_level <= DEBUG) {
                         emit(graph("Joint velocities (mjlab)", current_velocities_mj.transpose()));
