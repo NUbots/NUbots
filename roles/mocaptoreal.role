@@ -10,9 +10,14 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler
+  output::Overview
   # Sensors
   input::SensorFilter
   input::NatNet
+  # Webots
+  platform::Webots
+  # Director
+  extension::Director
   # Servos
   actuation::Servos
   actuation::Kinematics
@@ -30,6 +35,4 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
-  # Platform
-  platform::${SUBCONTROLLER}::HardwareIO
 )

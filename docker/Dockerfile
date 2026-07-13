@@ -471,4 +471,7 @@ RUN install -d -m 0755 /home/nubots/NUbots \
 # Configure the cache directories
 ENV CCACHE_DIR=/home/nubots/build/ccache
 
+# NatNet
+EXPOSE 1510-1511
+
 WORKDIR /home/nubots/NUbots
