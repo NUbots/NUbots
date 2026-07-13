@@ -2,10 +2,13 @@
 log_level: INFO
 
 # Tasks to emit on startup. Note: 0 priority will not emit the task.
+# Keep behaviour priorities below 2: Tester emits FallRecovery at hardcoded
+# priority 2 (mirroring Soccer, where play runs at 1). Any behaviour above 2
+# keeps the motors while fallen, so GetUp never gets to run.
 tasks:
   # Strategies
   align_ball_to_goal_priority: 1
-  find_ball_priority: 4
+  find_ball_priority: 1
   look_at_ball_priority: 0
   walk_to_ball_priority: 1
   walk_to_kick_ball_priority: 0
