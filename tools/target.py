@@ -56,13 +56,17 @@ def run(target, username, uid, reset, **kwargs):
         # Ensure the platform image is built
         platform.build(defaults.image, target, username, uid, reset)
 
+        # platform.build() tags generic as generic_k1 (see the NUgus-conflict note there),
+        # so the tag source must match or docker errors with "No such image".
+        tag_source = f"{target}_k1" if target == "generic" else target
+
         # Tag the built platform image as the selected image
         err = subprocess.call(
             [
                 "docker",
                 "image",
                 "tag",
-                defaults.image_name(target, username=username),
+                defaults.image_name(tag_source, username=username),
                 defaults.image_name("selected_k1", username=username),
             ]
         )
