@@ -60,7 +60,9 @@ def selected(image, username):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
+            # NB: plain sorted() here — the module-level list() platform helper below
+            # shadows the builtin, so list(sorted(names)) is a TypeError.
+            platform = sorted(names)[0]
             print(f"        The platform chosen will be {platform}")
             return platform
 
@@ -85,7 +87,7 @@ def build(image, platform, username, uid, reset):
 
     # If we are building the selected platform we need to work out what that refers to
     _selected = platform == "selected_k1"
-    platform = selected(image) if _selected else platform
+    platform = selected(image, username) if _selected else platform
 
     # Temporary workaround to prevent conflict with NUgus. Only the image *tag* gets
     # the _k1 suffix; the docker build arg must stay the real platform name, since the
