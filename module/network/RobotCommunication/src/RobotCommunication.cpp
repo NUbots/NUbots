@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -28,12 +28,13 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/RoboCup.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
@@ -48,15 +49,18 @@ namespace module::network {
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
-    using message::input::RoboCup;
+    using message::input::Message;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::planning::WalkTo;
+    using message::planning::WalkToDebug;
     using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::support::GlobalConfig;
+
     using utility::math::euler::mat_to_rpy_intrinsic;
+
 
     struct StartupDelay {};
 
@@ -107,7 +111,7 @@ namespace module::network {
                                 if (std::find(ignored_ip_addresses.begin(), ignored_ip_addresses.end(), remote_addr)
                                     == ignored_ip_addresses.end()) {
                                     ignored_ip_addresses.insert(remote_addr);
-                                    log<INFO>("Ignoring UDP packet from",
+                                    log<DEBUG>("Ignoring UDP packet from",
                                               remote_addr,
                                               "as it doesn't match configured filter address",
                                               cfg.udp_filter_address);
@@ -118,7 +122,7 @@ namespace module::network {
 
                             // Deserialise the incoming RoboCup message
                             const std::vector<unsigned char>& payload = p.payload;
-                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                            Message incoming_msg = NUClear::util::serialise::Serialise<Message>::deserialise(payload);
 
                             // Check if the incoming message is from the same player
                             bool own_player_message = global_config.player_id == incoming_msg.current_pose.player_id;
@@ -126,8 +130,15 @@ namespace module::network {
                             // Port-per-team ensures only teammates broadcast on this port
                             // Filter out messages from ourselves only
                             if (!own_player_message) {
-                                log<DEBUG>("Message received from teammate ID", incoming_msg.current_pose.player_id);
-                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
+                                log<DEBUG>("Message received from teammate ID",
+                                          incoming_msg.current_pose.player_id,
+                                          "position:",
+                                          incoming_msg.current_pose.position.x(),
+                                          incoming_msg.current_pose.position.y(),
+                                          incoming_msg.current_pose.position.z(),
+                                          "going for ball:",
+                                          incoming_msg.going_for_ball);
+                                emit(std::make_unique<Message>(std::move(incoming_msg)));
                             }
                         });
                 }
@@ -157,7 +168,7 @@ namespace module::network {
            Optional<With<Field>>,
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
-           Optional<With<WalkTo>>,
+           Optional<With<WalkToDebug>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -166,9 +177,9 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
-                         const std::shared_ptr<const WalkTo>& walk_to,
+                         const std::shared_ptr<const WalkToDebug>& walk_to,
                          const GlobalConfig& config) {
-                auto msg = std::make_unique<RoboCup>();
+                auto msg = std::make_unique<Message>();
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
@@ -176,33 +187,15 @@ namespace module::network {
                 // State
                 // If there is game state information, then process
                 if (game_state) {
-                    int penalty_reason = game_state->self.penalty_reason;
-                    switch (penalty_reason) {
-                        case 0: msg->state = 0; break;
-                        case 1: msg->state = 1; break;
-                        default: msg->state = 2; break;
+                    // Penalty
+                    if (game_state->self.penalty_reason == GameState::PenaltyReason::UNPENALISED) {
+                        msg->state = message::input::State::UNPENALISED;
                     }
-
-                    // Team colour
-                    switch (int(game_state->team.team_colour)) {
-                        case GameState::TeamColour::BLUE: msg->current_pose.team = message::input::Team::BLUE; break;
-                        case GameState::TeamColour::RED: msg->current_pose.team = message::input::Team::RED; break;
-                        case GameState::TeamColour::YELLOW:
-                            msg->current_pose.team = message::input::Team::YELLOW;
-                            break;
-                        case GameState::TeamColour::BLACK: msg->current_pose.team = message::input::Team::BLACK; break;
-                        case GameState::TeamColour::WHITE: msg->current_pose.team = message::input::Team::WHITE; break;
-                        case GameState::TeamColour::GREEN: msg->current_pose.team = message::input::Team::GREEN; break;
-                        case GameState::TeamColour::ORANGE:
-                            msg->current_pose.team = message::input::Team::ORANGE;
-                            break;
-                        case GameState::TeamColour::PURPLE:
-                            msg->current_pose.team = message::input::Team::PURPLE;
-                            break;
-                        case GameState::TeamColour::BROWN: msg->current_pose.team = message::input::Team::BROWN; break;
-                        case GameState::TeamColour::GRAY: msg->current_pose.team = message::input::Team::GRAY; break;
-                        default: msg->current_pose.team = message::input::Team::UNKNOWN_TEAM;
+                    else {
+                        msg->state = message::input::State::PENALISED;
                     }
+                    // Team
+                    msg->current_pose.team = message::input::Team::NUBOTS;
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
@@ -222,11 +215,13 @@ namespace module::network {
                         Eigen::Vector3d rTFf  = Hft.translation();
 
                         // Store our position from field to torso
-                        msg->current_pose.position     = rTFf.cast<float>();
+                        msg->current_pose.position = rTFf.cast<float>();
+                        // The mixed-team protocol expects the other team's field x-axis convention, which is
+                        // mirrored relative to ours, so flip x before sending
+                        msg->current_pose.position.x() *= -1.0F;
                         msg->current_pose.position.z() = mat_to_rpy_intrinsic(Hft.rotation()).z();
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
-                        msg->current_pose.cost       = field->cost;
                     }
                 }
 
@@ -245,6 +240,9 @@ namespace module::network {
                     Eigen::Vector3d rDFf = Hfd.translation();
                     // Store position
                     msg->target_pose.position = rDFf.cast<float>();
+                    // The mixed-team protocol expects the other team's field x-axis convention, which is
+                    // mirrored relative to ours, so flip x before sending
+                    msg->target_pose.position.x() *= -1.0F;
                     // Extract yaw from rotation matrix
                     msg->target_pose.position.z() = mat_to_rpy_intrinsic(Hfd.rotation()).z();
                     // Copy team and player ID to target pose
@@ -263,32 +261,61 @@ namespace module::network {
                 // Check if the ball has been seen recently, if it hasn't the message fields will 0
                 // and the confidence will be 0
                 if (loc_ball && (NUClear::clock::now() - loc_ball->time_of_measurement < cfg.ball_timeout)) {
-                    // Convert position of ball from world to field space
+                    // Convert position and velocity of ball from world to field space
                     if (field) {
-                        Eigen::Vector3d rBWw = loc_ball->rBWw;
-                        // Transform the field state into Hfw
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
-                        Eigen::Vector3d rBFf  = Hfw * rBWw;
+
                         // Store our position from field to ball
-                        msg->ball.position = rBFf.cast<float>();
+                        Eigen::Vector3d rBFf = Hfw * loc_ball->rBWw;
+                        msg->ball.position   = rBFf.cast<float>();
+
+                        // Rotate the ball's velocity from world frame into field frame (translation doesn't
+                        // apply to a velocity, so only use the rotation part of Hfw)
+                        Eigen::Vector3d vBFf = Hfw.linear() * loc_ball->vBw;
+                        msg->ball.velocity   = vBFf.cast<float>();
+
+                        // The mixed-team protocol expects the other team's field x-axis convention, which is
+                        // mirrored relative to ours, so flip x before sending
+                        msg->ball.position.x() *= -1.0F;
+                        msg->ball.velocity.x() *= -1.0F;
                     }
-                    // Confidence - our own estimates are 1.0, while if it's from a teammate, we have no confidence
-                    // This it to prevent everyone echoing
-                    msg->ball.confidence = loc_ball->confidence;
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-
-                    msg->ball.velocity = (loc_ball->vBw).cast<float>();
+                    // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate
+                    // guesses)
+                    if (loc_ball->confidence > 0.0) {
+                        msg->ball.age =
+                            std::chrono::duration<float>(NUClear::clock::now() - loc_ball->time_of_measurement).count();
+                    }
                 }
 
-                // Current purpose (soccer position) of the Robot
-                if (purpose) {
-                    msg->purpose = *purpose;
-                }
-                // Override the player ID in the purpose message to be consistent, and in case purpose is not set
-                msg->purpose.player_id = config.player_id;
+                // Purpose information, simple a bool in the new proto
+                msg->going_for_ball = (purpose && purpose->purpose.value == SoccerPosition::ATTACK);
+
+                // Single-line summary of the outgoing broadcast
+                log<DEBUG>(fmt::format(
+                    "Broadcast: id={} {} pose=({:.2f}, {:.2f}, {:.2f}) walk=({:.2f}, {:.2f}, {:.2f}) "
+                    "target=({:.2f}, {:.2f}, {:.2f}) kick=({:.2f}, {:.2f}) ball=({:.2f}, {:.2f}) age={:.1f}s "
+                    "going_for_ball={}",
+                    msg->current_pose.player_id,
+                    msg->state == message::input::State::PENALISED ? "PENALISED" : "UNPENALISED",
+                    msg->current_pose.position.x(),
+                    msg->current_pose.position.y(),
+                    msg->current_pose.position.z(),
+                    msg->walk_command.x(),
+                    msg->walk_command.y(),
+                    msg->walk_command.z(),
+                    msg->target_pose.position.x(),
+                    msg->target_pose.position.y(),
+                    msg->target_pose.position.z(),
+                    msg->kick_target.x(),
+                    msg->kick_target.y(),
+                    msg->ball.position.x(),
+                    msg->ball.position.y(),
+                    msg->ball.age,
+                    msg->going_for_ball));
 
                 // Check serialised size before sending
-                auto payload = NUClear::util::serialise::Serialise<RoboCup>::serialise(*msg);
+                auto payload = NUClear::util::serialise::Serialise<Message>::serialise(*msg);
                 if (payload.size() > cfg.max_message_size) {
                     log<WARN>("RoboCup message size",
                               payload.size(),
@@ -314,6 +341,7 @@ namespace module::network {
                         log<DEBUG>("Messages sent this game:", messages_sent, "/ ", cfg.max_messages_per_game);
                     }
                 }
+
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

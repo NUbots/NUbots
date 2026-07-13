@@ -56,6 +56,8 @@ message Field {
     repeated vec3 particles = 5;
     /// Association lines between observations and landmarks
     repeated Line association_lines = 6;
+    /// True once localisation has accepted enough measurements since the last reset to be trusted
+    bool localised = 7;
 }
 
 message ResetFieldLocalisation {}

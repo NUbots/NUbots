@@ -31,6 +31,8 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
+#include "walk_path_control.hpp"
+
 #include "extension/Behaviour.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
@@ -41,26 +43,12 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Maximum walk command velocity x for walking
-            double max_x_velocity = 0.0;
-            /// @brief Maximum walk command velocity y for walking
-            double max_y_velocity = 0.0;
-            /// @brief Maximum angular velocity command for walking
-            double max_angular_velocity = 0.0;
-            /// @brief Maximum velocity magnitude of the walk command to clamp "acceleration"
-            double max_velocity_magnitude = 0.0;
-            /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
-            double acceleration = 0.0;
-            // Distance to target point to begin decelerating and aligning with target heading
-            double max_align_radius = 0.0;
-            // Distance to target point to begin decelerating
-            double min_align_radius = 0.0;
-            // Maximum error in orientation to target heading for no translational velocity
-            double max_angle_error = 0.0;
-            // Minimum error in orientation to target heading for maximum translational velocity
-            double min_angle_error = 0.0;
-            // Proportional gain for strafing to target point
-            double strafe_gain = 0.0;
+            /// @brief WalkTo controller parameters (velocity limits, gains, alignment regions)
+            walk_path::WalkToParams walk_to{};
+            /// @brief Minimum effective velocity command per axis, smaller nonzero commands are bumped up to these
+            Eigen::Vector3d min_velocity = Eigen::Vector3d::Zero();
+            /// @brief Smoothed commands below this per-axis magnitude are snapped to zero
+            Eigen::Vector3d zero_tolerance = Eigen::Vector3d::Zero();
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
@@ -69,12 +57,12 @@ namespace module::planning {
             /// @brief Rotate on spot walk command side velocity
             double rotate_velocity_y = 0.0;
 
-            /// @brief Pivot ball command angular velocity
-            double pivot_ball_velocity = 0.0;
-            /// @brief Pivot ball forward velocity
-            double pivot_ball_velocity_x = 0.0;
-            /// @brief Pivot ball side velocity
-            double pivot_ball_velocity_y = 0.0;
+            /// @brief Pivot around point angular velocity (rad/s)
+            double pivot_angular_velocity = 0.0;
+            /// @brief Radius of the orbit around the pivot point (m)
+            double pivot_radius = 0.0;
+            /// @brief Forward velocity bias while pivoting (m/s)
+            double pivot_forward_velocity = 0.0;
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
@@ -87,30 +75,16 @@ namespace module::planning {
             /// @brief Complementary exponential smoothing factor for the velocity command [x, y, theta]
             Eigen::Vector3d one_minus_alpha = Eigen::Vector3d::Ones() - alpha;
 
-            /// @brief Starting velocity for the walk command
-            Eigen::Vector3d starting_velocity = Eigen::Vector3d(0, 0, 0);
-
         } cfg;
 
-        /// @brief Previous walk command
+        /// @brief Previous (smoothed, pre-dead-zone) walk command
         Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Update frequency of the walk command smoothing
         static constexpr int UPDATE_FREQUENCY = 10;
 
-        /// @brief Current magnitude of the translational velocity of the walk command
-        double velocity_magnitude = 0.0;
-
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};
-
-        /// @brief Constrain a velocity vector to ensure it is within the limits
-        /// @param v velocity vector to constrain
-        /// @return Constrained velocity vector
-        Eigen::Vector3d constrain_velocity(const Eigen::Vector3d& v);
-
-        /// @brief Exponentially smooth a proposed walk command (stores state).
-        Eigen::Vector3d smooth_walk_command(const Eigen::Vector3d& velocity_target);
 
         /// @brief Gets the closest obstacle in the path to the target, including obstacles close to that obstacle
         /// @param all_obstacles vector of all obstacles in the world

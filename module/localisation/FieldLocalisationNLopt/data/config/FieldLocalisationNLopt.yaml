@@ -17,7 +17,7 @@ save_map: false
 min_field_line_points: 8
 
 # Minimum number of field line intersections for an update
-min_field_line_intersections: 3
+min_field_line_intersections: 4
 
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 1
@@ -28,7 +28,7 @@ use_ground_truth_localisation: false
 # Bool to use the Hungarian algorithm for data association
 use_hungarian: true
 
-# Cost for a point outside the field
+# Cost for an intersection detection that cannot be associated with any landmark
 out_of_field_cost: 3.0
 
 # Reset localisation if the cost is above a threshold
@@ -46,8 +46,11 @@ window_size: 2.0
 # Number of angles to check during localisation reset search
 num_angles: 8
 
+# Number of accepted measurements after a reset before the pose estimate is trusted (Field.localised)
+min_localised_measurements: 5
+
 # Weighting associated with field line distance error cost term
-field_line_distance_weight: 1.0
+field_line_distance_weight: 0.0
 
 # Weighting associated with field intersection landmark error
 field_line_intersection_weight: 5.0
@@ -70,15 +73,15 @@ goal_post_error_tolerance: 0.5
 normal_opt:
   algorithm: LN_COBYLA
   # Relative tolerance on the optimisation parameters
-  xtol_rel: 1e-6
+  xtol_rel: 1e-12
   # Relative tolerance on the optimisation function value
-  ftol_rel: 1e-6
+  ftol_rel: 1e-12
   # Maximum number of evaluations for the optimisation
   maxeval: 1000
 
 uncertainty_opt: # Quicker optimisation, but less accurate.
-  algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific problem (quick and nasty optimisation)
-  # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation parameters at time t. Stop optimising when del_x < xtol_rel.
+  algorithm: LN_SBPLX # Subplex, a variant of Nelder-Mead that seems to perform better for this specific >
+  # Relative tolerance on the change del_x = |((x_{t}-x_{t-1})/x_{t-1}| where x_{t} are the optimisation >
   xtol_rel: 1e-3
   # Relative tolerance on the optimisation function value, del_f = |(f_{t}-f{t-1})/f_{t-1}|.
   ftol_rel: 1e-3

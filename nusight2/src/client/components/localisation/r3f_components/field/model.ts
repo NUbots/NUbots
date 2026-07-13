@@ -24,7 +24,7 @@ export class FieldModel {
       dimensions: FieldDimensions.of(),
       fieldColor: "#00cc00",
       lineColor: "#ffffff",
-      fieldType: "robocup",
+      fieldType: "robocup_small",
       blueGoalColor: "#0000ff",
       yellowGoalColor: "#ffff00",
     });

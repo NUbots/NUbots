@@ -25,7 +25,7 @@ import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
 import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
-import { Nugus } from "./r3f_components/nugus";
+import { K1 } from "./r3f_components/k1";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
@@ -43,7 +43,8 @@ type LocalisationViewProps = {
 
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
-  { label: "Robocup", value: "robocup" },
+  { label: "Robocup (Small)", value: "robocup_small" },
+  { label: "Robocup (Large)", value: "robocup_large" },
 ];
 
 // Apply the interfaces to the component's props
@@ -502,7 +503,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
   return (
     <object3D key={robot.id}>
-      <Nugus model={robot} />
+      <K1 model={robot} />
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
@@ -628,11 +629,10 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
 
-    {/* Goal labels - default to blue team if no robots available */}
+    {/* Goal labels in field frame: own goal (+x), opponent goal (-x). */}
     {model.goalsVisible && (
       <GoalLabels
         fieldModel={model.field}
-        teamColour={model.robots.length > 0 ? (model.target || model.robots[0]).teamColour : "blue"}
         cameraPitch={model.camera.pitch}
         cameraYaw={model.camera.yaw}
       />

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,23 +24,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <memory>
-
-#include "ScriptKick.hpp"
+#include "K1VisualKick.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/Limbs.hpp"
+#include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/skill/Kick.hpp"
-
-#include "utility/input/LimbID.hpp"
-#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
+    using message::booster::BoosterMode;
+    using message::booster::K1Mode;
     using message::skill::Kick;
     using VisualKick = message::booster::BoosterVisualKick;
     using KickVer    = message::booster::VisualKickVer;
@@ -48,28 +45,46 @@ namespace module::skill {
     K1VisualKick::K1VisualKick(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("ScriptKick.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file ScriptKick.yaml
+        on<Configuration>("K1VisualKick.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.version     = config["version"].as<int>() == 1 ? KickVer::V1 : KickVer::V2;
+            cfg.kick_duration = std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["kick_duration"].as<double>()));
         });
 
-        on<Provide<Kick>>().then([this](const Kick& kick, const RunReason& run_reason) {
-            // If the script has finished executing, then this is Done
-            if (run_reason == RunReason::SUBTASK_DONE) {
-                emit<Task>(std::make_unique<Done>());
-                return;
-            }
-            // If it isn't a new task, keep doing whatever we were doing
-            if (run_reason != RunReason::NEW_TASK) {
-                emit<Task>(std::make_unique<Continue>());
-                return;
-            }
+        // Every lets the task re-run to check whether kick_duration has elapsed
+        on<Provide<Kick>, Every<10, Per<std::chrono::seconds>>>().then(
+            [this](const RunReason& run_reason) {
+                // The SDK kick is autonomous, so the Kick task's leg/target/direction are unused
+                if (run_reason == RunReason::NEW_TASK) {
+                    log<INFO>("Starting visual kick");
+                    // Kicking requires movement, so request soccer mode from the Booster hardware.
+                    auto mode  = std::make_unique<BoosterMode>();
+                    mode->mode = K1Mode::SOCCER;
+                    emit(std::move(mode));
+                    auto vk     = std::make_unique<VisualKick>();
+                    vk->start   = true;
+                    vk->version = cfg.version;
+                    emit(std::move(vk));
+                    kick_start_time = NUClear::clock::now();
+                }
 
-            auto vk   = std::make_unique<VisualKick>();
-            vk->start = true;
-            vk->ver   = KickVer::V2;
+                // No completion feedback from the SDK, so finish after kick_duration
+                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration) {
+                    emit<Task>(std::make_unique<Done>());
+                }
+                else {
+                    emit<Task>(std::make_unique<Continue>());
+                }
+            });
 
-            emit<Task>(emit<VisualKick>(vk));
+        // Stop the SDK behaviour when the Kick task ends
+        on<Stop<Kick>>().then([this] {
+            log<INFO>("Stopping visual kick");
+            auto vk     = std::make_unique<VisualKick>();
+            vk->start   = false;
+            vk->version = cfg.version;
+            emit(std::move(vk));
         });
     }
 

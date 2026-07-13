@@ -169,22 +169,41 @@ export class LocalisationController {
           borderStripMinWidth: 0.38,
         });
         break;
-      case "robocup":
+      case "robocup_small":
         model.field.dimensions = new FieldDimensions({
           lineWidth: 0.06,
           markWidth: 0.1,
-          fieldLength: 9,
-          fieldWidth: 6,
-          goalDepth: 0.6,
-          goalWidth: 2.6,
-          goalAreaLength: 1,
-          goalAreaWidth: 3,
-          penaltyAreaLength: 2,
-          penaltyAreaWidth: 5,
-          goalCrossbarHeight: 1.25,
+          fieldLength: 9.0,
+          fieldWidth: 6.0,
+          goalDepth: 0.58,
+          goalWidth: 2.575,
+          goalAreaLength: 0.9,
+          goalAreaWidth: 2.9,
+          penaltyAreaLength: 1.9,
+          penaltyAreaWidth: 3.9,
+          goalCrossbarHeight: 1.2,
           goalPostDiameter: 0.1,
-          goalNetHeight: 1,
-          penaltyMarkDistance: 1.5,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 1.47,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+      case "robocup_large":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 9.0,
+          fieldWidth: 6.0,
+          goalDepth: 0.5,
+          goalWidth: 1.8,
+          goalAreaLength: 0.9,
+          goalAreaWidth: 2.9,
+          penaltyAreaLength: 1.9,
+          penaltyAreaWidth: 3.9,
+          goalCrossbarHeight: 1.2,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 1.47,
           centerCircleDiameter: 1.5,
           borderStripMinWidth: 1.0,
         });

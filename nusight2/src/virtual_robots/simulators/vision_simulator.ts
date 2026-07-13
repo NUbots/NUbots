@@ -1,3 +1,6 @@
+import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/message/output/CompressedImage";
+import { Ball_MeasurementTypeEnum, Balls } from "@proto/message/vision/Ball";
+import { Goal_SideEnum, Goals } from "@proto/message/vision/Goal";
 import fs from "fs";
 import { autorun } from "mobx";
 import { computedFn } from "mobx-utils";
@@ -5,10 +8,7 @@ import { Matrix4, Vector3 } from "three";
 
 import { FieldDimensions } from "../../shared/field/dimensions";
 import { fourcc } from "../../shared/image_decoder/fourcc";
-import { Imat4 } from "../../shared/messages";
-import { message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { TimestampObject } from "../../shared/time/timestamp";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";
 
@@ -24,12 +24,6 @@ import image8 from "./images/8.jpg";
 import image9 from "./images/9.jpg";
 import image10 from "./images/10.jpg";
 import { periodic } from "./periodic";
-import CompressedImage = message.output.CompressedImage;
-import Projection = message.output.CompressedImage.Lens.Projection;
-import MeasurementType = message.vision.Ball.MeasurementType;
-import Balls = message.vision.Balls;
-import Side = message.vision.Goal.Side;
-import Goals = message.vision.Goals;
 
 export class VisionSimulator extends Simulator {
   constructor(
@@ -66,20 +60,20 @@ export class VisionSimulator extends Simulator {
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t);
     return {
       messageType: "message.output.CompressedImage",
-      buffer: CompressedImage.encode({
+      buffer: new CompressedImage({
         format: fourcc("JPEG"),
         dimensions: { x: 712, y: 463 },
         data,
         id,
         name: `Virtual Camera #${id}`,
-        timestamp: TimestampObject.fromSeconds(time),
+        timestamp: toProtoTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         lens: {
-          projection: Projection.RECTILINEAR,
+          projection: CompressedImage_Lens_ProjectionEnum.RECTILINEAR,
           focalLength: 415 / 712,
           fov: 1,
         },
-      }).finish(),
+      }).toBinary(),
     };
   });
 
@@ -90,9 +84,9 @@ export class VisionSimulator extends Simulator {
     const uBCc = new Vector3(10, 1, 0).normalize().applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t));
     return {
       messageType: "message.vision.Balls",
-      buffer: Balls.encode({
+      buffer: new Balls({
         id: 1,
-        timestamp: TimestampObject.fromSeconds(time),
+        timestamp: toProtoTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         balls: [
           {
@@ -100,13 +94,13 @@ export class VisionSimulator extends Simulator {
             radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             measurements: [
               {
-                type: MeasurementType.ANGULAR,
+                type: Ball_MeasurementTypeEnum.ANGULAR,
                 rBCc: new Vector3(1, 0, 0),
               },
             ],
           },
         ],
-      }).finish(),
+      }).toBinary(),
     };
   }
 
@@ -117,13 +111,13 @@ export class VisionSimulator extends Simulator {
     const { goalCrossbarHeight } = FieldDimensions.of();
     return {
       messageType: "message.vision.Goals",
-      buffer: Goals.encode({
+      buffer: new Goals({
         id: 1,
-        timestamp: TimestampObject.fromSeconds(time),
+        timestamp: toProtoTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         goals: [
           {
-            side: Side.RIGHT,
+            side: Goal_SideEnum.RIGHT,
             post: {
               top: new Vector3(5, -1, goalCrossbarHeight / 2).normalize(),
               bottom: new Vector3(5, -1, -goalCrossbarHeight / 2).normalize(),
@@ -132,7 +126,7 @@ export class VisionSimulator extends Simulator {
             measurements: [],
           },
           {
-            side: Side.LEFT,
+            side: Goal_SideEnum.LEFT,
             post: {
               top: new Vector3(5, 1, goalCrossbarHeight / 2).normalize(),
               bottom: new Vector3(5, 1, -goalCrossbarHeight / 2).normalize(),
@@ -141,7 +135,7 @@ export class VisionSimulator extends Simulator {
             measurements: [],
           },
           {
-            side: Side.UNKNOWN_SIDE,
+            side: Goal_SideEnum.UNKNOWN_SIDE,
             post: {
               top: new Vector3(5, 0, goalCrossbarHeight / 2).normalize(),
               bottom: new Vector3(5, 0, -goalCrossbarHeight / 2).normalize(),
@@ -150,7 +144,7 @@ export class VisionSimulator extends Simulator {
             measurements: [],
           },
         ],
-      }).finish(),
+      }).toBinary(),
     };
   }
 }
@@ -159,11 +153,15 @@ function toUint8Array(b: Buffer): Uint8Array {
   return new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
 }
 
-function toProtoMat44(m: Matrix4): Imat4 {
+function toProtoMat44(m: Matrix4) {
   return {
     x: { x: m.elements[0], y: m.elements[1], z: m.elements[2], t: m.elements[3] },
     y: { x: m.elements[4], y: m.elements[5], z: m.elements[6], t: m.elements[7] },
     z: { x: m.elements[8], y: m.elements[9], z: m.elements[10], t: m.elements[11] },
     t: { x: m.elements[12], y: m.elements[13], z: m.elements[14], t: m.elements[15] },
   };
+}
+
+function toProtoTimestamp(seconds: number) {
+  return { seconds: BigInt(Math.floor(seconds)), nanos: Math.floor((seconds * 1e9) % 1e9) };
 }

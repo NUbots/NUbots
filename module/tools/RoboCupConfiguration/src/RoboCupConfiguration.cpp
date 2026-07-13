@@ -53,8 +53,9 @@ namespace module::tools {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.wifi_networks = config["wifi_networks"].as<std::map<std::string, std::string>>();
-            cfg.common_ips    = config["common_ips"].as<std::vector<std::string>>();
+            cfg.wifi_networks      = config["wifi_networks"].as<std::map<std::string, std::string>>();
+            cfg.common_ips         = config["common_ips"].as<std::vector<std::string>>();
+            cfg.field_preset_names = config["field_presets"].as<std::vector<std::string>>();
         });
 
         on<Startup>().then([this] {
@@ -70,7 +71,12 @@ namespace module::tools {
             curs_set(0);
 
             // Set the fields and show them
-            get_config_values();
+            try {
+                get_config_values();
+            }
+            catch (const std::exception& e) {
+                display.log_message = std::string("Startup error: ") + e.what();
+            }
             refresh_view();
         });
 
@@ -136,12 +142,10 @@ namespace module::tools {
                     display.log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
-                    system("systemctl enable --now wpa_supplicant");
-                    system("systemctl enable --now systemd-networkd");
+                    system("nmcli radio all on");
                     break;
                 case 'W':  // disables wifi services
-                    system("systemctl disable --now wpa_supplicant");
-                    system("systemctl disable --now systemd-networkd");
+                    system("nmcli radio all off");
                     break;
                 case 'X':  // shutdown powerplant
                     powerplant.shutdown();
@@ -162,18 +166,22 @@ namespace module::tools {
 
         // Team ID
         YAML::Node global_config = Configuration("GlobalConfig.yaml", hostname, binary, platform).config;
-        team_id                  = global_config["team_id"].as<int>();
-        player_id                = global_config["player_id"].as<int>();
+        team_id                  = global_config["team_id"].as<int>(1);
+        player_id                = global_config["player_id"].as<int>(1);
 
         // Robot position
         YAML::Node soccer_config = Configuration("Soccer.yaml", hostname, binary, platform).config;
-        is_goalie                = soccer_config["is_goalie"].as<bool>();
+        is_goalie                = soccer_config["is_goalie"].as<bool>(false);
+
+        // Field type
+        YAML::Node fd_config = Configuration("FieldDescription.yaml", hostname, binary, platform).config;
+        field_type           = fd_config["field_type"].as<std::string>("small");
 
         // Network info
         wifi_interface = utility::support::get_wireless_interface();
         ip_address     = utility::support::get_ip_address(wifi_interface);
         ssid           = utility::support::get_ssid(wifi_interface);
-        password       = utility::support::get_wifi_password(ssid, wifi_interface);
+        password       = utility::support::get_wifi_password(ssid);
 
         // Check if we have permissions
         if (geteuid() != 0) {
@@ -186,8 +194,8 @@ namespace module::tools {
         set_config_values();
 
         // Check if we are on a robot
-        if (get_platform() != "nugus") {
-            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
+        if (get_platform() != "booster") {
+            display.log_message = "Configure Error: Network configuration only available on Booster robots!";
             return;
         }
 
@@ -197,19 +205,22 @@ namespace module::tools {
             return;
         }
 
-        // Copy the network files
-        std::filesystem::copy_file(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname),
-                                   "/etc/systemd/network/30-wifi.network",
-                                   std::filesystem::copy_options::overwrite_existing);
-        std::filesystem::copy_file(
-            fmt::format("system/{}/etc/wpa_supplicant/wpa_supplicant-{}.conf", hostname, wifi_interface),
-            fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
-            std::filesystem::copy_options::overwrite_existing);
+        // Copy the nmconnection file and restrict permissions (NetworkManager requires 600)
+        const std::string nm_src =
+            fmt::format("system/{}/etc/NetworkManager/system-connections/wifi-robocup.nmconnection", hostname);
+        const std::string nm_dst = "/etc/NetworkManager/system-connections/wifi-robocup.nmconnection";
+        std::filesystem::copy_file(nm_src, nm_dst, std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::permissions(nm_dst,
+                                     std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+                                     std::filesystem::perm_options::replace);
 
-        // Restart the network
-        system("systemctl restart systemd-networkd");
-        system("systemctl restart wpa_supplicant");
-        system(("systemctl restart wpa_supplicant@" + wifi_interface).c_str());
+        // Show a popup while nmcli connects, as it can take a few seconds. nmcli's own output is
+        // redirected to /dev/null so it doesn't corrupt the curses display.
+        draw_popup("Connecting...");
+
+        // Reload connections and bring up the new profile
+        system("nmcli connection reload > /dev/null 2>&1");
+        system(("nmcli connection up wifi-robocup ifname " + wifi_interface + " > /dev/null 2>&1").c_str());
 
         display.log_message = "Network configured!";
     }
@@ -235,9 +246,18 @@ namespace module::tools {
             file << config;
         }
 
+        {
+            // Write selected field type to FieldDescription.yaml
+            std::string fd_file  = get_config_file("FieldDescription.yaml");
+            YAML::Node config    = YAML::LoadFile(fd_file);
+            config["field_type"] = field_type;
+            std::ofstream file(fd_file);
+            file << config;
+        }
+
         // Check if we are on a robot
-        if (get_platform() != "nugus") {
-            display.log_message = "Configure Error: Network configuration only available on NUgus robots!";
+        if (get_platform() != "booster") {
+            display.log_message = "Configure Error: Network configuration only available on Booster robots!";
             return;
         }
 
@@ -252,10 +272,7 @@ namespace module::tools {
             return;
         }
 
-        /* WIRELESS NETWORK SYSTEMD CONFIG */
-
-        // Get folder name
-        const std::string systemd_folder = fmt::format("system/{}/etc/systemd/network", hostname);
+        /* NETWORKMANAGER CONFIG */
 
         // Parse the IP address
         std::stringstream ss(ip_address);
@@ -274,34 +291,35 @@ namespace module::tools {
                 "be the player number. ";
         }
 
-        // Write the new ip address to the file
-        std::ofstream(fmt::format("{}/30-wifi.network", systemd_folder))
-            << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
-                           wifi_interface,
-                           ip_address,
-                           ip_parts[0],
-                           ip_parts[1]);
+        // Write the nmconnection file for the RoboCup WiFi network
+        const std::string nm_dir = fmt::format("system/{}/etc/NetworkManager/system-connections", hostname);
+        system(("mkdir -p " + nm_dir).c_str());
 
-
-        /* WPA_SUPPLICANT CONFIG */
-
-        // Make a new wpa_supplicant file in the robot-specific directory
-        // This is so that we don't lose the original if we need it
-        // And so when we append to it with a high priority, we are doing it from fresh
-        // And will not encounter any issues when running multiple times
-        std::string wpa_supplicant_dir  = fmt::format("system/{}/etc/wpa_supplicant", hostname);
-        std::string wpa_supplicant_file = fmt::format("{}/wpa_supplicant-{}.conf", wpa_supplicant_dir, wifi_interface);
-        system(("mkdir -p " + wpa_supplicant_dir).c_str());
-
-        std::filesystem::copy_file(
-            fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
-            wpa_supplicant_file,
-            std::filesystem::copy_options::overwrite_existing);
-
-        // Append to the wpa_supplicant file with a high priority
-        std::string command =
-            "wpa_passphrase " + ssid + " " + password + " | sed 's/}/\tpriority=9999\\n}/' >> " + wpa_supplicant_file;
-        system(command.c_str());
+        std::ofstream(fmt::format("{}/wifi-robocup.nmconnection", nm_dir)) << fmt::format(
+            "[connection]\n"
+            "id=wifi-robocup\n"
+            "uuid=07814fae-fa1d-479b-ac03-30e13717a27c\n"
+            "type=wifi\n"
+            "interface-name={}\n"
+            "autoconnect=true\n\n"
+            "[wifi]\n"
+            "ssid={}\n"
+            "mode=infrastructure\n\n"
+            "[wifi-security]\n"
+            "key-mgmt=wpa-psk\n"
+            "psk={}\n\n"
+            "[ipv4]\n"
+            "method=manual\n"
+            "address1={}/16,{}.{}.3.1\n"
+            "dns=8.8.8.8;\n\n"
+            "[ipv6]\n"
+            "method=ignore\n",
+            wifi_interface,
+            ssid,
+            password,
+            ip_address,
+            ip_parts[0],
+            ip_parts[1]);
 
         display.log_message += "Files have been configured.";
     }
@@ -354,6 +372,13 @@ namespace module::tools {
             case Display::Column2::PLAYER_ID: player_id = player_id == MAX_PLAYER_ID ? 1 : player_id + 1; break;
             case Display::Column2::TEAM_ID: team_id = team_id == MAX_TEAM_ID ? 1 : team_id + 1; break;
             case Display::Column2::GOALIE: is_goalie = !is_goalie; break;
+            case Display::Column2::FIELD_TYPE: {
+                auto& keys = cfg.field_preset_names;
+                auto it    = std::find(keys.begin(), keys.end(), field_type);
+                auto next  = std::next(it);
+                field_type = (next == keys.end()) ? keys.front() : *next;
+                break;
+            }
             default: break;
         }
     }
@@ -496,6 +521,7 @@ namespace module::tools {
         mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
         mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
         mvprintw(7, display.C2_PAD, ("Goalie? : " + std::string(is_goalie ? "True" : "False")).c_str());
+        mvprintw(8, display.C2_PAD, ("Field Type: " + field_type).c_str());
 
         // Print commands
         // Heading Commands
@@ -556,6 +582,21 @@ namespace module::tools {
         mvchgat(display.row_selection + 5, col_pos, display.SELECT_WIDTH, A_STANDOUT, 0, nullptr);
 
         refresh();
+    }
+
+    void RoboCupConfiguration::draw_popup(const std::string& message) {
+        const int width  = std::max(int(message.size()) + 4, 20);
+        const int height = 5;
+        const int y      = (LINES - height) / 2;
+        const int x      = (COLS - width) / 2;
+
+        WINDOW* popup = newwin(height, width, y, x);
+        box(popup, 0, 0);
+        wattron(popup, A_BOLD);
+        mvwprintw(popup, height / 2, (width - int(message.size())) / 2, "%s", message.c_str());
+        wattroff(popup, A_BOLD);
+        wrefresh(popup);
+        delwin(popup);
     }
 
 }  // namespace module::tools

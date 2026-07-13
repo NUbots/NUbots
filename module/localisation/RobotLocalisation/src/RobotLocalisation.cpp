@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -31,7 +31,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/RoboCup.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -51,7 +51,7 @@ namespace module::localisation {
 
     using message::eye::DataPoint;
     using message::input::GameState;
-    using message::input::RoboCup;
+    using message::input::Message;
     using message::localisation::Field;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
@@ -114,14 +114,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const RoboCup& robocup, const Field& field) {
-                // Do not consider a teammate's localisation if their cost is too high
-                if (robocup.current_pose.cost > cfg.max_localisation_cost) {
-                    log<DEBUG>("Teammate's localisation cost is too high, not processing.");
-                    return;
-                }
-
+        on<Trigger<Message>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const Message& robocup, const Field& field) {
                 // **Run prediction step**
                 prediction();
 
@@ -129,7 +123,13 @@ namespace module::localisation {
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
-                auto purpose = std::make_unique<Purpose>(robocup.purpose);
+                auto purpose = std::make_unique<Purpose>();
+                // Set the purpose message with the teammate's player id and whether they are going for the ball
+                purpose->player_id = robocup.current_pose.player_id;
+                purpose->purpose   = robocup.going_for_ball ? SoccerPosition::ATTACK : SoccerPosition::SUPPORT;
+                // Teammates only count in strategy decisions if active, so mark them active unless penalised
+                purpose->active    = robocup.state != PenaltyState::PENALISED;
+
                 // Run data association step
                 data_association(robots_rRWw, purpose);
             });

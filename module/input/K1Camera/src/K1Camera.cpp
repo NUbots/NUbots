@@ -26,6 +26,7 @@
  */
 #include "K1Camera.hpp"
 
+#include <algorithm>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -34,6 +35,7 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <chrono>
+#include <cmath>
 #include <cstring>
 #include <fmt/format.h>
 #include <opencv2/core.hpp>
@@ -47,19 +49,26 @@
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 
-#include "utility/input/FrameID.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/vision/fourcc.hpp"
 
 namespace bip = boost::interprocess;
+
 
 namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
+    using utility::nusight::graph;
     using utility::vision::fourcc;
 
     // Must match the writer-side layout in NUbridge exactly (binary compatibility).
     struct SharedImageHeader {
+        static constexpr uint32_t MAGIC   = 0x4E42494D;  // "NBIM"
+        static constexpr uint32_t VERSION = 1;
+        uint32_t magic{MAGIC};
+        uint32_t version{VERSION};
         bip::interprocess_mutex mutex;
         bip::interprocess_condition has_new_frame;
         uint64_t sequence{0};
@@ -125,6 +134,18 @@ namespace module::input {
                 auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
                 const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
 
+                // // Reject segments whose layout tag doesn't match ours (stale or mismatched
+                // // NUbridge version, or a segment NUbridge hasn't initialised yet)
+                // if (header->magic != SharedImageHeader::MAGIC || header->version != SharedImageHeader::VERSION) {
+                //     log<WARN>(
+                //         fmt::format("K1Camera: segment '{}' has unexpected magic/version (is NUbridge up to date?) —
+                //         "
+                //                     "retrying in 500 ms",
+                //                     ctx.segment_name));
+                //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                //     continue;
+                // }
+
                 uint64_t last_sequence = 0;
 
                 log<INFO>(fmt::format("K1Camera: successfully mapped segment '{}' for camera '{}'",
@@ -132,6 +153,7 @@ namespace module::input {
                                       ctx.camera_name));
 
                 // Inner loop: read frames until shutdown or segment disappears.
+                auto last_frame_time = std::chrono::steady_clock::now();
                 while (ctx.running) {
                     uint64_t seq       = 0;
                     uint32_t data_size = 0;
@@ -157,6 +179,12 @@ namespace module::input {
                             header->has_new_frame.timed_wait(lock,
                                                              boost::posix_time::microsec_clock::universal_time()
                                                                  + boost::posix_time::milliseconds(100));
+                            if (header->sequence == last_sequence
+                                && std::chrono::steady_clock::now() - last_frame_time > std::chrono::seconds(5)) {
+                                log<WARN>(fmt::format("K1Camera: no new frame from '{}' for 5 s — reconnecting",
+                                                      ctx.segment_name));
+                                goto reconnect;
+                            }
                         }
 
                         if (!ctx.running) {
@@ -221,7 +249,8 @@ namespace module::input {
                         log<DEBUG>(
                             fmt::format("K1Camera: {} dropped {} frame(s)", ctx.camera_name, seq - last_sequence - 1));
                     }
-                    last_sequence = seq;
+                    last_sequence   = seq;
+                    last_frame_time = std::chrono::steady_clock::now();
 
                     auto msg               = std::make_unique<Image>();
                     msg->format            = format;
@@ -236,13 +265,41 @@ namespace module::input {
                     msg->lens.fov          = fov;
                     msg->lens.centre       = {centre_x, centre_y};
                     msg->lens.k            = {k1, k2};
+
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d::Identity();
                     {
-                        std::lock_guard<std::mutex> lock(Hcw_mutex);
-                        msg->Hcw = latest_Hcw;
+                        std::lock_guard<std::mutex> lock(sensors_mutex);
+
+                        if (!Hcws.empty()) {
+                            auto Hcw_it =
+                                std::lower_bound(Hcws.begin(),
+                                                 Hcws.end(),
+                                                 std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
+                                                 [](const auto& a, const auto& b) { return a.first < b.first; });
+
+                            if (Hcw_it == Hcws.end()) {
+                                Hcw = std::prev(Hcw_it)->second;
+                            }
+                            else if (Hcw_it == Hcws.begin()) {
+                                Hcw = Hcw_it->second;
+                            }
+                            else {
+                                Hcw = std::abs((Hcw_it->first - msg->timestamp).count())
+                                              < std::abs((std::prev(Hcw_it)->first - msg->timestamp).count())
+                                          ? Hcw_it->second
+                                          : std::prev(Hcw_it)->second;
+                            }
+                        }
                     }
 
+                    msg->Hcw = Hcw;
+                    emit(graph("Camera Pose",
+                               msg->Hcw.translation().x(),
+                               msg->Hcw.translation().y(),
+                               msg->Hcw.translation().z()));
                     emit(msg);
                 }
+            reconnect:;
             }
             catch (const bip::interprocess_exception& ex) {
                 if (ctx.running) {
@@ -259,6 +316,7 @@ namespace module::input {
 
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
             std::lock_guard<std::mutex> lock(cameras_mutex);
+
             for (const auto& entry : cfg["cameras"]) {
                 auto ctx          = std::make_unique<CameraContext>();
                 ctx->segment_name = entry["segment"].as<std::string>();
@@ -270,19 +328,13 @@ namespace module::input {
             }
         });
 
-        // Camera-to-world from the sensor filter's head kinematics: Hcw = Htc⁻¹ · Htw,
-        // with Htc = Sensors.Htx[L_CAMERA] (torso→camera) and Htw = world→torso. Without
-        // this the Image carries an identity Hcw and every vision world-projection
-        // (mesh geometry, ball convex-hull check) is computed from a camera at the
-        // world origin — silently discarding all detections.
-        on<Trigger<message::input::Sensors>>().then([this](const message::input::Sensors& sensors) {
-            const auto l_camera = static_cast<size_t>(utility::input::FrameID::L_CAMERA);
-            if (l_camera < sensors.Htx.size()) {
-                const Eigen::Isometry3d Htc(sensors.Htx[l_camera].matrix());
-                const Eigen::Isometry3d Htw(sensors.Htw.matrix());
-                std::lock_guard<std::mutex> lock(Hcw_mutex);
-                latest_Hcw = Htc.inverse() * Htw;
-            }
+        on<Trigger<Sensors>>().then("Buffer Hcw", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hcws.resize(std::distance(Hcws.begin(), std::remove_if(Hcws.begin(), Hcws.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
+            Hcws.emplace_back(sensors.timestamp, Eigen::Isometry3d(sensors.Hcw));
         });
 
         on<Shutdown>().then([this] { stop_cameras(); });

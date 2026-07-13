@@ -39,7 +39,7 @@ foreach(proto ${builtin_protobufs})
   get_filename_component(file_we ${proto} NAME_WE)
 
   add_custom_command(
-    OUTPUT ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${py_out}/${file_we}_pb2.py ${dep_out}/${file_we}.d
+    OUTPUT ${py_out}/${file_we}_pb2.py ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${dep_out}/${file_we}.d
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${pb_out} --python_out=${py_out}
             --dependency_out=${dep_out}/${file_we}.d -I${builtin_dir} ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto

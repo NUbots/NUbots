@@ -1,4 +1,4 @@
-import { NbsTimestamp } from "nbsdecoder.js";
+import { NbsTimestamp, NbsTypeSubtypeBuffer } from "nbsdecoder.js";
 
 import { NbsScrubber } from "../../shared/nbs_scrubber";
 import { hashType } from "../../shared/nuclearnet/hash_type";
@@ -7,7 +7,7 @@ import { Clock } from "../../shared/time/clock";
 import { parseEventString } from "../nuclearnet/parse_event_string";
 import { NodeSystemClock } from "../time/node_clock";
 
-import { isSynthesizable, synthesize } from "./packet_synthesis";
+import { isStaticSyntheticType, isSynthesizable, synthesize } from "./packet_synthesis";
 import { Scrubber } from "./scrubber";
 
 export type ScrubberUpdateOpts =
@@ -193,6 +193,15 @@ export class ScrubberSet {
     return this.scrubbers.get(id);
   }
 
+  /** Get the raw bytes of a packet from the scrubber with the given id */
+  getPacketBytes(id: NbsScrubber["id"], typeSubtype: NbsTypeSubtypeBuffer, offset: number) {
+    const scrubber = this.scrubbers.get(id);
+    if (!scrubber) {
+      throw new Error(`scrubber ${id} not found to get packet bytes`);
+    }
+    return scrubber.getPacketBytes(typeSubtype, offset);
+  }
+
   /** Load a new scrubber into the set, with the given NBS files and optional name */
   load(opts: { files: string[]; name?: string; onCreate?: (scrubber: Scrubber) => void }) {
     // Generate a unique ID and create the scrubber
@@ -292,6 +301,11 @@ export class ScrubberSet {
     for (const { listenersByScrubber } of this.callbacks.values()) {
       const listeners = listenersByScrubber.get(scrubber) ?? [];
       for (const listener of listeners) {
+        // Static synthetic types (like the index) don't change with the scrubber's
+        // state, so there's no need to re-emit them when the scrubber changes.
+        if (isStaticSyntheticType({ type: listener.type, subtype: listener.subtype })) {
+          continue;
+        }
         this.loadAndEmitToListener(listener, timestamp);
       }
     }
@@ -335,6 +349,12 @@ export class ScrubberSet {
 
       // Abort if the listener was removed while it was processing the packet
       if (listener.removed) {
+        return;
+      }
+
+      // Static synthetic types (like the scrubber index) are emitted once and do not change
+      // over time, so we don't re-arm the listener to re-emit them during playback.
+      if (typeIsSynthesizable && isStaticSyntheticType(typeSubtype)) {
         return;
       }
 

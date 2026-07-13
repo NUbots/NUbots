@@ -10,13 +10,14 @@ output:
 messages:
   # Input
   message.platform.RawSensors: true
-  message.input.Image: true
+  message.input.Image: false
   message.output.CompressedImage: true
   # Vision
   message.vision.Balls: true
   message.vision.Goals: true
   message.vision.GreenHorizon: true
   message.vision.FieldLines: true
+  message.vision.FieldIntersections: true
   message.vision.VisualMesh: true
   message.vision.BoundingBoxes: true
   # Odometry and Localisation

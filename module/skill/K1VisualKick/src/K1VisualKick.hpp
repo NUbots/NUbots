@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -31,14 +31,28 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/booster/BoosterVisualKick.hpp"
+
 namespace module::skill {
 
     class K1VisualKick : public ::extension::behaviour::BehaviourReactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Which version of Booster's visual kick to use
+            message::booster::VisualKickVer version = message::booster::VisualKickVer::V2;
+            /// @brief How long to let the kick run before reporting the task as done
+            NUClear::clock::duration kick_duration{};
+        } cfg;
+
+        /// @brief The time the current visual kick was started
+        NUClear::clock::time_point kick_start_time{};
+
     public:
-        /// @brief Called by the powerplant to build and setup the ScriptKick reactor.
+        /// @brief Called by the powerplant to build and setup the K1VisualKick reactor.
         explicit K1VisualKick(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::skill
 
-#endif  // MODULE_SKILL_SCRIPTKICK_HPP
+#endif  // MODULE_SKILL_K1VISUALKICK_HPP

@@ -1,14 +1,13 @@
+import { LogLevelEnum } from "@proto/message/nuclear/LogLevel";
+import { LogMessage } from "@proto/message/nuclear/LogMessage";
 import { action } from "mobx";
 
-import { google, message } from "../../../shared/messages";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
 import { LogLevel, LogsRobotModel } from "./model";
-
-import LogMessage = message.nuclear.LogMessage;
-import NUClearLogLevel = message.nuclear.LogLevel;
 
 export class LogsNetwork {
   constructor(private network: Network) {
@@ -30,7 +29,7 @@ export class LogsNetwork {
 
     robot.messages.push({
       level: nuclearLogLevelToLogLevel(message.level),
-      timestamp: protobufTimestampToDate(message.timestamp!),
+      timestamp: new Timestamp(message.timestamp!).toDate(),
       message: message.message,
       reactor: message.reactionStatistics!.identifiers!.reactor!,
     });
@@ -38,28 +37,21 @@ export class LogsNetwork {
 }
 
 /** Convert the given NUClear log level to a NUsight log level. */
-function nuclearLogLevelToLogLevel(level: NUClearLogLevel): LogLevel {
+function nuclearLogLevelToLogLevel(level: LogLevelEnum): LogLevel {
   switch (level) {
-    case NUClearLogLevel.TRACE:
+    case LogLevelEnum.TRACE:
       return "trace";
-    case NUClearLogLevel.DEBUG:
+    case LogLevelEnum.DEBUG:
       return "debug";
-    case NUClearLogLevel.INFO:
+    case LogLevelEnum.INFO:
       return "info";
-    case NUClearLogLevel.WARN:
+    case LogLevelEnum.WARN:
       return "warn";
-    case NUClearLogLevel.ERROR:
+    case LogLevelEnum.ERROR:
       return "error";
-    case NUClearLogLevel.FATAL:
+    case LogLevelEnum.FATAL:
       return "fatal";
     default:
       return "unknown";
   }
-}
-
-/** Convert the given protobuf timestamp to a Date object */
-function protobufTimestampToDate(timestamp: google.protobuf.ITimestamp) {
-  const seconds = timestamp.seconds as number;
-  const nanos = timestamp.nanos as number;
-  return new Date(seconds * 1000 + nanos / 1000000);
 }

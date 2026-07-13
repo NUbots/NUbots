@@ -1,3 +1,4 @@
+import { WalkState_PhaseEnum } from "@proto/message/behaviour/state/WalkState";
 import { observable } from "mobx";
 import { computed } from "mobx";
 import { action } from "mobx";
@@ -5,7 +6,6 @@ import { action } from "mobx";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
-import { message } from "../../../shared/messages";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -28,6 +28,8 @@ export class ServoMotorSet {
   @observable leftShoulderRoll: ServoMotor;
   @observable rightElbow: ServoMotor;
   @observable leftElbow: ServoMotor;
+  @observable rightElbowYaw: ServoMotor;
+  @observable leftElbowYaw: ServoMotor;
   @observable rightHipYaw: ServoMotor;
   @observable leftHipYaw: ServoMotor;
   @observable rightHipRoll: ServoMotor;
@@ -50,6 +52,8 @@ export class ServoMotorSet {
     leftShoulderRoll,
     rightElbow,
     leftElbow,
+    rightElbowYaw,
+    leftElbowYaw,
     rightHipYaw,
     leftHipYaw,
     rightHipRoll,
@@ -71,6 +75,8 @@ export class ServoMotorSet {
     this.leftShoulderRoll = leftShoulderRoll;
     this.rightElbow = rightElbow;
     this.leftElbow = leftElbow;
+    this.rightElbowYaw = rightElbowYaw;
+    this.leftElbowYaw = leftElbowYaw;
     this.rightHipYaw = rightHipYaw;
     this.leftHipYaw = leftHipYaw;
     this.rightHipRoll = rightHipRoll;
@@ -95,6 +101,8 @@ export class ServoMotorSet {
       leftShoulderRoll: ServoMotor.of(),
       rightElbow: ServoMotor.of(),
       leftElbow: ServoMotor.of(),
+      rightElbowYaw: ServoMotor.of(),
+      leftElbowYaw: ServoMotor.of(),
       rightHipYaw: ServoMotor.of(),
       leftHipYaw: ServoMotor.of(),
       rightHipRoll: ServoMotor.of(),
@@ -152,6 +160,7 @@ export class LocalisationRobotModel {
   @observable Htw: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
+  @observable Hcw: Matrix4; // World to camera
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
   @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
@@ -178,13 +187,13 @@ export class LocalisationRobotModel {
   @observable teamColour: "red" | "blue" = "blue";
   @observable torsoTrajectory: Matrix4[];
   @observable swingFootTrajectory: Matrix4[];
-  @observable walkPhase: message.behaviour.state.WalkState.Phase;
+  @observable walkPhase: WalkState_PhaseEnum;
   @observable trajectoryHistory: {
     torso: Matrix4[];
     swingFoot: Matrix4[];
     color: string;
     timestamp: number;
-    phase: message.behaviour.state.WalkState.Phase;
+    phase: WalkState_PhaseEnum;
   }[] = [];
 
   constructor({
@@ -194,6 +203,7 @@ export class LocalisationRobotModel {
     Htw,
     Hrw,
     Hfw,
+    Hcw,
     Hrd,
     Hwp,
     Rwt,
@@ -228,6 +238,7 @@ export class LocalisationRobotModel {
     Htw: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
+    Hcw: Matrix4;
     Hrd?: Matrix4;
     Hwp: Matrix4;
     Rwt: Quaternion;
@@ -253,13 +264,13 @@ export class LocalisationRobotModel {
     teamColour?: "red" | "blue";
     torsoTrajectory: Matrix4[];
     swingFootTrajectory: Matrix4[];
-    walkPhase: message.behaviour.state.WalkState.Phase;
+    walkPhase: WalkState_PhaseEnum;
     trajectoryHistory: {
       torso: Matrix4[];
       swingFoot: Matrix4[];
       color: string;
       timestamp: number;
-      phase: message.behaviour.state.WalkState.Phase;
+      phase: WalkState_PhaseEnum;
     }[];
   }) {
     this.model = model;
@@ -268,6 +279,7 @@ export class LocalisationRobotModel {
     this.Htw = Htw;
     this.Hrw = Hrw;
     this.Hfw = Hfw;
+    this.Hcw = Hcw;
     this.Hrd = Hrd;
     this.Hwp = Hwp;
     this.Rwt = Rwt;
@@ -305,6 +317,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hcw: Matrix4.of(),
       Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
@@ -326,7 +339,7 @@ export class LocalisationRobotModel {
       teamColour: "blue",
       torsoTrajectory: [],
       swingFootTrajectory: [],
-      walkPhase: message.behaviour.state.WalkState.Phase.DOUBLE,
+      walkPhase: WalkState_PhaseEnum.DOUBLE,
       trajectoryHistory: [],
     });
   });
@@ -343,6 +356,12 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  /** Camera to field transformation */
+  @computed
+  get Hfc(): Matrix4 {
+    return this.Hfw.multiply(this.Hcw.invert());
   }
 
   /** Field line points in field space */

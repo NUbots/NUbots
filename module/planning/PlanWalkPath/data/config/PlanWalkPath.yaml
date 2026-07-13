@@ -1,34 +1,37 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-# General playing tuning values for walking
-max_x_velocity: 0.175
-max_y_velocity: 0.1
-max_angular_velocity: 0.4
+# Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
+max_velocity: [1.0, 0.5, 1.0]
+# Maximum backward speed (m/s), fast backward walking is unstable
+max_backward_velocity: 0.15
+# Minimum effective command per axis, smaller nonzero commands are bumped up to these
+min_velocity: [0.3, 0.3, 0.25]
+# Smoothed commands with per-axis magnitude below this are treated as a stop
+zero_tolerance: [0.05, 0.05, 0.05]
 
-acceleration: 0.005 # maximum increment in walk command velocity
+# Proportional gains
+k_translation: 1.5 # (1/s) translational speed per metre of distance to target
+k_theta: 2.0 # (1/s) angular velocity per radian of heading error
+
+max_align_radius: 1.5 # Radius [m] to begin omnidirectional approach and aligning with target heading
+min_align_radius: 0.4 # Radius [m] within which fully aligned with the target heading
+max_angle_error: 45 * pi / 180 # Heading error above which we only rotate on the spot
+min_angle_error: 20 * pi / 180 # Heading error below which full forward speed is allowed
 
 # Rotate on the spot tuning values
-rotate_velocity: 0.4
+rotate_velocity: 1.0
 rotate_velocity_x: 0.0
 rotate_velocity_y: 0.0
 
-# Rotate around ball tuning values
-pivot_ball_velocity: 0.5
-pivot_ball_velocity_x: 0.0
-pivot_ball_velocity_y: -0.2
-
-max_align_radius: 0.75 # Radius [m] to begin aligning with target heading
-min_align_radius: 0.4 # Radius [m] to stay aligning with the target heading
-max_angle_error: 45 * pi / 180 # Maximum angle error before only allowing turning on the spot
-min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translation velocity is allowed
-strafe_gain: 0.4
+# Rotate around ball tuning values. Orbit kinematics give vy = -vtheta * pivot_radius, keep
+# pivot_angular_velocity * pivot_radius >= min_velocity[1] or the dead-zone bump widens the orbit
+pivot_angular_velocity: 0.8
+pivot_radius: 0.4
+pivot_forward_velocity: 0.0
 
 # Radius around obstacles to avoid
 obstacle_radius: 0.8
 
 # Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
-tau: [1.0, 1.0, 3.0]
-
-# Initial velocity to use when resetting the smoothed walk command
-starting_velocity: [0.05, 0.0, 0.0]
+tau: [0.3, 0.3, 0.2]

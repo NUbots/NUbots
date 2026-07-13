@@ -28,20 +28,34 @@
 #include "GameController.hpp"
 
 #include <atomic>
+#include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/support/GlobalConfig.hpp"
+
+#include "utility/math/angle.hpp"
+#include "utility/math/euler.hpp"
 
 namespace module::input {
 
     using extension::Configuration;
     using gamecontroller::GameControllerPacket;
+    using message::behaviour::state::Stability;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::Team;
     using message::input::GameEvents;
     using message::input::GameState;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
     using message::support::GlobalConfig;
+    using utility::math::angle::normalise_angle;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using Score          = GameEvents::Score;
     using GoalScored     = GameEvents::GoalScored;
     using Penalisation   = GameEvents::Penalisation;
@@ -128,6 +142,25 @@ namespace module::input {
                   });
 
         on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply", [this] { send_reply_message(); });
+
+        on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+            latest_Htw   = Eigen::Isometry3d(sensors.Htw);
+            have_sensors = true;
+        });
+
+        on<Trigger<Field>>().then([this](const Field& field) {
+            latest_Hfw = Eigen::Isometry3d(field.Hfw);
+            have_field = true;
+        });
+
+        on<Trigger<Ball>>().then([this](const Ball& ball) {
+            latest_rBWw      = ball.rBWw;
+            latest_ball_time = ball.time_of_measurement;
+            have_ball        = true;
+        });
+
+        on<Trigger<Stability>>().then(
+            [this](const Stability& stability) { is_fallen = stability <= Stability::FALLING; });
     }
 
     void GameController::send_reply_message() {
@@ -140,15 +173,41 @@ namespace module::input {
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
 
-        // fallen, pose, ball_age and ball should be optional to be sent to the GameController
-        // TODO: wire up from localisation if required in the future
-        packet->fallen   = self_penalised ? 1 : 0;
-        packet->pose[0]  = 0.f;
-        packet->pose[1]  = 0.f;
-        packet->pose[2]  = 0.f;
-        packet->ball_age = -1.f;
-        packet->ball[0]  = 0.f;
-        packet->ball[1]  = 0.f;
+        // 1 = fallen, 0 = upright; drawn as lying down / standing in the visualiser
+        packet->fallen = is_fallen ? 1 : 0;
+
+        if (have_sensors && have_field) {
+            // Robot's torso pose in field space
+            const Eigen::Isometry3d Hft = latest_Hfw * latest_Htw.inverse();
+            const Eigen::Vector3d rTFf  = Hft.translation();
+            const double yaw            = mat_to_rpy_intrinsic(Hft.rotation()).z();
+
+            // GameController convention: 0,0 is the centre of the field and +ve x-axis points towards the goal
+            // we are attempting to score on. This is our internal field frame rotated 180 degrees about the
+            // centre, so negate x and y and rotate the yaw by pi. Convert metres to the millimetres
+            // GameController expects.
+            packet->pose[0] = static_cast<float>(-rTFf.x() * 1000.0);
+            packet->pose[1] = static_cast<float>(-rTFf.y() * 1000.0);
+            packet->pose[2] = static_cast<float>(normalise_angle(yaw + M_PI));
+        }
+        else {
+            packet->pose[0] = 0.f;
+            packet->pose[1] = 0.f;
+            packet->pose[2] = 0.f;
+        }
+
+        if (have_ball && have_sensors) {
+            // Ball position relative to the robot in millimetres: +x forward, +y to the robot's left
+            const Eigen::Vector3d rBTt = latest_Htw * latest_rBWw;
+            packet->ball_age = std::chrono::duration<float>(NUClear::clock::now() - latest_ball_time).count();
+            packet->ball[0]  = static_cast<float>(rBTt.x() * 1000.0);
+            packet->ball[1]  = static_cast<float>(rBTt.y() * 1000.0);
+        }
+        else {
+            packet->ball_age = -1.f;
+            packet->ball[0]  = 0.f;
+            packet->ball[1]  = 0.f;
+        }
 
         if (game_controller_address != "") {
             emit<Scope::UDP>(packet, game_controller_address, send_port);
@@ -218,19 +277,26 @@ namespace module::input {
 
         std::vector<std::function<void()>> state_changes;
 
-        // game score
+        // Stopped play
+        if (old_packet.stopped != new_packet.stopped) {
+            state_changes.emplace_back(
+                [this, new_packet] { log<DEBUG>("Stopped state changed:", uint(new_packet.stopped)); });
+        }
+        state->stopped = new_packet.stopped;
+
+        // Game score
         const auto& old_own_team = get_own_team(old_packet);
         const auto& new_own_team = get_own_team(new_packet);
 
         const auto& old_opponent_team = get_opponent_team(old_packet);
         const auto& new_opponent_team = get_opponent_team(new_packet);
 
-        // Log message budget for cross-checking against local counter
-        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
-
-        // Get colours
+        // Team colours
         state->team.team_colour     = get_team_colour(new_own_team.field_player_colour);
         state->opponent.team_colour = get_team_colour(new_opponent_team.field_player_colour);
+
+        // Log message budget for cross-checking against local counter
+        log<DEBUG>("GameController message budget remaining:", new_own_team.message_budget);
 
         /*******************************************************************************************
          * Process score updates
@@ -468,6 +534,15 @@ namespace module::input {
                     auto end_half  = NUClear::clock::now() + std::chrono::seconds(new_packet.secs_remaining);
                     auto ball_free = NUClear::clock::now() + std::chrono::seconds(new_packet.secondary_time);
 
+                    // technically, the game phase being set to PLAYING is done by the whistle detector, but this is a
+                    // backup for when it doesn't detect properly.
+
+                    // if the game state is already PLAYING, don't emit a new PLAYING event.
+
+                    if (state->phase == GameState::Phase::Value::PLAYING) {
+                        break;
+                    }
+
                     state->primary_time   = end_half;
                     state->secondary_time = ball_free;
                     state->phase          = GameState::Phase::Value::PLAYING;
@@ -579,19 +654,20 @@ namespace module::input {
     }
 
     PenaltyReason GameController::get_penalty_reason(const gamecontroller::PenaltyState& penalty_state) {
-        // ugly incoming
         switch (penalty_state) {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
-            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_DEFENSE;
-            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::MANUAL;
-            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::REQUEST_FOR_PICKUP;
-            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_MANIPULATION;
-            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::REQUEST_FOR_SERVICE;
-            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::ILLEGAL_ATTACK;
-            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PHYSICAL_CONTACT;
-            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::ILLEGAL_POSITIONING: return PenaltyReason::ILLEGAL_POSITIONING;
+            case gamecontroller::PenaltyState::MOTION_IN_SET: return PenaltyReason::MOTION_IN_SET;
+            case gamecontroller::PenaltyState::MOTION_IN_STOP: return PenaltyReason::MOTION_IN_STOP;
+            case gamecontroller::PenaltyState::LOCAL_GAME_STUCK: return PenaltyReason::LOCAL_GAME_STUCK;
+            case gamecontroller::PenaltyState::INCAPABLE_ROBOT: return PenaltyReason::INCAPABLE_ROBOT;
+            case gamecontroller::PenaltyState::PICK_UP: return PenaltyReason::PICK_UP;
+            case gamecontroller::PenaltyState::BALL_HOLDING: return PenaltyReason::BALL_HOLDING;
+            case gamecontroller::PenaltyState::LEAVING_THE_FIELD: return PenaltyReason::LEAVING_THE_FIELD;
+            case gamecontroller::PenaltyState::PLAYING_WITH_ARMS_HANDS: return PenaltyReason::PLAYING_WITH_ARMS_HANDS;
+            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PLAYER_PUSHING;
+            case gamecontroller::PenaltyState::CAUTIONED: return PenaltyReason::CAUTIONED;
+            case gamecontroller::PenaltyState::SENT_OFF: return PenaltyReason::SENT_OFF;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             default: throw std::runtime_error("Invalid Penalty State");
         }
@@ -616,17 +692,6 @@ namespace module::input {
         }
 
         throw std::runtime_error("No opponent teams not found");  // should never happen!
-    }
-
-    std::string GameController::ip_address_int_to_string(const uint32_t& ip_addr) {
-        uint32_t ip_addr_n = htonl(ip_addr);
-
-        char c[255];
-        std::memset(c, 0, sizeof(c));
-
-        std::string addr = inet_ntop(AF_INET, &ip_addr_n, c, sizeof(c));
-
-        return addr;
     }
 
     GameState::TeamColour::Value GameController::get_team_colour(const gamecontroller::TeamColour& colour) {

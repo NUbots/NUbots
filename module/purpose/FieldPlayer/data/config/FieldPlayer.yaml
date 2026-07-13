@@ -8,3 +8,6 @@ center_circle_offset: 0.5
 
 max_localisation_cost: 3.0
 search_when_lost: false
+
+# Maximum time in seconds to stand still and look around waiting to localise before playing anyway
+localise_timeout: 8

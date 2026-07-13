@@ -1,19 +1,10 @@
 log_level: INFO
+field_type: small # options: small, l1, l3
 
-# LAB FIELD
+# ROBOCUP FIELD SIZES
 Units: m
 BallRadius: 0.07
-LineWidth: 0.05
-
-FieldLength: 6.8
-FieldWidth: 5
-GoalDepth: 0.4
-# Distance between inner edges of goal posts.
-GoalWidth: 1.95
-GoalAreaLength: 1.05
-GoalAreaWidth: 2.62
-# Height to the bottom of the crossbar.
-GoalCrossbarHeight: 0.55 # from top of wood to ground
+LineWidth: 0.06
 # What shape the goal is (RECTANGLE,CIRCLE)
 GoalpostType: CIRCLE
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
@@ -21,13 +12,46 @@ GoalpostWidth: 0.10
 GoalpostDepth: 0.10
 GoalCrossbarWidth: 0.10
 GoalCrossbarDepth: 0.10
-GoalNetHeight: 1.0
-# Measured from the goal line.
-PenaltyMarkDistance: 1.27 # to the middle of the penalty mark
-CenterCircleDiameter: 1.5
-BorderStripMinWidth: 0.38
+GoalNetHeight: 1.2
+BorderStripMinWidth: 1.0
 PenaltyRobotStart: 1.0
 
-# New field markings
-PenaltyAreaLength: 1.55
-PenaltyAreaWidth: 4.05
+presets:
+  small:
+    FieldLength: 9.0
+    FieldWidth: 6.0
+    GoalDepth: 0.58
+    GoalWidth: 2.575
+    # Height to the bottom of the crossbar.
+    GoalCrossbarHeight: 1.2
+    GoalAreaLength: 0.9
+    GoalAreaWidth: 2.9
+    # Measured from the goal line
+    PenaltyMarkDistance: 1.47 #to the middle of the penalty mark.
+    CenterCircleDiameter: 1.5
+    PenaltyAreaLength: 1.9
+    PenaltyAreaWidth: 3.9
+  l1:
+    FieldLength: 12.0
+    FieldWidth: 9.0
+    GoalWidth: 2.6
+    GoalDepth: 0.6
+    GoalCrossbarHeight: 1.25
+    GoalAreaLength: 1.0
+    GoalAreaWidth: 4.0
+    PenaltyMarkDistance: 1.5
+    CenterCircleDiameter: 1.5
+    PenaltyAreaLength: 3.0
+    PenaltyAreaWidth: 6.0
+  l3:
+    FieldLength: 14.0
+    FieldWidth: 9.0
+    GoalWidth: 2.6
+    GoalDepth: 0.6
+    GoalCrossbarHeight: 1.25
+    GoalAreaLength: 1.0
+    GoalAreaWidth: 4.0
+    PenaltyMarkDistance: 1.5
+    CenterCircleDiameter: 1.5
+    PenaltyAreaLength: 3.0
+    PenaltyAreaWidth: 6.0

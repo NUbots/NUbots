@@ -45,5 +45,10 @@ velocity_low_pass:
 # Specify whether or not to use ground truth odometry from simulator
 use_ground_truth: false
 
+# Use the Booster controller's planar odometry (rt/odometer_state) for x/y/yaw instead of the
+# anchor-foot kinematic estimate. Enable on the K1 (no NUbots walk engine drives foot phase);
+# leave false for NUgus/webots which have no Booster odometry source.
+use_booster_odometry: true
+
 # Path to URDF file
 urdf_path: "models/robot.urdf"

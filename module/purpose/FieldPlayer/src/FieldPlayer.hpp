@@ -27,7 +27,11 @@
 #ifndef MODULE_FIELDPLAYER_HPP
 #define MODULE_FIELDPLAYER_HPP
 
+#include <map>
 #include <nuclear>
+#include <optional>
+#include <set>
+#include <string>
 
 #include "extension/Behaviour.hpp"
 
@@ -46,11 +50,21 @@ namespace module::purpose {
             /// @brief The offset to the center circle for the ready position.
             /// Avoids being in the center circle during another team's kickoff
             double center_circle_offset = 0.0;
+            /// @brief Player IDs that have a formation slot per mode, used to check if Support can handle READY
+            std::map<std::string, std::set<int>> formation_player_ids{};
             /// @brief The maximum cost for a localisation to be considered valid
             double max_localisation_cost = 0.0;
             /// @brief Whether to search around the field if the robot's localisation cost is high
             bool search_when_lost = false;
+            /// @brief Maximum time to stand still and look around waiting for localisation to converge
+            std::chrono::seconds localise_timeout{0};
         } cfg;
+
+        /// @brief Whether the last purpose decision was support, so switching to support is only logged once
+        bool supporting = false;
+
+        /// @brief When the robot started standing still and looking around to localise, unset when localised
+        std::optional<NUClear::clock::time_point> look_around_start{};
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldPlayer reactor.

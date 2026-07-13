@@ -11,21 +11,26 @@
 namespace module::platform::Booster {
 
     using booster::robot::ChannelFactory;
-    // K1 joint layout (22 joints, no waist; crank slots = ankle pitch/roll) — NOT the
-    // T1 `JointIndex`, whose waist entry shifts every leg index up by one.
-    using JointIndex = booster::robot::b1::JointIndexK1;
+    using booster::robot::b1::GetModeResponse;
+    using booster::robot::b1::JointIndexK1;
     using extension::Configuration;
     using extension::behaviour::RunReason;
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
     using message::booster::BoosterMode;
+    using message::booster::BoosterModeState;
+    using message::booster::BoosterOdometry;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
     using message::booster::K1Mode;
     using message::booster::VisualKickVer;
+    using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
+
+    /// Internal event used to switch into prep mode once the gait has had time to stop.
+    struct EnterPrep {};
 
     static void fill_servo(RawSensors::Servo& servo, const booster_interface::msg::MotorState& motor) {
         servo.present_position = motor.q();
@@ -40,6 +45,9 @@ namespace module::platform::Booster {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.prep_settle_time =
+                std::chrono::duration_cast<NUClear::clock::duration>(
+                    std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
         });
 
         on<Startup>().then([this]() {
@@ -47,7 +55,13 @@ namespace module::platform::Booster {
             ChannelFactory::Instance()->Init(0);
 
             booster_client.Init();
-            booster_client.ChangeMode(RobotMode::kSoccer);
+            booster_client.ChangeMode(RobotMode::kPrepare);
+            // Publish the initial mode so other modules can query it before the first poll
+            publish_current_mode();
+
+            if (int32_t res = booster_client.ResetOdometry(); res != 0) {
+                log<ERROR>("Failed to reset odometry on startup: " + res_code_to_string(res));
+            }
 
             low_state_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::LowState>(
                 "rt/low_state",
@@ -65,11 +79,19 @@ namespace module::platform::Booster {
                 ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::ButtonEventMsg>(
                     "rt/button_event",
                     [this](const void* msg) { button_event_handler(msg); });
+
+            odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
+                "rt/odometer_state",
+                [this](const void* msg) { odometer_handler(msg); });
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
+            // The robot must not move in prep mode, so drop walk commands while in (or entering) prep.
+            if (current_mode == RobotMode::kPrepare || prep_pending) {
+                return;
+            }
             if (move.velocity.isApprox(last_walk_velocity)) {
                 return;
             }
@@ -83,6 +105,12 @@ namespace module::platform::Booster {
         });
 
         on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
+            // The robot must not move in prep mode, so drop head/look commands while in (or entering)
+            // prep.
+            if (current_mode == RobotMode::kPrepare || prep_pending) {
+                return;
+            }
+
             // Clamp to the Booster SDK RotateHead limits (radians):
             //   pitch: downward positive, range [-0.3, 1.0]
             //   yaw:   leftward positive, range [-0.785, 0.785]
@@ -132,6 +160,13 @@ namespace module::platform::Booster {
             }
         });
 
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            int32_t res = booster_client.ResetOdometry();
+            if (res != 0) {
+                log<ERROR>("Failed to reset odometry: " + res_code_to_string(res));
+            }
+        });
+
         on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode_msg) {
             RobotMode robot_mode;
             switch (static_cast<int>(mode_msg.mode)) {
@@ -142,11 +177,89 @@ namespace module::platform::Booster {
                 case K1Mode::SOCCER: robot_mode = RobotMode::kSoccer; break;
                 default: robot_mode = RobotMode::kSoccer; break;
             }
-            int32_t res = booster_client.ChangeMode(robot_mode);
-            if (res != 0) {
-                log<ERROR>("Failed to change mode: " + res_code_to_string(res));
+
+            // Skip if the robot is already in the requested mode (avoids re-commanding and the
+            // unnecessary stop-then-prep sequence when we're already in prep).
+            GetModeResponse current_mode{};
+            if (booster_client.GetMode(current_mode) == 0 && current_mode.mode_ == robot_mode) {
+                log<DEBUG>("Booster is already in the requested mode, ignoring request");
+                prep_pending = false;
+                return;
             }
+
+            // Switching into prep mid-stride makes the robot fall, so first command the gait to stop
+            // and only switch to prep once it has had time to come to a complete stop.
+            if (robot_mode == RobotMode::kPrepare) {
+                log<DEBUG>("Stopping the gait before switching to prep mode");
+                if (int32_t res = booster_client.Move(0.0, 0.0, 0.0); res != 0) {
+                    log<ERROR>("Failed to stop before prep: " + res_code_to_string(res));
+                }
+                last_walk_velocity = Eigen::Vector3d::Zero();
+                prep_pending       = true;
+                emit<Scope::DELAY>(std::make_unique<EnterPrep>(), cfg.prep_settle_time);
+                return;
+            }
+
+            // Any other mode request cancels a pending prep switch
+            prep_pending = false;
+            change_mode(robot_mode);
         });
+
+        on<Trigger<EnterPrep>>().then([this] {
+            // The switch may have been cancelled by another mode request while the gait was stopping
+            if (!prep_pending) {
+                return;
+            }
+            prep_pending = false;
+            change_mode(RobotMode::kPrepare);
+        });
+
+        // Periodically poll the robot for its actual motion mode so the published BoosterModeState
+        // stays correct even if the mode changes outside of a BoosterMode command (or a change is
+        // still in progress).
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] { publish_current_mode(); });
+    }
+
+    void HardwareIO::change_mode(RobotMode robot_mode) {
+        int32_t res = booster_client.ChangeMode(robot_mode);
+        if (res != 0) {
+            log<ERROR>("Failed to change mode: " + res_code_to_string(res));
+            return;
+        }
+        // Publish the mode the robot is now in so other modules can query the current mode
+        publish_current_mode();
+    }
+
+    void HardwareIO::publish_current_mode() {
+        GetModeResponse mode_response{};
+        int32_t res = booster_client.GetMode(mode_response);
+        if (res != 0) {
+            log<WARN>("Failed to get current mode: " + res_code_to_string(res));
+            return;
+        }
+
+        // Any mode transition invalidates the odometry track, so zero the odometry whenever the mode
+        // changes, regardless of which mode it changed to. Skip the first observation (kUnknown) as
+        // startup already resets odometry explicitly.
+        if (current_mode != mode_response.mode_ && current_mode != RobotMode::kUnknown) {
+            if (int32_t reset_res = booster_client.ResetOdometry(); reset_res != 0) {
+                log<ERROR>("Failed to reset odometry on mode change: " + res_code_to_string(reset_res));
+            }
+        }
+
+        // Cache the mode so movement/look commands can be gated without a per-command SDK round-trip
+        current_mode = mode_response.mode_;
+
+        auto state = std::make_unique<BoosterModeState>();
+        switch (mode_response.mode_) {
+            case RobotMode::kDamping: state->mode = K1Mode::DAMP; break;
+            case RobotMode::kPrepare: state->mode = K1Mode::PREP; break;
+            case RobotMode::kWalking: state->mode = K1Mode::WALK; break;
+            case RobotMode::kCustom: state->mode = K1Mode::CUSTOM; break;
+            case RobotMode::kSoccer: state->mode = K1Mode::SOCCER; break;
+            default: log<WARN>("Booster reported an unknown motion mode"); return;
+        }
+        emit(std::move(state));
     }
 
     void HardwareIO::low_state_handler(const void* msg) {
@@ -164,50 +277,41 @@ namespace module::platform::Booster {
         sensors->gyroscope.y()     = imu.gyro()[1];
         sensors->gyroscope.z()     = imu.gyro()[2];
 
-        // Serial chain motors: head (0-1), arms (2-9) — K1 has no waist
-        // Indices in the serial vector match JointIndex enum values directly.
+        // Read joint-space feedback from the serial chain (the SDK converts the parallel ankle
+        // mechanism for us). Indices match the JointIndex enum directly; the ankles occupy the
+        // slots the enum labels kCrank{Up,Down}{Left,Right}.
         const auto& serial = low_msg->motor_state_serial();
 
-        auto fill_serial = [&](RawSensors::Servo& servo, JointIndex idx) {
+        auto fill_serial = [&](RawSensors::Servo& servo, JointIndexK1 idx) {
             auto i = static_cast<size_t>(idx);
             if (i < serial.size()) {
                 fill_servo(servo, serial[i]);
             }
         };
 
-        fill_serial(sensors->servo.head_pan, JointIndex::kHeadYaw);
-        fill_serial(sensors->servo.head_tilt, JointIndex::kHeadPitch);
-        fill_serial(sensors->servo.l_shoulder_pitch, JointIndex::kLeftShoulderPitch);
-        fill_serial(sensors->servo.l_shoulder_roll, JointIndex::kLeftShoulderRoll);
-        fill_serial(sensors->servo.l_elbow, JointIndex::kLeftElbowPitch);
-        fill_serial(sensors->servo.r_shoulder_pitch, JointIndex::kRightShoulderPitch);
-        fill_serial(sensors->servo.r_shoulder_roll, JointIndex::kRightShoulderRoll);
-        fill_serial(sensors->servo.r_elbow, JointIndex::kRightElbowPitch);
+        fill_serial(sensors->servo.head_pan, JointIndexK1::kHeadYaw);
+        fill_serial(sensors->servo.head_tilt, JointIndexK1::kHeadPitch);
+        fill_serial(sensors->servo.l_shoulder_pitch, JointIndexK1::kLeftShoulderPitch);
+        fill_serial(sensors->servo.l_shoulder_roll, JointIndexK1::kLeftShoulderRoll);
+        fill_serial(sensors->servo.l_elbow, JointIndexK1::kLeftElbowPitch);
+        fill_serial(sensors->servo.l_elbow_yaw, JointIndexK1::kLeftElbowYaw);
+        fill_serial(sensors->servo.r_shoulder_pitch, JointIndexK1::kRightShoulderPitch);
+        fill_serial(sensors->servo.r_shoulder_roll, JointIndexK1::kRightShoulderRoll);
+        fill_serial(sensors->servo.r_elbow, JointIndexK1::kRightElbowPitch);
+        fill_serial(sensors->servo.r_elbow_yaw, JointIndexK1::kRightElbowYaw);
 
-        // Parallel mechanism motors: legs (indices 11-22 in JointIndex, stored as 0-11 in the vector)
-        const auto& parallel    = low_msg->motor_state_parallel();
-        const size_t leg_offset = static_cast<size_t>(JointIndex::kLeftHipPitch);
-
-        auto fill_parallel = [&](RawSensors::Servo& servo, JointIndex idx) {
-            auto i = static_cast<size_t>(idx) - leg_offset;
-            if (i < parallel.size()) {
-                fill_servo(servo, parallel[i]);
-            }
-        };
-
-        fill_parallel(sensors->servo.l_hip_pitch, JointIndex::kLeftHipPitch);
-        fill_parallel(sensors->servo.l_hip_roll, JointIndex::kLeftHipRoll);
-        fill_parallel(sensors->servo.l_hip_yaw, JointIndex::kLeftHipYaw);
-        fill_parallel(sensors->servo.l_knee, JointIndex::kLeftKneePitch);
-        // Crank slots carry the serial-equivalent ankle pitch/roll values.
-        fill_parallel(sensors->servo.l_ankle_pitch, JointIndex::kCrankUpLeft);
-        fill_parallel(sensors->servo.l_ankle_roll, JointIndex::kCrankDownLeft);
-        fill_parallel(sensors->servo.r_hip_pitch, JointIndex::kRightHipPitch);
-        fill_parallel(sensors->servo.r_hip_roll, JointIndex::kRightHipRoll);
-        fill_parallel(sensors->servo.r_hip_yaw, JointIndex::kRightHipYaw);
-        fill_parallel(sensors->servo.r_knee, JointIndex::kRightKneePitch);
-        fill_parallel(sensors->servo.r_ankle_pitch, JointIndex::kCrankUpRight);
-        fill_parallel(sensors->servo.r_ankle_roll, JointIndex::kCrankDownRight);
+        fill_serial(sensors->servo.l_hip_pitch, JointIndexK1::kLeftHipPitch);
+        fill_serial(sensors->servo.l_hip_roll, JointIndexK1::kLeftHipRoll);
+        fill_serial(sensors->servo.l_hip_yaw, JointIndexK1::kLeftHipYaw);
+        fill_serial(sensors->servo.l_knee, JointIndexK1::kLeftKneePitch);
+        fill_serial(sensors->servo.l_ankle_pitch, JointIndexK1::kCrankUpLeft);   // L ankle pitch
+        fill_serial(sensors->servo.l_ankle_roll, JointIndexK1::kCrankDownLeft);  // L ankle roll
+        fill_serial(sensors->servo.r_hip_pitch, JointIndexK1::kRightHipPitch);
+        fill_serial(sensors->servo.r_hip_roll, JointIndexK1::kRightHipRoll);
+        fill_serial(sensors->servo.r_hip_yaw, JointIndexK1::kRightHipYaw);
+        fill_serial(sensors->servo.r_knee, JointIndexK1::kRightKneePitch);
+        fill_serial(sensors->servo.r_ankle_pitch, JointIndexK1::kCrankUpRight);   // R ankle pitch
+        fill_serial(sensors->servo.r_ankle_roll, JointIndexK1::kCrankDownRight);  // R ankle roll
 
         // Battery SOC (updated by battery_handler)
         {
@@ -224,6 +328,17 @@ namespace module::platform::Booster {
         }
 
         emit(std::move(sensors));
+    }
+
+    void HardwareIO::odometer_handler(const void* msg) {
+        const auto* odo_msg = static_cast<const booster_interface::msg::Odometer*>(msg);
+        auto out            = std::make_unique<BoosterOdometry>();
+        out->x              = odo_msg->x();
+        out->y              = odo_msg->y();
+        out->theta          = odo_msg->theta();
+        log<DEBUG>("Received odometry: x=" + std::to_string(out->x) + ", y=" + std::to_string(out->y)
+                   + ", theta=" + std::to_string(out->theta));
+        emit(out);
     }
 
     void HardwareIO::battery_handler(const void* msg) {
