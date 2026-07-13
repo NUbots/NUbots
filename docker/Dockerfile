@@ -401,6 +401,15 @@ RUN install-package -p ${platform} libusb-1.0-0-dev libcurl4-openssl-dev zlib1g-
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz \
     -DBUILD_SHARED_LIBS=ON
 
+# The alsa-lib layer above installs to the Jetson targetfs prefix even for generic builds
+# (the binaries are host-arch; only the path is wrong), so FindALSA fails for generic.
+# Copy the dev files into /usr/local where the generic toolchain actually looks.
+RUN if [ "${platform}" != "orinnx" ]; then \
+        cp -a /l4t/targetfs/usr/local/include/alsa /usr/local/include/ && \
+        cp -a /l4t/targetfs/usr/local/lib/libasound.* /usr/local/lib/ && \
+        ldconfig; \
+    fi
+
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
     doxygen \
