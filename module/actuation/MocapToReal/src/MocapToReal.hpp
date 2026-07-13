@@ -9,6 +9,9 @@ namespace module::actuation {
     private:
         struct Config {
             bool output_to_servos = true;
+            float servo_gain      = 10.0f;
+            float servo_torque    = 100.0f;
+            NUClear::clock::duration time_horizon{};
         } cfg;
 
     public:

@@ -3,3 +3,13 @@ log_level: INFO
 
 # Do you actually want to output this to the robot? This may result in the robot doing unexpected stuff.
 output_to_servos: true
+
+# Proportional gain applied to each servo target (hardware range 0-254, scripts typically use 10-20)
+servo_gain: 10
+
+# Servo torque enable: 0 = off, 100 = on
+servo_torque: 100
+
+# How far in the future each servo target's arrival time is set (ms). Smaller = snappier tracking,
+# larger = smoother but laggier motion
+time_horizon_ms: 50

@@ -1,10 +1,13 @@
 #include "MocapToReal.hpp"
 
+#include <chrono>
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/input/MotionCapture.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
@@ -13,6 +16,7 @@ namespace module::actuation {
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::input::MotionCapture;
+    using utility::input::ServoID;
     using utility::nusight::graph;
 
     MocapToReal::MocapToReal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -21,6 +25,9 @@ namespace module::actuation {
             // Use configuration here from file MocapToReal.yaml
             this->log_level      = config["log_level"].as<NUClear::LogLevel>();
             cfg.output_to_servos = config["output_to_servos"];
+            cfg.servo_gain       = config["servo_gain"].as<float>();
+            cfg.servo_torque     = config["servo_torque"].as<float>();
+            cfg.time_horizon     = std::chrono::milliseconds(config["time_horizon_ms"].as<int>());
         });
 
         on<Trigger<MotionCapture>>().then([this](const MotionCapture& mocap) {
@@ -44,7 +51,7 @@ namespace module::actuation {
                                                 skeleton.bones[11].rotation(2),
                                                 skeleton.bones[11].rotation(3)};
 
-                float r_elbow_angle_degrees = angleBetween(qRUpperArm, qRForeArm) * 180.0f / 3.14159265358979323846f;
+                float r_elbow_angle = angleBetween(qRUpperArm, qRForeArm);
 
 
                 // Left elbow
@@ -57,7 +64,7 @@ namespace module::actuation {
                                                 skeleton.bones[7].rotation(2),
                                                 skeleton.bones[7].rotation(3)};
 
-                float l_elbow_angle_degrees = angleBetween(qLUpperArm, qLForeArm) * 180.0f / 3.14159265358979323846f;
+                float l_elbow_angle = angleBetween(qLUpperArm, qLForeArm);
 
 
                 // Right knee
@@ -70,7 +77,7 @@ namespace module::actuation {
                                              skeleton.bones[18].rotation(2),
                                              skeleton.bones[18].rotation(3)};
 
-                float r_knee_angle_degrees = angleBetween(qRThigh, qRShin) * 180.0f / 3.14159265358979323846f;
+                float r_knee_angle = angleBetween(qRThigh, qRShin);
 
 
                 // Left knee
@@ -83,7 +90,7 @@ namespace module::actuation {
                                              skeleton.bones[14].rotation(2),
                                              skeleton.bones[14].rotation(3)};
 
-                float l_knee_angle_degrees = angleBetween(qLThigh, qLShin) * 180.0f / 3.14159265358979323846f;
+                float l_knee_angle = angleBetween(qLThigh, qLShin);
 
 
                 // Right ankle
@@ -92,7 +99,7 @@ namespace module::actuation {
                                             skeleton.bones[19].rotation(2),
                                             skeleton.bones[19].rotation(3)};
 
-                float r_ankle_angle_degrees = angleBetween(qRShin, qRFoot) * 180.0f / 3.14159265358979323846f;
+                float r_ankle_angle = angleBetween(qRShin, qRFoot);
 
 
                 // Left ankle
@@ -101,25 +108,39 @@ namespace module::actuation {
                                             skeleton.bones[15].rotation(2),
                                             skeleton.bones[15].rotation(3)};
 
-                float l_ankle_angle_degrees = angleBetween(qLShin, qLFoot) * 180.0f / 3.14159265358979323846f;
+                float l_ankle_angle = angleBetween(qLShin, qLFoot);
 
+                constexpr float rad_to_deg = 180.0f / 3.14159265358979323846f;
                 emit(graph("MocapToReal",
-                           r_elbow_angle_degrees,
-                           l_elbow_angle_degrees,
-                           r_knee_angle_degrees,
-                           l_knee_angle_degrees,
-                           r_ankle_angle_degrees,
-                           l_ankle_angle_degrees));
+                           r_elbow_angle * rad_to_deg,
+                           l_elbow_angle * rad_to_deg,
+                           r_knee_angle * rad_to_deg,
+                           l_knee_angle * rad_to_deg,
+                           r_ankle_angle * rad_to_deg,
+                           l_ankle_angle * rad_to_deg));
 
                 if (cfg.output_to_servos) {
-                    auto waypoints = std::make_unique<ServoTargets>();
-                    waypoints->targets.push_back(ServoTarget{.id = 5, .angle = r_elbow_angle_degrees});
-                    waypoints->targets.push_back(ServoTarget{.id = 6, .angle = l_elbow_angle_degrees});
-                    waypoints->targets.push_back(ServoTarget{.id = 13, .angle = r_knee_angle_degrees});
-                    waypoints->targets.push_back(ServoTarget{.id = 14, .angle = l_knee_angle_degrees});
-                    waypoints->targets.push_back(ServoTarget{.id = 15, .angle = r_ankle_angle_degrees});
-                    waypoints->targets.push_back(ServoTarget{.id = 16, .angle = l_ankle_angle_degrees});
-                    emit(waypoints);
+                    const NUClear::clock::time_point target_time = NUClear::clock::now() + cfg.time_horizon;
+                    auto waypoints                               = std::make_unique<ServoTargets>();
+                    waypoints->targets
+                        .emplace_back(target_time, ServoID::R_ELBOW, r_elbow_angle, cfg.servo_gain, cfg.servo_torque);
+                    waypoints->targets
+                        .emplace_back(target_time, ServoID::L_ELBOW, l_elbow_angle, cfg.servo_gain, cfg.servo_torque);
+                    waypoints->targets
+                        .emplace_back(target_time, ServoID::R_KNEE, r_knee_angle, cfg.servo_gain, cfg.servo_torque);
+                    waypoints->targets
+                        .emplace_back(target_time, ServoID::L_KNEE, l_knee_angle, cfg.servo_gain, cfg.servo_torque);
+                    waypoints->targets.emplace_back(target_time,
+                                                    ServoID::R_ANKLE_PITCH,
+                                                    r_ankle_angle,
+                                                    cfg.servo_gain,
+                                                    cfg.servo_torque);
+                    waypoints->targets.emplace_back(target_time,
+                                                    ServoID::L_ANKLE_PITCH,
+                                                    l_ankle_angle,
+                                                    cfg.servo_gain,
+                                                    cfg.servo_torque);
+                    emit(std::move(waypoints));
                 }
             }
         });
