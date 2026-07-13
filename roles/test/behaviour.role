@@ -17,10 +17,11 @@ nuclear_role(
   # Sensors
   input::K1Camera
   input::K1Sensors
-  # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::FieldLineDetector
+  # Vision — Yolo-only, matching the robocup.role hardware pipeline (mesh chain
+  # disabled there too; Orin NX has no OpenCL and Yolo covers detection)
+  # vision::VisualMesh
+  # vision::GreenHorizonDetector
+  # vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
