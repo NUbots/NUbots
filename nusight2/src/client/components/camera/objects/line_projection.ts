@@ -4,6 +4,7 @@ import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
 import { Vector4 } from "../../../../shared/math/vector4";
 import { mesh } from "../../three/builders";
+import { group } from "../../three/builders";
 import { planeGeometry } from "../../three/builders";
 import { rawShader } from "../../three/builders";
 import { shaderMaterial } from "../../three/builders";
@@ -65,13 +66,39 @@ export class LineProjection {
     return this.coneSegment({ axis, start, end: start, color, lineWidth });
   }
 
+  // Draw a closed loop by connecting successive rays with projected great-circle arcs
+  readonly rayLoop = group(({ rays, color, lineWidth }: { rays: Vector3[]; color: Vector4; lineWidth: number }) => {
+    if (rays.length < 2) {
+      return undefined;
+    }
+
+    const segmentCount = rays.length;
+
+    // For each sequential ray create an arc between them
+    const children = new Array(segmentCount).fill(0).map((_, i) => {
+      const start = rays[i];
+      const end = rays[(i + 1) % segmentCount];
+
+      const cross = new THREE.Vector3().crossVectors(start.toThree(), end.toThree());
+      // If the start and end are nearly collinear then segment plane is ill defined.
+      if (cross.lengthSq() < 1e-12) {
+        return false;
+      }
+
+      const axis = Vector3.fromThree(cross.normalize());
+      return this.coneSegment({ axis, start, end, color, lineWidth });
+    });
+
+    return { children };
+  });
+
   readonly coneSegment = mesh((segment: ConeSegment) => ({
     geometry: LineProjection.geometry(),
     material: this.material(segment),
   }));
 
   private readonly material = shaderMaterial((segment: ConeSegment) => {
-    const { projection, focalLength, centre = Vector2.of(), distortionCoeffecients = Vector2.of() } = this.lens;
+    const { projection, focalLength, centre = Vector2.of(), distortionCoefficients = Vector2.of() } = this.lens;
     return {
       shader: LineProjection.shader,
       uniforms: {
@@ -79,7 +106,7 @@ export class LineProjection {
         projection: { value: projection },
         focalLength: { value: focalLength },
         centre: { value: centre.toThree() },
-        k: { value: distortionCoeffecients.toThree() },
+        k: { value: distortionCoefficients.toThree() },
         imageAspectRatio: { value: this.imageAspectRatio },
         axis: { value: segment.axis?.toThree() },
         start: { value: segment.start.toThree() },

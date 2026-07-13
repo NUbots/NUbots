@@ -41,7 +41,12 @@ namespace module::strategy {
             NUClear::clock::duration ball_search_timeout{};
             /// @brief How long before the goal measurement is too old and we have nothing to look at
             NUClear::clock::duration goal_search_timeout{};
+            /// @brief Localisation cost threshold above which we should search for landmarks again
+            double max_localisation_cost = 0.0;
         } cfg;
+
+        /// @brief Whether we are currently looking around due to stale features, used to log only on transitions
+        bool looking_around = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the StrategiseLook reactor.
