@@ -288,12 +288,12 @@ namespace module::skill {
                             : Eigen::Vector2d::Zero();
                     idx += PHASE_SIZE;
 
-                    // Joint currents
-                    observation.segment<JOINT_POS_SIZE>(idx) = joint_state.load;
+                    // Joint currents. Must be reordered into Mujoco's tree-traversal order for inference
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_state.load);
                     idx += JOINT_POS_SIZE;
 
-                    // Joint voltages
-                    observation.segment<JOINT_POS_SIZE>(idx) = joint_state.voltage;
+                    // Joint voltages (per-servo presentVoltage), reordered into Mujoco order
+                    observation.segment<JOINT_POS_SIZE>(idx) = nubots_to_mjlab(joint_state.voltage);
                     idx += JOINT_POS_SIZE;
 
                     // Count the control step for the loop-timing diagnostics.

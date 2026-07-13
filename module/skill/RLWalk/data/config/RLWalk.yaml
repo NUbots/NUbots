@@ -9,7 +9,7 @@ model:
   num_joints: 20
   obs_size: 112 # gyro(3)+gravity(3)+joint_pos(20)+joint_vel(20)+last_action(21)+command(3)+phase(2)+current(20)+voltage(20)
   action_alpha: 1.00 # TODO: remove the filter completely
-  action_scale: 0.24722924456 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
+  action_scale: 0.2609 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
   gait_period: 0.7 # seconds, defined in mjlab training
 
 servos:
