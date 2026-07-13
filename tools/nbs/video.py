@@ -60,6 +60,11 @@ def register(command):
         choices=["libx264", "libopenh264", "h264_nvenc"],
         help="The encoder to use when encoding video",
     )
+    command.add_argument(
+        "--unix",
+        action="store_true",
+        help="Write absolute unix timecodes (seconds) instead of relative millisecond timecodes",
+    )
 
 
 def init_worker():
@@ -92,7 +97,7 @@ def packetise_stream(decoder):
             }
 
 
-def run(files, output, encoder, quality, **kwargs):
+def run(files, output, encoder, quality, unix, **kwargs):
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
@@ -109,6 +114,7 @@ def run(files, output, encoder, quality, **kwargs):
                         frame["fourcc"],
                         encoder,
                         quality,
+                        unix=unix,
                     )
 
                 # Push the next packet
