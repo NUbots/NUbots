@@ -341,12 +341,12 @@ RUN INCLUDE_PREFIX=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/loc
     --prefix ${INCLUDE_PREFIX} --no-toolchain \
     --header-path include/zstr
 
-# Make the OpenCL headers/loader visible at the standard prefix for generic builds before
-# VisualMesh, which probes OpenCL at build time and otherwise bakes VISUALMESH_DISABLE_OPENCL
-# into its exported cmake config (they were installed to the Jetson targetfs prefix above).
+# Make the OpenCL loader visible at the standard prefix for generic builds before VisualMesh,
+# which probes OpenCL at build time and otherwise bakes VISUALMESH_DISABLE_OPENCL into its
+# exported cmake config. The loader was installed to the Jetson targetfs prefix above; the
+# CL headers themselves come from the opencl-c-headers apt package (/usr/include/CL).
 RUN if [ "${platform}" != "orinnx" ]; then \
-        cp -an /l4t/targetfs/usr/local/include/CL /usr/local/include/ && \
-        cp -an /l4t/targetfs/usr/local/lib/libOpenCL.* /usr/local/lib/ && \
+        cp -a /l4t/targetfs/usr/local/lib/libOpenCL.* /usr/local/lib/ && \
         ldconfig; \
     fi
 
