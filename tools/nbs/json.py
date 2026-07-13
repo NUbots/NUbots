@@ -30,7 +30,7 @@ import re
 
 from google.protobuf.json_format import MessageToJson
 
-from utility.nbs import LinearDecoder
+from utility.nbs import LinearDecoder, resolve_nbs_paths
 
 
 def register(command):
@@ -38,11 +38,17 @@ def register(command):
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
+    command.add_argument(
+        "--no-zeros",
+        action="store_true",
+        default=True,
+        help="Don't include fields whose value is zero in the JSON output (includes zeros by default)",
+    )
 
 
-def run(files, **kwargs):
-    for packet in LinearDecoder(*files):
-        out = re.sub(r"\s+", " ", MessageToJson(packet.msg, True))
+def run(files, keep_zeros, **kwargs):
+    for packet in LinearDecoder(*resolve_nbs_paths(files)):
+        out = re.sub(r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros))
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type.name, packet.emit_timestamp, out)
         # Print as a json object
         print(out)
