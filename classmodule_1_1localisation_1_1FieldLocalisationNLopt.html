@@ -218,9 +218,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9a989fd8ce7e309f7002bd0ca7d7ba2e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9a989fd8ce7e309f7002bd0ca7d7ba2e">data_association</a> (const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const Eigen::Isometry3d &amp;Hfw)</td></tr>
 <tr class="memdesc:a9a989fd8ce7e309f7002bd0ca7d7ba2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform data association between intersection observations and landmarks using nearest neighbour.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a9a989fd8ce7e309f7002bd0ca7d7ba2e">More...</a><br /></td></tr>
 <tr class="separator:a9a989fd8ce7e309f7002bd0ca7d7ba2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a6706c7b7ada33db9fe0c3e016aea5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a">debug_field_localisation</a> (Eigen::Isometry3d Hfw)</td></tr>
-<tr class="memdesc:a1a6706c7b7ada33db9fe0c3e016aea5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find error between computed Hfw and ground truth if available.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a1a6706c7b7ada33db9fe0c3e016aea5a">More...</a><br /></td></tr>
-<tr class="separator:a1a6706c7b7ada33db9fe0c3e016aea5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0aee9b4b8a09a7adaa1fe96b98afb82b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0aee9b4b8a09a7adaa1fe96b98afb82b">debug_field_localisation</a> (const Eigen::Isometry3d &amp;Hfw, const Eigen::Isometry3d &amp;Htw)</td></tr>
+<tr class="memdesc:a0aee9b4b8a09a7adaa1fe96b98afb82b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find error between computed Hfw and ground truth if available.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a0aee9b4b8a09a7adaa1fe96b98afb82b">More...</a><br /></td></tr>
+<tr class="separator:a0aee9b4b8a09a7adaa1fe96b98afb82b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a682c5f136956d8b117ce2fd2fd27964a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Vector3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a">greedy_association</a> (const std::shared_ptr&lt; const FieldIntersections &gt; &amp;field_intersections, const Eigen::Isometry3d &amp;Hfw)</td></tr>
 <tr class="memdesc:a682c5f136956d8b117ce2fd2fd27964a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform data association between intersection observations and landmarks using nearest neighbour.  <a href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a682c5f136956d8b117ce2fd2fd27964a">More...</a><br /></td></tr>
 <tr class="separator:a682c5f136956d8b117ce2fd2fd27964a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -377,8 +377,8 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 
 </div>
 </div>
-<a id="a1a6706c7b7ada33db9fe0c3e016aea5a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a6706c7b7ada33db9fe0c3e016aea5a">&#9670;&nbsp;</a></span>debug_field_localisation()</h2>
+<a id="a0aee9b4b8a09a7adaa1fe96b98afb82b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0aee9b4b8a09a7adaa1fe96b98afb82b">&#9670;&nbsp;</a></span>debug_field_localisation()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -386,9 +386,19 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
         <tr>
           <td class="memname">void module::localisation::FieldLocalisationNLopt::debug_field_localisation </td>
           <td>(</td>
-          <td class="paramtype">Eigen::Isometry3d&#160;</td>
-          <td class="paramname"><em>Hfw</em></td><td>)</td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Hfw</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Eigen::Isometry3d &amp;&#160;</td>
+          <td class="paramname"><em>Htw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -645,7 +655,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>n_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li>
-    <li class="footer">Generated on Fri Jul 3 2026 00:36:28 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jul 15 2026 06:29:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
