@@ -19,8 +19,8 @@ nuclear_role(
   actuation::Kinematics
   actuation::FootController
   # Skills
-  skill::K1Walk
-  skill::K1GetUp
+  skill::K1WalkPolicy # on-robot ONNX walk inference -> LowCmd (replaces skill::K1Walk's Move RPC)
+  skill::K1GetUpPolicy # on-robot ONNX get-up inference -> LowCmd (replaces skill::K1GetUp)
   skill::K1Look
   # Planners
   planning::GetUpPlanner

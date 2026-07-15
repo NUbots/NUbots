@@ -93,6 +93,10 @@ namespace module::planning {
         const std::vector<Eigen::Vector2d> get_obstacles(const std::vector<Eigen::Vector2d>& all_obstacles,
                                                          const Eigen::Vector2d& rDRr);
 
+        /// @brief Applies exponential smoothing + dead-zone compensation to a proposed walk
+        /// velocity and forwards it to the Walk skill as a Director task
+        void emit_smoothed_walk(const Eigen::Vector3d& velocity_target);
+
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
         explicit PlanWalkPath(std::unique_ptr<NUClear::Environment> environment);

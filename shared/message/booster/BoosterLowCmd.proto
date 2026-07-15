@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package message.booster;
+
+// Low-level joint command forwarded by platform::Booster::HardwareIO to the Booster SDK
+// rt/joint_ctrl topic (LowCmd). Only honoured by the robot in CUSTOM mode. Motors are in
+// the SDK JointIndexK1 serial order (22 entries; the ankle pitch/roll values occupy the
+// kCrankUp/kCrankDown slots).
+message BoosterLowCmd {
+    enum CmdType {
+        PARALLEL = 0;
+        SERIAL   = 1;
+    }
+
+    message MotorCmd {
+        uint32 mode   = 1;
+        float  q      = 2;
+        float  dq     = 3;
+        float  tau    = 4;
+        float  kp     = 5;
+        float  kd     = 6;
+        float  weight = 7;
+    }
+
+    CmdType cmd_type            = 1;
+    repeated MotorCmd motor_cmd = 2;
+}

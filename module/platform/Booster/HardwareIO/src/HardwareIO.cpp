@@ -18,6 +18,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
+    using message::booster::BoosterLowCmd;
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
@@ -83,6 +84,9 @@ namespace module::platform::Booster {
             odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
                 "rt/odometer_state",
                 [this](const void* msg) { odometer_handler(msg); });
+
+            low_cmd_channel =
+                ChannelFactory::Instance()->CreateSendChannel<booster_interface::msg::LowCmd>("rt/joint_ctrl");
         });
 
         on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
@@ -150,6 +154,31 @@ namespace module::platform::Booster {
             int32_t res = booster_client.VisualKick(kick.start, version);
             if (res != 0) {
                 log<ERROR>("Failed to visual kick: " + res_code_to_string(res));
+            }
+        });
+
+        // Low-level joint commands (policy inference output). Only honoured by the robot in
+        // CUSTOM mode; forwarded verbatim to rt/joint_ctrl in SDK JointIndexK1 serial order.
+        on<Trigger<BoosterLowCmd>>().then([this](const BoosterLowCmd& cmd) {
+            booster_interface::msg::LowCmd low;
+            low.cmd_type(cmd.cmd_type == BoosterLowCmd::CmdType::PARALLEL ? booster_interface::msg::PARALLEL
+                                                                          : booster_interface::msg::SERIAL);
+            std::vector<booster_interface::msg::MotorCmd> motors;
+            motors.reserve(cmd.motor_cmd.size());
+            for (const auto& mc : cmd.motor_cmd) {
+                booster_interface::msg::MotorCmd motor;
+                motor.mode(mc.mode);
+                motor.q(mc.q);
+                motor.dq(mc.dq);
+                motor.tau(mc.tau);
+                motor.kp(mc.kp);
+                motor.kd(mc.kd);
+                motor.weight(mc.weight);
+                motors.push_back(motor);
+            }
+            low.motor_cmd(std::move(motors));
+            if (low_cmd_channel == nullptr || !low_cmd_channel->Write(&low)) {
+                log<WARN>("Failed to write LowCmd to rt/joint_ctrl");
             }
         });
 
@@ -276,6 +305,9 @@ namespace module::platform::Booster {
         sensors->gyroscope.x()     = imu.gyro()[0];
         sensors->gyroscope.y()     = imu.gyro()[1];
         sensors->gyroscope.z()     = imu.gyro()[2];
+        sensors->imu_rpy.x()       = imu.rpy()[0];
+        sensors->imu_rpy.y()       = imu.rpy()[1];
+        sensors->imu_rpy.z()       = imu.rpy()[2];
 
         // Read joint-space feedback from the serial chain (the SDK converts the parallel ankle
         // mechanism for us). Indices match the JointIndex enum directly; the ankles occupy the
