@@ -1,8 +1,8 @@
 import { NUClearNetPacket, NUClearNetSend } from "nuclearnet.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { message } from "../../../shared/messages";
-import { messageTypeToName } from "../../../shared/messages/type_converters";
+import { ScrubberLoadRequest } from "../../../shared/proto/message/eye/Scrubber";
+import { Test } from "../../../shared/proto/message/network/Test";
 import { NUsightSession } from "../session";
 import { NUsightSessionNetwork } from "../session_network";
 
@@ -13,10 +13,7 @@ import {
   createPacketFromServer,
 } from "./test_utils";
 
-import Test = message.network.Test;
-import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
-
-const testPacketType = messageTypeToName(Test);
+const testPacketType = Test.typeName;
 
 describe("NUsightSessionNetwork", () => {
   let nuclearnetClient: ReturnType<typeof createMockNUClearNetClient>["nuclearnetClient"];
@@ -143,7 +140,7 @@ describe("NUsightSessionNetwork", () => {
     // Emit a packet from NUClearNet and make sure the listener is called
     const packet: NUClearNetPacket = createPacketFromNUClearNet(new Test({ message: "hello world" }));
     nuclearnetMockEmit(testPacketType, packet);
-    expect(onTest).toHaveBeenCalledWith(packet.peer, { message: "hello world" });
+    expect(onTest).toHaveBeenCalledWith(packet.peer, expect.objectContaining({ message: "hello world" }));
 
     // Remove the listener
     off();
@@ -167,12 +164,12 @@ describe("NUsightSessionNetwork", () => {
     // Emit a packet from the client and make sure the listener is called
     const clientSend: NUClearNetSend = {
       type: testPacketType,
-      payload: Test.encode({ message: "hello world" }).finish() as Buffer,
+      payload: Buffer.from(new Test({ message: "hello world" }).toBinary()),
       // Target the packet to the NUsight server, so it's not sent to NUclearNet
       target: "nusight",
     };
     mockSocket.emit("packet", clientSend);
-    expect(onTest).toHaveBeenCalledWith(client, { message: "hello world" });
+    expect(onTest).toHaveBeenCalledWith(client, expect.objectContaining({ message: "hello world" }));
 
     // Remove the listener
     off();
@@ -202,7 +199,7 @@ describe("NUsightSessionNetwork", () => {
     const mockSocket = createMockWebSocket();
     const client = session.addClient(mockSocket.connection);
 
-    const requestTypeName = messageTypeToName(ScrubberLoadRequest);
+    const requestTypeName = ScrubberLoadRequest.typeName;
     const request = {
       rpc: { token: 1 },
       files: ["a.nbs", "b.nbs"],
@@ -211,17 +208,17 @@ describe("NUsightSessionNetwork", () => {
     // Emit a RPC request from the client and make sure the handler is called
     const clientSend: NUClearNetSend = {
       type: requestTypeName,
-      payload: ScrubberLoadRequest.encode(request).finish() as Buffer,
+      payload: Buffer.from(new ScrubberLoadRequest(request).toBinary()),
       // Target the packet to the NUsight server, so it's not sent to NUclearNet
       target: "nusight",
     };
     mockSocket.emit("packet", clientSend);
-    expect(onScrubberLoadRequest).toHaveBeenCalledWith(request, client);
+    expect(onScrubberLoadRequest).toHaveBeenCalledWith(expect.objectContaining({ files: request.files }), client);
 
     await tick();
 
     // Check that the response was sent to the client
-    const expectedResponseType = messageTypeToName(ScrubberLoadRequest.Response);
+    const expectedResponseType = ScrubberLoadRequest.Response.typeName;
     const expectedResponse = createPacketFromServer(
       new ScrubberLoadRequest.Response({
         rpc: {
@@ -254,7 +251,7 @@ describe("NUsightSessionNetwork", () => {
     const mockSocket = createMockWebSocket();
     session.addClient(mockSocket.connection);
 
-    const requestTypeName = messageTypeToName(ScrubberLoadRequest);
+    const requestTypeName = ScrubberLoadRequest.typeName;
     const request = {
       rpc: { token: 1 },
       files: ["a.nbs", "b.nbs"],
@@ -263,7 +260,7 @@ describe("NUsightSessionNetwork", () => {
     // Emit a RPC request from the client and make sure the handler is called
     const clientSend: NUClearNetSend = {
       type: requestTypeName,
-      payload: ScrubberLoadRequest.encode(request).finish() as Buffer,
+      payload: Buffer.from(new ScrubberLoadRequest(request).toBinary()),
       // Target the packet to the NUsight server, so it's not sent to NUclearNet
       target: "nusight",
     };
@@ -272,7 +269,7 @@ describe("NUsightSessionNetwork", () => {
     await tick();
 
     // Check that the response was sent to the client
-    const expectedResponseType = messageTypeToName(ScrubberLoadRequest.Response);
+    const expectedResponseType = ScrubberLoadRequest.Response.typeName;
     const expectedResponse = createPacketFromServer(
       new ScrubberLoadRequest.Response({
         rpc: {

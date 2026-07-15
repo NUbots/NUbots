@@ -22,4 +22,5 @@ Make sure that it has a lower challenge priority than the GetUp, otherwise it ma
 
 ## Dependencies
 
+- Director
 - The Script extension

@@ -1,3 +1,18 @@
+import { WalkState } from "@proto/message/behaviour/state/WalkState";
+import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
+import { Sensors } from "@proto/message/input/Sensors";
+import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
+import { Field } from "@proto/message/localisation/Field";
+import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
+import { WalkToDebug } from "@proto/message/planning/WalkPath";
+import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose";
+import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
+import { Overview } from "@proto/message/support/nusight/Overview";
+import { VSLAM } from "@proto/message/input/VSLAM";
+import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
+import { FieldLines } from "@proto/message/vision/FieldLines";
+import { Goals } from "@proto/message/vision/Goal";
+import { Iiso3 } from "@proto/Transform";
 import { action } from "mobx";
 import * as THREE from "three";
 
@@ -7,9 +22,7 @@ import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
-import { message } from "../../../shared/messages";
-import { Imat4 } from "../../../shared/messages";
-import { TimestampObject } from "../../../shared/time/timestamp";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -24,20 +37,20 @@ export class LocalisationNetwork {
     private network: Network,
     private model: LocalisationModel,
   ) {
-    this.network.on(message.input.Sensors, this.onSensors);
-    this.network.on(message.localisation.Field, this.onField);
-    this.network.on(message.localisation.Ball, this.onBall);
-    this.network.on(message.localisation.Robots, this.onRobots);
-    this.network.on(message.vision.FieldLines, this.onFieldLines);
-    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.vision.Goals, this.onGoals);
-    this.network.on(message.planning.WalkToDebug, this.onWalkToDebug);
-    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.strategy.WalkInsideBoundedBox, this.WalkInsideBoundedBox);
-    this.network.on(message.purpose.Purpose, this.onPurpose);
-    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
-    this.network.on(message.support.nusight.Overview, this.onOverview);
-    this.network.on(message.input.VSLAM, this.onVSLAM);
+    this.network.on(Sensors, this.onSensors);
+    this.network.on(Field, this.onField);
+    this.network.on(LocalisationBall, this.onBall);
+    this.network.on(LocalisationRobots, this.onRobots);
+    this.network.on(FieldLines, this.onFieldLines);
+    this.network.on(FieldIntersections, this.onFieldIntersections);
+    this.network.on(Goals, this.onGoals);
+    this.network.on(WalkToDebug, this.onWalkToDebug);
+    this.network.on(FieldIntersections, this.onFieldIntersections);
+    this.network.on(WalkInsideBoundedBox, this.WalkInsideBoundedBox);
+    this.network.on(Purpose, this.onPurpose);
+    this.network.on(WalkState, this.onWalkState);
+    this.network.on(Overview, this.onOverview);
+    this.network.on(VSLAM, this.onVSLAM);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -55,7 +68,7 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
+  private onField = (robotModel: RobotModel, field: Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
 
     // Flip the field if the robot is on the red team
@@ -72,7 +85,7 @@ export class LocalisationNetwork {
   };
 
   @action
-  private onWalkToDebug = (robotModel: RobotModel, walkToDebug: message.planning.WalkToDebug) => {
+  private onWalkToDebug = (robotModel: RobotModel, walkToDebug: WalkToDebug) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hrd = Matrix4.from(walkToDebug.Hrd);
     robot.maxAlignRadius = walkToDebug.maxAlignRadius;
@@ -86,7 +99,7 @@ export class LocalisationNetwork {
   };
 
   @action.bound
-  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: message.strategy.WalkInsideBoundedBox) {
+  private WalkInsideBoundedBox(robotModel: RobotModel, boundedBox: WalkInsideBoundedBox) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.boundingBox = {
       minX: boundedBox.xMin,
@@ -97,10 +110,10 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onPurpose(robotModel: RobotModel, purpose: message.purpose.Purpose) {
+  private onPurpose(robotModel: RobotModel, purpose: Purpose) {
     const robot = LocalisationRobotModel.of(robotModel);
     const position = purpose.purpose;
-    robot.purpose = this.getKey(message.purpose.SoccerPosition, position!)!;
+    robot.purpose = SoccerPositionFromEnum[position!];
 
     robot.playerId = purpose.playerId!;
 
@@ -119,23 +132,23 @@ export class LocalisationNetwork {
       robot.color = "black";
     }
 
-    robot.teamColour = purpose.teamColour == message.input.GameState.TeamColour.RED ? "red" : "blue";
+    robot.teamColour = purpose.teamColour == GameState_TeamColourEnum.RED ? "red" : "blue";
   }
 
   @action.bound
-  private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
+  private onFieldLines(robotModel: RobotModel, fieldLines: FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
   }
 
   @action.bound
-  private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
+  private onBall(robotModel: RobotModel, ball: LocalisationBall) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.ball = { rBWw: Vector3.from(ball.rBWw) };
   }
 
   @action.bound
-  private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
+  private onRobots(robotModel: RobotModel, localisation_robots: LocalisationRobots) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.robots = localisation_robots.robots.map((localisation_robot) => {
       return {
@@ -147,7 +160,7 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
+  private onFieldIntersections(robotModel: RobotModel, fieldIntersections: FieldIntersections) {
     const robot = LocalisationRobotModel.of(robotModel);
 
     robot.rIWw = fieldIntersections.intersections.map((intersection) => {
@@ -167,7 +180,7 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
+  private onGoals(robotModel: RobotModel, goalsMessage: Goals) {
     const { Hcw, goals } = goalsMessage;
     const Hwc = Matrix4.from(Hcw).invert();
     const robot = LocalisationRobotModel.of(robotModel);
@@ -178,7 +191,7 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
+  private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     // Ignore empty Sensors packets which may be emitted by the nbs scrubber
     // when there's no Sensors data at a requested timestamp).
     if (!sensors.Htw) {
@@ -224,7 +237,7 @@ export class LocalisationNetwork {
     }
   }
   @action.bound
-  private onWalkState(robotModel: RobotModel, walk_state: message.behaviour.state.WalkState) {
+  private onWalkState(robotModel: RobotModel, walk_state: WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
 
     // If phase changed, add current trajectories to history before updating
@@ -240,11 +253,11 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onOverview = (robotModel: RobotModel, overview: message.support.nusight.Overview) => {
+  private onOverview = (robotModel: RobotModel, overview: Overview) => {
     const robot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)
-    robot.time = TimestampObject.toSeconds(overview.timestamp);
+    robot.time = Timestamp.toSeconds(overview.timestamp);
 
     // The id number of the robot
     robot.playerId = overview.robotId;
@@ -276,9 +289,9 @@ export class LocalisationNetwork {
     robot.penaltyReason = overview.penaltyReason;
 
     // The last time we had a camera image, saw a ball/goal
-    robot.lastCameraImage = TimestampObject.toSeconds(overview.lastCameraImage);
-    robot.lastSeenBall = TimestampObject.toSeconds(overview.lastSeenBall);
-    robot.lastSeenGoal = TimestampObject.toSeconds(overview.lastSeenGoal);
+    robot.lastCameraImage = Timestamp.toSeconds(overview.lastCameraImage);
+    robot.lastSeenBall = Timestamp.toSeconds(overview.lastSeenBall);
+    robot.lastSeenGoal = Timestamp.toSeconds(overview.lastSeenGoal);
 
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand);
@@ -297,7 +310,7 @@ function decompose(m: THREE.Matrix4): {
   return { translation, rotation, scale };
 }
 
-function fromProtoMat44(m: Imat4): THREE.Matrix4 {
+function fromProtoMat44(m: Iiso3): THREE.Matrix4 {
   return new THREE.Matrix4().set(
     m!.x!.x!,
     m!.y!.x!,

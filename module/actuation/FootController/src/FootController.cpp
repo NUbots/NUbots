@@ -45,10 +45,10 @@ namespace module::actuation {
 
         on<Configuration>("FootController.yaml").then([this](const Configuration& config) {
             // Set log level from the configuration
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.mode        = config["mode"].as<std::string>();
-
+            this->log_level   = config["log_level"].as<NUClear::LogLevel>();
+            cfg.mode          = config["mode"].as<std::string>();
             cfg.desired_gains = config["servo_gains"].as<std::map<std::string, double>>();
+
             // Set gains of servo to startup phase values
             cfg.servo_states.clear();
             cfg.startup_gain = config["startup"]["servo_gain"].as<double>();
@@ -56,6 +56,18 @@ namespace module::actuation {
                 utility::input::ServoID servo_id(servo.first);
                 cfg.servo_states[servo_id] = ServoState(cfg.startup_gain, TORQUE_ENABLED);
             }
+
+            // Balance config
+            cfg.roll_p_gain     = config["balance"]["roll_p_gain"].as<double>();
+            cfg.pitch_p_gain    = config["balance"]["pitch_p_gain"].as<double>();
+            cfg.roll_i_gain     = config["balance"]["roll_i_gain"].as<double>();
+            cfg.pitch_i_gain    = config["balance"]["pitch_i_gain"].as<double>();
+            cfg.max_i_error     = config["balance"]["max_i_error"].as<double>();
+            cfg.roll_d_gain     = config["balance"]["roll_d_gain"].as<double>();
+            cfg.pitch_d_gain    = config["balance"]["pitch_d_gain"].as<double>();
+            cfg.max_pitch_error = config["balance"]["max_pitch_error"].as<double>();
+            cfg.max_roll_error  = config["balance"]["max_roll_error"].as<double>();
+
             // Emit request to set desired gains after a delay
             emit<Scope::DELAY>(std::make_unique<SetGains>(),
                                std::chrono::seconds(config["startup"]["duration"].as<int>()));
@@ -67,7 +79,6 @@ namespace module::actuation {
                 cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
             }
         });
-
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>, Priority::HIGH>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {

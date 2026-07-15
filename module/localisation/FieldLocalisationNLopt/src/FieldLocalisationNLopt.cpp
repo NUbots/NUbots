@@ -97,31 +97,36 @@ namespace module::localisation {
             cfg.goal_post_error_tolerance = config["goal_post_error_tolerance"].as<double>();
 
             // Optimisation parameters
-            cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
-            cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
-            cfg.maxeval  = config["opt"]["maxeval"].as<int>();
+            cfg.normal_xtol_rel        = config["normal_opt"]["xtol_rel"].as<double>();
+            cfg.normal_ftol_rel        = config["normal_opt"]["ftol_rel"].as<double>();
+            cfg.normal_maxeval         = config["normal_opt"]["maxeval"].as<int>();
+            std::string normal_opt_alg = config["normal_opt"]["algorithm"].as<std::string>();
+            if (auto it = nlopt_algorithm_map.find(normal_opt_alg); it != nlopt_algorithm_map.end()) {
+                cfg.normal_algorithm = it->second;
+            }
+            else {
+                log<WARN>("Unknown normal optimisation algorithm '",
+                          config["normal_opt"]["algorithm"].as<std::string>(),
+                          "', using default");
+                cfg.normal_algorithm = nlopt::LN_COBYLA;
+            }
 
-            // Define the process model
-            cfg.A = config["kalman"]["A"].as<Expression>();
 
-            // Define the input model
-            cfg.B = Eigen::Matrix<double, n_states, n_inputs>::Zero();
+            cfg.uncertainty_xtol_rel        = config["uncertainty_opt"]["xtol_rel"].as<double>();
+            cfg.uncertainty_ftol_rel        = config["uncertainty_opt"]["ftol_rel"].as<double>();
+            cfg.uncertainty_maxeval         = config["uncertainty_opt"]["maxeval"].as<int>();
+            std::string uncertainty_opt_alg = config["uncertainty_opt"]["algorithm"].as<std::string>();
+            if (auto it = nlopt_algorithm_map.find(uncertainty_opt_alg); it != nlopt_algorithm_map.end()) {
+                cfg.uncertainty_algorithm = it->second;
+            }
+            else {
+                log<WARN>("Unknown uncertainty optimisation algorithm '",
+                          config["uncertainty_opt"]["algorithm"].as<std::string>(),
+                          "', using default");
+            }
 
-            // Define the measurement model
-            cfg.C = config["kalman"]["C"].as<Expression>();
-
-            // Define the process noise covariance
-            cfg.Q = config["kalman"]["Q"].as<Expression>();
-
-            // Define the measurement noise covariance
-            cfg.R = config["kalman"]["R"].as<Expression>();
-            kf    = utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements>(cfg.initial_state,
-                                                                                                 cfg.P0,
-                                                                                                 cfg.A,
-                                                                                                 cfg.B,
-                                                                                                 cfg.C,
-                                                                                                 cfg.Q,
-                                                                                                 cfg.R);
+            // Exponential filter parameters
+            cfg.alpha = Eigen::Vector3d(config["exponential_filter"]["alpha"].as<Expression>());
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -185,18 +190,20 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<INFO>("Resetting field localisation");
-            state = cfg.initial_hypotheses[0];
-            kf.set_state(state);
-            startup    = true;
-            last_reset = NUClear::clock::now();
+            state             = cfg.initial_hypotheses[0];
+            filtered_state    = state;
+            first_measurement = true;
+            startup           = true;
+            last_reset        = NUClear::clock::now();
         });
 
         on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
             log<INFO>("Resetting field localisation for penalty kick");
-            state = reset.penalty_kick_position;
-            kf.set_state(state);
+            state              = reset.penalty_kick_position;
+            filtered_state     = state;
+            first_measurement  = true;
             last_reset         = NUClear::clock::now();
-            last_certain_state = state;
+            last_certain_state = state;  // Update the last certain state
         });
 
         on<Trigger<FieldLines>,
@@ -244,6 +251,7 @@ namespace module::localisation {
                     }
 
                     double chosen_state_cost = 0.0;
+                    Eigen::Vector3d proposed_state;
 
                     if (startup && cfg.starting_side == StartingSide::EITHER) {
                         // Find the best initial state to use based on the optimisation results of each
@@ -257,54 +265,79 @@ namespace module::localisation {
                             std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
                                 return a.second < b.second;
                             });
-                        state              = best_hypothesis->first;
-                        chosen_state_cost  = best_hypothesis->second;
+                        proposed_state    = best_hypothesis->first;
+                        chosen_state_cost = best_hypothesis->second;
+                        // For startup, always accept the best hypothesis
+                        state              = proposed_state;
                         last_certain_state = state;
-                        kf.set_state(state);
-                        startup = false;
+                        filtered_state     = state;
+                        first_measurement  = true;
+                        startup            = false;
                     }
                     else {
                         // Run the optimisation routine
                         std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(kf.get_state(), field_lines.rPWw, field_intersections, goals);
-                        state             = opt_results.first;
+                            run_field_line_optimisation(filtered_state, field_lines.rPWw, field_intersections, goals);
+                        proposed_state    = opt_results.first;
                         chosen_state_cost = opt_results.second;
-                    }
 
-                    // Time update (no process model)
-                    kf.time(Eigen::Matrix<double, n_inputs, 1>::Zero(), 0);
+                        // Only accept the optimisation result if the cost is below the threshold
+                        if (chosen_state_cost < cfg.cost_threshold) {
+                            state = proposed_state;
 
-                    // Measurement update
-                    kf.measure(state);
+                            // Apply exponential filter to smooth the state estimate unless it is the first measurement.
+                            filtered_state =
+                                first_measurement
+                                    ? state
+                                    : cfg.alpha.cwiseProduct(state)
+                                          + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
 
-                    // Check if uncertainty is too high
-                    emit(graph("Cost", chosen_state_cost));
-                    if (cfg.reset_on_cost && (chosen_state_cost > cfg.cost_threshold)
-                        && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
-                        num_over_cost++;
-                        // Cost has been high too many times, reset the localisation
-                        if (num_over_cost > cfg.max_over_cost) {
-                            // Emit that we are resetting, eg for behaviour
-                            emit(std::make_unique<UncertaintyResetFieldLocalisation>());
-                            // Reset localisation by finding a new low cost state
-                            uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
-                            // Reset variables
-                            num_over_cost = 0;
-                            last_reset    = NUClear::clock::now();
-                            // Let other modules know that localisation has finished resetting
-                            emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
+                            // Reset the flag.
+                            first_measurement = false;
+
+                            // Update the last certain state and reset counter
+                            last_certain_state = filtered_state;
+                            num_over_cost      = 0;
+                        }
+                        else {
+                            // Reject the update, keep previous filtered state
+                            log<DEBUG>("Rejecting optimisation result: cost ",
+                                       chosen_state_cost,
+                                       " exceeds threshold ",
+                                       cfg.cost_threshold);
+                            // Keep the current filtered_state unchanged
+                            // Increment the over-cost counter for potential reset
+                            num_over_cost++;
                         }
                     }
 
-                    else if ((chosen_state_cost < cfg.cost_threshold)) {
-                        // Update the last certain state
-                        num_over_cost      = 0;
-                        last_certain_state = kf.get_state();
+                    // Check if uncertainty is too high and trigger reset if needed
+                    emit(graph("Cost", chosen_state_cost));
+                    if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
+                        && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
+                        // Cost has been high too many times, reset the localisation
+                        log<WARN>("Cost exceeded threshold ",
+                                  cfg.max_over_cost,
+                                  " times, triggering uncertainty reset");
+                        // Emit that we are resetting, eg for behaviour
+                        emit(std::make_unique<UncertaintyResetFieldLocalisation>());
+                        // Reset localisation by finding a new low cost state
+                        const auto reset_start = NUClear::clock::now();
+                        uncertainty_reset(fd, field_lines, field_intersections, goals, sensors.Hrw);
+                        const auto reset_end = NUClear::clock::now();
+                        const auto reset_duration =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
+                        log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
+                        // Reset variables
+                        num_over_cost = 0;
+                        last_reset    = NUClear::clock::now();
+                        // Let other modules know that localisation has finished resetting
+                        emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
                     }
 
                     // Emit the field message
                     auto field = std::make_unique<Field>();
-                    field->Hfw = compute_Hfw(kf.get_state());
+                    field->Hfw = compute_Hfw(filtered_state);
 
                     // Debugging
                     if (log_level <= DEBUG) {
@@ -317,9 +350,7 @@ namespace module::localisation {
                     }
 
                     // Add cost, covariance, and uncertainty to the field message
-                    field->cost        = chosen_state_cost;
-                    field->covariance  = kf.get_covariance();
-                    field->uncertainty = kf.get_covariance().diagonal().sum();
+                    field->cost = chosen_state_cost;
 
                     emit(field);
                 });
@@ -327,7 +358,7 @@ namespace module::localisation {
 
     void FieldLocalisationNLopt::debug_field_localisation(Eigen::Isometry3d Hfw) {
         emit(graph("opt state", state.x(), state.y(), state.z()));
-        emit(graph("kf state", kf.get_state().x(), kf.get_state().y(), kf.get_state().z()));
+        emit(graph("filtered state", filtered_state.x(), filtered_state.y(), filtered_state.z()));
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = ground_truth_Hfw.translation();
         Eigen::Vector3d rFWw       = (Hfw.translation());
@@ -380,7 +411,8 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& field_lines,
         const std::shared_ptr<const FieldIntersections>& field_intersections,
-        const std::shared_ptr<const Goals>& goals) {
+        const std::shared_ptr<const Goals>& goals,
+        bool uncertainty_optimisation) {
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
@@ -449,11 +481,19 @@ namespace module::localisation {
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
         constexpr unsigned int n   = 3;
-        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+        nlopt::algorithm algorithm = uncertainty_optimisation ? cfg.uncertainty_algorithm : cfg.normal_algorithm;
         nlopt::opt opt             = nlopt::opt(algorithm, n);
-        opt.set_xtol_rel(cfg.xtol_rel);
-        opt.set_ftol_rel(cfg.ftol_rel);
-        opt.set_maxeval(cfg.maxeval);
+
+        if (uncertainty_optimisation) {
+            opt.set_xtol_rel(cfg.uncertainty_xtol_rel);
+            opt.set_ftol_rel(cfg.uncertainty_ftol_rel);
+            opt.set_maxeval(cfg.uncertainty_maxeval);
+        }
+        else {
+            opt.set_xtol_rel(cfg.normal_xtol_rel);
+            opt.set_ftol_rel(cfg.normal_ftol_rel);
+            opt.set_maxeval(cfg.normal_maxeval);
+        }
 
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
@@ -477,7 +517,41 @@ namespace module::localisation {
 
         // Find the optimal solution
         double final_cost;
-        opt.optimize(x, final_cost);
+        nlopt::result result = opt.optimize(x, final_cost);
+
+        log<DEBUG>("Ran optimisation with algorithm ",
+                   algorithm,
+                   " and initial guess (",
+                   initial_guess.x(),
+                   ", ",
+                   initial_guess.y(),
+                   ", ",
+                   initial_guess.z(),
+                   "), resulting in proposed state (",
+                   x[0],
+                   ", ",
+                   x[1],
+                   ", ",
+                   x[2],
+                   ") with cost ",
+                   final_cost);
+
+        // Debug information about the optimization result
+        log<DEBUG>("Final Cost: ", final_cost);
+        switch (result) {
+            case nlopt::SUCCESS: log<DEBUG>("Optimization succeeded"); break;
+            case nlopt::FTOL_REACHED: log<DEBUG>("Optimization stopped: function tolerance reached"); break;
+            case nlopt::XTOL_REACHED: log<DEBUG>("Optimization stopped: variable tolerance reached"); break;
+            case nlopt::MAXEVAL_REACHED:
+                log<DEBUG>("Optimization stopped: maximum evaluations reached (ftol_rel=",
+                           uncertainty_optimisation ? cfg.uncertainty_ftol_rel : cfg.normal_ftol_rel,
+                           ", xtol_rel=",
+                           uncertainty_optimisation ? cfg.uncertainty_xtol_rel : cfg.normal_xtol_rel,
+                           ")");
+                break;
+            default: log<ERROR>("Optimization failed with code ", result); break;
+        }
+        log<DEBUG>("Number of evaluations: ", opt.get_numevals());
 
         // Convert the optimized solution back to an Eigen vector
         Eigen::Matrix<double, n, 1> optimized_solution(n);

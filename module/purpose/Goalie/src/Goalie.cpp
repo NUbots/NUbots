@@ -51,7 +51,6 @@ namespace module::purpose {
     using extension::Configuration;
 
     using Phase      = message::input::GameState::Phase;
-    using SubMode    = message::input::GameState::SubMode;
     using GoalieTask = message::purpose::Goalie;
 
     using message::input::GameState;
@@ -66,7 +65,6 @@ namespace module::purpose {
     using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
     using message::strategy::LookAtBall;
-    using message::strategy::Search;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -99,17 +97,20 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
-                // Determine if the game is in a penalty situation
-                // Do this first to ensure the robot freezes if necessary
-                bool penalty = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                               && game_state.mode.value <= GameState::Mode::THROW_IN;
+                // If play is stopped, do nothing
+                if (game_state.stopped) {
+                    log<DEBUG>("Play is stopped, do nothing.");
+                    return;
+                }
 
-                // If sub_mode is 0, the robot must freeze for referee ball repositioning
-                // If sub_mode is 2, the robot must freeze until the referee calls execute
-                if (penalty
-                    && (game_state.secondary_state.sub_mode == SubMode::REF_PLACE
-                        || game_state.secondary_state.sub_mode == SubMode::PRE_EXECUTE)) {
-                    log<DEBUG>("We are in a freeze penalty situation, do nothing.");
+                // Determine if the game is in a set play situation
+                bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
+                                && game_state.mode.value <= GameState::Mode::THROW_IN;
+
+                // If it's the opponent's set play, freeze until the ball is free
+                // Ball is free when secondary_time expires or the ball has moved
+                if (set_play && !game_state.our_kick_off) {
+                    log<DEBUG>("Opponent set play, waiting for ball to be free.");
                     return;
                 }
 
@@ -196,14 +197,14 @@ namespace module::purpose {
                                                                   global_config.player_id,
                                                                   ignore_ids);
                 // The ball is in the defending third, and we are closest to the ball, defend the goals!
-                if (is_closest && !penalty) {
+                if (is_closest && !set_play) {
                     log<DEBUG>("Goalie is attacking.");
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
 
-                if (is_closest && penalty) {
-                    log<DEBUG>("Goalie is in the best position to take the penalty, readying attack.");
+                if (is_closest && set_play) {
+                    log<DEBUG>("Goalie is in the best position to take the set play, readying attack.");
                     emit<Task>(std::make_unique<ReadyAttack>());
                 }
 

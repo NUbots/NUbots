@@ -1,6 +1,6 @@
+import { DirectorState } from "@proto/message/behaviour/Director";
 import { action } from "mobx";
 
-import { message } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -12,7 +12,7 @@ export class DirectorNetwork {
     private model: DirectorModel,
     private network: Network,
   ) {
-    this.network.on(message.behaviour.DirectorState, this.onDirectorState);
+    this.network.on(DirectorState, this.onDirectorState);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: DirectorModel): DirectorNetwork {
@@ -25,7 +25,8 @@ export class DirectorNetwork {
   };
 
   @action.bound
-  private onDirectorState(_robot: RobotModel, state: message.behaviour.DirectorState) {
-    this.model.graph = transformDirectorState(state);
+  private onDirectorState(robotModel: RobotModel, state: DirectorState) {
+    const graph = transformDirectorState(state);
+    this.model.graphsByRobot.set(robotModel.id, graph);
   }
 }

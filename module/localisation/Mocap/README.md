@@ -21,5 +21,3 @@ Enable ground truth localisation in `SensorFilter` and `FieldLocalisationNLopt` 
 
 - `message::localisation::RobotPoseGroundTruth`: The ground truth pose of the robot, containing:
   - Transformation matrix (Hft)
-
-## Dependencies
