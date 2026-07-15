@@ -6,4 +6,4 @@ ball_search_timeout: 2
 # How long to wait until looking for the goals again (seconds)
 goal_search_timeout: 3
 # Localisation cost threshold above which the robot should look around to re-localise
-max_localisation_cost: 2.5
+max_localisation_cost: 100.0
