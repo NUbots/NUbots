@@ -39,6 +39,7 @@ from utility.dockerise import run_on_docker
 PRESETS = {
     "configs": ("/home/nubots/config/", "configs", True),  # append timestamp for configs by default
     "recordings": ("/home/nubots/recordings/", "recordings", False),
+    "scripts": ("/home/nubots/scripts/", "scripts", True),
 }
 
 
