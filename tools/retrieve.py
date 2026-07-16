@@ -60,7 +60,7 @@ def register(command):
         help="The local directory to retrieve the files to (defaults per preset)",
     )
 
-    command.add_argument("--user", "-u", help="The user to retrieve the files with")
+    command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
 
     command.add_argument("--append-timestamp", "-t", action="store_true", help="Append a timestamp to the local name")
 
@@ -88,9 +88,6 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
 
     append_timestamp = append_timestamp or preset_append_timestamp
     os.makedirs(local, exist_ok=True)
-
-    if user is None:
-        user = "nubots"
 
     if append_timestamp:  # make the timestamped local directory if requested / required
         import datetime
