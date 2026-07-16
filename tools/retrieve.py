@@ -64,6 +64,7 @@ def register(command):
 
     command.add_argument("--append-timestamp", "-t", action="store_true", help="Append a timestamp to the local name")
 
+
 @run_on_docker
 def run(host, target, local, user=None, append_timestamp=False, **kwargs):
     # Replace hostname with its IP address if the hostname is already known
@@ -99,11 +100,14 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         os.makedirs(local, exist_ok=True)
 
     cprint(f"Retrieving files from {host}:{target} to {local}", "green")
-    subprocess.run([
-        "rsync",
-        "-aP", # partial progression, archive mode
-        "-e",  # specify the remote shell to use
-        "ssh",
-        f"{user}@{host}:{target}",
-        f"{local}",
-    ], check=True)
+    subprocess.run(
+        [
+            "rsync",
+            "-aP",  # partial progression, archive mode
+            "-e",  # specify the remote shell to use
+            "ssh",
+            f"{user}@{host}:{target}",
+            f"{local}",
+        ],
+        check=True,
+    )
