@@ -26,20 +26,19 @@
 # SOFTWARE.
 #
 
-import glob
 import os
 import subprocess
 
 from termcolor import cprint
 
-import b
 from utility.dockerise import run_on_docker
 
 # Preset names that expand to (remote path, default local directory)
+# Preset names that expand to (remote path, default local directory, append_timestamp)
 # Trailing slash on the remote path makes rsync copy the directory contents
 PRESETS = {
-    "configs": ("/home/nubots/config/", "configs", True), # append timestamp is True for configs
-    "logs": ("/home/nubots/recordings/", "recordings", False),
+    "configs": ("/home/nubots/config/", "configs", True),  # append timestamp for configs by default
+    "recordings": ("/home/nubots/recordings/", "recordings", False),
 }
 
 
@@ -47,7 +46,7 @@ PRESETS = {
 def register(command):
     command.description = "Retrieve files from the target system to the local system"
 
-    command.add_argument("host", help="The host or directory to retrieve the files from")
+    command.add_argument("host", help="The host to retrieve the files from")
 
     command.add_argument(
         "target",
@@ -66,7 +65,7 @@ def register(command):
     command.add_argument("--append-timestamp", "-t", action="store_true", help="Append a timestamp to the local name")
 
 @run_on_docker
-def run(host, target, local, user=None, **kwargs):
+def run(host, target, local, user=None, append_timestamp=False, **kwargs):
     # Replace hostname with its IP address if the hostname is already known
     num_robots = 4
     host = {
@@ -75,29 +74,31 @@ def run(host, target, local, user=None, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
+    preset_append_timestamp = False
+
     # Expand preset names into their remote path and default local directory
     if target in PRESETS:
-        remote_path, default_local, append_timestamp = PRESETS[target]
+        remote_path, default_local, preset_append_timestamp = PRESETS[target]
         target = remote_path
         if local is None:
             local = default_local
     elif local is None:
         raise SystemExit("A local directory is required when not using a preset")
 
-    if not os.path.exists(local):
-        os.makedirs(local)
-
-    cprint(f"Retrieving files from {host}:{target} to {local}", "green")
+    append_timestamp = append_timestamp or preset_append_timestamp
+    os.makedirs(local, exist_ok=True)
 
     if user is None:
         user = "nubots"
 
-    if append_timestamp: # make the timestamped local directory if the preset requires it
+    if append_timestamp:  # make the timestamped local directory if requested / required
         import datetime
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") # this is UTC.
-        local = os.path.join(local, f"{timestamp}")
+
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
+        local = os.path.join(local, timestamp)
         os.makedirs(local, exist_ok=True)
 
+    cprint(f"Retrieving files from {host}:{target} to {local}", "green")
     subprocess.run([
         "rsync",
         "-aP", # partial progression, archive mode
