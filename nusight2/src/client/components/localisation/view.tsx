@@ -628,14 +628,9 @@ const LocalisationViewModel: React.FC<{ model: LocalisationModel }> = observer((
     {model.fieldVisible && <FieldView model={model.field} />}
     {model.gridVisible && <GridView />}
 
-    {/* Goal labels - default to blue team if no robots available */}
+    {/* Goal labels in field frame: own goal (+x), opponent goal (-x). */}
     {model.goalsVisible && (
-      <GoalLabels
-        fieldModel={model.field}
-        teamColour={model.robots.length > 0 ? (model.target || model.robots[0]).teamColour : "blue"}
-        cameraPitch={model.camera.pitch}
-        cameraYaw={model.camera.yaw}
-      />
+      <GoalLabels fieldModel={model.field} cameraPitch={model.camera.pitch} cameraYaw={model.camera.yaw} />
     )}
 
     {model.robotVisible && model.robots.map((robot) => <RobotComponents key={robot.id} robot={robot} model={model} />)}
