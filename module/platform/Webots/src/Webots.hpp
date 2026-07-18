@@ -97,7 +97,7 @@ namespace module::platform {
 
         /// @brief Sliding window of (sim time ticks, real time ms) pairs used to estimate the real
         /// time factor as a time-weighted slope rather than a per-message average
-        std::deque<std::pair<uint32_t, uint64_t>> clock_window;
+        std::deque<std::pair<uint32_t, uint64_t>> clock_window{};
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
