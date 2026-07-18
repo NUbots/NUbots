@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a453bd7d9e6fd1355f7d4f45aa60fbd01":[3,0,3,8,1,2,7],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a52958fdec0d243fd5a267b84869d673a":[3,0,3,8,1,2,3],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#a70709bcfd6c50b7259264bceda0efaa1":[3,0,3,8,1,2,0],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html#af23c897ee2c31a8900ff0eb042a5b111":[3,0,3,8,1,2,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a2a782f75c40641b3655161a0692f6e21":[3,0,3,11,2,0,3],
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a4dae3184ec29a55186c5d2a68afb87b8":[3,0,3,11,2,0,1],
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#a76245341420b126ec22af604d4bf9973":[3,0,3,11,2,0,0],
-"structmodule_1_1strategy_1_1FindObject_1_1Config.html#a9e4a657c13111b80133ada463fecddae":[3,0,3,11,2,0,5],
-"structmodule_1_1strategy_1_1FindObject_1_1Config.html#aac0b061d135be4405209261b92b0af0e":[3,0,3,11,2,0,6]
+"structmodule_1_1strategy_1_1FindObject_1_1Config.html#a9e4a657c13111b80133ada463fecddae":[3,0,3,11,2,0,5]
 };

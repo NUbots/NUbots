@@ -10,6 +10,7 @@ var classmodule_1_1platform_1_1Webots =
     [ "buffer", "classmodule_1_1platform_1_1Webots.html#a14ce2e31b4513dd1edaae6884f12d0a7", null ],
     [ "camera_context", "classmodule_1_1platform_1_1Webots.html#ac286bb4a01e50f433ccd47cd25ba71f7", null ],
     [ "clock_smoothing", "classmodule_1_1platform_1_1Webots.html#afbb26cc2c24bd63b2fdc4b9f53e1cfb8", null ],
+    [ "clock_window", "classmodule_1_1platform_1_1Webots.html#ab5c9dc5bb1f747b8469f07f708b2459a", null ],
     [ "connect_time", "classmodule_1_1platform_1_1Webots.html#a31cafdf08dfd83800f1de9cd7b15e70f", null ],
     [ "connection_active", "classmodule_1_1platform_1_1Webots.html#add3b2b8e0e804e11f1a342ed9c545546", null ],
     [ "current_real_time", "classmodule_1_1platform_1_1Webots.html#a13e4c3a6a31e38e55a64b12bd61411c1", null ],

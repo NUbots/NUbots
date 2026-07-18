@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1strategy_1_1FindObject_1_1Config.html#aac0b061d135be4405209261b92b0af0e":[3,0,3,11,2,0,6],
 "structmodule_1_1strategy_1_1FindObject_1_1Config.html#afc02b3e5ad5322ac3689c17190a952d6":[3,0,3,11,2,0,2],
 "structmodule_1_1strategy_1_1StartSafely_1_1Config.html":[3,0,3,11,4,0],
 "structmodule_1_1strategy_1_1StartSafely_1_1Config.html#a1abf6abdc8fa2ced560aaee31e548a2b":[3,0,3,11,4,0,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html":[3,0,7,0,13],
 "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html#a1717d9ecff1fefac53e86e0ada9c8e23":[3,0,7,0,13,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html":[3,0,7,0,14],
-"structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html#a1260265851d8fde2f7abc2c9b946b497":[3,0,7,0,14,0],
-"structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4.html":[3,0,7,0,15]
+"structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html#a1260265851d8fde2f7abc2c9b946b497":[3,0,7,0,14,0]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1skill_1_1Kicker.html#acd370f6bfe21dbc98088da25f4449741":[3,0,3,10,7,2],
 "classmodule_1_1skill_1_1Kicker.html#adc720fa422042679e09b9ea71c08a298":[3,0,3,10,7,8],
 "classmodule_1_1skill_1_1Look.html":[3,0,3,10,9],
 "classmodule_1_1skill_1_1Look.html#a9a18c367bd8fa8a76a7dc227d47b2373":[3,0,3,10,9,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a73a07937a9da1f9d50875e39dad4665d":[3,0,3,12,2,8,16],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a79708e9a9d3ed92b417cc9bd917a0f44":[3,0,3,12,2,8,17],
 "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a8b9dd50982f6c10c89ba9ae3b516aa14":[3,0,3,12,2,8,18],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a979625153168c65fcdaa96073f7fcc98":[3,0,3,12,2,8,8],
-"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#aac61d0f9a001f3c40c2de1e3996eff98":[3,0,3,12,2,8,6]
+"classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html#a979625153168c65fcdaa96073f7fcc98":[3,0,3,12,2,8,8]
 };

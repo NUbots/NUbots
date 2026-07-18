@@ -1,5 +1,6 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4.html":[3,0,7,0,15],
 "structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4.html#a22d1ef2af83920ed33824d396b49d4db":[3,0,7,0,15,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4.html":[3,0,7,0,16],
 "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4.html#a96fcf635b73b2f7298b23b9a5a6a6527":[3,0,7,0,16,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1nbs_1_1IndexItem.html#a2cd152894d42103d6a5d9d2e0344a370":[3,0,7,7,3,4],
 "structutility_1_1nbs_1_1IndexItem.html#a8998861ab27e5b00fd583b5da852cd51":[3,0,7,7,3,3],
 "structutility_1_1nbs_1_1IndexItem.html#acd64bcad3b74e7076768404c0cd427b6":[3,0,7,7,3,0],
-"structutility_1_1nbs_1_1IndexItem.html#afbf1ba5e631ab8a16384f46672479a12":[3,0,7,7,3,2],
-"structutility_1_1nbs_1_1IndexItemFile.html":[3,0,7,7,4]
+"structutility_1_1nbs_1_1IndexItem.html#afbf1ba5e631ab8a16384f46672479a12":[3,0,7,7,3,2]
 };

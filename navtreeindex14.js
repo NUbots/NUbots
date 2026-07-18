@@ -1,5 +1,6 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1network_1_1RobotCommunication_1_1Config.html#a6d2014d8e869fa90a8793d0d2b4369b5":[3,0,3,5,3,0,2],
 "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#a9afa8e7f107837f93d66c82b1caa3f68":[3,0,3,5,3,0,6],
 "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#abb9e6b41b54c7095ea0f9ca98dda1dfc":[3,0,3,5,3,0,4],
 "structmodule_1_1network_1_1RobotCommunication_1_1Config.html#ac151d88b94d4f104d6caef6b07fc2353":[3,0,3,5,3,0,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1cf453d78da031a342f8cb66f8f8197f":[3,0,3,8,1,1,0,169],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1dcf3ffda524a94dd17bfed940cfd0f3":[3,0,3,8,1,1,0,193],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da1ed4bc656d9e52c29be9f5381ca77cf0":[3,0,3,8,1,1,0,28],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da20ba1b04d1992078ef7f1a37de2b121d":[3,0,3,8,1,1,0,88],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da215fe607b8ce8415c908f70e822ce08e":[3,0,3,8,1,1,0,85]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da20ba1b04d1992078ef7f1a37de2b121d":[3,0,3,8,1,1,0,88]
 };

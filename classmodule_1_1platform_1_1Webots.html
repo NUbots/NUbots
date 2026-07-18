@@ -241,6 +241,10 @@ std::map&lt; std::string, <a class="el" href="structmodule_1_1platform_1_1Webots
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#afbb26cc2c24bd63b2fdc4b9f53e1cfb8">clock_smoothing</a> = 0.0</td></tr>
 <tr class="memdesc:afbb26cc2c24bd63b2fdc4b9f53e1cfb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from <a class="el" href="classmodule_1_1platform_1_1Webots.html">Webots</a>), 1.0 takes no updates from <a class="el" href="classmodule_1_1platform_1_1Webots.html">Webots</a>. <br /></td></tr>
 <tr class="separator:afbb26cc2c24bd63b2fdc4b9f53e1cfb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5c9dc5bb1f747b8469f07f708b2459a"><td class="memItemLeft" align="right" valign="top"><a id="ab5c9dc5bb1f747b8469f07f708b2459a"></a>
+std::deque&lt; std::pair&lt; uint32_t, uint64_t &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#ab5c9dc5bb1f747b8469f07f708b2459a">clock_window</a> {}</td></tr>
+<tr class="memdesc:ab5c9dc5bb1f747b8469f07f708b2459a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sliding window of (sim time ticks, real time ms) pairs used to estimate the real time factor as a time-weighted slope rather than a per-message average. <br /></td></tr>
+<tr class="separator:ab5c9dc5bb1f747b8469f07f708b2459a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31cafdf08dfd83800f1de9cd7b15e70f"><td class="memItemLeft" align="right" valign="top"><a id="a31cafdf08dfd83800f1de9cd7b15e70f"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#a31cafdf08dfd83800f1de9cd7b15e70f">connect_time</a> {}</td></tr>
 <tr class="memdesc:a31cafdf08dfd83800f1de9cd7b15e70f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time the connection was opened. <br /></td></tr>
@@ -421,7 +425,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1Webots.html">Webots</a></li>
-    <li class="footer">Generated on Thu Jul 16 2026 08:44:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jul 18 2026 04:01:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
