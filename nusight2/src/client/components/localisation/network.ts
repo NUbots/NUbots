@@ -69,11 +69,8 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    // Flip the field if the robot is on the red team
-    robot.Hfw =
-      robot.teamColour === "red"
-        ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
-        : Matrix4.from(field.Hfw);
+    // Keep field-frame orientation fixed across team colours.
+    robot.Hfw = Matrix4.from(field.Hfw);
 
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
     robot.associationLines = field.associationLines.map((line) => ({
