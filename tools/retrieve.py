@@ -42,6 +42,8 @@ PRESETS = {
     "scripts": ("/home/nubots/scripts/", "scripts", True),
 }
 
+TEMP_FOLDER = "temp"
+
 
 @run_on_docker
 def register(command):
@@ -76,28 +78,8 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
-    preset_append_timestamp = False
-
-    # Expand preset names into their remote path and default local directory
-    if target in PRESETS:
-        remote_path, default_local, preset_append_timestamp = PRESETS[target]
-        target = remote_path
-        if local is None:
-            local = default_local
-    elif local is None:
-        raise SystemExit("A local directory is required when not using a preset")
-
-    append_timestamp = append_timestamp or preset_append_timestamp
-    os.makedirs(local, exist_ok=True)
-
-    if append_timestamp:  # make the timestamped local directory if requested / required
-        import datetime
-
-        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
-        local = os.path.join(local, timestamp)
-        os.makedirs(local, exist_ok=True)
-
     cprint(f"Retrieving files from {host}:{target} to {local}", "green")
+
     subprocess.run(
         [
             "rsync",
@@ -105,7 +87,7 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             "-e",  # specify the remote shell to use
             "ssh",
             f"{user}@{host}:{target}",
-            f"{local}",
+            f"{TEMP_FOLDER}/",
         ],
         check=True,
     )
