@@ -35,8 +35,8 @@ from termcolor import cprint
 from utility.dockerise import run_on_docker
 
 TEMP_FOLDER = "temp"
-CONFIG_FOLDER = "config"
-RECORDINGS_FOLDER = "recordings"
+CONFIG_FOLDER = "/home/nubots/config"
+RECORDINGS_FOLDER = "/home/nubots/recordings"
 SCRIPTS_FOLDER = "ican'trememberwherethisgoes"
 
 
@@ -48,7 +48,7 @@ def register(command):
 
     command.add_argument(
         "target",
-        help="The target to retrieve: config/recordings/scripts",
+        help="The target to retrieve: config/recordings/scripts/the_works",
     )
 
     command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
@@ -64,90 +64,93 @@ def run(host, target, user=None, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
-    """
-    STAGE 1:
-    Copy all the configs back from the robot
-    """
+    if target == "config":
+        """
+        STAGE 1:
+        Copy all the configs back from the robot
+        """
 
-    cprint(f"Retrieving config from {host}:{target} to {TEMP_FOLDER}/", "green")
+        cprint(f"Retrieving config from {host}:{CONFIG_FOLDER} to {TEMP_FOLDER}/", "green")
 
-    subprocess.run(  # this retrieves back to a temp folder - just for now
-        [
-            "rsync",
-            "-aP",  # partial progression, archive mode
-            "-e",  # specify the remote shell to use
-            "ssh",
-            f"{user}@{host}:{target}",
-            f"{TEMP_FOLDER}/",
-        ],
-        check=True,
-    )
+        subprocess.run(  # this retrieves back to a temp folder - just for now
+            [
+                "rsync",
+                "-aP",  # partial progression, archive mode
+                "-e",  # specify the remote shell to use
+                "ssh",
+                f"{user}@{host}:{CONFIG_FOLDER}",
+                f"{TEMP_FOLDER}/",
+            ],
+            check=True,
+        )
 
-    # list every file in TEMP_FOLDER
+        # list every file in TEMP_FOLDER
 
-    if not os.path.isdir(TEMP_FOLDER):
-        cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
-        return
+        if not os.path.isdir(TEMP_FOLDER):
+            cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
+            return
 
-    files_in_temp = []
-    for root, _, filenames in os.walk(TEMP_FOLDER):
-        for fn in filenames:
-            files_in_temp.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
+        files_in_temp = []
+        for root, _, filenames in os.walk(TEMP_FOLDER):
+            for fn in filenames:
+                files_in_temp.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
 
-    if not files_in_temp:
-        cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
-    else:
-        cprint(f"Files in '{TEMP_FOLDER}':", "green")
-        print(files_in_temp)
+        if not files_in_temp:
+            cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
+        else:
+            cprint(f"Files in '{TEMP_FOLDER}':", "green")
+            print(files_in_temp)
 
-    all_matched = True
-    for temp_file in files_in_temp:
-        matches = []
-        for root, _, filenames in os.walk(os.getcwd()):
-            # skip the temp folder itself, otherwise every file matches its own copy
-            if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
-                continue
-            if os.path.basename(temp_file) in filenames:
-                matches.append(os.path.join(root, os.path.basename(temp_file)))
-        if matches:
-            cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
-            for match in matches:
-                print(f"  {match}")
+        all_matched = True
+        for temp_file in files_in_temp:
+            matches = []
+            for root, _, filenames in os.walk(os.getcwd()):
+                # skip the temp folder itself, otherwise every file matches its own copy
+                if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
+                    continue
+                if os.path.basename(temp_file) in filenames:
+                    matches.append(os.path.join(root, os.path.basename(temp_file)))
+            if matches:
+                cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
+                for match in matches:
+                    print(f"  {match}")
 
-            temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
+                temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
 
-            # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
-            best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None)
-            if best_match:
-                print("Match for common parent folder name:", temp_parent_folder)
-
-                shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
-
-            # failing this...
-            # second sort: parent folder's name of match is config (ie. it's not robot specific)
-            if not best_match:
-                best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == "config"), None)
+                # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
+                best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None)
                 if best_match:
-                    print("Match for generic config.")
+                    print("Match for common parent folder name:", temp_parent_folder)
 
                     shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
 
-            # failing this...
-            # tell the user we couldn't find a match
-            if not best_match:
-                print("Unable to match.")
+                # failing this...
+                # second sort: parent folder's name of match is config (ie. it's not robot specific)
+                if not best_match:
+                    best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == "config"), None)
+                    if best_match:
+                        print("Match for generic config.")
+
+                        shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+                # failing this...
+                # tell the user we couldn't find a match
+                if not best_match:
+                    print("Unable to match.")
+                    all_matched = False
+            else:
+                cprint(f"No local match found for {temp_file}", "yellow")
                 all_matched = False
+
+        # now remove all the temp files, but only if everything found a home
+        if all_matched:
+            shutil.rmtree(TEMP_FOLDER)
         else:
-            cprint(f"No local match found for {temp_file}", "yellow")
-            all_matched = False
+            cprint(f"Some files could not be matched — keeping '{TEMP_FOLDER}' for manual handling", "yellow")
 
-    # now remove all the temp files, but only if everything found a home
-    if all_matched:
-        shutil.rmtree(TEMP_FOLDER)
-    else:
-        cprint(f"Some files could not be matched — keeping '{TEMP_FOLDER}' for manual handling", "yellow")
 
-    """
-    STAGE 2:
-    Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
-    """
+    if target == "recordings":
+        """
+        STAGE 2:
+        Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
+        """
