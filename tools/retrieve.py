@@ -27,6 +27,7 @@
 #
 
 import os
+import shutil
 import subprocess
 
 from termcolor import cprint
@@ -41,6 +42,15 @@ PRESETS = {
     "recordings": ("/home/nubots/recordings/", "recordings", False),
     "scripts": ("/home/nubots/scripts/", "scripts", True),
 }
+
+TEMP_FOLDER = "temp"
+
+ROBOT_NAMES = [
+    "kevin",
+    "sarah",
+    "billie",
+    "frankie",
+]
 
 
 @run_on_docker
@@ -76,36 +86,81 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
-    preset_append_timestamp = False
-
-    # Expand preset names into their remote path and default local directory
-    if target in PRESETS:
-        remote_path, default_local, preset_append_timestamp = PRESETS[target]
-        target = remote_path
-        if local is None:
-            local = default_local
-    elif local is None:
-        raise SystemExit("A local directory is required when not using a preset")
-
-    append_timestamp = append_timestamp or preset_append_timestamp
-    os.makedirs(local, exist_ok=True)
-
-    if append_timestamp:  # make the timestamped local directory if requested / required
-        import datetime
-
-        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
-        local = os.path.join(local, timestamp)
-        os.makedirs(local, exist_ok=True)
-
     cprint(f"Retrieving files from {host}:{target} to {local}", "green")
-    subprocess.run(
+
+    subprocess.run( # this retrieves back to a temp folder - just for now
         [
             "rsync",
             "-aP",  # partial progression, archive mode
             "-e",  # specify the remote shell to use
             "ssh",
             f"{user}@{host}:{target}",
-            f"{local}",
+            f"{TEMP_FOLDER}/",
         ],
         check=True,
     )
+
+    # list every file in TEMP_FOLDER
+
+    files_in_temp = []
+
+    if not os.path.isdir(TEMP_FOLDER):
+        cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
+        return
+
+    files = []
+    for root, _, filenames in os.walk(TEMP_FOLDER):
+        for fn in filenames:
+            files.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
+
+    if not files:
+        cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
+    else:
+        cprint(f"Files in '{TEMP_FOLDER}':", "green")
+        for f in files:
+            files_in_temp.append(f)
+        print(files_in_temp)
+
+    for temp_file in files_in_temp:
+        matches = []
+        for root, _, filenames in os.walk(os.getcwd()):
+            # skip the temp folder itself, otherwise every file matches its own copy
+            if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
+                continue
+            if os.path.basename(temp_file) in filenames:
+                matches.append(os.path.join(root, os.path.basename(temp_file)))
+        if matches:
+            cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
+            for match in matches:
+                print(f"  {match}")
+
+            temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
+
+            # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
+            best_match = next(
+                (m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None
+            )
+            if best_match:
+                print("Match for common parent folder name:", temp_parent_folder)
+
+                shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+
+            # failing this...
+            # second sort: parent folder's name of match is config (ie. it's not robot specific)
+            if not best_match:
+                best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == "config"), None)
+                if best_match:
+                    print("Match for generic config.")
+
+                    shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+
+            # failing this...
+            # tell the user we couldn't find a match
+            if not best_match:
+                print("Unable to match.")
+
+    # now remove all the temp files
+
+    shutil.rmtree(TEMP_FOLDER)
