@@ -714,26 +714,29 @@ namespace module::platform {
             real_delta        = 0;
             current_sim_time  = 0;
             current_real_time = 0;
+            clock_window.clear();
 
             // Reset the local raw sensors buffer
             emit(std::make_unique<ResetWebotsServos>());
         }
 
-        // Save our previous deltas
-        const uint32_t prev_sim_delta  = sim_delta;
-        const uint64_t prev_real_delta = real_delta;
-
         // Update our current deltas
         real_delta = sensor_measurements.real_time - current_real_time;
         sim_delta  = sensor_measurements.time - current_sim_time;
 
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas,
-        // smoothed
-        const double ratio =
-            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
-
-        // Exponential filter to do the smoothing
-        rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        // Calculate the real time factor as the slope of sim time against real time over a sliding
+        // real-time window. Messages arrive once per sim step, so on hosts fast enough to burst
+        // several sim steps between pacing sleeps, a per-message exponential filter over-weights the
+        // burst-rate ratio and locks the clock above the true rate. A time-weighted window does not.
+        clock_window.emplace_back(sensor_measurements.time, sensor_measurements.real_time);
+        while (clock_window.size() > 2 && sensor_measurements.real_time - clock_window.front().second > 2000) {
+            clock_window.pop_front();
+        }
+        const double window_sim  = static_cast<double>(sensor_measurements.time - clock_window.front().first);
+        const double window_real = static_cast<double>(sensor_measurements.real_time - clock_window.front().second);
+        if (window_real > 0.0) {
+            rtf = window_sim / window_real;
+        }
         NUClear::clock::set_clock(NUClear::clock::now(), rtf);
 
         // Update our current times
