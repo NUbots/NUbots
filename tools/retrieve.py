@@ -160,3 +160,7 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             # tell the user we couldn't find a match
             if not best_match:
                 print("Unable to match.")
+
+    # now remove all the temp files
+
+    shutil.rmtree(TEMP_FOLDER)
