@@ -1,4 +1,4 @@
-# FieldLocalisationGaussian
+# FieldLocalisationSRIF
 
 ## Description
 
