@@ -80,7 +80,7 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
 
     cprint(f"Retrieving files from {host}:{target} to {local}", "green")
 
-    subprocess.run(
+    subprocess.run( # this retrieves back to a temp folder - just for now
         [
             "rsync",
             "-aP",  # partial progression, archive mode
@@ -91,3 +91,24 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         ],
         check=True,
     )
+
+    # list every file in TEMP_FOLDER
+
+    files_in_temp = []
+
+    if not os.path.isdir(TEMP_FOLDER):
+        cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
+        return
+
+    files = []
+    for root, _, filenames in os.walk(TEMP_FOLDER):
+        for fn in filenames:
+            files.append(os.path.join(fn))
+
+    if not files:
+        cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
+    else:
+        cprint(f"Files in '{TEMP_FOLDER}':", "green")
+        for f in files:
+            files_in_temp.append(f)
+        print(files_in_temp)
