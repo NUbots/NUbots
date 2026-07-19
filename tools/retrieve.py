@@ -35,6 +35,9 @@ from termcolor import cprint
 from utility.dockerise import run_on_docker
 
 TEMP_FOLDER = "temp"
+CONFIG_FOLDER = "config"
+RECORDINGS_FOLDER = "recordings"
+SCRIPTS_FOLDER = "ican'trememberwherethisgoes"
 
 
 @run_on_docker
@@ -45,7 +48,7 @@ def register(command):
 
     command.add_argument(
         "target",
-        help="The target directory/files to get",
+        help="The target to retrieve: config/recordings/scripts",
     )
 
     command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
@@ -143,3 +146,8 @@ def run(host, target, user=None, **kwargs):
         shutil.rmtree(TEMP_FOLDER)
     else:
         cprint(f"Some files could not be matched — keeping '{TEMP_FOLDER}' for manual handling", "yellow")
+
+    """
+    STAGE 2:
+    Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
+    """
