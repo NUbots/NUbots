@@ -64,7 +64,9 @@ def rsync_from(host, user, remote_folder, local_folder):
             "-aP",  # partial progression, archive mode
             "-e",  # specify the remote shell to use
             "ssh",
-            f"{user}@{host}:{remote_folder}",
+            # trailing slash on the source makes rsync copy the folder's contents,
+            # not the folder itself (avoids recordings/recordings/)
+            f"{user}@{host}:{remote_folder.rstrip('/')}/",
             f"{local_folder}/",
         ],
         check=True,
