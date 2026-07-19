@@ -44,6 +44,13 @@ PRESETS = {
 
 TEMP_FOLDER = "temp"
 
+ROBOT_NAMES = [
+    "kevin",
+    "sarah",
+    "billie",
+    "frankie",
+]
+
 
 @run_on_docker
 def register(command):
@@ -113,10 +120,15 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             files_in_temp.append(f)
         print(files_in_temp)
 
-    for root, _, filenames in os.walk(os.getcwd()):
-        # skip the temp folder itself, otherwise every file matches its own copy
-        if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
-            continue
-        for fn in filenames:
-            if fn in files_in_temp:
-                print(f"I found {os.path.join(root, fn)}")
+    for temp_file in files_in_temp:
+        matches = []
+        for root, _, filenames in os.walk(os.getcwd()):
+            # skip the temp folder itself, otherwise every file matches its own copy
+            if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
+                continue
+            if temp_file in filenames:
+                matches.append(os.path.join(root, temp_file))
+        if matches:
+            cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
+            for match in matches:
+                print(f"  {match}")
