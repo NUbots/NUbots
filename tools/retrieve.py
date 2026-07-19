@@ -27,6 +27,7 @@
 #
 
 import os
+import shutil
 import subprocess
 
 from termcolor import cprint
@@ -110,7 +111,7 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
     files = []
     for root, _, filenames in os.walk(TEMP_FOLDER):
         for fn in filenames:
-            files.append(os.path.join(fn))
+            files.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
 
     if not files:
         cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
@@ -126,9 +127,31 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             # skip the temp folder itself, otherwise every file matches its own copy
             if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
                 continue
-            if temp_file in filenames:
-                matches.append(os.path.join(root, temp_file))
+            if os.path.basename(temp_file) in filenames:
+                matches.append(os.path.join(root, os.path.basename(temp_file)))
         if matches:
             cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
             for match in matches:
                 print(f"  {match}")
+
+            temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
+
+            # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
+            best_match = next(
+                (m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None
+            )
+            if best_match:
+                print("Match for common parent folder name:", temp_parent_folder)
+
+
+            # failing this...
+            # second sort: parent folder's name of match is config (ie. it's not robot specific)
+            if not best_match:
+                best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == "config"), None)
+                if best_match:
+                    print("Match for generic config.")
+
+            # failing this...
+            # tell the user we couldn't find a match
+            if not best_match:
+                print("Shit.")
