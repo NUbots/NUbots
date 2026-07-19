@@ -154,3 +154,15 @@ def run(host, target, user=None, **kwargs):
         STAGE 2:
         Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
         """
+
+        subprocess.run(  # this retrieves back to a temp folder - just for now
+            [
+                "rsync",
+                "-aP",  # partial progression, archive mode
+                "-e",  # specify the remote shell to use
+                "ssh",
+                f"{user}@{host}:{RECORDINGS_FOLDER}",
+                f"recordings/",
+            ],
+            check=True,
+        )
