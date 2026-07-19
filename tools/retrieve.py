@@ -63,7 +63,7 @@ def run(host, target, user=None, **kwargs):
 
     cprint(f"Retrieving files from {host}:{target} to {TEMP_FOLDER}/", "green")
 
-    subprocess.run( # this retrieves back to a temp folder - just for now
+    subprocess.run(  # this retrieves back to a temp folder - just for now
         [
             "rsync",
             "-aP",  # partial progression, archive mode
@@ -109,14 +109,11 @@ def run(host, target, user=None, **kwargs):
             temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
 
             # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
-            best_match = next(
-                (m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None
-            )
+            best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None)
             if best_match:
                 print("Match for common parent folder name:", temp_parent_folder)
 
                 shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
-
 
             # failing this...
             # second sort: parent folder's name of match is config (ie. it's not robot specific)
@@ -126,7 +123,6 @@ def run(host, target, user=None, **kwargs):
                     print("Match for generic config.")
 
                     shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
-
 
             # failing this...
             # tell the user we couldn't find a match
