@@ -78,14 +78,33 @@ namespace module::input {
             cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
             cfg.y_cut_off_frequency = config["velocity_low_pass"]["y_cut_off_frequency"].as<double>();
 
-            // Initialise the anchor frame (left foot base)
-            Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
-                                                                                       nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
-                                        .translation()
-                                        .y();
+            // Hwp is now initialised using actual sensor data on the first update in update_odometry
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+
+            // Neural Odometry Config
+            cfg.neural_odom.use_neural_odometry = config["neural_odom"]["use_neural_odometry"].as<bool>();
+            cfg.neural_odom.model_path          = config["neural_odom"]["model_path"].as<std::string>();
+            cfg.neural_odom.device              = config["neural_odom"]["device"].as<std::string>();
+            cfg.neural_odom.zero_velocity_threshold = config["neural_odom"]["zero_velocity_threshold"].as<double>();
+
+            if (cfg.neural_odom.use_neural_odometry && !model_loaded) {
+                try {
+                    log<INFO>("Loading Neural Odometry model from: ", cfg.neural_odom.model_path);
+                    compiled_model = openvino_core.compile_model(cfg.neural_odom.model_path, cfg.neural_odom.device);
+                    infer_request  = compiled_model.create_infer_request();
+                    model_loaded   = true;
+                    log<INFO>("Neural Odometry model loaded successfully");
+                }
+                catch (const std::exception& e) {
+                    log<ERROR>("Failed to load Neural Odometry model: ", e.what());
+                    cfg.neural_odom.use_neural_odometry = false;
+                }
+            }
+        });
+
+        on<Trigger<WalkState>>().then([this](const WalkState& walk_state) {
+            last_walk_state = walk_state;
         });
 
         on<Startup>().then([this] {
@@ -123,6 +142,13 @@ namespace module::input {
                           debug_sensor_filter(sensors, robot_pose_ground_truth);
                       }
 
+                      // Populate ground truth for data collection and plotting
+                      if (robot_pose_ground_truth) {
+                          Eigen::Isometry3d Hft(robot_pose_ground_truth->Hft);
+                          Eigen::Isometry3d true_Hwt = ground_truth_Hfw.inverse() * Hft;
+                          sensors->Htw_ground_truth  = true_Hwt.inverse();
+                      }
+
                       emit(std::move(sensors));
                   });
 
@@ -133,13 +159,8 @@ namespace module::input {
             });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
-            // Reset anchor frame
-            Hwp                   = Eigen::Isometry3d::Identity();
-            Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
-                                                                                       nugus_model.home_configuration(),
-                                                                                       std::string("left_foot_base"))
-                                        .translation()
-                                        .y();
+            // Reset anchor frame initialisation flag
+            Hwp_initialised = false;
 
             // Reset yaw filter
             yaw_filter.reset();
