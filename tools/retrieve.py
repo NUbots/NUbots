@@ -37,7 +37,7 @@ from utility.dockerise import run_on_docker
 TEMP_FOLDER = "temp"
 CONFIG_FOLDER = "/home/nubots/config"
 RECORDINGS_FOLDER = "/home/nubots/recordings"
-SCRIPTS_FOLDER = "ican'trememberwherethisgoes"
+SCRIPTS_FOLDER = "/home/nubots/scripts"
 
 
 @run_on_docker
@@ -149,7 +149,7 @@ def run(host, target, user=None, **kwargs):
         Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
         """
 
-        subprocess.run(  # this retrieves back to a temp folder - just for now
+        subprocess.run(  # this retrieves back to the recordings folder :)
             [
                 "rsync",
                 "-aP",  # partial progression, archive mode
@@ -160,3 +160,81 @@ def run(host, target, user=None, **kwargs):
             ],
             check=True,
         )
+
+    if target == "scripts":
+        """
+        STAGE 3:
+        Copy all the scripts back and filter them very similar to how we did the configs
+        """
+
+        cprint(f"Retrieving config from {host}:{SCRIPTS_FOLDER} to {TEMP_FOLDER}/", "green")
+
+        subprocess.run(  # this retrieves back to a temp folder - just for now
+            [
+                "rsync",
+                "-aP",  # partial progression, archive mode
+                "-e",  # specify the remote shell to use
+                "ssh",
+                f"{user}@{host}:{SCRIPTS_FOLDER}",
+                f"{TEMP_FOLDER}/",
+            ],
+            check=True,
+        )
+
+        # list every file in TEMP_FOLDER
+
+        if not os.path.isdir(TEMP_FOLDER):
+            cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
+            return
+
+        files_in_temp = []
+        for root, _, filenames in os.walk(TEMP_FOLDER):
+            for fn in filenames:
+                files_in_temp.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
+
+        if not files_in_temp:
+            cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
+        else:
+            cprint(f"Files in '{TEMP_FOLDER}':", "green")
+            print(files_in_temp)
+
+        for temp_file in files_in_temp:
+            matches = []
+            for root, _, filenames in os.walk(os.getcwd()):
+                # skip the temp folder itself, otherwise every file matches its own copy
+                if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
+                    continue
+                if os.path.basename(temp_file) in filenames:
+                    matches.append(os.path.join(root, os.path.basename(temp_file)))
+            if matches:
+                cprint(f"{temp_file} found in {len(matches)} place(s):", "cyan")
+                for match in matches:
+                    print(f"  {match}")
+
+                temp_parent_folder = os.path.basename(os.path.dirname(temp_file))
+
+                # first sort: parent folder name matches (ie. frankie/SomeConfig.yaml)
+                best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == temp_parent_folder), None)
+                if best_match:
+                    print("Match for common parent folder name:", temp_parent_folder)
+
+                    shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+                # failing this...
+                # second sort: parent folder's name of match is config (ie. it's not robot specific)
+                if not best_match:
+                    best_match = next((m for m in matches if os.path.basename(os.path.dirname(m)) == "nugus"), None)
+                    if best_match:
+                        print("Match for generic config.")
+
+                        shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+                # failing this...
+                # tell the user we couldn't find a match
+                if not best_match:
+                    print("Unable to match.")
+            else:
+                cprint(f"No local match found for {temp_file}", "yellow")
+
+        # now remove all the temp files
+        shutil.rmtree(TEMP_FOLDER)
