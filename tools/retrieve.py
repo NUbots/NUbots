@@ -112,3 +112,11 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         for f in files:
             files_in_temp.append(f)
         print(files_in_temp)
+
+    for root, _, filenames in os.walk(os.getcwd()):
+        # skip the temp folder itself, otherwise every file matches its own copy
+        if os.path.abspath(root).startswith(os.path.abspath(TEMP_FOLDER)):
+            continue
+        for fn in filenames:
+            if fn in files_in_temp:
+                print(f"I found {os.path.join(root, fn)}")
