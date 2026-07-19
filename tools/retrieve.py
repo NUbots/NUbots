@@ -61,7 +61,12 @@ def run(host, target, user=None, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
-    cprint(f"Retrieving files from {host}:{target} to {TEMP_FOLDER}/", "green")
+    """
+    STAGE 1:
+    Copy all the configs back from the robot
+    """
+
+    cprint(f"Retrieving config from {host}:{target} to {TEMP_FOLDER}/", "green")
 
     subprocess.run(  # this retrieves back to a temp folder - just for now
         [
