@@ -34,23 +34,7 @@ from termcolor import cprint
 
 from utility.dockerise import run_on_docker
 
-# Preset names that expand to (remote path, default local directory)
-# Preset names that expand to (remote path, default local directory, append_timestamp)
-# Trailing slash on the remote path makes rsync copy the directory contents
-PRESETS = {
-    "configs": ("/home/nubots/config/", "configs", True),  # append timestamp for configs by default
-    "recordings": ("/home/nubots/recordings/", "recordings", False),
-    "scripts": ("/home/nubots/scripts/", "scripts", True),
-}
-
 TEMP_FOLDER = "temp"
-
-ROBOT_NAMES = [
-    "kevin",
-    "sarah",
-    "billie",
-    "frankie",
-]
 
 
 @run_on_docker
@@ -61,23 +45,14 @@ def register(command):
 
     command.add_argument(
         "target",
-        help=f"The target directory/files to get, or a preset name: {', '.join(PRESETS)}",
-    )
-
-    command.add_argument(
-        "local",
-        nargs="?",
-        default=None,
-        help="The local directory to retrieve the files to (defaults per preset)",
+        help="The target directory/files to get",
     )
 
     command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
 
-    command.add_argument("--append-timestamp", "-t", action="store_true", help="Append a timestamp to the local name")
-
 
 @run_on_docker
-def run(host, target, local, user=None, append_timestamp=False, **kwargs):
+def run(host, target, user=None, **kwargs):
     # Replace hostname with its IP address if the hostname is already known
     num_robots = 4
     host = {
@@ -86,7 +61,7 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
         for prefix in ("nugus", "n", "i", "igus")
     }.get(host, host)
 
-    cprint(f"Retrieving files from {host}:{target} to {local}", "green")
+    cprint(f"Retrieving files from {host}:{target} to {TEMP_FOLDER}/", "green")
 
     subprocess.run( # this retrieves back to a temp folder - just for now
         [
@@ -102,25 +77,22 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
 
     # list every file in TEMP_FOLDER
 
-    files_in_temp = []
-
     if not os.path.isdir(TEMP_FOLDER):
         cprint(f"Temp folder '{TEMP_FOLDER}' does not exist", "red")
         return
 
-    files = []
+    files_in_temp = []
     for root, _, filenames in os.walk(TEMP_FOLDER):
         for fn in filenames:
-            files.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
+            files_in_temp.append(os.path.relpath(os.path.join(root, fn), TEMP_FOLDER))
 
-    if not files:
+    if not files_in_temp:
         cprint(f"No files found in '{TEMP_FOLDER}'", "yellow")
     else:
         cprint(f"Files in '{TEMP_FOLDER}':", "green")
-        for f in files:
-            files_in_temp.append(f)
         print(files_in_temp)
 
+    all_matched = True
     for temp_file in files_in_temp:
         matches = []
         for root, _, filenames in os.walk(os.getcwd()):
@@ -160,7 +132,13 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             # tell the user we couldn't find a match
             if not best_match:
                 print("Unable to match.")
+                all_matched = False
+        else:
+            cprint(f"No local match found for {temp_file}", "yellow")
+            all_matched = False
 
-    # now remove all the temp files
-
-    shutil.rmtree(TEMP_FOLDER)
+    # now remove all the temp files, but only if everything found a home
+    if all_matched:
+        shutil.rmtree(TEMP_FOLDER)
+    else:
+        cprint(f"Some files could not be matched — keeping '{TEMP_FOLDER}' for manual handling", "yellow")
