@@ -101,7 +101,6 @@ def run(host, target, user=None, **kwargs):
             cprint(f"Files in '{TEMP_FOLDER}':", "green")
             print(files_in_temp)
 
-        all_matched = True
         for temp_file in files_in_temp:
             matches = []
             for root, _, filenames in os.walk(os.getcwd()):
@@ -137,16 +136,11 @@ def run(host, target, user=None, **kwargs):
                 # tell the user we couldn't find a match
                 if not best_match:
                     print("Unable to match.")
-                    all_matched = False
             else:
                 cprint(f"No local match found for {temp_file}", "yellow")
-                all_matched = False
 
-        # now remove all the temp files, but only if everything found a home
-        if all_matched:
-            shutil.rmtree(TEMP_FOLDER)
-        else:
-            cprint(f"Some files could not be matched — keeping '{TEMP_FOLDER}' for manual handling", "yellow")
+        # now remove all the temp files
+        shutil.rmtree(TEMP_FOLDER)
 
 
     if target == "recordings":
