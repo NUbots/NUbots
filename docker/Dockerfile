@@ -402,8 +402,9 @@ RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v
 RUN install-from-source https://github.com/danmar/cppcheck/archive/refs/tags/2.18.0.tar.gz
 
 # Boost + SuiteSparse (BLAS/LAPACK backends pull in automatically)
+# TODO: I don't think I need boost
 RUN install-package boost boost-libs
-RUN install-package suitesparse openblas lapack tbb
+RUN install-package suitesparse openblas lapack
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
