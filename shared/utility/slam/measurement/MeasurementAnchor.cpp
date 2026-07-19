@@ -1,4 +1,5 @@
 #include "MeasurementAnchor.hpp"
+
 #include <cmath>
 
 namespace utility::slam::measurement {
@@ -21,8 +22,7 @@ namespace utility::slam::measurement {
 
     // Evaluate h(x) from the measurement model y = h(x) + v
     // For anchor: h(x) = -e3^T*rCNn (anchor position from state)
-    Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
-                                                  const system::SystemEstimator& system) const {
+    Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x, const system::SystemEstimator& system) const {
         // Extract anchor position from state
         Eigen::VectorXd rBNn = x.segment<3>(6);
         Eigen::VectorXd rCNn = rBNn;
@@ -33,8 +33,8 @@ namespace utility::slam::measurement {
 
     // Evaluate h(x) and its Jacobian J = dh/dx
     Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
-                                                  const system::SystemEstimator& system,
-                                                  Eigen::MatrixXd& dhdx) const {
+                                               const system::SystemEstimator& system,
+                                               Eigen::MatrixXd& dhdx) const {
         Eigen::VectorXd h = predict(x, system);
 
         // Jacobian for anchor measurement
@@ -47,9 +47,9 @@ namespace utility::slam::measurement {
 
     // Evaluate h(x), Jacobian, and Hessian
     Eigen::VectorXd MeasurementAnchor::predict(const Eigen::VectorXd& x,
-                                                  const system::SystemEstimator& system,
-                                                  Eigen::MatrixXd& dhdx,
-                                                  Eigen::Tensor<double, 3>& d2hdx2) const {
+                                               const system::SystemEstimator& system,
+                                               Eigen::MatrixXd& dhdx,
+                                               Eigen::Tensor<double, 3>& d2hdx2) const {
         Eigen::VectorXd h = predict(x, system, dhdx);
 
         // Hessian for anchor measurement
@@ -61,8 +61,7 @@ namespace utility::slam::measurement {
     }
 
     // Define measurement noise covariance
-    gaussian::GaussianInfo<double> MeasurementAnchor::noiseDensity(
-        const system::SystemEstimator& system) const {
+    gaussian::GaussianInfo<double> MeasurementAnchor::noiseDensity(const system::SystemEstimator& system) const {
 
         // SR is an upper triangular matrix such that SR^T * SR = R
         // where R is the measurement noise covariance
@@ -71,4 +70,4 @@ namespace utility::slam::measurement {
         return gaussian::GaussianInfo<double>::fromSqrtMoment(SR);
     }
 
-} // namespace utility::slam::measurement
+}  // namespace utility::slam::measurement

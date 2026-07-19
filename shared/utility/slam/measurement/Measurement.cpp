@@ -1,39 +1,38 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "Measurement.hpp"
 
-#include <stdexcept>
-
 #include <Eigen/Core>
 #include <Eigen/SVD>
+#include <stdexcept>
 
-#include "../gaussian/GaussianInfo.hpp"
 #include "../funcmin.hpp"
+#include "../gaussian/GaussianInfo.hpp"
 
 namespace utility::slam::measurement {
 
@@ -51,8 +50,8 @@ namespace utility::slam::measurement {
     }
 
     double Measurement::costJointDensity(const Eigen::VectorXd& x,
-                                        const SystemEstimator& system,
-                                        Eigen::VectorXd& g) const {
+                                         const SystemEstimator& system,
+                                         Eigen::VectorXd& g) const {
         Eigen::VectorXd logpriorGrad(x.size());
         double logprior = system.density.log(x, logpriorGrad);
 
@@ -64,9 +63,9 @@ namespace utility::slam::measurement {
     }
 
     double Measurement::costJointDensity(const Eigen::VectorXd& x,
-                                        const SystemEstimator& system,
-                                        Eigen::VectorXd& g,
-                                        Eigen::MatrixXd& H) const {
+                                         const SystemEstimator& system,
+                                         Eigen::VectorXd& g,
+                                         Eigen::MatrixXd& H) const {
         Eigen::VectorXd logpriorGrad(x.size());
         Eigen::MatrixXd logpriorHess(x.size(), x.size());
         double logprior = system.density.log(x, logpriorGrad, logpriorHess);
@@ -170,7 +169,16 @@ namespace utility::slam::measurement {
 
         // Set posterior mean to maximum a posteriori (MAP) estimate
         Eigen::VectorXd mu = x;
-        system.density     = gaussian::GaussianInfo<double>::fromSqrtInfo(Xi * mu, Xi);
+
+        // Laplace approximation of the log evidence (needs the prior still in system.density):
+        // log p(y) = log p(y, x*) - log pp(x* | y)
+        //         ~= -V(x*) + (n/2) log(2 pi) - sum(log|diag(Xi)|)
+        // Where V is the optimum cost and Xi the posterior sqrt-info.
+        const double V        = costJointDensity(mu, system);
+        const double logDetXi = Xi.diagonal().array().abs().log().sum();
+        logEvidence_          = -V + 0.5 * nx * std::log(2.0 * M_PI) - logDetXi;
+
+        system.density = gaussian::GaussianInfo<double>::fromSqrtInfo(Xi * mu, Xi);
     }
 
 }  // namespace utility::slam::measurement
