@@ -143,6 +143,8 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
             if best_match:
                 print("Match for common parent folder name:", temp_parent_folder)
 
+                shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
 
             # failing this...
             # second sort: parent folder's name of match is config (ie. it's not robot specific)
@@ -151,7 +153,10 @@ def run(host, target, local, user=None, append_timestamp=False, **kwargs):
                 if best_match:
                     print("Match for generic config.")
 
+                    shutil.copy(os.path.join(TEMP_FOLDER, temp_file), best_match)
+
+
             # failing this...
             # tell the user we couldn't find a match
             if not best_match:
-                print("Shit.")
+                print("Unable to match.")
