@@ -39,7 +39,7 @@ CONFIG_FOLDER = "/home/nubots/config"
 RECORDINGS_FOLDER = "/home/nubots/recordings"
 SCRIPTS_FOLDER = "/home/nubots/scripts"
 
-TARGETS = ("config", "recordings", "scripts", "the_works")
+TARGETS = ("config", "recordings", "scripts", "all")
 
 
 @run_on_docker
@@ -51,7 +51,7 @@ def register(command):
     command.add_argument(
         "target",
         choices=TARGETS,
-        help="The target to retrieve: config/recordings/scripts/the_works",
+        help="The target to retrieve: config/recordings/scripts/all",
     )
 
     command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
@@ -161,13 +161,13 @@ def run(host, target, user=None, **kwargs):
     }.get(host, host)
 
     # STAGE 1: copy all the configs back from the robot
-    if target in ("config", "the_works"):
+    if target in ("config", "all"):
         retrieve_and_merge(host, user, CONFIG_FOLDER, "config")
 
     # STAGE 2: copy all the recordings back
-    if target in ("recordings", "the_works"):
+    if target in ("recordings", "all"):
         retrieve_recordings(host, user)
 
     # STAGE 3: copy all the scripts back, filtered very similar to the configs
-    if target in ("scripts", "the_works"):
+    if target in ("scripts", "all"):
         retrieve_and_merge(host, user, SCRIPTS_FOLDER, "nugus")
