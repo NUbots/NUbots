@@ -36,8 +36,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
-#include "message/vision/FieldIntersections.hpp"
-#include "message/vision/Goal.hpp"
+#include "message/vision/BoundingBoxes.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/slam/FieldMapFromDescription.hpp"
@@ -56,9 +55,8 @@ namespace module::localisation {
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
     using message::support::FieldDescription;
-    using message::vision::FieldIntersection;
-    using message::vision::FieldIntersections;
-    using message::vision::Goals;
+    using message::vision::BoundingBox;
+    using message::vision::BoundingBoxes;
 
     using utility::nusight::graph;
     using utility::slam::rot2rpy;
@@ -83,49 +81,30 @@ namespace module::localisation {
         return H;
     }
 
-    /// @brief Build a filter VisionSample (rays in camera frame {c}) from the vision messages.
+    /// @brief Build a filter VisionSample (rays in camera frame {c}) from YOLO bounding boxes.
     ///
-    /// Each landmark becomes a Detection whose four "corners" are all set to the single measured
-    /// bearing, so MeasurementFieldLandmarks::detectionRay recovers that bearing for both the
-    /// box-centre (intersections) and bottom-centre (goal posts) conventions.
-    static filter::VisionSample build_vision_sample(double t,
-                                                    const FieldIntersections& intersections,
-                                                    const std::shared_ptr<const Goals>& goals,
-                                                    double confidence) {
+    /// Each BoundingBox carries the class name, the YOLO confidence, and the four corner unit rays in
+    /// {c} (ordered TL, TR, BR, BL - matching MeasurementFieldLandmarks::detectionRay, which takes the
+    /// box centre for intersections and the bottom-centre for goal posts). detectionRay also filters to
+    /// the mapped landmark classes and drops low-confidence detections, so every usable box is passed
+    /// through here and the confidence drives the robust inlier weight.
+    static filter::VisionSample build_vision_sample(double t, const BoundingBoxes& boxes) {
         filter::VisionSample sample;
         sample.t          = t;
         sample.videoFrame = -1;
-        sample.Hcw        = to_pose(Eigen::Isometry3d(intersections.Hcw));
+        sample.Hcw        = to_pose(Eigen::Isometry3d(boxes.Hcw));
 
-        auto add = [&](const Eigen::Vector3d& ray_c, const std::string& name) {
-            if (!ray_c.allFinite() || ray_c.norm() < 1e-9) {
-                return;
+        for (const BoundingBox& box : boxes.bounding_boxes) {
+            if (box.corners.size() != 4) {
+                continue;  // detectionRay expects the four box-corner rays
             }
             filter::Detection det;
-            det.name       = name;
-            det.confidence = confidence;
-            det.corners    = ray_c.normalized().replicate<1, 4>();
+            det.name       = box.name;
+            det.confidence = box.confidence;
+            for (int c = 0; c < 4; ++c) {
+                det.corners.col(c) = box.corners[std::size_t(c)];
+            }
             sample.detections.push_back(std::move(det));
-        };
-
-        // Field-line intersections: the message carries the triangulated world position rIWw, so
-        // the camera-frame bearing is the direction to it once mapped through Hcw (world -> camera).
-        const Eigen::Isometry3d Hcw = Eigen::Isometry3d(intersections.Hcw);
-        for (const FieldIntersection& intersection : intersections.intersections) {
-            const Eigen::Vector3d ray_c = Hcw * intersection.rIWw;
-            switch (intersection.type.value) {
-                case FieldIntersection::IntersectionType::L_INTERSECTION: add(ray_c, "L-intersection"); break;
-                case FieldIntersection::IntersectionType::T_INTERSECTION: add(ray_c, "T-intersection"); break;
-                case FieldIntersection::IntersectionType::X_INTERSECTION: add(ray_c, "X-intersection"); break;
-                default: break;  // UNKNOWN is not a mapped landmark
-            }
-        }
-
-        // Goal posts: post.bottom is already a camera-frame vector to the base of the post.
-        if (goals != nullptr) {
-            for (const auto& goal : goals->goals) {
-                add(goal.post.bottom, "goal post");
-            }
         }
 
         return sample;
@@ -137,14 +116,13 @@ namespace module::localisation {
         on<Configuration>("FieldLocalisationSRIF.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.own_half_x_sign      = config["own_half_x_sign"].as<double>();
-            cfg.detection_confidence = config["detection_confidence"].as<double>();
-            cfg.use_hypothesis_bank  = config["use_hypothesis_bank"].as<bool>();
-            cfg.use_gyroscope        = config["use_gyroscope"].as<bool>();
-            cfg.use_gravity          = config["use_gravity"].as<bool>();
-            cfg.gravity_sigma        = config["gravity_sigma"].as<double>();
-            cfg.use_kinematic_height = config["use_kinematic_height"].as<bool>();
-            cfg.height_sigma         = config["height_sigma"].as<double>();
+            cfg.own_half_x_sign        = config["own_half_x_sign"].as<double>();
+            cfg.use_hypothesis_bank    = config["use_hypothesis_bank"].as<bool>();
+            cfg.use_gyroscope          = config["use_gyroscope"].as<bool>();
+            cfg.use_gravity            = config["use_gravity"].as<bool>();
+            cfg.gravity_sigma          = config["gravity_sigma"].as<double>();
+            cfg.use_kinematic_height   = config["use_kinematic_height"].as<bool>();
+            cfg.height_sigma           = config["height_sigma"].as<double>();
             cfg.max_odometry_gap       = config["max_odometry_gap"].as<double>();
             cfg.twist_window_seconds   = config["twist_window_seconds"].as<double>();
             cfg.max_sensor_pairing_age = config["max_sensor_pairing_age"].as<double>();
@@ -233,109 +211,102 @@ namespace module::localisation {
             twist_buffer = filter::SystemLocalisation::twistFromOdometry(sensors_window, 0.0, cfg.max_odometry_gap);
         });
 
-        on<Trigger<FieldIntersections>,
-           Optional<With<Goals>>,
-           Optional<With<Stability>>,
-           Sync<FieldLocalisationSRIF>,
-           Single>()
-            .then("SRIF field localisation",
-                  [this](const FieldIntersections& intersections,
-                         const std::shared_ptr<const Goals>& goals,
-                         const std::shared_ptr<const Stability>& stability) {
-                      // Prerequisites: map built, odometry seen, and the robot not mid-fall.
-                      if (map == nullptr || !have_t0) {
-                          return;
-                      }
-                      if (stability != nullptr && *stability <= Stability::FALLING) {
-                          log<DEBUG>("Robot unstable; skipping field localisation update");
-                          return;
-                      }
+        on<Trigger<BoundingBoxes>, Optional<With<Stability>>, Sync<FieldLocalisationSRIF>, Single>().then(
+            "SRIF field localisation",
+            [this](const BoundingBoxes& boxes, const std::shared_ptr<const Stability>& stability) {
+                // Prerequisites: map built, odometry seen, and the robot not mid-fall.
+                if (map == nullptr || !have_t0) {
+                    return;
+                }
+                if (stability != nullptr && *stability <= Stability::FALLING) {
+                    log<DEBUG>("Robot unstable; skipping field localisation update");
+                    return;
+                }
 
-                      const double t = seconds(intersections.timestamp);
+                const double t = seconds(boxes.timestamp);
 
-                      // Pair the odometry to the vision capture time. The message's Hcw is at capture, so
-                      // using the latest Htw instead would fold the capture-to-now torso motion into Tbc
-                      // and offset every reprojection.
-                      const filter::SensorsSample* paired = nearest_sensors(t);
-                      if (paired == nullptr) {
-                          log<DEBUG>("No odometry sample near the vision frame; skipping");
-                          return;
-                      }
-                      const filter::Pose<double>& Htw = paired->Htw;
+                // Pair the odometry to the vision capture time. The message's Hcw is at capture, so
+                // using the latest Htw instead would fold the capture-to-now torso motion into Tbc
+                // and offset every reprojection.
+                const filter::SensorsSample* paired = nearest_sensors(t);
+                if (paired == nullptr) {
+                    log<DEBUG>("No odometry sample near the vision frame; skipping");
+                    return;
+                }
+                const filter::Pose<double>& Htw = paired->Htw;
 
-                      // Camera pose w.r.t. torso from the kinematic chain (odometry world cancels when Htw
-                      // and Hcw are from the same time): Tbc = Htw * Hcw^{-1}.
-                      const filter::Pose<double> Tbc = Htw * to_pose(Eigen::Isometry3d(intersections.Hcw)).inverse();
+                // Camera pose w.r.t. torso from the kinematic chain (odometry world cancels when Htw
+                // and Hcw are from the same time): Tbc = Htw * Hcw^{-1}.
+                const filter::Pose<double> Tbc = Htw * to_pose(Eigen::Isometry3d(boxes.Hcw)).inverse();
 
-                      const filter::VisionSample sample =
-                          build_vision_sample(t, intersections, goals, cfg.detection_confidence);
-                      if (sample.detections.empty()) {
-                          return;
-                      }
+                const filter::VisionSample sample = build_vision_sample(t, boxes);
+                if (sample.detections.empty()) {
+                    return;
+                }
 
-                      // Bootstrap: solve a coarse initial pose the first time we see usable landmarks.
-                      if (!initialised) {
-                          const filter::Pose<double> Twt = Htw.inverse();
-                          Eigen::Matrix<double, 8, 1> eta0;
-                          if (!solve_initial_pose(sample, Tbc, Twt, eta0)) {
-                              log<DEBUG>("Initial pose solve did not associate enough landmarks yet");
-                              return;
-                          }
+                // Bootstrap: solve a coarse initial pose the first time we see usable landmarks.
+                if (!initialised) {
+                    const filter::Pose<double> Twt = Htw.inverse();
+                    Eigen::Matrix<double, 8, 1> eta0;
+                    if (!solve_initial_pose(sample, Tbc, Twt, eta0)) {
+                        log<DEBUG>("Initial pose solve did not associate enough landmarks yet");
+                        return;
+                    }
 
-                          Eigen::MatrixXd S0 =
-                              Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
-                          S0.diagonal() = cfg.initial_sqrt_covariance;
-                          const auto p0 = GaussianInfo<double>::fromSqrtMoment(Eigen::VectorXd(eta0), S0);
+                    Eigen::MatrixXd S0 =
+                        Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
+                    S0.diagonal() = cfg.initial_sqrt_covariance;
+                    const auto p0 = GaussianInfo<double>::fromSqrtMoment(Eigen::VectorXd(eta0), S0);
 
-                          system         = std::make_unique<filter::SystemLocalisation>(p0, twist_buffer);
-                          system->params = cfg.process;
-                          system->hyp    = cfg.hypothesis;
-                          system->resetTo(p0, t);
-                          if (cfg.use_hypothesis_bank) {
-                              system->initialiseHypotheses();
-                          }
-                          initialised = true;
-                          log<INFO>("Initialised field pose: x=",
-                                    eta0(0),
-                                    "m y=",
-                                    eta0(1),
-                                    "m yaw=",
-                                    eta0(5) * 180.0 / M_PI,
-                                    "deg");
-                      }
+                    system         = std::make_unique<filter::SystemLocalisation>(p0, twist_buffer);
+                    system->params = cfg.process;
+                    system->hyp    = cfg.hypothesis;
+                    system->resetTo(p0, t);
+                    if (cfg.use_hypothesis_bank) {
+                        system->initialiseHypotheses();
+                    }
+                    initialised = true;
+                    log<INFO>("Initialised field pose: x=",
+                              eta0(0),
+                              "m y=",
+                              eta0(1),
+                              "m yaw=",
+                              eta0(5) * 180.0 / M_PI,
+                              "deg");
+                }
 
-                      // Predict forward to the vision capture time using the odometry twist buffer.
-                      system->predict(t);
+                // Predict forward to the vision capture time using the odometry twist buffer.
+                system->predict(t);
 
-                      // Landmark measurement update (routed through process() so the hypothesis bank,
-                      // when active, applies it to every mixture component and reweights them).
-                      filter::MeasurementFieldLandmarks measurement(t, sample, Tbc, *map, *system, cfg.measurement);
-                      system->process(measurement);
+                // Landmark measurement update (routed through process() so the hypothesis bank,
+                // when active, applies it to every mixture component and reweights them).
+                filter::MeasurementFieldLandmarks measurement(t, sample, Tbc, *map, *system, cfg.measurement);
+                system->process(measurement);
 
-                      // Low-rate corrections from the paired Sensors sample.
-                      if (cfg.use_gravity && paired->accelerometer.allFinite()) {
-                          MeasurementGravity gravity(t, paired->accelerometer, cfg.gravity_sigma);
-                          system->process(gravity);
-                      }
-                      if (cfg.use_kinematic_height) {
-                          const double height = Htw.inverse().translationVector.z();
-                          if (std::isfinite(height)) {
-                              MeasurementKinematicHeight kinematic_height(t, height, cfg.height_sigma);
-                              system->process(kinematic_height);
-                          }
-                      }
+                // Low-rate corrections from the paired Sensors sample.
+                if (cfg.use_gravity && paired->accelerometer.allFinite()) {
+                    MeasurementGravity gravity(t, paired->accelerometer, cfg.gravity_sigma);
+                    system->process(gravity);
+                }
+                if (cfg.use_kinematic_height) {
+                    const double height = Htw.inverse().translationVector.z();
+                    if (std::isfinite(height)) {
+                        MeasurementKinematicHeight kinematic_height(t, height, cfg.height_sigma);
+                        system->process(kinematic_height);
+                    }
+                }
 
-                      // A diverged update (non-finite mean) would otherwise ship a NaN Hfw, which renders
-                      // the robot at the field origin. Drop back to re-initialisation instead.
-                      if (!system->density.mean().allFinite()) {
-                          log<WARN>("Field localisation state became non-finite; re-initialising");
-                          system.reset();
-                          initialised = false;
-                          return;
-                      }
+                // A diverged update (non-finite mean) would otherwise ship a NaN Hfw, which renders
+                // the robot at the field origin. Drop back to re-initialisation instead.
+                if (!system->density.mean().allFinite()) {
+                    log<WARN>("Field localisation state became non-finite; re-initialising");
+                    system.reset();
+                    initialised = false;
+                    return;
+                }
 
-                      emit_field(Htw, &measurement);
-                  });
+                emit_field(Htw, &measurement);
+            });
     }
 
     const filter::SensorsSample* FieldLocalisationSRIF::nearest_sensors(double t) const {

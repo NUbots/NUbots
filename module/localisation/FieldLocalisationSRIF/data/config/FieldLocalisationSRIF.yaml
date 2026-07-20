@@ -4,10 +4,8 @@ log_level: INFO
 # symmetry that on-field landmarks cannot: +1 => starts in the +x half, -1 => the -x half, 0 => no prior.
 own_half_x_sign: 1.0
 
-# Confidence assigned to every vision detection (FieldIntersections/Goals carry no YOLO score).
-detection_confidence: 0.7
-
 # Multi-hypothesis (field-symmetry) Gaussian mixture bank. Off keeps a single Gaussian.
+# Note: This cannot resolve the symmetry problem.
 use_hypothesis_bank: false
 
 # Feed Sensors.gyroscope into the body-twist angular velocity. Sensors.gyroscope is a calibrated rad/s
@@ -20,43 +18,43 @@ use_gyroscope: true
 # Sensors.accelerometer. The gravity-aligned attitude is also estimated upstream by the Mahony filter
 # and delivered via Htw, so this is a secondary anchor and may be turned off if Htw is trusted alone.
 use_gravity: true
-gravity_sigma: 1.0           # accelerometer gravity-direction noise std dev [m/s^2]
+gravity_sigma: 1.0 # accelerometer gravity-direction noise std dev [m/s^2]
 use_kinematic_height: true
-height_sigma: 0.02           # kinematic torso-height noise std dev [m]
+height_sigma: 0.02 # kinematic torso-height noise std dev [m]
 
 # Odometry twist buffer
-max_odometry_gap: 0.1        # max sample spacing to finite-difference across [s]
-twist_window_seconds: 2.0    # rolling odometry window length [s]
-max_sensor_pairing_age: 0.1  # max age of the odometry sample paired with a vision frame [s]
+max_odometry_gap: 0.1 # max sample spacing to finite-difference across [s]
+twist_window_seconds: 2.0 # rolling odometry window length [s]
+max_sensor_pairing_age: 0.1 # max age of the odometry sample paired with a vision frame [s]
 
 # Initial-pose grid search
-grid_step_xy: 0.35           # position step [m]
-grid_step_yaw: 18.0          # heading step [deg]
-min_init_associations: 4     # landmark associations needed to trust a solve
+grid_step_xy: 0.35 # position step [m]
+grid_step_yaw: 18.0 # heading step [deg]
+min_init_associations: 4 # landmark associations needed to trust a solve
 # Initial sqrt-covariance diagonal for the 8-dim state [x, y, z, roll, pitch, yaw, cam_roll, cam_pitch]
 initial_sqrt_covariance: [1.0, 1.0, 0.05, 0.05, 0.05, 0.5, 0.02, 0.02]
 
 # Process noise power spectral densities
 process:
-  sigma_pos_xy: 0.08         # horizontal position [m/sqrt(s)]
-  sigma_pos_z: 0.02          # vertical position [m/sqrt(s)]
-  sigma_att: 0.05            # roll/pitch [rad/sqrt(s)]
-  sigma_yaw: 0.05            # yaw [rad/sqrt(s)]
-  sigma_cam_bias: 3.0e-4     # camera-mount bias [rad/sqrt(s)]
+  sigma_pos_xy: 0.08 # horizontal position [m/sqrt(s)]
+  sigma_pos_z: 0.02 # vertical position [m/sqrt(s)]
+  sigma_att: 0.05 # roll/pitch [rad/sqrt(s)]
+  sigma_yaw: 0.05 # yaw [rad/sqrt(s)]
+  sigma_cam_bias: 3.0e-4 # camera-mount bias [rad/sqrt(s)]
 
 # Landmark ray measurement
 measurement:
-  sigma_angular: 0.25        # inlier ray angular noise std dev [rad]
-  gate_angle: 0.35           # max association residual angle [rad]
-  min_confidence: 0.5        # reject detections below this confidence
-  inlier_probability: 0.7    # inlier mixture weight at confidence_reference
-  confidence_reference: 0.7  # confidence that maps to inlier_probability
+  sigma_angular: 0.25 # inlier ray angular noise std dev [rad]
+  gate_angle: 0.35 # max association residual angle [rad]
+  min_confidence: 0.5 # reject detections below this confidence
+  inlier_probability: 0.7 # inlier mixture weight at confidence_reference
+  confidence_reference: 0.7 # confidence that maps to inlier_probability
   max_inlier_probability: 0.95
 
 # Hypothesis-bank spawning/pruning/merging (only used when use_hypothesis_bank is true)
 hypothesis:
-  min_weight: 0.02           # prune components below this normalised weight
-  max_components: 4          # cap on live components
-  merge_position: 0.30       # merge gate on position separation [m]
-  merge_yaw: 0.20            # merge gate on yaw separation [rad]
-  respawn_pos_std: 0.60      # respawn a mirror when the lone component's horizontal std exceeds this [m]
+  min_weight: 0.02 # prune components below this normalised weight
+  max_components: 4 # cap on live components
+  merge_position: 0.30 # merge gate on position separation [m]
+  merge_yaw: 0.20 # merge gate on yaw separation [rad]
+  respawn_pos_std: 0.60 # respawn a mirror when the lone component's horizontal std exceeds this [m]

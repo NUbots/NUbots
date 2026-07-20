@@ -92,8 +92,6 @@ namespace module::localisation {
             /// @brief Initial sqrt-covariance diagonal for the 8-dim state after the grid solve
             Eigen::Matrix<double, 8, 1> initial_sqrt_covariance =
                 (Eigen::Matrix<double, 8, 1>() << 1.0, 1.0, 0.05, 0.05, 0.05, 0.5, 0.02, 0.02).finished();
-            /// @brief Confidence assigned to a vision detection (the messages carry no YOLO score)
-            double detection_confidence = 0.7;
             /// @brief Sign of field-x for the starting half (from game context; breaks the field symmetry)
             double own_half_x_sign = 1.0;
             /// @brief Grid search steps for the initial pose solve
