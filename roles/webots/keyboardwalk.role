@@ -8,7 +8,6 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::NetworkForwarder
-  network::MCPServer
   output::Overview
   network::PlotJuggler
   # Sensors

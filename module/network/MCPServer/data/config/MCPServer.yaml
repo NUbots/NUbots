@@ -14,10 +14,3 @@ path: "/mcp"
 # cross-origin request that sets an Origin header.
 allowed_origins:
   - "https://claude.ai"
-
-# Maximum number of messages held in the buffer before the oldest are dropped
-max_buffered_messages: 100
-
-# Message types buffered for the model to read via read_last_messages
-messages:
-  message.input.Sensors: true
