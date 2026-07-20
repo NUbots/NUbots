@@ -91,6 +91,10 @@ namespace utility::slam {
      * NUbots/shared/message/support/FieldDescription.proto (message FieldDescription.FieldDimensions).
      */
     struct FieldDimensions {
+        // These defaults match the field this data set was recorded on; they stand in for unit tests and
+        // offline replay. At runtime, build them from a message::support::FieldDescription via
+        // utility::slam::field_dimensions() (FieldMapFromDescription.hpp), which keeps this struct — and
+        // the estimator core that includes it — free of the message library.
         double lineWidth            = 0.05;  ///< Width of field lines
         double fieldLength          = 6.8;   ///< Touchline (sideline) length
         double fieldWidth           = 5.0;   ///< Goal line (baseline) length
