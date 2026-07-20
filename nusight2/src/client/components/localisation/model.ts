@@ -99,7 +99,7 @@ export class ControlsModel {
 export class DashboardModel {
   @observable visible = false;
 
-  constructor() { }
+  constructor() {}
 
   static of(): DashboardModel {
     return new DashboardModel();

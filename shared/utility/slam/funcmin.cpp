@@ -1,41 +1,40 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "funcmin.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
+#include <Eigen/SparseCore>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <limits>
 #include <vector>
-
-#include <Eigen/Core>
-#include <Eigen/Eigenvalues>
-#include <Eigen/SparseCore>
 
 namespace utility::slam::funcmin {
 
@@ -56,7 +55,11 @@ namespace utility::slam::funcmin {
         return trsEig(Q, v, g, D, p);
     }
 
-    int trsEig(const Eigen::MatrixXd& Q, const Eigen::VectorXd& v, const Eigen::VectorXd& g, double D, Eigen::VectorXd& p) {
+    int trsEig(const Eigen::MatrixXd& Q,
+               const Eigen::VectorXd& v,
+               const Eigen::VectorXd& g,
+               double D,
+               Eigen::VectorXd& p) {
         assert(g.cols() == 1);
         assert(v.cols() == 1);
         assert(Q.rows() == Q.cols());
@@ -70,8 +73,8 @@ namespace utility::slam::funcmin {
         typedef Eigen::MatrixXd Matrix;
         typedef Vector::Index Index;
 
-        const Scalar eps     = std::numeric_limits<Scalar>::epsilon();
-        const Scalar sqrteps = std::sqrt(eps);
+        const Scalar eps        = std::numeric_limits<Scalar>::epsilon();
+        const Scalar sqrteps    = std::sqrt(eps);
         const int maxIterations = 20;
 
         Scalar l1 = v.minCoeff();  // Leftmost eigenvalue
@@ -97,9 +100,9 @@ namespace utility::slam::funcmin {
                 Vector scaledValid(idxValid.size());
                 Matrix QValid(v.size(), idxValid.size());
                 for (std::size_t i = 0; i < idxValid.size(); ++i) {
-                    Index idx       = idxValid[i];
-                    scaledValid(i)  = a(idx) / (v(idx) - l1);
-                    QValid.col(i)   = Q.col(idx);
+                    Index idx      = idxValid[i];
+                    scaledValid(i) = a(idx) / (v(idx) - l1);
+                    QValid.col(i)  = Q.col(idx);
                 }
                 Scalar t = std::sqrt(D * D - scaledValid.squaredNorm());
                 Vector pvec(v.size());
@@ -161,10 +164,10 @@ namespace utility::slam::funcmin {
     }
 
     int trsSqrtSparse(const Eigen::SparseMatrix<double>& Xi,
-                    const Eigen::PermutationMatrix<Eigen::Dynamic>& Pi,
-                    const Eigen::VectorXd& g,
-                    double D,
-                    Eigen::VectorXd& p) {
+                      const Eigen::PermutationMatrix<Eigen::Dynamic>& Pi,
+                      const Eigen::VectorXd& g,
+                      double D,
+                      Eigen::VectorXd& p) {
         assert(g.cols() == 1);
         assert(Xi.rows() == Xi.cols());
         assert(Xi.rows() == g.rows());

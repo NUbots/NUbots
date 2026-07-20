@@ -187,7 +187,7 @@ export class LocalisationRobotModel {
     phase: WalkState_PhaseEnum;
   }[] = [];
   @observable vslamMapPoints: { rNWn: Vector3[] } = { rNWn: [] };
-  @observable Hwn: Matrix4 = Matrix4.of();  // Add this line to store Hwn transform
+  @observable Hwn: Matrix4 = Matrix4.of(); // Add this line to store Hwn transform
 
   constructor({
     model,
@@ -414,9 +414,7 @@ export class LocalisationRobotModel {
   @computed
   get rNFf(): Vector3[] {
     // Transform from VSLAM world frame {n} to field frame {f}
-    return this.vslamMapPoints.rNWn.map((rNWn) =>
-      rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw)
-    );
+    return this.vslamMapPoints.rNWn.map((rNWn) => rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw));
   }
 
   /** Torso trajectory (Hpt) in field space */

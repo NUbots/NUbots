@@ -164,8 +164,8 @@ namespace utility::slam::measurement {
             if (idxFeatures_[j] >= 0) {
                 if (systemPointLandmarks.consecutiveFailures_[landmarkIdx] > 0) {
                     // std::cout << "  Landmark " << landmarkIdx << " SUCCESSFULLY associated after "
-                            //   << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << " failures (reset to 0)"
-                            //   << std::endl;
+                    //   << systemPointLandmarks.consecutiveFailures_[landmarkIdx] << " failures (reset to 0)"
+                    //   << std::endl;
                 }
                 systemPointLandmarks.consecutiveFailures_[landmarkIdx] = 0;
             }
@@ -174,7 +174,7 @@ namespace utility::slam::measurement {
                 systemPointLandmarks.consecutiveFailures_[landmarkIdx]++;
                 int newValue = systemPointLandmarks.consecutiveFailures_[landmarkIdx];
                 // std::cout << "  Landmark " << landmarkIdx << " failed association (was=" << oldValue
-                        //   << ", now=" << newValue << ")" << std::endl;
+                //   << ", now=" << newValue << ")" << std::endl;
             }
         }
 

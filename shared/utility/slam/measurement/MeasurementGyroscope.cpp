@@ -1,4 +1,5 @@
 #include "MeasurementGyroscope.hpp"
+
 #include <cmath>
 
 namespace utility::slam::measurement {
@@ -63,8 +64,7 @@ namespace utility::slam::measurement {
     }
 
     // Define measurement noise covariance
-    gaussian::GaussianInfo<double> MeasurementGyroscope::noiseDensity(
-        const system::SystemEstimator& system) const {
+    gaussian::GaussianInfo<double> MeasurementGyroscope::noiseDensity(const system::SystemEstimator& system) const {
 
         // SR is an upper triangular matrix such that SR^T * SR = R
         // where R is the measurement noise covariance
@@ -73,4 +73,4 @@ namespace utility::slam::measurement {
         return gaussian::GaussianInfo<double>::fromSqrtMoment(SR);
     }
 
-} // namespace utility::slam::measurement
+}  // namespace utility::slam::measurement

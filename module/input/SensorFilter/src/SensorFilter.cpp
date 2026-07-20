@@ -103,30 +103,31 @@ namespace module::input {
            Optional<With<VSLAMMsg>>,
            Single,
            Priority::HIGH>()
-            .then("Main Sensors Loop",
-                  [this](const RawSensors& raw_sensors,
-                         const std::shared_ptr<const Sensors>& previous_sensors,
-                         const Stability& stability,
-                         const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
-                         const std::shared_ptr<const VSLAMMsg>& vslam) {
-                      auto sensors = std::make_unique<Sensors>();
+            .then(
+                "Main Sensors Loop",
+                [this](const RawSensors& raw_sensors,
+                       const std::shared_ptr<const Sensors>& previous_sensors,
+                       const Stability& stability,
+                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                       const std::shared_ptr<const VSLAMMsg>& vslam) {
+                    auto sensors = std::make_unique<Sensors>();
 
-                      // Raw sensors (Accelerometer, Gyroscope, etc.)
-                      update_raw_sensors(sensors, previous_sensors, raw_sensors);
+                    // Raw sensors (Accelerometer, Gyroscope, etc.)
+                    update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-                      // Kinematics (Htw, foot down, CoM, etc.)
-                      update_kinematics(sensors, raw_sensors);
+                    // Kinematics (Htw, foot down, CoM, etc.)
+                    update_kinematics(sensors, raw_sensors);
 
-                      // Odometry (Htw and Hrw)
-                      update_odometry(sensors, previous_sensors, raw_sensors, stability, robot_pose_ground_truth, vslam);
+                    // Odometry (Htw and Hrw)
+                    update_odometry(sensors, previous_sensors, raw_sensors, stability, robot_pose_ground_truth, vslam);
 
-                      // Graph debug information
-                      if (log_level <= DEBUG) {
-                          debug_sensor_filter(sensors, robot_pose_ground_truth);
-                      }
+                    // Graph debug information
+                    if (log_level <= DEBUG) {
+                        debug_sensor_filter(sensors, robot_pose_ground_truth);
+                    }
 
-                      emit(std::move(sensors));
-                  });
+                    emit(std::move(sensors));
+                });
 
         on<Last<20, Trigger<RawSensors>>>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {

@@ -1,6 +1,7 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
 import { Sensors } from "@proto/message/input/Sensors";
+import { VSLAM } from "@proto/message/input/VSLAM";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
 import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
@@ -8,7 +9,6 @@ import { WalkToDebug } from "@proto/message/planning/WalkPath";
 import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose";
 import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
 import { Overview } from "@proto/message/support/nusight/Overview";
-import { VSLAM } from "@proto/message/input/VSLAM";
 import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
 import { FieldLines } from "@proto/message/vision/FieldLines";
 import { Goals } from "@proto/message/vision/Goal";

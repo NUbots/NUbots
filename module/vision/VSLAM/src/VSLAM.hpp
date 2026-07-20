@@ -25,59 +25,59 @@
  * SOFTWARE.
  */
 
- #ifndef MODULE_VISION_VSLAM_HPP
- #define MODULE_VISION_VSLAM_HPP
+#ifndef MODULE_VISION_VSLAM_HPP
+#define MODULE_VISION_VSLAM_HPP
 
+#include <Eigen/Geometry>
 #include <memory>
 #include <nuclear>
 #include <string>
 
-#include <Eigen/Geometry>
-
 #include "message/input/Sensors.hpp"
 #include "message/vision/FieldIntersections.hpp"
+
 #include "utility/slam/camera/Camera.hpp"
 #include "utility/slam/rotation.hpp"
 #include "utility/slam/system/SystemSLAM.hpp"
 
- namespace module::vision {
+namespace module::vision {
 
-     /**
-      * @brief Visual SLAM reactor for state estimation using YOLO field intersections
-      *
-      * This reactor implements visual SLAM using YOLO-detected field intersections
-      * (L, T, X intersections) as point landmarks for localization and mapping.
-      * It integrates both visual measurements and gyroscope measurements for improved
-      * orientation estimation.
-      */
-     class VSLAM : public NUClear::Reactor {
-     private:
-         /// @brief Configuration structure
-         struct Config {
-             /// Enable debug frame visualization (expensive, disable for performance)
-             bool enableVisualization = false;
+    /**
+     * @brief Visual SLAM reactor for state estimation using YOLO field intersections
+     *
+     * This reactor implements visual SLAM using YOLO-detected field intersections
+     * (L, T, X intersections) as point landmarks for localization and mapping.
+     * It integrates both visual measurements and gyroscope measurements for improved
+     * orientation estimation.
+     */
+    class VSLAM : public NUClear::Reactor {
+    private:
+        /// @brief Configuration structure
+        struct Config {
+            /// Enable debug frame visualization (expensive, disable for performance)
+            bool enableVisualization = false;
 
-             /// Path to camera calibration file
-             std::string cameraCalibrationPath = "";
+            /// Path to camera calibration file
+            std::string cameraCalibrationPath = "";
 
-             /// Initial covariance scaling factors
-             struct InitialCovariance {
-                 double velocity        = 0.3;
-                 double angularVelocity = 0.4;
-                 double position        = 0.01;
-                 double orientation     = 0.01;
-             } initialCovariance;
+            /// Initial covariance scaling factors
+            struct InitialCovariance {
+                double velocity        = 0.3;
+                double angularVelocity = 0.4;
+                double position        = 0.01;
+                double orientation     = 0.01;
+            } initialCovariance;
 
-         } cfg;
+        } cfg;
 
-         /// Camera object containing calibration and intrinsic parameters
-         utility::slam::camera::Camera camera_;
+        /// Camera object containing calibration and intrinsic parameters
+        utility::slam::camera::Camera camera_;
 
-         /// SLAM system for point landmarks
-         std::unique_ptr<utility::slam::system::SystemSLAM> system_;
+        /// SLAM system for point landmarks
+        std::unique_ptr<utility::slam::system::SystemSLAM> system_;
 
-         /// Flag indicating whether the system has been initialized
-         bool systemInitialized_ = false;
+        /// Flag indicating whether the system has been initialized
+        bool systemInitialized_ = false;
 
         /**
          * @brief Initialize the SLAM system aligned with the world frame
@@ -89,38 +89,38 @@
          */
         void initializeSystem(const Eigen::Isometry3d& Hwc);
 
-         /**
-          * @brief Process an image frame with field intersections through the SLAM pipeline
-          *
-          * Steps:
-          * 1. Initialize system on first frame (aligned with world frame)
-          * 2. Process gyroscope measurement (transformed to SLAM frame)
-          * 3. Extract pixel centres from field intersections
-          * 4. Create MeasurementPointBundle measurement
-          * 5. Update system state with measurement
-          * 6. Return debug visualization image
-          *
-          * @param img_rgb The input image frame
-          * @param timestamp Timestamp of the frame in seconds
-          * @param field_intersections Field intersections detected by YOLO
-          * @param Hwc World-to-camera transform from kinematics
-          * @param sensors Sensor data including gyroscope measurements
-          * @return cv::Mat Debug image with field intersections drawn
-          */
-         cv::Mat processSLAMFrame(const cv::Mat& img_rgb,
-                                  double timestamp,
-                                  const message::vision::FieldIntersections& field_intersections,
-                                  const Eigen::Isometry3d& Hwc,
-                                  const message::input::Sensors& sensors);
+        /**
+         * @brief Process an image frame with field intersections through the SLAM pipeline
+         *
+         * Steps:
+         * 1. Initialize system on first frame (aligned with world frame)
+         * 2. Process gyroscope measurement (transformed to SLAM frame)
+         * 3. Extract pixel centres from field intersections
+         * 4. Create MeasurementPointBundle measurement
+         * 5. Update system state with measurement
+         * 6. Return debug visualization image
+         *
+         * @param img_rgb The input image frame
+         * @param timestamp Timestamp of the frame in seconds
+         * @param field_intersections Field intersections detected by YOLO
+         * @param Hwc World-to-camera transform from kinematics
+         * @param sensors Sensor data including gyroscope measurements
+         * @return cv::Mat Debug image with field intersections drawn
+         */
+        cv::Mat processSLAMFrame(const cv::Mat& img_rgb,
+                                 double timestamp,
+                                 const message::vision::FieldIntersections& field_intersections,
+                                 const Eigen::Isometry3d& Hwc,
+                                 const message::input::Sensors& sensors);
 
-     public:
-         /**
-          * @brief Called by the powerplant to build and setup the VSLAM reactor.
-          * @param environment The NUClear environment
-          */
-         explicit VSLAM(std::unique_ptr<NUClear::Environment> environment);
-     };
+    public:
+        /**
+         * @brief Called by the powerplant to build and setup the VSLAM reactor.
+         * @param environment The NUClear environment
+         */
+        explicit VSLAM(std::unique_ptr<NUClear::Environment> environment);
+    };
 
- }  // namespace module::vision
+}  // namespace module::vision
 
- #endif  // MODULE_VISION_VSLAM_HPP
+#endif  // MODULE_VISION_VSLAM_HPP

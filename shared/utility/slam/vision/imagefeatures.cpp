@@ -1,29 +1,29 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "imagefeatures.hpp"
 
@@ -40,7 +40,7 @@ namespace utility::slam::vision {
         cv::Mat imgout = img.clone();
         cv::Mat gray;
         cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);  // Harris detector expects grayscale input.
-        cv::Mat dst;                                   // Store scores computed by harris detector.
+        cv::Mat dst;                                  // Store scores computed by harris detector.
 
         cv::cornerHarris(gray, dst, 3, 3, 0.04);  // input:output:neighborhoodsize:aperture:harrisparameter
 
@@ -115,9 +115,9 @@ namespace utility::slam::vision {
                         label,
                         pt + cv::Point(5, -5),  // offset text position
                         cv::FONT_HERSHEY_SIMPLEX,
-                        0.9,                     // font scale
-                        cv::Scalar(255, 0, 0),   // green text
-                        2);                      // thickness
+                        0.9,                    // font scale
+                        cv::Scalar(255, 0, 0),  // green text
+                        2);                     // thickness
         }
 
         return imgout;
@@ -130,11 +130,11 @@ namespace utility::slam::vision {
 
         // Use OpenCV's goodFeaturesToTrack (Shi-Tomasi corner detector)
         std::vector<cv::Point2f> corners;
-        double qualityLevel        = 0.01;   // Quality level for corner detection
-        double minDistance         = 10.0;   // Minimum distance between corners (built-in NMS)
-        int blockSize              = 5;      // Size of averaging block
-        bool useHarrisDetector     = false;  // Use Shi-Tomasi (not Harris)
-        double k                   = 0.04;   // Harris parameter (not used when useHarrisDetector=false)
+        double qualityLevel    = 0.01;   // Quality level for corner detection
+        double minDistance     = 10.0;   // Minimum distance between corners (built-in NMS)
+        int blockSize          = 5;      // Size of averaging block
+        bool useHarrisDetector = false;  // Use Shi-Tomasi (not Harris)
+        double k               = 0.04;   // Harris parameter (not used when useHarrisDetector=false)
 
         cv::goodFeaturesToTrack(gray,
                                 corners,
@@ -235,9 +235,9 @@ namespace utility::slam::vision {
                         label,
                         kp.pt + cv::Point2f(5, -5),  // offset text position
                         cv::FONT_HERSHEY_SIMPLEX,
-                        0.9,                     // font scale
-                        cv::Scalar(255, 0, 0),   // green text
-                        2);                      // thickness
+                        0.9,                    // font scale
+                        cv::Scalar(255, 0, 0),  // green text
+                        2);                     // thickness
         }
 
         return imgout;
@@ -248,7 +248,7 @@ namespace utility::slam::vision {
         ArucoDetectionResult result;
         result.image = img.clone();
         std::println("Warning: ArUco detection is disabled - opencv_contrib not available");
-        (void)maxNumFeatures;  // Suppress unused parameter warning
+        (void) maxNumFeatures;  // Suppress unused parameter warning
         return result;
 
         /* Disabled until opencv_contrib is available:

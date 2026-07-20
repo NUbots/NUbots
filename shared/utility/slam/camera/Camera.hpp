@@ -1,46 +1,44 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #ifndef UTILITY_SLAM_CAMERA_CAMERA_HPP
 #define UTILITY_SLAM_CAMERA_CAMERA_HPP
 
+#include <Eigen/Core>
 #include <cmath>
 #include <filesystem>
-#include <vector>
-
-#include <Eigen/Core>
-
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <opencv2/core/types.hpp>
+#include <vector>
 
-#include "Pose.hpp"
 #include "../serialisation.hpp"
+#include "Pose.hpp"
 
 // Define Eigen types in Eigen namespace
 namespace Eigen {
@@ -54,8 +52,8 @@ namespace utility::slam::camera {
         cv::Size boardSize;
         float squareSize;
 
-        void write(cv::FileStorage& fs) const;    // OpenCV serialisation
-        void read(const cv::FileNode& node);      // OpenCV serialisation
+        void write(cv::FileStorage& fs) const;  // OpenCV serialisation
+        void read(const cv::FileNode& node);    // OpenCV serialisation
 
         std::vector<cv::Point3f> gridPoints() const;
         friend std::ostream& operator<<(std::ostream&, const Chessboard&);
@@ -66,8 +64,8 @@ namespace utility::slam::camera {
         ChessboardImage(const cv::Mat&, const Chessboard&, const std::filesystem::path& = "");
         cv::Mat image;
         std::filesystem::path filename;
-        Pose<double> Tnc;                      // Extrinsic camera parameters
-        std::vector<cv::Point2f> corners;      // Chessboard corners in image [rQOi]
+        Pose<double> Tnc;                  // Extrinsic camera parameters
+        std::vector<cv::Point2f> corners;  // Chessboard corners in image [rQOi]
         bool isFound;
         void drawCorners(const Chessboard&);
         void drawBox(const Chessboard&, const Camera&);
@@ -113,10 +111,10 @@ namespace utility::slam::camera {
         void write(cv::FileStorage&) const;  // OpenCV serialisation
         void read(const cv::FileNode&);      // OpenCV serialisation
 
-        cv::Mat cameraMatrix;   // Camera matrix
-        cv::Mat distCoeffs;     // Lens distortion coefficients
-        int flags = 0;          // Calibration flags
-        cv::Size imageSize;     // Image size
+        cv::Mat cameraMatrix;  // Camera matrix
+        cv::Mat distCoeffs;    // Lens distortion coefficients
+        int flags = 0;         // Calibration flags
+        cv::Size imageSize;    // Image size
 
         Pose<double> Tbc;  // Relative pose of camera in body coordinates (Rbc, rCBb)
 
@@ -182,10 +180,8 @@ namespace utility::slam::camera {
         const Scalar c     = (Scalar(1) + alpha) / (Scalar(1) + beta);
 
         // Apply distortions
-        const Scalar u_prime =
-            c * u + (Scalar(2) * p1 * u * v + p2 * (r2 + Scalar(2) * u * u)) + (s1 * r2 + s2 * r4);
-        const Scalar v_prime =
-            c * v + (p1 * (r2 + Scalar(2) * v * v) + Scalar(2) * p2 * u * v) + (s3 * r2 + s4 * r4);
+        const Scalar u_prime = c * u + (Scalar(2) * p1 * u * v + p2 * (r2 + Scalar(2) * u * u)) + (s1 * r2 + s2 * r4);
+        const Scalar v_prime = c * v + (p1 * (r2 + Scalar(2) * v * v) + Scalar(2) * p2 * u * v) + (s3 * r2 + s4 * r4);
 
         // Final pixel coordinates
         Eigen::Vector2<Scalar> rQOi;

@@ -37,9 +37,9 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/input/VSLAM.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/input/VSLAM.hpp"
 
 #include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/YawFilter.hpp"

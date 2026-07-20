@@ -1,37 +1,36 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #ifndef UTILITY_SLAM_ASSOCIATION_UTIL_HPP
 #define UTILITY_SLAM_ASSOCIATION_UTIL_HPP
 
+#include <Eigen/Core>
 #include <cstddef>
 #include <vector>
-
-#include <Eigen/Core>
 
 #include "camera/Camera.hpp"
 #include "gaussian/GaussianInfo.hpp"
@@ -52,17 +51,18 @@ namespace utility::slam {
      * @param idxLandmarks                  Indices of landmarks to be associated
      * @param Y                             Matrix of observed features (2 x num_features)
      * @param camera                        Camera parameters including image dimensions
-     * @param idxFeatures                   Output vector of feature indices associated with landmarks (-1 for unassociated)
+     * @param idxFeatures                   Output vector of feature indices associated with landmarks (-1 for
+     * unassociated)
      * @param enforceJointCompatibility     Whether to enforce joint compatibility constraint
      * @return                              Total surprisal value of the association
      */
     double snn(const SystemSLAM& system,
-            const GaussianInfo<double>& featureBundleDensity,
-            const std::vector<std::size_t>& idxLandmarks,
-            const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-            const Camera& camera,
-            std::vector<int>& idxFeatures,
-            bool enforceJointCompatibility = false);
+               const GaussianInfo<double>& featureBundleDensity,
+               const std::vector<std::size_t>& idxLandmarks,
+               const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+               const Camera& camera,
+               std::vector<int>& idxFeatures,
+               bool enforceJointCompatibility = false);
 
     /**
      * @brief Checks individual compatibility between a feature and a landmark
@@ -75,10 +75,10 @@ namespace utility::slam {
      * @return          True if the feature-landmark pair is individually compatible
      */
     bool individualCompatibility(const int& i,
-                                const int& j,
-                                const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-                                const GaussianInfo<double>& density,
-                                const double& nSigma);
+                                 const int& j,
+                                 const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+                                 const GaussianInfo<double>& density,
+                                 const double& nSigma);
 
     /**
      * @brief Checks individual compatibility between a measurement and a marginal distribution
@@ -88,9 +88,7 @@ namespace utility::slam {
      * @param nSigma    Number of standard deviations for confidence region
      * @return          True if the measurement is within the confidence region
      */
-    bool individualCompatibility(const Eigen::Vector2d& y,
-                                const GaussianInfo<double>& marginal,
-                                const double& nSigma);
+    bool individualCompatibility(const Eigen::Vector2d& y, const GaussianInfo<double>& marginal, const double& nSigma);
 
     /**
      * @brief Checks joint compatibility of a set of feature-landmark associations
@@ -104,11 +102,11 @@ namespace utility::slam {
      * @return          True if the association set is jointly compatible
      */
     bool jointCompatibility(const std::vector<int>& idx,
-                        const double& sU,
-                        const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-                        const GaussianInfo<double>& density,
-                        const double& nSigma,
-                        double& surprisal);
+                            const double& sU,
+                            const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+                            const GaussianInfo<double>& density,
+                            const double& nSigma,
+                            double& surprisal);
 
 }  // namespace utility::slam
 

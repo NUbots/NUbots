@@ -1,45 +1,39 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "Camera.hpp"
 
+#include <Eigen/Core>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <filesystem>
 #include <format>
 #include <limits>
-#include <print>
-#include <regex>
-#include <stdexcept>
-#include <vector>
-
-#include <Eigen/Core>
-
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/core/mat.hpp>
@@ -48,6 +42,10 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
+#include <print>
+#include <regex>
+#include <stdexcept>
+#include <vector>
 
 #include "../rotation.hpp"
 #include "../to_string.hpp"
@@ -56,8 +54,8 @@ namespace utility::slam::camera {
 
     void Chessboard::write(cv::FileStorage& fs) const {
         fs << "{"
-        << "grid_width" << boardSize.width << "grid_height" << boardSize.height << "square_size" << squareSize
-        << "}";
+           << "grid_width" << boardSize.width << "grid_height" << boardSize.height << "square_size" << squareSize
+           << "}";
     }
 
     void Chessboard::read(const cv::FileNode& node) {
@@ -80,26 +78,26 @@ namespace utility::slam::camera {
     }
 
     ChessboardImage::ChessboardImage(const cv::Mat& image_,
-                                    const Chessboard& chessboard,
-                                    const std::filesystem::path& filename_)
+                                     const Chessboard& chessboard,
+                                     const std::filesystem::path& filename_)
         : image(image_), filename(filename_), isFound(false) {
         // Detect chessboard corners in image and set the corners member
         cv::Mat gray;
         cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
         std::vector<cv::Point2f> detectedCorners;
-        isFound = cv::findChessboardCorners(gray,
-                                            chessboard.boardSize,
-                                            detectedCorners,
-                                            cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE
-                                                + cv::CALIB_CB_FAST_CHECK);
+        isFound = cv::findChessboardCorners(
+            gray,
+            chessboard.boardSize,
+            detectedCorners,
+            cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE + cv::CALIB_CB_FAST_CHECK);
         // (optional) Do subpixel refinement of detected corners
         if (isFound) {
             corners = detectedCorners;
             cv::cornerSubPix(gray,
-                            corners,
-                            cv::Size(11, 11),
-                            cv::Size(-1, -1),
-                            cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
+                             corners,
+                             cv::Size(11, 11),
+                             cv::Size(-1, -1),
+                             cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
         }
     }
 
@@ -113,16 +111,16 @@ namespace utility::slam::camera {
 
         // Calculate the interior corners of the chessboard
         // The interior corners are one square in from each edge
-        double minX = 0;                                                  // One square from left edge
+        double minX = 0;                                                          // One square from left edge
         double maxX = (chessboard.boardSize.width - 1) * chessboard.squareSize;   // One square from right edge
-        double minY = 0;                                                  // One square from top edge
+        double minY = 0;                                                          // One square from top edge
         double maxY = (chessboard.boardSize.height - 1) * chessboard.squareSize;  // One square from bottom edge
 
         // Define the base corners of the box (on the chessboard plane, z = 0)
-        std::vector<cv::Vec3d> baseCorners = {{minX, minY, 0},  // Bottom-left
-                                            {maxX, minY, 0},  // Bottom-right
-                                            {maxX, maxY, 0},  // Top-right
-                                            {minX, maxY, 0}};  // Top-left
+        std::vector<cv::Vec3d> baseCorners = {{minX, minY, 0},   // Bottom-left
+                                              {maxX, minY, 0},   // Bottom-right
+                                              {maxX, maxY, 0},   // Top-right
+                                              {minX, maxY, 0}};  // Top-left
 
         // Define the top corners of the box (at height = 0.23 m)
         std::vector<cv::Vec3d> topCorners;
@@ -132,10 +130,10 @@ namespace utility::slam::camera {
 
         // Function to draw a line segment between two 3D points, handling curvature due to distortion
         auto drawCurvedLine = [&](const cv::Vec3d& P1,
-                                const cv::Vec3d& P2,
-                                const cv::Scalar& color,
-                                int thickness   = 4,
-                                int numSegments = 1000) {
+                                  const cv::Vec3d& P2,
+                                  const cv::Scalar& color,
+                                  int thickness   = 4,
+                                  int numSegments = 1000) {
             for (int i = 0; i < numSegments; ++i) {
                 double t1 = static_cast<double>(i) / numSegments;
                 double t2 = static_cast<double>(i + 1) / numSegments;
@@ -239,8 +237,8 @@ namespace utility::slam::camera {
                                 std::println(" done, found {} frames", nFrames);
 
                                 // Choose a sampling step (approximately 1 frame per second if fps is known, else 30)
-                                double fps       = cap.get(cv::CAP_PROP_FPS);
-                                int frameStep    = (fps > 0.0) ? std::max(1, static_cast<int>(std::lround(fps))) : 30;
+                                double fps    = cap.get(cv::CAP_PROP_FPS);
+                                int frameStep = (fps > 0.0) ? std::max(1, static_cast<int>(std::lround(fps))) : 30;
 
                                 // Loop through selected frames
                                 for (int idxFrame = 0; idxFrame < nFrames; idxFrame += frameStep) {
@@ -316,13 +314,13 @@ namespace utility::slam::camera {
         );
 
         rms = cv::calibrateCamera(rPNn_all_repeated,
-                                rQOi_all,
-                                imageSize,
-                                cameraMatrix,
-                                distCoeffs,
-                                Thetacn_all,
-                                rNCc_all,
-                                flags);
+                                  rQOi_all,
+                                  imageSize,
+                                  cameraMatrix,
+                                  distCoeffs,
+                                  Thetacn_all,
+                                  rNCc_all,
+                                  flags);
         std::println(" done");
 
         // Pre-compute constants used in isVectorWithinFOV
@@ -354,13 +352,13 @@ namespace utility::slam::camera {
         std::println("{:>30}\n{}", "cameraMatrix:", to_string(cameraMatrix));
         std::println("{:>30}\n{}", "distCoeffs:", to_string(distCoeffs.t()));
         std::println("{:>30} (fx, fy) = ({}, {})",
-                    "Focal lengths:",
-                    cameraMatrix.at<double>(0, 0),
-                    cameraMatrix.at<double>(1, 1));
+                     "Focal lengths:",
+                     cameraMatrix.at<double>(0, 0),
+                     cameraMatrix.at<double>(1, 1));
         std::println("{:>30} (cx, cy) = ({}, {})",
-                    "Principal point:",
-                    cameraMatrix.at<double>(0, 2),
-                    cameraMatrix.at<double>(1, 2));
+                     "Principal point:",
+                     cameraMatrix.at<double>(0, 2),
+                     cameraMatrix.at<double>(1, 2));
         std::println("{:>30} {} deg", "Field of view (horizontal):", 180.0 / CV_PI * hFOV);
         std::println("{:>30} {} deg", "Field of view (vertical):", 180.0 / CV_PI * vFOV);
         std::println("{:>30} {} deg", "Field of view (diagonal):", 180.0 / CV_PI * dFOV);
@@ -413,8 +411,8 @@ namespace utility::slam::camera {
         Pose<double> Tnc = bodyToCamera(Tnb);  // Tnb*Tbc
 
         // Compute the unit vector uPCc from the world position rPNn and camera pose Tnc
-        cv::Vec3d rPCc = Tnc.inverse() * rPNn;       // transform world point to camera frame
-        cv::Vec3d uPCc = rPCc / cv::norm(rPCc);      // compute the norm: gives us a unit vector
+        cv::Vec3d rPCc = Tnc.inverse() * rPNn;   // transform world point to camera frame
+        cv::Vec3d uPCc = rPCc / cv::norm(rPCc);  // compute the norm: gives us a unit vector
         return uPCc;
     }
 
@@ -508,13 +506,15 @@ namespace utility::slam::camera {
 
         double dc_dr = (dalpha_dr * (1 + beta) - (1 + alpha) * dbeta_dr) / ((1 + beta) * (1 + beta));
 
-        double du_prime_du =
-            (dc_dr * dr_du) * u + c + 2 * p1 * v + p2 * (2 * dr_du * r + 4 * u) + 2 * s1 * dr_du * r + 4 * s2 * r * r2 * dr_du;
-        double du_prime_dv = (dc_dr * dr_dv) * u + 2 * p1 * u + p2 * (2 * dr_dv * r) + 2 * s1 * dr_dv * r + 4 * s2 * r * r2 * dr_dv;
+        double du_prime_du = (dc_dr * dr_du) * u + c + 2 * p1 * v + p2 * (2 * dr_du * r + 4 * u) + 2 * s1 * dr_du * r
+                             + 4 * s2 * r * r2 * dr_du;
+        double du_prime_dv =
+            (dc_dr * dr_dv) * u + 2 * p1 * u + p2 * (2 * dr_dv * r) + 2 * s1 * dr_dv * r + 4 * s2 * r * r2 * dr_dv;
 
-        double dv_prime_du = (dc_dr * dr_du) * v + p1 * (2 * dr_du * r) + 2 * p2 * v + 2 * s3 * dr_du * r + 4 * s4 * r * r2 * dr_du;
-        double dv_prime_dv =
-            (dc_dr * dr_dv) * v + c + p1 * (2 * dr_dv * r + 4 * v) + 2 * p2 * u + 2 * s3 * dr_dv * r + 4 * s4 * r * r2 * dr_dv;
+        double dv_prime_du =
+            (dc_dr * dr_du) * v + p1 * (2 * dr_du * r) + 2 * p2 * v + 2 * s3 * dr_du * r + 4 * s4 * r * r2 * dr_du;
+        double dv_prime_dv = (dc_dr * dr_dv) * v + c + p1 * (2 * dr_dv * r + 4 * v) + 2 * p2 * u + 2 * s3 * dr_dv * r
+                             + 4 * s4 * r * r2 * dr_dv;
 
         J(0, 0) = fx * (du_prime_du * du_dx + du_prime_dv * dv_dx);
         J(0, 1) = fx * (du_prime_du * du_dy + du_prime_dv * dv_dy);
@@ -529,7 +529,7 @@ namespace utility::slam::camera {
 
     cv::Vec3d Camera::pixelToVector(const cv::Vec2d& rQOi) const {
         // Compute unit vector (uPCc) for the given pixel location (rQOi)
-        std::vector<cv::Point2f> distorted   = {cv::Point2f(rQOi[0], rQOi[1])};
+        std::vector<cv::Point2f> distorted = {cv::Point2f(rQOi[0], rQOi[1])};
         std::vector<cv::Point2f> undistorted;
 
         cv::undistortPoints(distorted, undistorted, cameraMatrix, distCoeffs);

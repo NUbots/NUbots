@@ -1,46 +1,48 @@
-#include <stdexcept>
-#include <Eigen/Core>
-#include "../Event.hpp"
-#include "../system/SystemEstimator.hpp"
-#include "../funcmin.hpp"
 #include "MeasurementGaussianLikelihood.hpp"
+
+#include <Eigen/Core>
+#include <stdexcept>
+
+#include "../Event.hpp"
+#include "../funcmin.hpp"
+#include "../system/SystemEstimator.hpp"
 
 namespace utility::slam::measurement {
 
-    MeasurementGaussianLikelihood::MeasurementGaussianLikelihood(double time, const Eigen::VectorXd & y)
-        : Measurement(time)
-        , y_(y)
-    {
-        updateMethod_= UpdateMethod::AFFINE;
+    MeasurementGaussianLikelihood::MeasurementGaussianLikelihood(double time, const Eigen::VectorXd& y)
+        : Measurement(time), y_(y) {
+        updateMethod_ = UpdateMethod::AFFINE;
     }
 
-    MeasurementGaussianLikelihood::MeasurementGaussianLikelihood(double time, const Eigen::VectorXd & y, int verbosity)
-        : Measurement(time, verbosity)
-        , y_(y)
-    {
-        updateMethod_= UpdateMethod::AFFINE;
+    MeasurementGaussianLikelihood::MeasurementGaussianLikelihood(double time, const Eigen::VectorXd& y, int verbosity)
+        : Measurement(time, verbosity), y_(y) {
+        updateMethod_ = UpdateMethod::AFFINE;
     }
 
     MeasurementGaussianLikelihood::~MeasurementGaussianLikelihood() = default;
 
-    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(const Eigen::VectorXd & x, const SystemEstimator & system) const
-    {
-        Eigen::VectorXd h = predict(x, system);
-        const Eigen::MatrixXd & SR = noiseDensity(system).sqrtCov();
+    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(const Eigen::VectorXd& x,
+                                                                                 const SystemEstimator& system) const {
+        Eigen::VectorXd h         = predict(x, system);
+        const Eigen::MatrixXd& SR = noiseDensity(system).sqrtCov();
         return gaussian::GaussianInfo<double>::fromSqrtMoment(h, SR);
     }
 
-    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(const Eigen::VectorXd & x, const SystemEstimator & system, Eigen::MatrixXd & dhdx) const
-    {
-        Eigen::VectorXd h = predict(x, system, dhdx);
-        const Eigen::MatrixXd & SR = noiseDensity(system).sqrtCov();
+    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(const Eigen::VectorXd& x,
+                                                                                 const SystemEstimator& system,
+                                                                                 Eigen::MatrixXd& dhdx) const {
+        Eigen::VectorXd h         = predict(x, system, dhdx);
+        const Eigen::MatrixXd& SR = noiseDensity(system).sqrtCov();
         return gaussian::GaussianInfo<double>::fromSqrtMoment(h, SR);
     }
 
-    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(const Eigen::VectorXd & x, const SystemEstimator & system, Eigen::MatrixXd & dhdx, Eigen::Tensor<double, 3> & d2hdx2) const
-    {
-        Eigen::VectorXd h = predict(x, system, dhdx, d2hdx2);
-        const Eigen::MatrixXd & SR = noiseDensity(system).sqrtCov();
+    gaussian::GaussianInfo<double> MeasurementGaussianLikelihood::predictDensity(
+        const Eigen::VectorXd& x,
+        const SystemEstimator& system,
+        Eigen::MatrixXd& dhdx,
+        Eigen::Tensor<double, 3>& d2hdx2) const {
+        Eigen::VectorXd h         = predict(x, system, dhdx, d2hdx2);
+        const Eigen::MatrixXd& SR = noiseDensity(system).sqrtCov();
         return gaussian::GaussianInfo<double>::fromSqrtMoment(h, SR);
     }
 
@@ -51,64 +53,59 @@ namespace utility::slam::measurement {
     //   ya  =   ha(x, v)
     //
     // Evaluate ha(x, v) and its Jacobian Ja = [dha/dx, dha/dv]
-    Eigen::MatrixXd MeasurementGaussianLikelihood::augmentedPredict(const Eigen::VectorXd & xv, Eigen::MatrixXd & Ja, const SystemEstimator & system) const
-    {
-        const Eigen::Index & nxv = xv.size();
-        const Eigen::Index & ny = y_.size();
-        const Eigen::Index & nx = nxv - ny;
-        Eigen::VectorXd x = xv.head(nx);
-        Eigen::VectorXd v = xv.tail(ny);
+    Eigen::MatrixXd MeasurementGaussianLikelihood::augmentedPredict(const Eigen::VectorXd& xv,
+                                                                    Eigen::MatrixXd& Ja,
+                                                                    const SystemEstimator& system) const {
+        const Eigen::Index& nxv = xv.size();
+        const Eigen::Index& ny  = y_.size();
+        const Eigen::Index& nx  = nxv - ny;
+        Eigen::VectorXd x       = xv.head(nx);
+        Eigen::VectorXd v       = xv.tail(ny);
         Eigen::MatrixXd J;
         Eigen::VectorXd y = predict(x, system, J) + v;
 
         Eigen::VectorXd ha(nx + ny);
-        ha << y,
-            x;
+        ha << y, x;
 
         Ja.resize(nx + ny, nx + ny);
-        Ja <<                                  J, Eigen::MatrixXd::Identity(ny, ny),
-            Eigen::MatrixXd::Identity(nx, nx), Eigen::MatrixXd::Zero(nx, ny);
+        Ja << J, Eigen::MatrixXd::Identity(ny, ny), Eigen::MatrixXd::Identity(nx, nx), Eigen::MatrixXd::Zero(nx, ny);
 
         return ha;
     }
 
-    void MeasurementGaussianLikelihood::update(SystemBase & system_)
-    {
+    void MeasurementGaussianLikelihood::update(SystemBase& system_) {
         // Downcast since we know that MeasurementGaussianLikelihood events only occur to SystemEstimator objects
-        SystemEstimator & system = dynamic_cast<SystemEstimator &>(system_);
+        SystemEstimator& system = dynamic_cast<SystemEstimator&>(system_);
 
-        const Eigen::Index & nx = system.density.dim();
-        switch (updateMethod_)
-        {
+        const Eigen::Index& nx = system.density.dim();
+        switch (updateMethod_) {
             case UpdateMethod::AFFINE:  // Update using affine transformation
             {
-                const Eigen::Index & ny = y_.size();
-                auto pxv = system.density*noiseDensity(system);
-                auto func = [&](const Eigen::VectorXd & x, Eigen::MatrixXd & J){ return augmentedPredict(x, J, system); };
-                auto pyx = pxv.affineTransform(func);
+                const Eigen::Index& ny = y_.size();
+                auto pxv               = system.density * noiseDensity(system);
+                auto func              = [&](const Eigen::VectorXd& x, Eigen::MatrixXd& J) {
+                    return augmentedPredict(x, J, system);
+                };
+                auto pyx       = pxv.affineTransform(func);
                 system.density = pyx.conditional(Eigen::lastN(nx), Eigen::seqN(0, ny), y_);
                 break;
             }
-            case UpdateMethod::GAUSSNEWTON:
-            {
+            case UpdateMethod::GAUSSNEWTON: {
                 throw std::runtime_error("Gauss-Newton method not yet implemented");
             }
-            case UpdateMethod::LEVENBERGMARQUARDT:
-            {
+            case UpdateMethod::LEVENBERGMARQUARDT: {
                 throw std::runtime_error("Levenberg-Marquardt method not yet implemented");
             }
-            default:
-                Measurement::update(system_);
+            default: Measurement::update(system_);
         }
     }
 
-    Eigen::VectorXd MeasurementGaussianLikelihood::simulate(const Eigen::VectorXd & x, const SystemEstimator & system) const
-    {
+    Eigen::VectorXd MeasurementGaussianLikelihood::simulate(const Eigen::VectorXd& x,
+                                                            const SystemEstimator& system) const {
         return predictDensity(x, system).simulate();
     }
 
-    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd & x, const SystemEstimator & system) const
-    {
+    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
         auto likelihood = predictDensity(x, system);
 
         // Evaluate log N(y; h(x), R)
@@ -116,8 +113,9 @@ namespace utility::slam::measurement {
         return logLik;
     }
 
-    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd & x, const SystemEstimator & system, Eigen::VectorXd & g) const
-    {
+    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd& x,
+                                                        const SystemEstimator& system,
+                                                        Eigen::VectorXd& g) const {
         Eigen::MatrixXd dhdx;
         auto likelihood = predictDensity(x, system, dhdx);
 
@@ -143,12 +141,14 @@ namespace utility::slam::measurement {
         // g_i = - sum_k ---- * ---- log N(y; h(x), R)
         //               dx_i   dy_k
         //
-        g = -dhdx.transpose()*loglikGrad;
+        g = -dhdx.transpose() * loglikGrad;
         return logLik;
     }
 
-    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd & x, const SystemEstimator & system, Eigen::VectorXd & g, Eigen::MatrixXd & H) const
-    {
+    double MeasurementGaussianLikelihood::logLikelihood(const Eigen::VectorXd& x,
+                                                        const SystemEstimator& system,
+                                                        Eigen::VectorXd& g,
+                                                        Eigen::MatrixXd& H) const {
         Eigen::MatrixXd dhdx;
         Eigen::Tensor<double, 3> d2hdx2;
         auto likelihood = predictDensity(x, system, dhdx, d2hdx2);
@@ -180,7 +180,7 @@ namespace utility::slam::measurement {
         // g_i = - sum_k ---- * ---- log N(y; h(x), R)
         //               dx_i   dy_k
         //
-        g = -dhdx.transpose()*loglikGrad;
+        g = -dhdx.transpose() * loglikGrad;
 
         // Hessian of log likelihood:
         //
@@ -204,13 +204,13 @@ namespace utility::slam::measurement {
 
         // secondTerm(i, j) = sum_k d2hdx2(k, i, j) * loglikGrad(k)
         Eigen::TensorMap<Eigen::Tensor<double, 3>> logLikGradTensorView(loglikGrad.data(), likelihood.dim(), 1, 1);
-        const Eigen::array<Eigen::Index, 3> bdims = {1, x.size(), x.size()};        // broadcast dimensions (cardinals)
-        const Eigen::array<Eigen::Index, 1> rdims = {0};                            // reduction dimensions (ordinals)
-        Eigen::Tensor<double, 2> secondTerm = (d2hdx2 * logLikGradTensorView.broadcast(bdims)).sum(rdims);
+        const Eigen::array<Eigen::Index, 3> bdims = {1, x.size(), x.size()};  // broadcast dimensions (cardinals)
+        const Eigen::array<Eigen::Index, 1> rdims = {0};                      // reduction dimensions (ordinals)
+        Eigen::Tensor<double, 2> secondTerm       = (d2hdx2 * logLikGradTensorView.broadcast(bdims)).sum(rdims);
         Eigen::Map<Eigen::MatrixXd> secondTermMatrixView(secondTerm.data(), x.size(), x.size());
 
-        H = dhdx.transpose()*logLikHess*dhdx - secondTermMatrixView;
+        H = dhdx.transpose() * logLikHess * dhdx - secondTermMatrixView;
         return logLik;
     }
 
-} // namespace utility::slam::measurement
+}  // namespace utility::slam::measurement

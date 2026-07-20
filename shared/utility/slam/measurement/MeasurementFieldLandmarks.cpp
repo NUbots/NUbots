@@ -143,7 +143,7 @@ namespace utility::slam::measurement {
                 // position uncertainty across the range + yaw uncertainty.
                 const Eigen::Matrix<double, 3, 2> T = tangentBasis(uPredF);
                 const Eigen::Vector2d a             = T.transpose() * Eigen::Vector3d::UnitZ().cross(uPredF);
-                const Eigen::Matrix2d S = Eigen::Matrix2d::Identity() * sigma2
+                const Eigen::Matrix2d S             = Eigen::Matrix2d::Identity() * sigma2
                                           + T.transpose() * Ppos * T / (range * range) + yawVar * a * a.transpose();
                 const Eigen::Vector2d e = T.transpose() * (uMeasF - uPredF);
                 const double surprisal =

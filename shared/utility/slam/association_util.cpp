@@ -1,54 +1,52 @@
 /*
-* MIT License
-*
-* Copyright (c) 2025 NUbots
-*
-* This file is part of the NUbots codebase.
-* See https://github.com/NUbots/NUbots for further info.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * MIT License
+ *
+ * Copyright (c) 2025 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include "association_util.hpp"
 
+#include <Eigen/Core>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include <vector>
-
-#include <Eigen/Core>
-
 #include <opencv2/core.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/features2d.hpp>
+#include <vector>
 
 namespace utility::slam {
 
     double snn(const SystemSLAM& system,
-            const GaussianInfo<double>& featureBundleDensity,
-            const std::vector<std::size_t>& idxLandmarks,
-            const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-            const Camera& camera,
-            std::vector<int>& idxFeatures,
-            bool enforceJointCompatibility) {
+               const GaussianInfo<double>& featureBundleDensity,
+               const std::vector<std::size_t>& idxLandmarks,
+               const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+               const Camera& camera,
+               std::vector<int>& idxFeatures,
+               bool enforceJointCompatibility) {
 
         double nSigma = 3.0;  // Number of standard deviations for confidence region
 
@@ -142,26 +140,24 @@ namespace utility::slam {
     }
 
     bool individualCompatibility(const int& i,
-                                const int& j,
-                                const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-                                const GaussianInfo<double>& density,
-                                const double& nSigma) {
+                                 const int& j,
+                                 const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+                                 const GaussianInfo<double>& density,
+                                 const double& nSigma) {
         GaussianInfo<double> marginal = density.marginal(Eigen::seqN(2 * j, 2));
         return individualCompatibility(Y.col(i), marginal, nSigma);
     }
 
-    bool individualCompatibility(const Eigen::Vector2d& y,
-                                const GaussianInfo<double>& marginal,
-                                const double& nSigma) {
+    bool individualCompatibility(const Eigen::Vector2d& y, const GaussianInfo<double>& marginal, const double& nSigma) {
         return marginal.isWithinConfidenceRegion(y, nSigma);
     }
 
     bool jointCompatibility(const std::vector<int>& idx,
-                        const double& sU,
-                        const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
-                        const GaussianInfo<double>& density,
-                        const double& nSigma,
-                        double& surprisal) {
+                            const double& sU,
+                            const Eigen::Matrix<double, 2, Eigen::Dynamic>& Y,
+                            const GaussianInfo<double>& density,
+                            const double& nSigma,
+                            double& surprisal) {
         int n = idx.size();  // Number of landmarks expected to be visible
 
         std::vector<int> idxi;   // Indices of measured features for associated landmarks
