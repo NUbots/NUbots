@@ -418,10 +418,21 @@ namespace module::localisation {
                                            const filter::MeasurementFieldLandmarks* measurement) {
         const Eigen::VectorXd mean = system->density.mean();
 
-        // Hfw = Tfb(mean) * Htw: torso-in-field composed with world-to-torso gives world-to-field.
-        const filter::Pose<double> Tfb = filter::SystemLocalisation::fieldPose<double>(mean);
-        auto field                     = std::make_unique<Field>();
-        field->Hfw                     = to_isometry(Tfb * Htw);
+        // World-to-field transform: Tfb(mean) * Htw (torso-in-field composed with world-to-torso).
+        const filter::Pose<double> Tfb   = filter::SystemLocalisation::fieldPose<double>(mean);
+        const Eigen::Isometry3d Hfw_full = to_isometry(Tfb * Htw);
+        auto field                       = std::make_unique<Field>();
+
+        // Emit the planar (ground-plane) world-to-field pose: keep (x, y) and the yaw, drop the torso
+        // height and roll/pitch. The field is a flat z=0 model, so a full SE(3) Hfw (which carries the
+        // walking torso's tilt and ~0.4 m height) tips the field lines off the plane in NUsight. Matching
+        // the NLopt convention (Hfw = Translation(x, y, 0) * Rz(yaw)) keeps them flat, and every consumer
+        // reasons about the field on the ground plane anyway.
+        const double yaw      = rot2rpy(Hfw_full.rotation()).z();
+        Eigen::Isometry3d Hfw = Eigen::Isometry3d::Identity();
+        Hfw.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hfw.translation()     = Eigen::Vector3d(Hfw_full.translation().x(), Hfw_full.translation().y(), 0.0);
+        field->Hfw            = Hfw;
 
         // TODO(future): localise the feet in the field frame as well. This emits only the torso field
         // pose (Hfw), which is enough to place the robot, but ball passing and foot placement would
