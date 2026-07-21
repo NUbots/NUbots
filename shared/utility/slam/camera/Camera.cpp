@@ -32,7 +32,7 @@
 #include <cmath>
 #include <cstddef>
 #include <filesystem>
-#include <format>
+#include <fmt/format.h>
 #include <limits>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -42,7 +42,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
-#include <print>
 #include <regex>
 #include <stdexcept>
 #include <vector>
@@ -190,7 +189,7 @@ namespace utility::slam::camera {
         // Read chessboard configuration
         cv::FileNode node = fs["chessboard_data"];
         node["chessboard"] >> chessboard;
-        std::println("Chessboard: {}", to_string(chessboard));
+        fmt::print("Chessboard: {}\n", to_string(chessboard));
 
         // Read file pattern for chessboard images
         std::string pattern;
@@ -202,7 +201,7 @@ namespace utility::slam::camera {
 
         // Get the directory containing the config file
         std::filesystem::path root = configPath.parent_path();
-        std::println("Scanning directory {} for file pattern \"{}\"", root.string(), pattern);
+        fmt::print("Scanning directory {} for file pattern \"{}\"\n", root.string(), pattern);
 
         // Populate chessboard images from regex
         chessboardImages.clear();
@@ -212,7 +211,7 @@ namespace utility::slam::camera {
                 if (std::filesystem::is_regular_file(p)) {
                     // Check if the file matches the regex pattern
                     if (std::regex_match(p.path().filename().string(), re)) {
-                        std::print("Loading {}...", p.path().filename().string());
+                        fmt::print("Loading {}...", p.path().filename().string());
 
                         // Try to load the file as an image
                         cv::Mat image = cv::imread(p.path().string(), cv::IMREAD_COLOR);
@@ -220,9 +219,9 @@ namespace utility::slam::camera {
                         bool isImage = !image.empty();
                         if (isImage) {
                             // If it's an image, detect chessboard
-                            std::print(" done, detecting chessboard...");
+                            fmt::print(" done, detecting chessboard...");
                             ChessboardImage ci(image, chessboard, p.path().filename());
-                            std::println("{}", ci.isFound ? " found" : " not found");
+                            fmt::print("{}\n", ci.isFound ? " found" : " not found");
                             if (ci.isFound) {
                                 chessboardImages.push_back(ci);
                             }
@@ -234,7 +233,7 @@ namespace utility::slam::camera {
                             if (isVideo) {
                                 // Get number of video frames
                                 int nFrames = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_COUNT));
-                                std::println(" done, found {} frames", nFrames);
+                                fmt::print(" done, found {} frames\n", nFrames);
 
                                 // Choose a sampling step (approximately 1 frame per second if fps is known, else 30)
                                 double fps    = cap.get(cv::CAP_PROP_FPS);
@@ -243,22 +242,22 @@ namespace utility::slam::camera {
                                 // Loop through selected frames
                                 for (int idxFrame = 0; idxFrame < nFrames; idxFrame += frameStep) {
                                     // Read frame
-                                    std::print("Reading {} frame {}...", p.path().filename().string(), idxFrame);
+                                    fmt::print("Reading {} frame {}...", p.path().filename().string(), idxFrame);
                                     cap.set(cv::CAP_PROP_POS_FRAMES, idxFrame);
                                     cv::Mat frame;
                                     cap >> frame;
 
                                     if (frame.empty()) {
-                                        std::println(" end of file found");
+                                        fmt::print(" end of file found\n");
                                         break;
                                     }
 
                                     // Detect chessboard in frame
-                                    std::print(" done, detecting chessboard...");
+                                    fmt::print(" done, detecting chessboard...");
                                     std::string baseName      = p.path().stem().string();
-                                    std::string frameFilename = std::format("{}_{:05d}.jpg", baseName, idxFrame);
+                                    std::string frameFilename = fmt::format("{}_{:05d}.jpg", baseName, idxFrame);
                                     ChessboardImage ci(frame, chessboard, frameFilename);
-                                    std::println("{}", ci.isFound ? " found" : " not found");
+                                    fmt::print("{}\n", ci.isFound ? " found" : " not found");
                                     if (ci.isFound) {
                                         chessboardImages.push_back(ci);
                                     }
@@ -307,7 +306,7 @@ namespace utility::slam::camera {
         distCoeffs   = cv::Mat::zeros(12, 1, CV_64F);
         std::vector<cv::Mat> Thetacn_all, rNCc_all;
         double rms;
-        std::print("Calibrating camera...");
+        fmt::print("Calibrating camera...");
         // Calibrate camera from detected chessboard corners
         std::vector<std::vector<cv::Point3f>> rPNn_all_repeated(rQOi_all.size(),  // number of corners in one image
                                                                 rPNn_all          // 3D chessboard points
@@ -321,7 +320,7 @@ namespace utility::slam::camera {
                                   Thetacn_all,
                                   rNCc_all,
                                   flags);
-        std::println(" done");
+        fmt::print(" done\n");
 
         // Pre-compute constants used in isVectorWithinFOV
         calcFieldOfView();
@@ -339,7 +338,7 @@ namespace utility::slam::camera {
         }
 
         printCalibration();
-        std::println("{:>30} {}", "RMS reprojection error:", rms);
+        fmt::print("{:>30} {}\n", "RMS reprojection error:", rms);
 
         assert(cv::checkRange(cameraMatrix));
         assert(cv::checkRange(distCoeffs));
@@ -347,21 +346,21 @@ namespace utility::slam::camera {
 
     void Camera::printCalibration() const {
         std::bitset<8 * sizeof(flags)> bitflag(flags);
-        std::println("\nCalibration data:");
-        std::println("{:>30} {}", "Bit flags:", bitflag.to_string());
-        std::println("{:>30}\n{}", "cameraMatrix:", to_string(cameraMatrix));
-        std::println("{:>30}\n{}", "distCoeffs:", to_string(distCoeffs.t()));
-        std::println("{:>30} (fx, fy) = ({}, {})",
-                     "Focal lengths:",
-                     cameraMatrix.at<double>(0, 0),
-                     cameraMatrix.at<double>(1, 1));
-        std::println("{:>30} (cx, cy) = ({}, {})",
-                     "Principal point:",
-                     cameraMatrix.at<double>(0, 2),
-                     cameraMatrix.at<double>(1, 2));
-        std::println("{:>30} {} deg", "Field of view (horizontal):", 180.0 / CV_PI * hFOV);
-        std::println("{:>30} {} deg", "Field of view (vertical):", 180.0 / CV_PI * vFOV);
-        std::println("{:>30} {} deg", "Field of view (diagonal):", 180.0 / CV_PI * dFOV);
+        fmt::print("\nCalibration data:\n");
+        fmt::print("{:>30} {}\n", "Bit flags:", bitflag.to_string());
+        fmt::print("{:>30}\n{}\n", "cameraMatrix:", to_string(cameraMatrix));
+        fmt::print("{:>30}\n{}\n", "distCoeffs:", to_string(distCoeffs.t()));
+        fmt::print("{:>30} (fx, fy) = ({}, {})\n",
+                   "Focal lengths:",
+                   cameraMatrix.at<double>(0, 0),
+                   cameraMatrix.at<double>(1, 1));
+        fmt::print("{:>30} (cx, cy) = ({}, {})\n",
+                   "Principal point:",
+                   cameraMatrix.at<double>(0, 2),
+                   cameraMatrix.at<double>(1, 2));
+        fmt::print("{:>30} {} deg\n", "Field of view (horizontal):", 180.0 / CV_PI * hFOV);
+        fmt::print("{:>30} {} deg\n", "Field of view (vertical):", 180.0 / CV_PI * vFOV);
+        fmt::print("{:>30} {} deg\n", "Field of view (diagonal):", 180.0 / CV_PI * dFOV);
     }
 
     void Camera::calcFieldOfView() {

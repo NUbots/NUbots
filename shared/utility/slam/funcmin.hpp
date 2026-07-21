@@ -34,8 +34,8 @@
 #include <Eigen/SparseQR>
 #include <cassert>
 #include <cmath>
+#include <fmt/format.h>
 #include <limits>
-#include <print>
 
 namespace utility::slam::funcmin {
 
@@ -198,7 +198,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite() || !H.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");
             return -1;
         }
 
@@ -218,21 +218,21 @@ namespace utility::slam::funcmin {
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}",
-                             i,
-                             f,
-                             LambdaSq,
-                             Delta);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
+                           i,
+                           f,
+                           LambdaSq,
+                           Delta);
             ;
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -272,7 +272,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 
@@ -392,7 +392,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");
             return -1;
         }
 
@@ -410,14 +410,14 @@ namespace utility::slam::funcmin {
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}",
-                             i,
-                             f,
-                             LambdaSq,
-                             Delta);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
+                           i,
+                           f,
+                           LambdaSq,
+                           Delta);
             ;
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             const Scalar LambdaSqThreshold =
                 std::sqrt(std::numeric_limits<Scalar>::epsilon());  // Loose convergence tolerance
@@ -425,7 +425,7 @@ namespace utility::slam::funcmin {
             // convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold && v(0) > 0.0) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -481,7 +481,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 
@@ -581,7 +581,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");  // initial means
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");  // initial means
             return -1;
         }
 
@@ -597,21 +597,21 @@ namespace utility::slam::funcmin {
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}",
-                             i,
-                             f,
-                             LambdaSq,
-                             Delta);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
+                           i,
+                           f,
+                           LambdaSq,
+                           Delta);
             ;
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -666,7 +666,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 
@@ -775,7 +775,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");
             return -1;
         }
 
@@ -795,21 +795,21 @@ namespace utility::slam::funcmin {
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}",
-                             i,
-                             f,
-                             LambdaSq,
-                             Delta);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
+                           i,
+                           f,
+                           LambdaSq,
+                           Delta);
             ;
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -887,7 +887,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 
@@ -1002,7 +1002,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");
             return -1;
         }
 
@@ -1019,21 +1019,21 @@ namespace utility::slam::funcmin {
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*inv(S.'*S)*p
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}",
-                             i,
-                             f,
-                             LambdaSq,
-                             Delta);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
+                           i,
+                           f,
+                           LambdaSq,
+                           Delta);
             ;
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -1087,7 +1087,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 
@@ -1190,7 +1190,7 @@ namespace utility::slam::funcmin {
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
             if (verbosity > 1)
-                std::println("ERROR: Initial point is not in domain of cost function");
+                fmt::print("ERROR: Initial point is not in domain of cost function\n");
             return -1;
         }
 
@@ -1231,13 +1231,13 @@ namespace utility::slam::funcmin {
                 -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p if p is the Newton step
             // Scalar NewtonDecrSq = z.squaredNorm();
             if (verbosity == 3)
-                std::println("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Lambda = {:10.2e}",
-                             i,
-                             f,
-                             NewtonDecrSq,
-                             lambda);
+                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Lambda = {:10.2e}\n",
+                           i,
+                           f,
+                           NewtonDecrSq,
+                           lambda);
             if (verbosity == 1)
-                std::print(".");
+                fmt::print(".");
 
             // const Scalar NewtonDecrSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance const Scalar NewtonDecrSqThreshold = 2*std::numeric_limits<Scalar>::epsilon(); //
@@ -1245,7 +1245,7 @@ namespace utility::slam::funcmin {
             const Scalar NewtonDecrSqThreshold = 1e3 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(NewtonDecrSq) < NewtonDecrSqThreshold) {
                 if (verbosity >= 2)
-                    std::println("CONVERGED: Newton decrement below threshold in {} iterations", i);
+                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
                 return 0;
             }
 
@@ -1300,7 +1300,7 @@ namespace utility::slam::funcmin {
             }
         }
         if (verbosity > 1)
-            std::println("WARNING: maximum number of iterations reached");
+            fmt::print("WARNING: maximum number of iterations reached\n");
         return 1;
     }
 

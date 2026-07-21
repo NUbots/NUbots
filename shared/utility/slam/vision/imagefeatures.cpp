@@ -28,11 +28,10 @@
 #include "imagefeatures.hpp"
 
 #include <algorithm>
-#include <print>
-#include <string>
-
+#include <fmt/format.h>
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc.hpp>
+#include <string>
 
 namespace utility::slam::vision {
 
@@ -72,11 +71,11 @@ namespace utility::slam::vision {
             cv::circle(imgout, kp.pt, 3, cv::Scalar(0, 255, 0), 1);  // Green in BGR
         }
 
-        std::println("Image width: {}", img.cols);
-        std::println("Image height: {}", img.rows);
-        std::println("Features requested: {}", maxNumFeatures);
-        std::println("Features detected: {}", keypoints.size());
-        std::println("{:<5} {:<10} {:<10} {:<10}", "Index", "X", "Y", "Score");
+        fmt::print("Image width: {}\n", img.cols);
+        fmt::print("Image height: {}\n", img.rows);
+        fmt::print("Features requested: {}\n", maxNumFeatures);
+        fmt::print("Features detected: {}\n", keypoints.size());
+        fmt::print("{:<5} {:<10} {:<10} {:<10}\n", "Index", "X", "Y", "Score");
 
         // Limit to maxNumFeatures.
         if (keypoints.size() > static_cast<float>(maxNumFeatures)) {
@@ -86,7 +85,7 @@ namespace utility::slam::vision {
         // Print each feature
         for (size_t i = 0; i < keypoints.size(); ++i) {
             const auto& kp = keypoints[i];
-            std::println("{:<5} {:<10} {:<10} {:.8f}", i + 1, kp.pt.x, kp.pt.y, kp.response);
+            fmt::print("{:<5} {:<10} {:<10} {:.8f}\n", i + 1, kp.pt.x, kp.pt.y, kp.response);
         }
         // Draw on output image
         for (size_t i = 0; i < keypoints.size(); ++i) {

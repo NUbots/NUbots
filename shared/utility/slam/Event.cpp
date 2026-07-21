@@ -27,7 +27,7 @@
 
 #include "Event.hpp"
 
-#include <print>
+#include <fmt/format.h>
 #include <string>
 
 #include "system/SystemBase.hpp"
@@ -42,7 +42,7 @@ namespace utility::slam {
 
     void Event::process(SystemBase& system) {
         if (verbosity_ > 0) {
-            std::print("[t={:07.3f}s] {}", time_, getProcessString());
+            fmt::print("[t={:07.3f}s] {}", time_, getProcessString());
         }
 
         // Time update
@@ -52,7 +52,7 @@ namespace utility::slam {
         update(system);
 
         if (verbosity_ > 0) {
-            std::println(" done");
+            fmt::print(" done\n");
         }
     }
 
