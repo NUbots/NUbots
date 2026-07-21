@@ -1,7 +1,6 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
 import { Sensors } from "@proto/message/input/Sensors";
-import { VSLAM } from "@proto/message/input/VSLAM";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
 import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
@@ -50,7 +49,6 @@ export class LocalisationNetwork {
     this.network.on(Purpose, this.onPurpose);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
-    this.network.on(VSLAM, this.onVSLAM);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -204,9 +202,6 @@ export class LocalisationNetwork {
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Hrw = Matrix4.from(sensors.Hrw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
-    if (sensors.Hwn) {
-      robot.Hwn = Matrix4.from(sensors.Hwn);
-    }
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!;
     robot.motors.rightShoulderRoll.angle = sensors.servo[2].presentPosition!;
@@ -228,14 +223,6 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
-  @action.bound
-  private onVSLAM(robotModel: RobotModel, vslam: message.input.VSLAM) {
-    const robot = LocalisationRobotModel.of(robotModel);
-    // Update Stella map points
-    if (vslam.mapPoints && vslam.mapPoints.length > 0) {
-      robot.vslamMapPoints.rNWn = vslam.mapPoints.map((point) => Vector3.from(point));
-    }
-  }
   @action.bound
   private onWalkState(robotModel: RobotModel, walk_state: WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);

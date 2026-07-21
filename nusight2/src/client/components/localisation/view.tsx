@@ -23,7 +23,6 @@ import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections";
 import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
-import { FieldSpheres } from "./r3f_components/field_spheres";
 import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
@@ -506,7 +505,6 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
       <Nugus model={robot} />
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
-      {model.vslamMapPointsVisible && <FieldSpheres points={robot.rNFf} color={"green"} size={0.015} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}

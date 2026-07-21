@@ -44,35 +44,9 @@
  * matching the FieldLocalisationNLopt.cpp convention, and leaves any "own"/"opposition"
  * labelling to the caller.
  *
- * @section landmark_types Landmark types and counts (default dimensions)
- * NUbots classifies field-line landmarks using
- * message::vision::FieldIntersection::IntersectionType, which has three useful values:
- * L_INTERSECTION, T_INTERSECTION and X_INTERSECTION (plus UNKNOWN, which is not used for map
- * landmarks). Goal posts are not part of that enum in NUbots -- they are tracked separately
- * (own_goal_posts / opp_goal_posts in FieldLocalisationNLopt.cpp) -- so this module adds a
- * fourth #LandmarkType, GOAL_POST, to hold them alongside the field-line landmarks.
- *
- * For the default FieldDimensions given in this file (which match the field this data set was
- * recorded on: field_length = 6.8 m, field_width = 5.0 m, goal_width = 1.95 m,
- * goal_area_length = 1.05 m, goal_area_width = 2.62 m, penalty_area_length = 1.55 m,
- * penalty_area_width = 4.05 m, penalty_mark_distance = 1.27 m,
- * centre_circle_diameter = 1.5 m), replicating setup_field_landmarks() gives:
- *  - L_INTERSECTION: 12 landmarks (4 field corners + 4 penalty-area corners nearest the goal
- *    line + 4 goal-area corners nearest the goal line).
- *  - T_INTERSECTION: 10 landmarks (2 halfway-line/touchline junctions + 4 penalty-area-line/
- *    goal-line junctions + 4 goal-area-line/goal-line junctions).
- *  - X_INTERSECTION: 5 landmarks (the centre-circle/halfway-line centre point, the 2 points
- *    where the centre circle crosses the halfway line, and the 2 penalty marks). NUbots
- *    classifies the penalty marks as X_INTERSECTION landmarks alongside the centre-circle
- *    crossings (FieldLineOccupanyMap.hpp:260-266) -- there is no separate "penalty mark"
- *    landmark type. NUbots' setup_field_landmarks() also re-pushes the centre point
- *    (0, 0, 0) a second time at FieldLineOccupanyMap.hpp:265-266, which is an exact duplicate
- *    of the point already added at FieldLineOccupanyMap.hpp:202-203; this module de-duplicates
- *    that repeated entry (judgement call: a duplicate landmark position carries no extra
- *    information for a localisation map and would only cost extra distance computations).
- *  - GOAL_POST: 4 landmarks (2 posts per goal, 2 goals).
- *
- * Total: 31 landmarks for the default field dimensions.
+ * Landmark types mirror message::vision::FieldIntersection::IntersectionType (L/T/X); GOAL_POST is
+ * added to hold the four goal posts, which NUbots tracks separately. Penalty marks are classified as
+ * X_INTERSECTION, matching setup_field_landmarks() (which the layout in build() otherwise replicates).
  */
 
 #ifndef FIELDMAP_HPP
@@ -91,23 +65,22 @@ namespace utility::slam {
      * NUbots/shared/message/support/FieldDescription.proto (message FieldDescription.FieldDimensions).
      */
     struct FieldDimensions {
-        // These defaults match the field this data set was recorded on; they stand in for unit tests and
-        // offline replay. At runtime, build them from a message::support::FieldDescription via
-        // utility::slam::field_dimensions() (FieldMapFromDescription.hpp), which keeps this struct — and
-        // the estimator core that includes it — free of the message library.
-        double lineWidth            = 0.05;  ///< Width of field lines
-        double fieldLength          = 6.8;   ///< Touchline (sideline) length
-        double fieldWidth           = 5.0;   ///< Goal line (baseline) length
-        double goalDepth            = 0.4;   ///< Distance behind the goal line to the back of the net
-        double goalWidth            = 1.95;  ///< Distance between the inner edges of the goal posts
-        double goalAreaLength       = 1.05;  ///< Goal area (6-yard box) length, from the goal line
-        double goalAreaWidth        = 2.62;  ///< Goal area (6-yard box) width
-        double penaltyMarkDistance  = 1.27;  ///< Distance from the goal line to the penalty mark
-        double centreCircleDiameter = 1.5;   ///< Diameter of the centre circle
-        double penaltyAreaLength    = 1.55;  ///< Penalty area (18-yard box) length, from the goal line
-        double penaltyAreaWidth     = 4.05;  ///< Penalty area (18-yard box) width
-        double goalpostWidth        = 0.10;  ///< Diameter of a (circular) goal post
-        double borderStripMinWidth  = 0.38;  ///< Minimum width of the border strip around the field
+        // Populated from a message::support::FieldDescription via utility::slam::field_dimensions()
+        // (FieldMapFromDescription.hpp), so FieldDescription.yaml is the single source of these values
+        // and the estimator core stays free of the message library.
+        double lineWidth;             ///< Width of field lines
+        double fieldLength;           ///< Touchline (sideline) length
+        double fieldWidth;            ///< Goal line (baseline) length
+        double goalDepth;             ///< Distance behind the goal line to the back of the net
+        double goalWidth;             ///< Distance between the inner edges of the goal posts
+        double goalAreaLength;        ///< Goal area (6-yard box) length, from the goal line
+        double goalAreaWidth;         ///< Goal area (6-yard box) width
+        double penaltyMarkDistance;   ///< Distance from the goal line to the penalty mark
+        double centreCircleDiameter;  ///< Diameter of the centre circle
+        double penaltyAreaLength;     ///< Penalty area (18-yard box) length, from the goal line
+        double penaltyAreaWidth;      ///< Penalty area (18-yard box) width
+        double goalpostWidth;         ///< Diameter of a (circular) goal post
+        double borderStripMinWidth;   ///< Minimum width of the border strip around the field
     };
 
     /**
@@ -124,17 +97,15 @@ namespace utility::slam {
     /**
      * @brief A static map of known field landmark positions in the field frame {f}
      *
-     * See @ref field_frame "the file-level documentation" for the field frame convention and
-     * @ref landmark_types "landmark type documentation" for the landmark layout and counts.
+     * See @ref field_frame "the file-level documentation" for the field frame convention.
      */
     class FieldMap {
     public:
         /**
          * @brief Construct the field map from a set of field dimensions
-         * @param dims Field dimensions to build the landmark map from (defaults to the field this
-         *             data set was recorded on)
+         * @param dims Field dimensions to build the landmark map from (see utility::slam::field_dimensions)
          */
-        explicit FieldMap(const FieldDimensions& dims = {});
+        explicit FieldMap(const FieldDimensions& dims);
 
         /**
          * @brief A painted line segment on the field (centreline coordinates, ground plane)

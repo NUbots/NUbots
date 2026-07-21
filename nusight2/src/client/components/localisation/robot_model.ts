@@ -186,8 +186,6 @@ export class LocalisationRobotModel {
     timestamp: number;
     phase: WalkState_PhaseEnum;
   }[] = [];
-  @observable vslamMapPoints: { rNWn: Vector3[] } = { rNWn: [] };
-  @observable Hwn: Matrix4 = Matrix4.of(); // Add this line to store Hwn transform
 
   constructor({
     model,
@@ -223,8 +221,6 @@ export class LocalisationRobotModel {
     swingFootTrajectory,
     walkPhase,
     trajectoryHistory,
-    vslamMapPoints,
-    Hwn,
   }: {
     model: RobotModel;
     name: string;
@@ -265,8 +261,6 @@ export class LocalisationRobotModel {
       timestamp: number;
       phase: WalkState_PhaseEnum;
     }[];
-    vslamMapPoints: { rNWn: Vector3[] };
-    Hwn: Matrix4;
   }) {
     this.model = model;
     this.name = name;
@@ -301,8 +295,6 @@ export class LocalisationRobotModel {
     this.swingFootTrajectory = swingFootTrajectory;
     this.walkPhase = walkPhase;
     this.trajectoryHistory = trajectoryHistory;
-    this.vslamMapPoints = vslamMapPoints;
-    this.Hwn = Hwn;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -336,8 +328,6 @@ export class LocalisationRobotModel {
       swingFootTrajectory: [],
       walkPhase: WalkState_PhaseEnum.DOUBLE,
       trajectoryHistory: [],
-      vslamMapPoints: { rNWn: [] },
-      Hwn: Matrix4.of(),
     });
   });
 
@@ -409,12 +399,6 @@ export class LocalisationRobotModel {
         position: intersection.position.applyMatrix4(this.Hfw),
       });
     });
-  }
-
-  @computed
-  get rNFf(): Vector3[] {
-    // Transform from VSLAM world frame {n} to field frame {f}
-    return this.vslamMapPoints.rNWn.map((rNWn) => rNWn.applyMatrix4(this.Hwn).applyMatrix4(this.Hfw));
   }
 
   /** Torso trajectory (Hpt) in field space */

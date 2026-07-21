@@ -46,11 +46,8 @@ namespace module::input {
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
                                        const message::behaviour::state::Stability& stability,
-                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
-                                       const std::shared_ptr<const VSLAMMsg>& vslam) {
-        // Use ground truth instead of calculating odometry, then return. Opt-in via config
-        // (use_ground_truth); both webots and hardware default to the real odometry below so webots
-        // mirrors hardware behaviour.
+                                       const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+        // Use ground truth instead of calculating odometry, then return
         if (cfg.use_ground_truth && robot_pose_ground_truth) {
             Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
             if (!ground_truth_initialised) {
@@ -177,23 +174,6 @@ namespace module::input {
         const double x_dot =
             (dt / cfg.x_cut_off_frequency) * x_dot_current + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
         sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
-
-        // ******** VSLAM pose override ********
-        // When a VSLAM pose estimate is available, use it for the world {w} to torso {t} transform in
-        // place of the kinematic odometry above (retained from the burgin/vslam branch).
-        if (!vslam_initialised && vslam) {
-            Hwn          = Eigen::Isometry3d::Identity();
-            Hwn.linear() = Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()).toRotationMatrix()
-                           * Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            vslam_initialised = true;
-            log<INFO>("VSLAM initialized. Hwn translation:", Hwn.translation().transpose());
-        }
-        if (vslam) {
-            const Eigen::Isometry3d Htc = Eigen::Isometry3d(sensors->Htx[FrameID::L_CAMERA]);
-            const Eigen::Isometry3d Hnc = vslam->Hnc;
-            sensors->Htw                = Htc * Hnc.inverse() * Hwn.inverse();
-            sensors->Hwn                = Hwn;
-        }
     }
 
 }  // namespace module::input
