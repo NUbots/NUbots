@@ -13,13 +13,14 @@ namespace utility::slam::measurement {
     }
 
     Eigen::VectorXd MeasurementKinematicHeight::simulate(const Eigen::VectorXd& x,
-                                                         const SystemEstimator& system) const {
+                                                         const SystemEstimator& /*system*/) const {
         Eigen::VectorXd y(1);
         y << x(2);
         return y;
     }
 
-    double MeasurementKinematicHeight::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    double MeasurementKinematicHeight::logLikelihood(const Eigen::VectorXd& x,
+                                                     const SystemEstimator& /*system*/) const {
         const double sigma2 = sigma_ * sigma_;
         const double e      = y_ - x(2);
         return -0.5 * std::log(2.0 * M_PI * sigma2) - 0.5 * e * e / sigma2;

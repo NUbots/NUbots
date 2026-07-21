@@ -202,18 +202,19 @@ namespace utility::slam::measurement {
         return outcomes;
     }
 
-    Eigen::VectorXd MeasurementFieldLandmarks::simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    Eigen::VectorXd MeasurementFieldLandmarks::simulate(const Eigen::VectorXd& x,
+                                                        const SystemEstimator& /*system*/) const {
         // Stack predicted rays (noise-free measurement model)
         Eigen::Matrix<double, 3, Eigen::Dynamic> uPred = predictRays<double>(x);
         return Eigen::Map<Eigen::VectorXd>(uPred.data(), uPred.size());
     }
 
-    double MeasurementFieldLandmarks::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    double MeasurementFieldLandmarks::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
         return logLikelihoodImpl<double>(x);
     }
 
     double MeasurementFieldLandmarks::logLikelihood(const Eigen::VectorXd& x,
-                                                    const SystemEstimator& system,
+                                                    const SystemEstimator& /*system*/,
                                                     Eigen::VectorXd& g) const {
         using autodiff::at;
         using autodiff::dual;
@@ -230,7 +231,7 @@ namespace utility::slam::measurement {
     }
 
     double MeasurementFieldLandmarks::logLikelihood(const Eigen::VectorXd& x,
-                                                    const SystemEstimator& system,
+                                                    const SystemEstimator& /*system*/,
                                                     Eigen::VectorXd& g,
                                                     Eigen::MatrixXd& H) const {
         using autodiff::at;

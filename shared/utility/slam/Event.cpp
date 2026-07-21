@@ -27,8 +27,6 @@
 
 #include "Event.hpp"
 
-#include <string>
-
 #include "system/SystemBase.hpp"
 
 namespace utility::slam {
@@ -43,10 +41,6 @@ namespace utility::slam {
 
         // Event-specific implementation
         update(system);
-    }
-
-    std::string Event::getProcessString() const {
-        return "Processing event:";
     }
 
 }  // namespace utility::slam

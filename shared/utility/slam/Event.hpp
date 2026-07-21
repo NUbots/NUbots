@@ -28,7 +28,6 @@
 #ifndef UTILITY_SLAM_EVENT_HPP
 #define UTILITY_SLAM_EVENT_HPP
 
-#include <string>
 
 #include "system/SystemBase.hpp"
 
@@ -71,15 +70,6 @@ namespace utility::slam {
          * to define the specific behavior of the event.
          */
         virtual void update(SystemBase& system) = 0;
-
-        /**
-         * @brief Get a string representation of the event processing.
-         * @return A string describing the event processing.
-         *
-         * This virtual function can be overridden by derived classes to provide
-         * a custom string representation of the event processing.
-         */
-        virtual std::string getProcessString() const;
 
         double time_;  ///< The time at which the event occurs.
     };

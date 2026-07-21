@@ -372,13 +372,11 @@ namespace utility::slam::camera {
         int height = imageSize.height;
 
         // Horizontal FOV from center to left
-        cv::Vec2d center(width / 2.0, height / 2.0);
         cv::Vec2d left_pixel(0, height / 2.0);
         cv::Vec2d right_pixel(width - 1, height / 2.0);
 
-        cv::Vec3d u_center = pixelToVector(center);
-        cv::Vec3d u_left   = pixelToVector(left_pixel);
-        cv::Vec3d u_right  = pixelToVector(right_pixel);
+        cv::Vec3d u_left  = pixelToVector(left_pixel);
+        cv::Vec3d u_right = pixelToVector(right_pixel);
 
         double angle_left  = std::atan2(u_left[0], u_left[2]);
         double angle_right = std::atan2(u_right[0], u_right[2]);

@@ -40,11 +40,13 @@ namespace utility::slam::system {
         return f;
     }
 
-    Eigen::VectorXd SystemLocalisation::dynamics(double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u) const {
+    Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
+                                                 const Eigen::VectorXd& x,
+                                                 const Eigen::VectorXd& u) const {
         return dynamicsLocalisationTemplated<double>(x, u);
     }
 
-    Eigen::VectorXd SystemLocalisation::dynamics(double t,
+    Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
                                                  const Eigen::VectorXd& x,
                                                  const Eigen::VectorXd& u,
                                                  Eigen::MatrixXd& J) const {
@@ -68,7 +70,7 @@ namespace utility::slam::system {
         return f;
     }
 
-    Eigen::VectorXd SystemLocalisation::input(double t, const Eigen::VectorXd& x) const {
+    Eigen::VectorXd SystemLocalisation::input(double t, const Eigen::VectorXd& /*x*/) const {
         // Zero-order-hold lookup of the body twist at time t (zero outside buffer)
         Eigen::VectorXd u = Eigen::VectorXd::Zero(6);
         if (twistBuffer_ == nullptr || twistBuffer_->empty()) {

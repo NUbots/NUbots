@@ -95,7 +95,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::BFGSTrustSqrt(costFunc, x, g, Xi);
+                [[maybe_unused]] int ret = funcmin::BFGSTrustSqrt(costFunc, x, g, Xi);
                 assert(ret == 0);
                 break;
             }
@@ -106,7 +106,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::BFGSLMSqrt(costFunc, x, g, Xi);
+                [[maybe_unused]] int ret = funcmin::BFGSLMSqrt(costFunc, x, g, Xi);
                 assert(ret == 0);
                 break;
             }
@@ -134,7 +134,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::SR1TrustEig(costFunc, x, g, Q, v);
+                [[maybe_unused]] int ret = funcmin::SR1TrustEig(costFunc, x, g, Q, v);
                 assert(ret == 0);
 
                 // Post-calculate posterior square-root information matrix from Hessian eigendecomposition
@@ -152,7 +152,7 @@ namespace utility::slam::measurement {
                 // Minimise cost
                 Eigen::MatrixXd Q(nx, nx);
                 Eigen::VectorXd v(nx);
-                int ret = funcmin::NewtonTrustEig(costFunc, x, g, Q, v);
+                [[maybe_unused]] int ret = funcmin::NewtonTrustEig(costFunc, x, g, Q, v);
                 assert(ret == 0);
 
                 // Post-calculate posterior square-root information matrix from Hessian eigendecomposition

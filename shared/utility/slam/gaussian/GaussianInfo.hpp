@@ -397,7 +397,7 @@ namespace utility::slam::gaussian {
             const std::size_t& nI    = idx.size();
             const std::size_t& nNotI = idxNot.size();
             const std::size_t n      = nI + nNotI;
-            assert(n == dim());
+            assert(n == static_cast<std::size_t>(dim()));
 
             // Form [Xi(:, idxNot), Xi(:, idx), nu]
             Eigen::MatrixX<Scalar> RR(n, n + 1);
@@ -560,8 +560,8 @@ namespace utility::slam::gaussian {
             Eigen::VectorX<Scalar> muy = h(mux, J);  // Evaluate function at mean value
             const std::size_t m        = J.rows();
             const std::size_t n        = J.cols();
-            assert(m == muy.size());
-            assert(n == dim());
+            assert(m == static_cast<std::size_t>(muy.size()));
+            assert(n == static_cast<std::size_t>(dim()));
 
             // Linearise y = h(x) about x = mux
             // y ~= h(mux) + J*(x - mux)

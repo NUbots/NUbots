@@ -78,17 +78,18 @@ namespace utility::slam::measurement {
                                                  const SystemLocalisation& system)
         : MeasurementFieldLines(time, sample, Tbc, map, system, Options{}) {}
 
-    Eigen::VectorXd MeasurementFieldLines::simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    Eigen::VectorXd MeasurementFieldLines::simulate(const Eigen::VectorXd& /*x*/,
+                                                    const SystemEstimator& /*system*/) const {
         // The "noise-free measurement" is zero distance to the nearest line for every point
         return Eigen::VectorXd::Zero(rays_.cols());
     }
 
-    double MeasurementFieldLines::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    double MeasurementFieldLines::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
         return logLikelihoodImpl<double>(x);
     }
 
     double MeasurementFieldLines::logLikelihood(const Eigen::VectorXd& x,
-                                                const SystemEstimator& system,
+                                                const SystemEstimator& /*system*/,
                                                 Eigen::VectorXd& g) const {
         using autodiff::at;
         using autodiff::dual;
@@ -105,7 +106,7 @@ namespace utility::slam::measurement {
     }
 
     double MeasurementFieldLines::logLikelihood(const Eigen::VectorXd& x,
-                                                const SystemEstimator& system,
+                                                const SystemEstimator& /*system*/,
                                                 Eigen::VectorXd& g,
                                                 Eigen::MatrixXd& H) const {
         using autodiff::at;

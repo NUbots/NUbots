@@ -13,17 +13,17 @@ namespace utility::slam::measurement {
         updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;
     }
 
-    Eigen::VectorXd MeasurementGravity::simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    Eigen::VectorXd MeasurementGravity::simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
         const Eigen::Matrix3d Rfb = rpy2rot(Eigen::Vector3d(x.segment<3>(3)));
         return Rfb.transpose() * Eigen::Vector3d(0, 0, gravity_);
     }
 
-    double MeasurementGravity::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const {
+    double MeasurementGravity::logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
         return logLikelihoodImpl<double>(x);
     }
 
     double MeasurementGravity::logLikelihood(const Eigen::VectorXd& x,
-                                             const SystemEstimator& system,
+                                             const SystemEstimator& /*system*/,
                                              Eigen::VectorXd& g) const {
         using autodiff::at;
         using autodiff::dual;
@@ -40,7 +40,7 @@ namespace utility::slam::measurement {
     }
 
     double MeasurementGravity::logLikelihood(const Eigen::VectorXd& x,
-                                             const SystemEstimator& system,
+                                             const SystemEstimator& /*system*/,
                                              Eigen::VectorXd& g,
                                              Eigen::MatrixXd& H) const {
         using autodiff::at;
