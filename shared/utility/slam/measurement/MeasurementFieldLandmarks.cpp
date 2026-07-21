@@ -22,7 +22,7 @@ namespace utility::slam::measurement {
                                                          const FieldMap& map,
                                                          const SystemLocalisation& system,
                                                          const Options& options)
-        : Measurement(time, 0), map_(map), Tbc_(Tbc), options_(options) {
+        : Measurement(time), map_(map), Tbc_(Tbc), options_(options) {
         // Exact Hessian is cheap for a 6-dim state and yields the exact
         // Laplace-approximation posterior sqrt information
         updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;

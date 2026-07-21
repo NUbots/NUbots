@@ -38,9 +38,6 @@ namespace utility::slam::measurement {
 
     Measurement::Measurement(double time) : Event(time), updateMethod_(UpdateMethod::BFGSTRUSTSQRT) {}
 
-    Measurement::Measurement(double time, int verbosity)
-        : Event(time, verbosity), updateMethod_(UpdateMethod::BFGSTRUSTSQRT) {}
-
     Measurement::~Measurement() = default;
 
     double Measurement::costJointDensity(const Eigen::VectorXd& x, const SystemEstimator& system) const {
@@ -98,7 +95,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::BFGSTrustSqrt(costFunc, x, g, Xi, verbosity_);
+                int ret = funcmin::BFGSTrustSqrt(costFunc, x, g, Xi);
                 assert(ret == 0);
                 break;
             }
@@ -109,7 +106,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::BFGSLMSqrt(costFunc, x, g, Xi, verbosity_);
+                int ret = funcmin::BFGSLMSqrt(costFunc, x, g, Xi);
                 assert(ret == 0);
                 break;
             }
@@ -137,7 +134,7 @@ namespace utility::slam::measurement {
                 };
 
                 // Minimise cost
-                int ret = funcmin::SR1TrustEig(costFunc, x, g, Q, v, verbosity_);
+                int ret = funcmin::SR1TrustEig(costFunc, x, g, Q, v);
                 assert(ret == 0);
 
                 // Post-calculate posterior square-root information matrix from Hessian eigendecomposition
@@ -155,7 +152,7 @@ namespace utility::slam::measurement {
                 // Minimise cost
                 Eigen::MatrixXd Q(nx, nx);
                 Eigen::VectorXd v(nx);
-                int ret = funcmin::NewtonTrustEig(costFunc, x, g, Q, v, verbosity_);
+                int ret = funcmin::NewtonTrustEig(costFunc, x, g, Q, v);
                 assert(ret == 0);
 
                 // Post-calculate posterior square-root information matrix from Hessian eigendecomposition

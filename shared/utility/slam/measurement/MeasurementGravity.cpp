@@ -9,7 +9,7 @@
 namespace utility::slam::measurement {
 
     MeasurementGravity::MeasurementGravity(double time, const Eigen::Vector3d& accelerometer, double sigma)
-        : Measurement(time, 0), y_(accelerometer), sigma_(sigma) {
+        : Measurement(time), y_(accelerometer), sigma_(sigma) {
         updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;
     }
 

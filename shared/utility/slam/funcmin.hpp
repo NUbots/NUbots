@@ -36,6 +36,7 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <limits>
+#include <nuclear>
 
 namespace utility::slam::funcmin {
 
@@ -167,16 +168,10 @@ namespace utility::slam::funcmin {
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] Q Eigenvectors of the Hessian at the optimal solution
      * @param[out] v Eigenvalues of the Hessian at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int NewtonTrustEig(Func costFunc,
-                       Eigen::VectorXd& x,
-                       Eigen::VectorXd& g,
-                       Eigen::MatrixXd& Q,
-                       Eigen::VectorXd& v,
-                       int verbosity = 0) {
+    int NewtonTrustEig(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Q, Eigen::VectorXd& v) {
         typedef double Scalar;
         typedef Eigen::VectorXd Vector;
         typedef Eigen::MatrixXd Matrix;
@@ -197,8 +192,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g, H);
         if (!std::isfinite(f) || !g.allFinite() || !H.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -217,22 +211,13 @@ namespace utility::slam::funcmin {
 
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
-                           i,
-                           f,
-                           LambdaSq,
-                           Delta);
-            ;
-            if (verbosity == 1)
-                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -271,8 +256,7 @@ namespace utility::slam::funcmin {
                 Q = eigenH_.eigenvectors();
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -287,14 +271,13 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int NewtonTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int NewtonTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::MatrixXd Q(x.size(), x.size());
         Eigen::VectorXd v(x.size());
-        int retval = NewtonTrustEig(costFunc, x, g, Q, v, verbosity);
+        int retval = NewtonTrustEig(costFunc, x, g, Q, v);
         H          = Q * v.asDiagonal() * Q.transpose();
         return retval;
     }
@@ -309,13 +292,12 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient and Hessian
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int NewtonTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int NewtonTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return NewtonTrust(costFunc, x, g, H, verbosity);
+        return NewtonTrust(costFunc, x, g, H);
     }
 
     /**
@@ -324,13 +306,12 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient and Hessian
      * @param[in,out] x  Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int NewtonTrust(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int NewtonTrust(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return NewtonTrust(costFunc, x, g, verbosity);
+        return NewtonTrust(costFunc, x, g);
     }
 
     /**
@@ -362,16 +343,10 @@ namespace utility::slam::funcmin {
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] Q Eigenvectors of the Hessian at the optimal solution
      * @param[out] v Eigenvalues of the Hessian at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return int 0 on success, non-zero on failure
      */
     template <typename Func>
-    int SR1TrustEig(Func costFunc,
-                    Eigen::VectorXd& x,
-                    Eigen::VectorXd& g,
-                    Eigen::MatrixXd& Q,
-                    Eigen::VectorXd& v,
-                    int verbosity = 0) {
+    int SR1TrustEig(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Q, Eigen::VectorXd& v) {
         typedef double Scalar;
         typedef Eigen::VectorXd Vector;
         typedef Eigen::MatrixXd Matrix;
@@ -391,8 +366,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g);
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -409,23 +383,14 @@ namespace utility::slam::funcmin {
 
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
-                           i,
-                           f,
-                           LambdaSq,
-                           Delta);
-            ;
-            if (verbosity == 1)
-                fmt::print(".");
 
             const Scalar LambdaSqThreshold =
                 std::sqrt(std::numeric_limits<Scalar>::epsilon());  // Loose convergence tolerance
             // const Scalar LambdaSqThreshold = 2*std::numeric_limits<Scalar>::epsilon();              // Tight
             // convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold && v(0) > 0.0) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -480,8 +445,7 @@ namespace utility::slam::funcmin {
                 }
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -496,16 +460,15 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int SR1Trust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int SR1Trust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::MatrixXd Q(x.size(), x.size());
         Eigen::VectorXd v(x.size());
         Q.setIdentity();
         v.fill(1.0);
-        int retval = SR1TrustEig(costFunc, x, g, Q, v, verbosity);
+        int retval = SR1TrustEig(costFunc, x, g, Q, v);
         H          = Q * v.asDiagonal() * Q.transpose();
         return retval;
     }
@@ -520,13 +483,12 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int SR1Trust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int SR1Trust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return SR1Trust(costFunc, x, g, H, verbosity);
+        return SR1Trust(costFunc, x, g, H);
     }
 
     /**
@@ -538,13 +500,12 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int SR1Trust(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int SR1Trust(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return SR1Trust(costFunc, x, g, verbosity);
+        return SR1Trust(costFunc, x, g);
     }
 
     /**
@@ -559,11 +520,10 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[in,out] Xi Square-root of the Hessian matrix (upper triangular)
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrustSqrt(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Xi, int verbosity = 0) {
+    int BFGSTrustSqrt(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Xi) {
         typedef double Scalar;
         typedef Eigen::VectorXd Vector;
         typedef Eigen::MatrixXd Matrix;
@@ -580,8 +540,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g);
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");  // initial means
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -596,22 +555,13 @@ namespace utility::slam::funcmin {
 
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
-                           i,
-                           f,
-                           LambdaSq,
-                           Delta);
-            ;
-            if (verbosity == 1)
-                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -665,8 +615,7 @@ namespace utility::slam::funcmin {
                 }
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -681,14 +630,13 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int BFGSTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::MatrixXd Xi(x.size(), x.size());
         Xi.setIdentity();
-        int retval = BFGSTrustSqrt(costFunc, x, g, Xi, verbosity);
+        int retval = BFGSTrustSqrt(costFunc, x, g, Xi);
         H          = Xi.transpose() * Xi;
         return retval;
     }
@@ -703,13 +651,12 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int BFGSTrust(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return BFGSTrust(costFunc, x, g, H, verbosity);
+        return BFGSTrust(costFunc, x, g, H);
     }
 
     /**
@@ -721,13 +668,12 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrust(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int BFGSTrust(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return BFGSTrust(costFunc, x, g, verbosity);
+        return BFGSTrust(costFunc, x, g);
     }
 
     /**
@@ -745,7 +691,6 @@ namespace utility::slam::funcmin {
      * @param[out] g Gradient vector at the optimal solution
      * @param[in,out] Xi Sparse square-root of the Hessian matrix (upper triangular)
      * @param[in,out] Pi Permutation matrix for column pivoting to reduce fill-in
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      *
      * @note This variant is particularly efficient for large-scale optimization problems where
@@ -756,8 +701,7 @@ namespace utility::slam::funcmin {
                             Eigen::VectorXd& x,
                             Eigen::VectorXd& g,
                             Eigen::SparseMatrix<double>& Xi,
-                            Eigen::PermutationMatrix<Eigen::Dynamic>& Pi,
-                            int verbosity = 0) {
+                            Eigen::PermutationMatrix<Eigen::Dynamic>& Pi) {
         typedef double Scalar;
         typedef Eigen::VectorXd Vector;
         // typedef Eigen::MatrixXd Matrix;
@@ -774,8 +718,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g);
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -794,22 +737,13 @@ namespace utility::slam::funcmin {
 
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
-                           i,
-                           f,
-                           LambdaSq,
-                           Delta);
-            ;
-            if (verbosity == 1)
-                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -886,8 +820,7 @@ namespace utility::slam::funcmin {
                 }
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -904,7 +837,6 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      *
      * @note This variant uses sparse matrix operations internally but returns a dense Hessian matrix.
@@ -912,12 +844,12 @@ namespace utility::slam::funcmin {
      *       during optimization but a dense result is desired.
      */
     template <typename Func>
-    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::SparseMatrix<double> Xi(x.size(), x.size());
         Xi.setIdentity();
         Eigen::PermutationMatrix<Eigen::Dynamic> Pi(x.size());
         Pi.setIdentity();
-        int retval = BFGSTrustSqrtSparse(costFunc, x, g, Xi, Pi, verbosity);
+        int retval = BFGSTrustSqrtSparse(costFunc, x, g, Xi, Pi);
         H          = Pi * (Xi.transpose() * Xi) * Pi.transpose();
         return retval;
     }
@@ -933,16 +865,15 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      *
      * @note This variant is optimized for large-scale problems where memory usage is a concern
      *       and the final Hessian matrix is not needed.
      */
     template <typename Func>
-    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return BFGSTrustSparse(costFunc, x, g, H, verbosity);
+        return BFGSTrustSparse(costFunc, x, g, H);
     }
 
     /**
@@ -956,16 +887,15 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      *
      * @note This is the most memory-efficient variant, suitable for large-scale optimization
      *       problems where only the optimal solution is needed.
      */
     template <typename Func>
-    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int BFGSTrustSparse(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return BFGSTrustSparse(costFunc, x, g, verbosity);
+        return BFGSTrustSparse(costFunc, x, g);
     }
 
     /**
@@ -980,11 +910,10 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[in,out] S Square-root of the inverse Hessian matrix (upper triangular)
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrustSqrtInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& S, int verbosity = 0) {
+    int BFGSTrustSqrtInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& S) {
         typedef double Scalar;
         typedef Eigen::VectorXd Vector;
         typedef Eigen::MatrixXd Matrix;
@@ -1001,8 +930,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g);
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -1018,22 +946,13 @@ namespace utility::slam::funcmin {
 
             Scalar pg       = p.dot(g);
             Scalar LambdaSq = -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*inv(S.'*S)*p
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Delta = {:10.2e}\n",
-                           i,
-                           f,
-                           LambdaSq,
-                           Delta);
-            ;
-            if (verbosity == 1)
-                fmt::print(".");
 
             // const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();  // Tight convergence tolerance
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -1086,8 +1005,7 @@ namespace utility::slam::funcmin {
                 }
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -1103,14 +1021,13 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::MatrixXd S(x.size(), x.size());
         S.setIdentity();
-        int retval = BFGSTrustSqrtInv(costFunc, x, g, S, verbosity);
+        int retval = BFGSTrustSqrtInv(costFunc, x, g, S);
         Eigen::MatrixXd Xi =
             S.triangularView<Eigen::Upper>().transpose().solve(Eigen::MatrixXd::Identity(x.size(), x.size()));
         Eigen::HouseholderQR<Eigen::Ref<Eigen::MatrixXd>> qr(Xi);  // In-place QR decomposition
@@ -1129,13 +1046,12 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return BFGSTrustInv(costFunc, x, g, H, verbosity);
+        return BFGSTrustInv(costFunc, x, g, H);
     }
 
     /**
@@ -1147,13 +1063,12 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int BFGSTrustInv(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return BFGSTrustInv(costFunc, x, g, verbosity);
+        return BFGSTrustInv(costFunc, x, g);
     }
 
     /**
@@ -1168,11 +1083,10 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[in,out] Xi Square-root of the Hessian matrix (upper triangular)
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSLMSqrt(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Xi, int verbosity = 0) {
+    int BFGSLMSqrt(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& Xi) {
         typedef double Scalar;
         typedef Eigen::VectorX<Scalar> Vector;
         typedef Eigen::MatrixX<Scalar> Matrix;
@@ -1189,8 +1103,7 @@ namespace utility::slam::funcmin {
         Scalar f = costFunc(x, g);
         if (!std::isfinite(f) || !g.allFinite())  // if any nan, -inf or +inf
         {
-            if (verbosity > 1)
-                fmt::print("ERROR: Initial point is not in domain of cost function\n");
+            NUClear::log<NUClear::LogLevel::WARN>("Initial point is not in domain of cost function");
             return -1;
         }
 
@@ -1230,22 +1143,14 @@ namespace utility::slam::funcmin {
             Scalar NewtonDecrSq =
                 -pg;  // The Newton decrement squared is g.'*inv(H)*g = p.'*H*p = p.'*Xi.'*Xi*p if p is the Newton step
             // Scalar NewtonDecrSq = z.squaredNorm();
-            if (verbosity == 3)
-                fmt::print("Iter = {:5}, Cost = {:10.2e}, Newton decr^2 = {:10.2e}, Lambda = {:10.2e}\n",
-                           i,
-                           f,
-                           NewtonDecrSq,
-                           lambda);
-            if (verbosity == 1)
-                fmt::print(".");
 
             // const Scalar NewtonDecrSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());     // Loose
             // convergence tolerance const Scalar NewtonDecrSqThreshold = 2*std::numeric_limits<Scalar>::epsilon(); //
             // Tight convergence tolerance
             const Scalar NewtonDecrSqThreshold = 1e3 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(NewtonDecrSq) < NewtonDecrSqThreshold) {
-                if (verbosity >= 2)
-                    fmt::print("CONVERGED: Newton decrement below threshold in {} iterations\n", i);
+                NUClear::log<NUClear::LogLevel::DEBUG>(
+                    fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
 
@@ -1299,8 +1204,7 @@ namespace utility::slam::funcmin {
                 }
             }
         }
-        if (verbosity > 1)
-            fmt::print("WARNING: maximum number of iterations reached\n");
+        NUClear::log<NUClear::LogLevel::WARN>("Maximum number of iterations reached");
         return 1;
     }
 
@@ -1315,14 +1219,13 @@ namespace utility::slam::funcmin {
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
      * @param[out] H Hessian matrix at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSLM(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H, int verbosity = 0) {
+    int BFGSLM(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, Eigen::MatrixXd& H) {
         Eigen::MatrixXd Xi(x.size(), x.size());
         Xi.setIdentity();
-        int retval = BFGSLMSqrt(costFunc, x, g, Xi, verbosity);
+        int retval = BFGSLMSqrt(costFunc, x, g, Xi);
         H          = Xi.transpose() * Xi;
         return retval;
     }
@@ -1337,13 +1240,12 @@ namespace utility::slam::funcmin {
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
      * @param[out] g Gradient vector at the optimal solution
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSLM(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g, int verbosity = 0) {
+    int BFGSLM(Func costFunc, Eigen::VectorXd& x, Eigen::VectorXd& g) {
         Eigen::MatrixXd H(x.size(), x.size());
-        return BFGSLM(costFunc, x, g, H, verbosity);
+        return BFGSLM(costFunc, x, g, H);
     }
 
     /**
@@ -1355,13 +1257,12 @@ namespace utility::slam::funcmin {
      * @tparam Func Type of the cost function
      * @param costFunc Cost function that returns f(x) and computes gradient
      * @param[in,out] x Initial guess on input, optimal solution on output
-     * @param verbosity Verbosity level (0: silent, 1: dots, 2: summary, 3: iteration details)
      * @return 0 on success, non-zero on failure
      */
     template <typename Func>
-    int BFGSLM(Func costFunc, Eigen::VectorXd& x, int verbosity = 0) {
+    int BFGSLM(Func costFunc, Eigen::VectorXd& x) {
         Eigen::VectorXd g(x.size());
-        return BFGSLM(costFunc, x, g, verbosity);
+        return BFGSLM(costFunc, x, g);
     }
 
 

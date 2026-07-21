@@ -19,7 +19,7 @@ namespace utility::slam::measurement {
                                                  const FieldMap& map,
                                                  const SystemLocalisation& system,
                                                  const Options& options)
-        : Measurement(time, 0), map_(map), Tbc_(Tbc), options_(options) {
+        : Measurement(time), map_(map), Tbc_(Tbc), options_(options) {
         updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;
 
         // Select usable rays at the prior mean: downward-looking with a bounded

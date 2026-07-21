@@ -7,7 +7,7 @@
 
 namespace utility::slam::measurement {
     MeasurementKinematicHeight::MeasurementKinematicHeight(double time, double height, double sigma)
-        : Measurement(time, 0), y_(height), sigma_(sigma) {
+        : Measurement(time), y_(height), sigma_(sigma) {
         // Linear-Gaussian in the state: closed-form quadratic log-likelihood
         updateMethod_ = UpdateMethod::NEWTONTRUSTEIG;
     }

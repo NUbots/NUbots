@@ -27,33 +27,22 @@
 
 #include "Event.hpp"
 
-#include <fmt/format.h>
 #include <string>
 
 #include "system/SystemBase.hpp"
 
 namespace utility::slam {
 
-    Event::Event(double time) : time_(time), verbosity_(1) {}
-
-    Event::Event(double time, int verbosity) : time_(time), verbosity_(verbosity) {}
+    Event::Event(double time) : time_(time) {}
 
     Event::~Event() = default;
 
     void Event::process(SystemBase& system) {
-        if (verbosity_ > 0) {
-            fmt::print("[t={:07.3f}s] {}", time_, getProcessString());
-        }
-
         // Time update
         system.predict(time_);
 
         // Event-specific implementation
         update(system);
-
-        if (verbosity_ > 0) {
-            fmt::print(" done\n");
-        }
     }
 
     std::string Event::getProcessString() const {

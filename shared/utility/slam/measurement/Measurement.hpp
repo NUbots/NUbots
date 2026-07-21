@@ -55,13 +55,6 @@ namespace utility::slam::measurement {
         Measurement(double time);
 
         /**
-         * @brief Construct a new Measurement object.
-         * @param time The time at which the measurement occurs.
-         * @param verbosity The verbosity level for logging and output.
-         */
-        Measurement(double time, int verbosity);
-
-        /**
          * @brief Destroy the Measurement object.
          */
         virtual ~Measurement() override;

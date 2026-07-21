@@ -52,13 +52,6 @@ namespace utility::slam {
         Event(double time);
 
         /**
-         * @brief Construct a new Event object.
-         * @param time The time at which the event occurs.
-         * @param verbosity The verbosity level for the event.
-         */
-        Event(double time, int verbosity);
-
-        /**
          * @brief Destroy the Event object.
          */
         virtual ~Event();
@@ -88,8 +81,7 @@ namespace utility::slam {
          */
         virtual std::string getProcessString() const;
 
-        double time_;    ///< The time at which the event occurs.
-        int verbosity_;  ///< Verbosity level
+        double time_;  ///< The time at which the event occurs.
     };
 
 }  // namespace utility::slam
