@@ -37,6 +37,7 @@
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/AvoidRobot.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -59,8 +60,7 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::StandStill;
-
-    using message::strategy::StandStill;
+    using message::strategy::AvoidRobot;
 
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -122,11 +122,13 @@ namespace module::planning {
             stability = new_stability;
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>, Needs<WalkProposal>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;
+
+                log<INFO>("Planning Walking");
 
                 // Decompose the target pose into position and orientation
                 Eigen::Vector2d rDRr = Hrd.translation().head(2);
@@ -260,8 +262,14 @@ namespace module::planning {
         });
 
         // Intercept Walk commands and apply smoothing
-        on<Provide<WalkProposal>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this](const WalkProposal&
-                                                                                                        walk) {
+        on<Provide<WalkProposal>, Uses<AvoidRobot>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then(
+            [this](const WalkProposal& walk, const Uses<AvoidRobot>& avoid) {
+            // If the avoidance provider is currently running, do not override its WalkProposal
+            // This prevents the periodic planner from stealing control when AvoidRobot is active.
+            if (avoid.run_state == RunState::RUNNING) {
+                return;
+            }
+
             // Apply exponential smoothing to the walk command
             Eigen::Vector3d smoothed_command =
                 walk.velocity_target.cwiseProduct(cfg.alpha) + previous_walk_command.cwiseProduct(cfg.one_minus_alpha);
