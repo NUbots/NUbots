@@ -50,8 +50,7 @@ namespace module::vision {
             }
 
             // Create output image for drawing features
-            cv::Mat imgout   = img_rgb.clone();
-            double timestamp = NUClear::clock::now().time_since_epoch().count() / 1e9;
+            cv::Mat imgout = img_rgb.clone();
             std::vector<cv::KeyPoint> keypoints;  // Store keypoints computed by FAST detector.
             cv::Ptr<cv::FastFeatureDetector> detector =
                 cv::FastFeatureDetector::create(65, true, cv::FastFeatureDetector::TYPE_9_16);
