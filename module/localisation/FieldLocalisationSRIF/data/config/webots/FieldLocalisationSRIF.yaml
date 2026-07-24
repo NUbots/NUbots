@@ -1,0 +1,7 @@
+# Webots overrides (merged over data/config/FieldLocalisationSRIF.yaml)
+#
+# Webots mirrors the hardware sensor pipeline: the accelerometer and gyroscope are decoded to physical
+# units (m/s^2, rad/s) via the same NUgus.proto lookup table (see Webots.cpp), and SensorFilter runs the
+# real Mahony/anchor odometry (use_ground_truth: false). So there is no sensor difference to override
+# here - the base config applies unchanged.
+log_level: DEBUG

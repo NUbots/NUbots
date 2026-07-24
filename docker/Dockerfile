@@ -391,6 +391,16 @@ RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 # Nanopb for generating messages for NUSense
 RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
 
+# autodiff
+RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v1.1.2.tar.gz \
+    -DAUTODIFF_BUILD_PYTHON=OFF \
+    -DAUTODIFF_BUILD_TESTS=OFF \
+    -DAUTODIFF_BUILD_EXAMPLES=OFF \
+    -DAUTODIFF_BUILD_DOCS=OFF
+
+# Boost, for the incomplete gamma function and reproducible random number generation in utility::slam::gaussian
+RUN install-package boost boost-libs
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

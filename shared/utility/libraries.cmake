@@ -1,6 +1,9 @@
 find_package(Eigen3 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
 
+find_package(OpenCV REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${OpenCV_LIBRARIES})
+
 find_package(yaml-cpp REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC yaml-cpp)
 
