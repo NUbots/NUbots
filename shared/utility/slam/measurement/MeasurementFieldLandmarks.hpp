@@ -151,6 +151,20 @@ namespace utility::slam::measurement {
         /// @brief Association outcome of every usable detection (for the visualiser).
         std::vector<DetectionOutcome> detectionOutcomes() const;
 
+        /**
+         * @brief Re-associate the detections against the system's current pose.
+         *
+         * Used by the hypothesis bank so each mixture component is scored against
+         * the landmark assignment implied by its OWN pose. The 180 deg field mirror
+         * is the case that matters: re-associated at its own pose it fits the
+         * mirror-partner landmarks exactly as well as the true pose fits the
+         * originals, so on-field evidence leaves the two equally weighted (the
+         * asymmetry that separates them comes from the out-of-field map instead).
+         */
+        void reassociate(const SystemEstimator& system) override {
+            assocKeys_ = associate(system.density.mean(), system.density.cov());
+        }
+
     protected:
         /**
          * @brief MAP update with iterated re-association (cf. iterative landmark matching).

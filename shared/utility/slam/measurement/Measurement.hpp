@@ -112,6 +112,16 @@ namespace utility::slam::measurement {
             return logEvidence_;
         }
 
+        /**
+         * @brief Re-run data association against the system's current density.
+         *
+         * No-op by default. The multi-hypothesis path calls this once per mixture
+         * component (with the density set to that component) so a pose-dependent
+         * association is recomputed for each hypothesis rather than shared from the
+         * representative. Measurements with no data association ignore it.
+         */
+        virtual void reassociate(const SystemEstimator& /*system*/) {}
+
     protected:
         /**
          * @brief Calculate the cost of the joint density.

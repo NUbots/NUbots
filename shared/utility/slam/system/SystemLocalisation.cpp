@@ -180,6 +180,13 @@ namespace utility::slam::system {
         assert(newDensity.dim() == nx);
         density = newDensity;
         time_   = time;
+        // A reset asserts a single known belief, so it collapses any mixture -- the
+        // old components describe a state we are declaring void (init, injected
+        // kidnap). Recovery of the alternative, if needed, is re-seeded afterwards
+        // (initialiseHypotheses at startup, or spawnMirror on out-of-field doubt).
+        components_.clear();
+        logWeights_.clear();
+        lastRepMean_ = Eigen::VectorXd();
     }
 
     GaussianInfo<double> SystemLocalisation::positionDensity() const {
@@ -231,6 +238,7 @@ namespace utility::slam::system {
         components_.push_back(density);
         components_.push_back(mirrorDensity(density));
         logWeights_.assign(components_.size(), 0.0);  // Equal weights
+        lastRepMean_ = Eigen::VectorXd();             // Fresh: representative is the seeded primary (index 0)
         setRepresentative();
     }
 
@@ -246,6 +254,31 @@ namespace utility::slam::system {
         logWeights_.push_back(logWeights_[best]);
         normaliseWeights();
         pruneComponents();
+        setRepresentative();
+    }
+
+    void SystemLocalisation::addSideLogEvidence(double logRatio) {
+        if (components_.size() < 2 || !std::isfinite(logRatio)) {
+            return;  // Nothing to disambiguate, or no usable evidence this frame
+        }
+        // Favour the representative -- the pose SideDisambiguator scored as "own" --
+        // by logRatio. It is the component matching the current density, which under
+        // a near-tie is the hysteresis pick, NOT necessarily the max-weight one, so
+        // match on the mean rather than taking an argmax. With the usual own+mirror
+        // pair this is a shift of the pair; normaliseWeights keeps them summing to one.
+        const Eigen::VectorXd rep = density.mean();
+        std::size_t repIdx        = 0;
+        double bestDist           = std::numeric_limits<double>::infinity();
+        for (std::size_t i = 0; i < components_.size(); ++i) {
+            const double d = (components_[i].mean() - rep).norm();
+            if (d < bestDist) {
+                bestDist = d;
+                repIdx   = i;
+            }
+        }
+        logWeights_[repIdx] += logRatio;
+        normaliseWeights();
+        pruneComponents();  // A decisive ratio drops the mirror below minWeight
         setRepresentative();
     }
 
@@ -373,8 +406,33 @@ namespace utility::slam::system {
     void SystemLocalisation::setRepresentative() {
         if (components_.empty())
             return;
-        std::size_t best = std::distance(logWeights_.begin(), std::max_element(logWeights_.begin(), logWeights_.end()));
-        density          = components_[best];
+        const double maxLW = *std::max_element(logWeights_.begin(), logWeights_.end());
+
+        // Hysteresis on a near-tie: the two symmetric hypotheses sit at 50/50 on
+        // landmark evidence alone and are numerically indistinguishable, so a plain
+        // argmax would swap the reported pose between a side and its mirror on
+        // floating-point noise. Among components within kTieEps of the top weight,
+        // keep the one nearest the outgoing representative; a decisive lead
+        // (out-of-field evidence) exceeds kTieEps and switches cleanly.
+        constexpr double kTieEps = 0.5;  ///< Weight lead [nats] needed to unseat the incumbent
+        std::size_t best         = 0;
+        if (lastRepMean_.size() == nx) {
+            double bestDist = std::numeric_limits<double>::infinity();
+            for (std::size_t i = 0; i < components_.size(); ++i) {
+                if (logWeights_[i] >= maxLW - kTieEps) {
+                    const double d = (components_[i].mean() - lastRepMean_).norm();
+                    if (d < bestDist) {
+                        bestDist = d;
+                        best     = i;
+                    }
+                }
+            }
+        }
+        else {
+            best = std::distance(logWeights_.begin(), std::max_element(logWeights_.begin(), logWeights_.end()));
+        }
+        density      = components_[best];
+        lastRepMean_ = density.mean();
     }
 
     void SystemLocalisation::process(Event& event) {
@@ -393,6 +451,14 @@ namespace utility::slam::system {
         for (std::size_t i = 0; i < components_.size(); ++i) {
             time_   = t0;
             density = components_[i];
+            // Re-run any pose-dependent data association against THIS component
+            // before the update, so a hypothesis is scored on its own assignment
+            // rather than the representative's (no-op for measurements without
+            // association). The single-hypothesis path above never calls this, so
+            // its behaviour is byte-for-byte unchanged.
+            if (meas != nullptr) {
+                meas->reassociate(*this);
+            }
             event.process(*this);
             components_[i] = density;
             if (meas) {
@@ -409,5 +475,13 @@ namespace utility::slam::system {
         pruneComponents();
         respawnIfUnconfident();
         setRepresentative();
+
+        // Leave the measurement's stored association matching the representative, so
+        // downstream diagnostics (numAssociated, the residual overlays) reflect the
+        // pose actually reported rather than whichever component happened to be
+        // processed last.
+        if (meas != nullptr) {
+            meas->reassociate(*this);
+        }
     }
 }  // namespace utility::slam::system

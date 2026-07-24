@@ -248,9 +248,13 @@ namespace utility::slam {
             std::size_t nCandidates       = 0;        ///< Live bearing candidates
             double scoreOwn               = 0.0;      ///< Robust side score at the current pose [nats]
             double scoreMirror            = 0.0;      ///< Robust side score at the mirrored pose [nats]
-            double llr                    = 0.0;      ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
-            bool mapFrozen                = false;    ///< Map building was frozen this frame
-            bool flipRequested            = false;    ///< The evidence says the filter is on the wrong side
+            double sideDelta              = 0.0;      ///< Clamped, turn-gated own-minus-mirror increment this frame
+                                                      ///< [nats]; 0 on an unscored frame. This is the per-frame
+                                                      ///< evidence to fold into a hypothesis bank (SystemLocalisation::
+                                                      ///< addSideLogEvidence) -- the same quantity that drives the LLR.
+            double llr         = 0.0;                 ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
+            bool mapFrozen     = false;               ///< Map building was frozen this frame
+            bool flipRequested = false;               ///< The evidence says the filter is on the wrong side
             std::vector<OutOfFieldFeature> features;  ///< The detected corners (for display)
             std::vector<int> featureStatus;           ///< Per detected corner: a FeatureStatus
             std::vector<LandmarkView> landmarkViews;  ///< Map landmarks projected into the image at the current pose

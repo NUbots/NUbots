@@ -147,6 +147,11 @@ namespace utility::slam::system {
 
         /**
          * @brief Reset the state density and system clock (initialisation / relocalisation).
+         *
+         * A reset asserts a single known belief, so it also collapses any active
+         * hypothesis mixture. Seed the bank afterwards (initialiseHypotheses) if the
+         * new belief is still symmetry-ambiguous.
+         *
          * @param density New state density
          * @param time New system time [s]
          */
@@ -204,6 +209,25 @@ namespace utility::slam::system {
         void spawnMirror();
 
         /**
+         * @brief Fold one frame of out-of-field side evidence into the mixture weights.
+         *
+         * On-field landmarks cannot separate the two symmetric hypotheses (they fit
+         * their respective mirror-partner landmarks equally well), so the mixture
+         * would sit at 50/50 forever on landmark evidence alone. The asymmetric
+         * background scenery is what breaks it: @p logRatio is the per-frame
+         * log-likelihood ratio favouring the representative pose over its 180 deg
+         * mirror (SideDisambiguator's clamped own-minus-mirror score, FrameResult::
+         * sideDelta). It is added to the representative component's log-weight, so a
+         * sustained positive ratio collapses the mirror and a negative one hands
+         * leadership to it.
+         *
+         * No-op unless at least two hypotheses are live (nothing to disambiguate).
+         *
+         * @param logRatio Log-likelihood ratio own-vs-mirror for this frame [nats]
+         */
+        void addSideLogEvidence(double logRatio);
+
+        /**
          * @brief Process an event across every active hypothesis.
          *
          * For each component the shared system clock is rewound and the event is
@@ -257,12 +281,13 @@ namespace utility::slam::system {
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)
         std::vector<double> logWeights_;                ///< Unnormalised log weights per component
+        Eigen::VectorXd lastRepMean_;                   ///< Outgoing representative mean (setRepresentative hysteresis)
 
         void normaliseWeights();      ///< Renormalise logWeights_ (subtract log-sum-exp)
         void mergeComponents();       ///< Merge components within the merge gate (keep-best)
         void pruneComponents();       ///< Drop low-weight components; cap to maxComponents
         void respawnIfUnconfident();  ///< Respawn a mirror if collapsed to one uncertain component
-        void setRepresentative();     ///< Set `density` to the maximum-weight component
+        void setRepresentative();     ///< Set `density` to the maximum-weight component (tie-broken by hysteresis)
     };
 
 }  // namespace utility::slam::system

@@ -5,7 +5,11 @@ log_level: INFO
 own_half_x_sign: 1.0
 
 # Multi-hypothesis (field-symmetry) Gaussian mixture bank. Off keeps a single Gaussian.
-# Note: This cannot resolve the symmetry problem.
+# Note: This cannot resolve the symmetry problem. On-field landmarks fit a pose and its 180 deg
+# mirror equally well (each component is now scored on its OWN association), so the pair sits at a
+# genuine 50/50 and the reported pose stays with the bootstrapped hypothesis. Breaking the tie needs
+# asymmetric off-field evidence fed in via SystemLocalisation::addSideLogEvidence, which this module
+# does not yet source (see utility::slam::SideDisambiguator).
 use_hypothesis_bank: false
 
 # Feed Sensors.gyroscope into the body-twist angular velocity. Sensors.gyroscope is a calibrated rad/s

@@ -257,7 +257,9 @@ namespace utility::slam::measurement {
 
         // Iterated re-association (cf. iterative landmark matching): optimise with
         // the current association, then re-associate at the posterior mean; if the
-        // association set changed, restore the prior and re-run.
+        // association set changed, restore the prior and re-run. The starting
+        // association is whatever was set for this density: the constructor's (single
+        // hypothesis) or reassociate()'s (each mixture component, see process()).
         for (int iteration = 0; iteration < maxAssociationIterations_; ++iteration) {
             if (uMeas_.cols() == 0) {
                 system.density = prior;  // Nothing associated; leave the prior untouched
