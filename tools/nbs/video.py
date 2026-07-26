@@ -40,10 +40,18 @@ from tqdm import tqdm
 from utility.nbs import LinearDecoder
 
 from .images import decode_image
+from .images.fourcc import fourcc_to_string
 from .images.video_recorder import Recorder
 
 # Configure TensorFlow to use CPU only for multiprocessing compatibility
 tf.config.set_visible_devices([], "GPU")
+
+# The message types each --source option reads.
+source_types = {
+    "compressed": ["message.output.CompressedImage"],
+    "raw": ["message.input.Image"],
+    "both": ["message.output.CompressedImage", "message.input.Image"],
+}
 
 
 def register(command):
@@ -65,6 +73,13 @@ def register(command):
         action="store_true",
         help="Write absolute unix timecodes (seconds) instead of relative millisecond timecodes",
     )
+    command.add_argument(
+        "--source",
+        "-s",
+        default="compressed",
+        choices=sorted(source_types.keys()),
+        help="Which images to make the videos from. Either compressed, raw or both.",
+    )
 
 
 def init_worker():
@@ -73,7 +88,7 @@ def init_worker():
 
 
 def process_frame(item):
-    data = decode_image(item["data"], item["format"])
+    data = decode_image(item["data"], item["format"], item["dimensions"])
 
     return {
         "timestamp": item["timestamp"],
@@ -86,18 +101,17 @@ def process_frame(item):
 
 def packetise_stream(decoder):
     for packet in decoder:
-        # Check for compressed images
-        if packet.type.name in ("message.output.CompressedImage", "message.input.Image"):
-            # Get some useful info into a pickleable format
-            yield {
-                "camera_name": packet.msg.name,
-                "timestamp": (packet.msg.timestamp.seconds, packet.msg.timestamp.nanos),
-                "data": packet.msg.data,
-                "format": packet.msg.format,
-            }
+        # Get some useful info into a pickleable format
+        yield {
+            "camera_name": packet.msg.name,
+            "timestamp": (packet.msg.timestamp.seconds, packet.msg.timestamp.nanos),
+            "data": packet.msg.data,
+            "format": packet.msg.format,
+            "dimensions": (packet.msg.dimensions.x, packet.msg.dimensions.y),
+        }
 
 
-def run(files, output, encoder, quality, unix, **kwargs):
+def run(files, output, encoder, quality, unix, source, **kwargs):
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
@@ -105,11 +119,20 @@ def run(files, output, encoder, quality, unix, **kwargs):
     with multiprocessing.Pool(multiprocessing.cpu_count(), initializer=init_worker) as pool:
 
         def record_frame(msg):
-            # If we haven't seen this camera before, make a new encoder for it
             for frame in msg["data"]:
-                if frame["name"] not in recorders:
-                    recorders[frame["name"]] = Recorder(
-                        os.path.join(output, "{}.mp4".format(frame["name"])),
+                # A recorder is locked to one pixel format, so each format a camera provides needs its own video
+                key = (frame["name"], frame["fourcc"])
+
+                # If we haven't seen this camera before, make a new encoder for it
+                if key not in recorders:
+                    # Only tell the videos apart by format when we are actually reading more than one of them
+                    name = (
+                        "{}_{}".format(frame["name"], fourcc_to_string(frame["fourcc"]).strip())
+                        if source == "both"
+                        else frame["name"]
+                    )
+                    recorders[key] = Recorder(
+                        os.path.join(output, "{}.mp4".format(name)),
                         tf.shape(frame["image"]),
                         frame["fourcc"],
                         encoder,
@@ -118,12 +141,12 @@ def run(files, output, encoder, quality, unix, **kwargs):
                     )
 
                 # Push the next packet
-                recorders[frame["name"]].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
+                recorders[key].encode({"timestamp": msg["timestamp"], "image": frame["image"]})
 
         results = []
         for msg in packetise_stream(
             tqdm(
-                LinearDecoder(*files, show_progress=True),
+                LinearDecoder(*files, types=source_types[source], show_progress=True),
                 unit="packet",
                 unit_scale=True,
                 dynamic_ncols=True,
