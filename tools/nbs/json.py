@@ -41,12 +41,12 @@ def register(command):
     command.add_argument(
         "--no-zeros",
         action="store_true",
-        default=True,
         help="Don't include fields whose value is zero in the JSON output (includes zeros by default)",
     )
 
 
-def run(files, keep_zeros, **kwargs):
+def run(files, no_zeros, **kwargs):
+    keep_zeros = not no_zeros
     for packet in LinearDecoder(*resolve_nbs_paths(files)):
         out = re.sub(r"\s+", " ", MessageToJson(packet.msg, always_print_fields_with_no_presence=keep_zeros))
         out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(packet.type.name, packet.emit_timestamp, out)
