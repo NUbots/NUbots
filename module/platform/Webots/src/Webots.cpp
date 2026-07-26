@@ -314,15 +314,15 @@ namespace module::platform {
             // Compute Hpc, the transform from the camera to the head pitch space
             auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
             auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    std::string("left_camera"),
-                                                                    std::string("head"));
+                                                                            nugus_model.home_configuration(),
+                                                                            std::string("left_camera"),
+                                                                            std::string("head"));
 
             // Apply roll and pitch offsets
             double roll_offset  = config["roll_offset"].as<Expression>();
             double pitch_offset = config["pitch_offset"].as<Expression>();
             context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
+                                  * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
@@ -502,6 +502,9 @@ namespace module::platform {
             send_io.unbind();
             error_io.unbind();
             buffer.clear();
+
+            // We may be reconnecting to a different simulation, so re-anchor simulation time on the next measurement
+            sim_start_time_known = false;
 
             if (fd != -1) {
                 // Disconnect the fd gracefully
@@ -716,9 +719,28 @@ namespace module::platform {
             current_real_time = 0;
             clock_window.clear();
 
+            // The simulation clock restarted, so our anchor to the NUClear clock is no longer valid
+            sim_start_time_known = false;
+
             // Reset the local raw sensors buffer
             emit(std::make_unique<ResetWebotsServos>());
         }
+
+        // Webots counts from the start of the simulation rather than from the unix epoch, so anchor simulation time
+        // zero to the NUClear clock. Without this every timestamp we take from Webots lands in 1970, which puts them
+        // on a different epoch to the messages we timestamp with NUClear::clock::now()
+        if (!sim_start_time_known) {
+            sim_start_time       = NUClear::clock::now() - std::chrono::milliseconds(sensor_measurements.time);
+            sim_start_time_known = true;
+        }
+
+        // The simulation time of this measurement, on the same epoch as the rest of the system
+        const NUClear::clock::time_point timestamp =
+            sim_start_time + std::chrono::milliseconds(sensor_measurements.time);
+
+        // Save our previous deltas
+        const uint32_t prev_sim_delta  = sim_delta;
+        const uint64_t prev_real_delta = real_delta;
 
         // Update our current deltas
         real_delta = sensor_measurements.real_time - current_real_time;
@@ -856,7 +878,7 @@ namespace module::platform {
             // Read each field of msg, translate it to our protobuf and emit the data
             auto sensor_data = std::make_unique<RawSensors>();
 
-            sensor_data->timestamp = NUClear::clock::time_point(std::chrono::milliseconds(sensor_measurements.time));
+            sensor_data->timestamp = timestamp;
 
             for (const auto& position : sensor_measurements.position_sensors) {
                 auto& servo            = translate_servo_id(position.name, sensor_data->servo);
@@ -930,7 +952,7 @@ namespace module::platform {
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::milliseconds(sensor_measurements.time));
+            image->timestamp = timestamp;
 
             Eigen::Isometry3d Hcw;
 

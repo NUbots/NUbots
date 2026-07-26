@@ -81,6 +81,14 @@ namespace module::platform {
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time{};
 
+        /// @brief The NUClear::clock time that a Webots simulation time of zero corresponds to.
+        /// Webots reports its time as milliseconds since the simulation started, which is a different epoch to
+        /// NUClear::clock. Timestamps we put on messages must be offset by this so that they share an epoch with
+        /// the rest of the system, otherwise they end up sitting at the start of 1970.
+        NUClear::clock::time_point sim_start_time{};
+        /// @brief False until sim_start_time has been anchored for the current simulation run
+        bool sim_start_time_known = false;
+
         /// @brief The number of time ticks which have passed since the last IO::READ trigger
         uint32_t sim_delta = 0;
         /// @brief The number of milliseconds which have passed since the last IO::READ trigger
