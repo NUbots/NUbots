@@ -58,9 +58,23 @@ namespace utility::slam::measurement {
         struct Options {
             double sigmaAngular =
                 0.25;  ///< Inlier ray angular noise std dev [rad] (total per-frame error incl. systematic)
-            double gateAngle         = 0.35;  ///< Max association residual angle [rad] (~20 deg)
-            double minConfidence     = 0.5;   ///< Reject detections below this confidence outright
-            double inlierProbability = 0.7;   ///< Inlier mixture weight at confidenceReference
+            double gateAngle = 0.35;  ///< Max association residual angle [rad] (~20 deg)
+
+            // The pre-gate above is a hard geometric cap, so on its own it also caps
+            // what the filter can ever recover from: a getup that leaves the robot
+            // yawed by more than gateAngle puts every predicted bearing outside it,
+            // and no amount of covariance inflation helps, because the pre-gate does
+            // not look at the covariance. Widening it with the yaw uncertainty is what
+            // makes an inflated belief actually able to re-associate. The surprisal
+            // score still decides what associates -- this only stops the cheap
+            // geometric filter from throwing the candidates away first. Normal
+            // operation is unaffected: it takes sigma_yaw > gateAngle/gateYawScale
+            // (10 deg at these defaults) before the widened gate exceeds gateAngle.
+            double gateYawScale = 2.0;  ///< Pre-gate widens to this many yaw std devs
+            double gateAngleMax = 1.0;  ///< Ceiling on the widened pre-gate [rad] (~57 deg)
+
+            double minConfidence     = 0.5;  ///< Reject detections below this confidence outright
+            double inlierProbability = 0.7;  ///< Inlier mixture weight at confidenceReference
 
             // YOLO confidence is (roughly) the probability that a box is a true
             // positive, which is exactly what the inlier weight of the robust

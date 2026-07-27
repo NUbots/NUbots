@@ -9,6 +9,7 @@
 
 #include "../rotation.hpp"
 #include "../system/SystemEstimator.hpp"
+#include "../system/SystemLocalisation.hpp"
 #include "Measurement.hpp"
 
 /**
@@ -59,8 +60,8 @@ namespace utility::slam::measurement {
 
     template <typename Scalar>
     Scalar MeasurementGravity::logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
-        const Eigen::VectorX<Scalar> Theta = x.segment(3, 3);
-        const Eigen::Matrix3<Scalar> Rfb   = rpy2rot(Theta);
+        const Eigen::Vector4<Scalar> q   = x.segment(utility::slam::system::SystemLocalisation::iQuat, 4);
+        const Eigen::Matrix3<Scalar> Rfb = quat2rot(q);
 
         Eigen::Vector3<Scalar> gf(Scalar(0), Scalar(0), Scalar(gravity_));
         Eigen::Vector3<Scalar> yhat = Rfb.transpose() * gf;

@@ -89,9 +89,14 @@ namespace module::localisation {
             filter::SystemLocalisation::HypothesisParameters hypothesis{};
             /// @brief Landmark measurement noise/association options
             filter::MeasurementFieldLandmarks::Options measurement{};
-            /// @brief Initial sqrt-covariance diagonal for the 8-dim state after the grid solve
-            Eigen::Matrix<double, 8, 1> initial_sqrt_covariance =
-                (Eigen::Matrix<double, 8, 1>() << 1.0, 1.0, 0.05, 0.05, 0.05, 0.5, 0.02, 0.02).finished();
+            /// @brief Initial sqrt-covariance diagonal for the 9-dim state after the grid solve.
+            ///
+            /// Indices 3..6 are the attitude quaternion's components, not roll/pitch/yaw. A
+            /// tangent-space std of s becomes a component std of s/2 (see
+            /// SystemLocalisation::quaternionSigma), so the 0.5 rad of initial yaw doubt the old
+            /// layout carried at index 5 is 0.25 spread across the four components here.
+            Eigen::Matrix<double, 9, 1> initial_sqrt_covariance =
+                (Eigen::Matrix<double, 9, 1>() << 1.0, 1.0, 0.05, 0.25, 0.25, 0.25, 0.25, 0.02, 0.02).finished();
             /// @brief Sign of field-x for the starting half (from game context; breaks the field symmetry)
             double own_half_x_sign = 1.0;
             /// @brief Grid search steps for the initial pose solve
@@ -116,10 +121,34 @@ namespace module::localisation {
             bool use_gravity = true;
             /// @brief Accelerometer gravity-direction noise std dev [m/s^2]
             double gravity_sigma = 1.0;
+            /// @brief How far the specific-force magnitude may sit from standard gravity and still
+            ///        be treated as a gravity reading [m/s^2].
+            ///
+            /// The accelerometer measures gravity whenever the torso is not being accelerated,
+            /// which is true of a robot lying still on the carpet and false of one in free fall or
+            /// hitting the ground -- a property of the specific force, not of the posture, so this
+            /// is the condition rather than "is the robot upright". Loose on purpose: ordinary gait
+            /// swings the magnitude by a couple of m/s^2 and the model already carries
+            /// gravity_sigma of noise.
+            double gravity_quasi_static_tolerance = 3.0;
             /// @brief Enable the kinematic torso-height measurement
             bool use_kinematic_height = true;
             /// @brief Kinematic torso-height noise std dev [m]
             double height_sigma = 0.02;
+            /// @brief Std dev on the |q| = 1 pseudo-measurement (dimensionless)
+            double quaternion_norm_sigma = 1e-3;
+
+            // --- fall handling ---
+            /// @brief How long into a fall the disturbed process PSDs apply [s].
+            ///
+            /// A fall is a bounded event. Running the disturbed PSDs for its whole duration models
+            /// a robot lying still as a random walk, so the belief would report how long it had
+            /// been down rather than how far it could have gone.
+            double disturbed_window = 2.0;
+            /// @brief Horizontal position std restored on recovering from a fall [m]
+            double recovery_pos_std = 0.5;
+            /// @brief Yaw std restored on recovering from a fall [rad]
+            double recovery_yaw_std = 0.6;
             /// @brief Maximum odometry sample spacing to finite-difference across [s]
             double max_odometry_gap = 0.1;
             /// @brief Length of the rolling odometry window used to build the twist buffer [s]
@@ -143,6 +172,15 @@ namespace module::localisation {
         std::unique_ptr<filter::FieldMap> map;
         /// @brief Whether the estimator has been initialised from a landmark frame
         bool initialised = false;
+
+        /// @brief Whether the robot was upright on the previous vision frame.
+        ///
+        /// Recovery fires on the transition back to upright, not merely on "the last frame was
+        /// not upright": measurement updates keep running while fallen, so the latter would
+        /// re-inflate the belief on every frame of the fall.
+        bool was_upright = true;
+        /// @brief Time the current non-upright episode began [s since t0]
+        double fall_start_t = 0.0;
 
         /// @brief Seconds since the module time origin t0
         [[nodiscard]] double seconds(const NUClear::clock::time_point& tp) const {
@@ -179,13 +217,13 @@ namespace module::localisation {
          * @param sample Landmark rays extracted from the vision messages
          * @param Tbc Camera pose w.r.t. torso at capture time
          * @param Twt Torso pose in the odometry world frame at capture time
-         * @param eta0 Output: initial 8-dim state estimate
+         * @param eta0 Output: initial 9-dim state estimate (attitude as a quaternion)
          * @return True if enough landmarks associated to trust the solve
          */
         [[nodiscard]] bool solve_initial_pose(const filter::VisionSample& sample,
                                               const filter::Pose<double>& Tbc,
                                               const filter::Pose<double>& Twt,
-                                              Eigen::Matrix<double, 8, 1>& eta0) const;
+                                              Eigen::Matrix<double, 9, 1>& eta0) const;
     };
 
 }  // namespace module::localisation

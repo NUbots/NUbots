@@ -14,14 +14,14 @@
 
 namespace utility::slam {
 
-    SideDisambiguator::SideDisambiguator(const FisheyeLens& lens, const FieldDimensions& dims, const Options& opts)
+    SideDisambiguator::SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims, const Options& opts)
         : options(opts)
         , lens_(lens)
         , detector_(lens, dims)
         , halfCarpetLength_(dims.fieldLength / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , halfCarpetWidth_(dims.fieldWidth / 2 + dims.borderStripMinWidth + opts.fieldMargin) {}
 
-    SideDisambiguator::SideDisambiguator(const FisheyeLens& lens, const FieldDimensions& dims)
+    SideDisambiguator::SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims)
         : SideDisambiguator(lens, dims, Options{}) {}
 
     bool SideDisambiguator::isBackgroundPoint(const Eigen::Vector3d& rPFf) const {
@@ -160,7 +160,7 @@ namespace utility::slam {
 
             const Eigen::Vector3d uFf = rel / range;
             const Eigen::Vector3d uCc = Rcf * uFf;
-            if (!FisheyeLens::inFrontOfCamera(uCc))
+            if (!CameraLens::inFrontOfCamera(uCc))
                 continue;
             const Eigen::Vector2d px = lens_.project(uCc);
             if (!lens_.inImage(px))
@@ -438,7 +438,8 @@ namespace utility::slam {
                                                               const Pose<double>& TfcMirror,
                                                               double posStd,
                                                               double yawStd,
-                                                              double yawRateAbs) {
+                                                              double yawRateAbs,
+                                                              double heading) {
         FrameResult res;
 
         res.features                                   = detector_.detect(gray, Tfc);
@@ -567,14 +568,46 @@ namespace utility::slam {
                 flipStreak_--;  // Still in doubt, frame unqualifying: leak, don't reset
             }
 
+            // Remember where the robot was pointing the last time the map actually
+            // confirmed the own side. That is the reference the turn gate below
+            // measures against, so it deliberately needs a healthy match rather than
+            // any match at all: during a turn the association count decays through
+            // small non-zero values, and taking the last of those as the reference
+            // would measure the turn from halfway through it.
+            const bool ownConfirmed =
+                visOwn > 0
+                && res.nAssociated >= std::max(
+                       options.blindMatchMinAssoc,
+                       static_cast<std::size_t>(std::ceil(options.blindMatchFraction * static_cast<double>(visOwn))));
+            if (ownConfirmed) {
+                headingAtOwnMatch_ = heading;
+                haveOwnMatch_      = true;
+            }
+
+            // Net heading change since then. A flip asserts a 180 deg discontinuity;
+            // if the robot has already turned by about that much under its own
+            // gyroscope, the mirror-looking view is what the turn predicts and the
+            // out-of-field evidence cannot separate the two (see Options).
+            const double turn  = haveOwnMatch_ ? std::remainder(heading - headingAtOwnMatch_, 2.0 * M_PI) : 0.0;
+            res.turnSinceMatch = turn;
+            const bool turnExplainsMirror =
+                haveOwnMatch_ && std::abs(std::abs(turn) - M_PI) < options.blindTurnTolerance;
+
             // Blind-own escape (see Options): near-clamp LLR, own essentially
             // blind, mirror matching real structure. Same leak/reset semantics.
-            if (llr_ <= -options.flipBlindLlr && res.nAssociated <= options.flipBlindOwnMax
-                && res.nAssociatedMirror
-                       >= std::max(options.flipBlindMinAssoc,
-                                   static_cast<std::size_t>(
-                                       std::ceil(options.flipDominance * static_cast<double>(res.nAssociated))))) {
+            if (llr_ <= -options.flipBlindLlr && visOwn >= options.flipBlindMinVisibleOwn
+                && res.nAssociated <= options.flipBlindOwnMax
+                && res.nAssociatedMirror >= std::max(options.flipBlindMinAssoc,
+                                                     static_cast<std::size_t>(std::ceil(
+                                                         options.flipDominance * static_cast<double>(res.nAssociated))))
+                && !turnExplainsMirror) {
                 blindStreak_++;
+            }
+            else if (llr_ <= -options.flipBlindLlr && (turnExplainsMirror || visOwn < options.flipBlindMinVisibleOwn)) {
+                // Refused because the comparison is not a comparison: hold the streak
+                // rather than leaking it, so a robot that turns back to mapped
+                // territory neither flips nor re-earns the evidence from scratch.
+                res.blindTurnBlocked = true;
             }
             else if (llr_ > -options.flipThreshold) {
                 blindStreak_ = 0;

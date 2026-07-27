@@ -202,6 +202,121 @@ namespace utility::slam {
     }
 
     /**
+     * @brief Rotation matrix from a quaternion (w, x, y, z).
+     *
+     * The quaternion is normalised inside, which is what makes every geometric model
+     * built on this function invariant to |q|. That invariance is deliberate: it
+     * confines the redundant fourth degree of freedom to a direction no bearing,
+     * gravity or height measurement can see, so it cannot corrupt the attitude
+     * estimate. MeasurementQuaternionNorm is what supplies information along it, and
+     * without that the MAP Hessian would be singular there.
+     *
+     * @tparam Derived The derived type of the input Eigen expression.
+     * @param q Quaternion (w, x, y, z); need not be unit length.
+     * @return The 3x3 rotation matrix Rfb.
+     */
+    template <typename Derived>
+    Eigen::Matrix3<typename Derived::Scalar> quat2rot(const Eigen::MatrixBase<Derived>& q) {
+        using Scalar = typename Derived::Scalar;
+        using std::sqrt;
+
+        const Scalar n = sqrt(q(0) * q(0) + q(1) * q(1) + q(2) * q(2) + q(3) * q(3));
+        const Scalar w = q(0) / n;
+        const Scalar x = q(1) / n;
+        const Scalar y = q(2) / n;
+        const Scalar z = q(3) / n;
+
+        Eigen::Matrix3<Scalar> R;
+        R(0, 0) = Scalar(1) - Scalar(2) * (y * y + z * z);
+        R(0, 1) = Scalar(2) * (x * y - z * w);
+        R(0, 2) = Scalar(2) * (x * z + y * w);
+        R(1, 0) = Scalar(2) * (x * y + z * w);
+        R(1, 1) = Scalar(1) - Scalar(2) * (x * x + z * z);
+        R(1, 2) = Scalar(2) * (y * z - x * w);
+        R(2, 0) = Scalar(2) * (x * z - y * w);
+        R(2, 1) = Scalar(2) * (y * z + x * w);
+        R(2, 2) = Scalar(1) - Scalar(2) * (x * x + y * y);
+        return R;
+    }
+
+    /**
+     * @brief Quaternion kinematics matrix: qdot = 0.5*quatXi(q)*omega_body.
+     *
+     * Follows from qdot = 0.5*q (x) (0, omega_b), the body-rate form matching
+     * Rdot = R*hatSO3(omega_b) for R = quat2rot(q). Unlike the roll-pitch-yaw rate
+     * transform TK() it has no singularity: every entry is linear in q, so a robot
+     * toppling through pitch = +-90 deg is an ordinary point on the trajectory.
+     *
+     * @tparam Derived The derived type of the input Eigen expression.
+     * @param q Quaternion (w, x, y, z).
+     * @return The 4x3 kinematics matrix Xi(q).
+     */
+    template <typename Derived>
+    Eigen::Matrix<typename Derived::Scalar, 4, 3> quatXi(const Eigen::MatrixBase<Derived>& q) {
+        using Scalar    = typename Derived::Scalar;
+        const Scalar& w = q(0);
+        const Scalar& x = q(1);
+        const Scalar& y = q(2);
+        const Scalar& z = q(3);
+
+        // clang-format off
+        Eigen::Matrix<Scalar, 4, 3> Xi;
+        Xi << -x, -y, -z,
+               w, -z,  y,
+               z,  w, -x,
+              -y,  x,  w;
+        // clang-format on
+        return Xi;
+    }
+
+    /**
+     * @brief Hamilton product of two (w, x, y, z) quaternions.
+     *
+     * @param a Left quaternion (w, x, y, z).
+     * @param b Right quaternion (w, x, y, z).
+     * @return The product a (x) b.
+     */
+    template <typename DerivedA, typename DerivedB>
+    Eigen::Vector4<typename DerivedA::Scalar> quatMultiply(const Eigen::MatrixBase<DerivedA>& a,
+                                                           const Eigen::MatrixBase<DerivedB>& b) {
+        using Scalar = typename DerivedA::Scalar;
+        Eigen::Vector4<Scalar> c;
+        c(0) = a(0) * b(0) - a(1) * b(1) - a(2) * b(2) - a(3) * b(3);
+        c(1) = a(0) * b(1) + a(1) * b(0) + a(2) * b(3) - a(3) * b(2);
+        c(2) = a(0) * b(2) - a(1) * b(3) + a(2) * b(0) + a(3) * b(1);
+        c(3) = a(0) * b(3) + a(1) * b(2) - a(2) * b(1) + a(3) * b(0);
+        return c;
+    }
+
+    /**
+     * @brief Quaternion (w, x, y, z) from a rotation matrix.
+     *
+     * @param R A 3x3 rotation matrix.
+     * @return The unit quaternion (w, x, y, z) with w >= 0.
+     */
+    inline Eigen::Vector4d rot2quat(const Eigen::Matrix3d& R) {
+        const Eigen::Quaterniond q(R);
+        // Eigen stores (x, y, z, w); the sign is free, so pick w >= 0 for a canonical
+        // representative -- q and -q are the same rotation, and letting the mean drift
+        // between the two hemispheres would make a Gaussian over the components meaningless.
+        Eigen::Vector4d v(q.w(), q.x(), q.y(), q.z());
+        if (v(0) < 0.0) {
+            v = -v;
+        }
+        return v.normalized();
+    }
+
+    /**
+     * @brief Quaternion (w, x, y, z) from roll-pitch-yaw angles.
+     *
+     * @param Theta Vector containing [roll, pitch, yaw] angles in radians.
+     * @return The unit quaternion (w, x, y, z) with w >= 0.
+     */
+    inline Eigen::Vector4d rpy2quat(const Eigen::Vector3d& Theta) {
+        return rot2quat(rpy2rot(Theta));
+    }
+
+    /**
      * @brief Computes the kinematic transformation matrix T(theta).
      *
      * The transformation relates body-frame angular velocities to Euler angle rates.

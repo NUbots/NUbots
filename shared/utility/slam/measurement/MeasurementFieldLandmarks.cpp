@@ -103,9 +103,18 @@ namespace utility::slam::measurement {
         // Pose uncertainty inflating each predicted bearing. Bearings are compared in
         // {f}: the tangent-plane geometry and the yaw term are both natural there.
         const Eigen::Matrix3d Ppos = P.topLeftCorner<3, 3>();
-        const double yawVar        = P(5, 5);
-        const double sigma2        = options_.sigmaAngular * options_.sigmaAngular;
-        const double cosGate       = std::cos(options_.gateAngle);
+        // Yaw is no longer a state element -- the attitude is a quaternion, so the
+        // heading variance is a projection of its 4x4 block onto the field z axis.
+        const double yawVar = SystemLocalisation::yawVariance(x, P);
+        const double sigma2 = options_.sigmaAngular * options_.sigmaAngular;
+        // Pre-gate widened by the yaw uncertainty (see Options::gateYawScale): a
+        // no-op while the belief is tight, and the only thing that lets a recovering
+        // filter re-associate after a fall has turned the robot further than the
+        // nominal gate.
+        const double gateAngle =
+            std::min(std::max(options_.gateAngle, options_.gateYawScale * std::sqrt(std::max(yawVar, 0.0))),
+                     options_.gateAngleMax);
+        const double cosGate = std::cos(gateAngle);
 
         // SNN: enumerate all (detection, landmark) pairs of matching type inside the
         // geometric pre-gate, score each by its surprisal relative to the clutter

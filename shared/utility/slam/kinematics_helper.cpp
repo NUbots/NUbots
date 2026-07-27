@@ -7,16 +7,10 @@
 
 namespace utility::slam {
 
-    using std::sin, std::cos, std::tan;
-
+    // Forwards to the templated version so the pitch singularity is guarded in one
+    // place; a second copy of the formula would only be a second place to forget it.
     Eigen::Matrix3d TKfromTheta(const Eigen::VectorXd& Theta) {
-        const double phi   = Theta(0);
-        const double theta = Theta(1);
-
-        Eigen::Matrix3d TK;
-        TK << 1, sin(phi) * tan(theta), cos(phi) * tan(theta), 0, cos(phi), -sin(phi), 0, sin(phi) / cos(theta),
-            cos(phi) / cos(theta);
-        return TK;
+        return TKfromThetaTemplated<double>(Theta);
     }
 
     Eigen::MatrixXd JKfromEta(const Eigen::VectorXd& eta) {

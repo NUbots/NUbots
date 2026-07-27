@@ -46,12 +46,12 @@
 
 #include "FieldMap.hpp"
 #include "OutOfFieldFeatures.hpp"
-#include "camera/FisheyeLens.hpp"
+#include "camera/CameraLens.hpp"
 #include "camera/Pose.hpp"
 
 namespace utility::slam {
 
-    using utility::slam::camera::FisheyeLens;
+    using utility::slam::camera::CameraLens;
     using utility::slam::camera::Pose;
 
     class SideDisambiguator {
@@ -167,8 +167,40 @@ namespace utility::slam {
             std::size_t flipBlindOwnMax   = 1;     ///< ... with at most this many own-side associations
             std::size_t flipBlindMinAssoc = 2;     ///< ... and at least this many mirror-side associations
             int flipBlindConsecutive      = 40;    ///< ... over this many (leaky) scored frames
-            double flipCooldown           = 5.0;   ///< Freeze map building for this long after a flip [s], so the
-                                                   ///< estimator can re-converge before new observations are trusted
+
+            // The escape's premise is that a pose staring at unmapped territory while
+            // the mirror matches must BE the mirror. That is only sound if the robot
+            // has not simply turned to face somewhere it never mapped. Against a
+            // background that is itself 180 deg symmetric -- the webots stadium, both
+            // ends alike -- turning around in place and being mirrored produce the
+            // SAME observation, exactly, and the escape resolves the tie towards
+            // "mirrored" by construction. It did so on data4_webots at t = 65.8 s
+            // after the robot physically turned 164.6 deg, flipping a pose that was
+            // correct to 2 cm and costing the rest of the run.
+            //
+            // The escape therefore requires that the own hypothesis PREDICTS something
+            // and fails to match it. A hypothesis that predicts nothing cannot be
+            // contradicted by anything: visOwn == 0 says the map does not cover where
+            // own is looking, which is what happens every time the robot turns to face
+            // new scenery, and says nothing whatever about which side it is on.
+            // Scoring it as mirror evidence is the reasoning error.
+            //
+            // A net-180 deg turn gate is kept as a second line: after a turn the map
+            // may still predict a handful of landmarks near the edge of view, and a
+            // turn of about half a revolution is precisely the motion that makes a
+            // symmetric background look mirrored. The odometry knows about that turn
+            // and a flip asserts a 180 deg jump contradicting it, so "no decision" is
+            // the honest answer. A kidnapped robot is carried, not turned under its own
+            // gyroscope, so a genuine displacement still gets through; the fair path
+            // above is untouched either way.
+            std::size_t flipBlindMinVisibleOwn = 1;           ///< Own must predict at least this many landmarks in view
+            double blindTurnTolerance = 60.0 * M_PI / 180.0;  ///< Refuse the escape within this of a 180 deg net
+                                                              ///< turn [rad]
+            std::size_t blindMatchMinAssoc = 10;              ///< Own counts as confirmed at this many associations ...
+            double blindMatchFraction      = 0.1;  ///< ... and at least this fraction of its predicted-visible
+
+            double flipCooldown = 5.0;  ///< Freeze map building for this long after a flip [s], so the
+                                        ///< estimator can re-converge before new observations are trusted
         };
 
         /**
@@ -237,24 +269,27 @@ namespace utility::slam {
          * @brief Per-frame result: association counts, side scores and the decision state.
          */
         struct FrameResult {
-            std::size_t nFeatures         = 0;        ///< Detected corners
-            std::size_t nOutOfField       = 0;        ///< ... classified out-of-field
-            std::size_t nAssociated       = 0;        ///< ... associated to map landmarks at the current pose
-            std::size_t nAssociatedMirror = 0;        ///< ... associated at the mirrored pose
-            std::size_t nOutlier          = 0;        ///< ... gated to a landmark but rejected (under either pose)
-            std::size_t nVisibleOwn       = 0;        ///< Landmarks predicted well inside the image at the current pose
-            std::size_t nVisibleMirror    = 0;        ///< ... at the mirrored pose
-            std::size_t nLandmarks        = 0;        ///< Live map landmarks
-            std::size_t nCandidates       = 0;        ///< Live bearing candidates
-            double scoreOwn               = 0.0;      ///< Robust side score at the current pose [nats]
-            double scoreMirror            = 0.0;      ///< Robust side score at the mirrored pose [nats]
-            double sideDelta              = 0.0;      ///< Clamped, turn-gated own-minus-mirror increment this frame
-                                                      ///< [nats]; 0 on an unscored frame. This is the per-frame
-                                                      ///< evidence to fold into a hypothesis bank (SystemLocalisation::
-                                                      ///< addSideLogEvidence) -- the same quantity that drives the LLR.
-            double llr         = 0.0;                 ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
-            bool mapFrozen     = false;               ///< Map building was frozen this frame
-            bool flipRequested = false;               ///< The evidence says the filter is on the wrong side
+            std::size_t nFeatures         = 0;    ///< Detected corners
+            std::size_t nOutOfField       = 0;    ///< ... classified out-of-field
+            std::size_t nAssociated       = 0;    ///< ... associated to map landmarks at the current pose
+            std::size_t nAssociatedMirror = 0;    ///< ... associated at the mirrored pose
+            std::size_t nOutlier          = 0;    ///< ... gated to a landmark but rejected (under either pose)
+            std::size_t nVisibleOwn       = 0;    ///< Landmarks predicted well inside the image at the current pose
+            std::size_t nVisibleMirror    = 0;    ///< ... at the mirrored pose
+            std::size_t nLandmarks        = 0;    ///< Live map landmarks
+            std::size_t nCandidates       = 0;    ///< Live bearing candidates
+            double scoreOwn               = 0.0;  ///< Robust side score at the current pose [nats]
+            double scoreMirror            = 0.0;  ///< Robust side score at the mirrored pose [nats]
+            double sideDelta              = 0.0;  ///< Clamped, turn-gated own-minus-mirror increment this frame
+                                                  ///< [nats]; 0 on an unscored frame. This is the per-frame
+                                                  ///< evidence to fold into a hypothesis bank (SystemLocalisation::
+                                                  ///< addSideLogEvidence) -- the same quantity that drives the LLR.
+            double llr            = 0.0;          ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
+            bool mapFrozen        = false;        ///< Map building was frozen this frame
+            bool flipRequested    = false;        ///< The evidence says the filter is on the wrong side
+            double turnSinceMatch = 0.0;          ///< Net heading change since the own side was last confirmed [rad]
+            bool blindTurnBlocked = false;        ///< The blind escape was refused because that turn explains
+                                                  ///< the view
             std::vector<OutOfFieldFeature> features;  ///< The detected corners (for display)
             std::vector<int> featureStatus;           ///< Per detected corner: a FeatureStatus
             std::vector<LandmarkView> landmarkViews;  ///< Map landmarks projected into the image at the current pose
@@ -266,10 +301,10 @@ namespace utility::slam {
          * @param dims Field dimensions (carpet extent)
          * @param options Tuning options
          */
-        SideDisambiguator(const FisheyeLens& lens, const FieldDimensions& dims, const Options& options);
+        SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims, const Options& options);
 
         /// @brief Construct with default options.
-        SideDisambiguator(const FisheyeLens& lens, const FieldDimensions& dims);
+        SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims);
 
         /**
          * @brief Process one video frame.
@@ -280,6 +315,7 @@ namespace utility::slam {
          * @param posStd Horizontal position std of the filter [m] (map-building gate)
          * @param yawStd Yaw std of the filter [rad] (association gating)
          * @param yawRateAbs Magnitude of the current yaw rate [rad/s] (turn gating)
+         * @param heading Estimated torso yaw in {f} [rad] (for the blind-escape turn gate)
          * @return Association/score/decision summary for this frame
          */
         FrameResult process(double t,
@@ -288,7 +324,8 @@ namespace utility::slam {
                             const Pose<double>& TfcMirror,
                             double posStd,
                             double yawStd,
-                            double yawRateAbs);
+                            double yawRateAbs,
+                            double heading);
 
         /**
          * @brief Notify that the filter state was mirrored (flip applied or kidnap injected).
@@ -414,7 +451,7 @@ namespace utility::slam {
                               double t,
                               std::vector<char>& featureGrewTrack);
 
-        const FisheyeLens& lens_;
+        const CameraLens& lens_;
         OutOfFieldDetector detector_;
         double halfCarpetLength_;  ///< Field half-length + border strip + margin [m]
         double halfCarpetWidth_;   ///< Field half-width + border strip + margin [m]
@@ -422,12 +459,14 @@ namespace utility::slam {
         std::vector<Landmark> landmarks_;
         std::vector<Candidate> candidates_;
 
-        double llr_            = 0.0;    ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
-        int flipStreak_        = 0;      ///< Consecutive scored frames at/below the flip threshold
-        int blindStreak_       = 0;      ///< Leaky streak for the blind-own flip escape
-        bool doubt_            = false;  ///< Latched after deep doubt; cleared only by positive evidence
-        double mapFreezeUntil_ = -std::numeric_limits<double>::infinity();  ///< Post-flip map-building freeze [s]
-        Stats stats_;                                                       ///< Map-building funnel diagnostics
+        double llr_               = 0.0;    ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
+        int flipStreak_           = 0;      ///< Consecutive scored frames at/below the flip threshold
+        int blindStreak_          = 0;      ///< Leaky streak for the blind-own flip escape
+        bool doubt_               = false;  ///< Latched after deep doubt; cleared only by positive evidence
+        double headingAtOwnMatch_ = 0.0;    ///< Heading when the map last confirmed the own side [rad]
+        bool haveOwnMatch_        = false;  ///< Whether headingAtOwnMatch_ has been set
+        double mapFreezeUntil_    = -std::numeric_limits<double>::infinity();  ///< Post-flip map-building freeze [s]
+        Stats stats_;                                                          ///< Map-building funnel diagnostics
     };
 }  // namespace utility::slam
 

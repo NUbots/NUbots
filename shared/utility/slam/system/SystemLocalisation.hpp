@@ -45,9 +45,9 @@ namespace utility::slam::system {
      * State contains the 6-DOF torso pose in the field frame {f} plus a 2-DOF
      * camera-mount attitude bias:
      *
-     *     [ rBFf    ] Torso position in field frame (3)
-     * x = [ Thetafb ] Torso orientation RPY angles (3), Rfb = rpy2rot(Thetafb)
-     *     [ deltaC  ] Camera mount attitude bias (roll, pitch) about the camera axes (2)
+     *     [ rBFf   ] Torso position in field frame (3)
+     * x = [ q      ] Torso orientation quaternion (w, x, y, z), Rfb = quat2rot(q)
+     *     [ deltaC ] Camera mount attitude bias (roll, pitch) about the camera axes (2)
      *
      * Field frame {f}: origin at centre of field on the ground plane, z up,
      * consistent with the NUbots Hfw convention.
@@ -67,7 +67,7 @@ namespace utility::slam::system {
      *
      *   deta/dt = JK(eta) * nu(t) + dw,   ddeltaC/dt = dw_c
      *
-     * where JK(eta) = blkdiag(Rfb, TK(Theta)) transports the body twist to
+     * where JK(eta) = blkdiag(Rfb, 0.5*Xi(q)) transports the body twist to
      * field-frame pose rates.
      */
     class SystemLocalisation : public SystemEstimator {
@@ -83,13 +83,54 @@ namespace utility::slam::system {
             double sigmaYaw     = 0.05;  ///< Yaw process noise PSD [rad/sqrt(s)]
             double sigmaCamBias = 3e-4;  ///< Camera mount bias process noise PSD [rad/sqrt(s)] (kept small so bias
                                          ///< cannot wander while stationary)
+
+            // While the robot is not upright the process model is not merely noisier,
+            // it is wrong: the twist input's linear velocity comes from walk-engine
+            // odometry, which reports the gait it believes it is executing rather than
+            // the metre the torso travels while toppling and being levered back up.
+            // The attitude channel is in better shape (the gyroscope measures the
+            // tumble directly) but integrates through impact transients. These PSDs
+            // are what the belief decays towards over a fall instead: a 2 s fall grows
+            // the horizontal position std by ~0.57 m and the yaw std by ~0.85 rad,
+            // enough to reopen the landmark association gates on recovery.
+            double sigmaPosXYDisturbed = 0.40;  ///< Horizontal position process noise PSD while not upright [m/sqrt(s)]
+            double sigmaPosZDisturbed  = 0.30;  ///< Vertical position process noise PSD while not upright [m/sqrt(s)]
+            double sigmaAttDisturbed   = 0.60;  ///< Roll/pitch process noise PSD while not upright [rad/sqrt(s)]
+            double sigmaYawDisturbed   = 0.60;  ///< Yaw process noise PSD while not upright [rad/sqrt(s)]
         };
 
-        static constexpr Eigen::Index nx = 8;  ///< State dimension
+        // State layout (nx = 9):
+        //   0..2  rBFf         torso position in {f} [m]
+        //   3..6  q            attitude quaternion (w, x, y, z), Rfb = quat2rot(q)
+        //   7..8  camera mount bias (roll, pitch) [rad]
+        //
+        // Attitude was roll-pitch-yaw until the fall work. The Euler-rate transform
+        // TK() is singular at pitch = +-90 deg, which is not an edge case for a
+        // falling robot -- it is on the trajectory of every topple. Passing through
+        // it landed the state on the gimbal alias (roll+180, 180-pitch, yaw+180):
+        // the same rotation, so fieldPose() and the landmark models carried on
+        // working, but every consumer reading x(5) as heading was then 180 deg out,
+        // which is the yaw flip seen across both real falls in the webots recordings.
+        // A quaternion has no such point, so the state can sit at pitch = 90 deg for
+        // as long as the robot is face-down and measurement updates can keep running
+        // there.
+        //
+        // The cost is a fourth parameter for three degrees of freedom. quat2rot
+        // normalises, so |q| is invisible to every geometric model; the information
+        // along it comes from MeasurementQuaternionNorm alone, which is what keeps
+        // the MAP Hessian non-singular. See attitudeTangent() for the mapping used
+        // wherever a 3-DOF attitude quantity (process noise, yaw variance, a yaw
+        // inflation) has to be expressed in these four components.
+        static constexpr Eigen::Index nx = 9;  ///< State dimension
+
+        static constexpr Eigen::Index iPos  = 0;  ///< First position index
+        static constexpr Eigen::Index iQuat = 3;  ///< First quaternion index
+        static constexpr Eigen::Index iBias = 7;  ///< First camera-bias index
 
         SystemLocalisation(const GaussianInfo<double>& density, const std::vector<BodyTwistSample>& twistBuffer);
         virtual SystemLocalisation* clone() const;
 
+        virtual void predict(double time) override;
         virtual Eigen::VectorXd dynamics(double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u) const override;
         virtual Eigen::VectorXd dynamics(double t,
                                          const Eigen::VectorXd& x,
@@ -101,27 +142,125 @@ namespace utility::slam::system {
 
         /**
          * @brief Torso pose in field frame from a state vector.
-         * @param x State vector (6)
+         * @param x State vector (nx)
          * @return Tfb with rotationMatrix Rfb and translationVector rBFf
          */
         template <typename Scalar>
         static Pose<Scalar> fieldPose(const Eigen::VectorX<Scalar>& x) {
             Pose<Scalar> Tfb;
-            Tfb.rotationMatrix    = rpy2rot(Eigen::Vector3<Scalar>(x.template segment<3>(3)));
-            Tfb.translationVector = x.template segment<3>(0);
+            Tfb.rotationMatrix    = quat2rot(Eigen::Vector4<Scalar>(x.template segment<4>(iQuat)));
+            Tfb.translationVector = x.template segment<3>(iPos);
             return Tfb;
         }
 
         /**
          * @brief Camera-mount attitude bias correction from a state vector.
-         * @param x State vector (8)
+         * @param x State vector (nx)
          * @return Rotation applied on the camera side of the extrinsic: R(deltaC)
          */
         template <typename Scalar>
         static Eigen::Matrix3<Scalar> cameraBiasRotation(const Eigen::VectorX<Scalar>& x) {
             Eigen::Vector3<Scalar> rpy;
-            rpy << x(6), x(7), Scalar(0);
+            rpy << x(iBias), x(iBias + 1), Scalar(0);
             return rpy2rot(rpy);
+        }
+
+        /**
+         * @brief Roll, pitch and yaw of the estimated attitude, for reporting.
+         *
+         * Always read heading through this rather than off a state element. The
+         * quaternion has no distinguished yaw component, and the whole point of the
+         * change is that no single index means "heading" any more.
+         *
+         * @param x State vector (nx)
+         * @return [roll, pitch, yaw] in radians
+         */
+        static Eigen::Vector3d attitudeRpy(const Eigen::VectorXd& x) {
+            return rot2rpy(quat2rot(Eigen::Vector4d(x.segment<4>(iQuat))));
+        }
+
+        /// @brief Heading (yaw) of the estimated attitude [rad].
+        static double heading(const Eigen::VectorXd& x) {
+            return attitudeRpy(x)(2);
+        }
+
+        /**
+         * @brief Jacobian of a body-frame rotation vector w.r.t. the quaternion states.
+         *
+         * A small body rotation dtheta perturbs the quaternion by dq = 0.5*Xi(q)*dtheta,
+         * so this 4x3 matrix maps 3-DOF attitude quantities into the four components
+         * and its pseudo-inverse maps them back. Everything that used to index the
+         * single yaw element -- process noise, the association gate's yaw variance,
+         * the recovery inflation -- goes through it.
+         *
+         * @param x State vector (nx)
+         * @return 4x3 matrix dq/dtheta at the state's attitude
+         */
+        static Eigen::Matrix<double, 4, 3> attitudeTangent(const Eigen::VectorXd& x) {
+            Eigen::Vector4d q = x.segment<4>(iQuat);
+            q.normalize();
+            return 0.5 * quatXi(q);
+        }
+
+        /**
+         * @brief Jacobian mapping a field-frame rotation vector to the quaternion states.
+         *
+         * dq = 0.5*Xi(q)*Rfb^T*dtheta_f. Used wherever an uncertainty is naturally
+         * stated about a field axis -- above all yaw, about field z.
+         *
+         * @param x State vector (nx)
+         * @return 4x3 matrix dq/dtheta_f at the state's attitude
+         */
+        static Eigen::Matrix<double, 4, 3> attitudeTangentField(const Eigen::VectorXd& x) {
+            const Eigen::Matrix3d Rfb = quat2rot(Eigen::Vector4d(x.segment<4>(iQuat)));
+            return attitudeTangent(x) * Rfb.transpose();
+        }
+
+        /**
+         * @brief Attitude covariance as a 3x3 in the field-frame tangent [rad^2].
+         *
+         * The replacement for reading P(3..5, 3..5) directly. Xi has orthonormal
+         * columns for a unit q, so the pseudo-inverse of dq/dtheta is 2*Xi^T; that
+         * maps the quaternion block of P back to three degrees of freedom, and Rfb
+         * puts them on the field axes. Element (2, 2) is the yaw variance.
+         *
+         * @param x State mean (nx)
+         * @param P State covariance (nx by nx)
+         * @return Field-tangent attitude covariance (roll, pitch, yaw)
+         */
+        static Eigen::Matrix3d attitudeCovariance(const Eigen::VectorXd& x, const Eigen::MatrixXd& P) {
+            const Eigen::Matrix<double, 3, 4> G = attitudeJacobian(x);
+            return G * P.block<4, 4>(iQuat, iQuat) * G.transpose();
+        }
+
+        /**
+         * @brief Left inverse of attitudeTangentField: field rotation vector per unit dq.
+         *
+         * Row 2 is what maps a quaternion perturbation to a heading change, so it is
+         * also what any cross-covariance between position and yaw has to go through
+         * (the Field message's reported (x, y, yaw) block, for one).
+         *
+         * @param x State vector (nx)
+         * @return 3x4 matrix dtheta_f/dq at the state's attitude
+         */
+        static Eigen::Matrix<double, 3, 4> attitudeJacobian(const Eigen::VectorXd& x) {
+            // dq = 0.5*Xi*dtheta and Xi has orthonormal columns, so the left inverse
+            // is dtheta = 2*Xi^T*dq. Note that is 2*Xi^T, NOT 2*attitudeTangent^T --
+            // attitudeTangent already carries the 0.5, and folding it in twice
+            // under-reports every attitude std dev by a factor of two.
+            Eigen::Vector4d q = x.segment<4>(iQuat);
+            q.normalize();
+            return quat2rot(q) * (2.0 * quatXi(q).transpose());
+        }
+
+        /// @brief Variance of the field-frame yaw implied by the attitude covariance.
+        static double yawVariance(const Eigen::VectorXd& x, const Eigen::MatrixXd& P) {
+            return attitudeCovariance(x, P)(2, 2);
+        }
+
+        /// @brief Per-axis attitude std devs in the field tangent (roll, pitch, yaw) [rad].
+        static Eigen::Vector3d attitudeStd(const Eigen::VectorXd& x, const Eigen::MatrixXd& P) {
+            return attitudeCovariance(x, P).diagonal().cwiseMax(0.0).cwiseSqrt();
         }
 
         /**
@@ -143,7 +282,7 @@ namespace utility::slam::system {
                                                               double maxGap = 0.1);
 
         GaussianInfo<double> positionDensity() const;     ///< Marginal density of rBFf
-        GaussianInfo<double> orientationDensity() const;  ///< Marginal density of Thetafb
+        GaussianInfo<double> orientationDensity() const;  ///< Marginal density of the attitude quaternion q
 
         /**
          * @brief Reset the state density and system clock (initialisation / relocalisation).
@@ -157,17 +296,123 @@ namespace utility::slam::system {
          */
         void resetTo(const GaussianInfo<double>& density, double time);
 
+        /**
+         * @brief Declare whether the robot is currently upright.
+         *
+         * Two things change while disturbed. The process noise switches to the
+         * `*Disturbed` PSDs, so the belief decays honestly across a fall instead of
+         * coasting at walking-grade confidence. And the twist input's linear velocity
+         * is zeroed: it is derived by differencing walk-engine odometry, which during
+         * a fall describes a gait that is not happening. The gyroscope-derived angular
+         * velocity is kept, because it measures the topple for real.
+         *
+         * This is a mode, not an event: the caller sets it every frame from the
+         * posture and it stays in force until changed.
+         *
+         * @param disturbed True while the robot is not upright
+         */
+        void setDisturbed(bool disturbed) {
+            disturbed_ = disturbed;
+        }
+
+        /**
+         * @brief Whether the robot is currently flagged as not upright.
+         */
+        bool disturbed() const {
+            return disturbed_;
+        }
+
+        /**
+         * @brief Add variance to the belief without moving its mean.
+         *
+         * Used on recovery from a fall. The pre-fall mean is still the best estimate
+         * available -- a fall and getup translate the torso well under a metre, far
+         * less than a global relocalisation would risk getting wrong -- but the
+         * confidence attached to it is not survivable, particularly in yaw. Applies
+         * to every live hypothesis as well as to the representative density.
+         *
+         * @param extraVar Variance to add per state element (length nx, non-negative)
+         */
+        void inflateCovariance(const Eigen::VectorXd& extraVar);
+
+        /**
+         * @brief Add a full covariance block to the belief without moving its mean.
+         *
+         * The diagonal overload cannot express an attitude inflation any more: yaw
+         * uncertainty about the field z axis lands on the quaternion states as a
+         * rank-one block (attitudeTangentField), not on one element.
+         *
+         * @param extraCov Positive-semidefinite matrix (nx by nx) added to the covariance
+         */
+        void inflateCovariance(const Eigen::MatrixXd& extraCov);
+
+        /**
+         * @brief Project the attitude mean back onto the unit sphere (and w >= 0).
+         *
+         * Called after every predict and every measurement update.
+         * MeasurementQuaternionNorm keeps the belief near the sphere but is a soft
+         * prior, so this is what actually holds |q| = 1.
+         */
+        void normaliseQuaternion();
+
+        /**
+         * @brief 180 deg field rotation as a linear map on the quaternion components.
+         *
+         * qz(pi) (x) q for qz(pi) = (0, 0, 0, 1) sends (w, x, y, z) to (-z, -y, x, w).
+         */
+        static Eigen::Matrix4d mirrorQuatMap() {
+            Eigen::Matrix4d M = Eigen::Matrix4d::Zero();
+            M(0, 3)           = -1.0;
+            M(1, 2)           = -1.0;
+            M(2, 1)           = 1.0;
+            M(3, 0)           = 1.0;
+            return M;
+        }
+
+        /**
+         * @brief Per-component process-noise std devs for the quaternion block.
+         *
+         * The PSDs are specified in the 3-DOF body tangent (roll/pitch and yaw), which
+         * is where they are meaningful. A small body rotation dtheta moves the
+         * quaternion by 0.5*Xi(q)*dtheta and Xi has orthonormal columns, so a tangent
+         * std of s becomes a component std of s/2. The fourth (radial) component is
+         * given the same magnitude as the attitude channels: it is invisible to every
+         * geometric model, so its only job is to leave MeasurementQuaternionNorm room
+         * to work rather than to fight it.
+         *
+         * @param sigmaAtt Roll/pitch process noise PSD [rad/sqrt(s)]
+         * @param sigmaYaw Yaw process noise PSD [rad/sqrt(s)]
+         */
+        static Eigen::Vector4d quaternionSigma(double sigmaAtt, double sigmaYaw) {
+            const double s = 0.5 * std::max(sigmaAtt, sigmaYaw);
+            return Eigen::Vector4d::Constant(s);
+        }
+
+        /**
+         * @brief Advance the belief to @p time with no measurement.
+         *
+         * Prediction otherwise only ever happens inside Event::process, so a frame
+         * that yields no usable measurement used to advance neither the state nor the
+         * clock. That is exactly what a fall produces (the camera is in the carpet and
+         * YOLO returns nothing), and it left the filter holding its pre-fall mean at
+         * its pre-fall covariance across the whole event. Predicts every hypothesis
+         * when the bank is active.
+         *
+         * @param time Time to advance the belief to [s]
+         */
+        void predictAll(double time);
+
         Parameters params;
 
         // ---------------------------------------------------------------------
         // Hypothesis bank (multi-hypothesis field-symmetry handling)
         //
         // The RoboCup field has a 180 deg rotational symmetry about its centre:
-        // the pose (rBFf, Thetafb) and its mirror produce identical landmark
+        // the pose (rBFf, q) and its mirror produce identical landmark
         // observations, so a single Gaussian cannot represent the true belief
         // when the symmetry is unbroken. Following the B-Human multi-hypothesis
         // approach (Rofer et al.), the belief is a weighted Gaussian mixture; each
-        // component is an independent 8-DOF pose density carried through the same
+        // component is an independent pose density carried through the same
         // predict/update machinery, and the weights are updated from the Laplace
         // log-evidence each measurement reports (Measurement::logEvidence()).
         //
@@ -267,7 +512,7 @@ namespace utility::slam::system {
          * @brief The 180 deg field-symmetry mirror of a state vector.
          *
          * Rotates the pose by pi about the field-centre z axis:
-         *   (x, y) -> (-x, -y),  yaw -> yaw + pi,  roll/pitch/z/cam-bias unchanged.
+         *   (x, y) -> (-x, -y),  q -> mirrorQuatMap()*q,  z/cam-bias unchanged.
          */
         static Eigen::VectorXd mirrorState(const Eigen::VectorXd& x);
 
@@ -278,6 +523,7 @@ namespace utility::slam::system {
 
     protected:
         const std::vector<BodyTwistSample>* twistBuffer_;  ///< Non-owning; ZOH input lookup
+        bool disturbed_ = false;                           ///< Robot is not upright (see setDisturbed)
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)
         std::vector<double> logWeights_;                ///< Unnormalised log weights per component

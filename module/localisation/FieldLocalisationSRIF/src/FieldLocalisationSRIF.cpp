@@ -43,6 +43,7 @@
 #include "utility/slam/gaussian/GaussianInfo.hpp"
 #include "utility/slam/measurement/MeasurementGravity.hpp"
 #include "utility/slam/measurement/MeasurementKinematicHeight.hpp"
+#include "utility/slam/measurement/MeasurementQuaternionNorm.hpp"
 #include "utility/slam/rotation.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -60,9 +61,11 @@ namespace module::localisation {
 
     using utility::nusight::graph;
     using utility::slam::rot2rpy;
+    using utility::slam::rpy2quat;
     using utility::slam::gaussian::GaussianInfo;
     using utility::slam::measurement::MeasurementGravity;
     using utility::slam::measurement::MeasurementKinematicHeight;
+    using utility::slam::measurement::MeasurementQuaternionNorm;
     using utility::support::Expression;
 
     /// @brief Convert an Eigen isometry to the filter's pose type
@@ -127,6 +130,12 @@ namespace module::localisation {
             cfg.twist_window_seconds   = config["twist_window_seconds"].as<double>();
             cfg.max_sensor_pairing_age = config["max_sensor_pairing_age"].as<double>();
 
+            cfg.gravity_quasi_static_tolerance = config["gravity_quasi_static_tolerance"].as<double>();
+            cfg.quaternion_norm_sigma          = config["quaternion_norm_sigma"].as<double>();
+            cfg.disturbed_window               = config["fall"]["disturbed_window"].as<double>();
+            cfg.recovery_pos_std               = config["fall"]["recovery_pos_std"].as<double>();
+            cfg.recovery_yaw_std               = config["fall"]["recovery_yaw_std"].as<double>();
+
             cfg.grid_step_xy          = config["grid_step_xy"].as<double>();
             cfg.grid_step_yaw         = config["grid_step_yaw"].as<double>() * M_PI / 180.0;  // deg -> rad
             cfg.min_init_associations = config["min_init_associations"].as<int>();
@@ -144,9 +153,17 @@ namespace module::localisation {
             cfg.process.sigmaYaw     = config["process"]["sigma_yaw"].as<double>();
             cfg.process.sigmaCamBias = config["process"]["sigma_cam_bias"].as<double>();
 
+            // Process noise PSDs while the robot is not upright
+            cfg.process.sigmaPosXYDisturbed = config["process"]["sigma_pos_xy_disturbed"].as<double>();
+            cfg.process.sigmaPosZDisturbed  = config["process"]["sigma_pos_z_disturbed"].as<double>();
+            cfg.process.sigmaAttDisturbed   = config["process"]["sigma_att_disturbed"].as<double>();
+            cfg.process.sigmaYawDisturbed   = config["process"]["sigma_yaw_disturbed"].as<double>();
+
             // Landmark measurement options
             cfg.measurement.sigmaAngular         = config["measurement"]["sigma_angular"].as<double>();
             cfg.measurement.gateAngle            = config["measurement"]["gate_angle"].as<double>();
+            cfg.measurement.gateYawScale         = config["measurement"]["gate_yaw_scale"].as<double>();
+            cfg.measurement.gateAngleMax         = config["measurement"]["gate_angle_max"].as<double>();
             cfg.measurement.minConfidence        = config["measurement"]["min_confidence"].as<double>();
             cfg.measurement.inlierProbability    = config["measurement"]["inlier_probability"].as<double>();
             cfg.measurement.confidenceReference  = config["measurement"]["confidence_reference"].as<double>();
@@ -214,16 +231,27 @@ namespace module::localisation {
         on<Trigger<BoundingBoxes>, Optional<With<Stability>>, Sync<FieldLocalisationSRIF>, Single>().then(
             "SRIF field localisation",
             [this](const BoundingBoxes& boxes, const std::shared_ptr<const Stability>& stability) {
-                // Prerequisites: map built, odometry seen, and the robot not mid-fall.
+                // Prerequisites: map built and odometry seen.
                 if (map == nullptr || !have_t0) {
-                    return;
-                }
-                if (stability != nullptr && *stability <= Stability::FALLING) {
-                    log<DEBUG>("Robot unstable; skipping field localisation update");
                     return;
                 }
 
                 const double t = seconds(boxes.timestamp);
+
+                // Posture gate. This used to suppress every update while the robot was not
+                // upright, on the grounds that all four measurement models assume an upright
+                // robot. That was only half right. The models that break are the ones whose
+                // *assumption* breaks -- kinematic height needs the support leg on the ground,
+                // and the accelerometer only reads gravity when the robot is not being
+                // accelerated. The landmark model is plain geometry: given the right attitude it
+                // is as valid face-down as standing. What actually forced blanket suppression was
+                // the roll-pitch-yaw state, which could not represent a fallen robot without
+                // passing through gimbal lock; with a quaternion (see SystemLocalisation) it can,
+                // so the gate is per-model rather than all-or-nothing. That matters because a
+                // fall is exactly when the estimate is most at risk: a robot that spins while
+                // toppling or getting up changes its heading, and only measurements taken during
+                // the event can catch it.
+                const bool upright = stability == nullptr || *stability > Stability::FALLING;
 
                 // Pair the odometry to the vision capture time. The message's Hcw is at capture, so
                 // using the latest Htw instead would fold the capture-to-now torso motion into Tbc
@@ -240,14 +268,35 @@ namespace module::localisation {
                 const filter::Pose<double> Tbc = Htw * to_pose(Eigen::Isometry3d(boxes.Hcw)).inverse();
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
+
+                // Only the first disturbed_window seconds of a fall get the disturbed PSDs; past
+                // that the robot is lying still and diffusing the belief further would be
+                // inventing motion.
+                if (initialised) {
+                    const double fall_elapsed = upright ? 0.0 : t - fall_start_t;
+                    system->setDisturbed(!upright && fall_elapsed < cfg.disturbed_window);
+                }
+
+                // A face-down fall produces no detections at all. Prediction otherwise only ever
+                // happens inside Event::process, so such a frame would advance neither the state
+                // nor the clock and the filter would emerge from the fall holding its pre-fall
+                // mean at its pre-fall covariance -- confidently wrong rather than honestly
+                // uncertain.
                 if (sample.detections.empty()) {
+                    if (initialised) {
+                        if (upright != was_upright && !upright) {
+                            fall_start_t = t;
+                        }
+                        system->predictAll(t);
+                        was_upright = upright;
+                    }
                     return;
                 }
 
                 // Bootstrap: solve a coarse initial pose the first time we see usable landmarks.
                 if (!initialised) {
                     const filter::Pose<double> Twt = Htw.inverse();
-                    Eigen::Matrix<double, 8, 1> eta0;
+                    Eigen::Matrix<double, 9, 1> eta0;
                     if (!solve_initial_pose(sample, Tbc, Twt, eta0)) {
                         log<DEBUG>("Initial pose solve did not associate enough landmarks yet");
                         return;
@@ -266,17 +315,69 @@ namespace module::localisation {
                         system->initialiseHypotheses();
                     }
                     initialised = true;
+                    was_upright = upright;
                     log<INFO>("Initialised field pose: x=",
                               eta0(0),
                               "m y=",
                               eta0(1),
                               "m yaw=",
-                              eta0(5) * 180.0 / M_PI,
+                              filter::SystemLocalisation::heading(Eigen::VectorXd(eta0)) * 180.0 / M_PI,
                               "deg");
                 }
 
+                if (!upright && was_upright) {
+                    fall_start_t = t;
+                    log<INFO>(
+                        "Robot not upright; suppressing kinematic height, landmark and "
+                        "(quasi-static) gravity updates continue");
+                }
+
+                // Recovery from a fall. The mean is kept: a fall and getup move the torso well
+                // under a metre, so the pre-fall position is still the best estimate available,
+                // and re-solving the pose globally would be worse -- the grid search resolves the
+                // field symmetry from the known starting half, a prior that is simply false once
+                // play is under way. What a fall actually destroys is confidence, above all in
+                // yaw, so that is what is given back.
+                if (upright && !was_upright) {
+                    // Yaw uncertainty is about the field z axis, which on the quaternion states is
+                    // a rank-one block rather than a single diagonal element -- there is no "the
+                    // yaw element" any more.
+                    const Eigen::VectorXd xr = system->density.mean();
+                    Eigen::MatrixXd extra_cov =
+                        Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
+                    extra_cov(0, 0) = extra_cov(1, 1) = cfg.recovery_pos_std * cfg.recovery_pos_std;
+                    const Eigen::Vector4d j_yaw       = filter::SystemLocalisation::attitudeTangentField(xr).col(2);
+                    extra_cov.block<4, 4>(filter::SystemLocalisation::iQuat, filter::SystemLocalisation::iQuat) =
+                        cfg.recovery_yaw_std * cfg.recovery_yaw_std * j_yaw * j_yaw.transpose();
+                    system->inflateCovariance(extra_cov);
+
+                    // A fall is also a chance to have been turned around without the landmarks
+                    // noticing, and they can never notice: the two symmetric field poses fit each
+                    // other's landmarks identically. Re-seed the mirror so any out-of-field
+                    // evidence has something to switch to.
+                    if (cfg.use_hypothesis_bank && system->numHypotheses() == 1) {
+                        system->spawnMirror();
+                    }
+                    log<INFO>("Recovered after ",
+                              t - fall_start_t,
+                              "s not upright; inflated to sigma_yaw ",
+                              std::sqrt(filter::SystemLocalisation::yawVariance(system->density.mean(),
+                                                                                system->density.cov()))
+                                  * 180.0 / M_PI,
+                              "deg");
+                }
+                was_upright = upright;
+
                 // Predict forward to the vision capture time using the odometry twist buffer.
                 system->predict(t);
+
+                // Unit-norm pseudo-measurement. The four attitude states carry three degrees of
+                // freedom and quat2rot normalises, so |q| is invisible to every other model here;
+                // without this the MAP Hessian is singular along it and the Newton step has a flat
+                // direction to wander down. Applied first so the rest of the frame's updates see a
+                // belief that is on the sphere.
+                MeasurementQuaternionNorm quaternion_norm(t, cfg.quaternion_norm_sigma);
+                system->process(quaternion_norm);
 
                 // Landmark measurement update (routed through process() so the hypothesis bank,
                 // when active, applies it to every mixture component and reweights them).
@@ -284,11 +385,25 @@ namespace module::localisation {
                 system->process(measurement);
 
                 // Low-rate corrections from the paired Sensors sample.
+                //
+                // Gravity is valid whenever the torso is not being accelerated -- true of a robot
+                // lying still on the carpet, false of one in free fall or hitting the ground,
+                // regardless of posture. Gating on the specific-force magnitude tests that
+                // directly, which is both the right condition during a fall and a better one than
+                // "upright" while walking.
                 if (cfg.use_gravity && paired->accelerometer.allFinite()) {
-                    MeasurementGravity gravity(t, paired->accelerometer, cfg.gravity_sigma);
-                    system->process(gravity);
+                    constexpr double standard_gravity = 9.80665;
+                    const double a_mag                = paired->accelerometer.norm();
+                    if (std::abs(a_mag - standard_gravity) < cfg.gravity_quasi_static_tolerance) {
+                        MeasurementGravity gravity(t, paired->accelerometer, cfg.gravity_sigma);
+                        system->process(gravity);
+                    }
                 }
-                if (cfg.use_kinematic_height) {
+                // Torso height above ground assumes the support leg reaches the ground, so this is
+                // the one model a fall genuinely invalidates: lying down, the chain still reports a
+                // near-upright 0.44 m torso and would fight the attitude the other measurements
+                // are establishing.
+                if (cfg.use_kinematic_height && upright) {
                     const double height = Htw.inverse().translationVector.z();
                     if (std::isfinite(height)) {
                         MeasurementKinematicHeight kinematic_height(t, height, cfg.height_sigma);
@@ -325,7 +440,7 @@ namespace module::localisation {
     bool FieldLocalisationSRIF::solve_initial_pose(const filter::VisionSample& sample,
                                                    const filter::Pose<double>& Tbc,
                                                    const filter::Pose<double>& Twt,
-                                                   Eigen::Matrix<double, 8, 1>& eta0) const {
+                                                   Eigen::Matrix<double, 9, 1>& eta0) const {
         constexpr Eigen::Index nx = filter::SystemLocalisation::nx;
 
         // Roll, pitch and torso height come from the gravity-aligned kinematic chain.
@@ -352,7 +467,7 @@ namespace module::localisation {
             for (double y = -half_width; y <= half_width; y += cfg.grid_step_xy) {
                 for (double yaw = -M_PI; yaw < M_PI; yaw += cfg.grid_step_yaw) {
                     Eigen::VectorXd candidate(nx);
-                    candidate << x, y, z0, roll0, pitch0, yaw, 0.0, 0.0;
+                    candidate << x, y, z0, rpy2quat(Eigen::Vector3d(roll0, pitch0, yaw)), 0.0, 0.0;
                     probe.resetTo(GaussianInfo<double>::fromSqrtMoment(candidate, S_probe), sample.t);
 
                     filter::MeasurementFieldLandmarks measurement(sample.t, sample, Tbc, *map, probe, cfg.measurement);
@@ -411,13 +526,20 @@ namespace module::localisation {
         // composing the kinematic foot frames (Sensors.Htx[L_FOOT_BASE]/[R_FOOT_BASE]) with the field
         // pose, then emitted alongside (or added to) the Field message. Deferred - future work.
 
-        // Covariance / uncertainty of the reported (x, y, yaw) = state indices (0, 1, 5).
-        const Eigen::MatrixXd P = system->density.cov();
+        // Covariance / uncertainty of the reported (x, y, yaw). Position is still the leading 2x2
+        // block, but yaw is no longer a state element: it is a direction in the quaternion block,
+        // so both its variance and its cross-covariance with position go through row 2 of the
+        // attitude Jacobian rather than through index 5.
+        const Eigen::MatrixXd P           = system->density.cov();
+        constexpr Eigen::Index iq         = filter::SystemLocalisation::iQuat;
+        const Eigen::RowVector4d g_yaw    = filter::SystemLocalisation::attitudeJacobian(mean).row(2);
+        const Eigen::Vector2d cov_pos_yaw = P.block<2, 4>(0, iq) * g_yaw.transpose();
+        const double var_yaw              = g_yaw * P.block<4, 4>(iq, iq) * g_yaw.transpose();
         Eigen::Matrix3d covariance;
         // clang-format off
-        covariance << P(0, 0), P(0, 1), P(0, 5),
-                      P(1, 0), P(1, 1), P(1, 5),
-                      P(5, 0), P(5, 1), P(5, 5);
+        covariance << P(0, 0),          P(0, 1),          cov_pos_yaw(0),
+                      P(1, 0),          P(1, 1),          cov_pos_yaw(1),
+                      cov_pos_yaw(0),   cov_pos_yaw(1),   var_yaw;
         // clang-format on
         field->covariance  = covariance;
         field->uncertainty = covariance.trace();
@@ -426,11 +548,11 @@ namespace module::localisation {
         if (system->numHypotheses() > 1) {
             for (const GaussianInfo<double>& component : system->hypotheses()) {
                 const Eigen::VectorXd m = component.mean();
-                field->particles.emplace_back(m(0), m(1), m(5));
+                field->particles.emplace_back(m(0), m(1), filter::SystemLocalisation::heading(m));
             }
         }
         else {
-            field->particles.emplace_back(mean(0), mean(1), mean(5));
+            field->particles.emplace_back(mean(0), mean(1), filter::SystemLocalisation::heading(mean));
         }
 
         // Cost: mean chordal angular residual of the associated rays at the posterior mean [rad].
@@ -449,7 +571,7 @@ namespace module::localisation {
         emit(field);
 
         if (log_level <= DEBUG) {
-            emit(graph("SRIF field pose (x, y, yaw)", mean(0), mean(1), mean(5)));
+            emit(graph("SRIF field pose (x, y, yaw)", mean(0), mean(1), filter::SystemLocalisation::heading(mean)));
             emit(graph("SRIF uncertainty", field->uncertainty));
             emit(graph("SRIF cost (mean ray residual)", cost));
             if (measurement != nullptr) {

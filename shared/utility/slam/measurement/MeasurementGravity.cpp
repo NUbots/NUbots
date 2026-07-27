@@ -14,7 +14,8 @@ namespace utility::slam::measurement {
     }
 
     Eigen::VectorXd MeasurementGravity::simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
-        const Eigen::Matrix3d Rfb = rpy2rot(Eigen::Vector3d(x.segment<3>(3)));
+        const Eigen::Matrix3d Rfb =
+            quat2rot(Eigen::Vector4d(x.segment<4>(utility::slam::system::SystemLocalisation::iQuat)));
         return Rfb.transpose() * Eigen::Vector3d(0, 0, gravity_);
     }
 

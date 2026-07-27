@@ -11,7 +11,7 @@
  * This module extracts those features from a camera frame:
  *  - FAST corners on the grayscale image (strongest maxFeatures kept),
  *  - an ORB descriptor per corner (oriented BRIEF, matchable across frames),
- *  - a unit ray in the camera frame {c} per corner (FisheyeLens::unproject),
+ *  - a unit ray in the camera frame {c} per corner (CameraLens::unproject),
  *  - an out-of-field classification given the estimated camera pose in {f}:
  *    a ray is out-of-field when it points at/above the horizon or its ground-plane
  *    intersection lands outside the field carpet (boundary + border strip + margin).
@@ -29,12 +29,12 @@
 #include <vector>
 
 #include "FieldMap.hpp"
-#include "camera/FisheyeLens.hpp"
+#include "camera/CameraLens.hpp"
 #include "camera/Pose.hpp"
 
 namespace utility::slam {
 
-    using utility::slam::camera::FisheyeLens;
+    using utility::slam::camera::CameraLens;
     using utility::slam::camera::Pose;
 
     /**
@@ -70,10 +70,10 @@ namespace utility::slam {
          * @param dims Field dimensions defining the carpet extent
          * @param options Detection and classification options
          */
-        OutOfFieldDetector(const FisheyeLens& lens, const FieldDimensions& dims, const Options& options);
+        OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims, const Options& options);
 
         /// @brief Construct with default options.
-        OutOfFieldDetector(const FisheyeLens& lens, const FieldDimensions& dims);
+        OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims);
 
         /**
          * @brief Detect corners in a frame and classify them against the field extent.
@@ -94,7 +94,7 @@ namespace utility::slam {
         Options options;
 
     private:
-        const FisheyeLens& lens_;
+        const CameraLens& lens_;
         double halfCarpetLength_;  ///< Field half-length + border strip + margin [m]
         double halfCarpetWidth_;   ///< Field half-width + border strip + margin [m]
         cv::Ptr<cv::ORB> orb_;     ///< Descriptor extractor (compute only; detection is FAST)

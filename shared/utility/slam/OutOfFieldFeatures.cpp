@@ -9,14 +9,14 @@
 
 namespace utility::slam {
 
-    OutOfFieldDetector::OutOfFieldDetector(const FisheyeLens& lens, const FieldDimensions& dims, const Options& opts)
+    OutOfFieldDetector::OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims, const Options& opts)
         : options(opts)
         , lens_(lens)
         , halfCarpetLength_(dims.fieldLength / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , halfCarpetWidth_(dims.fieldWidth / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , orb_(cv::ORB::create()) {}
 
-    OutOfFieldDetector::OutOfFieldDetector(const FisheyeLens& lens, const FieldDimensions& dims)
+    OutOfFieldDetector::OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims)
         : OutOfFieldDetector(lens, dims, Options{}) {}
 
     bool OutOfFieldDetector::isOutOfField(const Eigen::Vector3d& uPCc, const Pose<double>& Tfc) const {
