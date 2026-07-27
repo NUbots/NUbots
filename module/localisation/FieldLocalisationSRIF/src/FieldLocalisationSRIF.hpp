@@ -139,12 +139,10 @@ namespace module::localisation {
             double quaternion_norm_sigma = 1e-3;
 
             // --- fall handling ---
-            /// @brief How long into a fall the disturbed process PSDs apply [s].
-            ///
-            /// A fall is a bounded event. Running the disturbed PSDs for its whole duration models
-            /// a robot lying still as a random walk, so the belief would report how long it had
-            /// been down rather than how far it could have gone.
-            double disturbed_window = 2.0;
+            // Note: how long the elevated PSDs apply lives in process.disturbed_window, next to
+            // the PSDs it governs, so it cannot be confused with the separate (and unbounded)
+            // question of whether the odometry velocity is usable. See SystemLocalisation::
+            // setPosture().
             /// @brief Horizontal position std restored on recovering from a fall [m]
             double recovery_pos_std = 0.5;
             /// @brief Yaw std restored on recovering from a fall [rad]
@@ -198,6 +196,18 @@ namespace module::localisation {
          * @return The nearest sample, or nullptr if the window is empty or the nearest is too old.
          */
         [[nodiscard]] const filter::SensorsSample* nearest_sensors(double t) const;
+
+        /**
+         * @brief Hand confidence back to the belief on standing up again.
+         *
+         * Called on the upright transition only, and from the posture block that runs before any
+         * early return -- a getup ends in motion blur, so the frame the robot first reads upright
+         * again is often one with no usable detections, and doing this inside the update path
+         * meant it was skipped on exactly those runs.
+         *
+         * @param t Time the robot became upright again [s since t0]
+         */
+        void apply_fall_recovery(double t);
 
         /**
          * @brief Emit the localisation Field message (and debug graphs) from the current belief.

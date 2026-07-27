@@ -90,12 +90,15 @@ namespace utility::slam::system {
         u.head<3>()              = s.vBb;
         u.tail<3>()              = s.omegaBb;
         if (disturbed_) {
-            // vBb is a finite difference of walk-engine odometry, which keeps
-            // describing the gait it thinks it is executing while the robot is on the
-            // ground; worse, twistFromOdometry drops intervals longer than maxGap, so
-            // the zero-order hold above would carry the last pre-fall velocity across
-            // a sensor stall. Neither is information. omegaBb comes from the
-            // gyroscope, which measures the topple honestly, so it is kept.
+            // vBb is a finite difference of walk-engine odometry, which keeps describing
+            // the gait it thinks it is executing while the robot is on the ground, and
+            // during a getup describes a scripted flail that is not locomotion; worse,
+            // twistFromOdometry drops intervals longer than maxGap, so the zero-order hold
+            // above would carry the last pre-fall velocity across a sensor stall. None of
+            // that is information, and it does not become information after a couple of
+            // seconds -- this is keyed off the posture itself, NOT off the bounded window
+            // that governs the elevated PSDs. omegaBb comes from the gyroscope, which
+            // measures the topple honestly, so it is kept.
             u.head<3>().setZero();
         }
         return u;
@@ -104,7 +107,7 @@ namespace utility::slam::system {
     GaussianInfo<double> SystemLocalisation::processNoiseDensity(double dt) const {
         // dw ~ N^{-1}(0, LambdaQ/dt), i.e., cov(dw) = Q*dt
         Eigen::VectorXd sigma(nx);
-        if (disturbed_) {
+        if (diffusing_) {
             // The camera mount bias is a property of the kinematic chain, not of the
             // posture, so it keeps its ordinary (deliberately tiny) PSD: a fall is no
             // reason to let the extrinsic calibration wander.

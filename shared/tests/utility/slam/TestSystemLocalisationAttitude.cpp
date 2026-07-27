@@ -260,7 +260,7 @@ SCENARIO("Disturbed mode changes what prediction believes", "[slam][localisation
         WHEN("the same two seconds are predicted while not upright") {
             SystemLocalisation sys(tight_belief(x0), twists);
             sys.resetTo(tight_belief(x0), 0.0);
-            sys.setDisturbed(true);
+            sys.setPosture(false, 0.0);
             sys.predictAll(2.0);
             const Eigen::VectorXd mu = sys.density.mean();
             const Eigen::MatrixXd P  = sys.density.cov();
@@ -284,12 +284,49 @@ SCENARIO("Disturbed mode changes what prediction believes", "[slam][localisation
                 constant_twist(Eigen::Vector3d(0.3, 0.0, 0.0), Eigen::Vector3d(0.0, 0.0, 0.5));
             SystemLocalisation sys(tight_belief(x0), spin);
             sys.resetTo(tight_belief(x0), 0.0);
-            sys.setDisturbed(true);
+            sys.setPosture(false, 0.0);
             sys.predictAll(1.0);
 
             THEN("yaw follows the gyroscope") {
                 REQUIRE_THAT(SystemLocalisation::heading(sys.density.mean()),
                              WithinAbs(SystemLocalisation::heading(x0) + 0.5, 0.05));
+            }
+        }
+    }
+}
+
+SCENARIO("A long fall does not integrate the getup as if it were walking", "[slam][localisation]") {
+    GIVEN("A robot down for eight seconds while the odometry still reports motion") {
+        // The walk engine and the getup script both keep moving the torso in the odometry world
+        // frame, so vBb stays large the whole time the robot is on the ground. It is not
+        // locomotion and must never be integrated.
+        const std::vector<BodyTwistSample> twists =
+            constant_twist(Eigen::Vector3d(0.6, 0.0, 0.0), Eigen::Vector3d::Zero());
+        const Eigen::VectorXd x0 = nominal_state();
+
+        WHEN("the posture is driven from a single fall start, past the disturbed window") {
+            SystemLocalisation sys(tight_belief(x0), twists);
+            sys.resetTo(tight_belief(x0), 0.0);
+            for (double t = 0.05; t <= 8.0; t += 0.05) {
+                sys.setPosture(false, t);  // Not upright throughout; elapsed grows past the window
+                sys.predictAll(t);
+            }
+
+            THEN("the estimate has not moved") {
+                // The regression: tying the velocity discard to the same window as the PSDs meant
+                // that from 2 s in, the getup's odometry was integrated at full weight -- 0.6 m/s
+                // for six seconds is 3.6 m, straight off the field, and the belief stayed too tight
+                // for the association gate to pull it back.
+                REQUIRE_THAT((sys.density.mean().head<2>() - x0.head<2>()).norm(), WithinAbs(0.0, 1e-6));
+            }
+
+            THEN("the velocity stays discarded but the PSDs have stood down") {
+                REQUIRE(sys.disturbed());
+                REQUIRE_FALSE(sys.diffusing());
+                // Still uncertain from the first two seconds, but not 0.40 m/sqrt(s) for all eight.
+                const double pos_std = std::sqrt(sys.density.cov()(0, 0));
+                REQUIRE(pos_std > 0.4);
+                REQUIRE(pos_std < 1.0);
             }
         }
     }

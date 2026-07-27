@@ -97,6 +97,11 @@ namespace utility::slam::system {
             double sigmaPosZDisturbed  = 0.30;  ///< Vertical position process noise PSD while not upright [m/sqrt(s)]
             double sigmaAttDisturbed   = 0.60;  ///< Roll/pitch process noise PSD while not upright [rad/sqrt(s)]
             double sigmaYawDisturbed   = 0.60;  ///< Yaw process noise PSD while not upright [rad/sqrt(s)]
+            /// How long into a non-upright episode the PSDs above apply [s]. Past this the robot
+            /// is lying still and diffusing further would be inventing motion. Note this bounds
+            /// the PSDs ONLY -- the odometry velocity stays discarded for the whole episode, see
+            /// setPosture().
+            double disturbedWindow = 2.0;
         };
 
         // State layout (nx = 9):
@@ -297,29 +302,54 @@ namespace utility::slam::system {
         void resetTo(const GaussianInfo<double>& density, double time);
 
         /**
-         * @brief Declare whether the robot is currently upright.
+         * @brief Declare the robot's posture for this step.
          *
-         * Two things change while disturbed. The process noise switches to the
-         * `*Disturbed` PSDs, so the belief decays honestly across a fall instead of
-         * coasting at walking-grade confidence. And the twist input's linear velocity
-         * is zeroed: it is derived by differencing walk-engine odometry, which during
-         * a fall describes a gait that is not happening. The gyroscope-derived angular
-         * velocity is kept, because it measures the topple for real.
+         * Two different things follow from a fall, and they are deliberately NOT the same
+         * switch, because they expire differently:
          *
-         * This is a mode, not an event: the caller sets it every frame from the
-         * posture and it stays in force until changed.
+         *  - The twist input's linear velocity is discarded. It is derived by differencing
+         *    walk-engine odometry, which while the robot is on the ground describes a gait
+         *    that is not happening -- and during a getup describes a scripted flail that is
+         *    happening but is not locomotion. That is a statement about whether the signal
+         *    means anything, and it does not become true again after some number of
+         *    seconds: it holds for the WHOLE time the robot is not upright. The
+         *    gyroscope-derived angular velocity is kept throughout, because it measures the
+         *    topple for real.
          *
-         * @param disturbed True while the robot is not upright
+         *  - The process noise switches to the `*Disturbed` PSDs, so the belief decays
+         *    honestly instead of coasting at walking-grade confidence. That one IS bounded:
+         *    a fall is a bounded event, and modelling a robot lying still as a 0.40 m/sqrt(s)
+         *    random walk would make the belief's width report how long it had been down
+         *    rather than how far it could have gone. It applies for params.disturbedWindow
+         *    seconds from the start of the episode and then stands down.
+         *
+         * Tying both to the same window is what let a long fall integrate the getup's
+         * odometry at nominal confidence, marching the estimate off the field with a
+         * covariance too tight for the association gate to ever recover it.
+         *
+         * This is a mode, not an event: the caller sets it every frame from the posture.
+         *
+         * @param upright True when the robot is upright
+         * @param disturbedFor Seconds since the current non-upright episode began (ignored
+         *                     when upright; 0 means "just started", i.e. fully disturbed)
          */
-        void setDisturbed(bool disturbed) {
-            disturbed_ = disturbed;
+        void setPosture(bool upright, double disturbedFor = 0.0) {
+            disturbed_ = !upright;
+            diffusing_ = !upright && !(disturbedFor >= params.disturbedWindow);
         }
 
         /**
-         * @brief Whether the robot is currently flagged as not upright.
+         * @brief Whether the robot is not upright, so the odometry velocity is discarded.
          */
         bool disturbed() const {
             return disturbed_;
+        }
+
+        /**
+         * @brief Whether the elevated (fall) process-noise PSDs are currently in force.
+         */
+        bool diffusing() const {
+            return diffusing_;
         }
 
         /**
@@ -523,7 +553,8 @@ namespace utility::slam::system {
 
     protected:
         const std::vector<BodyTwistSample>* twistBuffer_;  ///< Non-owning; ZOH input lookup
-        bool disturbed_ = false;                           ///< Robot is not upright (see setDisturbed)
+        bool disturbed_ = false;  ///< Robot is not upright: discard the odometry velocity (see setPosture)
+        bool diffusing_ = false;  ///< Elevated fall PSDs in force (bounded window, see setPosture)
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)
         std::vector<double> logWeights_;                ///< Unnormalised log weights per component

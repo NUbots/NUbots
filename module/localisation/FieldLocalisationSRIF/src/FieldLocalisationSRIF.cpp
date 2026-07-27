@@ -132,7 +132,6 @@ namespace module::localisation {
 
             cfg.gravity_quasi_static_tolerance = config["gravity_quasi_static_tolerance"].as<double>();
             cfg.quaternion_norm_sigma          = config["quaternion_norm_sigma"].as<double>();
-            cfg.disturbed_window               = config["fall"]["disturbed_window"].as<double>();
             cfg.recovery_pos_std               = config["fall"]["recovery_pos_std"].as<double>();
             cfg.recovery_yaw_std               = config["fall"]["recovery_yaw_std"].as<double>();
 
@@ -158,6 +157,7 @@ namespace module::localisation {
             cfg.process.sigmaPosZDisturbed  = config["process"]["sigma_pos_z_disturbed"].as<double>();
             cfg.process.sigmaAttDisturbed   = config["process"]["sigma_att_disturbed"].as<double>();
             cfg.process.sigmaYawDisturbed   = config["process"]["sigma_yaw_disturbed"].as<double>();
+            cfg.process.disturbedWindow     = config["process"]["disturbed_window"].as<double>();
 
             // Landmark measurement options
             cfg.measurement.sigmaAngular         = config["measurement"]["sigma_angular"].as<double>();
@@ -253,12 +253,36 @@ namespace module::localisation {
                 // the event can catch it.
                 const bool upright = stability == nullptr || *stability > Stability::FALLING;
 
+                // Posture transitions are handled here, before any early return, and never inside
+                // one. A getup ends in motion blur, so the frame the robot first reads upright
+                // again is very often a frame with no usable detections; handling the transition
+                // further down meant the recovery inflation was simply skipped on those runs, and
+                // the filter came out of the fall holding pre-fall confidence in a mean that had
+                // moved. Setting the posture up here also means it is set from THIS frame's fall
+                // start rather than the previous episode's.
+                if (initialised) {
+                    if (!upright && was_upright) {
+                        fall_start_t = t;
+                        log<INFO>(
+                            "Robot not upright; suppressing kinematic height, landmark and "
+                            "(quasi-static) gravity updates continue");
+                    }
+                    else if (upright && !was_upright) {
+                        apply_fall_recovery(t);
+                    }
+                    system->setPosture(upright, upright ? 0.0 : t - fall_start_t);
+                    was_upright = upright;
+                }
+
                 // Pair the odometry to the vision capture time. The message's Hcw is at capture, so
                 // using the latest Htw instead would fold the capture-to-now torso motion into Tbc
                 // and offset every reprojection.
                 const filter::SensorsSample* paired = nearest_sensors(t);
                 if (paired == nullptr) {
                     log<DEBUG>("No odometry sample near the vision frame; skipping");
+                    if (initialised) {
+                        system->predictAll(t);
+                    }
                     return;
                 }
                 const filter::Pose<double>& Htw = paired->Htw;
@@ -269,14 +293,6 @@ namespace module::localisation {
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
 
-                // Only the first disturbed_window seconds of a fall get the disturbed PSDs; past
-                // that the robot is lying still and diffusing the belief further would be
-                // inventing motion.
-                if (initialised) {
-                    const double fall_elapsed = upright ? 0.0 : t - fall_start_t;
-                    system->setDisturbed(!upright && fall_elapsed < cfg.disturbed_window);
-                }
-
                 // A face-down fall produces no detections at all. Prediction otherwise only ever
                 // happens inside Event::process, so such a frame would advance neither the state
                 // nor the clock and the filter would emerge from the fall holding its pre-fall
@@ -284,11 +300,7 @@ namespace module::localisation {
                 // uncertain.
                 if (sample.detections.empty()) {
                     if (initialised) {
-                        if (upright != was_upright && !upright) {
-                            fall_start_t = t;
-                        }
                         system->predictAll(t);
-                        was_upright = upright;
                     }
                     return;
                 }
@@ -324,49 +336,6 @@ namespace module::localisation {
                               filter::SystemLocalisation::heading(Eigen::VectorXd(eta0)) * 180.0 / M_PI,
                               "deg");
                 }
-
-                if (!upright && was_upright) {
-                    fall_start_t = t;
-                    log<INFO>(
-                        "Robot not upright; suppressing kinematic height, landmark and "
-                        "(quasi-static) gravity updates continue");
-                }
-
-                // Recovery from a fall. The mean is kept: a fall and getup move the torso well
-                // under a metre, so the pre-fall position is still the best estimate available,
-                // and re-solving the pose globally would be worse -- the grid search resolves the
-                // field symmetry from the known starting half, a prior that is simply false once
-                // play is under way. What a fall actually destroys is confidence, above all in
-                // yaw, so that is what is given back.
-                if (upright && !was_upright) {
-                    // Yaw uncertainty is about the field z axis, which on the quaternion states is
-                    // a rank-one block rather than a single diagonal element -- there is no "the
-                    // yaw element" any more.
-                    const Eigen::VectorXd xr = system->density.mean();
-                    Eigen::MatrixXd extra_cov =
-                        Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
-                    extra_cov(0, 0) = extra_cov(1, 1) = cfg.recovery_pos_std * cfg.recovery_pos_std;
-                    const Eigen::Vector4d j_yaw       = filter::SystemLocalisation::attitudeTangentField(xr).col(2);
-                    extra_cov.block<4, 4>(filter::SystemLocalisation::iQuat, filter::SystemLocalisation::iQuat) =
-                        cfg.recovery_yaw_std * cfg.recovery_yaw_std * j_yaw * j_yaw.transpose();
-                    system->inflateCovariance(extra_cov);
-
-                    // A fall is also a chance to have been turned around without the landmarks
-                    // noticing, and they can never notice: the two symmetric field poses fit each
-                    // other's landmarks identically. Re-seed the mirror so any out-of-field
-                    // evidence has something to switch to.
-                    if (cfg.use_hypothesis_bank && system->numHypotheses() == 1) {
-                        system->spawnMirror();
-                    }
-                    log<INFO>("Recovered after ",
-                              t - fall_start_t,
-                              "s not upright; inflated to sigma_yaw ",
-                              std::sqrt(filter::SystemLocalisation::yawVariance(system->density.mean(),
-                                                                                system->density.cov()))
-                                  * 180.0 / M_PI,
-                              "deg");
-                }
-                was_upright = upright;
 
                 // Predict forward to the vision capture time using the odometry twist buffer.
                 system->predict(t);
@@ -422,6 +391,43 @@ namespace module::localisation {
 
                 emit_field(Htw, &measurement);
             });
+    }
+
+    void FieldLocalisationSRIF::apply_fall_recovery(double t) {
+        // The mean is kept: a fall and getup move the torso well under a metre, so the pre-fall
+        // position is still the best estimate available, and re-solving the pose globally would be
+        // worse -- the grid search resolves the field symmetry from the known starting half, a
+        // prior that is simply false once play is under way. What a fall actually destroys is
+        // confidence, above all in yaw, so that is what is given back. The widened belief is also
+        // what lets the landmark association gate reopen (see Options::gateYawScale); without it a
+        // getup that turned the robot leaves every predicted bearing outside the gate and the
+        // filter can never re-associate.
+        const Eigen::VectorXd xr = system->density.mean();
+        Eigen::MatrixXd extra_cov =
+            Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
+        extra_cov(0, 0) = extra_cov(1, 1) = cfg.recovery_pos_std * cfg.recovery_pos_std;
+        // Yaw uncertainty is about the field z axis, which on the quaternion states is a rank-one
+        // block rather than a single diagonal element -- there is no "the yaw element" any more.
+        const Eigen::Vector4d j_yaw = filter::SystemLocalisation::attitudeTangentField(xr).col(2);
+        extra_cov.block<4, 4>(filter::SystemLocalisation::iQuat, filter::SystemLocalisation::iQuat) =
+            cfg.recovery_yaw_std * cfg.recovery_yaw_std * j_yaw * j_yaw.transpose();
+        system->inflateCovariance(extra_cov);
+
+        // A fall is also a chance to have been turned around without the landmarks noticing, and
+        // they can never notice: the two symmetric field poses fit each other's landmarks
+        // identically. Re-seed the mirror so any out-of-field evidence has something to switch to.
+        if (cfg.use_hypothesis_bank && system->numHypotheses() == 1) {
+            system->spawnMirror();
+        }
+
+        log<INFO>("Recovered after ",
+                  t - fall_start_t,
+                  "s not upright; inflated to sigma_xy ",
+                  std::sqrt(system->density.cov()(0, 0)),
+                  "m, sigma_yaw ",
+                  std::sqrt(filter::SystemLocalisation::yawVariance(system->density.mean(), system->density.cov()))
+                      * 180.0 / M_PI,
+                  "deg");
     }
 
     const filter::SensorsSample* FieldLocalisationSRIF::nearest_sensors(double t) const {

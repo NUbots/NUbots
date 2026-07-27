@@ -41,10 +41,6 @@ quaternion_norm_sigma: 1.0e-3
 # model is plain geometry and stays valid face-down, and a robot that spins while toppling or getting up
 # changes its heading, which only measurements taken during the event can catch.
 fall:
-  # How long into a fall the process:sigma_*_disturbed PSDs apply [s]. A fall is a bounded event; running
-  # them for its whole duration models a robot lying still as a random walk, so the belief would report
-  # how long it had been down rather than how far it could have gone.
-  disturbed_window: 2.0
   # Confidence handed back on standing up again. The mean is kept - a fall and getup move the torso well
   # under a metre, so the pre-fall position is still the best estimate available - but the confidence
   # attached to it is not survivable, above all in yaw.
@@ -74,13 +70,18 @@ process:
   sigma_cam_bias: 3.0e-4 # camera-mount bias [rad/sqrt(s)]
   # While the robot is not upright the process model is not merely noisier, it is wrong: the twist input's
   # linear velocity comes from walk-engine odometry, which reports the gait it believes it is executing
-  # rather than the metre the torso travels while toppling and being levered back up. These are what the
-  # belief decays towards instead, for the first fall:disturbed_window seconds. The camera-mount bias
-  # keeps its ordinary tiny PSD: a fall is no reason to let the extrinsic calibration wander.
+  # rather than the metre the torso travels while toppling and being levered back up. That velocity is
+  # discarded for the WHOLE time the robot is down (it does not become meaningful again after N seconds).
+  # These PSDs are what the belief decays towards meanwhile. The camera-mount bias keeps its ordinary tiny
+  # PSD: a fall is no reason to let the extrinsic calibration wander.
   sigma_pos_xy_disturbed: 0.40 # horizontal position while not upright [m/sqrt(s)]
   sigma_pos_z_disturbed: 0.30 # vertical position while not upright [m/sqrt(s)]
   sigma_att_disturbed: 0.60 # roll/pitch while not upright [rad/sqrt(s)]
   sigma_yaw_disturbed: 0.60 # yaw while not upright [rad/sqrt(s)]
+  # How long into a fall the PSDs above apply [s]. A fall is a bounded event; running them for its whole
+  # duration models a robot lying still as a random walk, so the belief would report how long it had been
+  # down rather than how far it could have gone. This bounds the PSDs ONLY - never the velocity discard.
+  disturbed_window: 2.0
 
 # Landmark ray measurement
 measurement:
