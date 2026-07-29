@@ -41,6 +41,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/slam/FieldMapFromDescription.hpp"
 #include "utility/slam/gaussian/GaussianInfo.hpp"
+#include "utility/slam/measurement/MeasurementBodyRates.hpp"
 #include "utility/slam/measurement/MeasurementGravity.hpp"
 #include "utility/slam/measurement/MeasurementKinematicHeight.hpp"
 #include "utility/slam/measurement/MeasurementQuaternionNorm.hpp"
@@ -63,7 +64,9 @@ namespace module::localisation {
     using utility::slam::rot2rpy;
     using utility::slam::rpy2quat;
     using utility::slam::gaussian::GaussianInfo;
+    using utility::slam::measurement::MeasurementBodyVelocity;
     using utility::slam::measurement::MeasurementGravity;
+    using utility::slam::measurement::MeasurementGyroscope;
     using utility::slam::measurement::MeasurementKinematicHeight;
     using utility::slam::measurement::MeasurementQuaternionNorm;
     using utility::support::Expression;
@@ -119,16 +122,21 @@ namespace module::localisation {
         on<Configuration>("FieldLocalisationSRIF.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.own_half_x_sign        = config["own_half_x_sign"].as<double>();
-            cfg.use_hypothesis_bank    = config["use_hypothesis_bank"].as<bool>();
-            cfg.use_gyroscope          = config["use_gyroscope"].as<bool>();
-            cfg.use_gravity            = config["use_gravity"].as<bool>();
-            cfg.gravity_sigma          = config["gravity_sigma"].as<double>();
-            cfg.use_kinematic_height   = config["use_kinematic_height"].as<bool>();
-            cfg.height_sigma           = config["height_sigma"].as<double>();
-            cfg.max_odometry_gap       = config["max_odometry_gap"].as<double>();
-            cfg.twist_window_seconds   = config["twist_window_seconds"].as<double>();
-            cfg.max_sensor_pairing_age = config["max_sensor_pairing_age"].as<double>();
+            cfg.own_half_x_sign         = config["own_half_x_sign"].as<double>();
+            cfg.use_hypothesis_bank     = config["use_hypothesis_bank"].as<bool>();
+            cfg.use_gyroscope           = config["use_gyroscope"].as<bool>();
+            cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
+            cfg.use_odometry_velocity   = config["use_odometry_velocity"].as<bool>();
+            cfg.odometry_velocity_sigma = config["odometry_velocity_sigma"].as<double>();
+            cfg.zupt_sigma              = config["zupt_sigma"].as<double>();
+            cfg.zupt_dynamic_sigma      = config["zupt_dynamic_sigma"].as<double>();
+            cfg.use_gravity             = config["use_gravity"].as<bool>();
+            cfg.gravity_sigma           = config["gravity_sigma"].as<double>();
+            cfg.use_kinematic_height    = config["use_kinematic_height"].as<bool>();
+            cfg.height_sigma            = config["height_sigma"].as<double>();
+            cfg.max_odometry_gap        = config["max_odometry_gap"].as<double>();
+            cfg.twist_window_seconds    = config["twist_window_seconds"].as<double>();
+            cfg.max_sensor_pairing_age  = config["max_sensor_pairing_age"].as<double>();
 
             cfg.gravity_quasi_static_tolerance = config["gravity_quasi_static_tolerance"].as<double>();
             cfg.quaternion_norm_sigma          = config["quaternion_norm_sigma"].as<double>();
@@ -157,6 +165,11 @@ namespace module::localisation {
             cfg.process.sigmaPosZDisturbed  = config["process"]["sigma_pos_z_disturbed"].as<double>();
             cfg.process.sigmaAttDisturbed   = config["process"]["sigma_att_disturbed"].as<double>();
             cfg.process.sigmaYawDisturbed   = config["process"]["sigma_yaw_disturbed"].as<double>();
+            cfg.process.sigmaVel            = config["process"]["sigma_vel"].as<double>();
+            cfg.process.sigmaOmega          = config["process"]["sigma_omega"].as<double>();
+            cfg.process.sigmaGyroBias       = config["process"]["sigma_gyro_bias"].as<double>();
+            cfg.process.sigmaVelDisturbed   = config["process"]["sigma_vel_disturbed"].as<double>();
+            cfg.process.sigmaOmegaDisturbed = config["process"]["sigma_omega_disturbed"].as<double>();
             cfg.process.disturbedWindow     = config["process"]["disturbed_window"].as<double>();
 
             // Landmark measurement options
@@ -207,11 +220,9 @@ namespace module::localisation {
             s.t             = seconds(sensors.timestamp);
             s.Htw           = to_pose(Eigen::Isometry3d(sensors.Htw));
             s.accelerometer = sensors.accelerometer;
-            // twistFromOdometry uses the gyro as the body angular velocity when it is finite, otherwise it
-            // falls back to the rate finite-differenced from the odometry attitude in Htw. Feed a NaN when
-            // use_gyroscope is off to force that odometry-derived fallback.
-            s.gyroscope = cfg.use_gyroscope ? sensors.gyroscope
-                                            : Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
+            // Raw, and kept raw: the gyroscope is its own measurement of omegaBb now
+            // (MeasurementGyroscope), not a substitute for the odometry's angular rate.
+            s.gyroscope = sensors.gyroscope;
             sensors_window.push_back(std::move(s));
 
             // Drop samples older than the configured window (keep at least two to difference across)
@@ -223,8 +234,9 @@ namespace module::localisation {
                 sensors_window.erase(sensors_window.begin(), first_kept);
             }
 
-            // Rebuild in place: assignment keeps the vector object address stable, so the pointer the
-            // system holds to twist_buffer stays valid.
+            // Body-fixed velocity samples for MeasurementBodyVelocity. The system no longer
+            // holds a pointer to this -- nothing is a known input any more -- so it is just a
+            // buffer the vision reaction reads the nearest sample from.
             twist_buffer = filter::SystemLocalisation::twistFromOdometry(sensors_window, 0.0, cfg.max_odometry_gap);
         });
 
@@ -293,6 +305,51 @@ namespace module::localisation {
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
 
+                // Body-rate measurements go in before the no-detections gate below, because
+                // neither of them has anything to do with whether YOLO found something. A
+                // fallen robot's camera is in the carpet, so those are exactly the frames
+                // that return no detections -- and exactly the frames where an unmeasured
+                // velocity state would integrate the pre-fall gait straight off the field.
+                // (Measurement::process predicts to t itself, so the predictAll below is a
+                // zero-dt no-op once these have run.)
+                if (initialised) {
+                    // The gyroscope runs unconditionally, including through a fall: it is the
+                    // one sensor that measures a topple honestly, and its reading is valid
+                    // whatever the robot's posture.
+                    if (cfg.use_gyroscope && paired->gyroscope.allFinite()) {
+                        MeasurementGyroscope gyro(t, paired->gyroscope, cfg.gyroscope_sigma);
+                        system->process(gyro);
+                    }
+
+                    // The walk-engine odometry velocity, on the other hand, describes the gait
+                    // the engine believes it is executing. Upright that is loose but real
+                    // information; on the ground it is fiction, and during a getup it is a
+                    // scripted flail that is not locomotion. So while not upright it is
+                    // replaced by a zero-velocity update -- the same per-model gating as
+                    // kinematic height, which is a tidier way to say it than the special case
+                    // that used to live inside the process model's input().
+                    if (upright) {
+                        const filter::BodyTwistSample* twist = nearest_twist(t);
+                        if (cfg.use_odometry_velocity && twist != nullptr && twist->vBb.allFinite()) {
+                            MeasurementBodyVelocity vel(t, twist->vBb, cfg.odometry_velocity_sigma);
+                            system->process(vel);
+                        }
+                    }
+                    else {
+                        // A robot on the carpet is not travelling anywhere, and saying so is the
+                        // most confident measurement available. It is also the only thing
+                        // stopping the pre-fall walking velocity from integrating across the
+                        // whole fall, which with velocity in the state is exactly how the
+                        // estimate walks off the field. Leaving it unmeasured is not the neutral
+                        // choice it looks like: it asserts the robot may still be moving at
+                        // whatever it was doing when it fell.
+                        const bool settled = stability != nullptr && *stability == Stability::FALLEN;
+                        MeasurementBodyVelocity zupt =
+                            MeasurementBodyVelocity::stationary(t, settled ? cfg.zupt_sigma : cfg.zupt_dynamic_sigma);
+                        system->process(zupt);
+                    }
+                }
+
                 // A face-down fall produces no detections at all. Prediction otherwise only ever
                 // happens inside Event::process, so such a frame would advance neither the state
                 // nor the clock and the filter would emerge from the fall holding its pre-fall
@@ -308,7 +365,7 @@ namespace module::localisation {
                 // Bootstrap: solve a coarse initial pose the first time we see usable landmarks.
                 if (!initialised) {
                     const filter::Pose<double> Twt = Htw.inverse();
-                    Eigen::Matrix<double, 9, 1> eta0;
+                    Eigen::Matrix<double, 18, 1> eta0;
                     if (!solve_initial_pose(sample, Tbc, Twt, eta0)) {
                         log<DEBUG>("Initial pose solve did not associate enough landmarks yet");
                         return;
@@ -319,7 +376,7 @@ namespace module::localisation {
                     S0.diagonal() = cfg.initial_sqrt_covariance;
                     const auto p0 = GaussianInfo<double>::fromSqrtMoment(Eigen::VectorXd(eta0), S0);
 
-                    system         = std::make_unique<filter::SystemLocalisation>(p0, twist_buffer);
+                    system         = std::make_unique<filter::SystemLocalisation>(p0);
                     system->params = cfg.process;
                     system->hyp    = cfg.hypothesis;
                     system->resetTo(p0, t);
@@ -393,6 +450,19 @@ namespace module::localisation {
             });
     }
 
+    const filter::BodyTwistSample* FieldLocalisationSRIF::nearest_twist(double t) const {
+        const filter::BodyTwistSample* best = nullptr;
+        double best_dt                      = std::numeric_limits<double>::infinity();
+        for (const filter::BodyTwistSample& s : twist_buffer) {
+            const double dt = std::abs(s.t - t);
+            if (dt < best_dt) {
+                best_dt = dt;
+                best    = &s;
+            }
+        }
+        return best_dt <= cfg.max_sensor_pairing_age ? best : nullptr;
+    }
+
     void FieldLocalisationSRIF::apply_fall_recovery(double t) {
         // The mean is kept: a fall and getup move the torso well under a metre, so the pre-fall
         // position is still the best estimate available, and re-solving the pose globally would be
@@ -446,7 +516,7 @@ namespace module::localisation {
     bool FieldLocalisationSRIF::solve_initial_pose(const filter::VisionSample& sample,
                                                    const filter::Pose<double>& Tbc,
                                                    const filter::Pose<double>& Twt,
-                                                   Eigen::Matrix<double, 9, 1>& eta0) const {
+                                                   Eigen::Matrix<double, 18, 1>& eta0) const {
         constexpr Eigen::Index nx = filter::SystemLocalisation::nx;
 
         // Roll, pitch and torso height come from the gravity-aligned kinematic chain.
@@ -460,10 +530,8 @@ namespace module::localisation {
         const double half_width             = dims.fieldWidth / 2.0 + dims.borderStripMinWidth;
 
         // Probe system used only to drive association/likelihood scoring (no prediction).
-        const std::vector<filter::BodyTwistSample> no_twist;
         const Eigen::MatrixXd S_probe = Eigen::MatrixXd::Identity(nx, nx) * 0.01;
-        filter::SystemLocalisation probe(GaussianInfo<double>::fromSqrtMoment(Eigen::VectorXd::Zero(nx), S_probe),
-                                         no_twist);
+        filter::SystemLocalisation probe(GaussianInfo<double>::fromSqrtMoment(Eigen::VectorXd::Zero(nx), S_probe));
 
         double best_score        = -std::numeric_limits<double>::infinity();
         std::size_t best_assoc   = 0;
@@ -473,7 +541,10 @@ namespace module::localisation {
             for (double y = -half_width; y <= half_width; y += cfg.grid_step_xy) {
                 for (double yaw = -M_PI; yaw < M_PI; yaw += cfg.grid_step_yaw) {
                     Eigen::VectorXd candidate(nx);
-                    candidate << x, y, z0, rpy2quat(Eigen::Vector3d(roll0, pitch0, yaw)), 0.0, 0.0;
+                    // Rates start at zero: the grid solve runs on the first usable frame, and
+                    // the body-rate measurements sharpen them within a frame or two.
+                    candidate << x, y, z0, rpy2quat(Eigen::Vector3d(roll0, pitch0, yaw)),
+                        Eigen::Matrix<double, 9, 1>::Zero(), 0.0, 0.0;
                     probe.resetTo(GaussianInfo<double>::fromSqrtMoment(candidate, S_probe), sample.t);
 
                     filter::MeasurementFieldLandmarks measurement(sample.t, sample, Tbc, *map, probe, cfg.measurement);

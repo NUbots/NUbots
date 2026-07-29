@@ -42,15 +42,51 @@ namespace utility::slam::system {
     };
 
     /*
-     * State contains the 6-DOF torso pose in the field frame {f} plus a 2-DOF
-     * camera-mount attitude bias:
+     * State contains the 6-DOF torso pose in the field frame {f}, its body-fixed
+     * velocity, the gyroscope bias, and a 2-DOF camera-mount attitude bias:
      *
-     *     [ rBFf   ] Torso position in field frame (3)
-     * x = [ q      ] Torso orientation quaternion (w, x, y, z), Rfb = quat2rot(q)
-     *     [ deltaC ] Camera mount attitude bias (roll, pitch) about the camera axes (2)
+     *     [ rBFf    ] Torso position in field frame (3)
+     *     [ q       ] Torso orientation quaternion (4), Rfb = quat2rot(q)
+     * x = [ vBb     ] Body-fixed translational velocity (3)
+     *     [ omegaBb ] Body-fixed angular velocity (3)
+     *     [ bGyro   ] Gyroscope bias, body frame (3)
+     *     [ deltaC  ] Camera mount attitude bias (roll, pitch) about the camera axes (2)
      *
      * Field frame {f}: origin at centre of field on the ground plane, z up,
      * consistent with the NUbots Hfw convention.
+     *
+     * Pose in {f}, velocity in {b}: the Fossen vehicle-dynamics convention
+     * (eta, nu) rather than the strapdown-INS one, which would carry velocity in
+     * {f} alongside position. Two reasons. The velocity states are a random walk,
+     * and "the robot keeps walking forward at this speed" is a far better model of
+     * a turning robot than "its field-frame velocity vector is constant" -- the
+     * latter needs a PSD sized for the turn even when walking straight. And every
+     * velocity measurement arrives body-fixed (the gyroscope directly, the walk
+     * odometry as a body-frame finite difference), so h(x) is the identity rather
+     * than Rfb^T. The frames are mixed regardless: omegaBb has to be body-fixed
+     * because that is what the gyroscope measures and what q-dot takes.
+     *
+     * A pleasant consequence: the 180 deg field mirror leaves both velocity blocks
+     * alone. v_b' = (Rz(pi) Rfb)^T Rz(pi) v_f = v_b, so mirrorState() stays a
+     * position-and-quaternion operation. Field-frame velocity would have needed
+     * its horizontal components negated alongside the position.
+     *
+     * Nothing is a known input. The gyroscope and the walk-engine odometry are
+     * *measurements* of omegaBb and vBb (MeasurementGyroscope,
+     * MeasurementBodyVelocity), so their noise is modelled where it belongs and
+     * the gyroscope bias is estimated rather than calibrated by heuristic. That
+     * bias is unobservable to the upstream Mahony filter, whose bias integrator is
+     * driven by the gravity error -- a cross product of two near-vertical vectors,
+     * which has no component about the vertical -- so before this nothing in the
+     * system estimated the yaw-rate bias, the one that becomes heading drift.
+     * Measured on the data2 recording it is ~0.78 deg/s, and estimating it is
+     * worth 2.5 deg of heading RMSE.
+     *
+     * The process model is the kinematics plus a random walk on the rates:
+     *
+     *   d(rBFf)/dt = Rfb*vBb,   dq/dt = 0.5*Xi(q)*omegaBb,
+     *   d(vBb)/dt  = dw_v,      d(omegaBb)/dt = dw_omega,
+     *   d(bGyro)/dt = dw_b,     d(deltaC)/dt  = dw_c
      *
      * The camera bias models a constant error in the kinematic torso-to-camera
      * chain (evident in the recorded data as ground-projection errors growing
@@ -58,17 +94,6 @@ namespace utility::slam::system {
      * bias). It is a random-walk state with very small process noise, applied
      * on the camera side of the extrinsic transform by vision measurements:
      *   Tfc = Tfb(x) * Tbc * R(deltaC)
-     *
-     * Prediction is driven by a buffer of body-fixed twist samples: linear
-     * velocity from finite-differencing the odometry stream (Htw), angular
-     * velocity from the torso gyroscope (bias-calibrated on quiet samples; the
-     * walk-engine odometry attitude slips badly while turning, the gyro does
-     * not). The twist is treated as a known input with additive process noise:
-     *
-     *   deta/dt = JK(eta) * nu(t) + dw,   ddeltaC/dt = dw_c
-     *
-     * where JK(eta) = blkdiag(Rfb, 0.5*Xi(q)) transports the body twist to
-     * field-frame pose rates.
      */
     class SystemLocalisation : public SystemEstimator {
     public:
@@ -76,46 +101,59 @@ namespace utility::slam::system {
          * @brief Process noise and input handling parameters.
          */
         struct Parameters {
-            double sigmaPosXY = 0.08;    ///< Position process noise PSD, horizontal [m/sqrt(s)] (floor vs collapse in
-                                         ///< weakly-observable directions)
-            double sigmaPosZ    = 0.02;  ///< Position process noise PSD, vertical [m/sqrt(s)]
-            double sigmaAtt     = 0.05;  ///< Roll/pitch process noise PSD [rad/sqrt(s)]
-            double sigmaYaw     = 0.05;  ///< Yaw process noise PSD [rad/sqrt(s)]
-            double sigmaCamBias = 3e-4;  ///< Camera mount bias process noise PSD [rad/sqrt(s)] (kept small so bias
-                                         ///< cannot wander while stationary)
+            // The pose states are driven by the velocity states, so their own PSDs are a
+            // small floor against collapse in weakly-observable directions rather than
+            // the main source of growth: uncertainty now reaches position by integrating
+            // the velocity uncertainty, which is where the real ignorance lives.
+            double sigmaPosXY = 0.02;  ///< Position process noise PSD, horizontal [m/sqrt(s)]
+            double sigmaPosZ  = 0.01;  ///< Position process noise PSD, vertical [m/sqrt(s)]
+            double sigmaAtt   = 0.01;  ///< Roll/pitch process noise PSD [rad/sqrt(s)]
+            double sigmaYaw   = 0.01;  ///< Yaw process noise PSD [rad/sqrt(s)]
 
-            // While the robot is not upright the process model is not merely noisier,
-            // it is wrong: the twist input's linear velocity comes from walk-engine
-            // odometry, which reports the gait it believes it is executing rather than
-            // the metre the torso travels while toppling and being levered back up.
-            // The attitude channel is in better shape (the gyroscope measures the
-            // tumble directly) but integrates through impact transients. These PSDs
-            // are what the belief decays towards over a fall instead: a 2 s fall grows
-            // the horizontal position std by ~0.57 m and the yaw std by ~0.85 rad,
-            // enough to reopen the landmark association gates on recovery.
-            double sigmaPosXYDisturbed = 0.40;  ///< Horizontal position process noise PSD while not upright [m/sqrt(s)]
-            double sigmaPosZDisturbed  = 0.30;  ///< Vertical position process noise PSD while not upright [m/sqrt(s)]
-            double sigmaAttDisturbed   = 0.60;  ///< Roll/pitch process noise PSD while not upright [rad/sqrt(s)]
-            double sigmaYawDisturbed   = 0.60;  ///< Yaw process noise PSD while not upright [rad/sqrt(s)]
-            /// How long into a non-upright episode the PSDs above apply [s]. Past this the robot
-            /// is lying still and diffusing further would be inventing motion. Note this bounds
-            /// the PSDs ONLY -- the odometry velocity stays discarded for the whole episode, see
-            /// setPosture().
+            // How fast the body-fixed rates are allowed to change between measurements.
+            // These are the dominant process noise now. A walking robot changes its
+            // forward speed over a step (~0.3 s), so a PSD near the walk speed itself is
+            // about right; angular velocity is measured at IMU rate so its random walk
+            // only has to cover one sample interval.
+            double sigmaVel      = 0.35;  ///< Body linear velocity process noise PSD [m/s/sqrt(s)]
+            double sigmaOmega    = 1.50;  ///< Body angular velocity process noise PSD [rad/s/sqrt(s)]
+            double sigmaGyroBias = 2e-4;  ///< Gyroscope bias random walk PSD [rad/s/sqrt(s)]: slow thermal
+                                          ///< drift only, so vision can average it out over many frames
+            double sigmaCamBias = 3e-4;   ///< Camera mount bias process noise PSD [rad/sqrt(s)] (kept small
+                                          ///< so bias cannot wander while stationary)
+
+            // While the robot is not upright the rates are not merely noisier, they are
+            // unmeasured: the walk-engine odometry describes a gait that is not
+            // happening, so MeasurementBodyVelocity is replaced by a zero-velocity
+            // update. These PSDs are what the belief decays towards meanwhile, so a fall
+            // widens honestly enough to reopen the landmark association gates on recovery.
+            double sigmaVelDisturbed   = 1.00;  ///< Body linear velocity PSD while not upright [m/s/sqrt(s)]
+            double sigmaOmegaDisturbed = 3.00;  ///< Body angular velocity PSD while not upright [rad/s/sqrt(s)]
+            double sigmaPosXYDisturbed = 0.20;  ///< Horizontal position PSD while not upright [m/sqrt(s)]
+            double sigmaPosZDisturbed  = 0.20;  ///< Vertical position PSD while not upright [m/sqrt(s)]
+            double sigmaAttDisturbed   = 0.20;  ///< Roll/pitch PSD while not upright [rad/sqrt(s)]
+            double sigmaYawDisturbed   = 0.20;  ///< Yaw PSD while not upright [rad/sqrt(s)]
+            /// How long into a non-upright episode the PSDs above apply [s]. Past this the
+            /// robot is lying still and diffusing further would be inventing motion. Note
+            /// this bounds the PSDs ONLY -- the odometry velocity measurement stays
+            /// suppressed for the whole episode, see setPosture().
             double disturbedWindow = 2.0;
         };
 
-        // State layout (nx = 9):
-        //   0..2  rBFf         torso position in {f} [m]
-        //   3..6  q            attitude quaternion (w, x, y, z), Rfb = quat2rot(q)
-        //   7..8  camera mount bias (roll, pitch) [rad]
+        // State layout (nx = 18):
+        //   0..2    rBFf         torso position in {f} [m]
+        //   3..6    q            attitude quaternion (w, x, y, z), Rfb = quat2rot(q)
+        //   7..9    vBb          body-fixed linear velocity [m/s]
+        //   10..12  omegaBb      body-fixed angular velocity [rad/s]
+        //   13..15  bGyro        gyroscope bias in {b} [rad/s]
+        //   16..17  camera mount bias (roll, pitch) [rad]
         //
         // Attitude was roll-pitch-yaw until the fall work. The Euler-rate transform
         // TK() is singular at pitch = +-90 deg, which is not an edge case for a
         // falling robot -- it is on the trajectory of every topple. Passing through
         // it landed the state on the gimbal alias (roll+180, 180-pitch, yaw+180):
         // the same rotation, so fieldPose() and the landmark models carried on
-        // working, but every consumer reading x(5) as heading was then 180 deg out,
-        // which is the yaw flip seen across both real falls in the webots recordings.
+        // working, but every consumer reading x(5) as heading was then 180 deg out.
         // A quaternion has no such point, so the state can sit at pitch = 90 deg for
         // as long as the robot is face-down and measurement updates can keep running
         // there.
@@ -126,13 +164,16 @@ namespace utility::slam::system {
         // the MAP Hessian non-singular. See attitudeTangent() for the mapping used
         // wherever a 3-DOF attitude quantity (process noise, yaw variance, a yaw
         // inflation) has to be expressed in these four components.
-        static constexpr Eigen::Index nx = 9;  ///< State dimension
+        static constexpr Eigen::Index nx = 18;  ///< State dimension
 
-        static constexpr Eigen::Index iPos  = 0;  ///< First position index
-        static constexpr Eigen::Index iQuat = 3;  ///< First quaternion index
-        static constexpr Eigen::Index iBias = 7;  ///< First camera-bias index
+        static constexpr Eigen::Index iPos      = 0;   ///< First position index
+        static constexpr Eigen::Index iQuat     = 3;   ///< First quaternion index
+        static constexpr Eigen::Index iVel      = 7;   ///< First body linear velocity index
+        static constexpr Eigen::Index iOmega    = 10;  ///< First body angular velocity index
+        static constexpr Eigen::Index iGyroBias = 13;  ///< First gyroscope bias index
+        static constexpr Eigen::Index iBias     = 16;  ///< First camera-bias index
 
-        SystemLocalisation(const GaussianInfo<double>& density, const std::vector<BodyTwistSample>& twistBuffer);
+        explicit SystemLocalisation(const GaussianInfo<double>& density);
         virtual SystemLocalisation* clone() const;
 
         virtual void predict(double time) override;
@@ -269,14 +310,18 @@ namespace utility::slam::system {
         }
 
         /**
-         * @brief Build a body-twist buffer from the odometry and gyroscope streams.
+         * @brief Body-fixed velocity samples finite-differenced from the odometry stream.
          *
          * For consecutive odometry samples, the relative pose
          * DeltaT = Twt(t1)^{-1} * Twt(t2) with Twt = Htw^{-1} yields
-         * vBb = Delta r / dt, stamped at the interval midpoint; omegaBb is the
-         * interval-mean gyroscope reading minus the quiet-sample gyro bias
-         * (falling back to log(Delta R) / dt when the gyro is not finite).
-         * Samples spanning gaps larger than maxGap are skipped.
+         * vBb = Delta r / dt, stamped at the interval midpoint; omegaBb is
+         * log(Delta R) / dt. Samples spanning gaps larger than maxGap are skipped.
+         *
+         * These are now *measurements* (MeasurementBodyVelocity), not a known input,
+         * so no gyroscope enters here and no bias is subtracted: the raw gyroscope is
+         * its own measurement (MeasurementGyroscope) and its bias is a state. The
+         * omegaBb field is retained for the odometry-derived angular rate, which is
+         * only of interest as a fallback when no gyroscope is available.
          *
          * @param sensors Time-ordered odometry samples (absolute time [s])
          * @param t0 Time origin subtracted from sample times [s]
@@ -286,7 +331,29 @@ namespace utility::slam::system {
                                                               double t0,
                                                               double maxGap = 0.1);
 
-        GaussianInfo<double> positionDensity() const;     ///< Marginal density of rBFf
+        GaussianInfo<double> positionDensity() const;  ///< Marginal density of rBFf
+        GaussianInfo<double> velocityDensity() const;  ///< Marginal density of vBb
+
+        /// @brief Body-fixed linear velocity of a state [m/s].
+        static Eigen::Vector3d bodyVelocity(const Eigen::VectorXd& x) {
+            return x.segment<3>(iVel);
+        }
+
+        /// @brief Body-fixed angular velocity of a state [rad/s].
+        static Eigen::Vector3d bodyRate(const Eigen::VectorXd& x) {
+            return x.segment<3>(iOmega);
+        }
+
+        /// @brief Estimated gyroscope bias of a state [rad/s].
+        static Eigen::Vector3d gyroBias(const Eigen::VectorXd& x) {
+            return x.segment<3>(iGyroBias);
+        }
+
+        /// @brief Speed over ground implied by the body velocity [m/s].
+        static double groundSpeed(const Eigen::VectorXd& x) {
+            return x.segment<2>(iVel).norm();
+        }
+
         GaussianInfo<double> orientationDensity() const;  ///< Marginal density of the attitude quaternion q
 
         /**
@@ -552,7 +619,9 @@ namespace utility::slam::system {
         static GaussianInfo<double> mirrorDensity(const GaussianInfo<double>& g);
 
     protected:
-        const std::vector<BodyTwistSample>* twistBuffer_;  ///< Non-owning; ZOH input lookup
+        // No input buffer: the process model is autonomous (kinematics plus a random
+        // walk on the rates), and everything that used to be a known input is now a
+        // measurement of the corresponding state.
         bool disturbed_ = false;  ///< Robot is not upright: discard the odometry velocity (see setPosture)
         bool diffusing_ = false;  ///< Elevated fall PSDs in force (bounded window, see setPosture)
 

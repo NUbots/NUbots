@@ -89,14 +89,32 @@ namespace module::localisation {
             filter::SystemLocalisation::HypothesisParameters hypothesis{};
             /// @brief Landmark measurement noise/association options
             filter::MeasurementFieldLandmarks::Options measurement{};
-            /// @brief Initial sqrt-covariance diagonal for the 9-dim state after the grid solve.
+            /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve.
             ///
             /// Indices 3..6 are the attitude quaternion's components, not roll/pitch/yaw. A
             /// tangent-space std of s becomes a component std of s/2 (see
             /// SystemLocalisation::quaternionSigma), so the 0.5 rad of initial yaw doubt the old
             /// layout carried at index 5 is 0.25 spread across the four components here.
-            Eigen::Matrix<double, 9, 1> initial_sqrt_covariance =
-                (Eigen::Matrix<double, 9, 1>() << 1.0, 1.0, 0.05, 0.25, 0.25, 0.25, 0.25, 0.02, 0.02).finished();
+            Eigen::Matrix<double, 18, 1> initial_sqrt_covariance = (Eigen::Matrix<double, 18, 1>() << 1.0,
+                                                                    1.0,
+                                                                    0.05,  // position
+                                                                    0.25,
+                                                                    0.25,
+                                                                    0.25,
+                                                                    0.25,  // quaternion
+                                                                    0.30,
+                                                                    0.30,
+                                                                    0.10,  // body linear velocity [m/s]
+                                                                    0.50,
+                                                                    0.50,
+                                                                    0.50,  // body angular velocity [rad/s]
+                                                                    0.05,
+                                                                    0.05,
+                                                                    0.05,  // gyroscope bias [rad/s] (~3 deg/s)
+                                                                    0.02,
+                                                                    0.02  // camera mount bias
+                                                                    )
+                                                                       .finished();
             /// @brief Sign of field-x for the starting half (from game context; breaks the field symmetry)
             double own_half_x_sign = 1.0;
             /// @brief Grid search steps for the initial pose solve
@@ -106,12 +124,6 @@ namespace module::localisation {
             int min_init_associations = 4;
             /// @brief Enable the multi-hypothesis (field-symmetry) Gaussian mixture bank
             bool use_hypothesis_bank = false;
-            /// @brief Feed Sensors.gyroscope into the body-twist angular velocity.
-            ///
-            /// Sensors.gyroscope is a calibrated rad/s torso-frame rate on both hardware and webots (the
-            /// same NUgus.proto lookup table decodes it in each). When off, the angular velocity is
-            /// finite-differenced from the odometry attitude in Htw instead.
-            bool use_gyroscope = true;
             /// @brief Enable the accelerometer gravity measurement.
             ///
             /// Uses the calibrated m/s^2 Sensors.accelerometer (physical on both hardware and webots).
@@ -137,6 +149,31 @@ namespace module::localisation {
             double height_sigma = 0.02;
             /// @brief Std dev on the |q| = 1 pseudo-measurement (dimensionless)
             double quaternion_norm_sigma = 1e-3;
+
+            // --- body-rate measurements ---
+            /// @brief Feed Sensors.gyroscope as a measurement of the body angular velocity.
+            ///
+            /// The gyroscope is no longer a prediction input: it measures omegaBb + bGyro, which
+            /// is what makes the bias observable. Sensors.gyroscope is raw (SensorFilter passes
+            /// the hardware value through; Mahony keeps its own bias estimate internal), so there
+            /// is no double-correction here.
+            bool use_gyroscope = true;
+            /// @brief Gyroscope noise std dev per axis [rad/s]
+            double gyroscope_sigma = 0.02;
+            /// @brief Feed the walk-engine odometry velocity as a measurement of vBb.
+            bool use_odometry_velocity = true;
+            /// @brief Walk-odometry velocity noise std dev per axis [m/s].
+            ///
+            /// Deliberately loose, comparable to the walk speed itself: the odometry slips on
+            /// foot contact and reports the gait the engine believes it is executing. As a
+            /// measurement that is evidence the filter can weigh, never truth it must accept.
+            double odometry_velocity_sigma = 0.15;
+            /// @brief Zero-velocity update noise while FALLEN (lying still) [m/s]
+            double zupt_sigma = 0.02;
+            /// @brief Zero-velocity update noise while FALLING or getting up [m/s].
+            ///
+            /// Toppling and being levered upright genuinely move the torso, just not anywhere.
+            double zupt_dynamic_sigma = 0.30;
 
             // --- fall handling ---
             // Note: how long the elevated PSDs apply lives in process.disturbed_window, next to
@@ -198,6 +235,17 @@ namespace module::localisation {
         [[nodiscard]] const filter::SensorsSample* nearest_sensors(double t) const;
 
         /**
+         * @brief The body-velocity sample in the twist buffer nearest a given time.
+         *
+         * Feeds MeasurementBodyVelocity. Returns nullptr when the buffer is empty or its
+         * nearest sample is too old to describe this frame.
+         *
+         * @param t Vision capture time [s since t0]
+         * @return The nearest sample, or nullptr if there is nothing usable.
+         */
+        [[nodiscard]] const filter::BodyTwistSample* nearest_twist(double t) const;
+
+        /**
          * @brief Hand confidence back to the belief on standing up again.
          *
          * Called on the upright transition only, and from the posture block that runs before any
@@ -227,13 +275,13 @@ namespace module::localisation {
          * @param sample Landmark rays extracted from the vision messages
          * @param Tbc Camera pose w.r.t. torso at capture time
          * @param Twt Torso pose in the odometry world frame at capture time
-         * @param eta0 Output: initial 9-dim state estimate (attitude as a quaternion)
+         * @param eta0 Output: initial 18-dim state estimate (attitude as a quaternion, rates zeroed)
          * @return True if enough landmarks associated to trust the solve
          */
         [[nodiscard]] bool solve_initial_pose(const filter::VisionSample& sample,
                                               const filter::Pose<double>& Tbc,
                                               const filter::Pose<double>& Twt,
-                                              Eigen::Matrix<double, 9, 1>& eta0) const;
+                                              Eigen::Matrix<double, 18, 1>& eta0) const;
     };
 
 }  // namespace module::localisation

@@ -7,9 +7,7 @@ namespace utility::slam::system {
     using utility::slam::gaussian::GaussianInfo;
     using utility::slam::measurement::Measurement;
 
-    SystemLocalisation::SystemLocalisation(const GaussianInfo<double>& density,
-                                           const std::vector<BodyTwistSample>& twistBuffer)
-        : SystemEstimator(density), twistBuffer_(&twistBuffer) {
+    SystemLocalisation::SystemLocalisation(const GaussianInfo<double>& density) : SystemEstimator(density) {
         assert(density.dim() == nx);
     }
 
@@ -17,40 +15,52 @@ namespace utility::slam::system {
         return new SystemLocalisation(*this);
     }
 
-    // Templated dynamics for autodiff:
-    // deta/dt = JK(eta) * nu(t), JK(eta) = blkdiag(Rfb, 0.5*Xi(q))
+    // Templated dynamics for autodiff. Autonomous: nothing is a known input any more,
+    // so the derivative is the rigid-body kinematics driven by the velocity STATES.
+    //
+    //   d(rBFf)/dt = Rfb*vBb           (Fossen's eta-dot = J(eta)*nu, position half)
+    //   dq/dt      = 0.5*Xi(q)*omegaBb (        ... and the attitude half)
+    //   everything else is a random walk: zero drift, process noise only
+    //
+    // Note there is no Coriolis term in d(vBb)/dt. That would appear if vBb were
+    // driven by measured specific force (a strapdown INS); here the model is simply
+    // that the body-fixed velocity is nearly constant between measurements, which is
+    // exactly why body-fixed is the right frame to carry it in -- a robot walking a
+    // curve holds vBb while its field-frame velocity rotates the whole way round.
     template <typename Scalar>
-    static Eigen::VectorX<Scalar> dynamicsLocalisationTemplated(const Eigen::VectorX<Scalar>& x,
-                                                                const Eigen::VectorXd& u) {
+    static Eigen::VectorX<Scalar> dynamicsLocalisationTemplated(const Eigen::VectorX<Scalar>& x) {
         assert(x.size() == SystemLocalisation::nx);
-        assert(u.size() == 6);
 
         const Eigen::Vector4<Scalar> q   = x.segment(SystemLocalisation::iQuat, 4);
         const Eigen::Matrix3<Scalar> Rfb = quat2rot(q);
 
-        const Eigen::Vector3d vBb     = u.head<3>();
-        const Eigen::Vector3d omegaBb = u.tail<3>();
+        const Eigen::Vector3<Scalar> vBb     = x.segment(SystemLocalisation::iVel, 3);
+        const Eigen::Vector3<Scalar> omegaBb = x.segment(SystemLocalisation::iOmega, 3);
 
         Eigen::VectorX<Scalar> f(SystemLocalisation::nx);
         f.setZero();
-        f.segment(SystemLocalisation::iPos, 3) = Rfb * vBb.cast<Scalar>();
+        f.segment(SystemLocalisation::iPos, 3) = Rfb * vBb;
         // qdot = 0.5*Xi(q)*omega_b. No singularity anywhere: every entry of Xi is
         // linear in q, so the toppling robot that used to blow up the roll-pitch-yaw
         // rate transform at pitch = +-90 deg now integrates like any other attitude.
-        f.segment(SystemLocalisation::iQuat, 4) = Scalar(0.5) * quatXi(q) * omegaBb.cast<Scalar>();
-        // Camera mount bias states are a random walk: zero drift
+        f.segment(SystemLocalisation::iQuat, 4) = Scalar(0.5) * quatXi(q) * omegaBb;
+        // vBb, omegaBb, the gyroscope bias and the camera mount bias are all random
+        // walks: zero drift.
         return f;
     }
 
+    // The input is unused: the process model is autonomous, driven by the velocity
+    // states rather than by a twist fed in from outside. The parameter stays because
+    // SystemBase's interface is shared with input-driven systems.
     Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
                                                  const Eigen::VectorXd& x,
-                                                 const Eigen::VectorXd& u) const {
-        return dynamicsLocalisationTemplated<double>(x, u);
+                                                 const Eigen::VectorXd& /*u*/) const {
+        return dynamicsLocalisationTemplated<double>(x);
     }
 
     Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
                                                  const Eigen::VectorXd& x,
-                                                 const Eigen::VectorXd& u,
+                                                 const Eigen::VectorXd& /*u*/,
                                                  Eigen::MatrixXd& J) const {
         using autodiff::at;
         using autodiff::dual;
@@ -59,7 +69,7 @@ namespace utility::slam::system {
 
         Eigen::VectorX<dual> xdual = x.cast<dual>();
         auto func                  = [&](const Eigen::VectorX<dual>& xd) -> Eigen::VectorX<dual> {
-            return dynamicsLocalisationTemplated<dual>(xd, u);
+            return dynamicsLocalisationTemplated<dual>(xd);
         };
 
         Eigen::VectorX<dual> fdual;
@@ -72,52 +82,35 @@ namespace utility::slam::system {
         return f;
     }
 
-    Eigen::VectorXd SystemLocalisation::input(double t, const Eigen::VectorXd& /*x*/) const {
-        // Zero-order-hold lookup of the body twist at time t (zero outside buffer)
-        Eigen::VectorXd u = Eigen::VectorXd::Zero(6);
-        if (twistBuffer_ == nullptr || twistBuffer_->empty()) {
-            return u;
-        }
-
-        const auto& buf = *twistBuffer_;
-        auto it         = std::upper_bound(buf.begin(), buf.end(), t, [](double time, const BodyTwistSample& s) {
-            return time < s.t;
-        });
-        if (it == buf.begin()) {
-            return u;  // Before first sample
-        }
-        const BodyTwistSample& s = *std::prev(it);
-        u.head<3>()              = s.vBb;
-        u.tail<3>()              = s.omegaBb;
-        if (disturbed_) {
-            // vBb is a finite difference of walk-engine odometry, which keeps describing
-            // the gait it thinks it is executing while the robot is on the ground, and
-            // during a getup describes a scripted flail that is not locomotion; worse,
-            // twistFromOdometry drops intervals longer than maxGap, so the zero-order hold
-            // above would carry the last pre-fall velocity across a sensor stall. None of
-            // that is information, and it does not become information after a couple of
-            // seconds -- this is keyed off the posture itself, NOT off the bounded window
-            // that governs the elevated PSDs. omegaBb comes from the gyroscope, which
-            // measures the topple honestly, so it is kept.
-            u.head<3>().setZero();
-        }
-        return u;
+    Eigen::VectorXd SystemLocalisation::input(double, const Eigen::VectorXd&) const {
+        // The process model is autonomous. What used to be a known input -- the body
+        // twist finite-differenced from walk-engine odometry, with the gyroscope
+        // substituted for its angular part -- is now two measurements
+        // (MeasurementBodyVelocity, MeasurementGyroscope) of two velocity states. That
+        // is the whole point of carrying the rates: the odometry's noise is modelled
+        // where it belongs instead of being asserted as truth, and the gyroscope's bias
+        // becomes an estimated state rather than a heuristic subtracted up front.
+        return Eigen::VectorXd();
     }
 
     GaussianInfo<double> SystemLocalisation::processNoiseDensity(double dt) const {
         // dw ~ N^{-1}(0, LambdaQ/dt), i.e., cov(dw) = Q*dt
         Eigen::VectorXd sigma(nx);
         if (diffusing_) {
-            // The camera mount bias is a property of the kinematic chain, not of the
-            // posture, so it keeps its ordinary (deliberately tiny) PSD: a fall is no
-            // reason to let the extrinsic calibration wander.
+            // The gyroscope and camera-mount biases are properties of the hardware, not
+            // of the posture, so they keep their ordinary (deliberately tiny) PSDs: a
+            // fall is no reason to let a calibration wander.
             sigma << params.sigmaPosXYDisturbed, params.sigmaPosXYDisturbed, params.sigmaPosZDisturbed,
-                quaternionSigma(params.sigmaAttDisturbed, params.sigmaYawDisturbed), params.sigmaCamBias,
-                params.sigmaCamBias;
+                quaternionSigma(params.sigmaAttDisturbed, params.sigmaYawDisturbed),
+                Eigen::Vector3d::Constant(params.sigmaVelDisturbed),
+                Eigen::Vector3d::Constant(params.sigmaOmegaDisturbed), Eigen::Vector3d::Constant(params.sigmaGyroBias),
+                params.sigmaCamBias, params.sigmaCamBias;
         }
         else {
             sigma << params.sigmaPosXY, params.sigmaPosXY, params.sigmaPosZ,
-                quaternionSigma(params.sigmaAtt, params.sigmaYaw), params.sigmaCamBias, params.sigmaCamBias;
+                quaternionSigma(params.sigmaAtt, params.sigmaYaw), Eigen::Vector3d::Constant(params.sigmaVel),
+                Eigen::Vector3d::Constant(params.sigmaOmega), Eigen::Vector3d::Constant(params.sigmaGyroBias),
+                params.sigmaCamBias, params.sigmaCamBias;
         }
 
         Eigen::MatrixXd XiQ = Eigen::MatrixXd::Zero(nx, nx);
@@ -144,26 +137,6 @@ namespace utility::slam::system {
         }
         twists.reserve(sensors.size() - 1);
 
-        // Gyroscope bias from quiet samples. While the robot stands still the
-        // gyro reads its bias directly (|omega| well below the walking
-        // oscillation), so the mean over quiet samples calibrates it. The data2
-        // recording shows ~0.75 deg/s of uncorrected z-bias, which otherwise
-        // becomes a steady yaw drift the vision must keep fighting.
-        Eigen::Vector3d gyroBias = Eigen::Vector3d::Zero();
-        {
-            Eigen::Vector3d sum = Eigen::Vector3d::Zero();
-            std::size_t n       = 0;
-            for (const SensorsSample& s : sensors) {
-                if (s.gyroscope.allFinite() && s.gyroscope.norm() < 0.05) {
-                    sum += s.gyroscope;
-                    n++;
-                }
-            }
-            if (n >= 100) {
-                gyroBias = sum / static_cast<double>(n);
-            }
-        }
-
         for (std::size_t k = 1; k < sensors.size(); ++k) {
             const SensorsSample& a = sensors[k - 1];
             const SensorsSample& b = sensors[k];
@@ -187,17 +160,16 @@ namespace utility::slam::system {
             Eigen::AngleAxisd aa(dT.rotationMatrix);
 
             BodyTwistSample s;
-            s.t       = 0.5 * (a.t + b.t) - t0;
-            s.vBb     = dT.translationVector / dt;
+            s.t   = 0.5 * (a.t + b.t) - t0;
+            s.vBb = dT.translationVector / dt;
+            // Odometry-derived angular rate. Previously the gyroscope was substituted in
+            // here, because the walk-engine odometry attitude slips badly while turning
+            // (data2 mocap: ~150 deg of yaw lost by t=40 s on odometry alone). It is no
+            // longer substituted: the gyroscope is its own measurement of omegaBb with
+            // its own noise and its own estimated bias, and folding it into this sample
+            // would feed the same reading in twice. This field is only useful as a
+            // fallback when no gyroscope is available.
             s.omegaBb = aa.angle() * aa.axis() / dt;
-            // The walk-engine odometry attitude slips badly while turning (data2
-            // mocap: ~150 deg of yaw lost by t=40 s on odometry alone), but the
-            // torso-frame gyroscope measures the angular velocity directly and is
-            // immune to foot slip: prefer it whenever the sample carries one.
-            const Eigen::Vector3d gyro = 0.5 * (a.gyroscope + b.gyroscope) - gyroBias;
-            if (gyro.allFinite()) {
-                s.omegaBb = gyro;
-            }
             if (!s.vBb.allFinite() || !s.omegaBb.allFinite()) {
                 continue;
             }
@@ -275,6 +247,10 @@ namespace utility::slam::system {
         return density.marginal(Eigen::seqN(iQuat, 4));
     }
 
+    GaussianInfo<double> SystemLocalisation::velocityDensity() const {
+        return density.marginal(Eigen::seqN(iVel, 3));
+    }
+
     // Project one density's attitude mean back onto the unit sphere.
     static GaussianInfo<double> projectQuaternion(const GaussianInfo<double>& g) {
         Eigen::VectorXd mu = g.mean();
@@ -329,6 +305,13 @@ namespace utility::slam::system {
         // quaternion that premultiplication is qz(pi) (x) q with qz(pi) = (0,0,0,1),
         // i.e. (w,x,y,z) -> (-z,-y,x,w) -- a signed permutation, so unlike the yaw
         // offset it used to be it is exactly linear and needs no wrapping.
+        //
+        // The velocity states are untouched, and that is a property of carrying them
+        // body-fixed rather than an oversight: v_b' = (Rz(pi) Rfb)^T Rz(pi) v_f = v_b.
+        // The robot is doing exactly the same thing, just somewhere else on the field.
+        // Field-frame velocity would have needed its horizontal components negated
+        // alongside the position. The gyroscope and camera biases are hardware
+        // properties and are likewise unaffected by where the robot is standing.
         Eigen::VectorXd y   = x;
         y(0)                = -x(0);
         y(1)                = -x(1);

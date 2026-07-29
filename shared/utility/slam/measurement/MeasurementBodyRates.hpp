@@ -1,0 +1,138 @@
+/**
+ * @file MeasurementBodyRates.hpp
+ * @brief Direct measurements of the body-fixed velocity states.
+ *
+ * These are the two signals that used to be a known input to the process model.
+ * Making them measurements is the point of carrying vBb and omegaBb as states:
+ *
+ *  - an input asserts its value as truth, so its noise can only be expressed as
+ *    process noise on whatever it drives, and any bias it carries is unmodelled;
+ *  - a measurement carries its own sigma and can be gated, suppressed or
+ *    contradicted by the rest of the belief, and a bias on it can be a state.
+ *
+ * That last point is what the gyroscope bias needed. It is unobservable to the
+ * upstream Mahony filter (whose bias integrator is driven by the gravity error, a
+ * cross product of two near-vertical vectors, which has no component about the
+ * vertical), so nothing in the system was estimating the yaw-rate bias -- the one
+ * that turns into steady heading drift.
+ */
+#ifndef MEASUREMENTBODYRATES_HPP
+#define MEASUREMENTBODYRATES_HPP
+
+#include <Eigen/Core>
+#include <cmath>
+
+#include "../system/SystemEstimator.hpp"
+#include "../system/SystemLocalisation.hpp"
+#include "Measurement.hpp"
+
+namespace utility::slam::measurement {
+
+    /**
+     * @class MeasurementGyroscope
+     * @brief Torso gyroscope as a measurement of the body angular velocity.
+     *
+     *   y = omegaBb + bGyro + v,   v ~ N(0, sigma^2 I3)
+     *
+     * The bias is a state, so this is what makes it observable: the gyroscope sees
+     * the sum, and the landmark measurements pin omegaBb through the attitude they
+     * constrain, leaving the difference to accumulate onto the bias.
+     */
+    class MeasurementGyroscope : public Measurement {
+    public:
+        /**
+         * @brief Construct a gyroscope measurement.
+         * @param time Event time [s]
+         * @param gyroscope Measured angular velocity in the torso frame [rad/s]
+         * @param sigma Noise standard deviation per axis [rad/s]
+         */
+        MeasurementGyroscope(double time, const Eigen::Vector3d& gyroscope, double sigma = 0.02);
+
+        virtual Eigen::VectorXd simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x,
+                                     const SystemEstimator& system,
+                                     Eigen::VectorXd& g) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x,
+                                     const SystemEstimator& system,
+                                     Eigen::VectorXd& g,
+                                     Eigen::MatrixXd& H) const override;
+
+        /// @brief Templated log-likelihood for autodiff.
+        template <typename Scalar>
+        Scalar logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
+            const Eigen::Vector3<Scalar> yhat =
+                Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iOmega, 3))
+                + Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iGyroBias, 3));
+            const Eigen::Vector3<Scalar> e = y_.cast<Scalar>() - yhat;
+            const double sigma2            = sigma_ * sigma_;
+            return Scalar(-1.5 * std::log(2.0 * M_PI * sigma2)) - Scalar(0.5) * e.squaredNorm() / Scalar(sigma2);
+        }
+
+    protected:
+        Eigen::Vector3d y_;  ///< Measured angular velocity [rad/s]
+        double sigma_;       ///< Noise standard deviation [rad/s]
+    };
+
+    /**
+     * @class MeasurementBodyVelocity
+     * @brief Body-fixed linear velocity, from walk-engine odometry or a zero-velocity update.
+     *
+     *   y = vBb + v,   v ~ N(0, sigma^2 I3)
+     *
+     * Two callers, with very different sigmas:
+     *
+     *  - the walk-engine odometry, finite-differenced from Htw. It slips on foot
+     *    contact and describes the gait the engine believes it is executing, so it
+     *    earns a loose sigma -- but as a measurement that is now something the filter
+     *    can weigh against vision rather than something it has to accept.
+     *  - a zero-velocity update while the robot is not upright. A fallen robot is not
+     *    travelling anywhere, and saying so is both the most confident measurement in
+     *    the system and the only thing stopping the pre-fall velocity from integrating
+     *    across the whole fall. Leaving it unmeasured is not the neutral choice it
+     *    looks like: it asserts the robot may still be moving at whatever it was doing
+     *    when it fell, which is the one thing it is certainly not doing.
+     */
+    class MeasurementBodyVelocity : public Measurement {
+    public:
+        /**
+         * @brief Construct a body-velocity measurement.
+         * @param time Event time [s]
+         * @param velocity Measured body-fixed linear velocity [m/s]
+         * @param sigma Noise standard deviation per axis [m/s]
+         */
+        MeasurementBodyVelocity(double time, const Eigen::Vector3d& velocity, double sigma = 0.15);
+
+        /// @brief A zero-velocity update: the robot is known not to be travelling.
+        static MeasurementBodyVelocity stationary(double time, double sigma = 0.02) {
+            return MeasurementBodyVelocity(time, Eigen::Vector3d::Zero(), sigma);
+        }
+
+        virtual Eigen::VectorXd simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x,
+                                     const SystemEstimator& system,
+                                     Eigen::VectorXd& g) const override;
+        virtual double logLikelihood(const Eigen::VectorXd& x,
+                                     const SystemEstimator& system,
+                                     Eigen::VectorXd& g,
+                                     Eigen::MatrixXd& H) const override;
+
+        /// @brief Templated log-likelihood for autodiff.
+        template <typename Scalar>
+        Scalar logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
+            const Eigen::Vector3<Scalar> e =
+                y_.cast<Scalar>()
+                - Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iVel, 3));
+            const double sigma2 = sigma_ * sigma_;
+            return Scalar(-1.5 * std::log(2.0 * M_PI * sigma2)) - Scalar(0.5) * e.squaredNorm() / Scalar(sigma2);
+        }
+
+    protected:
+        Eigen::Vector3d y_;  ///< Measured body velocity [m/s]
+        double sigma_;       ///< Noise standard deviation [m/s]
+    };
+
+}  // namespace utility::slam::measurement
+
+#endif

@@ -12,10 +12,24 @@ own_half_x_sign: 1.0
 # does not yet source (see utility::slam::SideDisambiguator).
 use_hypothesis_bank: false
 
-# Feed Sensors.gyroscope into the body-twist angular velocity. Sensors.gyroscope is a calibrated rad/s
-# torso-frame rate on both hardware and webots. When off, the angular velocity is finite-differenced
-# from the odometry attitude in Htw instead (useful if a platform lacks a trusted gyro).
+# Body-rate measurements. The gyroscope and the walk-engine odometry are no longer known inputs to the
+# process model - they are measurements of the body angular and linear velocity states. That is what
+# lets their noise be modelled honestly and, for the gyroscope, what makes its bias an estimated state
+# rather than a heuristic subtracted up front. Sensors.gyroscope is raw (SensorFilter passes the
+# hardware value through and Mahony keeps its bias internal), so there is no double-correction.
 use_gyroscope: true
+gyroscope_sigma: 0.02 # gyroscope noise std dev per axis [rad/s]
+use_odometry_velocity: true
+# Deliberately loose, comparable to the walk speed itself: the odometry slips on foot contact and
+# reports the gait the engine believes it is executing. As a measurement that is evidence the filter can
+# weigh, never truth it has to accept.
+odometry_velocity_sigma: 0.15 # [m/s]
+# Zero-velocity updates while the robot is down. A robot on the carpet is not travelling anywhere, and
+# saying so is the only thing stopping the pre-fall gait from integrating across the whole fall.
+# Leaving it unmeasured is not the neutral choice it looks like - it asserts the robot may still be
+# moving at whatever it was doing when it fell.
+zupt_sigma: 0.02 # [m/s] FALLEN, lying still
+zupt_dynamic_sigma: 0.30 # [m/s] FALLING or getting up - the torso moves, just not anywhere
 
 # Low-rate corrections
 # Accelerometer gravity-direction measurement of torso roll/pitch, from the calibrated m/s^2
@@ -56,17 +70,19 @@ max_sensor_pairing_age: 0.1 # max age of the odometry sample paired with a visio
 grid_step_xy: 0.35 # position step [m]
 grid_step_yaw: 18.0 # heading step [deg]
 min_init_associations: 4 # landmark associations needed to trust a solve
-# Initial sqrt-covariance diagonal for the 9-dim state [x, y, z, qw, qx, qy, qz, cam_roll, cam_pitch].
+# Initial sqrt-covariance diagonal for the 18-dim state.
 # Attitude is a quaternion, not roll/pitch/yaw: a tangent-space std of s becomes a component std of s/2,
 # so the 0.5 rad of initial yaw doubt the old layout carried is 0.25 across the four components.
-initial_sqrt_covariance: [1.0, 1.0, 0.05, 0.25, 0.25, 0.25, 0.25, 0.02, 0.02]
+# [x, y, z | qw, qx, qy, qz | vx, vy, vz | wx, wy, wz | bgx, bgy, bgz | cam_roll, cam_pitch]
+initial_sqrt_covariance:
+  [1.0, 1.0, 0.05, 0.25, 0.25, 0.25, 0.25, 0.30, 0.30, 0.10, 0.50, 0.50, 0.50, 0.05, 0.05, 0.05, 0.02, 0.02]
 
 # Process noise power spectral densities
 process:
-  sigma_pos_xy: 0.08 # horizontal position [m/sqrt(s)]
-  sigma_pos_z: 0.02 # vertical position [m/sqrt(s)]
-  sigma_att: 0.05 # roll/pitch [rad/sqrt(s)]
-  sigma_yaw: 0.05 # yaw [rad/sqrt(s)]
+  sigma_pos_xy: 0.02 # horizontal position [m/sqrt(s)]
+  sigma_pos_z: 0.01 # vertical position [m/sqrt(s)]
+  sigma_att: 0.01 # roll/pitch [rad/sqrt(s)]
+  sigma_yaw: 0.01 # yaw [rad/sqrt(s)]
   sigma_cam_bias: 3.0e-4 # camera-mount bias [rad/sqrt(s)]
   # While the robot is not upright the process model is not merely noisier, it is wrong: the twist input's
   # linear velocity comes from walk-engine odometry, which reports the gait it believes it is executing
@@ -74,10 +90,18 @@ process:
   # discarded for the WHOLE time the robot is down (it does not become meaningful again after N seconds).
   # These PSDs are what the belief decays towards meanwhile. The camera-mount bias keeps its ordinary tiny
   # PSD: a fall is no reason to let the extrinsic calibration wander.
-  sigma_pos_xy_disturbed: 0.40 # horizontal position while not upright [m/sqrt(s)]
-  sigma_pos_z_disturbed: 0.30 # vertical position while not upright [m/sqrt(s)]
-  sigma_att_disturbed: 0.60 # roll/pitch while not upright [rad/sqrt(s)]
-  sigma_yaw_disturbed: 0.60 # yaw while not upright [rad/sqrt(s)]
+  sigma_pos_xy_disturbed: 0.20 # horizontal position while not upright [m/sqrt(s)]
+  sigma_pos_z_disturbed: 0.20 # vertical position while not upright [m/sqrt(s)]
+  sigma_att_disturbed: 0.20 # roll/pitch while not upright [rad/sqrt(s)]
+  sigma_yaw_disturbed: 0.20 # yaw while not upright [rad/sqrt(s)]
+  # The body-fixed rates. These are the dominant process noise now: uncertainty reaches position by
+  # integrating velocity uncertainty, which is where the real ignorance lives, so the pose PSDs above
+  # are only a floor against collapse in weakly-observable directions.
+  sigma_vel: 0.35 # body linear velocity [m/s/sqrt(s)]
+  sigma_omega: 1.50 # body angular velocity [rad/s/sqrt(s)]
+  sigma_gyro_bias: 2.0e-4 # gyroscope bias random walk [rad/s/sqrt(s)]: slow thermal drift only
+  sigma_vel_disturbed: 1.00 # body linear velocity while not upright [m/s/sqrt(s)]
+  sigma_omega_disturbed: 3.00 # body angular velocity while not upright [rad/s/sqrt(s)]
   # How long into a fall the PSDs above apply [s]. A fall is a bounded event; running them for its whole
   # duration models a robot lying still as a random walk, so the belief would report how long it had been
   # down rather than how far it could have gone. This bounds the PSDs ONLY - never the velocity discard.
