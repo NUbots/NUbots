@@ -398,8 +398,9 @@ RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v
     -DAUTODIFF_BUILD_EXAMPLES=OFF \
     -DAUTODIFF_BUILD_DOCS=OFF
 
-# Boost, for the incomplete gamma function and reproducible random number generation in utility::slam::gaussian
-RUN install-package boost boost-libs
+# Boost
+RUN install-from-source https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-b2-nodocs.tar.gz \
+    --without-python
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
