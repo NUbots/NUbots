@@ -62,18 +62,24 @@ namespace module::localisation {
     /**
      * @brief Square-root information filter field localisation
      *
-     * Estimates the 6-DOF torso pose in the field frame {f} plus a 2-DOF camera-mount attitude bias, as a Gaussian in
-     * square-root information form. Prediction is driven by body-twist inputs finite-differenced from the odometry
-     * stream (Sensors.Htw); measurement updates are MAP optimisations (trust-region Newton) over the robust landmark
-     * ray likelihood, yielding a Laplace-approximation posterior with a covariance that quantifies the estimate's
-     * uncertainty.
+     * Estimates the torso pose in the field frame {f}, its body-fixed velocity, the gyroscope bias and a 2-DOF
+     * camera-mount attitude bias, as a Gaussian in square-root information form. See
+     * utility::slam::system::SystemLocalisation for the state layout and why attitude is a quaternion.
      *
-     * Landmarks are the YOLO field-line intersections (L/T/X) and goal posts, consumed as unit rays in the camera
-     * frame; gravity (accelerometer) and the kinematic torso height provide additional low-rate corrections.
+     * Nothing is a known input. The process model is rigid-body kinematics driven by the velocity states, and every
+     * sensor enters as a measurement carrying its own noise: YOLO field-line intersections (L/T/X) and goal posts as
+     * unit rays, the gyroscope as the body angular velocity, the walk-engine odometry as the body linear velocity,
+     * plus gravity and the kinematic torso height as low-rate corrections. Updates are MAP optimisations
+     * (trust-region Newton) over the robust landmark ray likelihood, yielding a Laplace-approximation posterior whose
+     * covariance quantifies the estimate's uncertainty.
      *
      * Initialisation is a coarse grid-search over (x, y, yaw) on the first usable vision frame, scored by the same
-     * landmark likelihood. The field's 180 degree symmetry is broken with the game-context prior that the robot starts
-     * in its own half (own_half_x_sign).
+     * landmark likelihood; roll, pitch and height come from the kinematic chain and the rates start at zero. The
+     * field's 180 degree symmetry is broken with the game-context prior that the robot starts in its own half
+     * (own_half_x_sign) -- which is also why there is no recovery path for a mid-game kidnap.
+     *
+     * A fall gates each measurement separately rather than suppressing all of them; see the posture block in the
+     * vision reaction.
      */
     class FieldLocalisationSRIF : public NUClear::Reactor {
     public:
@@ -89,32 +95,9 @@ namespace module::localisation {
             filter::SystemLocalisation::HypothesisParameters hypothesis{};
             /// @brief Landmark measurement noise/association options
             filter::MeasurementFieldLandmarks::Options measurement{};
-            /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve.
-            ///
-            /// Indices 3..6 are the attitude quaternion's components, not roll/pitch/yaw. A
-            /// tangent-space std of s becomes a component std of s/2 (see
-            /// SystemLocalisation::quaternionSigma), so the 0.5 rad of initial yaw doubt the old
-            /// layout carried at index 5 is 0.25 spread across the four components here.
-            Eigen::Matrix<double, 18, 1> initial_sqrt_covariance = (Eigen::Matrix<double, 18, 1>() << 1.0,
-                                                                    1.0,
-                                                                    0.05,  // position
-                                                                    0.25,
-                                                                    0.25,
-                                                                    0.25,
-                                                                    0.25,  // quaternion
-                                                                    0.30,
-                                                                    0.30,
-                                                                    0.10,  // body linear velocity [m/s]
-                                                                    0.50,
-                                                                    0.50,
-                                                                    0.50,  // body angular velocity [rad/s]
-                                                                    0.05,
-                                                                    0.05,
-                                                                    0.05,  // gyroscope bias [rad/s] (~3 deg/s)
-                                                                    0.02,
-                                                                    0.02  // camera mount bias
-                                                                    )
-                                                                       .finished();
+            /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve. Ones by default,
+            /// config overwrites.
+            Eigen::Matrix<double, 18, 1> initial_sqrt_covariance = Eigen::Matrix<double, 18, 1>::Ones();
             /// @brief Sign of field-x for the starting half (from game context; breaks the field symmetry)
             double own_half_x_sign = 1.0;
             /// @brief Grid search steps for the initial pose solve
@@ -151,13 +134,6 @@ namespace module::localisation {
             double quaternion_norm_sigma = 1e-3;
 
             // --- body-rate measurements ---
-            /// @brief Feed Sensors.gyroscope as a measurement of the body angular velocity.
-            ///
-            /// The gyroscope is no longer a prediction input: it measures omegaBb + bGyro, which
-            /// is what makes the bias observable. Sensors.gyroscope is raw (SensorFilter passes
-            /// the hardware value through; Mahony keeps its own bias estimate internal), so there
-            /// is no double-correction here.
-            bool use_gyroscope = true;
             /// @brief Gyroscope noise std dev per axis [rad/s]
             double gyroscope_sigma = 0.02;
             /// @brief Feed the walk-engine odometry velocity as a measurement of vBb.
@@ -186,7 +162,7 @@ namespace module::localisation {
             double recovery_yaw_std = 0.6;
             /// @brief Maximum odometry sample spacing to finite-difference across [s]
             double max_odometry_gap = 0.1;
-            /// @brief Length of the rolling odometry window used to build the twist buffer [s]
+            /// @brief Length of the rolling odometry window the velocity samples are built from [s]
             double twist_window_seconds = 2.0;
             /// @brief Maximum age of the odometry sample paired with a vision frame [s]
             double max_sensor_pairing_age = 0.1;
@@ -199,7 +175,10 @@ namespace module::localisation {
 
         /// @brief Rolling window of recent odometry samples, newest last (bounded by twist_window_seconds)
         std::vector<filter::SensorsSample> sensors_window;
-        /// @brief Body-twist input buffer the system predicts against (owned; system_ holds a pointer to it)
+        /// @brief Body-fixed velocity samples finite-differenced from the odometry window.
+        ///
+        /// Feeds MeasurementBodyVelocity. Not an input to the process model -- the system holds no
+        /// reference to it, and the vision reaction reads the sample nearest each frame.
         std::vector<filter::BodyTwistSample> twist_buffer;
         /// @brief The estimator (null until the first successful initial-pose solve)
         std::unique_ptr<filter::SystemLocalisation> system;
@@ -248,10 +227,10 @@ namespace module::localisation {
         /**
          * @brief Hand confidence back to the belief on standing up again.
          *
-         * Called on the upright transition only, and from the posture block that runs before any
-         * early return -- a getup ends in motion blur, so the frame the robot first reads upright
-         * again is often one with no usable detections, and doing this inside the update path
-         * meant it was skipped on exactly those runs.
+         * Called on the upright transition only, from the posture block that runs before any early
+         * return. It has to stay there: a getup ends in motion blur, so the frame the robot first
+         * reads upright again often carries no usable detections, and anything inside the update
+         * path is skipped on exactly those falls.
          *
          * @param t Time the robot became upright again [s since t0]
          */

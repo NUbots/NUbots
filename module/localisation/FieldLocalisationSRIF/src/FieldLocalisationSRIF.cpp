@@ -124,7 +124,6 @@ namespace module::localisation {
 
             cfg.own_half_x_sign         = config["own_half_x_sign"].as<double>();
             cfg.use_hypothesis_bank     = config["use_hypothesis_bank"].as<bool>();
-            cfg.use_gyroscope           = config["use_gyroscope"].as<bool>();
             cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
             cfg.use_odometry_velocity   = config["use_odometry_velocity"].as<bool>();
             cfg.odometry_velocity_sigma = config["odometry_velocity_sigma"].as<double>();
@@ -147,10 +146,19 @@ namespace module::localisation {
             cfg.grid_step_yaw         = config["grid_step_yaw"].as<double>() * M_PI / 180.0;  // deg -> rad
             cfg.min_init_associations = config["min_init_associations"].as<int>();
 
+            // Check size of sqrt-covariance vector and copy into Eigen vector.
             const auto init_sqrt = config["initial_sqrt_covariance"].as<std::vector<double>>();
-            for (Eigen::Index i = 0; i < cfg.initial_sqrt_covariance.size() && i < Eigen::Index(init_sqrt.size());
-                 ++i) {
-                cfg.initial_sqrt_covariance(i) = init_sqrt[std::size_t(i)];
+            if (init_sqrt.size() != std::size_t(cfg.initial_sqrt_covariance.size())) {
+                throw std::runtime_error("initial_sqrt_covariance in FieldLocalisationSRIF.yaml has "
+                                         + std::to_string(init_sqrt.size()) + " entries, but the state is "
+                                         + std::to_string(cfg.initial_sqrt_covariance.size()) + "-dimensional");
+            }
+            cfg.initial_sqrt_covariance = Eigen::Map<const Eigen::VectorXd>(init_sqrt.data(), init_sqrt.size());
+
+            // Check for small values in initial_sqrt_covariance.
+            constexpr double min_sqrt_covariance = 1e-4;
+            if ((cfg.initial_sqrt_covariance.array() < min_sqrt_covariance).any()) {
+                log<WARN>("initial_sqrt_covariance has an entry below", min_sqrt_covariance);
             }
 
             // Process noise PSDs
@@ -234,9 +242,9 @@ namespace module::localisation {
                 sensors_window.erase(sensors_window.begin(), first_kept);
             }
 
-            // Body-fixed velocity samples for MeasurementBodyVelocity. The system no longer
-            // holds a pointer to this -- nothing is a known input any more -- so it is just a
-            // buffer the vision reaction reads the nearest sample from.
+            // Body-fixed velocity samples for MeasurementBodyVelocity. Nothing is a known input
+            // to the process model, so this is simply a buffer the vision reaction reads the
+            // nearest sample from.
             twist_buffer = filter::SystemLocalisation::twistFromOdometry(sensors_window, 0.0, cfg.max_odometry_gap);
         });
 
@@ -250,28 +258,22 @@ namespace module::localisation {
 
                 const double t = seconds(boxes.timestamp);
 
-                // Posture gate. This used to suppress every update while the robot was not
-                // upright, on the grounds that all four measurement models assume an upright
-                // robot. That was only half right. The models that break are the ones whose
-                // *assumption* breaks -- kinematic height needs the support leg on the ground,
-                // and the accelerometer only reads gravity when the robot is not being
-                // accelerated. The landmark model is plain geometry: given the right attitude it
-                // is as valid face-down as standing. What actually forced blanket suppression was
-                // the roll-pitch-yaw state, which could not represent a fallen robot without
-                // passing through gimbal lock; with a quaternion (see SystemLocalisation) it can,
-                // so the gate is per-model rather than all-or-nothing. That matters because a
-                // fall is exactly when the estimate is most at risk: a robot that spins while
-                // toppling or getting up changes its heading, and only measurements taken during
-                // the event can catch it.
+                // Posture drives a per-model gate. Each measurement is
+                // suppressed only where its own assumption breaks: kinematic height needs the
+                // support leg on the ground, gravity needs the torso not to be accelerating.
+                // Landmarks and the gyroscope are valid face-down, and a fall is when the
+                // estimate is most at risk -- a robot that spins while toppling or getting up
+                // changes its heading, and only measurements taken during the event catch it.
+                //
+                // Absent a Stability message the robot is assumed upright, so fall handling
+                // simply never engages.
                 const bool upright = stability == nullptr || *stability > Stability::FALLING;
 
-                // Posture transitions are handled here, before any early return, and never inside
-                // one. A getup ends in motion blur, so the frame the robot first reads upright
-                // again is very often a frame with no usable detections; handling the transition
-                // further down meant the recovery inflation was simply skipped on those runs, and
-                // the filter came out of the fall holding pre-fall confidence in a mean that had
-                // moved. Setting the posture up here also means it is set from THIS frame's fall
-                // start rather than the previous episode's.
+                // Transitions are handled before any early return below, and must stay that way:
+                // a getup ends in motion blur, so the frame the robot first reads upright again
+                // often carries no usable detections. Handling it further down would skip the
+                // recovery inflation on exactly those falls. Doing it here also means setPosture
+                // sees this episode's fall_start_t rather than the previous one's.
                 if (initialised) {
                     if (!upright && was_upright) {
                         fall_start_t = t;
@@ -305,29 +307,22 @@ namespace module::localisation {
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
 
-                // Body-rate measurements go in before the no-detections gate below, because
-                // neither of them has anything to do with whether YOLO found something. A
-                // fallen robot's camera is in the carpet, so those are exactly the frames
-                // that return no detections -- and exactly the frames where an unmeasured
-                // velocity state would integrate the pre-fall gait straight off the field.
-                // (Measurement::process predicts to t itself, so the predictAll below is a
-                // zero-dt no-op once these have run.)
+                // Body rates go in before the no-detections gate below: neither depends on YOLO
+                // finding anything, and a fallen robot's camera is in the carpet, so those are
+                // exactly the frames where an unmeasured velocity state would integrate the
+                // pre-fall gait straight off the field. Measurement::process predicts to t
+                // itself, so the predictAll further down is a zero-dt no-op once these have run.
                 if (initialised) {
-                    // The gyroscope runs unconditionally, including through a fall: it is the
-                    // one sensor that measures a topple honestly, and its reading is valid
-                    // whatever the robot's posture.
-                    if (cfg.use_gyroscope && paired->gyroscope.allFinite()) {
+                    // Valid whatever the posture: the gyroscope measures a topple honestly.
+                    if (paired->gyroscope.allFinite()) {
                         MeasurementGyroscope gyro(t, paired->gyroscope, cfg.gyroscope_sigma);
                         system->process(gyro);
                     }
 
-                    // The walk-engine odometry velocity, on the other hand, describes the gait
-                    // the engine believes it is executing. Upright that is loose but real
-                    // information; on the ground it is fiction, and during a getup it is a
-                    // scripted flail that is not locomotion. So while not upright it is
-                    // replaced by a zero-velocity update -- the same per-model gating as
-                    // kinematic height, which is a tidier way to say it than the special case
-                    // that used to live inside the process model's input().
+                    // The walk-engine odometry describes the gait the engine believes it is
+                    // executing. Upright that is loose but real information; on the ground it is
+                    // fiction, and during a getup a scripted flail that is not locomotion. So
+                    // while not upright it is replaced by a zero-velocity update.
                     if (upright) {
                         const filter::BodyTwistSample* twist = nearest_twist(t);
                         if (cfg.use_odometry_velocity && twist != nullptr && twist->vBb.allFinite()) {
@@ -336,13 +331,12 @@ namespace module::localisation {
                         }
                     }
                     else {
-                        // A robot on the carpet is not travelling anywhere, and saying so is the
-                        // most confident measurement available. It is also the only thing
-                        // stopping the pre-fall walking velocity from integrating across the
-                        // whole fall, which with velocity in the state is exactly how the
-                        // estimate walks off the field. Leaving it unmeasured is not the neutral
-                        // choice it looks like: it asserts the robot may still be moving at
-                        // whatever it was doing when it fell.
+                        // A robot on the carpet is not travelling anywhere. Saying so is what
+                        // stops the pre-fall walking velocity integrating across the whole fall.
+                        // Leaving vBb unmeasured instead is not the neutral choice it looks like:
+                        // it asserts the robot may still be moving at whatever it was doing when
+                        // it fell. Lying still it really is stationary (zupt_sigma); mid-topple
+                        // and mid-getup the torso moves, just not anywhere (zupt_dynamic_sigma).
                         const bool settled = stability != nullptr && *stability == Stability::FALLEN;
                         MeasurementBodyVelocity zupt =
                             MeasurementBodyVelocity::stationary(t, settled ? cfg.zupt_sigma : cfg.zupt_dynamic_sigma);
@@ -350,11 +344,10 @@ namespace module::localisation {
                     }
                 }
 
-                // A face-down fall produces no detections at all. Prediction otherwise only ever
-                // happens inside Event::process, so such a frame would advance neither the state
-                // nor the clock and the filter would emerge from the fall holding its pre-fall
-                // mean at its pre-fall covariance -- confidently wrong rather than honestly
-                // uncertain.
+                // A face-down fall produces no detections at all. Prediction otherwise happens
+                // only inside Event::process, so such a frame would advance neither the state nor
+                // the clock, and the filter would leave the fall holding its pre-fall mean at its
+                // pre-fall covariance -- confidently wrong rather than honestly uncertain.
                 if (sample.detections.empty()) {
                     if (initialised) {
                         system->predictAll(t);
@@ -394,14 +387,14 @@ namespace module::localisation {
                               "deg");
                 }
 
-                // Predict forward to the vision capture time using the odometry twist buffer.
+                // Advance to the vision capture time. The process model is autonomous, driven by
+                // the velocity states rather than by any input.
                 system->predict(t);
 
                 // Unit-norm pseudo-measurement. The four attitude states carry three degrees of
                 // freedom and quat2rot normalises, so |q| is invisible to every other model here;
-                // without this the MAP Hessian is singular along it and the Newton step has a flat
-                // direction to wander down. Applied first so the rest of the frame's updates see a
-                // belief that is on the sphere.
+                // without this the MAP Hessian is singular along it. Applied first so the rest of
+                // the frame's updates see a belief that is on the sphere.
                 MeasurementQuaternionNorm quaternion_norm(t, cfg.quaternion_norm_sigma);
                 system->process(quaternion_norm);
 
@@ -410,13 +403,11 @@ namespace module::localisation {
                 filter::MeasurementFieldLandmarks measurement(t, sample, Tbc, *map, *system, cfg.measurement);
                 system->process(measurement);
 
-                // Low-rate corrections from the paired Sensors sample.
-                //
                 // Gravity is valid whenever the torso is not being accelerated -- true of a robot
                 // lying still on the carpet, false of one in free fall or hitting the ground,
-                // regardless of posture. Gating on the specific-force magnitude tests that
-                // directly, which is both the right condition during a fall and a better one than
-                // "upright" while walking.
+                // whatever its posture. Gating on the specific-force magnitude tests that
+                // condition directly, which beats gating on "upright" both during a fall and
+                // while walking.
                 if (cfg.use_gravity && paired->accelerometer.allFinite()) {
                     constexpr double standard_gravity = 9.80665;
                     const double a_mag                = paired->accelerometer.norm();
@@ -425,8 +416,8 @@ namespace module::localisation {
                         system->process(gravity);
                     }
                 }
-                // Torso height above ground assumes the support leg reaches the ground, so this is
-                // the one model a fall genuinely invalidates: lying down, the chain still reports a
+                // Torso height assumes the support leg reaches the ground, so this is the one
+                // model a fall genuinely invalidates: lying down, the chain still reports a
                 // near-upright 0.44 m torso and would fight the attitude the other measurements
                 // are establishing.
                 if (cfg.use_kinematic_height && upright) {
@@ -465,19 +456,19 @@ namespace module::localisation {
 
     void FieldLocalisationSRIF::apply_fall_recovery(double t) {
         // The mean is kept: a fall and getup move the torso well under a metre, so the pre-fall
-        // position is still the best estimate available, and re-solving the pose globally would be
-        // worse -- the grid search resolves the field symmetry from the known starting half, a
-        // prior that is simply false once play is under way. What a fall actually destroys is
-        // confidence, above all in yaw, so that is what is given back. The widened belief is also
-        // what lets the landmark association gate reopen (see Options::gateYawScale); without it a
-        // getup that turned the robot leaves every predicted bearing outside the gate and the
-        // filter can never re-associate.
+        // position is still the best estimate available. Re-solving globally would be worse, since
+        // the grid search breaks the field symmetry using the known starting half -- a prior that
+        // is false once play is under way. What a fall destroys is confidence, above all in yaw,
+        // so that is what is handed back. The widened belief is also what reopens the landmark
+        // association gate (MeasurementFieldLandmarks::Options::gateYawScale); without it a getup
+        // that turned the robot leaves every predicted bearing outside the gate and the filter
+        // can never re-acquire.
         const Eigen::VectorXd xr = system->density.mean();
         Eigen::MatrixXd extra_cov =
             Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
         extra_cov(0, 0) = extra_cov(1, 1) = cfg.recovery_pos_std * cfg.recovery_pos_std;
-        // Yaw uncertainty is about the field z axis, which on the quaternion states is a rank-one
-        // block rather than a single diagonal element -- there is no "the yaw element" any more.
+        // Yaw uncertainty is about the field z axis, which lands on the quaternion states as a
+        // rank-one block rather than a single diagonal element: no element is "the yaw".
         const Eigen::Vector4d j_yaw = filter::SystemLocalisation::attitudeTangentField(xr).col(2);
         extra_cov.block<4, 4>(filter::SystemLocalisation::iQuat, filter::SystemLocalisation::iQuat) =
             cfg.recovery_yaw_std * cfg.recovery_yaw_std * j_yaw * j_yaw.transpose();
@@ -603,10 +594,9 @@ namespace module::localisation {
         // composing the kinematic foot frames (Sensors.Htx[L_FOOT_BASE]/[R_FOOT_BASE]) with the field
         // pose, then emitted alongside (or added to) the Field message. Deferred - future work.
 
-        // Covariance / uncertainty of the reported (x, y, yaw). Position is still the leading 2x2
-        // block, but yaw is no longer a state element: it is a direction in the quaternion block,
-        // so both its variance and its cross-covariance with position go through row 2 of the
-        // attitude Jacobian rather than through index 5.
+        // Covariance of the reported (x, y, yaw). Position is the leading 2x2 block; yaw is not a
+        // state element but a direction in the quaternion block, so both its variance and its
+        // cross-covariance with position go through row 2 of the attitude Jacobian.
         const Eigen::MatrixXd P           = system->density.cov();
         constexpr Eigen::Index iq         = filter::SystemLocalisation::iQuat;
         const Eigen::RowVector4d g_yaw    = filter::SystemLocalisation::attitudeJacobian(mean).row(2);
