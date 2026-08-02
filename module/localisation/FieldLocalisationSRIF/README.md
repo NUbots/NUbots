@@ -12,17 +12,19 @@ trust it, rather than a bare pose.
 
 ### State
 
-The state is nine elements: the 6-DOF torso pose in the field frame `{f}` plus a 2-DOF camera-mount
+The state is 18 elements: the 6-DOF torso pose in the field frame `{f}`, 6-DOF Torso fixed velocities, 3-DOF gyro bias states plus a 2-DOF camera-mount
 attitude bias.
 
-| Index | Symbol   | Meaning                                                       |
-| ----: | -------- | ------------------------------------------------------------- |
-|  0..2 | `rBFf`   | Torso position in the field frame [m]                         |
-|  3..6 | `q`      | Torso attitude quaternion `(w, x, y, z)`, `Rfb = quat2rot(q)` |
-|  7..8 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                |
+|  Index | Symbol   | Meaning                                                       |
+| -----: | -------- | ------------------------------------------------------------- |
+|   0..2 | `rTFf`   | Torso position in the field frame [m]                         |
+|   3..6 | `q`      | Torso attitude quaternion `(w, x, y, z)`, `Rfb = quat2rot(q)` |
+|   7..9 | `v`      | Torso fixed linear velocities [m/s]                           |
+| 10..12 | `omega`  | Torso fixed rotational velocities [rads/s]                    |
+| 13..15 | `bG`     | Gyroscope bias estimates [rads/s]                             |
+| 17..18 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                |
 
-Field frame `{f}`: origin at the centre of the field on the ground plane, z up, matching the NUbots
-`Hfw` convention.
+Field frame `{f}`: origin at the centre of the field on the ground plane, z up.
 
 Attitude is a quaternion rather than roll-pitch-yaw because the Euler rate transform is singular at
 pitch = ±90°, which is on the trajectory of every topple. Passing through it put the old state on the
@@ -137,27 +139,61 @@ Add to a role:
 localisation::FieldLocalisationSRIF
 ```
 
-Already enabled in `roles/webots/localisation.role` and `roles/test/localisation.role`.
-
 Requires a `FieldDescription` (the landmark map is built from it at startup), a `Sensors` stream for
 odometry, and `BoundingBoxes` from the vision pipeline. `Stability` is optional — without it the robot
 is treated as always upright and the fall handling never engages.
 
 Emit `ResetFieldLocalisation` to drop the estimate and re-run the initial grid search.
 
-Tuning lives in `data/config/FieldLocalisationSRIF.yaml`. The values most worth knowing about:
+Tuning lives in `data/config/FieldLocalisationSRIF.yaml`.
 
-| Key                                          | Meaning                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------- |
-| `own_half_x_sign`                            | Sign of field-x for the starting half; breaks the 180° symmetry at init |
-| `measurement.min_confidence`                 | YOLO confidence below which a detection is discarded                    |
-| `measurement.gate_angle`                     | Nominal association pre-gate [rad]                                      |
-| `measurement.gate_yaw_scale`                 | How many yaw std devs the pre-gate widens to when uncertain             |
-| `process.sigma_*` / `sigma_*_disturbed`      | Process noise PSDs, upright and while down                              |
-| `process.disturbed_window`                   | How long the disturbed PSDs apply [s] (bounds the PSDs only)            |
-| `fall.recovery_pos_std` / `recovery_yaw_std` | Confidence handed back on standing up                                   |
-| `gravity_quasi_static_tolerance`             | How far ‖a‖ may sit from g and still count as gravity [m/s²]            |
-| `use_hypothesis_bank`                        | Multi-hypothesis mixture; off by default, see Limitations               |
+**Initialisation**
+
+| Key                              | Meaning                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| `own_half_x_sign`                | Sign of field-x for the starting half; breaks the 180° symmetry at init |
+| `grid_step_xy` / `grid_step_yaw` | Grid search resolution [m] / [deg]                                      |
+| `min_init_associations`          | Landmark associations needed to trust a solve                           |
+| `initial_sqrt_covariance`        | Per-state std devs of the initial belief.                               |
+
+**Measurements** — each is `use_*` to enable plus a `*_sigma` for how far it is trusted
+
+| Key                                                 | Meaning                                                                |
+| --------------------------------------------------- | ---------------------------------------------------------------------- |
+| `measurement.min_confidence`                        | YOLO confidence below which a detection is discarded                   |
+| `measurement.gate_angle`                            | Nominal association pre-gate [rad]                                     |
+| `measurement.gate_yaw_scale`                        | How many yaw std devs the pre-gate widens to when uncertain            |
+| `gyroscope_sigma`                                   | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
+| `use_odometry_velocity` / `odometry_velocity_sigma` | Walk-engine odometry as a body-velocity measurement [m/s]              |
+| `use_gravity` / `gravity_sigma`                     | Accelerometer gravity direction [m/s²]                                 |
+| `gravity_quasi_static_tolerance`                    | How far ‖a‖ may sit from g and still count as gravity [m/s²]           |
+| `use_kinematic_height` / `height_sigma`             | Torso height from the support-leg chain [m]                            |
+| `quaternion_norm_sigma`                             | Soft \|q\| = 1 prior; pins the redundant fourth attitude parameter     |
+
+**Process noise** (`process:`) — PSDs, `*_disturbed` variants apply while not upright
+
+| Key                                       | Meaning                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| `sigma_vel` / `sigma_omega`               | Body-rate random walks — the dominant process noise                             |
+| `sigma_gyro_bias`                         | Gyroscope bias random walk; slow thermal drift only                             |
+| `sigma_pos_*` / `sigma_att` / `sigma_yaw` | Pose PSDs; only a floor, since uncertainty arrives by integrating the rates     |
+| `sigma_cam_bias`                          | Camera-mount bias random walk                                                   |
+| `disturbed_window`                        | How long the `*_disturbed` PSDs apply [s]; bounds the PSDs only, never the ZUPT |
+
+**Falls**
+
+| Key                                          | Meaning                                                     |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `zupt_sigma` / `zupt_dynamic_sigma`          | Zero-velocity update noise, lying still vs mid-topple [m/s] |
+| `fall.recovery_pos_std` / `recovery_yaw_std` | Confidence handed back on standing up                       |
+
+**Other**
+
+| Key                                         | Meaning                                                        |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `use_hypothesis_bank`                       | Multi-hypothesis mixture; off by default, see Limitations      |
+| `max_odometry_gap` / `twist_window_seconds` | Odometry differencing gap and rolling window [s]               |
+| `max_sensor_pairing_age`                    | Oldest odometry sample allowed to pair with a vision frame [s] |
 
 ## Consumes
 
@@ -172,6 +208,12 @@ Tuning lives in `data/config/FieldLocalisationSRIF.yaml`. The values most worth 
 - `message::localisation::Field` — planar `Hfw`, `(x, y, yaw)` covariance, `uncertainty` (its trace),
   hypothesis `particles`, and `cost` (mean chordal angular residual of the associated rays [rad])
 - NUsight graphs for pose, uncertainty, cost and association count, at `DEBUG` log level
+
+NUsight's localisation view draws the `(x, y)` covariance as a 3σ uncertainty ellipse on the field,
+toggled by **Debug → Uncertainty**. That is the signal worth watching live: it inflates on a fall and
+shrinks as vision re-acquires, so a pose drifting while the ellipse stays small is the signature of a
+filter that is confidently wrong. `particles` are drawn on the same view when the hypothesis bank is
+enabled.
 
 ## Dependencies
 

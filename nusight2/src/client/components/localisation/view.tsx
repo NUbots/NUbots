@@ -17,7 +17,6 @@ import { DashboardRobotPanelViewModel } from "./dashboard_components/robot_panel
 import { LocalisationModel, ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { AssociationLines } from "./r3f_components/association_lines";
-import { UncertaintyEllipse } from "./r3f_components/uncertainty_ellipse";
 import { Ball } from "./r3f_components/ball";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
 import { FieldView } from "./r3f_components/field/view";
@@ -29,6 +28,7 @@ import { GridView } from "./r3f_components/grid";
 import { Nugus } from "./r3f_components/nugus";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
+import { UncertaintyEllipse } from "./r3f_components/uncertainty_ellipse";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
