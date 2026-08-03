@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message;
+
+message Ping {
+    uint32 count = 1;
+}
+
+message Pong {
+    uint32 count = 1;
+}
