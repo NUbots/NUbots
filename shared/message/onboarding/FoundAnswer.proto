@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package message.onboarding;
 
-message Ping{
+message FoundAnswer{
     int32 count = 1;
-    int32 iter_count = 2;
 }

@@ -1,0 +1,2 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
