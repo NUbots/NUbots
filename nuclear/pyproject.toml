@@ -1,3 +1,12 @@
+[project]
+name = "nubots-nuclear"
+version = "0.0.1"
+requires-python = ">=3.10,<3.13"
+dependencies = []
+
+[tool.uv]
+package = false
+
 [tool.black]
 line-length = 120
 

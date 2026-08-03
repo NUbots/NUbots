@@ -13,6 +13,12 @@ resolution-markers = [
     "(python_full_version < '3.11' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.11' and sys_platform != 'darwin' and sys_platform != 'linux')",
 ]
 
+[manifest]
+members = [
+    "nubots",
+    "nubots-nuclear",
+]
+
 [[package]]
 name = "astroid"
 version = "3.3.9"
@@ -501,6 +507,11 @@ requires-dist = [
     { name = "tqdm", specifier = "==4.67.1" },
     { name = "xxhash", specifier = "==3.5.0" },
 ]
+
+[[package]]
+name = "nubots-nuclear"
+version = "0.0.1"
+source = { virtual = "nuclear" }
 
 [[package]]
 name = "packaging"
