@@ -3,10 +3,17 @@ log_level: INFO
 
 confidence_threshold: 0.7 # Minimum confidence required for a ball point to be a ball point
 cluster_points: 20 # Minimum number of points for a cluster to be a viable ball
+merge_buffer_scalar:
+  1.4 # When considered if overlapping for merging, its buffer is used which has a radius of
+  # the cluster's radius * merge_buffer_scalar
+merge_preference:
+  1.4 # Increases the effective circularity score of the totally merged cluster,
+  # encouraging full merges
 minimum_ball_distance: 2.5 # Minimum distance for a cluster to be a viable ball
 distance_disagreement:
   1.0 # Percentage difference between width and projection based distances. 0.0 means
   # the distance measurements must match perfectly
+minimum_fill: 0.10 # Minimum percentage fill required for a cluster to be considered a viable ball
 maximum_deviation:
   0.3 # A threshold on how large the standard deviation of the angle between ray and
   # cone axis can be

@@ -1,12 +1,18 @@
 /* eslint-env node */
+import { fileURLToPath } from "node:url";
+
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+import { aliasEntries } from "./build_scripts/alias_entries";
 import glslPlugin from "./build_scripts/glsl_plugin";
 
 // See https://vitejs.dev/config/
 export default defineConfig({
   publicDir: "./src/assets",
+  resolve: {
+    alias: aliasEntries,
+  },
   optimizeDeps: {
     // These dependencies are not auto-detected in Vite's initial pre-bundling run.
     // Adding them here includes them in the first run, avoiding a second one.
@@ -32,6 +38,10 @@ export default defineConfig({
       // that require geotiff, so we can safely mark these as external for
       // rollup to avoid bundling them.
       external: ["geotiff", "geotiff/src/compression", "fs", "http", "https", "url"],
+      input: {
+        main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        standalone: fileURLToPath(new URL("./standalone.html", import.meta.url)),
+      },
     },
   },
   test: {

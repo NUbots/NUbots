@@ -28,6 +28,7 @@ syntax = "proto3";
 package message.platform;
 
 import "message/platform/webots/messages.proto";
+import "message/platform/NUSenseData.proto";
 import "google/protobuf/timestamp.proto";
 
 import "Vector.proto";
@@ -184,6 +185,7 @@ message RawSensors {
 
     /// Ground truth from a simulator
     webots.RobotPoseGroundTruth robot_pose_ground_truth = 12;
+    FanWarning                  fan_warning             = 13;
 }
 
 // Reset sensors and servo targets in Webots

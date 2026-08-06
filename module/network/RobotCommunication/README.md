@@ -11,13 +11,16 @@ UDP messages that have been emitted by the receiving robot are filtered out.
 
 The information that has been received over UDP is then emitted locally.
 
+Team messages are sent on port `10000 + team_number` with a maximum payload size of 512 bytes. Messages are counted only during
+Ready, Set, and Playing game states toward the 12000 message budget per game.
+
 ## Usage
 
 Add this module to get information about other robots.
 
 ## Consumes
 
-- `message::input::RoboCup` which contains data about the robot, including its state, current position, projected position and its view of the other robots.
+- `message::input::RoboCup` which contains data about the robot, including its state, current position and projected position.
 - `message::behaviour::state::WalkState` which contains data about the robot's current movement.
 - `message::input::GameState` which contains the current state of the game and penalised robots.
 - `message::input::Sensors` which contains data from the robot's sensors, used to calculate its world position.

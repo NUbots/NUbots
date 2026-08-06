@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import compression from "compression";
 import express from "express";
 import http from "http";
@@ -17,6 +20,7 @@ const args = minimist(process.argv.slice(2));
 
 const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
+const nuclearnetPort = args.port || "7447";
 
 async function main() {
   const app = express();
@@ -26,7 +30,7 @@ async function main() {
   // Initialize socket.io namespace immediately to catch reconnections.
   NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
     fakeNetworking: withVirtualRobots,
-    connectionOpts: { name: "nusight", address: nuclearnetAddress },
+    connectionOpts: { name: "nusight", address: nuclearnetAddress, port: nuclearnetPort },
   });
 
   const viteDevServer = await createViteServer({
@@ -37,6 +41,25 @@ async function main() {
 
   app.use(compression());
   app.use(favicon(faviconPath));
+
+  // Configure extra client entry points in addition to the main `index.html`.
+  // Entries specified here should also be configured in `vite.config.ts` and in `prod.ts`.
+  const additionalEntryPoints = {
+    "/standalone": path.resolve("standalone.html"),
+  } as const;
+
+  for (const [url, htmlFilePath] of Object.entries(additionalEntryPoints)) {
+    app.use(url, async (_req, res, next) => {
+      try {
+        const template = await fs.promises.readFile(htmlFilePath, "utf-8");
+        const html = await viteDevServer.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      } catch (e) {
+        next(e);
+      }
+    });
+  }
+
   app.use(viteDevServer.middlewares);
 
   const port = process.env.PORT || 3000;

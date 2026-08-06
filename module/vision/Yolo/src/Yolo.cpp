@@ -285,7 +285,7 @@ namespace module::vision {
                             continue;  // skip this run of the loop and continue the for loop
                         }
 
-                        Ball b;
+                        Ball b{};
                         b.uBCc = ray_to_camera_space(centre_ray).normalized();
                         b.measurements.emplace_back();
                         b.measurements.back().type = Ball::MeasurementType::PROJECTION;

@@ -4,21 +4,22 @@
 
 The BallDetector module performs post-processing on the output of the VisualMesh to determine where balls are in the image, if any. If there are no balls, it will emit an empty `Balls` message.
 
-The BallDetector first tries to create balls, and then removes candidate balls if they fail to pass a set of checks.
+The BallDetector first cluster points, creates ball candidates and then adds candidates to balls if they pass a set of checks.
 
-Balls are created by clustering neighbouring Visual Mesh points that have a high enough confidence that they are a ball point and are not surrounded by ball points. That is, clusters are made up of ball edge points.
+Clusters are created by clustering neighbouring Visual Mesh points that have a high enough confidence that they are a ball point and are not surrounded by ball points. That is, clusters are made up of ball edge points. Ball candidates are made of a vector of cluster indices and metadata like radius and central axis. For each cluster a ball candidate is created which corresponds to it. Close together ball candidates are checked for if merging improves circular fit, if it does a new ball candidate is created holding the cluster indices of all candidates that were used in merging. Ball candidates that were used in merging are marked.
 
-Each cluster is checked to see if
+Each candidate is checked to see if
 
-1. It is below the green horizon
-2. It has a high enough degree of fit to a circle
-3. It's angular and projection based distances are close enough
-4. It is not too close to the robot
-5. It is closer or equal to the length of the field
+1. It wasn't marked as used in merging
+2. It is below or intersecting the green horizon
+3. It has a high enough degree of fit to a circle
+4. It's angular and projection based distances are close enough
+5. It is not too close to the robot
+6. It is closer or equal to the length of the field
 
-If it doesn't meet any of these criterion, the cluster is not considered to be a ball.
+If it meet all of these criterion, the candidate is rejected
 
-If a cluster passes the checks, it is added to a Balls message.
+If a candidate passes the checks, it is added to a Balls message.
 
 Zero or many balls could be detected and emitted in a Balls message.
 

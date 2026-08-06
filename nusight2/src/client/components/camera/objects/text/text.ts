@@ -213,7 +213,7 @@ export class TextViewModel {
         imageAspectRatio: { value: this.imageAspectRatio },
         focalLength: { value: this.params.lens.focalLength },
         centre: { value: this.params.lens.centre.toThree() },
-        k: { value: this.params.lens.distortionCoeffecients.toThree() },
+        k: { value: this.params.lens.distortionCoefficients.toThree() },
         projection: { value: this.params.lens.projection },
         textColor: { value: opts.textColor?.toThree() ?? DefaultOpts.textColor.toThree() },
         backgroundColor: { value: opts.backgroundColor?.toThree() ?? DefaultOpts.backgroundColor.toThree() },

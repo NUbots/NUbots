@@ -1,10 +1,8 @@
-import { message } from "../../shared/messages";
+import { FileEntry_TypeEnum, ListFilesRequest } from "@proto/message/eye/File";
+
 import { NUsightSession } from "../session/session";
 
 import { listFiles } from "./list_files";
-
-import FileEntry = message.eye.FileEntry;
-import ListFilesRequest = message.eye.ListFilesRequest;
 
 export class FilePickerNetwork {
   private cleanUp?: () => void;
@@ -31,12 +29,13 @@ export class FilePickerNetwork {
       directory,
       entries: entries.map((entry) => {
         return {
-          type: entry.type === "directory" ? FileEntry.Type.DIRECTORY : FileEntry.Type.FILE,
+          type: entry.type === "directory" ? FileEntry_TypeEnum.DIRECTORY : FileEntry_TypeEnum.FILE,
           name: entry.name,
           path: entry.path,
-          size: entry.size,
+          size: BigInt(entry.size),
           dateModified: {
-            seconds: entry.dateModified.getTime() / 1000,
+            seconds: BigInt(Math.floor(entry.dateModified.getTime() / 1000)),
+            nanos: (entry.dateModified.getTime() % 1000) * 1e6,
           },
         };
       }),

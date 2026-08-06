@@ -1,10 +1,12 @@
+import { DataPoint } from "@proto/message/eye/DataPoint";
+import { ISensors_Servo, Sensors } from "@proto/message/input/Sensors";
 import bounds from "binary-search-bounds";
 import { action } from "mobx";
 
 import { BrowserSystemClock } from "../../../client/time/browser_clock";
 import { Vector2 } from "../../../shared/math/vector2";
-import { message } from "../../../shared/messages";
 import { Clock } from "../../../shared/time/clock";
+import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -12,10 +14,6 @@ import { RobotModel } from "../robot/model";
 import { ChartModel } from "./model";
 import { DataSeries } from "./model";
 import { TreeData } from "./model";
-
-import Sensors = message.input.Sensors;
-import DataPoint = message.eye.DataPoint;
-import { TimestampObject } from "../../../shared/time/timestamp";
 
 const ServoIds = [
   "Right Shoulder Pitch",
@@ -85,7 +83,7 @@ export class ChartNetwork {
 
       if (!node.has(key)) {
         // Create a new series with the start time of this datapoint
-        node.set(key, DataSeries.of(TimestampObject.toSeconds(data.timestamp)));
+        node.set(key, DataSeries.of(Timestamp.toSeconds(data.timestamp)));
       }
 
       const leaf = node.get(key) as DataSeries;
@@ -95,7 +93,7 @@ export class ChartNetwork {
       const chartTime = this.clock.now() - this.model.startTime;
 
       // Now according to the datapoint
-      const pointTime = TimestampObject.toSeconds(data.timestamp) - leaf.startTime;
+      const pointTime = Timestamp.toSeconds(data.timestamp) - leaf.startTime;
 
       // Estimate the drifting distance between the clocks
       leaf.updateDelta(pointTime - chartTime);
@@ -203,7 +201,7 @@ export class ChartNetwork {
 
     // Servos
     if (servo.length) {
-      servo.forEach((servo: Sensors.IServo, index: number) => {
+      servo.forEach((servo: ISensors_Servo, index: number) => {
         const name = ServoIds[index];
 
         // PID gain

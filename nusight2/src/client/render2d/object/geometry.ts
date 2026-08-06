@@ -4,6 +4,7 @@ import { CircleGeometry } from "../geometry/circle_geometry";
 import { LineGeometry } from "../geometry/line_geometry";
 import { PathGeometry } from "../geometry/path_geometry";
 import { PolygonGeometry } from "../geometry/polygon_geometry";
+import { RectangleGeometry } from "../geometry/rectangle_geometry";
 import { TextGeometry } from "../geometry/text_geometry";
 
 export type Geometry =
@@ -13,4 +14,5 @@ export type Geometry =
   | LineGeometry
   | PathGeometry
   | PolygonGeometry
+  | RectangleGeometry
   | TextGeometry;

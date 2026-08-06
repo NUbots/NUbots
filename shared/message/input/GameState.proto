@@ -35,6 +35,14 @@ message GameState {
         UNKNOWN = 0;
         BLUE    = 1;
         RED     = 2;
+        YELLOW  = 3;
+        BLACK   = 4;
+        WHITE   = 5;
+        GREEN   = 6;
+        ORANGE  = 7;
+        PURPLE  = 8;
+        BROWN   = 9;
+        GRAY    = 10;
     };
 
     enum Mode {
@@ -62,18 +70,20 @@ message GameState {
     }
 
     enum PenaltyReason {
-        UNKNOWN_PENALTY_REASON        = 0;
-        UNPENALISED                   = 1;
-        BALL_MANIPULATION             = 2;
-        PHYSICAL_CONTACT              = 3;
-        ILLEGAL_ATTACK                = 4;
-        ILLEGAL_DEFENSE               = 5;
-        REQUEST_FOR_PICKUP            = 6;
-        REQUEST_FOR_SERVICE           = 7;
-        REQUEST_FOR_PICKUP_TO_SERVICE = 8;
-        SUBSTITUTE                    = 9;
-        MANUAL                        = 10;
-        PLAYER_PUSHING                = 11;
+        UNPENALISED             = 0;
+        ILLEGAL_POSITIONING     = 1;
+        MOTION_IN_SET           = 2;
+        MOTION_IN_STOP          = 3;
+        LOCAL_GAME_STUCK        = 4;
+        INCAPABLE_ROBOT         = 5;
+        PICK_UP                 = 6;
+        BALL_HOLDING            = 7;
+        LEAVING_THE_FIELD       = 8;
+        PLAYING_WITH_ARMS_HANDS = 9;
+        PLAYER_PUSHING          = 10;
+        CAUTIONED               = 11;
+        SENT_OFF                = 12;
+        SUBSTITUTE              = 13;
     }
 
     /// Used to keep track of penalised robots
@@ -87,22 +97,10 @@ message GameState {
     }
 
     message Team {
-        uint32         team_id       = 1;
-        TeamColour     team_colour   = 2;
-        uint32         score         = 3;
-        string         coach_message = 4;
-        repeated Robot players       = 5;
-    }
-
-    enum SubMode {
-        REF_PLACE      = 0;
-        ROBOT_POSITION = 1;
-        PRE_EXECUTE    = 2;
-    }
-
-    message SecondaryState {
-        uint32  team_performing = 1;
-        SubMode sub_mode        = 2;
+        uint32         team_id     = 1;
+        TeamColour     team_colour = 2;
+        uint32         score       = 3;
+        repeated Robot players     = 4;
     }
 
     Phase                     phase            = 1;
@@ -114,9 +112,9 @@ message GameState {
     /// Timestamp when the robot thinks the half is due to end
     google.protobuf.Timestamp primary_time = 7;
     /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
-    google.protobuf.Timestamp secondary_time  = 8;
-    Team                      team            = 9;
-    Team                      opponent        = 10;
-    Robot                     self            = 11;
-    SecondaryState            secondary_state = 12;
+    google.protobuf.Timestamp secondary_time = 8;
+    Team                      team           = 9;
+    Team                      opponent       = 10;
+    Robot                     self           = 11;
+    bool                      stopped        = 12;
 }

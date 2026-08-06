@@ -4,7 +4,7 @@
 
 Listens for RoboCup GameController UDP broadcast packets, converts them into NUClear messages, and maintains a canonical `message::input::GameState`.
 
-The module also sends periodic and state-dependent reply packets back to the GameController (alive, penalised, unpenalised).
+The module also sends periodic reply packets back to the GameController.
 
 ## Usage
 
@@ -17,7 +17,7 @@ This module is configured by `GameController.yaml` and consumes:
 At runtime it:
 
 - Listens for UDP broadcast packets on `receive_port`
-- Accepts only supported packet version `12`
+- Accepts only supported packet version `19`
 - Optionally filters incoming packets by source IP using `udp_filter_address`
 - Tracks the sender address and sends reply packets to that address on `send_port`
 - Sends `ALIVE` reply packets every 2 seconds
@@ -32,14 +32,12 @@ At runtime it:
 - `message::input::GameEvents::GoalScored`
 - `message::input::GameEvents::Penalisation`
 - `message::input::GameEvents::Unpenalisation`
-- `message::input::GameEvents::CoachMessage`
 - `message::input::GameEvents::HalfTime`
-- `message::input::GameEvents::BallKickedOut`
 - `message::input::GameEvents::KickOffTeam`
 - `message::input::GameEvents::GamePhase`
 - `message::input::GameEvents::GameMode`
 
-Also sends UDP GameController reply packets (`PENALISED`, `UNPENALISED`, `ALIVE`) via `emit<Scope::UDP>(...)`.
+Also sends UDP GameController reply packets via `emit<Scope::UDP>(...)`.
 
 ## Dependencies
 

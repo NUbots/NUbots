@@ -16,6 +16,7 @@ import { WebSocketServer } from "./web_socket/web_socket_server";
 const args = minimist(process.argv.slice(2));
 const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
+const nuclearnetPort = args.port || "7447";
 
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +27,9 @@ app.use(
     rewrites: [
       // Allows user to navigate to /storybook/ without needing to type /index.html
       { from: /\/storybook\/$/, to: "storybook/index.html" },
+      // Additional entry points that are not the main `index.html`.
+      // Entries here should also be configured in `vite.config.ts` and in `dev.ts`.
+      { from: /\/standalone(?!.*\..*)/, to: "standalone.html" },
     ],
   }),
 );
@@ -46,5 +50,5 @@ if (withVirtualRobots) {
 
 NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
   fakeNetworking: withVirtualRobots,
-  connectionOpts: { name: "nusight", address: nuclearnetAddress },
+  connectionOpts: { name: "nusight", address: nuclearnetAddress, port: nuclearnetPort },
 });

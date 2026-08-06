@@ -1,20 +1,15 @@
+import { GameState_ModeEnum, GameState_PenaltyReasonEnum, GameState_PhaseEnum } from "@proto/message/input/GameState";
+import { Overview } from "@proto/message/support/nusight/Overview";
 import { autorun } from "mobx";
 
 import { SeededRandom } from "../../shared/base/random/seeded_random";
 import { FieldDimensions } from "../../shared/field/dimensions";
 import { Vector2 } from "../../shared/math/vector2";
 import { Vector3 } from "../../shared/math/vector3";
-import { Ivec2, message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { TimestampObject } from "../../shared/time/timestamp";
 import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
-
-import Mode = message.input.GameState.Mode;
-import PenaltyReason = message.input.GameState.PenaltyReason;
-import Phase = message.input.GameState.Phase;
-import Overview = message.support.nusight.Overview;
 
 export class OverviewSimulator extends Simulator {
   constructor(
@@ -67,12 +62,12 @@ export class OverviewSimulator extends Simulator {
     // TODO (Annable): Add helper for getting the angle for a unit vector.
     const robotAngle = Math.atan2(robotHeading.y, robotHeading.x);
 
-    const modes = getEnumValues<Mode>(Mode);
-    const phases = getEnumValues<Phase>(Phase);
-    const penaltyReasons = getEnumValues<PenaltyReason>(PenaltyReason);
+    const modes = getEnumValues<GameState_ModeEnum>(GameState_ModeEnum);
+    const phases = getEnumValues<GameState_PhaseEnum>(GameState_PhaseEnum);
+    const penaltyReasons = getEnumValues<GameState_PenaltyReasonEnum>(GameState_PenaltyReasonEnum);
 
-    const buffer = Overview.encode({
-      timestamp: TimestampObject.fromSeconds(time),
+    const buffer = new Overview({
+      timestamp: toProtoTimestamp(time),
       robotId: this.robotIndex + 1,
       roleName: "Overview Simulator",
       battery: this.random.float(),
@@ -92,22 +87,22 @@ export class OverviewSimulator extends Simulator {
       gameMode: this.random.choice(modes),
       gamePhase: this.random.choice(phases),
       penaltyReason: this.random.choice(penaltyReasons),
-      lastCameraImage: TimestampObject.fromSeconds(this.randomSeconds(time, -5)),
-      lastSeenBall: TimestampObject.fromSeconds(this.randomSeconds(time, -30)),
-      lastSeenGoal: TimestampObject.fromSeconds(this.randomSeconds(time, -30)),
+      lastCameraImage: toProtoTimestamp(this.randomSeconds(time, -5)),
+      lastSeenBall: toProtoTimestamp(this.randomSeconds(time, -30)),
+      lastSeenGoal: toProtoTimestamp(this.randomSeconds(time, -30)),
       walkCommand: {
         x: Math.cos(time / 3 + this.robotIndex),
         y: Math.cos(time / 5 + this.robotIndex),
         z: Math.cos(time / 7 + this.robotIndex),
       },
-    }).finish();
+    }).toBinary();
 
     const message = { messageType, buffer };
 
     return message;
   }
 
-  private randomFieldPosition(): Ivec2 {
+  private randomFieldPosition() {
     const fieldLength = this.field.fieldLength;
     const fieldWidth = this.field.fieldWidth;
     return {
@@ -130,5 +125,9 @@ export class OverviewSimulator extends Simulator {
 }
 
 function getEnumValues<T>(enumObject: any): T[] {
-  return Object.keys(enumObject).map((key) => enumObject[key]) as T[];
+  return Object.values(enumObject).filter((v) => typeof v === "number") as T[];
+}
+
+function toProtoTimestamp(seconds: number) {
+  return { seconds: BigInt(Math.floor(seconds)), nanos: Math.floor((seconds * 1e9) % 1e9) };
 }

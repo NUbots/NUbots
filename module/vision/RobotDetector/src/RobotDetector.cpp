@@ -28,8 +28,10 @@
 #include "RobotDetector.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fmt/format.h>
 #include <numeric>
+#include <ranges>
 
 #include "extension/Configuration.hpp"
 
@@ -59,7 +61,7 @@ namespace module::vision {
             cfg.confidence_threshold   = config["confidence_threshold"].as<double>();
             cfg.cluster_points         = config["cluster_points"].as<int>();
             cfg.minimum_robot_distance = config["minimum_robot_distance"].as<double>();
-            cfg.robot_radius           = config["robot_radius"].as<double>();
+            cfg.radius_cutoff_height   = config["radius_cutoff_height"].as<double>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Visual Mesh", [this](const GreenHorizon& horizon) {
@@ -142,8 +144,34 @@ namespace module::vision {
                     continue;
                 }
 
-                // Should be changed to the average confidence of the robot
-                robot.radius = cfg.robot_radius;
+                // Returns rPCc, vector of point from camera in camera space
+                auto camera_transform = [&](int idx) -> Eigen::Vector3d { return horizon.Hcw * rPWw.col(idx); };
+
+                // Where x is forward, y sideways and z up.
+                auto find_yaw   = [](const Eigen::Vector3d v) -> double { return std::atan2(v.y(), v.x()); };
+                auto find_pitch = [](const Eigen::Vector3d v) -> double { return std::atan2(v.z(), v.x()); };
+
+                // Outreached hands can inflate the other robot's detected radius as it uses yaw. To avoid
+                // this we cutoff points above stop_pitch to only take the min/max yaw near the robots feet.
+                double stop_pitch = std::atan2(robot.rRCc.z() + cfg.radius_cutoff_height, robot.rRCc.x());
+
+                auto filtered_cluster = cluster | std::views::filter([&, stop_pitch](int a) {
+                                            return find_pitch(camera_transform(a)) < stop_pitch;
+                                        });
+
+                const auto [min, max] =
+                    std::ranges::minmax_element(filtered_cluster.begin(), filtered_cluster.end(), [&](int a, int b) {
+                        return find_yaw(camera_transform(a)) < find_yaw(camera_transform(b));
+                    });
+
+                double min_yaw    = find_yaw(camera_transform(*min));
+                double max_yaw    = find_yaw(camera_transform(*max));
+                double yaw_radius = (max_yaw - min_yaw) / 2;
+
+                log<DEBUG>(fmt::format("Robot's detected radius is {}", yaw_radius));
+
+                robot.radius = std::cos(yaw_radius);  // Robot radius is in cos(theta)
+
                 robots->robots.push_back(std::move(robot));
             }
 

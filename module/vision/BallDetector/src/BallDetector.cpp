@@ -28,9 +28,13 @@
 #include "BallDetector.hpp"
 
 #include <Eigen/Geometry>
+#include <cstddef>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <numeric>
+#include <optional>
+#include <ranges>
+#include <set>
 
 #include "extension/Configuration.hpp"
 
@@ -60,6 +64,26 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nusight::graph;
     using utility::support::Expression;
+    using utility::vision::visualmesh::find_cluster_angular_radius;
+    using utility::vision::visualmesh::find_cluster_central_axis;
+    using utility::vision::visualmesh::find_cluster_fill;
+
+    namespace {
+        struct BallCandidate {
+            // Indices of the clusters used to make this cluster
+            std::vector<size_t> cluster_indices;
+
+            // Central axis of the ball
+            Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
+
+            // Radius is = cos(theta), where theta is angle between uBCw and the furthest point on the ball
+            double radius = 0.0;
+
+            bool used_in_merge = false;
+
+            std::optional<double> fill = std::nullopt;
+        };
+    }  // namespace
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -68,8 +92,11 @@ namespace module::vision {
 
             cfg.confidence_threshold  = config["confidence_threshold"].as<double>();
             cfg.cluster_points        = config["cluster_points"].as<int>();
+            cfg.merge_buffer_scalar   = config["merge_buffer_scalar"].as<double>();
+            cfg.merge_preference      = config["merge_preference"].as<double>();
             cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
             cfg.distance_disagreement = config["distance_disagreement"].as<double>();
+            cfg.minimum_fill          = config["minimum_fill"].as<double>();
             cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
             cfg.ball_angular_cov      = Eigen::Vector3d(config["ball_angular_cov"].as<Expression>());
         });
@@ -106,15 +133,23 @@ namespace module::vision {
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
-                // Clustering is down in two steps
+                // Clustering is done in three steps
                 // 1) Take the set of ball points found above and partition them into potential clusters by
                 //    a) Add the first point and its ball neighbours to a cluster
                 //    b) Find all other ball points who are neighbours of the points in the cluster
                 //    c) Partition all of the indices that are in the cluster
                 //    d) Repeat a-c for all points that were not partitioned
                 //    e) Delete all partitions smaller than a given threshold
-                // 2) Discard all clusters are entirely above the green horizon
-                std::vector<std::vector<int>> clusters;
+                // 2) Create BallCandidates from clusters, considering opportunities to merge clusters by
+                //    a) Create a ball candidate for each each cluster
+                //    b) Compute central axis and angular radius of each ball candidate
+                //    c) Create an adjacency table with connections being minimal angular offset between ball candidates
+                //    d) For each connected component, check if merging nCn or nCn-1 ball candidates is preferred
+                //    e) Create a new ball candidate from the merged candidates, then compute its radius and axis
+                //    f) Mark candidates used for merging as used in merging
+                // 3) Discard all ball candidates whose points are entirely above the green horizon
+
+                std::vector<std::vector<int>> clusters{};
                 utility::vision::visualmesh::cluster_points(indices.begin(),
                                                             indices.end(),
                                                             neighbours,
@@ -123,31 +158,170 @@ namespace module::vision {
 
                 log<DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-                // Partition the clusters such that clusters above the green horizons are removed,
-                // and then resize the vector to remove them
-                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
-                                                                                            horizon.horizon,
-                                                                                            rPWw,
-                                                                                            false,
-                                                                                            true,
-                                                                                            true);
-                clusters.resize(std::distance(clusters.begin(), green_boundary));
+                // Create ball candidates for each cluster
+                std::vector<BallCandidate> ball_candidates(clusters.size());
+                for (size_t i = 0; i < clusters.size(); ++i) {
+                    auto& ball           = ball_candidates[i];
+                    ball.cluster_indices = {i};
+                    ball.uBCw            = find_cluster_central_axis(clusters[i].begin(), clusters[i].end(), uPCw);
+                    ball.radius = find_cluster_angular_radius(clusters[i].begin(), clusters[i].end(), uPCw, ball.uBCw);
+                }
 
-                log<DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                // Create a adjacency list of potentially valid cluster merges
+                std::vector<std::vector<size_t>> adj_list(ball_candidates.size());
+                for (size_t i = 0; i < ball_candidates.size(); ++i) {
+                    // Convert cluster radius stored as cos(theta) to angles
+                    const double r_i_angle       = std::acos(ball_candidates[i].radius);
+                    const Eigen::Vector3d uBCw_i = ball_candidates[i].uBCw;
+                    for (size_t j = i + 1; j < ball_candidates.size(); ++j) {
+                        const double r_j_angle       = std::acos(ball_candidates[j].radius);
+                        const Eigen::Vector3d uBCw_j = ball_candidates[j].uBCw;
+
+                        // If angular separation of 2 cluster axes < sum of their angular radii, from the camera's view
+                        // they overlap and can be merged. In use, sum of radii is multiplied by merge_buffer_scalar
+                        // to encourage merging of closeby clusters
+                        if (std::acos(uBCw_i.dot(uBCw_j)) < (r_i_angle + r_j_angle) * (cfg.merge_buffer_scalar)) {
+                            adj_list[i].push_back(j);
+                            adj_list[j].push_back(i);
+                        }
+                    }
+                }
+
+                // Find connected components (potential merges) through depth first search of the ball candidates
+                const size_t original_count = ball_candidates.size();
+                std::vector<bool> visited(original_count, false);
+                for (size_t i = 0; i < original_count; ++i) {
+                    if (visited[i]) {
+                        continue;
+                    }
+
+                    std::vector<size_t> proposed_component{};
+                    std::vector<size_t> stack = {i};
+                    visited[i]                = true;
+
+                    while (!stack.empty()) {
+                        size_t current = stack.back();
+                        stack.pop_back();
+                        proposed_component.push_back(current);
+
+                        for (size_t neighbour : adj_list[current]) {
+                            if (!visited[neighbour]) {
+                                stack.push_back(neighbour);
+                                visited[neighbour] = true;
+                            }
+                        }
+                    }
+
+                    // End early if there aren't multiple clusters in the component
+                    if (proposed_component.size() <= 1) {
+                        continue;
+                    }
+
+                    // Evaluates a merge returning a std::tuple<> of uBCw, radius and fill
+                    auto evaluate_merge = [&](const std::vector<size_t>& cluster_indices) {
+                        // Combine views of the balls clusters to make a flattened view of all its uPCw mesh indices.
+                        // Use its iterators to traverse over all mesh points on the ball simply.
+                        auto view = cluster_indices
+                                    | std::views::transform([&](size_t i) { return std::views::all(clusters[i]); })
+                                    | std::views::join;
+
+                        Eigen::Vector3d rBCw = Eigen::Vector3d::Zero();
+                        for (int idx : view) {
+                            rBCw += uPCw.col(idx);
+                        }
+                        Eigen::Vector3d uBCw = rBCw.normalized();
+                        double radius        = find_cluster_angular_radius(view.begin(), view.end(), uPCw, uBCw);
+                        double fill = find_cluster_fill(view.begin(), view.end(), neighbours, uBCw, radius, uPCw);
+                        return std::make_tuple(uBCw, radius, fill);
+                    };
+
+                    auto [best_uBCw, best_radius, best_fill] = evaluate_merge(proposed_component);
+                    best_fill *= cfg.merge_preference;
+                    std::optional<size_t> excluded_index = std::nullopt;
+
+                    // Greedily check nC(n-1) options
+                    for (size_t i = 0; i < proposed_component.size(); ++i) {
+                        std::vector<size_t> filtered_indices = proposed_component;
+                        filtered_indices.erase(filtered_indices.begin() + i);
+                        auto [uBCw, radius, fill] = evaluate_merge(filtered_indices);
+
+                        if (fill > best_fill) {
+                            // We select this index to remove
+                            excluded_index = i;
+                            best_uBCw      = uBCw;
+                            best_radius    = radius;
+                            best_fill      = fill;
+                        }
+                    }
+
+                    if (excluded_index) {
+                        proposed_component.erase(proposed_component.begin() + *excluded_index);
+                        log<DEBUG>("A cluster has been removed from a potential merge to improve fill");
+                    }
+
+                    if (proposed_component.size() <= 1) {
+                        log<DEBUG>("Merge aborted due to it resulting in a worse fill");
+                        continue;
+                    }
+
+                    for (size_t idx : proposed_component) {
+                        ball_candidates[idx].used_in_merge = true;
+                    }
+
+                    ball_candidates.push_back({.cluster_indices = std::move(proposed_component),
+                                               .uBCw            = best_uBCw,
+                                               .radius          = best_radius,
+                                               .fill            = best_fill});
+                }
+
+                log<DEBUG>(fmt::format(
+                    "Created {} additional ball candidates through merging {} clusters",
+                    ball_candidates.size() - clusters.size(),
+                    std::count_if(ball_candidates.begin(), ball_candidates.end(), [](const BallCandidate& candidate) {
+                        return candidate.used_in_merge;
+                    })));
+
+                // Get a mask for whether a cluster is inside or intersecting the green horizon
+                std::vector<bool> accepted_cluster_mask =
+                    utility::vision::visualmesh::get_green_horizon_side_mask(clusters,
+                                                                             horizon.horizon,
+                                                                             rPWw,
+                                                                             false,
+                                                                             true,
+                                                                             true);
+
+                log<DEBUG>(fmt::format("Found {} clusters below green horizon",
+                                       std::count(accepted_cluster_mask.begin(), accepted_cluster_mask.end(), true)));
+
+                // Throw out ball candidates where all clusters making it are above the green horizon
+                auto cutoff = std::partition(ball_candidates.begin(),
+                                             ball_candidates.end(),
+                                             [&accepted_cluster_mask](const BallCandidate& ball_candidate) {
+                                                 bool kept{false};
+                                                 for (const size_t cluster_idx : ball_candidate.cluster_indices) {
+                                                     if (accepted_cluster_mask[cluster_idx]) {
+                                                         kept = true;
+                                                         break;
+                                                     }
+                                                 }
+                                                 return kept;
+                                             });
+
+                ball_candidates.resize(std::distance(ball_candidates.begin(), cutoff));
 
                 // Create the Balls message, which will contain a Ball for every cluster that is a valid ball
                 auto balls = std::make_unique<Balls>();
 
                 // Balls is still emitted even if there are no balls, to indicate to other modules that no balls are
                 // currently visible
-                if (clusters.empty()) {
+                if (ball_candidates.empty()) {
                     log<DEBUG>("Found no balls.");
                     emit(std::move(balls));
                     return;
                 }
 
                 // Reserve the memory in advance for efficiency
-                balls->balls.reserve(clusters.size());
+                balls->balls.reserve(ball_candidates.size());
 
                 balls->id        = horizon.id;         // camera id
                 balls->timestamp = horizon.timestamp;  // time when the image was taken
@@ -156,38 +330,17 @@ namespace module::vision {
                 // World to camera transform, to be used in for loop below
                 const Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
 
-                // CHECK EACH CLUSTER FOR VALID BALL
-                for (auto& cluster : clusters) {
-                    Ball b;
+                // Add ball for each valid ball candidate
+                for (BallCandidate& candidate : ball_candidates) {
+                    Ball b{};
 
-                    // FIND CENTRAL AXIS OF BALL
-                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
-                    // an average vector, which represents the central cone axis
+                    // Find central axis of ball, using precomputed measurements from merge logic
                     // uBCw: unit vector from camera to ball central axis in world space
-                    Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
-                    for (const auto& idx : cluster) {
-                        uBCw += uPCw.col(idx);
-                    }
-                    uBCw.normalize();  // get cone axis as a unit vector
-
-                    // FIND ANGULAR RADIUS OF BALL
-                    // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
-                    // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
-                    // is the angle between the central ball axis (uBCw) and the edge of the ball. This helps to find
-                    // the approximate distance to the ball.
-                    double radius = 1.0;
-                    for (const auto& idx : cluster) {
-                        // Unit vector from the camera to the ball edge, in world space
-                        const Eigen::Vector3d& uECw(uPCw.col(idx));
-                        // Find the vector that gives the largest angle between the central axis and ball edge
-                        // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
-                        radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
-                    }
-
                     // The vectors are in world space, multiply by Rcw to get the central axis in camera space
-                    b.uBCc = Hcw.rotation() * uBCw;
+                    b.uBCc = Hcw.rotation() * candidate.uBCw;
+
                     // Angular radius, or cos(theta) where theta is the angle between central axis and ball edge
-                    b.radius = radius;
+                    b.radius = candidate.radius;
 
                     // CALCULATE DISTANCE TO BALL WITH TWO METHODS
                     // 1. Angular-based distance
@@ -204,7 +357,7 @@ namespace module::vision {
                     //      distance = (field.ball_radius) / (sin(arccos(radius)))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
                     //      distance = field.ball_radius / sqrt(1 - radius^2)
-                    const double angular_distance = field.ball_radius / std::sqrt(1.0 - radius * radius);
+                    const double angular_distance = field.ball_radius / std::sqrt(1.0 - b.radius * b.radius);
                     // Convert uBCc into a position vector (rBCc) and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
                     b.measurements.emplace_back();
@@ -222,7 +375,8 @@ namespace module::vision {
                     //      Point on line: (0, 0, 0)
                     // Since the plane normal zeros out x and y, only consider z
                     // rWCw = -Hcw.inverse().translation().z()
-                    const double projection_distance = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
+                    const double projection_distance =
+                        (field.ball_radius - Hcw.inverse().translation().z()) / candidate.uBCw.z();
                     // Create a ball measurement message for this calculation
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
@@ -239,29 +393,67 @@ namespace module::vision {
                     log<DEBUG>("**************************************************");
                     log<DEBUG>("*                    THROWOUTS                   *");
                     log<DEBUG>("**************************************************");
-                    bool keep = true;
-                    b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
+                    b.colour.fill(1.0);  // A valid ball has a white colour in NUsight
+
+                    // Discard if cluster was used for merging
+                    if (candidate.used_in_merge) {
+                        log<DEBUG>("Ball candidate discarded: merged with another detection to create another ball");
+                        log<DEBUG>("--------------------------------------------------");
+                        // Balls that were used in merging will show up as orange in NUsight
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 0.65, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
+                    }
+
+                    // Discard if ball's fill is too low
+                    if (!candidate.fill.has_value()) {
+                        auto points =
+                            candidate.cluster_indices
+                            | std::views::transform([&](size_t idx) { return std::views::all(clusters[idx]); })
+                            | std::views::join;
+                        candidate.fill = find_cluster_fill(points.begin(),
+                                                           points.end(),
+                                                           neighbours,
+                                                           candidate.uBCw,
+                                                           candidate.radius,
+                                                           uPCw);
+                    }
+
+                    if (candidate.fill.value() < cfg.minimum_fill) {
+                        // Balls that have too low fill will show up as purple in NUsight
+                        b.colour = !b.is_invalid ? message::conversion::math::vec4(0.62, 0.13, 0.94, 1.0) : b.colour;
+                        b.is_invalid = true;
+                    }
 
                     // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
                     // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
                     std::vector<double> angles;
+                    const size_t num_angles = std::accumulate(candidate.cluster_indices.begin(),
+                                                              candidate.cluster_indices.end(),
+                                                              0,
+                                                              [&clusters](size_t count, size_t cluster_index) {
+                                                                  return count + clusters[cluster_index].size();
+                                                              });
+
                     double mean             = 0.0;
-                    const double max_radius = std::acos(radius);  // largest angle between vectors
+                    const double max_radius = std::acos(b.radius);  // Largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
-                    for (const auto& idx : cluster) {
-                        const double angle = std::acos(uBCw.dot(uPCw.col(idx))) / max_radius;
-                        angles.emplace_back(angle);
-                        mean += angle;
+                    for (const size_t cluster_idx : candidate.cluster_indices) {
+                        for (const int idx : clusters[cluster_idx]) {
+                            const double angle = std::acos(candidate.uBCw.dot(uPCw.col(idx))) / max_radius;
+                            angles.emplace_back(angle);
+                            mean += angle;
+                        }
                     }
-                    mean /= angles.size();
+
+                    mean /= num_angles;
                     // Calculate standard deviation of angles in cluster
                     double deviation = 0.0;
                     for (const auto& angle : angles) {
                         deviation += (mean - angle) * (mean - angle);
                     }
-                    deviation = std::sqrt(deviation / (angles.size() - 1));
+                    deviation = std::sqrt(deviation / (num_angles - 1));
 
                     // Check if standard deviation is low enough
                     if (deviation > cfg.maximum_deviation) {
@@ -271,8 +463,8 @@ namespace module::vision {
                                                cfg.maximum_deviation));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
@@ -287,8 +479,8 @@ namespace module::vision {
                                         projection_distance));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
@@ -300,8 +492,8 @@ namespace module::vision {
                                                cfg.minimum_ball_distance));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     // DISCARD IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -314,8 +506,8 @@ namespace module::vision {
                                         field.dimensions.field_length));
                         log<DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as yellow in NUsight
-                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 1.0, 1.0) : b.colour;
-                        keep     = false;
+                        b.colour     = !b.is_invalid ? message::conversion::math::vec4(1.0, 1.0, 0.0, 1.0) : b.colour;
+                        b.is_invalid = true;
                     }
 
                     log<DEBUG>(fmt::format("Camera {}", balls->id));
@@ -323,19 +515,20 @@ namespace module::vision {
                     log<DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
                     log<DEBUG>(
                         fmt::format("Distance {} - rBCc {}", angular_distance, b.measurements[0].rBCc.transpose()));
-                    log<DEBUG>(fmt::format("Projection Distance {} - rBCc",
+                    log<DEBUG>(fmt::format("Projection Distance {} - rBCc {}",
                                            projection_distance,
                                            b.measurements[1].rBCc.transpose()));
                     log<DEBUG>(fmt::format("Distance Throwout {}",
                                            std::abs(projection_distance - angular_distance) / max_distance));
+                    size_t num_clusters_used{candidate.cluster_indices.size()};
+                    if (num_clusters_used > 1) {
+                        log<DEBUG>(fmt::format("Created through merging {} clusters", num_clusters_used));
+                    }
                     log<DEBUG>("**************************************************");
 
-                    if (!keep) {
-                        b.measurements.clear();
-                    }
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
-                    if (keep || log_level <= DEBUG) {
+                    if (!b.is_invalid || log_level <= DEBUG) {
                         balls->balls.push_back(std::move(b));
                     }
 
@@ -345,8 +538,8 @@ namespace module::vision {
                         const Eigen::Vector3d rBCc = Hcw * horizon.vision_ground_truth.rBWw.cast<double>();
                         const Eigen::Vector3d rBWw = horizon.vision_ground_truth.rBWw.cast<double>();
 
-                        Eigen::Vector3d ball_position_projection = uBCw * projection_distance;
-                        Eigen::Vector3d ball_position_angular    = uBCw * angular_distance;
+                        Eigen::Vector3d ball_position_projection = candidate.uBCw * projection_distance;
+                        Eigen::Vector3d ball_position_angular    = candidate.uBCw * angular_distance;
                         Eigen::Vector3d ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
                         Eigen::Vector3d ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
 

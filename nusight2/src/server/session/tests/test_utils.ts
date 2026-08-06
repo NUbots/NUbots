@@ -3,8 +3,7 @@ import { Mock, vi } from "vitest";
 
 import { AwaitableMock, createAwaitableMock } from "../../../shared/base/testing/awaitable_mock";
 import { createMockEventEmitter } from "../../../shared/base/testing/create_mock_event_emitter";
-import { MessageType } from "../../../shared/messages";
-import { messageTypeToName } from "../../../shared/messages/type_converters";
+import { MessageType } from "../../../shared/messages/types";
 import { hashType } from "../../../shared/nuclearnet/hash_type";
 import { NUClearNetClient } from "../../../shared/nuclearnet/nuclearnet_client";
 import { FakeNUClearNetClient } from "../../nuclearnet/fake_nuclearnet_client";
@@ -33,8 +32,8 @@ export function createMockWebSocket(): {
     emit: mockEmitter.emit,
     emitMessage: (message: any) => {
       const messageType = message.constructor as MessageType<any>;
-      const type = messageTypeToName(messageType);
-      const payload = messageType.encode(message).finish() as Buffer;
+      const type = messageType.typeName;
+      const payload = Buffer.from(message.toBinary());
       const packet: NUClearNetSend = { payload, type, reliable: true, target: "nusight" };
       mockEmitter.emit("packet", packet);
     },
@@ -66,9 +65,9 @@ export function createMockNUClearNetClient(): {
 /** Create a packet from the NUsight server with the given message type */
 export function createPacketFromServer(message: any): NUClearNetPacket {
   const messageType = message.constructor as MessageType<any>;
-  const typeName = messageTypeToName(messageType);
+  const typeName = messageType.typeName;
   const hash = hashType(typeName);
-  const payload = messageType.encode(message).finish() as Buffer;
+  const payload = Buffer.from(message.toBinary());
 
   return {
     hash,
@@ -85,9 +84,9 @@ export function createPacketFromServer(message: any): NUClearNetPacket {
 /** Create a packet from NUClearNet server with the given message type */
 export function createPacketFromNUClearNet(message: any, opts: { reliable?: boolean } = {}) {
   const messageType = message.constructor as MessageType<any>;
-  const typeName = messageTypeToName(messageType);
+  const typeName = messageType.typeName;
   const hash = hashType(typeName);
-  const payload = messageType.encode(message).finish() as Buffer;
+  const payload = Buffer.from(message.toBinary());
 
   const packet: NUClearNetPacket = {
     hash,
@@ -109,7 +108,7 @@ export function findPacketFromCalls(
   packetType: MessageType<any>,
   nthMatchingPacket: number = 1,
 ): NUClearNetPacket | undefined {
-  const packetTypeName = messageTypeToName(packetType);
+  const packetTypeName = packetType.typeName;
 
   let matchedCount = 0;
   const matchedCall = mockFn.mock.calls.find((callArgs) => {
@@ -139,7 +138,7 @@ export function findAndDecodePacketFromCalls<T>(
   const packet = findPacketFromCalls(mockFn, packetType, nthMatchingPacket);
 
   if (packet) {
-    const payload = packetType.decode(packet.payload);
+    const payload = packetType.fromBinary(packet.payload as Uint8Array);
     return { ...packet, payload };
   }
 }

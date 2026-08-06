@@ -27,6 +27,7 @@
 #include "BallLocalisation.hpp"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <chrono>
 #include <numeric>
 
@@ -115,8 +116,8 @@ namespace module::localisation {
         on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then([this](const VisionBalls& balls,
                                                                                             const FieldDescription& fd,
                                                                                             const Field& field) {
-            // If no balls, return
-            if (balls.balls.empty()) {
+            // If there are no balls or there are no valid balls, return
+            if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
                 return;
             }
 
@@ -128,6 +129,10 @@ namespace module::localisation {
             Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
             double lowest_distance = std::numeric_limits<double>::max();
             for (const auto& ball : balls.balls) {
+                if (ball.is_invalid) {
+                    continue;  // Skip ball if it is marked invalid
+                }
+
                 Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
                 double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                 if (current_distance < lowest_distance) {

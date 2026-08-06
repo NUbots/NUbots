@@ -29,7 +29,7 @@ export function TaskChip({ task }: TaskChipProps) {
 
   const visibleName = fromTypeFallback ? shortName(displayName) : shortName(displayName!);
 
-  const { priority, optional } = task as any;
+  const { priority, optional } = task;
   return (
     <div
       title={displayName}

@@ -37,6 +37,14 @@ enum Team {
     UNKNOWN_TEAM = 0;
     BLUE         = 1;
     RED          = 2;
+    YELLOW       = 3;
+    BLACK        = 4;
+    WHITE        = 5;
+    GREEN        = 6;
+    ORANGE       = 7;
+    PURPLE       = 8;
+    BROWN        = 9;
+    GRAY         = 10;
 }
 
 message Robot {
