@@ -9,15 +9,21 @@
 
 namespace utility::slam {
 
-    OutOfFieldDetector::OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims, const Options& opts)
+    OutOfFieldDetector::OutOfFieldDetector(const message::input::Image::Lens& lens,
+                                           const Eigen::Vector2d& dimensions,
+                                           const FieldDimensions& dims,
+                                           const Options& opts)
         : options(opts)
         , lens_(lens)
+        , dimensions_(dimensions)
         , halfCarpetLength_(dims.fieldLength / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , halfCarpetWidth_(dims.fieldWidth / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , orb_(cv::ORB::create()) {}
 
-    OutOfFieldDetector::OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims)
-        : OutOfFieldDetector(lens, dims, Options{}) {}
+    OutOfFieldDetector::OutOfFieldDetector(const message::input::Image::Lens& lens,
+                                           const Eigen::Vector2d& dimensions,
+                                           const FieldDimensions& dims)
+        : OutOfFieldDetector(lens, dimensions, dims, Options{}) {}
 
     bool OutOfFieldDetector::isOutOfField(const Eigen::Vector3d& uPCc, const Pose<double>& Tfc) const {
         // Ray direction in the field frame and camera position above the ground plane.
@@ -67,7 +73,7 @@ namespace utility::slam {
         for (std::size_t i = 0; i < keypoints.size(); ++i) {
             OutOfFieldFeature f;
             f.px         = Eigen::Vector2d(keypoints[i].pt.x, keypoints[i].pt.y);
-            f.uPCc       = lens_.unproject(f.px);
+            f.uPCc       = utility::vision::unproject_pixel(f.px, lens_, dimensions_);
             f.descriptor = descriptors.row(static_cast<int>(i));
             f.response   = keypoints[i].response;
             f.outOfField = isOutOfField(f.uPCc, Tfc);

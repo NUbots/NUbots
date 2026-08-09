@@ -11,7 +11,7 @@
  * This module extracts those features from a camera frame:
  *  - FAST corners on the grayscale image (strongest maxFeatures kept),
  *  - an ORB descriptor per corner (oriented BRIEF, matchable across frames),
- *  - a unit ray in the camera frame {c} per corner (CameraLens::unproject),
+ *  - a unit ray in the camera frame {c} per corner (utility::vision::unproject_pixel),
  *  - an out-of-field classification given the estimated camera pose in {f}:
  *    a ray is out-of-field when it points at/above the horizon or its ground-plane
  *    intersection lands outside the field carpet (boundary + border strip + margin).
@@ -29,12 +29,14 @@
 #include <vector>
 
 #include "FieldMap.hpp"
-#include "camera/CameraLens.hpp"
 #include "camera/Pose.hpp"
+
+#include "message/input/Image.hpp"
+
+#include "utility/vision/projection.hpp"
 
 namespace utility::slam {
 
-    using utility::slam::camera::CameraLens;
     using utility::slam::camera::Pose;
 
     /**
@@ -66,14 +68,20 @@ namespace utility::slam {
 
         /**
          * @brief Construct the detector.
-         * @param lens Fisheye lens model for pixel -> ray unprojection
+         * @param lens Width-normalised lens calibration, as carried on message::input::Image
+         * @param dimensions Image dimensions in pixels {width, height}
          * @param dims Field dimensions defining the carpet extent
          * @param options Detection and classification options
          */
-        OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims, const Options& options);
+        OutOfFieldDetector(const message::input::Image::Lens& lens,
+                           const Eigen::Vector2d& dimensions,
+                           const FieldDimensions& dims,
+                           const Options& options);
 
         /// @brief Construct with default options.
-        OutOfFieldDetector(const CameraLens& lens, const FieldDimensions& dims);
+        OutOfFieldDetector(const message::input::Image::Lens& lens,
+                           const Eigen::Vector2d& dimensions,
+                           const FieldDimensions& dims);
 
         /**
          * @brief Detect corners in a frame and classify them against the field extent.
@@ -94,10 +102,11 @@ namespace utility::slam {
         Options options;
 
     private:
-        const CameraLens& lens_;
-        double halfCarpetLength_;  ///< Field half-length + border strip + margin [m]
-        double halfCarpetWidth_;   ///< Field half-width + border strip + margin [m]
-        cv::Ptr<cv::ORB> orb_;     ///< Descriptor extractor (compute only; detection is FAST)
+        message::input::Image::Lens lens_;  ///< Width-normalised lens calibration
+        Eigen::Vector2d dimensions_;        ///< Image dimensions in pixels {width, height}
+        double halfCarpetLength_;           ///< Field half-length + border strip + margin [m]
+        double halfCarpetWidth_;            ///< Field half-width + border strip + margin [m]
+        cv::Ptr<cv::ORB> orb_;              ///< Descriptor extractor (compute only; detection is FAST)
     };
 }  // namespace utility::slam
 

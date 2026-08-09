@@ -12,17 +12,32 @@
 
 #include "rotation.hpp"
 
+#include "utility/vision/projection.hpp"
+
 namespace utility::slam {
 
-    SideDisambiguator::SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims, const Options& opts)
+    namespace {
+        /// @brief True if a pixel lies within the image bounds.
+        bool in_image(const Eigen::Vector2d& px, const Eigen::Vector2d& dimensions) {
+            return px.x() >= 0.0 && px.x() < dimensions.x() && px.y() >= 0.0 && px.y() < dimensions.y();
+        }
+    }  // namespace
+
+    SideDisambiguator::SideDisambiguator(const message::input::Image::Lens& lens,
+                                         const Eigen::Vector2d& dimensions,
+                                         const FieldDimensions& dims,
+                                         const Options& opts)
         : options(opts)
         , lens_(lens)
-        , detector_(lens, dims)
+        , dimensions_(dimensions)
+        , detector_(lens, dimensions, dims)
         , halfCarpetLength_(dims.fieldLength / 2 + dims.borderStripMinWidth + opts.fieldMargin)
         , halfCarpetWidth_(dims.fieldWidth / 2 + dims.borderStripMinWidth + opts.fieldMargin) {}
 
-    SideDisambiguator::SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims)
-        : SideDisambiguator(lens, dims, Options{}) {}
+    SideDisambiguator::SideDisambiguator(const message::input::Image::Lens& lens,
+                                         const Eigen::Vector2d& dimensions,
+                                         const FieldDimensions& dims)
+        : SideDisambiguator(lens, dimensions, dims, Options{}) {}
 
     bool SideDisambiguator::isBackgroundPoint(const Eigen::Vector3d& rPFf) const {
         // Plausible static background: beyond the carpet in plan view, or overhead
@@ -160,10 +175,12 @@ namespace utility::slam {
 
             const Eigen::Vector3d uFf = rel / range;
             const Eigen::Vector3d uCc = Rcf * uFf;
-            if (!CameraLens::inFrontOfCamera(uCc))
+            // Only rays in the camera's forward hemisphere can land on the sensor; a ray at or behind
+            // the horizon projects to a radius that says nothing about where it would be seen.
+            if (uCc.x() <= 1e-3)
                 continue;
-            const Eigen::Vector2d px = lens_.project(uCc);
-            if (!lens_.inImage(px))
+            const Eigen::Vector2d px = utility::vision::project_pixel(uCc, lens_, dimensions_);
+            if (!in_image(px, dimensions_))
                 continue;
 
             Predicted pr;
@@ -190,7 +207,7 @@ namespace utility::slam {
             out.landmark   = j;
             out.px         = px;
             const double m = options.visibleMargin;
-            out.wellInside = px.x() >= m && px.x() < lens_.width - m && px.y() >= m && px.y() < lens_.height - m;
+            out.wellInside = px.x() >= m && px.x() < dimensions_.x() - m && px.y() >= m && px.y() < dimensions_.y() - m;
             out.ambiguous  = 0.5 * trS + dS > options.maxTangentSigma * options.maxTangentSigma;
 
             pr.Sinv           = S.inverse();

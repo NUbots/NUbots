@@ -46,12 +46,12 @@
 
 #include "FieldMap.hpp"
 #include "OutOfFieldFeatures.hpp"
-#include "camera/CameraLens.hpp"
 #include "camera/Pose.hpp"
+
+#include "message/input/Image.hpp"
 
 namespace utility::slam {
 
-    using utility::slam::camera::CameraLens;
     using utility::slam::camera::Pose;
 
     class SideDisambiguator {
@@ -297,14 +297,21 @@ namespace utility::slam {
 
         /**
          * @brief Construct the disambiguator.
-         * @param lens Fisheye lens model (shared with the detector)
+         * @param lens Width-normalised lens calibration (shared with the detector), as carried on
+         *             message::input::Image
+         * @param dimensions Image dimensions in pixels {width, height}
          * @param dims Field dimensions (carpet extent)
          * @param options Tuning options
          */
-        SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims, const Options& options);
+        SideDisambiguator(const message::input::Image::Lens& lens,
+                          const Eigen::Vector2d& dimensions,
+                          const FieldDimensions& dims,
+                          const Options& options);
 
         /// @brief Construct with default options.
-        SideDisambiguator(const CameraLens& lens, const FieldDimensions& dims);
+        SideDisambiguator(const message::input::Image::Lens& lens,
+                          const Eigen::Vector2d& dimensions,
+                          const FieldDimensions& dims);
 
         /**
          * @brief Process one video frame.
@@ -451,7 +458,8 @@ namespace utility::slam {
                               double t,
                               std::vector<char>& featureGrewTrack);
 
-        const CameraLens& lens_;
+        message::input::Image::Lens lens_;  ///< Width-normalised lens calibration
+        Eigen::Vector2d dimensions_;        ///< Image dimensions in pixels {width, height}
         OutOfFieldDetector detector_;
         double halfCarpetLength_;  ///< Field half-length + border strip + margin [m]
         double halfCarpetWidth_;   ///< Field half-width + border strip + margin [m]
