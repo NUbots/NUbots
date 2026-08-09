@@ -2,51 +2,14 @@
  * @file FieldMap.hpp
  * @brief Defines a static map of known landmark positions on a RoboCup humanoid soccer field
  *
- * This file provides #FieldDimensions (the physical measurements of the field, matching the
- * layout used by the NUbots humanoid robot soccer codebase, see
- * NUbots/module/support/configuration/SoccerConfig/data/config/FieldDescription.yaml and
- * NUbots/shared/message/support/FieldDescription.proto) and #FieldMap, which builds the set of
- * field-line intersection landmarks and goal-post landmarks in the field coordinate frame
- * {f} for use as a known map in robot localisation (e.g. an EKF/particle filter observing
- * field lines and goal posts).
- *
- * The landmark layout and field frame convention are derived directly from the NUbots
- * reference implementation:
- *  - NUbots/shared/utility/localisation/FieldLineOccupanyMap.hpp,
- *    function setup_field_landmarks() (L/T/X field-line intersections)
- *  - NUbots/module/localisation/FieldLocalisationNLopt/src/FieldLocalisationNLopt.cpp,
- *    lines 143-154 (goal post positions)
- *
  * @section field_frame Field coordinate frame {f}
  * The field frame {f} is a right-handed frame with:
- *  - Origin at the centre of the field, i.e. the centre of the centre circle / the midpoint
- *    of the halfway line (see setup_field_landmarks(): the field corners are placed at
- *    (\f$\pm\f$half_length, \f$\pm\f$half_width) and the halfway-line/centre-circle
- *    intersection landmark is placed at the origin,
- *    FieldLineOccupanyMap.hpp:182-203).
- *  - +x axis directed along the long axis of the field (the direction from one goal line to
- *    the other, i.e. parallel to the sidelines/touchlines), such that the two goals sit at
- *    x = -field_length/2 and x = +field_length/2
- *    (FieldLocalisationNLopt.cpp:143-150, where the goal posts are placed at
- *    x = \f$\pm\f$field_length/2).
- *  - +y axis directed along the short axis of the field (parallel to the goal lines,
- *    i.e. from one touchline to the other), such that the two goal posts of either goal sit
- *    at y = -goal_width/2 and y = +goal_width/2
- *    (FieldLocalisationNLopt.cpp:143-150).
+ *  - Origin at the centre of the field
+ *  - +x axis directed along the long axis of the field
+ *  - +y axis directed along the short axis of the field
  *  - +z axis normal to the field surface, pointing up out of the ground (right-handed frame);
  *    all landmarks in this file lie on the ground plane, so z = 0 for every landmark.
  *
- * Note: which physical goal is labelled "own" vs "opposition" is not part of the map itself
- * (NUbots's own two modules disagree on this convention -- compare
- * FieldLocalisationNLopt.cpp:143-150, which places "own" goal posts at +half_length, against
- * SoccerConfig.cpp:53-56, which places "own" goal posts at -half_length). #FieldMap therefore
- * simply reports all four goal posts at x = \f$\pm\f$fieldLength/2, y = \f$\pm\f$goalWidth/2,
- * matching the FieldLocalisationNLopt.cpp convention, and leaves any "own"/"opposition"
- * labelling to the caller.
- *
- * Landmark types mirror message::vision::FieldIntersection::IntersectionType (L/T/X); GOAL_POST is
- * added to hold the four goal posts, which NUbots tracks separately. Penalty marks are classified as
- * X_INTERSECTION, matching setup_field_landmarks() (which the layout in build() otherwise replicates).
  */
 
 #ifndef FIELDMAP_HPP
