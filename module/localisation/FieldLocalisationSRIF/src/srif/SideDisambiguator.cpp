@@ -10,7 +10,7 @@
 #include <opencv2/core.hpp>
 #include <vector>
 
-#include "utility/slam/rotation.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/vision/projection.hpp"
 
 namespace module::localisation::srif {

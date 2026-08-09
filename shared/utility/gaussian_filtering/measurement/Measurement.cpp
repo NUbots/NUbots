@@ -31,10 +31,10 @@
 #include <Eigen/SVD>
 #include <stdexcept>
 
-#include "utility/slam/funcmin.hpp"
-#include "utility/slam/gaussian/GaussianInfo.hpp"
+#include "utility/gaussian_filtering/funcmin.hpp"
+#include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
 
-namespace utility::slam::measurement {
+namespace utility::gaussian_filtering::measurement {
 
     Measurement::Measurement(double time) : Event(time), updateMethod_(UpdateMethod::BFGSTRUSTSQRT) {}
 
@@ -178,4 +178,4 @@ namespace utility::slam::measurement {
         system.density = gaussian::GaussianInfo<double>::fromSqrtInfo(Xi * mu, Xi);
     }
 
-}  // namespace utility::slam::measurement
+}  // namespace utility::gaussian_filtering::measurement

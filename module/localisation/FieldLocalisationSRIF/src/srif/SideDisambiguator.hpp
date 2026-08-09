@@ -49,13 +49,13 @@
 
 #include "message/input/Image.hpp"
 
-#include "utility/slam/Pose.hpp"
-#include "utility/slam/rotation.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
 
 namespace module::localisation::srif {
 
-    using utility::slam::Pose;
-    using utility::slam::tangentBasis;
+    using utility::gaussian_filtering::Pose;
+    using utility::gaussian_filtering::tangentBasis;
 
     class SideDisambiguator {
     public:

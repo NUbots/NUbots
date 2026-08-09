@@ -38,7 +38,7 @@
 #include <limits>
 #include <nuclear>
 
-namespace utility::slam::funcmin {
+namespace utility::gaussian_filtering::funcmin {
 
     /**
      * @brief Solve trust-region subproblem
@@ -1266,6 +1266,6 @@ namespace utility::slam::funcmin {
     }
 
 
-}  // namespace utility::slam::funcmin
+}  // namespace utility::gaussian_filtering::funcmin
 
 #endif  // UTILITY_SLAM_FUNCMIN_HPP

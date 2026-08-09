@@ -38,7 +38,7 @@
 #include "srif/FieldSamples.hpp"
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/slam/Pose.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
 
 namespace module::localisation {
 
@@ -47,7 +47,7 @@ namespace module::localisation {
      *
      * The filter itself is module-local: its state layout, field map and measurement models all live
      * under src/srif and src/measurement. Only the generic estimator scaffolding it is built on
-     * (Pose, Event/Measurement, SystemEstimator, GaussianInfo, funcmin) is shared, in utility::slam.
+     * (Pose, Event/Measurement, SystemEstimator, GaussianInfo, funcmin) is shared, in utility::gaussian_filtering.
      * This re-exports the handful of types the reactor names so the class body reads cleanly.
      */
     namespace filter {
@@ -59,7 +59,7 @@ namespace module::localisation {
         using srif::SensorsSample;
         using srif::SystemLocalisation;
         using srif::VisionSample;
-        using utility::slam::Pose;
+        using utility::gaussian_filtering::Pose;
     }  // namespace filter
 
     /**

@@ -34,7 +34,7 @@
 #include "../gaussian/GaussianInfo.hpp"
 #include "SystemBase.hpp"
 
-namespace utility::slam::system {
+namespace utility::gaussian_filtering::system {
 
     /**
      * @brief Class for system state estimation.
@@ -113,6 +113,6 @@ namespace utility::slam::system {
         double dtMaxEst = 1e-2;  ///< Maximum time step for process model prediction
     };
 
-}  // namespace utility::slam::system
+}  // namespace utility::gaussian_filtering::system
 
 #endif  // UTILITY_SLAM_SYSTEM_ESTIMATOR_HPP

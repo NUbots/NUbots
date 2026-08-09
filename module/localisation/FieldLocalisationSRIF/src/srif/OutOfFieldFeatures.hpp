@@ -32,12 +32,12 @@
 
 #include "message/input/Image.hpp"
 
-#include "utility/slam/Pose.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/vision/projection.hpp"
 
 namespace module::localisation::srif {
 
-    using utility::slam::Pose;
+    using utility::gaussian_filtering::Pose;
 
     /**
      * @brief One detected corner feature, with its camera ray and classification.

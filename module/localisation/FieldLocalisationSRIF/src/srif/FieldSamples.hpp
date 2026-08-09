@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-#include "utility/slam/Pose.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
 
 namespace module::localisation::srif {
 
-    using utility::slam::Pose;
+    using utility::gaussian_filtering::Pose;
 
     /**
      * @brief A single message.input.Sensors sample (IMU + torso pose estimate at capture time)

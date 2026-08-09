@@ -34,7 +34,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 
-namespace utility::slam {
+namespace utility::gaussian_filtering {
 
     /**
      * @brief Helper class for working with elements of \f$\mathsf{SE}(3)\f$
@@ -209,6 +209,6 @@ namespace utility::slam {
         }
     };
 
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering
 
 #endif  // UTILITY_SLAM_POSE_HPP

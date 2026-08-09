@@ -30,11 +30,11 @@
 
 #include <Eigen/Core>
 
-#include "utility/slam/Event.hpp"
-#include "utility/slam/system/SystemBase.hpp"
-#include "utility/slam/system/SystemEstimator.hpp"
+#include "utility/gaussian_filtering/Event.hpp"
+#include "utility/gaussian_filtering/system/SystemBase.hpp"
+#include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
-namespace utility::slam::measurement {
+namespace utility::gaussian_filtering::measurement {
 
     // Bring types into scope
     using system::SystemBase;
@@ -177,6 +177,6 @@ namespace utility::slam::measurement {
         double logEvidence_ = std::numeric_limits<double>::quiet_NaN();  ///< Laplace log evidence from the last update.
     };
 
-}  // namespace utility::slam::measurement
+}  // namespace utility::gaussian_filtering::measurement
 
 #endif  // UTILITY_SLAM_MEASUREMENT_MEASUREMENT_HPP

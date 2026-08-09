@@ -40,7 +40,7 @@
 
 #include "GaussianBase.hpp"
 
-namespace utility::slam::gaussian {
+namespace utility::gaussian_filtering::gaussian {
 
     /**
      * @brief Represents a Gaussian distribution using the information form.
@@ -777,6 +777,6 @@ namespace utility::slam::gaussian {
         Eigen::MatrixX<Scalar> Xi_;  ///< The square root information matrix.
     };
 
-}  // namespace utility::slam::gaussian
+}  // namespace utility::gaussian_filtering::gaussian
 
 #endif  // UTILITY_SLAM_GAUSSIAN_GAUSSIAN_INFO_HPP

@@ -3,9 +3,9 @@
 
 namespace module::localisation::srif {
 
-    using utility::slam::Pose;
-    using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::measurement::Measurement;
+    using utility::gaussian_filtering::Pose;
+    using utility::gaussian_filtering::gaussian::GaussianInfo;
+    using utility::gaussian_filtering::measurement::Measurement;
 
     SystemLocalisation::SystemLocalisation(const GaussianInfo<double>& density) : SystemEstimator(density) {
         assert(density.dim() == nx);

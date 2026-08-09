@@ -29,7 +29,7 @@
 
 #include <Eigen/Core>
 
-namespace utility::slam::system {
+namespace utility::gaussian_filtering::system {
 
     SystemEstimator::SystemEstimator(const gaussian::GaussianInfo<double>& density) : SystemBase(), density(density) {}
 
@@ -131,4 +131,4 @@ namespace utility::slam::system {
         return X.col(0);
     }
 
-}  // namespace utility::slam::system
+}  // namespace utility::gaussian_filtering::system

@@ -25,55 +25,47 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_SLAM_EVENT_HPP
-#define UTILITY_SLAM_EVENT_HPP
+#ifndef UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP
+#define UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP
 
+#include <Eigen/Core>
+#include <cmath>
 
-#include "system/SystemBase.hpp"
-
-namespace utility::slam {
-
-    // Bring types into scope
-    using system::SystemBase;
+namespace utility::gaussian_filtering::gaussian {
 
     /**
-     * @brief Base class for all events in the system.
+     * @brief Base class for probability density functions.
      *
-     * This class represents an abstract event that can be processed by the system.
-     * Concrete event types should inherit from this class and implement the update method.
+     * @tparam Scalar The scalar type used for calculations (default: double).
      */
-    class Event {
+    template <typename Scalar = double>
+    class DensityBase {
     public:
         /**
-         * @brief Construct a new Event object.
-         * @param time The time at which the event occurs.
+         * @brief Virtual destructor.
          */
-        Event(double time);
+        virtual ~DensityBase() = default;
 
         /**
-         * @brief Destroy the Event object.
-         */
-        virtual ~Event();
-
-        /**
-         * @brief Process the event in the given system.
-         * @param system The system in which to process the event.
-         */
-        void process(SystemBase& system);
-
-    protected:
-        /**
-         * @brief Update the system based on this event.
-         * @param system The system to update.
+         * @brief Computes the log of the probability density function.
          *
-         * This pure virtual function must be implemented by derived classes
-         * to define the specific behavior of the event.
+         * @param x The input vector.
+         * @return The log of the probability density at x.
          */
-        virtual void update(SystemBase& system) = 0;
+        virtual Scalar log(const Eigen::VectorX<Scalar>& x) const = 0;
 
-        double time_;  ///< The time at which the event occurs.
+        /**
+         * @brief Evaluates the probability density function.
+         *
+         * @param x The input vector.
+         * @return The probability density at x.
+         */
+        Scalar eval(const Eigen::VectorX<Scalar>& x) const {
+            using std::exp;
+            return exp(log(x));
+        }
     };
 
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering::gaussian
 
-#endif  // UTILITY_SLAM_EVENT_HPP
+#endif  // UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP

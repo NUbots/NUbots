@@ -44,9 +44,9 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/BoundingBoxes.hpp"
 
+#include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/slam/gaussian/GaussianInfo.hpp"
-#include "utility/slam/rotation.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::localisation {
@@ -66,10 +66,10 @@ namespace module::localisation {
     using measurement::MeasurementGyroscope;
     using measurement::MeasurementKinematicHeight;
     using measurement::MeasurementQuaternionNorm;
+    using utility::gaussian_filtering::rot2rpy;
+    using utility::gaussian_filtering::rpy2quat;
+    using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::nusight::graph;
-    using utility::slam::rot2rpy;
-    using utility::slam::rpy2quat;
-    using utility::slam::gaussian::GaussianInfo;
     using utility::support::Expression;
 
     /// @brief Convert an Eigen isometry to the filter's pose type

@@ -9,7 +9,7 @@ own_half_x_sign: 1.0
 # equally well, and each component is scored on its own association, so the pair sits at a genuine
 # 50/50 and the reported pose stays with whichever was bootstrapped. Breaking the tie needs asymmetric
 # off-field evidence fed in through SystemLocalisation::addSideLogEvidence -- implemented in
-# utility::slam::SideDisambiguator, but not yet sourced by this module.
+# utility::gaussian_filtering::SideDisambiguator, but not yet sourced by this module.
 use_hypothesis_bank: false
 
 # Body-rate measurements. The gyroscope and the walk-engine odometry measure the body angular and linear

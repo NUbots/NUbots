@@ -30,7 +30,7 @@
 
 #include <Eigen/Core>
 
-namespace utility::slam::system {
+namespace utility::gaussian_filtering::system {
 
     /**
      * @brief Base class for system representation.
@@ -89,6 +89,6 @@ namespace utility::slam::system {
         double time_;  ///< The current system time.
     };
 
-}  // namespace utility::slam::system
+}  // namespace utility::gaussian_filtering::system
 
 #endif  // UTILITY_SLAM_SYSTEM_BASE_HPP

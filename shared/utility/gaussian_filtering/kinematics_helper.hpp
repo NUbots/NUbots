@@ -3,7 +3,7 @@
 
 #include <Eigen/Core>
 
-namespace utility::slam {
+namespace utility::gaussian_filtering {
     Eigen::Matrix3d TKfromTheta(const Eigen::VectorXd& Theta);
 
     /// Smallest |cos(pitch)| the Euler-rate transform is evaluated at, bounding tan(pitch) at 1e3.
@@ -53,6 +53,6 @@ namespace utility::slam {
 
     Eigen::MatrixXd JKfromEta(const Eigen::VectorXd& eta);
 
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering
 
 #endif  // KINEMATICS_HELPER_H

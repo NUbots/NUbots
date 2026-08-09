@@ -18,26 +18,26 @@
 
 #include "srif/FieldSamples.hpp"
 
-#include "utility/slam/Event.hpp"
-#include "utility/slam/Pose.hpp"
-#include "utility/slam/gaussian/GaussianInfo.hpp"
-#include "utility/slam/kinematics_helper.hpp"
-#include "utility/slam/measurement/Measurement.hpp"
-#include "utility/slam/rotation.hpp"
-#include "utility/slam/system/SystemEstimator.hpp"
+#include "utility/gaussian_filtering/Event.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
+#include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
+#include "utility/gaussian_filtering/kinematics_helper.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 
 namespace module::localisation::srif {
 
-    using utility::slam::Event;
-    using utility::slam::Pose;
-    using utility::slam::quat2rot;
-    using utility::slam::quatXi;
-    using utility::slam::rot2rpy;
-    using utility::slam::rpy2rot;
-    using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::measurement::Measurement;
-    using utility::slam::system::SystemEstimator;
+    using utility::gaussian_filtering::Event;
+    using utility::gaussian_filtering::Pose;
+    using utility::gaussian_filtering::quat2rot;
+    using utility::gaussian_filtering::quatXi;
+    using utility::gaussian_filtering::rot2rpy;
+    using utility::gaussian_filtering::rpy2rot;
+    using utility::gaussian_filtering::gaussian::GaussianInfo;
+    using utility::gaussian_filtering::measurement::Measurement;
+    using utility::gaussian_filtering::system::SystemEstimator;
 
     /**
      * @brief A body-fixed twist sample derived from odometry.

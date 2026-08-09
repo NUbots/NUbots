@@ -10,15 +10,15 @@
 
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/slam/measurement/Measurement.hpp"
-#include "utility/slam/system/SystemEstimator.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 namespace module::localisation::measurement {
 
     using srif::SystemLocalisation;
-    using utility::slam::quat2rot;
-    using utility::slam::measurement::Measurement;
-    using utility::slam::system::SystemEstimator;
+    using utility::gaussian_filtering::quat2rot;
+    using utility::gaussian_filtering::measurement::Measurement;
+    using utility::gaussian_filtering::system::SystemEstimator;
 
     /**
      * @class MeasurementQuaternionNorm

@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <cmath>
 
-#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
 
 namespace module::localisation::measurement {
     MeasurementKinematicHeight::MeasurementKinematicHeight(double time, double height, double sigma)

@@ -39,7 +39,7 @@
 
 #include "DensityBase.hpp"
 
-namespace utility::slam::gaussian {
+namespace utility::gaussian_filtering::gaussian {
 
     /**
      * @brief Base class for Gaussian distributions.
@@ -367,6 +367,6 @@ namespace utility::slam::gaussian {
         }
     };
 
-}  // namespace utility::slam::gaussian
+}  // namespace utility::gaussian_filtering::gaussian
 
 #endif  // UTILITY_SLAM_GAUSSIAN_GAUSSIAN_BASE_HPP

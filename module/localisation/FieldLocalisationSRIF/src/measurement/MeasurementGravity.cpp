@@ -4,7 +4,7 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
 
 namespace module::localisation::measurement {
 

@@ -217,7 +217,7 @@ enabled.
 
 ## Dependencies
 
-- `utility::slam` (`shared/utility/slam`) — the generic estimator scaffolding, nothing localisation
+- `utility::gaussian_filtering` (`shared/utility/slam`) — the generic estimator scaffolding, nothing localisation
   specific: `GaussianInfo` (square-root information Gaussian), the `Event`/`Measurement` and
   `SystemBase`/`SystemEstimator` base classes, `Pose`, the rotation and kinematics helpers, and the
   trust-region optimiser (`funcmin`)

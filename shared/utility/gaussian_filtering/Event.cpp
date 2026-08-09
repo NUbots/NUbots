@@ -25,47 +25,22 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP
-#define UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP
+#include "Event.hpp"
 
-#include <Eigen/Core>
-#include <cmath>
+#include "system/SystemBase.hpp"
 
-namespace utility::slam::gaussian {
+namespace utility::gaussian_filtering {
 
-    /**
-     * @brief Base class for probability density functions.
-     *
-     * @tparam Scalar The scalar type used for calculations (default: double).
-     */
-    template <typename Scalar = double>
-    class DensityBase {
-    public:
-        /**
-         * @brief Virtual destructor.
-         */
-        virtual ~DensityBase() = default;
+    Event::Event(double time) : time_(time) {}
 
-        /**
-         * @brief Computes the log of the probability density function.
-         *
-         * @param x The input vector.
-         * @return The log of the probability density at x.
-         */
-        virtual Scalar log(const Eigen::VectorX<Scalar>& x) const = 0;
+    Event::~Event() = default;
 
-        /**
-         * @brief Evaluates the probability density function.
-         *
-         * @param x The input vector.
-         * @return The probability density at x.
-         */
-        Scalar eval(const Eigen::VectorX<Scalar>& x) const {
-            using std::exp;
-            return exp(log(x));
-        }
-    };
+    void Event::process(SystemBase& system) {
+        // Time update
+        system.predict(time_);
 
-}  // namespace utility::slam::gaussian
+        // Event-specific implementation
+        update(system);
+    }
 
-#endif  // UTILITY_SLAM_GAUSSIAN_DENSITY_BASE_HPP
+}  // namespace utility::gaussian_filtering

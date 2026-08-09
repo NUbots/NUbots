@@ -13,7 +13,7 @@
 #include "srif/FieldMap.hpp"
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
 
 namespace module::localisation::measurement {
 

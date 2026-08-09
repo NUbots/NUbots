@@ -36,7 +36,7 @@
 #include <limits>
 #include <vector>
 
-namespace utility::slam::funcmin {
+namespace utility::gaussian_filtering::funcmin {
 
     int trsEig(const Eigen::MatrixXd& H, const Eigen::VectorXd& g, double D, Eigen::VectorXd& p) {
         assert(g.cols() == 1);
@@ -203,4 +203,4 @@ namespace utility::slam::funcmin {
         return 0;
     }
 
-}  // namespace utility::slam::funcmin
+}  // namespace utility::gaussian_filtering::funcmin

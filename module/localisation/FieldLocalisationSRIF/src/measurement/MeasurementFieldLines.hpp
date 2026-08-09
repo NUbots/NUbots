@@ -12,10 +12,10 @@
 #include "srif/FieldSamples.hpp"
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/slam/Pose.hpp"
-#include "utility/slam/measurement/Measurement.hpp"
-#include "utility/slam/rotation.hpp"
-#include "utility/slam/system/SystemEstimator.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementFieldLines
@@ -44,11 +44,11 @@ namespace module::localisation::measurement {
     using srif::FieldMap;
     using srif::LinePointsSample;
     using srif::SystemLocalisation;
-    using utility::slam::Pose;
-    using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::measurement::Measurement;
-    using utility::slam::system::SystemBase;
-    using utility::slam::system::SystemEstimator;
+    using utility::gaussian_filtering::Pose;
+    using utility::gaussian_filtering::gaussian::GaussianInfo;
+    using utility::gaussian_filtering::measurement::Measurement;
+    using utility::gaussian_filtering::system::SystemBase;
+    using utility::gaussian_filtering::system::SystemEstimator;
 
     class MeasurementFieldLines : public Measurement {
     public:

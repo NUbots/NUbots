@@ -32,8 +32,8 @@
 #include <cmath>
 #include <vector>
 
-#include "measurement/MeasurementBodyRates.hpp"
-#include "srif/SystemLocalisation.hpp"
+#include "../../../../module/localisation/FieldLocalisationSRIF/src/measurement/MeasurementBodyRates.hpp"
+#include "../../../../module/localisation/FieldLocalisationSRIF/src/srif/SystemLocalisation.hpp"
 
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
 #include "utility/gaussian_filtering/rotation.hpp"
@@ -41,11 +41,11 @@
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
 
-using module::localisation::measurement::MeasurementBodyVelocity;
-using module::localisation::measurement::MeasurementGyroscope;
-using module::localisation::srif::SystemLocalisation;
 using utility::gaussian_filtering::rpy2quat;
 using utility::gaussian_filtering::gaussian::GaussianInfo;
+using utility::gaussian_filtering::measurement::MeasurementBodyVelocity;
+using utility::gaussian_filtering::measurement::MeasurementGyroscope;
+using utility::gaussian_filtering::system::SystemLocalisation;
 
 namespace {
 

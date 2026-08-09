@@ -5,7 +5,7 @@
 
 #include "rotation.hpp"
 
-namespace utility::slam {
+namespace utility::gaussian_filtering {
 
     // Forwards to the templated version so the pitch singularity is guarded in one
     // place; a second copy of the formula would only be a second place to forget it.
@@ -23,4 +23,4 @@ namespace utility::slam {
         return JK;
     }
 
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering

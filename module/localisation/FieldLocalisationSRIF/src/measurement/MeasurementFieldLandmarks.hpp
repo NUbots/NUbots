@@ -13,10 +13,10 @@
 #include "srif/FieldSamples.hpp"
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/slam/Pose.hpp"
-#include "utility/slam/measurement/Measurement.hpp"
-#include "utility/slam/rotation.hpp"
-#include "utility/slam/system/SystemEstimator.hpp"
+#include "utility/gaussian_filtering/Pose.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementFieldLandmarks
@@ -47,12 +47,12 @@ namespace module::localisation::measurement {
     using srif::LandmarkType;
     using srif::SystemLocalisation;
     using srif::VisionSample;
-    using utility::slam::Pose;
-    using utility::slam::tangentBasis;
-    using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::measurement::Measurement;
-    using utility::slam::system::SystemBase;
-    using utility::slam::system::SystemEstimator;
+    using utility::gaussian_filtering::Pose;
+    using utility::gaussian_filtering::tangentBasis;
+    using utility::gaussian_filtering::gaussian::GaussianInfo;
+    using utility::gaussian_filtering::measurement::Measurement;
+    using utility::gaussian_filtering::system::SystemBase;
+    using utility::gaussian_filtering::system::SystemEstimator;
 
     class MeasurementFieldLandmarks : public Measurement {
     public:

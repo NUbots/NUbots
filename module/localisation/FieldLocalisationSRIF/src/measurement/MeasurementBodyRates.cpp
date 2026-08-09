@@ -4,7 +4,7 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/gaussian_filtering/measurement/Measurement.hpp"
 
 // Both models are linear in the state, so the exact Hessian is constant and the
 // trust-region Newton update converges in one step.

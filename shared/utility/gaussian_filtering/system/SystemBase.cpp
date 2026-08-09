@@ -25,22 +25,12 @@
  * SOFTWARE.
  */
 
-#include "Event.hpp"
+#include "SystemBase.hpp"
 
-#include "system/SystemBase.hpp"
+namespace utility::gaussian_filtering::system {
 
-namespace utility::slam {
+    SystemBase::SystemBase() : time_(0) {}
 
-    Event::Event(double time) : time_(time) {}
+    SystemBase::~SystemBase() = default;
 
-    Event::~Event() = default;
-
-    void Event::process(SystemBase& system) {
-        // Time update
-        system.predict(time_);
-
-        // Event-specific implementation
-        update(system);
-    }
-
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering::system

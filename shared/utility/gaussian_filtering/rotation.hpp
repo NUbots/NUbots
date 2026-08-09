@@ -33,7 +33,7 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-namespace utility::slam {
+namespace utility::gaussian_filtering {
 
     /**
      * @brief Computes a rotation matrix around the X-axis.
@@ -390,6 +390,6 @@ namespace utility::slam {
         return T;
     }
 
-}  // namespace utility::slam
+}  // namespace utility::gaussian_filtering
 
 #endif  // UTILITY_SLAM_ROTATION_HPP
