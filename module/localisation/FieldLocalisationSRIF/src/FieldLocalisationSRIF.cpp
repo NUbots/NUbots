@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "measurement/MeasurementBodyRates.hpp"
 #include "measurement/MeasurementGravity.hpp"
@@ -39,27 +41,36 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/BoundingBoxes.hpp"
+#include "message/vision/OutOfFieldFeatures.hpp"
 
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
 #include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
+#include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
 namespace module::localisation {
 
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
+    using message::input::Image;
     using message::input::Sensors;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
     using message::support::FieldDescription;
     using message::vision::BoundingBox;
     using message::vision::BoundingBoxes;
+    using message::vision::OutOfFieldFeature;
+    using message::vision::OutOfFieldFeatures;
+    using message::vision::OutOfFieldLandmark;
 
     using measurement::MeasurementBodyVelocity;
     using measurement::MeasurementGravity;
@@ -86,6 +97,34 @@ namespace module::localisation {
         H.linear()          = T.rotationMatrix;
         H.translation()     = T.translationVector;
         return H;
+    }
+
+    /// @brief Single-channel 8-bit view of a camera frame, for FAST/ORB.
+    ///
+    /// Handles the formats the two cameras this runs on actually deliver: BGR3 and Bayer RGGB from
+    /// the hardware Camera module, RGBA from Webots. The corner detector only ever wanted intensity,
+    /// so a demosaic to colour and back would be wasted work -- Bayer is converted straight to grey.
+    ///
+    /// @return False if the format is not one we can read, leaving `gray` untouched.
+    static bool to_grayscale(const Image& image, cv::Mat& gray) {
+        const int width  = int(image.dimensions.x());
+        const int height = int(image.dimensions.y());
+        // The Mat is a view over the message's buffer; cvtColor allocates the output, so nothing
+        // here outlives the message.
+        uint8_t* data = const_cast<uint8_t*>(image.data.data());
+        switch (image.format) {
+            case utility::vision::fourcc("BGR3"):
+                cv::cvtColor(cv::Mat(height, width, CV_8UC3, data), gray, cv::COLOR_BGR2GRAY);
+                return true;
+            case utility::vision::FOURCC::RGGB:
+                cv::cvtColor(cv::Mat(height, width, CV_8UC1, data), gray, cv::COLOR_BayerRG2GRAY);
+                return true;
+            case utility::vision::fourcc("RGBA"):
+                cv::cvtColor(cv::Mat(height, width, CV_8UC4, data), gray, cv::COLOR_RGBA2GRAY);
+                return true;
+            case utility::vision::FOURCC::GREY: cv::Mat(height, width, CV_8UC1, data).copyTo(gray); return true;
+            default: return false;
+        }
     }
 
     /// @brief Build a filter VisionSample (rays in camera frame {c}) from YOLO bounding boxes.
@@ -125,6 +164,7 @@ namespace module::localisation {
 
             cfg.own_half_x_sign         = config["own_half_x_sign"].as<double>();
             cfg.use_hypothesis_bank     = config["use_hypothesis_bank"].as<bool>();
+            cfg.use_side_disambiguator  = config["use_side_disambiguator"].as<bool>();
             cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
             cfg.use_odometry_velocity   = config["use_odometry_velocity"].as<bool>();
             cfg.odometry_velocity_sigma = config["odometry_velocity_sigma"].as<double>();
@@ -440,6 +480,175 @@ namespace module::localisation {
 
                 emit_field(Htw, &measurement);
             });
+
+        // Out-of-field side disambiguation runs off the raw camera frame rather than the YOLO
+        // boxes: it needs the pixels for FAST/ORB, and the image carries its own lens and
+        // capture-time Hcw, so it can pair itself against the odometry exactly as the landmark
+        // path does. Kept as its own reaction (and its own Single) so a slow frame drops corner
+        // detection instead of delaying a landmark update.
+        on<Trigger<Image>, Sync<FieldLocalisationSRIF>, Single>().then(
+            "SRIF out-of-field side disambiguation",
+            [this](const Image& image) { run_side_disambiguation(image); });
+    }
+
+    void FieldLocalisationSRIF::run_side_disambiguation(const Image& image) {
+        // Nothing to disambiguate before there is a pose and a field to compare against.
+        if (!cfg.use_side_disambiguator || map == nullptr || !initialised || !have_t0) {
+            return;
+        }
+
+        cv::Mat gray;
+        if (!to_grayscale(image, gray)) {
+            log<WARN>("Out-of-field disambiguation: unsupported image format ", utility::vision::fourcc(image.format));
+            return;
+        }
+
+        // Built on the first frame, not at configuration time: the lens calibration and the image
+        // size travel with the image, so this is the first point at which they are known and
+        // correct for whichever camera is actually running.
+        if (side == nullptr) {
+            side = std::make_unique<filter::SideDisambiguator>(
+                image.lens,
+                Eigen::Vector2d(double(image.dimensions.x()), double(image.dimensions.y())),
+                map->dims);
+        }
+
+        const double t = seconds(image.timestamp);
+
+        // Same pairing as the landmark path: Hcw is at capture, so the torso pose must be too.
+        const filter::SensorsSample* paired = nearest_sensors(t);
+        if (paired == nullptr) {
+            log<DEBUG>("No odometry sample near the camera frame; skipping side disambiguation");
+            return;
+        }
+        const filter::Pose<double> Tbc = paired->Htw * to_pose(Eigen::Isometry3d(image.Hcw)).inverse();
+
+        // Camera pose in {f} at the posterior mean, and under the mirrored state. Same kinematics
+        // both times -- only the torso pose is mirrored, which is exactly the ambiguity being tested.
+        const Eigen::VectorXd mean = system->density.mean();
+        auto camera_pose           = [&Tbc](const Eigen::VectorXd& x) {
+            return filter::SystemLocalisation::fieldPose<double>(x) * Tbc
+                   * filter::Pose<double>(filter::SystemLocalisation::cameraBiasRotation<double>(x),
+                                          Eigen::Vector3d::Zero());
+        };
+        const Eigen::VectorXd mirror = filter::SystemLocalisation::mirrorState(mean);
+
+        // Gating inputs: how uncertain the filter thinks it is, and how fast it is turning.
+        const Eigen::MatrixXd P   = system->density.cov();
+        const double pos_std      = std::sqrt(std::max(P(0, 0), P(1, 1)));
+        const double yaw_std      = std::sqrt(filter::SystemLocalisation::yawVariance(mean, P));
+        const double yaw_rate_abs = std::abs(paired->gyroscope.z());
+
+        const filter::SideDisambiguator::FrameResult result = side->process(t,
+                                                                            gray,
+                                                                            camera_pose(mean),
+                                                                            camera_pose(mirror),
+                                                                            pos_std,
+                                                                            yaw_std,
+                                                                            yaw_rate_abs,
+                                                                            filter::SystemLocalisation::heading(mean));
+
+        if (cfg.use_hypothesis_bank) {
+            // Bank mode: the background evidence is the only thing that separates the two symmetric
+            // hypotheses (landmarks leave them at 50/50), so fold each frame's log-ratio into the
+            // mixture weights. The representative switching sides IS the correction, done smoothly
+            // by the weights rather than by a discontinuous state flip.
+            system->addSideLogEvidence(result.sideDelta);
+
+            // If the mirror has already been pruned and the evidence now says the surviving belief
+            // is wrong (a mid-game kidnap), re-seed the alternative so the weights have something to
+            // switch to. The cooldown stops repeated spawns while flipRequested stays latched -- the
+            // LLR takes a few seconds to climb back after a switch.
+            if (result.flipRequested && system->numHypotheses() == 1
+                && t - last_respawn_t > side->options.flipCooldown) {
+                system->spawnMirror();
+                last_respawn_t = t;
+                log<INFO>("Out-of-field evidence (llr ", result.llr, ") re-seeded the mirror hypothesis");
+            }
+        }
+        else if (result.flipRequested) {
+            // Single-hypothesis mode: the background says we are on the wrong side, so mirror the
+            // belief outright and tell the disambiguator, which negates its accumulated evidence and
+            // freezes map building while the estimator re-converges.
+            system->resetTo(filter::SystemLocalisation::mirrorDensity(system->density), t);
+            side->notifyFlipApplied(t);
+            const Eigen::VectorXd flipped = system->density.mean();
+            log<INFO>("Out-of-field side flip (llr ",
+                      result.llr,
+                      ", assoc ",
+                      result.nAssociated,
+                      "/",
+                      result.nAssociatedMirror,
+                      " own/mirror): corrected to x=",
+                      flipped(0),
+                      "m y=",
+                      flipped(1),
+                      "m yaw=",
+                      filter::SystemLocalisation::heading(flipped) * 180.0 / M_PI,
+                      "deg");
+        }
+
+        emit_out_of_field(image, result);
+
+        if (log_level <= DEBUG) {
+            emit(graph("SRIF/side llr", result.llr));
+            emit(graph("SRIF/side associations own-mirror",
+                       double(result.nAssociated),
+                       double(result.nAssociatedMirror)));
+            emit(graph("SRIF/side landmarks", double(result.nLandmarks), double(result.nCandidates)));
+        }
+    }
+
+    void FieldLocalisationSRIF::emit_out_of_field(const Image& image,
+                                                  const filter::SideDisambiguator::FrameResult& result) {
+        auto msg       = std::make_unique<OutOfFieldFeatures>();
+        msg->id        = image.id;
+        msg->timestamp = image.timestamp;
+        msg->Hcw       = image.Hcw;
+
+        // The status enums are declared in the same precedence order on both sides, so the mapping
+        // is positional. Static-assert the ends so a value inserted in either list is a build error
+        // rather than a silently miscoloured overlay.
+        using FeatureStatus  = OutOfFieldFeature::Status;
+        using LandmarkStatus = OutOfFieldLandmark::Status;
+        static_assert(int(FeatureStatus::ON_CARPET) == filter::SideDisambiguator::FEATURE_ON_CARPET
+                          && int(FeatureStatus::ASSOCIATED) == filter::SideDisambiguator::FEATURE_ASSOCIATED,
+                      "OutOfFieldFeature::Status has diverged from SideDisambiguator::FeatureStatus");
+        static_assert(int(LandmarkStatus::NOT_IN_VIEW) == filter::SideDisambiguator::LANDMARK_NOT_IN_VIEW
+                          && int(LandmarkStatus::CULLED_OUTLIER) == filter::SideDisambiguator::LANDMARK_CULLED_OUTLIER,
+                      "OutOfFieldLandmark::Status has diverged from SideDisambiguator::LandmarkStatus");
+
+        msg->features.reserve(result.features.size());
+        for (std::size_t i = 0; i < result.features.size(); ++i) {
+            OutOfFieldFeature feature;
+            feature.uPCc   = result.features[i].uPCc;
+            feature.status = FeatureStatus(FeatureStatus::Value(result.featureStatus[i]));
+            msg->features.push_back(feature);
+        }
+
+        // Landmarks are sent as rays rather than pixels so NUsight can re-project them through the
+        // lens it already holds, and so a landmark that has drifted outside the image still draws.
+        const Eigen::Vector2d dimensions(double(image.dimensions.x()), double(image.dimensions.y()));
+        msg->landmarks.reserve(result.landmarkViews.size());
+        for (const filter::SideDisambiguator::LandmarkView& view : result.landmarkViews) {
+            OutOfFieldLandmark landmark;
+            landmark.uPCc         = utility::vision::unproject_pixel(view.px, image.lens, dimensions);
+            landmark.status       = LandmarkStatus(LandmarkStatus::Value(view.status));
+            landmark.bearing_only = view.far;
+            if (view.status == filter::SideDisambiguator::LANDMARK_ASSOCIATED) {
+                landmark.uMatchCc = utility::vision::unproject_pixel(view.matchPx, image.lens, dimensions);
+            }
+            msg->landmarks.push_back(landmark);
+        }
+
+        msg->llr             = result.llr;
+        msg->side_delta      = result.sideDelta;
+        msg->landmark_count  = uint32_t(result.nLandmarks);
+        msg->candidate_count = uint32_t(result.nCandidates);
+        msg->map_frozen      = result.mapFrozen;
+        msg->flip_requested  = result.flipRequested;
+
+        emit(msg);
     }
 
     const filter::BodyTwistSample* FieldLocalisationSRIF::nearest_twist(double t) const {

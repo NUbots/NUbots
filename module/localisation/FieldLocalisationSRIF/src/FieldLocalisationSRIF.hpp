@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <limits>
 #include <memory>
 #include <nuclear>
 #include <vector>
@@ -36,7 +37,10 @@
 #include "measurement/MeasurementFieldLandmarks.hpp"
 #include "srif/FieldMap.hpp"
 #include "srif/FieldSamples.hpp"
+#include "srif/SideDisambiguator.hpp"
 #include "srif/SystemLocalisation.hpp"
+
+#include "message/input/Image.hpp"
 
 #include "utility/gaussian_filtering/Pose.hpp"
 
@@ -57,6 +61,7 @@ namespace module::localisation {
         using srif::FieldDimensions;
         using srif::FieldMap;
         using srif::SensorsSample;
+        using srif::SideDisambiguator;
         using srif::SystemLocalisation;
         using srif::VisionSample;
         using utility::gaussian_filtering::Pose;
@@ -110,6 +115,13 @@ namespace module::localisation {
             int min_init_associations = 4;
             /// @brief Enable the multi-hypothesis (field-symmetry) Gaussian mixture bank
             bool use_hypothesis_bank = false;
+            /// @brief Enable out-of-field side disambiguation.
+            ///
+            /// Maps background corners (walls, posters, spectators) from the raw camera frame and
+            /// compares how well the current pose and its 180 degree mirror explain them. This is
+            /// the only evidence that can separate the two, since on-field landmarks fit both
+            /// equally -- see SideDisambiguator. Costs roughly 4 ms per frame, so it is a switch.
+            bool use_side_disambiguator = true;
             /// @brief Enable the accelerometer gravity measurement.
             ///
             /// Uses the calibrated m/s^2 Sensors.accelerometer (physical on both hardware and webots).
@@ -187,6 +199,10 @@ namespace module::localisation {
         std::unique_ptr<filter::SystemLocalisation> system;
         /// @brief Field landmark map (null until the first FieldDescription arrives)
         std::unique_ptr<filter::FieldMap> map;
+        /// @brief Out-of-field side disambiguator (null until the first image, which carries the lens)
+        std::unique_ptr<filter::SideDisambiguator> side;
+        /// @brief Time of the last mirror re-seed, so a latched flip request cannot respawn every frame
+        double last_respawn_t = -std::numeric_limits<double>::infinity();
         /// @brief Whether the estimator has been initialised from a landmark frame
         bool initialised = false;
 
@@ -245,6 +261,26 @@ namespace module::localisation {
          * @param measurement The processed landmark measurement (nullptr on the bootstrap frame)
          */
         void emit_field(const filter::Pose<double>& Htw, const filter::MeasurementFieldLandmarks* measurement);
+
+        /**
+         * @brief Run out-of-field side disambiguation on one camera frame and act on the verdict.
+         *
+         * Detects background corners, scores the current pose against its 180 degree mirror, and
+         * folds the result back in: as mixture-weight evidence when the hypothesis bank is running,
+         * or as an outright state flip when it is not. Also publishes the per-frame working state
+         * for NUsight.
+         *
+         * @param image The camera frame (carries its own lens, dimensions and capture-time Hcw)
+         */
+        void run_side_disambiguation(const message::input::Image& image);
+
+        /**
+         * @brief Publish one frame of out-of-field working state for the NUsight vision pane.
+         * @param image The camera frame the corners were detected in
+         * @param result The disambiguator's per-frame result
+         */
+        void emit_out_of_field(const message::input::Image& image,
+                               const filter::SideDisambiguator::FrameResult& result);
 
         /**
          * @brief Coarse global grid search for the initial pose on one vision frame.

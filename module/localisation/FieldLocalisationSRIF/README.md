@@ -200,6 +200,8 @@ Tuning lives in `data/config/FieldLocalisationSRIF.yaml`.
 - `message::support::FieldDescription` — field dimensions; the landmark map is built from this at startup
 - `message::input::Sensors` — `Htw` odometry, `accelerometer`, `gyroscope`
 - `message::vision::BoundingBoxes` — YOLO detections as corner unit rays in `{c}`, plus `Hcw`
+- `message::input::Image` — the raw camera frame, for out-of-field corner detection
+  (`use_side_disambiguator` only)
 - `message::behaviour::state::Stability` — optional; posture for the fall gate
 - `message::localisation::ResetFieldLocalisation` — forces re-initialisation
 
@@ -207,7 +209,12 @@ Tuning lives in `data/config/FieldLocalisationSRIF.yaml`.
 
 - `message::localisation::Field` — planar `Hfw`, `(x, y, yaw)` covariance, `uncertainty` (its trace),
   hypothesis `particles`, and `cost` (mean chordal angular residual of the associated rays [rad])
-- NUsight graphs for pose, uncertainty, cost and association count, at `DEBUG` log level
+- `message::vision::OutOfFieldFeatures` — per-frame out-of-field working state for the NUsight vision
+  pane: every detected corner and every predicted landmark as a ray in `{c}` with its association
+  outcome, plus the accumulated own-vs-mirror log-likelihood ratio. Display only; nothing in the
+  estimator consumes it.
+- NUsight graphs for pose, uncertainty, cost, association count and the side evidence, at `DEBUG` log
+  level
 
 NUsight's localisation view draws the `(x, y)` covariance as a 3σ uncertainty ellipse on the field,
 toggled by **Debug → Uncertainty**. That is the signal worth watching live: it inflates on a fall and
@@ -215,9 +222,19 @@ shrinks as vision re-acquires, so a pose drifting while the ellipse stays small 
 filter that is confidently wrong. `particles` are drawn on the same view when the hypothesis bank is
 enabled.
 
+The vision pane draws the out-of-field corners over the camera image, toggled by **Out of Field**.
+Colour is the association outcome: cyan is usable background scenery nothing has claimed, steel is a
+candidate track being grown, green matched the map at the pose we believe, and **yellow matched only
+the mirrored pose**. A view filling with yellow is the disambiguator telling you the filter is on the
+wrong side of the field, and is what precedes a flip. Red is a corner the evidence rejected; faint
+grey dots are corners masked out as carpet rather than background, drawn only so the mask can be
+checked. Wider rings are map landmarks predicted into the frame (thin when bearing-only), each joined
+to its matched corner by a line whose length is the reprojection residual — lines growing while the
+matches still hold is drift.
+
 ## Dependencies
 
-- `utility::gaussian_filtering` (`shared/utility/slam`) — the generic estimator scaffolding, nothing localisation
+- `utility::gaussian_filtering` (`shared/utility/gaussian_filtering`) — the generic estimator scaffolding, nothing localisation
   specific: `GaussianInfo` (square-root information Gaussian), the `Event`/`Measurement` and
   `SystemBase`/`SystemEstimator` base classes, `Pose`, the rotation and kinematics helpers, and the
   trust-region optimiser (`funcmin`)
@@ -228,17 +245,21 @@ enabled.
 
 ## Limitations
 
-- **The 180° field symmetry is only broken at initialisation.** On-field landmarks fit a pose and its
-  mirror equally well, so nothing downstream recovers a wrong-side lock. `use_hypothesis_bank` carries
-  a mirror hypothesis, but each component is scored on its own association and the pair sits at a
-  genuine 50/50, so the bank alone cannot resolve it — hence off by default. Breaking the tie needs
-  asymmetric off-field evidence fed in through `SystemLocalisation::addSideLogEvidence`.
-  `srif::SideDisambiguator` (`src/srif`) implements exactly that — out-of-field FAST/ORB corner landmarks
+- **The 180° field symmetry is resolved by out-of-field evidence alone.** On-field landmarks fit a pose
+  and its mirror equally well, so they can never recover a wrong-side lock, and `use_hypothesis_bank`
+  cannot either — each component is scored on its own association, so the pair sits at a genuine 50/50.
+  `srif::SideDisambiguator` (`src/srif`) is what breaks it: out-of-field FAST/ORB corner landmarks
   classified geometrically against the carpet and horizon, triangulated online (mostly as bearing-only
   landmarks, since distant background rarely accrues usable parallax), then scored against the pose and
-  its mirror — but **this module does not source it yet**. Future work; it costs roughly 4 ms/frame.
-- There is no recovery path for a mid-game kidnap: re-initialisation would re-apply the own-half prior,
-  which is false once play is under way.
+  its mirror. Enabled by `use_side_disambiguator`; costs roughly 4 ms/frame, on its own reaction so it
+  delays no landmark update. With the hypothesis bank on, each frame's evidence goes into the mixture
+  weights through `SystemLocalisation::addSideLogEvidence` and the correction happens smoothly as the
+  representative changes; with it off, a sustained and decisive mirror preference flips the belief
+  outright. Turning `use_side_disambiguator` off leaves the symmetry broken only at initialisation, by
+  the `own_half_x_sign` prior — which is false once play is under way.
+- The map is only trustworthy if it was built while the filter was on the correct side, so map building
+  freezes whenever the accumulated evidence starts favouring the mirror. A robot that starts the half
+  already on the wrong side has no anchor to recover from.
 - Only the torso pose is localised. Foot poses in the field frame would come from composing the
   kinematic foot frames (`Sensors.Htx[L_FOOT_BASE]`/`[R_FOOT_BASE]`) with the field pose; not emitted.
 - `MeasurementFieldLines` exists in `src/measurement` but is not wired in — this module localises from
