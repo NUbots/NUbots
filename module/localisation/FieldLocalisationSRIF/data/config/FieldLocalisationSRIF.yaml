@@ -1,9 +1,5 @@
 log_level: INFO
 
-# Sign of field-x for the robot's starting half (from game context). Breaks the field's 180 deg
-# symmetry that on-field landmarks cannot: +1 => starts in the +x half, -1 => the -x half, 0 => no prior.
-own_half_x_sign: 1.0
-
 # Multi-hypothesis (field-symmetry) Gaussian mixture bank. Off keeps a single Gaussian.
 # On its own this cannot resolve the symmetry: on-field landmarks fit a pose and its 180 deg mirror
 # equally well, and each component is scored on its own association, so the pair sits at a genuine

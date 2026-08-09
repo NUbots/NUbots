@@ -162,7 +162,6 @@ namespace module::localisation {
         on<Configuration>("FieldLocalisationSRIF.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.own_half_x_sign         = config["own_half_x_sign"].as<double>();
             cfg.use_hypothesis_bank     = config["use_hypothesis_bank"].as<bool>();
             cfg.use_side_disambiguator  = config["use_side_disambiguator"].as<bool>();
             cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
@@ -768,9 +767,17 @@ namespace module::localisation {
             return false;
         }
 
-        // Resolve the own-half/opponent-half symmetry from game context. The mirror has an identical
-        // likelihood, so this loses no fit; it only picks the physically valid side.
-        if (cfg.own_half_x_sign != 0.0 && best_eta(0) * cfg.own_half_x_sign < 0.0) {
+        // Resolve the own-half/opponent-half symmetry. The mirror has an identical likelihood, so
+        // this loses no fit; it only picks the physically valid side.
+        //
+        // Own half is +x by the field-frame convention the rest of the codebase already hardcodes:
+        // our goal sits at +field_length/2 (Defend, Goalie, ReadyAttack, FieldLocalisationNLopt's
+        // own_goal_posts) and the goal we attack at -field_length/2 (WalkToBall, PenaltyShootout).
+        // The frame is defined relative to our own goal and nothing swaps it by team or half, so
+        // this is a fixed fact about the frame rather than a per-game setting -- and the rules put
+        // every robot in its own half at kickoff, which is what makes the prior true at init and
+        // false afterwards.
+        if (best_eta(0) < 0.0) {
             best_eta = filter::SystemLocalisation::mirrorState(best_eta);
         }
 

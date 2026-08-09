@@ -49,8 +49,12 @@ scored by the same robust landmark likelihood used for updates. Roll, pitch and 
 from the gravity-aligned kinematic chain rather than searched.
 
 The field is symmetric under a 180° rotation about its centre, so the maximum and its mirror score
-identically. The tie is broken by game context: `own_half_x_sign` picks the half the robot starts in.
-That prior is only true at kick-off — see [Limitations](#limitations).
+identically. The tie is broken by the rule that every robot starts in its own half, which is **+x** by
+the field-frame convention the rest of the codebase already hardcodes — our goal at
+`+field_length/2` (`Defend`, `Goalie`, `ReadyAttack`, `FieldLocalisationNLopt`), the goal we attack at
+`-field_length/2` (`WalkToBall`, `PenaltyShootout`). The frame is defined relative to our own goal and
+nothing swaps it by team or by half, so this is not configurable. The prior is only true at kick-off —
+see [Limitations](#limitations).
 
 ### Measurement updates
 
@@ -151,7 +155,6 @@ Tuning lives in `data/config/FieldLocalisationSRIF.yaml`.
 
 | Key                              | Meaning                                                                 |
 | -------------------------------- | ----------------------------------------------------------------------- |
-| `own_half_x_sign`                | Sign of field-x for the starting half; breaks the 180° symmetry at init |
 | `grid_step_xy` / `grid_step_yaw` | Grid search resolution [m] / [deg]                                      |
 | `min_init_associations`          | Landmark associations needed to trust a solve                           |
 | `initial_sqrt_covariance`        | Per-state std devs of the initial belief.                               |
@@ -256,7 +259,7 @@ matches still hold is drift.
   weights through `SystemLocalisation::addSideLogEvidence` and the correction happens smoothly as the
   representative changes; with it off, a sustained and decisive mirror preference flips the belief
   outright. Turning `use_side_disambiguator` off leaves the symmetry broken only at initialisation, by
-  the `own_half_x_sign` prior — which is false once play is under way.
+  the own-half (+x) rule — which is false once play is under way.
 - The map is only trustworthy if it was built while the filter was on the correct side, so map building
   freezes whenever the accumulated evidence starts favouring the mirror. A robot that starts the half
   already on the wrong side has no anchor to recover from.

@@ -83,8 +83,9 @@ namespace module::localisation {
      *
      * Initialisation is a coarse grid-search over (x, y, yaw) on the first usable vision frame, scored by the same
      * landmark likelihood; roll, pitch and height come from the kinematic chain and the rates start at zero. The
-     * field's 180 degree symmetry is broken with the game-context prior that the robot starts in its own half
-     * (own_half_x_sign) -- which is also why there is no recovery path for a mid-game kidnap.
+     * field's 180 degree symmetry is broken at init with the rule that every robot starts in its own half, which
+     * is +x by the codebase's field-frame convention. That prior is only true at kickoff, so recovering a
+     * mid-game kidnap is the out-of-field disambiguator's job (use_side_disambiguator).
      *
      * A fall gates each measurement separately rather than suppressing all of them; see the posture block in the
      * vision reaction.
@@ -106,8 +107,6 @@ namespace module::localisation {
             /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve. Ones by default,
             /// config overwrites.
             Eigen::Matrix<double, 18, 1> initial_sqrt_covariance = Eigen::Matrix<double, 18, 1>::Ones();
-            /// @brief Sign of field-x for the starting half (from game context; breaks the field symmetry)
-            double own_half_x_sign = 1.0;
             /// @brief Grid search steps for the initial pose solve
             double grid_step_xy  = 0.35;
             double grid_step_yaw = 18.0 * M_PI / 180.0;
@@ -287,8 +286,8 @@ namespace module::localisation {
          *
          * Roll, pitch and torso height come from the kinematic chain (the odometry
          * world frame is gravity-aligned); (x, y, yaw) are found by maximising the
-         * landmark measurement log-likelihood over a grid, and the own-half prior
-         * (own_half_x_sign) selects between the maximum and its 180 degree mirror.
+         * landmark measurement log-likelihood over a grid, and the own-half convention
+         * (own goal at +x) selects between the maximum and its 180 degree mirror.
          *
          * @param sample Landmark rays extracted from the vision messages
          * @param Tbc Camera pose w.r.t. torso at capture time
