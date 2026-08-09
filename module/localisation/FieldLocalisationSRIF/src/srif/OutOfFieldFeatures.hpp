@@ -20,24 +20,24 @@
  * region of the image is the same under a pose and its mirror, so a wrong-side
  * estimate still masks the field correctly.
  */
-#ifndef OUTOFFIELDFEATURES_HPP
-#define OUTOFFIELDFEATURES_HPP
+#ifndef MODULE_LOCALISATION_SRIF_OUTOFFIELDFEATURES_HPP
+#define MODULE_LOCALISATION_SRIF_OUTOFFIELDFEATURES_HPP
 
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <vector>
 
-#include "FieldMap.hpp"
-#include "camera/Pose.hpp"
+#include "srif/FieldMap.hpp"
 
 #include "message/input/Image.hpp"
 
+#include "utility/slam/Pose.hpp"
 #include "utility/vision/projection.hpp"
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
-    using utility::slam::camera::Pose;
+    using utility::slam::Pose;
 
     /**
      * @brief One detected corner feature, with its camera ray and classification.
@@ -108,6 +108,6 @@ namespace utility::slam {
         double halfCarpetWidth_;            ///< Field half-width + border strip + margin [m]
         cv::Ptr<cv::ORB> orb_;              ///< Descriptor extractor (compute only; detection is FAST)
     };
-}  // namespace utility::slam
+}  // namespace module::localisation::srif
 
-#endif
+#endif  // MODULE_LOCALISATION_SRIF_OUTOFFIELDFEATURES_HPP

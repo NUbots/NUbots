@@ -34,8 +34,8 @@
  * guarantees the side). Map building therefore freezes whenever the accumulated
  * evidence starts favouring the mirror.
  */
-#ifndef SIDEDISAMBIGUATOR_HPP
-#define SIDEDISAMBIGUATOR_HPP
+#ifndef MODULE_LOCALISATION_SRIF_SIDEDISAMBIGUATOR_HPP
+#define MODULE_LOCALISATION_SRIF_SIDEDISAMBIGUATOR_HPP
 
 #include <Eigen/Core>
 #include <cmath>
@@ -44,15 +44,18 @@
 #include <opencv2/core.hpp>
 #include <vector>
 
-#include "FieldMap.hpp"
-#include "OutOfFieldFeatures.hpp"
-#include "camera/Pose.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/OutOfFieldFeatures.hpp"
 
 #include "message/input/Image.hpp"
 
-namespace utility::slam {
+#include "utility/slam/Pose.hpp"
+#include "utility/slam/rotation.hpp"
 
-    using utility::slam::camera::Pose;
+namespace module::localisation::srif {
+
+    using utility::slam::Pose;
+    using utility::slam::tangentBasis;
 
     class SideDisambiguator {
     public:
@@ -476,6 +479,6 @@ namespace utility::slam {
         double mapFreezeUntil_    = -std::numeric_limits<double>::infinity();  ///< Post-flip map-building freeze [s]
         Stats stats_;                                                          ///< Map-building funnel diagnostics
     };
-}  // namespace utility::slam
+}  // namespace module::localisation::srif
 
-#endif
+#endif  // MODULE_LOCALISATION_SRIF_SIDEDISAMBIGUATOR_HPP

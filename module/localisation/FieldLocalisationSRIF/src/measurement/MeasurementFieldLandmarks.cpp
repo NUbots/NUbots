@@ -10,11 +10,12 @@
 #include <limits>
 #include <vector>
 
-#include "../FieldMap.hpp"
-#include "../measurement/Measurement.hpp"
-#include "../system/SystemLocalisation.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/SystemLocalisation.hpp"
 
-namespace utility::slam::measurement {
+#include "utility/slam/measurement/Measurement.hpp"
+
+namespace module::localisation::measurement {
 
     MeasurementFieldLandmarks::MeasurementFieldLandmarks(double time,
                                                          const VisionSample& sample,
@@ -290,4 +291,4 @@ namespace utility::slam::measurement {
             system.density = prior;
         }
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement

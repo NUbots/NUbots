@@ -217,9 +217,13 @@ enabled.
 
 ## Dependencies
 
-- `utility::slam` (`shared/utility/slam`) — the estimator core: `GaussianInfo` (square-root
-  information Gaussian), `SystemLocalisation`, the measurement models, `FieldMap`, and the
-  trust-region optimiser
+- `utility::slam` (`shared/utility/slam`) — the generic estimator scaffolding, nothing localisation
+  specific: `GaussianInfo` (square-root information Gaussian), the `Event`/`Measurement` and
+  `SystemBase`/`SystemEstimator` base classes, `Pose`, the rotation and kinematics helpers, and the
+  trust-region optimiser (`funcmin`)
+- `src/srif` and `src/measurement` (this module) — everything specific to this filter: the state
+  layout (`SystemLocalisation`), `FieldMap`, the log-replay sample types, the side disambiguator and
+  the concrete measurement models
 - Eigen, and autodiff for the gradients and Hessians of the measurement log-likelihoods
 
 ## Limitations
@@ -229,7 +233,7 @@ enabled.
   a mirror hypothesis, but each component is scored on its own association and the pair sits at a
   genuine 50/50, so the bank alone cannot resolve it — hence off by default. Breaking the tie needs
   asymmetric off-field evidence fed in through `SystemLocalisation::addSideLogEvidence`.
-  `utility::slam::SideDisambiguator` implements exactly that — out-of-field FAST/ORB corner landmarks
+  `srif::SideDisambiguator` (`src/srif`) implements exactly that — out-of-field FAST/ORB corner landmarks
   classified geometrically against the carpet and horizon, triangulated online (mostly as bearing-only
   landmarks, since distant background rarely accrues usable parallax), then scored against the pose and
   its mirror — but **this module does not source it yet**. Future work; it costs roughly 4 ms/frame.
@@ -237,7 +241,7 @@ enabled.
   which is false once play is under way.
 - Only the torso pose is localised. Foot poses in the field frame would come from composing the
   kinematic foot frames (`Sensors.Htx[L_FOOT_BASE]`/`[R_FOOT_BASE]`) with the field pose; not emitted.
-- `MeasurementFieldLines` exists in `utility::slam` but is not wired in — this module localises from
+- `MeasurementFieldLines` exists in `src/measurement` but is not wired in — this module localises from
   YOLO landmarks alone, not raw field-line points.
 - The zero-velocity update asserts the robot is not travelling for the whole non-upright window. That
   is sound for a topple and a getup, but wrong if a handler picks the robot up while it still reads

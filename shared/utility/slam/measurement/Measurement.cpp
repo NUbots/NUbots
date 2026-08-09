@@ -31,8 +31,8 @@
 #include <Eigen/SVD>
 #include <stdexcept>
 
-#include "../funcmin.hpp"
-#include "../gaussian/GaussianInfo.hpp"
+#include "utility/slam/funcmin.hpp"
+#include "utility/slam/gaussian/GaussianInfo.hpp"
 
 namespace utility::slam::measurement {
 

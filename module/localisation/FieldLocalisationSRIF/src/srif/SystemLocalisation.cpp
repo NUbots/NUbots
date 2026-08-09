@@ -1,9 +1,9 @@
 #include "SystemLocalisation.hpp"
 
 
-namespace utility::slam::system {
+namespace module::localisation::srif {
 
-    using utility::slam::camera::Pose;
+    using utility::slam::Pose;
     using utility::slam::gaussian::GaussianInfo;
     using utility::slam::measurement::Measurement;
 
@@ -595,4 +595,4 @@ namespace utility::slam::system {
             meas->reassociate(*this);
         }
     }
-}  // namespace utility::slam::system
+}  // namespace module::localisation::srif

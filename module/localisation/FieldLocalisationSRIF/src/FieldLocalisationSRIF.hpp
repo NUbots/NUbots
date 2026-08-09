@@ -33,30 +33,33 @@
 #include <nuclear>
 #include <vector>
 
-#include "utility/slam/FieldMap.hpp"
-#include "utility/slam/FieldSamples.hpp"
-#include "utility/slam/camera/Pose.hpp"
-#include "utility/slam/measurement/MeasurementFieldLandmarks.hpp"
-#include "utility/slam/system/SystemLocalisation.hpp"
+#include "measurement/MeasurementFieldLandmarks.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/FieldSamples.hpp"
+#include "srif/SystemLocalisation.hpp"
+
+#include "utility/slam/Pose.hpp"
 
 namespace module::localisation {
 
     /**
-     * @brief Short local aliases for the utility::slam estimator types this module drives.
+     * @brief Short local aliases for the estimator types this module drives.
      *
-     * The estimator core lives in shared/utility/slam (namespace utility::slam::...); this
-     * re-exports the handful of types the reactor names so the class body reads cleanly.
+     * The filter itself is module-local: its state layout, field map and measurement models all live
+     * under src/srif and src/measurement. Only the generic estimator scaffolding it is built on
+     * (Pose, Event/Measurement, SystemEstimator, GaussianInfo, funcmin) is shared, in utility::slam.
+     * This re-exports the handful of types the reactor names so the class body reads cleanly.
      */
     namespace filter {
-        using utility::slam::Detection;
-        using utility::slam::FieldDimensions;
-        using utility::slam::FieldMap;
-        using utility::slam::SensorsSample;
-        using utility::slam::VisionSample;
-        using utility::slam::camera::Pose;
-        using utility::slam::measurement::MeasurementFieldLandmarks;
-        using utility::slam::system::BodyTwistSample;
-        using utility::slam::system::SystemLocalisation;
+        using measurement::MeasurementFieldLandmarks;
+        using srif::BodyTwistSample;
+        using srif::Detection;
+        using srif::FieldDimensions;
+        using srif::FieldMap;
+        using srif::SensorsSample;
+        using srif::SystemLocalisation;
+        using srif::VisionSample;
+        using utility::slam::Pose;
     }  // namespace filter
 
     /**
@@ -64,7 +67,7 @@ namespace module::localisation {
      *
      * Estimates the torso pose in the field frame {f}, its body-fixed velocity, the gyroscope bias and a 2-DOF
      * camera-mount attitude bias, as a Gaussian in square-root information form. See
-     * utility::slam::system::SystemLocalisation for the state layout and why attitude is a quaternion.
+     * srif::SystemLocalisation for the state layout and why attitude is a quaternion.
      *
      * Nothing is a known input. The process model is rigid-body kinematics driven by the velocity states, and every
      * sensor enters as a measurement carrying its own noise: YOLO field-line intersections (L/T/X) and goal posts as

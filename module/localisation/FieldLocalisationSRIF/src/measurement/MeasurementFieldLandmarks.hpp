@@ -2,20 +2,21 @@
  * @file MeasurementFieldLandmarks.h
  * @brief Vision measurement of known field landmarks from YOLO detections.
  */
-#ifndef MEASUREMENTFIELDLANDMARKS_HPP
-#define MEASUREMENTFIELDLANDMARKS_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLANDMARKS_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLANDMARKS_HPP
 
 #include <Eigen/Core>
 #include <string>
 #include <vector>
 
-#include "../FieldMap.hpp"
-#include "../FieldSamples.hpp"
-#include "../camera/Pose.hpp"
-#include "../rotation.hpp"
-#include "../system/SystemEstimator.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/FieldSamples.hpp"
+#include "srif/SystemLocalisation.hpp"
+
+#include "utility/slam/Pose.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/rotation.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementFieldLandmarks
@@ -39,11 +40,19 @@
  * posterior (mean and sqrt information) in the usual way.
  */
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
 
-    using utility::slam::camera::Pose;
+    using srif::Detection;
+    using srif::FieldMap;
+    using srif::LandmarkType;
+    using srif::SystemLocalisation;
+    using srif::VisionSample;
+    using utility::slam::Pose;
+    using utility::slam::tangentBasis;
     using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::system::SystemLocalisation;
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemBase;
+    using utility::slam::system::SystemEstimator;
 
     class MeasurementFieldLandmarks : public Measurement {
     public:
@@ -292,6 +301,6 @@ namespace utility::slam::measurement {
         }
         return logLik;
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
 
-#endif
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLANDMARKS_HPP

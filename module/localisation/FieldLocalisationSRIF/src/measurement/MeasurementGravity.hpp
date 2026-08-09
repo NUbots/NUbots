@@ -2,15 +2,16 @@
  * @file MeasurementGravity.h
  * @brief Accelerometer gravity-direction measurement of torso roll/pitch.
  */
-#ifndef MEASUREMENTGRAVITY_HPP
-#define MEASUREMENTGRAVITY_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTGRAVITY_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTGRAVITY_HPP
 
 #include <Eigen/Core>
 
-#include "../rotation.hpp"
-#include "../system/SystemEstimator.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/SystemLocalisation.hpp"
+
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/rotation.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementGravity
@@ -24,7 +25,13 @@
  * accelerations violating the quasi-static assumption.
  */
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
+
+    using srif::SystemLocalisation;
+    using utility::slam::quat2rot;
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemEstimator;
+
     class MeasurementGravity : public Measurement {
     public:
         /**
@@ -60,7 +67,7 @@ namespace utility::slam::measurement {
 
     template <typename Scalar>
     Scalar MeasurementGravity::logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
-        const Eigen::Vector4<Scalar> q   = x.segment(utility::slam::system::SystemLocalisation::iQuat, 4);
+        const Eigen::Vector4<Scalar> q   = x.segment(srif::SystemLocalisation::iQuat, 4);
         const Eigen::Matrix3<Scalar> Rfb = quat2rot(q);
 
         Eigen::Vector3<Scalar> gf(Scalar(0), Scalar(0), Scalar(gravity_));
@@ -70,6 +77,6 @@ namespace utility::slam::measurement {
         Eigen::Vector3<Scalar> e = y_.cast<Scalar>() - yhat;
         return Scalar(-1.5 * std::log(2.0 * M_PI * sigma2)) - Scalar(0.5) * e.squaredNorm() / Scalar(sigma2);
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
 
-#endif
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTGRAVITY_HPP

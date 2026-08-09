@@ -2,8 +2,8 @@
  * @file SystemLocalisation.h
  * @brief Defines the SystemLocalisation class for humanoid robot field localisation.
  */
-#ifndef SYSTEMLOCALISATION_HPP
-#define SYSTEMLOCALISATION_HPP
+#ifndef MODULE_LOCALISATION_SRIF_SYSTEMLOCALISATION_HPP
+#define MODULE_LOCALISATION_SRIF_SYSTEMLOCALISATION_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -16,21 +16,28 @@
 #include <numeric>
 #include <vector>
 
-#include "../Event.hpp"
-#include "../FieldSamples.hpp"
-#include "../camera/Pose.hpp"
-#include "../gaussian/GaussianInfo.hpp"
-#include "../kinematics_helper.hpp"
-#include "../measurement/Measurement.hpp"
-#include "../rotation.hpp"
-#include "SystemEstimator.hpp"
+#include "srif/FieldSamples.hpp"
+
+#include "utility/slam/Event.hpp"
+#include "utility/slam/Pose.hpp"
+#include "utility/slam/gaussian/GaussianInfo.hpp"
+#include "utility/slam/kinematics_helper.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/rotation.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 
-namespace utility::slam::system {
+namespace module::localisation::srif {
 
-    using utility::slam::camera::Pose;
+    using utility::slam::Event;
+    using utility::slam::Pose;
+    using utility::slam::quat2rot;
+    using utility::slam::quatXi;
+    using utility::slam::rot2rpy;
+    using utility::slam::rpy2rot;
     using utility::slam::gaussian::GaussianInfo;
     using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemEstimator;
 
     /**
      * @brief A body-fixed twist sample derived from odometry.
@@ -636,6 +643,6 @@ namespace utility::slam::system {
         void setRepresentative();     ///< Set `density` to the maximum-weight component (tie-broken by hysteresis)
     };
 
-}  // namespace utility::slam::system
+}  // namespace module::localisation::srif
 
-#endif
+#endif  // MODULE_LOCALISATION_SRIF_SYSTEMLOCALISATION_HPP

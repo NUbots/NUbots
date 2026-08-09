@@ -4,14 +4,14 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-#include "Measurement.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
 
 // Both models are linear in the state, so the exact Hessian is constant and the
 // trust-region Newton update converges in one step.
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
 
-    using utility::slam::system::SystemLocalisation;
+    using srif::SystemLocalisation;
 
     // =====================================================================
     // MeasurementGyroscope
@@ -124,4 +124,4 @@ namespace utility::slam::measurement {
         return static_cast<double>(fdual);
     }
 
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement

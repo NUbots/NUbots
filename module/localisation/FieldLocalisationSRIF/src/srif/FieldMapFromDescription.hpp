@@ -2,18 +2,18 @@
  * @file FieldMapFromDescription.hpp
  * @brief Build a FieldMap/FieldDimensions from a NUbots message::support::FieldDescription.
  *
- * This is kept separate from FieldMap.hpp so the estimator core (FieldMap and the measurement/system
+ * This is kept separate from FieldMap.hpp so the filter core (FieldMap and the measurement/system
  * headers that include it) stays free of the message library: only code that actually has a
  * FieldDescription to hand pulls in the protobuf dependency by including this header.
  */
-#ifndef UTILITY_SLAM_FIELDMAPFROMDESCRIPTION_HPP
-#define UTILITY_SLAM_FIELDMAPFROMDESCRIPTION_HPP
+#ifndef MODULE_LOCALISATION_SRIF_FIELDMAPFROMDESCRIPTION_HPP
+#define MODULE_LOCALISATION_SRIF_FIELDMAPFROMDESCRIPTION_HPP
 
-#include "FieldMap.hpp"
+#include "srif/FieldMap.hpp"
 
 #include "message/support/FieldDescription.hpp"
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
     /**
      * @brief FieldDimensions from a NUbots FieldDescription message.
@@ -40,11 +40,6 @@ namespace utility::slam {
         return dims;
     }
 
-    /// @brief Build a FieldMap from a NUbots FieldDescription message.
-    inline FieldMap field_map(const message::support::FieldDescription& fd) {
-        return FieldMap(field_dimensions(fd));
-    }
+}  // namespace module::localisation::srif
 
-}  // namespace utility::slam
-
-#endif  // UTILITY_SLAM_FIELDMAPFROMDESCRIPTION_HPP
+#endif  // MODULE_LOCALISATION_SRIF_FIELDMAPFROMDESCRIPTION_HPP

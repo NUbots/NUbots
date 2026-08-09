@@ -10,11 +10,10 @@
 #include <opencv2/core.hpp>
 #include <vector>
 
-#include "rotation.hpp"
-
+#include "utility/slam/rotation.hpp"
 #include "utility/vision/projection.hpp"
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
     namespace {
         /// @brief True if a pixel lies within the image bounds.
@@ -757,4 +756,4 @@ namespace utility::slam {
         mapFreezeUntil_ = t + options.flipCooldown;
     }
 
-}  // namespace utility::slam
+}  // namespace module::localisation::srif

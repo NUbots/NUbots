@@ -30,9 +30,9 @@
 
 #include <Eigen/Core>
 
-#include "../Event.hpp"
-#include "../system/SystemBase.hpp"
-#include "../system/SystemEstimator.hpp"
+#include "utility/slam/Event.hpp"
+#include "utility/slam/system/SystemBase.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 namespace utility::slam::measurement {
 

@@ -16,17 +16,22 @@
  * vertical), so nothing in the system was estimating the yaw-rate bias -- the one
  * that turns into steady heading drift.
  */
-#ifndef MEASUREMENTBODYRATES_HPP
-#define MEASUREMENTBODYRATES_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
 
 #include <Eigen/Core>
 #include <cmath>
 
-#include "../system/SystemEstimator.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/SystemLocalisation.hpp"
 
-namespace utility::slam::measurement {
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
+
+namespace module::localisation::measurement {
+
+    using srif::SystemLocalisation;
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemEstimator;
 
     /**
      * @class MeasurementGyroscope
@@ -62,8 +67,8 @@ namespace utility::slam::measurement {
         template <typename Scalar>
         Scalar logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
             const Eigen::Vector3<Scalar> yhat =
-                Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iOmega, 3))
-                + Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iGyroBias, 3));
+                Eigen::Vector3<Scalar>(x.segment(srif::SystemLocalisation::iOmega, 3))
+                + Eigen::Vector3<Scalar>(x.segment(srif::SystemLocalisation::iGyroBias, 3));
             const Eigen::Vector3<Scalar> e = y_.cast<Scalar>() - yhat;
             const double sigma2            = sigma_ * sigma_;
             return Scalar(-1.5 * std::log(2.0 * M_PI * sigma2)) - Scalar(0.5) * e.squaredNorm() / Scalar(sigma2);
@@ -122,8 +127,7 @@ namespace utility::slam::measurement {
         template <typename Scalar>
         Scalar logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
             const Eigen::Vector3<Scalar> e =
-                y_.cast<Scalar>()
-                - Eigen::Vector3<Scalar>(x.segment(utility::slam::system::SystemLocalisation::iVel, 3));
+                y_.cast<Scalar>() - Eigen::Vector3<Scalar>(x.segment(srif::SystemLocalisation::iVel, 3));
             const double sigma2 = sigma_ * sigma_;
             return Scalar(-1.5 * std::log(2.0 * M_PI * sigma2)) - Scalar(0.5) * e.squaredNorm() / Scalar(sigma2);
         }
@@ -133,6 +137,6 @@ namespace utility::slam::measurement {
         double sigma_;       ///< Noise standard deviation [m/s]
     };
 
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
 
-#endif
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP

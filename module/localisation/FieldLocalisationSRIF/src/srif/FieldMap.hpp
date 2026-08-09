@@ -12,13 +12,13 @@
  *
  */
 
-#ifndef FIELDMAP_HPP
-#define FIELDMAP_HPP
+#ifndef MODULE_LOCALISATION_SRIF_FIELDMAP_HPP
+#define MODULE_LOCALISATION_SRIF_FIELDMAP_HPP
 
 #include <Eigen/Core>
 #include <vector>
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
     /**
      * @brief Physical measurements of a RoboCup humanoid soccer field, in metres
@@ -28,7 +28,7 @@ namespace utility::slam {
      * NUbots/shared/message/support/FieldDescription.proto (message FieldDescription.FieldDimensions).
      */
     struct FieldDimensions {
-        // Populated from a message::support::FieldDescription via utility::slam::field_dimensions()
+        // Populated from a message::support::FieldDescription via srif::field_dimensions()
         // (FieldMapFromDescription.hpp), so FieldDescription.yaml is the single source of these values
         // and the estimator core stays free of the message library.
         double lineWidth;             ///< Width of field lines
@@ -66,7 +66,7 @@ namespace utility::slam {
     public:
         /**
          * @brief Construct the field map from a set of field dimensions
-         * @param dims Field dimensions to build the landmark map from (see utility::slam::field_dimensions)
+         * @param dims Field dimensions to build the landmark map from (see srif::field_dimensions)
          */
         explicit FieldMap(const FieldDimensions& dims);
 
@@ -158,6 +158,6 @@ namespace utility::slam {
         std::vector<LineSegment> lineSegments_;           ///< Painted line segments
         std::vector<Circle> lineCircles_;                 ///< Painted circles
     };
-}  // namespace utility::slam
+}  // namespace module::localisation::srif
 
-#endif  // FIELDMAP_H
+#endif  // MODULE_LOCALISATION_SRIF_FIELDMAP_HPP

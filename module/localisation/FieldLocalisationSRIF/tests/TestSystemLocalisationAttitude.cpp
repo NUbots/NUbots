@@ -32,19 +32,20 @@
 #include <cmath>
 #include <vector>
 
+#include "measurement/MeasurementBodyRates.hpp"
+#include "srif/SystemLocalisation.hpp"
+
 #include "utility/slam/gaussian/GaussianInfo.hpp"
-#include "utility/slam/measurement/MeasurementBodyRates.hpp"
 #include "utility/slam/rotation.hpp"
-#include "utility/slam/system/SystemLocalisation.hpp"
 
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
 
+using module::localisation::measurement::MeasurementBodyVelocity;
+using module::localisation::measurement::MeasurementGyroscope;
+using module::localisation::srif::SystemLocalisation;
 using utility::slam::rpy2quat;
 using utility::slam::gaussian::GaussianInfo;
-using utility::slam::measurement::MeasurementBodyVelocity;
-using utility::slam::measurement::MeasurementGyroscope;
-using utility::slam::system::SystemLocalisation;
 
 namespace {
 

@@ -30,6 +30,12 @@
 #include <cmath>
 #include <limits>
 
+#include "measurement/MeasurementBodyRates.hpp"
+#include "measurement/MeasurementGravity.hpp"
+#include "measurement/MeasurementKinematicHeight.hpp"
+#include "measurement/MeasurementQuaternionNorm.hpp"
+#include "srif/FieldMapFromDescription.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
@@ -39,12 +45,7 @@
 #include "message/vision/BoundingBoxes.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/slam/FieldMapFromDescription.hpp"
 #include "utility/slam/gaussian/GaussianInfo.hpp"
-#include "utility/slam/measurement/MeasurementBodyRates.hpp"
-#include "utility/slam/measurement/MeasurementGravity.hpp"
-#include "utility/slam/measurement/MeasurementKinematicHeight.hpp"
-#include "utility/slam/measurement/MeasurementQuaternionNorm.hpp"
 #include "utility/slam/rotation.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -60,15 +61,15 @@ namespace module::localisation {
     using message::vision::BoundingBox;
     using message::vision::BoundingBoxes;
 
+    using measurement::MeasurementBodyVelocity;
+    using measurement::MeasurementGravity;
+    using measurement::MeasurementGyroscope;
+    using measurement::MeasurementKinematicHeight;
+    using measurement::MeasurementQuaternionNorm;
     using utility::nusight::graph;
     using utility::slam::rot2rpy;
     using utility::slam::rpy2quat;
     using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::measurement::MeasurementBodyVelocity;
-    using utility::slam::measurement::MeasurementGravity;
-    using utility::slam::measurement::MeasurementGyroscope;
-    using utility::slam::measurement::MeasurementKinematicHeight;
-    using utility::slam::measurement::MeasurementQuaternionNorm;
     using utility::support::Expression;
 
     /// @brief Convert an Eigen isometry to the filter's pose type
@@ -205,7 +206,7 @@ namespace module::localisation {
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Build field landmark map", [this](const FieldDescription& fd) {
-            map = std::make_unique<filter::FieldMap>(utility::slam::field_dimensions(fd));
+            map = std::make_unique<filter::FieldMap>(srif::field_dimensions(fd));
             log<INFO>("Built field landmark map from FieldDescription");
         });
 

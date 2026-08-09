@@ -4,9 +4,9 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-#include "Measurement.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
 
     double MeasurementQuaternionNorm::logLikelihood(const Eigen::VectorXd& x,
                                                     const SystemEstimator& /*system*/,
@@ -46,4 +46,4 @@ namespace utility::slam::measurement {
         return static_cast<double>(fdual);
     }
 
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement

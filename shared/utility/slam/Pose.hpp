@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef UTILITY_SLAM_CAMERA_POSE_HPP
-#define UTILITY_SLAM_CAMERA_POSE_HPP
+#ifndef UTILITY_SLAM_POSE_HPP
+#define UTILITY_SLAM_POSE_HPP
 
 #include <Eigen/Core>
 #include <opencv2/calib3d.hpp>
@@ -34,7 +34,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 
-namespace utility::slam::camera {
+namespace utility::slam {
 
     /**
      * @brief Helper class for working with elements of \f$\mathsf{SE}(3)\f$
@@ -209,6 +209,6 @@ namespace utility::slam::camera {
         }
     };
 
-}  // namespace utility::slam::camera
+}  // namespace utility::slam
 
-#endif  // UTILITY_SLAM_CAMERA_POSE_HPP
+#endif  // UTILITY_SLAM_POSE_HPP

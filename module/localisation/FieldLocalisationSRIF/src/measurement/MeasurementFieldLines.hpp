@@ -2,19 +2,20 @@
  * @file MeasurementFieldLines.h
  * @brief Field-line point measurement against the analytic field line map.
  */
-#ifndef MEASUREMENTFIELDLINES_HPP
-#define MEASUREMENTFIELDLINES_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLINES_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLINES_HPP
 
 #include <Eigen/Core>
 #include <vector>
 
-#include "../FieldMap.hpp"
-#include "../FieldSamples.hpp"
-#include "../camera/Pose.hpp"
-#include "../rotation.hpp"
-#include "../system/SystemEstimator.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/FieldSamples.hpp"
+#include "srif/SystemLocalisation.hpp"
+
+#include "utility/slam/Pose.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/rotation.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementFieldLines
@@ -38,11 +39,16 @@
  * term count during optimisation.
  */
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
 
-    using utility::slam::camera::Pose;
+    using srif::FieldMap;
+    using srif::LinePointsSample;
+    using srif::SystemLocalisation;
+    using utility::slam::Pose;
     using utility::slam::gaussian::GaussianInfo;
-    using utility::slam::system::SystemLocalisation;
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemBase;
+    using utility::slam::system::SystemEstimator;
 
     class MeasurementFieldLines : public Measurement {
     public:
@@ -165,6 +171,6 @@ namespace utility::slam::measurement {
         }
         return logLik;
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
 
-#endif
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLINES_HPP

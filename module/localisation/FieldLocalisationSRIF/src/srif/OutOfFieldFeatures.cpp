@@ -7,7 +7,7 @@
 #include <opencv2/features2d.hpp>
 #include <vector>
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
     OutOfFieldDetector::OutOfFieldDetector(const message::input::Image::Lens& lens,
                                            const Eigen::Vector2d& dimensions,
@@ -81,4 +81,4 @@ namespace utility::slam {
         }
         return features;
     }
-}  // namespace utility::slam
+}  // namespace module::localisation::srif

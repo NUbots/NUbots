@@ -1,17 +1,17 @@
 
-#ifndef FIELDSAMPLES_HPP
-#define FIELDSAMPLES_HPP
+#ifndef MODULE_LOCALISATION_SRIF_FIELDSAMPLES_HPP
+#define MODULE_LOCALISATION_SRIF_FIELDSAMPLES_HPP
 
 #include <Eigen/Core>
 #include <filesystem>
 #include <string>
 #include <vector>
 
-#include "camera/Pose.hpp"
+#include "utility/slam/Pose.hpp"
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
-    using utility::slam::camera::Pose;
+    using utility::slam::Pose;
 
     /**
      * @brief A single message.input.Sensors sample (IMU + torso pose estimate at capture time)
@@ -52,6 +52,6 @@ namespace utility::slam {
         Eigen::Matrix<double, 3, Eigen::Dynamic>
             rays;  ///< unit rays in camera frame {c}, one column per field-line point
     };
-}  // namespace utility::slam
+}  // namespace module::localisation::srif
 
-#endif
+#endif  // MODULE_LOCALISATION_SRIF_FIELDSAMPLES_HPP

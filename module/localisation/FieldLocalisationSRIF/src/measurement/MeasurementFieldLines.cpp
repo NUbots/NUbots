@@ -7,11 +7,12 @@
 #include <cmath>
 #include <vector>
 
-#include "../FieldMap.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/FieldMap.hpp"
+#include "srif/SystemLocalisation.hpp"
 
-namespace utility::slam::measurement {
+#include "utility/slam/measurement/Measurement.hpp"
+
+namespace module::localisation::measurement {
 
     MeasurementFieldLines::MeasurementFieldLines(double time,
                                                  const LinePointsSample& sample,
@@ -132,4 +133,4 @@ namespace utility::slam::measurement {
         }
         Measurement::update(system);
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement

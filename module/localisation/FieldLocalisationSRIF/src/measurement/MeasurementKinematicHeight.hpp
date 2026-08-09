@@ -2,13 +2,13 @@
  * @file MeasurementKinematicHeight.h
  * @brief Forward-kinematic torso height pseudo-measurement.
  */
-#ifndef MEASUREMENTKINEMATICHEIGHT_HPP
-#define MEASUREMENTKINEMATICHEIGHT_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTKINEMATICHEIGHT_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTKINEMATICHEIGHT_HPP
 
 #include <Eigen/Core>
 
-#include "../system/SystemEstimator.hpp"
-#include "Measurement.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
 
 /**
  * @class MeasurementKinematicHeight
@@ -20,7 +20,11 @@
  * This anchors the otherwise weakly observable z state.
  */
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
+
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemEstimator;
+
     class MeasurementKinematicHeight : public Measurement {
     public:
         /**
@@ -45,5 +49,5 @@ namespace utility::slam::measurement {
         double y_;      ///< Measured torso height [m]
         double sigma_;  ///< Noise standard deviation [m]
     };
-}  // namespace utility::slam::measurement
-#endif
+}  // namespace module::localisation::measurement
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTKINEMATICHEIGHT_HPP

@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace utility::slam {
+namespace module::localisation::srif {
 
     FieldMap::FieldMap(const FieldDimensions& dims) : dims(dims) {
         build();
@@ -118,4 +118,4 @@ namespace utility::slam {
         // Centre circle
         lineCircles_.push_back({Eigen::Vector2d::Zero(), dims.centreCircleDiameter / 2});
     }
-}  // namespace utility::slam
+}  // namespace module::localisation::srif

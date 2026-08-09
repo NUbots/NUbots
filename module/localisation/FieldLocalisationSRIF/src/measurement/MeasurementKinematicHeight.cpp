@@ -3,9 +3,9 @@
 #include <Eigen/Core>
 #include <cmath>
 
-#include "Measurement.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
     MeasurementKinematicHeight::MeasurementKinematicHeight(double time, double height, double sigma)
         : Measurement(time), y_(height), sigma_(sigma) {
         // Linear-Gaussian in the state: closed-form quadratic log-likelihood
@@ -45,4 +45,4 @@ namespace utility::slam::measurement {
         return logLikelihood(x, system, g);
     }
 
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement

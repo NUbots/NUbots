@@ -2,17 +2,23 @@
  * @file MeasurementQuaternionNorm.hpp
  * @brief Unit-norm pseudo-measurement pinning the redundant quaternion DOF.
  */
-#ifndef MEASUREMENTQUATERNIONNORM_HPP
-#define MEASUREMENTQUATERNIONNORM_HPP
+#ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTQUATERNIONNORM_HPP
+#define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTQUATERNIONNORM_HPP
 
 #include <Eigen/Core>
 #include <cmath>
 
-#include "../system/SystemEstimator.hpp"
-#include "../system/SystemLocalisation.hpp"
-#include "Measurement.hpp"
+#include "srif/SystemLocalisation.hpp"
 
-namespace utility::slam::measurement {
+#include "utility/slam/measurement/Measurement.hpp"
+#include "utility/slam/system/SystemEstimator.hpp"
+
+namespace module::localisation::measurement {
+
+    using srif::SystemLocalisation;
+    using utility::slam::quat2rot;
+    using utility::slam::measurement::Measurement;
+    using utility::slam::system::SystemEstimator;
 
     /**
      * @class MeasurementQuaternionNorm
@@ -45,7 +51,7 @@ namespace utility::slam::measurement {
         }
 
         virtual Eigen::VectorXd simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const override {
-            return Eigen::VectorXd::Constant(1, x.segment<4>(utility::slam::system::SystemLocalisation::iQuat).norm());
+            return Eigen::VectorXd::Constant(1, x.segment<4>(srif::SystemLocalisation::iQuat).norm());
         }
 
         virtual double logLikelihood(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const override {
@@ -64,7 +70,7 @@ namespace utility::slam::measurement {
         template <typename Scalar>
         Scalar logLikelihoodImpl(const Eigen::VectorX<Scalar>& x) const {
             using std::sqrt;
-            const Eigen::Vector4<Scalar> q = x.segment(utility::slam::system::SystemLocalisation::iQuat, 4);
+            const Eigen::Vector4<Scalar> q = x.segment(srif::SystemLocalisation::iQuat, 4);
             const Scalar n                 = sqrt(q(0) * q(0) + q(1) * q(1) + q(2) * q(2) + q(3) * q(3));
             const Scalar e                 = n - Scalar(1);
             const double sigma2            = sigma_ * sigma_;
@@ -75,6 +81,6 @@ namespace utility::slam::measurement {
         double sigma_;  ///< Std dev on |q|
     };
 
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
 
-#endif
+#endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTQUATERNIONNORM_HPP

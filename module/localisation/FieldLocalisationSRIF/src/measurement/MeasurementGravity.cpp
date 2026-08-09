@@ -4,9 +4,9 @@
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
 
-#include "Measurement.hpp"
+#include "utility/slam/measurement/Measurement.hpp"
 
-namespace utility::slam::measurement {
+namespace module::localisation::measurement {
 
     MeasurementGravity::MeasurementGravity(double time, const Eigen::Vector3d& accelerometer, double sigma)
         : Measurement(time), y_(accelerometer), sigma_(sigma) {
@@ -14,8 +14,7 @@ namespace utility::slam::measurement {
     }
 
     Eigen::VectorXd MeasurementGravity::simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
-        const Eigen::Matrix3d Rfb =
-            quat2rot(Eigen::Vector4d(x.segment<4>(utility::slam::system::SystemLocalisation::iQuat)));
+        const Eigen::Matrix3d Rfb = quat2rot(Eigen::Vector4d(x.segment<4>(srif::SystemLocalisation::iQuat)));
         return Rfb.transpose() * Eigen::Vector3d(0, 0, gravity_);
     }
 
@@ -60,4 +59,4 @@ namespace utility::slam::measurement {
         H = hessian(func, wrt(xdual), at(xdual), fdual, g);
         return static_cast<double>(fdual);
     }
-}  // namespace utility::slam::measurement
+}  // namespace module::localisation::measurement
