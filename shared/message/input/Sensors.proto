@@ -157,13 +157,8 @@ message Sensors {
     /// Homogeneous transform: planted foot {p} to world {w}
     iso3 Hwp = 15;
 
-    /// Homogeneous transform: NUbots world {w} to VSLAM world {n}
-    /// To transform a point from VSLAM world to NUbots world: p_w = Hwn.inverse() * p_n
-    /// To transform a point from NUbots world to VSLAM world: p_n = Hwn * p_w
-    iso3 Hwn = 16;
-
     /// Translational velocity of torso {t} in world {w} space
-    vec3 vTw = 17;
+    vec3 vTw = 16;
 
-    behaviour.state.WalkState.Phase planted_foot_phase = 18;
+    behaviour.state.WalkState.Phase planted_foot_phase = 17;
 }
