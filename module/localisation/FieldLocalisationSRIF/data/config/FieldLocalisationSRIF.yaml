@@ -1,148 +1,87 @@
 log_level: INFO
 
+# The intent for what belongs here: if you would change it because something about the robot, the
+# venue or the game changed, it goes in this file. If it was tuned once against recorded data and
+# then left alone, it belongs next to its explanation in the header.
+
+# --- What the filter runs ------------------------------------------------------------------------
+
 # Multi-hypothesis (field-symmetry) Gaussian mixture bank. Off keeps a single Gaussian.
 # On its own this cannot resolve the symmetry: on-field landmarks fit a pose and its 180 deg mirror
-# equally well, and each component is scored on its own association, so the pair sits at a genuine
-# 50/50 and the reported pose stays with whichever was bootstrapped. Breaking the tie needs the
-# asymmetric off-field evidence below, which is fed in through SystemLocalisation::addSideLogEvidence.
+# equally well, so the pair sits at a genuine 50/50. Breaking the tie requires the prior of "we must
+# start on our own half" and we can keep better track of the mirror with out of field landmarks.
+# TODO: Decide whether to keep this at all.
 use_hypothesis_bank: false
 
-# Out-of-field side disambiguation (srif::SideDisambiguator). Maps background corners -- walls,
-# posters, furniture, spectators -- from the raw camera frame and compares how well the current pose
-# and its 180 deg mirror explain them. That scenery is not symmetric, so it is the only evidence that
-# can separate the two, and it is what recovers a mid-game kidnap or a wrong-side convergence.
+# Out-of-field side disambiguation. Maps background corners from the raw camera frame and compares
+# how well the current pose and its mirror explain them. That scenery is (ideally) not symmetric.
 #
 # With use_hypothesis_bank on, each frame's evidence goes into the mixture weights and the correction
-# happens smoothly as the representative changes; with it off, a sustained and decisive preference for
-# the mirror flips the belief outright.
+# happens smoothly as the representative changes; with it off, a sustained and decisive preference
+# for the mirror flips the belief outright.
+# TODO: confirm this
 #
-# Costs roughly 4 ms per camera frame (FAST + ORB + association), on its own reaction so it delays no
-# landmark update. Turn it off to get that time back on a robot that will never be picked up.
+# Costs roughly 4 ms per camera frame, on its own reaction so it delays no landmark update. Turn it
+# off to get that time back on a robot that will never be picked up.
+# TODO: confirm timing
 use_side_disambiguator: true
 
-# Body-rate measurements. The gyroscope and the walk-engine odometry measure the body angular and linear
-# velocity states directly, so their noise is modelled here rather than folded into the process noise,
-# and the gyroscope's bias is an estimated state. That bias is invisible to the upstream Mahony filter,
-# whose bias integrator cannot observe rotation about gravity, so this is the only thing estimating the
-# yaw-rate bias that turns into heading drift.
-gyroscope_sigma: 0.02 # gyroscope noise std dev per axis [rad/s]
+# Walk-engine odometry as a measurement of the body linear velocity. Off leaves vBb driven by the
+# process model alone while upright.
 use_odometry_velocity: true
-# Deliberately loose, comparable to the walk speed itself: the odometry slips on foot contact and
-# reports the gait the engine believes it is executing. As a measurement that is evidence the filter can
-# weigh, never truth it has to accept.
-odometry_velocity_sigma: 0.15 # [m/s]
-# Zero-velocity updates replace the odometry measurement while the robot is down. A robot on the carpet
-# is not travelling anywhere, and saying so is what stops the pre-fall gait integrating across the whole
-# fall. Leaving the velocity unmeasured instead is not the neutral choice it looks like: it asserts the
-# robot may still be moving at whatever it was doing when it fell.
-zupt_sigma: 0.02 # [m/s] FALLEN, lying still
-zupt_dynamic_sigma: 0.30 # [m/s] FALLING or getting up - the torso moves, just not anywhere
 
-# Low-rate corrections
-# Accelerometer gravity-direction measurement of torso roll/pitch, from the calibrated m/s^2
-# Sensors.accelerometer. The gravity-aligned attitude is also estimated upstream by the Mahony filter
-# and delivered via Htw, so this is a secondary anchor and may be turned off if Htw is trusted alone.
+# Accelerometer gravity-direction measurement of torso roll/pitch. The gravity-aligned attitude is
+# also estimated upstream by the Mahony filter and delivered via Htw, so this is a secondary anchor
+# and may be turned off if Htw is trusted on its own.
+# TODO: compare on/off and remove if unneeded
 use_gravity: true
-gravity_sigma: 1.0 # accelerometer gravity-direction noise std dev [m/s^2]
-# The accelerometer reads gravity whenever the torso is not being accelerated - true of a robot lying
-# still on the carpet, false of one in free fall or hitting the ground. Gating on how far the specific
-# force sits from standard gravity tests that directly, which is the right condition during a fall and a
-# better one than "is the robot upright" while walking. Loose on purpose: gait swings the magnitude by a
-# couple of m/s^2 and the model already carries gravity_sigma of noise.
-gravity_quasi_static_tolerance: 3.0 # [m/s^2] from standard gravity
-# Torso height above ground assumes the support leg reaches the ground, so this is the one model a fall
-# genuinely invalidates - it is suppressed while the robot is not upright (see fall: below).
+
+# Forward-kinematic torso height above the ground plane. Anchors the weakly observable z state.
+# Suppressed automatically while the robot is not upright, so this switch is about trusting the
+# kinematic chain, not about falls.
+# TODO: I suspect this should never be turned off, test and see how bad it is
 use_kinematic_height: true
-height_sigma: 0.02 # kinematic torso-height noise std dev [m]
-# Soft |q| = 1 prior. The four attitude states carry three degrees of freedom and quat2rot normalises, so
-# no other model can see |q|; without this the MAP Hessian is singular along it.
-quaternion_norm_sigma: 1.0e-3
 
-# Fall handling. Measurement updates are NOT suppressed wholesale while the robot is down: the landmark
-# model is plain geometry and stays valid face-down, and a robot that spins while toppling or getting up
-# changes its heading, which only measurements taken during the event can catch.
-fall:
-  # Confidence handed back on standing up again. The mean is kept - a fall and getup move the torso well
-  # under a metre, so the pre-fall position is still the best estimate available - but the confidence
-  # attached to it is not survivable, above all in yaw.
-  recovery_pos_std: 0.5 # horizontal position std restored on recovery [m]
-  recovery_yaw_std: 0.6 # yaw std restored on recovery [rad]
+# --- How far each sensor is trusted (noise standard deviations) ---------------------------------
+# TODO: replace with measured values where possible
 
-# Odometry twist buffer
-max_odometry_gap: 0.1 # max sample spacing to finite-difference across [s]
-twist_window_seconds: 2.0 # rolling odometry window length [s]
-max_sensor_pairing_age: 0.1 # max age of the odometry sample paired with a vision frame [s]
+# The gyroscope is the only thing estimating the yaw-rate bias that turns into heading drift: the
+# upstream Mahony filter's bias integrator cannot observe rotation about gravity.
+gyroscope_sigma: 0.02 # [rad/s] per axis
 
-# Initial-pose grid search
-grid_step_xy: 0.35 # position step [m]
-grid_step_yaw: 18.0 # heading step [deg]
-min_init_associations: 4 # landmark associations needed to trust a solve
+# Deliberately loose, comparable to the walk speed itself: the odometry slips on foot contact and
+# reports the gait the engine believes it is executing. As a measurement that is evidence the filter
+# can weigh, never truth it has to accept.
+odometry_velocity_sigma: 0.15 # [m/s]
 
-# Covariance of the belief the filter starts from post grid search. Bigger = less certain.
-#
-#   x, y            how far the grid solve could be out. Its step is grid_step_xy, so a cell or three.
-#   z, roll, pitch  how far the kinematic chain could be out - the grid takes these from it, unsearched.
-#   quaternion      the grid's attitude doubt (predominantly yaw) Note: yaw is not separable across
-#                   components, so all four carry the loose figure (0.25 here is ~0.5 rad of heading).
-#   v, omega        robot is probably not moving yet.
-#   bg              prior on the gyroscope bias. ~3 deg/s covers the drift it exists to absorb.
-#   cam             prior on the camera extrinsics.
-#
-# Important note:
-#   - The filter stores the INVERSE of these (square-root information form), so a near-zero std dev (~1e-4)
-#     becomes a near-infinite information and the estimate goes non-finite, typically hundreds of frames later.
-initial_sqrt_covariance:
-  # [x, y, z | qw, qx, qy, qz | vx, vy, vz | wx, wy, wz | bgx, bgy, bgz | cam_roll, cam_pitch]
-  [1.0, 1.0, 0.05, 0.25, 0.25, 0.25, 0.25, 0.30, 0.30, 0.10, 0.50, 0.50, 0.50, 0.05, 0.05, 0.05, 0.02, 0.02]
+gravity_sigma: 1.0 # accelerometer gravity-direction noise [m/s^2] (TODO: this is huge not sure why)
+height_sigma: 0.02 # kinematic torso-height noise [m]
 
-# Process noise power spectral densities
+# --- How far vision is trusted -------------------------------------------------------------------
+measurement:
+  # Total per-frame ray error including systematic terms, not just pixel noise.
+  sigma_angular: 0.25 # inlier ray angular noise [rad]
+  # Max association residual angle. Widened at runtime by the filter's own yaw uncertainty, so an
+  # inflated belief can still re-associate after a getup that turned the robot.
+  gate_angle: 0.35 # [rad]
+  # Detections below this are dropped outright. Above it, YOLO confidence scales the robust inlier
+  # weight rather than the noise, so a weak detection cannot sharpen the posterior.
+  min_confidence: 0.5
+
+# --- How fast the belief may move ----------------------------------------------------------------
+# The dominant process noise. Uncertainty reaches position by integrating velocity uncertainty,
+# which is where the real ignorance lives, so these two are the tuning dials; the position and
+# attitude PSDs in the header are only a floor against collapse in weakly observable directions.
+# Raise these if the filter is too slow to follow the robot, lower them if the pose is twitchy.
 process:
-  sigma_pos_xy: 0.02 # horizontal position [m/sqrt(s)]
-  sigma_pos_z: 0.01 # vertical position [m/sqrt(s)]
-  sigma_att: 0.01 # roll/pitch [rad/sqrt(s)]
-  sigma_yaw: 0.01 # yaw [rad/sqrt(s)]
-  sigma_cam_bias: 3.0e-4 # camera-mount bias [rad/sqrt(s)]
-  # While the robot is not upright the rates are barely observed - the odometry velocity is replaced by
-  # a zero-velocity update and nothing else measures vBb - so the belief has to widen enough on its own
-  # that the landmark association gate reopens on recovery.
-  sigma_pos_xy_disturbed: 0.20 # horizontal position while not upright [m/sqrt(s)]
-  sigma_pos_z_disturbed: 0.20 # vertical position while not upright [m/sqrt(s)]
-  sigma_att_disturbed: 0.20 # roll/pitch while not upright [rad/sqrt(s)]
-  sigma_yaw_disturbed: 0.20 # yaw while not upright [rad/sqrt(s)]
-  # The body-fixed rates, and the dominant process noise: uncertainty reaches position by integrating
-  # velocity uncertainty, which is where the real ignorance lives. The pose PSDs above are only a floor
-  # against collapse in weakly-observable directions.
   sigma_vel: 0.35 # body linear velocity [m/s/sqrt(s)]
   sigma_omega: 1.50 # body angular velocity [rad/s/sqrt(s)]
-  sigma_gyro_bias: 2.0e-4 # gyroscope bias random walk [rad/s/sqrt(s)]: slow thermal drift only
-  sigma_vel_disturbed: 1.00 # body linear velocity while not upright [m/s/sqrt(s)]
-  sigma_omega_disturbed: 3.00 # body angular velocity while not upright [rad/s/sqrt(s)]
-  # How long into a fall the *_disturbed PSDs apply [s]. A fall is a bounded event; running them for its
-  # whole duration models a robot lying still as a random walk, so the belief would report how long it
-  # had been down rather than how far it could have gone. This bounds the PSDs only - the zero-velocity
-  # update runs for the whole time the robot is down, however long that is.
-  disturbed_window: 2.0
 
-# Landmark ray measurement
-measurement:
-  sigma_angular: 0.25 # inlier ray angular noise std dev [rad]
-  gate_angle: 0.35 # max association residual angle [rad]
-  # The pre-gate is a hard geometric cap, so on its own it also caps what the filter can recover from: a
-  # getup leaving the robot yawed past gate_angle puts every predicted bearing outside it, and covariance
-  # inflation does not help because the pre-gate never looks at the covariance. Widening it with the yaw
-  # uncertainty is what lets an inflated belief re-associate. Normal operation is untouched: it takes
-  # sigma_yaw > gate_angle/gate_yaw_scale (10 deg here) before the widened gate exceeds gate_angle.
-  gate_yaw_scale: 2.0 # pre-gate widens to this many yaw std devs
-  gate_angle_max: 1.0 # ceiling on the widened pre-gate [rad]
-  min_confidence: 0.5 # reject detections below this confidence
-  inlier_probability: 0.7 # inlier mixture weight at confidence_reference
-  confidence_reference: 0.7 # confidence that maps to inlier_probability
-  max_inlier_probability: 0.95
-
-# Hypothesis-bank spawning/pruning/merging (only used when use_hypothesis_bank is true)
-hypothesis:
-  min_weight: 0.02 # prune components below this normalised weight
-  max_components: 4 # cap on live components
-  merge_position: 0.30 # merge gate on position separation [m]
-  merge_yaw: 0.20 # merge gate on yaw separation [rad]
-  respawn_pos_std: 0.60 # respawn a mirror when the lone component's horizontal std exceeds this [m]
+# --- How much confidence a fall costs ------------------------------------------------------------
+# The mean is kept on standing up -- a fall and getup move the torso well under a metre, so the
+# pre-fall position is still the best estimate available -- but the confidence attached to it is not
+# survivable, above all in yaw. This is also what reopens the landmark association gate; too small
+# and a getup that turned the robot leaves every predicted bearing outside it.
+fall:
+  recovery_pos_std: 0.5 # horizontal position std restored on recovery [m]
+  recovery_yaw_std: 0.6 # yaw std restored on recovery [rad]

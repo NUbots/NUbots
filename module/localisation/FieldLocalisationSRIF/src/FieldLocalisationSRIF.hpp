@@ -96,7 +96,13 @@ namespace module::localisation {
         explicit FieldLocalisationSRIF(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// @brief Configuration parameters for this module
+        /**
+         * @brief Configuration parameters for this module.
+         *
+         * What the filter runs, how far each sensor is trusted, and how fast the belief may
+         * move are in the yaml; everything tuned once and then left alone lives here, next to
+         * the reasoning for its value.
+         */
         struct Config {
             /// @brief Process noise PSDs [m/sqrt(s), rad/sqrt(s)]
             filter::SystemLocalisation::Parameters process{};
@@ -104,9 +110,37 @@ namespace module::localisation {
             filter::SystemLocalisation::HypothesisParameters hypothesis{};
             /// @brief Landmark measurement noise/association options
             filter::MeasurementFieldLandmarks::Options measurement{};
-            /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve. Ones by default,
-            /// config overwrites.
-            Eigen::Matrix<double, 18, 1> initial_sqrt_covariance = Eigen::Matrix<double, 18, 1>::Ones();
+            /**
+             * @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve.
+             *
+             * The belief the filter starts from. Bigger means less certain:
+             *
+             *   x, y            how far the grid solve could be out. Its step is grid_step_xy, so a
+             *                   cell or three.
+             *   z, roll, pitch  how far the kinematic chain could be out -- the grid takes these from
+             *                   it, unsearched.
+             *   quaternion      the grid's attitude doubt (predominantly yaw). Yaw is not separable
+             *                   across components, so all four carry the loose figure; 0.25 here is
+             *                   about 0.5 rad of heading.
+             *   v, omega        the robot is probably not moving yet.
+             *   bg              prior on the gyroscope bias. ~3 deg/s covers the drift it absorbs.
+             *   cam             prior on the camera extrinsics.
+             *
+             * Do not set an entry near zero. The filter stores the INVERSE of these (square-root
+             * information form), so a near-zero std dev becomes a near-infinite information and the
+             * estimate goes non-finite -- typically hundreds of frames later, far from the cause.
+             */
+            // clang-format off
+            Eigen::Matrix<double, 18, 1> initial_sqrt_covariance =
+                (Eigen::Matrix<double, 18, 1>() <<
+                 1.00, 1.00, 0.05,              // x, y, z [m]
+                 0.25, 0.25, 0.25, 0.25,        // quaternion (w, x, y, z)
+                 0.30, 0.30, 0.10,              // v [m/s]
+                 0.50, 0.50, 0.50,              // omega [rad/s]
+                 0.05, 0.05, 0.05,              // gyroscope bias [rad/s]
+                 0.02, 0.02                     // camera mount bias (roll, pitch) [rad]
+                 ).finished();
+            // clang-format on
             /// @brief Grid search steps for the initial pose solve
             double grid_step_xy  = 0.35;
             double grid_step_yaw = 18.0 * M_PI / 180.0;
@@ -144,7 +178,10 @@ namespace module::localisation {
             bool use_kinematic_height = true;
             /// @brief Kinematic torso-height noise std dev [m]
             double height_sigma = 0.02;
-            /// @brief Std dev on the |q| = 1 pseudo-measurement (dimensionless)
+            /// @brief Std dev on the |q| = 1 pseudo-measurement (dimensionless).
+            ///
+            /// The four attitude states carry three degrees of freedom, and quat2rot normalises, so
+            /// no other model here can see |q|. Without this the MAP Hessian is singular along it.
             double quaternion_norm_sigma = 1e-3;
 
             // --- body-rate measurements ---

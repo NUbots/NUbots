@@ -162,80 +162,39 @@ namespace module::localisation {
         on<Configuration>("FieldLocalisationSRIF.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.use_hypothesis_bank     = config["use_hypothesis_bank"].as<bool>();
-            cfg.use_side_disambiguator  = config["use_side_disambiguator"].as<bool>();
+            // Only the knobs worth reaching for live in the yaml; everything else is a tuned constant
+            // in Config, next to the reasoning for its value. See the comment on Config.
+
+            // What the filter runs
+            cfg.use_hypothesis_bank    = config["use_hypothesis_bank"].as<bool>();
+            cfg.use_side_disambiguator = config["use_side_disambiguator"].as<bool>();
+            cfg.use_odometry_velocity  = config["use_odometry_velocity"].as<bool>();
+            cfg.use_gravity            = config["use_gravity"].as<bool>();
+            cfg.use_kinematic_height   = config["use_kinematic_height"].as<bool>();
+
+            // How far each sensor is trusted
             cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
-            cfg.use_odometry_velocity   = config["use_odometry_velocity"].as<bool>();
             cfg.odometry_velocity_sigma = config["odometry_velocity_sigma"].as<double>();
-            cfg.zupt_sigma              = config["zupt_sigma"].as<double>();
-            cfg.zupt_dynamic_sigma      = config["zupt_dynamic_sigma"].as<double>();
-            cfg.use_gravity             = config["use_gravity"].as<bool>();
             cfg.gravity_sigma           = config["gravity_sigma"].as<double>();
-            cfg.use_kinematic_height    = config["use_kinematic_height"].as<bool>();
             cfg.height_sigma            = config["height_sigma"].as<double>();
-            cfg.max_odometry_gap        = config["max_odometry_gap"].as<double>();
-            cfg.twist_window_seconds    = config["twist_window_seconds"].as<double>();
-            cfg.max_sensor_pairing_age  = config["max_sensor_pairing_age"].as<double>();
 
-            cfg.gravity_quasi_static_tolerance = config["gravity_quasi_static_tolerance"].as<double>();
-            cfg.quaternion_norm_sigma          = config["quaternion_norm_sigma"].as<double>();
-            cfg.recovery_pos_std               = config["fall"]["recovery_pos_std"].as<double>();
-            cfg.recovery_yaw_std               = config["fall"]["recovery_yaw_std"].as<double>();
+            // How far vision is trusted
+            cfg.measurement.sigmaAngular  = config["measurement"]["sigma_angular"].as<double>();
+            cfg.measurement.gateAngle     = config["measurement"]["gate_angle"].as<double>();
+            cfg.measurement.minConfidence = config["measurement"]["min_confidence"].as<double>();
 
-            cfg.grid_step_xy          = config["grid_step_xy"].as<double>();
-            cfg.grid_step_yaw         = config["grid_step_yaw"].as<double>() * M_PI / 180.0;  // deg -> rad
-            cfg.min_init_associations = config["min_init_associations"].as<int>();
+            // How fast the belief may move. These two dominate: uncertainty reaches position by
+            // integrating velocity uncertainty, so the pose PSDs are only a floor against collapse.
+            cfg.process.sigmaVel   = config["process"]["sigma_vel"].as<double>();
+            cfg.process.sigmaOmega = config["process"]["sigma_omega"].as<double>();
 
-            // Check size of sqrt-covariance vector and copy into Eigen vector.
-            const auto init_sqrt = config["initial_sqrt_covariance"].as<std::vector<double>>();
-            if (init_sqrt.size() != std::size_t(cfg.initial_sqrt_covariance.size())) {
-                throw std::runtime_error("initial_sqrt_covariance in FieldLocalisationSRIF.yaml has "
-                                         + std::to_string(init_sqrt.size()) + " entries, but the state is "
-                                         + std::to_string(cfg.initial_sqrt_covariance.size()) + "-dimensional");
+            // How much confidence a fall costs
+            cfg.recovery_pos_std = config["fall"]["recovery_pos_std"].as<double>();
+            cfg.recovery_yaw_std = config["fall"]["recovery_yaw_std"].as<double>();
+
+            if ((cfg.initial_sqrt_covariance.array() < 1e-4).any()) {
+                log<WARN>("initial_sqrt_covariance has a near-zero entry; the filter stores its inverse");
             }
-            cfg.initial_sqrt_covariance = Eigen::Map<const Eigen::VectorXd>(init_sqrt.data(), init_sqrt.size());
-
-            // Check for small values in initial_sqrt_covariance.
-            constexpr double min_sqrt_covariance = 1e-4;
-            if ((cfg.initial_sqrt_covariance.array() < min_sqrt_covariance).any()) {
-                log<WARN>("initial_sqrt_covariance has an entry below", min_sqrt_covariance);
-            }
-
-            // Process noise PSDs
-            cfg.process.sigmaPosXY   = config["process"]["sigma_pos_xy"].as<double>();
-            cfg.process.sigmaPosZ    = config["process"]["sigma_pos_z"].as<double>();
-            cfg.process.sigmaAtt     = config["process"]["sigma_att"].as<double>();
-            cfg.process.sigmaYaw     = config["process"]["sigma_yaw"].as<double>();
-            cfg.process.sigmaCamBias = config["process"]["sigma_cam_bias"].as<double>();
-
-            // Process noise PSDs while the robot is not upright
-            cfg.process.sigmaPosXYDisturbed = config["process"]["sigma_pos_xy_disturbed"].as<double>();
-            cfg.process.sigmaPosZDisturbed  = config["process"]["sigma_pos_z_disturbed"].as<double>();
-            cfg.process.sigmaAttDisturbed   = config["process"]["sigma_att_disturbed"].as<double>();
-            cfg.process.sigmaYawDisturbed   = config["process"]["sigma_yaw_disturbed"].as<double>();
-            cfg.process.sigmaVel            = config["process"]["sigma_vel"].as<double>();
-            cfg.process.sigmaOmega          = config["process"]["sigma_omega"].as<double>();
-            cfg.process.sigmaGyroBias       = config["process"]["sigma_gyro_bias"].as<double>();
-            cfg.process.sigmaVelDisturbed   = config["process"]["sigma_vel_disturbed"].as<double>();
-            cfg.process.sigmaOmegaDisturbed = config["process"]["sigma_omega_disturbed"].as<double>();
-            cfg.process.disturbedWindow     = config["process"]["disturbed_window"].as<double>();
-
-            // Landmark measurement options
-            cfg.measurement.sigmaAngular         = config["measurement"]["sigma_angular"].as<double>();
-            cfg.measurement.gateAngle            = config["measurement"]["gate_angle"].as<double>();
-            cfg.measurement.gateYawScale         = config["measurement"]["gate_yaw_scale"].as<double>();
-            cfg.measurement.gateAngleMax         = config["measurement"]["gate_angle_max"].as<double>();
-            cfg.measurement.minConfidence        = config["measurement"]["min_confidence"].as<double>();
-            cfg.measurement.inlierProbability    = config["measurement"]["inlier_probability"].as<double>();
-            cfg.measurement.confidenceReference  = config["measurement"]["confidence_reference"].as<double>();
-            cfg.measurement.maxInlierProbability = config["measurement"]["max_inlier_probability"].as<double>();
-
-            // Hypothesis-bank parameters
-            cfg.hypothesis.minWeight     = config["hypothesis"]["min_weight"].as<double>();
-            cfg.hypothesis.maxComponents = config["hypothesis"]["max_components"].as<std::size_t>();
-            cfg.hypothesis.mergePosition = config["hypothesis"]["merge_position"].as<double>();
-            cfg.hypothesis.mergeYaw      = config["hypothesis"]["merge_yaw"].as<double>();
-            cfg.hypothesis.respawnPosStd = config["hypothesis"]["respawn_pos_std"].as<double>();
 
             // Propagate live tuning into an already-constructed estimator
             if (system != nullptr) {

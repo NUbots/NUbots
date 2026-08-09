@@ -149,54 +149,54 @@ is treated as always upright and the fall handling never engages.
 
 Emit `ResetFieldLocalisation` to drop the estimate and re-run the initial grid search.
 
-Tuning lives in `data/config/FieldLocalisationSRIF.yaml`.
+Tuning is split by how often you would reach for it. `data/config/FieldLocalisationSRIF.yaml` holds
+the knobs you change because something about the robot, the venue or the game changed — the tables
+below are all of it. Everything else was tuned once against recorded data and is a constant in the
+code, documented where it is defined: `struct Config` in `FieldLocalisationSRIF.hpp` (initial
+covariance, grid search, ZUPT noise, the odometry buffer, gravity gating, the |q| = 1 prior),
+`SystemLocalisation::Parameters` (the rest of the process PSDs, the `*_disturbed` set and its window)
+and `MeasurementFieldLandmarks::Options` (association gate internals, the robust inlier mixture).
 
-**Initialisation**
+**What the filter runs**
 
-| Key                              | Meaning                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------- |
-| `grid_step_xy` / `grid_step_yaw` | Grid search resolution [m] / [deg]                                      |
-| `min_init_associations`          | Landmark associations needed to trust a solve                           |
-| `initial_sqrt_covariance`        | Per-state std devs of the initial belief.                               |
+| Key                      | Meaning                                                                  |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `use_hypothesis_bank`    | Multi-hypothesis mixture; off by default, see Limitations                 |
+| `use_side_disambiguator` | Out-of-field side disambiguation; the only thing that resolves the mirror |
+| `use_odometry_velocity`  | Walk-engine odometry as a body linear velocity measurement                |
+| `use_gravity`            | Accelerometer gravity direction as a secondary attitude anchor            |
+| `use_kinematic_height`   | Torso height from the support-leg chain                                   |
 
-**Measurements** — each is `use_*` to enable plus a `*_sigma` for how far it is trusted
+**How far each sensor is trusted** — noise std devs; bigger means weighed less
 
-| Key                                                 | Meaning                                                                |
-| --------------------------------------------------- | ---------------------------------------------------------------------- |
-| `measurement.min_confidence`                        | YOLO confidence below which a detection is discarded                   |
-| `measurement.gate_angle`                            | Nominal association pre-gate [rad]                                     |
-| `measurement.gate_yaw_scale`                        | How many yaw std devs the pre-gate widens to when uncertain            |
-| `gyroscope_sigma`                                   | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
-| `use_odometry_velocity` / `odometry_velocity_sigma` | Walk-engine odometry as a body-velocity measurement [m/s]              |
-| `use_gravity` / `gravity_sigma`                     | Accelerometer gravity direction [m/s²]                                 |
-| `gravity_quasi_static_tolerance`                    | How far ‖a‖ may sit from g and still count as gravity [m/s²]           |
-| `use_kinematic_height` / `height_sigma`             | Torso height from the support-leg chain [m]                            |
-| `quaternion_norm_sigma`                             | Soft \|q\| = 1 prior; pins the redundant fourth attitude parameter     |
+| Key                       | Meaning                                                                |
+| ------------------------- | ---------------------------------------------------------------------- |
+| `gyroscope_sigma`         | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
+| `odometry_velocity_sigma` | Walk-engine odometry velocity [m/s]                                    |
+| `gravity_sigma`           | Accelerometer gravity direction [m/s²]                                 |
+| `height_sigma`            | Torso height from the support-leg chain [m]                            |
 
-**Process noise** (`process:`) — PSDs, `*_disturbed` variants apply while not upright
+**How far vision is trusted** (`measurement:`)
 
-| Key                                       | Meaning                                                                         |
-| ----------------------------------------- | ------------------------------------------------------------------------------- |
-| `sigma_vel` / `sigma_omega`               | Body-rate random walks — the dominant process noise                             |
-| `sigma_gyro_bias`                         | Gyroscope bias random walk; slow thermal drift only                             |
-| `sigma_pos_*` / `sigma_att` / `sigma_yaw` | Pose PSDs; only a floor, since uncertainty arrives by integrating the rates     |
-| `sigma_cam_bias`                          | Camera-mount bias random walk                                                   |
-| `disturbed_window`                        | How long the `*_disturbed` PSDs apply [s]; bounds the PSDs only, never the ZUPT |
+| Key              | Meaning                                                            |
+| ---------------- | ------------------------------------------------------------------ |
+| `sigma_angular`  | Inlier ray angular noise [rad]; total per-frame error, not just px |
+| `gate_angle`     | Nominal association pre-gate [rad]; widened at runtime by yaw std  |
+| `min_confidence` | YOLO confidence below which a detection is discarded outright      |
 
-**Falls**
+**How fast the belief may move** (`process:`) — the dominant process noise
 
-| Key                                          | Meaning                                                     |
-| -------------------------------------------- | ----------------------------------------------------------- |
-| `zupt_sigma` / `zupt_dynamic_sigma`          | Zero-velocity update noise, lying still vs mid-topple [m/s] |
-| `fall.recovery_pos_std` / `recovery_yaw_std` | Confidence handed back on standing up                       |
+| Key           | Meaning                                                                             |
+| ------------- | ----------------------------------------------------------------------------------- |
+| `sigma_vel`   | Body linear velocity random walk [m/s/√s]; raise if the filter lags the robot        |
+| `sigma_omega` | Body angular velocity random walk [rad/s/√s]; lower if the pose is twitchy           |
 
-**Other**
+**How much confidence a fall costs** (`fall:`)
 
-| Key                                         | Meaning                                                        |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| `use_hypothesis_bank`                       | Multi-hypothesis mixture; off by default, see Limitations      |
-| `max_odometry_gap` / `twist_window_seconds` | Odometry differencing gap and rolling window [s]               |
-| `max_sensor_pairing_age`                    | Oldest odometry sample allowed to pair with a vision frame [s] |
+| Key                 | Meaning                                                                    |
+| ------------------- | -------------------------------------------------------------------------- |
+| `recovery_pos_std`  | Horizontal position std restored on standing up [m]                        |
+| `recovery_yaw_std`  | Yaw std restored on standing up [rad]; also reopens the association gate    |
 
 ## Consumes
 
@@ -269,4 +269,4 @@ matches still hold is drift.
   YOLO landmarks alone, not raw field-line points.
 - The zero-velocity update asserts the robot is not travelling for the whole non-upright window. That
   is sound for a topple and a getup, but wrong if a handler picks the robot up while it still reads
-  `FALLEN`; `zupt_sigma` is the knob if that becomes a problem in a real game.
+  `FALLEN`; `Config::zupt_sigma` (in the header) is the knob if that becomes a problem in a real game.
