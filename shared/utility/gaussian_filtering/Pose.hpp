@@ -29,10 +29,6 @@
 #define UTILITY_SLAM_POSE_HPP
 
 #include <Eigen/Core>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/core/eigen.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/types.hpp>
 
 namespace utility::gaussian_filtering {
 
@@ -67,28 +63,6 @@ namespace utility::gaussian_filtering {
          * @param t Translation vector
          */
         Pose(const Matrix3& R, const Vector3& t) : rotationMatrix(R), translationVector(t) {}
-
-        /**
-         * @brief Constructor from OpenCV rotation matrix and translation vector
-         * @param R OpenCV rotation matrix
-         * @param t OpenCV translation vector
-         */
-        Pose(const cv::Matx33d& R, const cv::Vec3d& t) {
-            cv::cv2eigen(R, rotationMatrix);
-            cv::cv2eigen(t, translationVector);
-        }
-
-        /**
-         * @brief Constructor from OpenCV rotation vector and translation vector
-         * @param rvec OpenCV rotation vector (exponential coordinates)
-         * @param tvec OpenCV translation vector
-         */
-        Pose(const cv::Mat& rvec, const cv::Mat& tvec) {
-            cv::Mat R;
-            cv::Rodrigues(rvec, R);
-            cv::cv2eigen(R, rotationMatrix);
-            cv::cv2eigen(tvec, translationVector);
-        }
 
         /**
          * @brief Copy constructor with type conversion
@@ -149,21 +123,9 @@ namespace utility::gaussian_filtering {
          *
          * @param r The point to transform
          * @return The transformed point
-         * @see Pose::operator*(const cv::Vec3d &) const
          */
         Vector3 operator*(const Vector3& r) const {
             return rotationMatrix * r + translationVector;
-        }
-
-        /**
-         * @brief Action of \f$\mathsf{SE}(3)\f$ on \f$\mathbb{P}^3\f$ (OpenCV version)
-         * @param r The point to transform (OpenCV vector)
-         * @return The transformed point (OpenCV vector)
-         * @see Pose::operator*(const Vector3 &) const
-         */
-        cv::Vec3d operator*(const cv::Vec3d& r) const {
-            Vector3 result = rotationMatrix * Eigen::Map<const Vector3>(r.val) + translationVector;
-            return cv::Vec3d(result[0], result[1], result[2]);
         }
 
         /**
@@ -184,28 +146,6 @@ namespace utility::gaussian_filtering {
             result.rotationMatrix    = rotationMatrix.transpose();
             result.translationVector = -result.rotationMatrix * translationVector;
             return result;
-        }
-
-        /**
-         * @brief Conversion to OpenCV rotation matrix
-         * @return The rotation matrix in OpenCV format
-         * @see Pose::translationVectorCV
-         */
-        cv::Matx33d rotationMatrixCV() const {
-            cv::Matx33d R;
-            cv::eigen2cv(rotationMatrix, R);
-            return R;
-        }
-
-        /**
-         * @brief Conversion to OpenCV translation vector
-         * @return The translation vector in OpenCV format
-         * @see Pose::rotationMatrixCV
-         */
-        cv::Vec3d translationVectorCV() const {
-            cv::Vec3d t;
-            cv::eigen2cv(translationVector, t);
-            return t;
         }
     };
 
