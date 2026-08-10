@@ -87,7 +87,6 @@ namespace module::localisation::measurement {
     std::vector<std::pair<std::size_t, std::size_t>> MeasurementFieldLandmarks::associate(const Eigen::VectorXd& x,
                                                                                           const Eigen::MatrixXd& P) {
         std::vector<std::pair<std::size_t, std::size_t>> keys;
-        assocCand_.clear();
         inlierWeight_.clear();
         if (candidates_.empty()) {
             uMeas_.resize(3, 0);
@@ -188,28 +187,16 @@ namespace module::localisation::measurement {
 
         uMeas_.resize(3, static_cast<Eigen::Index>(chosen.size()));
         rLFf_.resize(3, static_cast<Eigen::Index>(chosen.size()));
-        assocCand_.reserve(chosen.size());
         inlierWeight_.reserve(chosen.size());
         for (std::size_t k = 0; k < chosen.size(); ++k) {
             const CandidatePair& p                   = *chosen[k];
             uMeas_.col(static_cast<Eigen::Index>(k)) = candidates_[p.det].ray;
             rLFf_.col(static_cast<Eigen::Index>(k))  = map_.landmarks(p.type)[p.lm];
-            assocCand_.push_back(p.det);
             inlierWeight_.push_back(candidates_[p.det].inlierWeight);
             keys.emplace_back(p.det, lmKey(p.type, p.lm));
         }
         std::sort(keys.begin(), keys.end());
         return keys;
-    }
-
-    std::vector<MeasurementFieldLandmarks::DetectionOutcome> MeasurementFieldLandmarks::detectionOutcomes() const {
-        std::vector<DetectionOutcome> outcomes;
-        outcomes.reserve(candidates_.size());
-        for (std::size_t i = 0; i < candidates_.size(); ++i) {
-            const bool associated = std::find(assocCand_.begin(), assocCand_.end(), i) != assocCand_.end();
-            outcomes.push_back({candidates_[i].detection, associated});
-        }
-        return outcomes;
     }
 
     Eigen::VectorXd MeasurementFieldLandmarks::simulate(const Eigen::VectorXd& x,

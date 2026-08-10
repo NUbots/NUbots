@@ -337,9 +337,6 @@ namespace module::localisation::srif {
                                                               double t0,
                                                               double maxGap = 0.1);
 
-        GaussianInfo<double> positionDensity() const;  ///< Marginal density of rBFf
-        GaussianInfo<double> velocityDensity() const;  ///< Marginal density of vBb
-
         /// @brief Body-fixed linear velocity of a state [m/s].
         static Eigen::Vector3d bodyVelocity(const Eigen::VectorXd& x) {
             return x.segment<3>(iVel);
@@ -354,13 +351,6 @@ namespace module::localisation::srif {
         static Eigen::Vector3d gyroBias(const Eigen::VectorXd& x) {
             return x.segment<3>(iGyroBias);
         }
-
-        /// @brief Speed over ground implied by the body velocity [m/s].
-        static double groundSpeed(const Eigen::VectorXd& x) {
-            return x.segment<2>(iVel).norm();
-        }
-
-        GaussianInfo<double> orientationDensity() const;  ///< Marginal density of the attitude quaternion q
 
         /**
          * @brief Reset the state density and system clock (initialisation / relocalisation).
@@ -380,14 +370,16 @@ namespace module::localisation::srif {
          * Two different things follow from a fall, and they are deliberately NOT the same
          * switch, because they expire differently:
          *
-         *  - The twist input's linear velocity is discarded. It is derived by differencing
+         *  - The twist's linear velocity is discarded. It is derived by differencing
          *    walk-engine odometry, which while the robot is on the ground describes a gait
          *    that is not happening -- and during a getup describes a scripted flail that is
          *    happening but is not locomotion. That is a statement about whether the signal
          *    means anything, and it does not become true again after some number of
          *    seconds: it holds for the WHOLE time the robot is not upright. The
          *    gyroscope-derived angular velocity is kept throughout, because it measures the
-         *    topple for real.
+         *    topple for real. That half is enforced by the caller, which substitutes a
+         *    zero-velocity update for MeasurementBodyVelocity while not upright; this
+         *    method carries only the process-noise half.
          *
          *  - The process noise switches to the `*Disturbed` PSDs, so the belief decays
          *    honestly instead of coasting at walking-grade confidence. That one IS bounded:
@@ -407,22 +399,7 @@ namespace module::localisation::srif {
          *                     when upright; 0 means "just started", i.e. fully disturbed)
          */
         void setPosture(bool upright, double disturbedFor = 0.0) {
-            disturbed_ = !upright;
             diffusing_ = !upright && !(disturbedFor >= params.disturbedWindow);
-        }
-
-        /**
-         * @brief Whether the robot is not upright, so the odometry velocity is discarded.
-         */
-        bool disturbed() const {
-            return disturbed_;
-        }
-
-        /**
-         * @brief Whether the elevated (fall) process-noise PSDs are currently in force.
-         */
-        bool diffusing() const {
-            return diffusing_;
         }
 
         /**
@@ -628,7 +605,6 @@ namespace module::localisation::srif {
         // No input buffer: the process model is autonomous (kinematics plus a random
         // walk on the rates), and everything that used to be a known input is now a
         // measurement of the corresponding state.
-        bool disturbed_ = false;  ///< Robot is not upright: discard the odometry velocity (see setPosture)
         bool diffusing_ = false;  ///< Elevated fall PSDs in force (bounded window, see setPosture)
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)

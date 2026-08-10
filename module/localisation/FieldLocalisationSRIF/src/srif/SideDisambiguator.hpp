@@ -351,9 +351,6 @@ namespace module::localisation::srif {
         const std::vector<Landmark>& landmarks() const {
             return landmarks_;
         }
-        double llr() const {
-            return llr_;
-        }
 
         /// @brief Cumulative diagnostics of the map-building funnel.
         struct Stats {

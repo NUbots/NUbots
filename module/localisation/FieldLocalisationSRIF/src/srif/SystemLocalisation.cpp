@@ -239,18 +239,6 @@ namespace module::localisation::srif {
         setRepresentative();
     }
 
-    GaussianInfo<double> SystemLocalisation::positionDensity() const {
-        return density.marginal(Eigen::seqN(iPos, 3));
-    }
-
-    GaussianInfo<double> SystemLocalisation::orientationDensity() const {
-        return density.marginal(Eigen::seqN(iQuat, 4));
-    }
-
-    GaussianInfo<double> SystemLocalisation::velocityDensity() const {
-        return density.marginal(Eigen::seqN(iVel, 3));
-    }
-
     // Project one density's attitude mean back onto the unit sphere.
     static GaussianInfo<double> projectQuaternion(const GaussianInfo<double>& g) {
         Eigen::VectorXd mu = g.mean();

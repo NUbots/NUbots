@@ -94,16 +94,6 @@ namespace module::localisation::srif {
          */
         const std::vector<Eigen::Vector3d>& landmarks(LandmarkType type) const;
 
-        /// @brief Painted line segments (boundary, halfway line, goal/penalty areas)
-        const std::vector<LineSegment>& lineSegments() const {
-            return lineSegments_;
-        }
-
-        /// @brief Painted circles (centre circle)
-        const std::vector<Circle>& lineCircles() const {
-            return lineCircles_;
-        }
-
         /**
          * @brief Squared distance from a ground-plane point to the nearest painted line.
          *
