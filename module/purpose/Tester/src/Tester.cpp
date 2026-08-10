@@ -34,6 +34,7 @@
 #include "message/planning/LookAround.hpp"
 #include "message/skill/GPT.hpp"
 #include "message/skill/Say.hpp"
+#include "message/strategy/AvoidRobot.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -60,6 +61,8 @@ namespace module::purpose {
     using message::strategy::WalkToFieldPosition;
     using message::strategy::WalkToKickBall;
 
+    using message::strategy::AvoidRobot;
+
     using utility::math::euler::pos_rpy_to_transform;
     using utility::support::Expression;
 
@@ -83,6 +86,8 @@ namespace module::purpose {
             cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
             cfg.say_text                        = config["say_text"].as<std::string>();
             cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
+
+            cfg.avoid_robot_priority = config["tasks"]["avoid_robot_priority"].as<int>();
 
             cfg.start_delay = config["start_delay"].as<int>();
         });
@@ -134,6 +139,11 @@ namespace module::purpose {
                 if (cfg.audiogpt_priority > 0) {
                     emit<Task>(std::make_unique<GPTAudioRequest>(true, true, cfg.audiogpt_listen_duration),
                                cfg.audiogpt_priority);
+                }
+
+                // HACK: For testing
+                if (cfg.avoid_robot_priority > 0) {
+                    emit<Task>(std::make_unique<AvoidRobot>(), cfg.avoid_robot_priority);
                 }
             });
         });
