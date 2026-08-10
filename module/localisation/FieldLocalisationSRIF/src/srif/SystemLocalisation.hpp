@@ -21,7 +21,6 @@
 #include "utility/gaussian_filtering/Event.hpp"
 #include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
-#include "utility/gaussian_filtering/kinematics_helper.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
 #include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
