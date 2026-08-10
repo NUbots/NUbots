@@ -69,11 +69,8 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    // Flip the field if the robot is on the red team
-    robot.Hfw =
-      robot.teamColour === "red"
-        ? (robot.Hfw = Matrix4.fromRotationZ(Math.PI).multiply(Matrix4.from(field.Hfw)))
-        : Matrix4.from(field.Hfw);
+    // Keep field-frame orientation fixed across team colours.
+    robot.Hfw = Matrix4.from(field.Hfw);
 
     // Rz(pi) acts as -I on the (x, y) block, so the position covariance is invariant under the
     // red-team flip applied to Hfw above and needs no corresponding transform.
