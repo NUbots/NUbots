@@ -60,12 +60,12 @@ namespace dynamixel::v2 {
         uint8_t id;
         /// The bytes that we are writing
         T data;
-    } __attribute__((packed));  // Make it so that the compiler reads this struct "as is" (no padding bytes)
+    };
 
     template <typename T, size_t N>
     struct SyncWriteCommand {
 
-        SyncWriteCommand(uint16_t address, const SyncWriteData<T> (&data)[N])
+        SyncWriteCommand(uint16_t address, const std::array<SyncWriteData<T>, N>& data)
             : magic(0x00FDFFFF)
             , id(0xFE)
             , length(3 + sizeof(address) + sizeof(size) + N * sizeof(data[0]))
@@ -88,10 +88,10 @@ namespace dynamixel::v2 {
         /// The number of bytes to read
         const uint16_t size;
         /// List of device IDs to read from
-        const SyncWriteData<T> data[N];
+        const std::array<SyncWriteData<T>, N> data;
         /// Our checksum for this command
         const uint16_t checksum;
-    } __attribute__((packed));  // Make it so that the compiler reads this struct "as is" (no padding bytes)
+    };
 
 }  // namespace dynamixel::v2
 
