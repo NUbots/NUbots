@@ -46,15 +46,18 @@ def register(command):
     command.add_argument(
         "-r", "--reset", default=False, action="store_true", dest="reset", help="Reset buildx instance"
     )
+    command.add_argument(
+        "-j", "--jobs", default=defaults.jobs, help="the number of jobs to use when building the platform image"
+    )
 
 
-def run(target, username, uid, reset, **kwargs):
+def run(target, username, uid, reset, jobs, **kwargs):
     if target is None:
         target = platform.selected(defaults.image, username)
         print(f"Currently selected platform is {target}")
     else:
         # Ensure the platform image is built
-        platform.build(defaults.image, target, username, uid, reset)
+        platform.build(defaults.image, target, username, uid, reset, jobs)
 
         # Tag the built platform image as the selected image
         err = subprocess.call(

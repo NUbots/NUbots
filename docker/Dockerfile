@@ -110,6 +110,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 ################################################
 ARG platform=generic
 ARG prefix=/usr/local
+ARG jobs=1
 
 # Create a python virtual environment at ${PREFIX} to decouple python packages from the system
 RUN python -m venv ${prefix}
@@ -127,6 +128,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
 
 # LLVM and Clang
 RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+    --jobs ${jobs} \
     --build-system cmake \
     --configure-path "llvm" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -136,24 +138,30 @@ RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.
 
 # SPIRV LLVM Translator
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/a53b216b970cd101e5019c35d3f3f096459073de.tar.gz \
+    --jobs ${jobs} \
     --build-system cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
 RUN install-from-source https://github.com/intel/opencl-clang/archive/470cf0018e1ef6fc92eda1356f5f31f7da452abc.tar.gz \
+    --jobs ${jobs} \
     --patch https://gist.githubusercontent.com/ysims/2c3f93fd7c0a6edba6594f1564dcfecb/raw/0a00b1c16c23822178170d2b7ae47a1ce0ed343c/resource_linker_skip_cross.patch
 
 # Intel graphics compiler dependencies
 RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.19.0.tar.gz \
+    --jobs ${jobs} \
     -DLLVM_DIR=${prefix}/lib/cmake/llvm
-RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/1c6bb2743599e6eb6f37b2969acc0aef812e32e3.tar.gz \
+    --jobs ${jobs}
 RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2023.6.rc1.tar.gz \
+    --jobs ${jobs} \
     -DSPIRV_WERROR=Off \
     -DBUILD_SHARED_LIBS=ON \
     -DSPIRV_TOOLS_BUILD_STATIC=OFF \
     -DSPIRV-Headers_SOURCE_DIR=${prefix}
-RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.6.2.tar.gz
+RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.6.2.tar.gz \
+    --jobs ${jobs}
 
 # We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
 RUN install-package ncurses
@@ -162,6 +170,7 @@ RUN pip install pyyaml mako
 
 # Intel graphics compiler
 RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/refs/tags/igc-1.0.17791.9.tar.gz \
+    --jobs ${jobs} \
     --patch https://gist.githubusercontent.com/ysims/3775531601b210507c478bca083b768d/raw/fa435e70c2870f2539c0da973a161ad7968d4696/built_tools_target.patch \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
     -DIGC_OPTION__CLANG_MODE=Prebuilds \
@@ -177,19 +186,24 @@ RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive
 
 # gmmlib
 RUN install-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.5.2.tar.gz \
+    --jobs ${jobs} \
     --build-system cmake \
     -DRUN_TEST_SUITE=OFF
 
 # Libpci access and libdrm for communicating with graphics hardware
-RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
+RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2 \
+    --jobs ${jobs}
 RUN install-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz \
+    --jobs ${jobs} \
     --build-system meson \
     -Dudev=false \
     -Dvalgrind=false
 
 # Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz
+RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.22.0.tar.gz \
+    --jobs ${jobs}
 RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-24.3.4.tar.gz \
+    --jobs ${jobs} \
     --build-system cmake \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="${prefix}/lib/dri" \
@@ -201,22 +215,27 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
 
 # Install intel compute runtime (OpenCL implementation)
 RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/24.39.31294.12.tar.gz \
+    --jobs ${jobs} \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
 # Install OpenCL C Headers
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2022.05.18.tar.gz \
+    --jobs ${jobs}
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz \
+    --jobs ${jobs}
 
 # OpenCV
-RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz \
+    --jobs ${jobs}
 
 # Protobuf
 RUN install-package protobuf && \
     install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    --jobs ${jobs} \
     --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
     -DWITH_PROTOC="/usr/sbin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
@@ -266,16 +285,18 @@ RUN mkdir build && cd build && \
     -DENABLE_CPPLINT:BOOL='OFF' \
     -DCMAKE_CXX_STANDARD='17' \
     -Wno-dev && \
-    make -j$(nproc) && make install
+    make -j${jobs} && make install
 
 # Move OpenVino libraries to our library path
 RUN sudo cp /openvino/bin/intel64/Release/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
 # Eigen3
-RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz \
+    --jobs ${jobs}
 
 # tcmalloc
 RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
+    --jobs ${jobs} \
     --build-system autotools \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
@@ -283,6 +304,7 @@ RUN install-from-source https://github.com/gperftools/gperftools/releases/downlo
 # Libjpeg
 RUN install-package yasm
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.0.7-esr.tar.gz \
+    --jobs ${jobs} \
     -DWITH_SIMD=ON \
     -DFORCE_INLINE=ON \
     -DINLINE_WORKS=1 \
@@ -296,16 +318,19 @@ RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/r
 
 # yaml-cpp
 RUN install-from-source https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.tar.gz \
+    --jobs ${jobs} \
     -DYAML_CPP_BUILD_TESTS=OFF \
     -DBUILD_SHARED_LIBS=OFF
 
 # fmt formatting library
 RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/9.0.0.tar.gz \
+    --jobs ${jobs} \
     -DFMT_DOC=OFF \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
 RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.8.0.tar.gz \
+    --jobs ${jobs} \
     -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
     -DCATCH_CONFIG_CPP11_TO_STRING=ON \
     -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \
@@ -315,16 +340,21 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
     -DCATCH_CONFIG_CPP17_BYTE=ON
 
 # Aravis
-RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
+RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz \
+    --jobs ${jobs}
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
+    --jobs ${jobs} \
     --without-python
-RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
+RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz \
+    --jobs ${jobs}
 RUN install-package glib2-devel
 RUN install-from-source https://download.gnome.org/sources/glib/2.84/glib-2.84.0.tar.xz \
+    --jobs ${jobs} \
     -Ddefault_library=both && \
     cp ${prefix}/lib/glib-2.0/include/glibconfig.h ${prefix}/include/glibconfig.h
 RUN  ls ${prefix}/include && \
     install-from-source https://github.com/AravisProject/aravis/releases/download/0.8.22/aravis-0.8.22.tar.xz \
+    --jobs ${jobs} \
     -Ddefault_library=both \
     -Dusb=enabled \
     -Ddocumentation=disabled \
@@ -332,32 +362,39 @@ RUN  ls ${prefix}/include && \
 
 # LibUV
 RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz \
+    --jobs ${jobs} \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/925dca0f31484a7df64fd335de5a6c9335483c7f.tar.gz \
+    --jobs ${jobs} \
     -DBUILD_TESTS=OFF
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8602fda64e78f1f46563220f2ee9f7e70819c51d.tar.gz \
+    --jobs ${jobs} \
     --without-system-libunwind \
     --enable-shared \
     --enable-static
 
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
+    --jobs ${jobs} \
     --without-debug
 RUN install-package alsa-utils
-RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
+RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz \
+    --jobs ${jobs}
 # Need to run ldconfig before building eSpeak because ...... ¯\_(ツ)_/¯
 RUN ldconfig && \
     install-from-source https://github.com/espeak-ng/espeak-ng/archive/refs/tags/1.51.tar.gz \
+    --jobs ${jobs} \
     --no-toolchain \
     --autotools-force-regenerate
 
 # mio memory mapping library
 RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz \
+    --jobs ${jobs} \
     --patch https://patch-diff.githubusercontent.com/raw/mandreyel/mio/pull/93.patch
 
 # zstr header to have file streams that do zlib compression
@@ -368,28 +405,35 @@ RUN install-from-source https://raw.githubusercontent.com/mateidavid/zstr/v1.0.6
 
 # Visual Mesh
 RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a17bbee73339eaee556f47a80b93c40.tar.gz \
+    --jobs ${jobs} \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
-RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp \
+    --jobs ${jobs}
 
 # TinyXML
-RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
+RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz \
+    --jobs ${jobs}
 
 # NLopt
-RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz \
+    --jobs ${jobs}
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
+    --jobs ${jobs} \
     -DBUILD_TESTS=OFF
 
 # lame
-RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz \
+    --jobs ${jobs}
 
 # Nanopb for generating messages for NUSense
-RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz
+RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz \
+    --jobs ${jobs}
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
