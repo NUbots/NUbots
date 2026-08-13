@@ -15,6 +15,12 @@ This allows the AI and user to collaboratively debug the NUbots system by actual
 
 ## Roadmap
 
+- Getting localisation info, like the `Htw`
+
+- Speak, using the implemented `GPT` skills
+
+- Get gyro and accelerometer data?
+
 ## Usage
 
 Including this module will start an MCP endpoint on the machine that allows Claude (or any other AI product) to arbitrarily emit messages and run commands on the machine.
