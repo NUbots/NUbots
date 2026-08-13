@@ -1,0 +1,31 @@
+# Section 1:
+# Important safety controls
+
+# ACE: Arbitrary code execution
+# MCP clients can, with no oversight, arbitrarily run code.
+# This is stupid, and so is the poor soul who implemented it.
+allow_ace: true
+# Note: until I have a way of asking the human if a command is OK to run, every command is technically ACE.
+
+# Section 2:
+# MCP config stuff - how it talks to your Claude session
+
+# Address the MCP Streamable HTTP endpoint binds to
+host: "0.0.0.0"
+
+# Port the MCP endpoint listens on
+port: 8080
+
+# URL path of the MCP endpoint
+path: "/mcp"
+
+# Origin allowlist (DNS-rebinding protection). Empty list rejects every
+# cross-origin request that sets an Origin header.
+allowed_origins:
+  - "https://claude.ai"
+
+# Section 3:
+# NUClear stuff
+
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG

@@ -373,7 +373,11 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
     -DBUILD_OPENCL_ENGINE=ON
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
-RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+# PlotJuggler, GPT, and MCPServer
+RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
+
+# cpp-httplib, header-only HTTP/HTTPS library (https://github.com/yhirose/cpp-httplib)
+RUN install-from-source https://raw.githubusercontent.com/yhirose/cpp-httplib/v0.18.5/httplib.h
 
 # TinyXML
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
@@ -472,3 +476,5 @@ RUN install -d -m 0755 /home/nubots/NUbots \
 ENV CCACHE_DIR=/home/nubots/build/ccache
 
 WORKDIR /home/nubots/NUbots
+
+EXPOSE 8080
