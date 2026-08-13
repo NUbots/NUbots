@@ -7,6 +7,9 @@ nuclear_role(
   support::SignalCatcher # Allows for graceful shutdown
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig # Field description
+  # Localisation
+  localisation::FieldLocalisationNLopt
   # Network
   network::NUClearNet
   network::NetworkForwarder

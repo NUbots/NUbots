@@ -9,6 +9,8 @@
 #include <vector>
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 
 namespace module::network {
 
@@ -35,6 +37,16 @@ namespace module::network {
         std::mutex image_mutex;
         /// @brief The most recent raw camera image, if one has been seen yet
         std::shared_ptr<const message::input::Image> last_image{};
+
+        /// @brief Guards last_sensors, which is written from the Sensors reaction and read from MCP tool calls
+        std::mutex sensors_mutex;
+        /// @brief The most recent Sensors message if one has been seen yet
+        std::shared_ptr<const message::input::Sensors> last_sensors{};
+
+        /// @brief Guards last_field, which is written from the Field reaction and read from MCP tool calls
+        std::mutex field_mutex;
+        /// @brief The most recent Field localisation message if one has been seen yet
+        std::shared_ptr<const message::localisation::Field> last_field{};
 
         /// @brief Register the tools exposed to each MCP session
         void register_tools(mcp::Server& server);

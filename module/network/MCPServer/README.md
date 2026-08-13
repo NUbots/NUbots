@@ -15,8 +15,6 @@ This allows the AI and user to collaboratively debug the NUbots system by actual
 
 ## Roadmap
 
-- Getting localisation info, like the `Htw`
-
 - Speak, using the implemented `GPT` skills
 
 - Get gyro and accelerometer data?
@@ -32,12 +30,14 @@ Hence this module should not be included in roles where reliability is required,
 - `walk` - Emits a `Walk` task. Parameters: `speed` (m/s, required, clamped to 0-0.3), `angle` (strafe angle in rad, +clockwise, required), `rotation` (yaw rate in rad/s, +clockwise, clamped to -1.0-1.0, defaults to 0).
 - `look` - Emits a `Look` task at a point in torso space. Parameters: `x`, `y`, `z` (all required).
 - `get_image` - Debayers the latest cached camera `Image`, JPEG-encodes it, and returns it as a base64 `ImageContent` block. No parameters. Returns a text message if no image has been received yet.
+- `get_localisation` - Combines the latest cached `Field::Hfw` (from `localisation::FieldLocalisationNLopt`) with `Sensors::Htw` to get the robot's pose in field space (Hft: field to torso), and returns `x`/`y`/`z`/`yaw`/`cost` as JSON text. The field frame is centred on the pitch with x toward the opponent's goal, so this is comparable against pitch markings seen in `get_image`. No parameters. Returns a text message if no sensor data or no field localisation estimate has been received yet.
 - `cmd` - Runs an arbitrary shell command on the robot via `popen` and returns its stdout. Parameters: `command` (required). Only executes if `allow_ace` is enabled in `MCPServer.yaml`; otherwise returns a text message telling the user to enable it.
 - `log_to_user` - Logs a message via NUClear's logger at a chosen level. Parameters: `message` (required), `log_level` (required, one of `TRACE`/`DEBUG`/`INFO`/`WARN`/`ERROR`/`FATAL`).
 
 ## Consumes
 
 - `message::input::Image`
+- `message::input::Sensors`
 
 ## Emits
 
