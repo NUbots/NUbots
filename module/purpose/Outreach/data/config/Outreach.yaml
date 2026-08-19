@@ -1,0 +1,32 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Minimum YOLO confidence for a bounding box to count as a person
+confidence_threshold: 0.5
+
+# How long in seconds after the last person detection we keep tracking them
+person_timeout: 1.0
+
+# Proportional gain from the person's bearing (rad) to the walk's rotational velocity (rad/s)
+turn_gain: 0.6
+
+# Maximum rotational velocity in rad/s used to turn towards the person
+max_turn_speed: 0.4
+
+# Bearing error in radians below which we stop turning, to stop the robot shuffling on the spot
+turn_deadband: 0.15
+
+# Minimum time in seconds between the start of one wave and the start of the next.
+# Must be longer than the wave itself, which is 8 seconds of script scaled by wave_speed
+wave_cooldown: 5.0
+
+# Duration modifier for the Wave script, smaller is faster
+wave_speed: 0.3
+
+# Priorities of the tasks this purpose emits
+tasks:
+  outreach_priority: 1
+  fall_recovery_priority: 5
+  look_priority: 1
+  walk_priority: 1
+  wave_priority: 2

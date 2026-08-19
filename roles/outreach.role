@@ -1,0 +1,41 @@
+# Public outreach demo. The robot stands on the spot, looks for people with the COCO YOLO model, tracks whoever it
+# finds with its head and body heading, and waves at them.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::GlobalConfig
+  support::configuration::SoccerConfig # Field description
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
+  # Input
+  input::Camera
+  input::SensorFilter
+  platform::${SUBCONTROLLER}::HardwareIO
+  # Vision
+  vision::YoloCoco # Detects people, the NUbots models have no person class
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::GetUp
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  planning::PlanLook # Provides LookAround, used to scan for people
+  # Strategies
+  strategy::FallRecovery
+  # Purpose
+  purpose::Outreach
+)
