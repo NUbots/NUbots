@@ -5,16 +5,20 @@ log_level: INFO
 search_fixation_time: 0.5
 
 # List of positions for search
-min_yaw: &min_yaw -0.7
-max_yaw: &max_yaw 0.7
-min_pitch: &min_pitch 0.63 # note that the pitch servo rotates down for positive
-max_pitch: &max_pitch 0.0
+min_yaw: &min_yaw -0.9
+max_yaw: &max_yaw 0.9
+center_yaw: &center_yaw 0.0
+high_pitch: &high_pitch 0.1 # note that the pitch servo rotates down for positive
+mid_pitch: &mid_pitch 0.35
+low_pitch: &low_pitch 0.63
+level_pitch: &level_pitch 0.0
 search_positions:
   [
-    [*min_yaw, *min_pitch],
-    [0, *min_pitch],
-    [*max_yaw, *min_pitch],
-    [*max_yaw, *max_pitch],
-    [0, *max_pitch],
-    [*min_yaw, *max_pitch],
+    [*min_yaw, *mid_pitch],
+    [-0.5, *high_pitch],
+    [*center_yaw, *high_pitch],
+    [0.5, *high_pitch],
+    [*max_yaw, *mid_pitch],
+    [*center_yaw, *level_pitch],
+    [*center_yaw, *low_pitch],
   ]
