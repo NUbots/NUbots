@@ -69,9 +69,9 @@ def register(command):
         help="The encoder to use when encoding video",
     )
     command.add_argument(
-        "--unix",
+        "--unix_ts",
         action="store_true",
-        help="Write absolute unix timecodes (seconds) instead of relative millisecond timecodes",
+        help="Write unix timestamps to timecode.txt instead of relative millisecond timestamps.",
     )
     command.add_argument(
         "--source",
@@ -111,7 +111,7 @@ def packetise_stream(decoder):
         }
 
 
-def run(files, output, encoder, quality, unix, source, **kwargs):
+def run(files, output, encoder, quality, unix_ts, source, **kwargs):
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
@@ -137,7 +137,7 @@ def run(files, output, encoder, quality, unix, source, **kwargs):
                         frame["fourcc"],
                         encoder,
                         quality,
-                        unix=unix,
+                        unix_ts=unix_ts,
                     )
 
                 # Push the next packet
