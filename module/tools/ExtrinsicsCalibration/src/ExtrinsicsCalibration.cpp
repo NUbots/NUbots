@@ -101,9 +101,9 @@ namespace module::tools {
             auto nugus_model  = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
             auto camera_frame = cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
             auto Hpc          = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    camera_frame,
-                                                                    std::string("head"));
+                                                                             nugus_model.home_configuration(),
+                                                                             camera_frame,
+                                                                             std::string("head"));
             Hpc_base          = Eigen::Isometry3d(Hpc.matrix());
 
             // Read the robot's current extrinsic offsets, which form the initial guess for the optimisation
@@ -114,8 +114,8 @@ namespace module::tools {
             try {
                 YAML::Node cam_cfg = YAML::LoadFile(camera_config_path);
                 current_offsets    = Eigen::Vector3d(cam_cfg["roll_offset"].as<Expression>(),
-                                                  cam_cfg["pitch_offset"].as<Expression>(),
-                                                  cam_cfg["yaw_offset"].as<Expression>());
+                                                     cam_cfg["pitch_offset"].as<Expression>(),
+                                                     cam_cfg["yaw_offset"].as<Expression>());
                 log<INFO>(fmt::format(
                     "Calibrating {} camera for {}. Initial offsets (deg): roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}",
                     cfg.camera,
@@ -164,13 +164,13 @@ namespace module::tools {
 
                 // Only gather a sample once the head has swept far enough since the last capture, so the data
                 // spans distinct viewpoints (the head sweeps automatically) rather than over-sampling one pose.
-                const double head_yaw   = sensors.servo[ServoID::HEAD_YAW].present_position;
+                const double neck_yaw   = sensors.servo[ServoID::NECK_YAW].present_position;
                 const double head_pitch = sensors.servo[ServoID::HEAD_PITCH].present_position;
-                if (!frames.empty() && std::abs(head_yaw - last_head_yaw) < cfg.min_head_pose_change
+                if (!frames.empty() && std::abs(neck_yaw - last_head_yaw) < cfg.min_head_pose_change
                     && std::abs(head_pitch - last_head_pitch) < cfg.min_head_pose_change) {
                     return;
                 }
-                last_head_yaw   = head_yaw;
+                last_head_yaw   = neck_yaw;
                 last_head_pitch = head_pitch;
 
                 // --- Build the known transforms for this frame ---

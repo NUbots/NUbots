@@ -45,9 +45,7 @@ namespace module::skill {
             int num_joints;
             /// @brief Size of the observation vector
             int obs_size;
-            /// @brief Alpha value for the action smoothing filter
-            float action_alpha;
-            /// @brief Servo torque value used for policy-generated commands
+            /// @brief Servo torque value to send to nusense
             float servo_torque;
             /// @brief Servo proportional gain for leg and hip joints
             float leg_servo_gain;
@@ -80,15 +78,17 @@ namespace module::skill {
         /// @brief Fixed control timestep (seconds) corresponding to UPDATE_FREQUENCY
         static constexpr double STEP_DT = 1.0 / UPDATE_FREQUENCY;
 
+        /// @brief Gap (seconds) since the previous timing tick beyond which the control loop is treated
+        /// as having paused (e.g. the walk was pre-empted by a get-up). On resume the timing diagnostics
+        /// re-baseline instead of reporting a spurious low frequency / huge drift across the gap.
+        static constexpr double MAX_TICK_GAP = STEP_DT * 5.0;  // 0.1s, i.e. ~5 missed control steps
+
         /// @brief Number of control steps executed since the walk started. Used to advance the
         /// gait phase deterministically as control_step * STEP_DT rather than from wall-clock time.
         uint64_t control_step = 0;
 
         /// @brief Last action taken by the model
         JointVector last_action;
-
-        /// @brief Flag used by the action smoothing filter
-        bool have_last_action = false;
 
         /// @brief Default pose for the robot
         JointVector default_pose;
@@ -98,10 +98,8 @@ namespace module::skill {
         /// @brief Upper per-servo position limits used to clip the final commanded servo positions as a safety measure
         JointVector servo_limit_max;
 
-        /// @brief Last joint positions for velocity estimation
+        /// @brief Last joint positions for inference
         JointVector previous_pose;
-        bool have_previous_pose = false;
-        NUClear::clock::time_point last_update_time;
 
         // Control-loop timing diagnostics params
         /// @brief Whether a previous tick has been sampled (false until the first stable tick).
@@ -112,6 +110,9 @@ namespace module::skill {
         /// @brief Timestamps at the first stable tick, used to compute cumulative gait-clock drift.
         NUClear::clock::time_point walk_start_nuclear{};
         std::chrono::steady_clock::time_point walk_start_steady{};
+        /// @brief Value of control_step when the current timing baseline was established. Gait-clock drift
+        /// is measured from here so it stays meaningful after a re-baseline following a pause.
+        uint64_t timing_control_step_start = 0;
         /// @brief Time of the last rolling-summary log, used to throttle the summary to timing_report_period.
         NUClear::clock::time_point last_timing_report{};
         /// @brief Running statistics on the NUClear-clock per-tick period (seconds), since the walk started.

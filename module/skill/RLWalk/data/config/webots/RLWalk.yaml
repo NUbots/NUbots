@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 model:
   path: model.onnx
@@ -14,7 +14,7 @@ model:
 
 servos:
   torque: 100.0
-  leg_gains: 30.0
+  leg_gains: 9.0
   head_gains: 1.0
   arm_gains: 1.0
 
