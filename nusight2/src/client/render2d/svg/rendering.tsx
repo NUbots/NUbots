@@ -14,6 +14,7 @@ import { LineGeometry } from "../geometry/line_geometry";
 import { MarkerGeometry } from "../geometry/marker_geometry";
 import { PathGeometry } from "../geometry/path_geometry";
 import { PolygonGeometry } from "../geometry/polygon_geometry";
+import { RectangleGeometry } from "../geometry/rectangle_geometry";
 import { TextGeometry } from "../geometry/text_geometry";
 import { Geometry } from "../object/geometry";
 import { Shape } from "../object/shape";
@@ -26,6 +27,7 @@ import { Line } from "./line";
 import { Marker } from "./marker";
 import { Path } from "./path";
 import { Polygon } from "./polygon";
+import { Rectangle } from "./rectangle";
 import { Text } from "./text";
 
 export function toSvgEventHandlers(eventHandlers: Render2DEventHandlers, transforms: SVGRendererTransforms) {
@@ -104,6 +106,8 @@ export const ShapeView = observer(({ obj }: Props): JSX.Element => {
     return <Path model={obj as Shape<PathGeometry>} />;
   } else if (obj.geometry instanceof PolygonGeometry) {
     return <Polygon model={obj as Shape<PolygonGeometry>} />;
+  } else if (obj.geometry instanceof RectangleGeometry) {
+    return <Rectangle model={obj as Shape<RectangleGeometry>} />;
   } else if (obj.geometry instanceof TextGeometry) {
     return <Text model={obj as Shape<TextGeometry>} />;
   } else {

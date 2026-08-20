@@ -1,11 +1,14 @@
 /* eslint-env node */
 // @ts-check
+import alias from "@rollup/plugin-alias";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import run from "@rollup/plugin-run";
 import typescript from "@rollup/plugin-typescript";
 import url from "@rollup/plugin-url";
 import minimist from "minimist";
 import * as path from "path";
+
+import { aliasEntries } from "./build_scripts/alias_entries";
 
 const rootDir = __dirname;
 
@@ -52,6 +55,7 @@ const config = {
     sourcemap: isContinuousIntegration ? false : true,
   },
   plugins: [
+    alias({ entries: aliasEntries }),
     url({
       include: ["**/*.ico", "**/*.jpg"],
       publicPath: assetsDir + "/", // Prepended to the path of imported assets

@@ -341,7 +341,7 @@ namespace module::localisation {
          * @brief Find error between computed Hfw and ground truth if available
          * @param Hfw Computed Hfw to be compared against ground truth
          */
-        void debug_field_localisation(Eigen::Isometry3d Hfw);
+        void debug_field_localisation(const Eigen::Isometry3d& Hfw, const Eigen::Isometry3d& Htw);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}

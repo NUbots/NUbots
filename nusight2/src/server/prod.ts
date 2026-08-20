@@ -27,6 +27,9 @@ app.use(
     rewrites: [
       // Allows user to navigate to /storybook/ without needing to type /index.html
       { from: /\/storybook\/$/, to: "storybook/index.html" },
+      // Additional entry points that are not the main `index.html`.
+      // Entries here should also be configured in `vite.config.ts` and in `dev.ts`.
+      { from: /\/standalone(?!.*\..*)/, to: "standalone.html" },
     ],
   }),
 );

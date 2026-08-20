@@ -3,9 +3,8 @@ import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetOptions } from "nuclearnet.js";
 import { NUClearNetSend } from "nuclearnet.js";
 
-import { MessageType } from "../../shared/messages";
 import { Emit } from "../../shared/messages/emit";
-import { messageTypeToName } from "../../shared/messages/type_converters";
+import { MessageInstance, MessageType } from "../../shared/messages/types";
 import { NUClearNetClient, NUClearNetPeerWithType } from "../../shared/nuclearnet/nuclearnet_client";
 import { memoize } from "../base/memoize";
 import { AppModel } from "../components/app/model";
@@ -32,7 +31,7 @@ const nusightServerRobotModel = RobotModel.of({
 
 /**
  * This class is intended to handle NUsight-specific networking. It handles the subscription of NUClearNet messages and
- * decoding them into real protobufjs objects for convenient use. Components should not directly use this class, but
+ * decoding them into real protobuf message objects for convenient use. Components should not directly use this class, but
  * instead create their own ComponentNetwork class which uses the Network helper class.
  */
 export class NUsightNetwork {
@@ -55,9 +54,8 @@ export class NUsightNetwork {
   }
 
   emit: Emit = (message, opts) => {
-    const type = Object.getPrototypeOf(message).constructor;
-    const messageTypeName = messageTypeToName(type);
-    const payload = type.encode(message).finish();
+    const messageTypeName = message.$typeName;
+    const payload = message.toBinary();
 
     this.send({
       type: messageTypeName,
@@ -76,9 +74,12 @@ export class NUsightNetwork {
     }
   }
 
-  onNUClearMessage<T>(type: MessageType<T> | { type: MessageType<T>; subtype?: number }, cb: MessageCallback<T>) {
+  onNUClearMessage<T extends MessageInstance>(
+    type: MessageType<T> | { type: MessageType<T>; subtype?: number },
+    cb: MessageCallback<T>,
+  ) {
     const messageType = typeof type === "object" ? type.type : type;
-    const messageTypeName = messageTypeToName(messageType);
+    const messageTypeName = messageType.typeName;
     const subtype = typeof type === "object" ? type.subtype : null;
 
     const event = `${messageTypeName}${subtype ? `#${subtype}` : ""}`;
@@ -88,7 +89,7 @@ export class NUsightNetwork {
         runInAction(async () => {
           try {
             const buffer = new Uint8Array(packet.payload);
-            const message = messageType.decode(buffer);
+            const message = messageType.fromBinary(buffer);
             const peer = packet.peer;
             const robotModel = this.appModel.robots.find((robot) => {
               return robot.name === peer.name && robot.address === peer.address && robot.port === peer.port;
