@@ -142,7 +142,7 @@ namespace module::purpose {
             if (!person_seen_recently()) {
                 // Nobody around, so stand still and scan for someone
                 emit<Task>(std::make_unique<LookAround>(), cfg.look_priority);
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), cfg.walk_priority);
+                // emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), cfg.walk_priority);
                 return;
             }
 
@@ -154,7 +154,7 @@ namespace module::purpose {
             const double omega   = std::abs(bearing) < cfg.turn_deadband
                                        ? 0.0
                                        : std::clamp(cfg.turn_gain * bearing, -cfg.max_turn_speed, cfg.max_turn_speed);
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.0, 0.0, omega)), cfg.walk_priority);
+            // emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.0, 0.0, omega)), cfg.walk_priority);
         });
 
         // Wave whenever someone is being tracked, but no more often than the cooldown allows
