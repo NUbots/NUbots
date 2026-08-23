@@ -1,0 +1,12 @@
+nuclear_role(
+    extension::FileWatcher
+    input::SensorFilter
+    support::logging::ConsoleLogHandler
+    motion::KinematicsConfiguration
+    support::configuration::GlobalConfig
+    network::NUClearNet
+    support::logging::DataPlayback
+    input::SensorFilter
+    support::NUsight
+    tools::FilterTester
+)
