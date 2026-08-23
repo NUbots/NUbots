@@ -23,7 +23,7 @@ describe("NUsightSessionNetwork", () => {
 
   beforeEach(() => {
     ({ nuclearnetClient, nuclearnetMockEmit } = createMockNUClearNetClient());
-    session = new NUsightSession(nuclearnetClient, []);
+    session = new NUsightSession([nuclearnetClient], []);
     network = new NUsightSessionNetwork(session);
   });
 

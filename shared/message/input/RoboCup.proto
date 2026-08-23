@@ -29,6 +29,8 @@ package message.input;
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
+import "Neutron.proto";
+import "Transform.proto";
 
 import "message/purpose/Purpose.proto";
 
@@ -129,6 +131,29 @@ message RoboCup {
 
     /// IDs 1-100 are reserved for official use
 
+    /// NUbots-specific extension data, carried alongside the official RoboCup fields above
+    NUbots nubots = 100;
+
     /// The purpose of the robot
     purpose.Purpose purpose = 101;
+}
+
+/// NUbots-specific extension to the RoboCup team communication message. Not part of the official
+/// RoboCup Standard Message; used to carry additional information between our own robots (and to
+/// NUsight, e.g. via the RoboCup UDP side channel) that other teams will simply ignore.
+message NUbots {
+    /// The present position (in radians) of each servo, in the same order as
+    /// message.input.Sensors.servo: right shoulder pitch, left shoulder pitch, right shoulder
+    /// roll, left shoulder roll, right elbow, left elbow, right hip yaw, left hip yaw, right hip
+    /// roll, left hip roll, right hip pitch, left hip pitch, right knee, left knee, right ankle
+    /// pitch, left ankle pitch, right ankle roll, left ankle roll, head pan, head tilt
+    repeated float servos = 1 [(array_size) = 20];
+
+    /// The robot's torso pose in field space: translation and full 3D orientation (unlike
+    /// current_pose.position, which only carries a flattened x, y, θ). Precombines localisation
+    /// and odometry into a single transform so we don't need to send them separately:
+    ///   Hft = Hfw * Htw⁻¹
+    /// where Hfw is message.localisation.Field.Hfw (localisation's field-to-world transform) and
+    /// Htw is message.input.Sensors.Htw (odometry's world-to-torso transform).
+    fiso3 Hft = 2;
 }

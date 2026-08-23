@@ -21,7 +21,7 @@ describe("NUsightServer", () => {
     nuclearnetServer = new FakeNUClearNetServer();
     nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer);
     nuclearnetClient.connect({ name: "bob" });
-    new NUsightServer(webSocketServer, nuclearnetClient, {
+    new NUsightServer(webSocketServer, [nuclearnetClient], {
       name: "test",
       address: "10.1.255.255",
     });

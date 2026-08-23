@@ -41,4 +41,11 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type NUClearNetPacketMaybeEmpty = PartialBy<NUClearNetPacket, "payload">;
 
 /** A NUClearNet peer with peer type information */
-export type NUClearNetPeerWithType = NUClearNetPeer & { type: "nbs-scrubber" | "nuclearnet-peer" | "nusight-server" };
+export type NUClearNetPeerWithType = NUClearNetPeer & {
+  type:
+    | "nbs-scrubber"
+    | "nuclearnet-peer"
+    | "nusight-server"
+    // A peer received via the RoboCup UDP side channel, see server/nuclearnet/robocup_udp_client.ts
+    | "robocup-udp-peer";
+};

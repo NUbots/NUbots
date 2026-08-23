@@ -21,7 +21,7 @@ export class NUsightSessionClient {
   constructor(
     public readonly id: number,
     public connection: ClientConnection,
-    private nuclearnetClient: NUClearNetClient,
+    private nuclearnetClients: NUClearNetClient[],
     private nuclearNetPacketProcessor: NUClearNetPacketProcessor,
     private nbsPacketProcessor: NbsPacketProcessor,
     private session: NUsightSession,
@@ -31,7 +31,7 @@ export class NUsightSessionClient {
     id: number,
     connection: ClientConnection,
     opts: {
-      nuclearnetClient: NUClearNetClient;
+      nuclearnetClients: NUClearNetClient[];
       scrubberSet: ScrubberSet;
       session: NUsightSession;
     },
@@ -39,7 +39,7 @@ export class NUsightSessionClient {
     return new NUsightSessionClient(
       id,
       connection,
-      opts.nuclearnetClient,
+      opts.nuclearnetClients,
       NUClearNetPacketProcessor.of((event: string, ...args: any[]) => {
         connection.send(event, ...args);
       }),
@@ -56,8 +56,7 @@ export class NUsightSessionClient {
    */
   startProcessing(): () => void {
     return compose([
-      this.nuclearnetClient.onJoin(this.onJoin),
-      this.nuclearnetClient.onLeave(this.onLeave),
+      ...this.nuclearnetClients.flatMap((client) => [client.onJoin(this.onJoin), client.onLeave(this.onLeave)]),
       this.connection.on("listen", this.onListen),
       this.connection.on("unlisten", this.onUnlisten),
       this.connection.on("packet", this.onClientPacket),
@@ -81,8 +80,10 @@ export class NUsightSessionClient {
 
   /** Handle a request from the client to listen for a message */
   private onListen = (event: string, requestToken: string) => {
-    // Listen for the message on NUClearNet
-    const nuclearNetOff = this.nuclearnetClient.on(event, this.onServerPacket.bind(this, event));
+    // Listen for the message on every underlying network client
+    const nuclearNetOffs = this.nuclearnetClients.map((client) =>
+      client.on(event, this.onServerPacket.bind(this, event)),
+    );
 
     // Add the event type to the NBS packet processor, to forward
     // packets of that type to the client from loaded scrubbers
@@ -92,7 +93,7 @@ export class NUsightSessionClient {
     this.onEvents.set(requestToken, {
       event,
       off() {
-        nuclearNetOff();
+        nuclearNetOffs.forEach((off) => off());
         nbsScrubberOff();
       },
     });
@@ -116,15 +117,18 @@ export class NUsightSessionClient {
     this.nuclearNetPacketProcessor.onPacket(event, packet, packetMetadata);
   };
 
-  /** Handle an outgoing packet from the client by forwarding it to NUClearNet */
+  /** Handle an outgoing packet from the client by forwarding it to every underlying network client */
   private onClientPacket = (options: NUClearNetSend) => {
     // Handle packets sent to the NUsight server
     if (options.target === "nusight") {
       this.session.processClientPacket(options, this);
     }
-    // Forward all other packets to NUClearNet
+    // Forward all other packets to every network client. Receive-only side channels (e.g. the
+    // RoboCup UDP side channel) simply ignore sends.
     else {
-      this.nuclearnetClient.send(options);
+      for (const client of this.nuclearnetClients) {
+        client.send(options);
+      }
     }
   };
 }

@@ -1,6 +1,7 @@
 import { NUClearNetPacket } from "nuclearnet.js";
 import { NUClearNetPeer } from "nuclearnet.js";
 
+import { compose } from "../../shared/base/compose";
 import { Emit } from "../../shared/messages/emit";
 import { messageNameToType } from "../../shared/messages/generated/type_converters";
 import { MessageInstance, MessageType } from "../../shared/messages/types";
@@ -66,24 +67,32 @@ export class NUsightSessionNetwork {
     } else if (options.target === "*") {
       const packet: NUClearNetPacket = { hash, reliable, payload, peer };
       this.session.sendToAll(messageTypeName, packet);
-      this.session.nuclearnetClient.send({ type: hash, payload, reliable });
+      for (const client of this.session.nuclearnetClients) {
+        client.send({ type: hash, payload, reliable });
+      }
     } else {
-      this.session.nuclearnetClient.send({ type: hash, payload, reliable, target: options.target });
+      for (const client of this.session.nuclearnetClients) {
+        client.send({ type: hash, payload, reliable, target: options.target });
+      }
     }
   };
 
-  /** Register a listener for the given message type from NUClearNet */
+  /** Register a listener for the given message type across every underlying network client */
   onNUClearMessage<T extends MessageInstance>(
     type: MessageType<T> | { type: MessageType<T>; subtype?: number },
     cb: NUClearMessageCallback<T>,
   ) {
     const { event, MessageType } = findMessageType(type);
 
-    return this.session.nuclearnetClient.on(event, (packet: NUClearNetPacket) => {
-      const buffer = new Uint8Array(packet.payload);
-      const message = MessageType.fromBinary(buffer);
-      cb(packet.peer, message);
-    });
+    return compose(
+      this.session.nuclearnetClients.map((client) =>
+        client.on(event, (packet: NUClearNetPacket) => {
+          const buffer = new Uint8Array(packet.payload);
+          const message = MessageType.fromBinary(buffer);
+          cb(packet.peer, message);
+        }),
+      ),
+    );
   }
 
   /** Register a listener for the given message type from a client in the session */
