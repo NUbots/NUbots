@@ -26,13 +26,37 @@
 # SOFTWARE.
 #
 
+import tensorflow as tf
+
 from .decompress_bayer import decompress_bayer
 from .decompress_jpeg import decompress_jpeg
 from .decompress_polarized import decompress_polarized
 from .fourcc import fourcc, fourcc_to_string
 
+# The formats that are already stored as raw pixel data, and how many bytes each of their pixels takes up
+raw_channels = {
+    fourcc("BGGR"): 1,
+    fourcc("RGGB"): 1,
+    fourcc("GRBG"): 1,
+    fourcc("GBRG"): 1,
+    fourcc("RGBA"): 4,
+    fourcc("RGB3"): 3,
+    fourcc("RGB8"): 3,
+    fourcc("BGRA"): 4,
+    fourcc("BGR3"): 3,
+    fourcc("BGR8"): 3,
+    fourcc("GRAY"): 1,
+    fourcc("GREY"): 1,
+    fourcc("Y8  "): 1,
+}
 
-def decode_image(data, fmt):
+
+def decode_image(data, fmt, dimensions=None):
+    """Decode an image into a list of {name, image, fourcc} dicts where image is a height x width x channels tensor.
+
+    dimensions is the (width, height) of the image. It is only needed for the raw formats, as the compressed
+    formats already carry their own dimensions.
+    """
 
     # Decompress and depermute compressed bayer formats
     if fmt in [fourcc(s) for s in ("JPBG", "JPRG", "JPGR", "JPGB")]:
@@ -42,25 +66,16 @@ def decode_image(data, fmt):
     # JPEGs can just be decompressed
     elif fmt in [fourcc("JPEG")]:
         return decompress_jpeg(data, fmt)
-    # Already raw formats can just be returned
-    elif fmt in [
-        fourcc(s)
-        for s in (
-            "BGGR",
-            "RGGB",
-            "GRBG",
-            "GBRG",
-            "RGBA",
-            "RGB3",
-            "RGB8",
-            "BGRA",
-            "BGR3",
-            "BGR8",
-            "GRAY",
-            "GREY",
-            "Y8  ",
-        )
-    ]:
-        return [{"name": "", "image": data, "fourcc": fmt}]
+    # Already raw formats just need their shape put back on, as the packet stores them as a flat run of bytes
+    elif fmt in raw_channels:
+        if dimensions is None:
+            raise RuntimeError(
+                "The image dimensions are needed to decode the raw format {}".format(fourcc_to_string(fmt))
+            )
+
+        width, height = dimensions
+        image = tf.reshape(tf.io.decode_raw(data, tf.uint8), (height, width, raw_channels[fmt]))
+
+        return [{"name": "", "image": image, "fourcc": fmt}]
     else:
         raise RuntimeError("Unknown format {}".format(fourcc_to_string(fmt)))

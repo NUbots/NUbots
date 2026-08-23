@@ -53,11 +53,12 @@ def pix_fmt_from_fourcc(code):
 
 
 class Recorder:
-    def __init__(self, output_path, dimensions, fourcc, encoder, bitrate, buffer_size=100):
+    def __init__(self, output_path, dimensions, fourcc, encoder, bitrate, buffer_size=100, unix=False):
 
         self.timecode_path = "{}_timecode.txt".format(os.path.splitext(output_path)[0])
         self.video_path = output_path
         self.buffer_size = buffer_size
+        self.unix = unix
 
         self.timecode = open(self.timecode_path, "w")
         self.frames = []
@@ -107,11 +108,15 @@ class Recorder:
         self.start_time = msg["timestamp"] if self.start_time is None else min(self.start_time, msg["timestamp"])
 
         # Calculate our timecode time and write it to the file
-        self.timecode.write(
-            "{}\n".format(
-                1e3 * (msg["timestamp"][0] - self.start_time[0]) + 1e-6 * (msg["timestamp"][1] - self.start_time[1])
+        if self.unix:
+            # Absolute unix timecodes (seconds + nanoseconds)
+            timecode = msg["timestamp"][0] + 1e-9 * msg["timestamp"][1]
+        else:
+            # Relative millisecond timecodes offset from the start time
+            timecode = 1e3 * (msg["timestamp"][0] - self.start_time[0]) + 1e-6 * (
+                msg["timestamp"][1] - self.start_time[1]
             )
-        )
+        self.timecode.write("{}\n".format(timecode))
 
         self.encoder.stdin.write(msg["image"])
 
