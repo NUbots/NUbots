@@ -50,6 +50,7 @@ namespace module::purpose {
 
     using extension::Configuration;
 
+    using message::actuation::LeftArmSequence;
     using message::actuation::RightArmSequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
@@ -160,8 +161,11 @@ namespace module::purpose {
         // Wave whenever someone is being tracked, but no more often than the cooldown allows
         on<Provide<WaveAtPerson>>().then([this] {
             if (person_seen_recently() && NUClear::clock::now() - last_wave > cfg.wave_cooldown) {
-                last_wave = NUClear::clock::now();
-                emit<Task>(load_script<RightArmSequence>(ScriptRequest{"Wave.yaml", float(cfg.wave_speed)}));
+                // Both arms start from the same time point, so the two scripts stay in step with each other
+                const auto start = NUClear::clock::now();
+                last_wave        = start;
+                emit<Task>(load_script<RightArmSequence>(ScriptRequest{"Wave.yaml", float(cfg.wave_speed)}, start));
+                emit<Task>(load_script<LeftArmSequence>(ScriptRequest{"WaveLeft.yaml", float(cfg.wave_speed)}, start));
                 return;
             }
 
