@@ -21,13 +21,17 @@ include(CMakeParseArguments)
 function(GenerateNeutron)
   # We need protobuf and python to generate the neutron messages
   find_package(Protobuf REQUIRED)
-  find_package(Python3 REQUIRED)
+  find_package(
+    Python3
+    COMPONENTS Interpreter
+    REQUIRED
+  )
 
   # Set the path to our generating scripts
   set(SCRIPT_SOURCE "${PROJECT_SOURCE_DIR}/nuclear/cmake/Scripts")
 
   # Files that are used to generate the neutron files
-  file(GLOB_RECURSE message_class_generator_files "${SCRIPT_SOURCE}/generator/**.py")
+  file(GLOB_RECURSE message_class_generator_files CONFIGURE_DEPENDS "${SCRIPT_SOURCE}/generator/**.py")
 
   # Extract the arguments from our function call
   set(options, "")
@@ -72,7 +76,7 @@ function(GenerateNeutron)
     COMMAND
       ${PROTOBUF_PROTOC_EXECUTABLE} --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt
       --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/descriptor.pb -I${NEUTRON_PARENT_DIR} -I${NEUTRON_BUILTIN_DIR}
-      ${NEUTRON_PROTO}
+      ${NEUTRON_PROTO} COMMAND_ERROR_IS_FATAL ANY
   )
   file(READ "${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt" dependencies)
   string(REGEX REPLACE "\\\\\n" ";" dependencies ${dependencies})
@@ -120,7 +124,7 @@ function(GenerateNeutron)
   # by adding protobuf to the package
   add_custom_command(
     OUTPUT "${pb}.proto"
-    COMMAND ${Python3_EXECUTABLE} ARGS "${SCRIPT_SOURCE}/repackage_message.py" "${NEUTRON_PROTO}" "${pb}.proto"
+    COMMAND Python3::Interpreter "${SCRIPT_SOURCE}/repackage_message.py" "${NEUTRON_PROTO}" "${pb}.proto"
     WORKING_DIRECTORY "${SCRIPT_SOURCE}"
     DEPENDS "${SCRIPT_SOURCE}/repackage_message.py" ${NEUTRON_PROTO}
     COMMENT "Repackaging protobuf ${NEUTRON_PROTO}"
@@ -150,7 +154,7 @@ function(GenerateNeutron)
   # Build our c++ class from the extracted information
   add_custom_command(
     OUTPUT "${nt}.cpp" "${nt}.py.cpp" "${nt}.hpp"
-    COMMAND ${CMAKE_COMMAND} -E env NEUTRON_BUILTIN_DIR=${NEUTRON_BUILTIN_OUTPUT_DIR} ${Python3_EXECUTABLE} ARGS
+    COMMAND ${CMAKE_COMMAND} -E env NEUTRON_BUILTIN_DIR=${NEUTRON_BUILTIN_OUTPUT_DIR} ${Python3_EXECUTABLE}
             "${SCRIPT_SOURCE}/build_message_class.py" "${nt}"
     WORKING_DIRECTORY "${nt_out}"
     DEPENDS "${SCRIPT_SOURCE}/build_message_class.py" ${message_class_generator_files} "${nt}.pb"

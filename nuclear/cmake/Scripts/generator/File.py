@@ -72,9 +72,11 @@ class File:
             '2<string>',
             '2<array>',
             '2<exception>',
+            '2<variant>',
             '2<map>',
             '2<memory>',
             '2<vector>',
+            '2<optional>',
             '4"{}"'.format(self.name[:-6] + '.pb.h'),
             '5"message/MessageBase.hpp"'
         }
