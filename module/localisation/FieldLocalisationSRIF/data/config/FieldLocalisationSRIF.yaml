@@ -26,10 +26,6 @@ use_hypothesis_bank: false
 # TODO: confirm timing
 use_side_disambiguator: true
 
-# Walk-engine odometry as a measurement of the body linear velocity. Off leaves vBb driven by the
-# process model alone while upright.
-use_odometry_velocity: true
-
 # Accelerometer gravity-direction measurement of torso roll/pitch. The gravity-aligned attitude is
 # also estimated upstream by the Mahony filter and delivered via Htw, so this is a secondary anchor
 # and may be turned off if Htw is trusted on its own.
@@ -49,9 +45,20 @@ use_kinematic_height: true
 # upstream Mahony filter's bias integrator cannot observe rotation about gravity.
 gyroscope_sigma: 0.02 # [rad/s] per axis
 
-# Deliberately loose, comparable to the walk speed itself: the odometry slips on foot contact and
-# reports the gait the engine believes it is executing. As a measurement that is evidence the filter
-# can weigh, never truth it has to accept.
+# Where the body linear velocity measurement comes from. There is no option to go without one:
+# nothing else measures vBb, so with no source it is left to the sigma_vel random walk between
+# vision frames, which is worse than any odometry. The choice is only which signal to believe.
+#   HTW_DIFFERENCE - finite difference of consecutive Sensors.Htw. Works on every platform.
+#   SENSORS_VTW    - Sensors.vTw rotated into the torso frame. For platforms whose odometry is a
+#                    real state estimator (the K1's neural odometry). Not the NUgus, where vTw is
+#                    itself a low-passed difference of the same Htw with z zeroed.
+# A property of the robot, so per-robot config (config/<robot>/) is its natural home.
+odometry_velocity_source: HTW_DIFFERENCE
+
+# Sized for whichever source is selected above. For HTW_DIFFERENCE on the NUgus, deliberately
+# loose and comparable to the walk speed itself: the odometry slips on foot contact and reports the
+# gait the engine believes it is executing. A real state estimator earns far tighter. Either way it
+# is evidence the filter can weigh, never truth it has to accept.
 odometry_velocity_sigma: 0.15 # [m/s]
 
 gravity_sigma: 1.0 # accelerometer gravity-direction noise [m/s^2] (TODO: this is huge not sure why)

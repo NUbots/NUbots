@@ -58,16 +58,29 @@ see [Limitations](#limitations).
 
 ### Measurement updates
 
-| Source                 | Model                        | When                               |
-| ---------------------- | ---------------------------- | ---------------------------------- |
-| YOLO field landmarks   | `MeasurementFieldLandmarks`  | Every frame with usable detections |
-| Accelerometer          | `MeasurementGravity`         | While quasi-static (see below)     |
-| Kinematic torso height | `MeasurementKinematicHeight` | While upright only                 |
-| Unit-norm prior        | `MeasurementQuaternionNorm`  | Every update                       |
+| Source                 | Model                        | When                                 |
+| ---------------------- | ---------------------------- | ------------------------------------ |
+| YOLO field landmarks   | `MeasurementFieldLandmarks`  | Every frame with usable detections   |
+| Accelerometer          | `MeasurementGravity`         | While quasi-static (see below)       |
+| Kinematic torso height | `MeasurementKinematicHeight` | While upright only                   |
+| Unit-norm prior        | `MeasurementQuaternionNorm`  | Every update                         |
+| Gyroscope              | `MeasurementGyroscope`       | Every frame, any posture             |
+| Body linear velocity   | `MeasurementBodyVelocity`    | Every frame (ZUPT while not upright) |
 
-The gyroscope is **not** a measurement update — it enters as the angular velocity of the body-twist
-prediction input, bias-calibrated on quiet samples. The walk-engine odometry attitude slips badly
-while turning; the gyro does not.
+Nothing is a known input, the gyroscope included: it measures `omegaBb` with its own sigma and its
+own estimated bias, rather than being substituted into the odometry's angular rate. That bias is the
+point — it is invisible to the upstream Mahony filter, whose integrator is driven by the gravity
+error, and it is the yaw-rate component that becomes heading drift.
+
+**Body velocity.** `odometry_velocity_source` picks the signal, and there is deliberately no option
+to go without one: `MeasurementBodyVelocity` is the only thing that measures `vBb`, so with no
+source it falls to the `sigma_vel` random walk between vision frames — worse than any odometry.
+`HTW_DIFFERENCE` finite-differences consecutive `Sensors.Htw` and works on every platform;
+`SENSORS_VTW` reads `Sensors.vTw` and rotates it into the torso frame, for platforms whose odometry
+is a real state estimator rather than support-leg dead reckoning. On the NUgus `vTw` is itself a
+low-passed difference of the same `Htw` with `z` zeroed, so `HTW_DIFFERENCE` strictly dominates
+there; on a platform like the K1 it does not. The velocity is resolved once, when the sample is
+buffered, so the vision reaction reads it off the same paired sample the extrinsics come from.
 
 **Landmarks.** Goal posts and L/T/X field-line intersections arrive as unit rays in the camera frame:
 the box centre for intersections, the bottom-centre for posts. Detections below `min_confidence` are
@@ -159,22 +172,22 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 
 **What the filter runs**
 
-| Key                      | Meaning                                                                  |
-| ------------------------ | ------------------------------------------------------------------------ |
+| Key                      | Meaning                                                                   |
+| ------------------------ | ------------------------------------------------------------------------- |
 | `use_hypothesis_bank`    | Multi-hypothesis mixture; off by default, see Limitations                 |
 | `use_side_disambiguator` | Out-of-field side disambiguation; the only thing that resolves the mirror |
-| `use_odometry_velocity`  | Walk-engine odometry as a body linear velocity measurement                |
 | `use_gravity`            | Accelerometer gravity direction as a secondary attitude anchor            |
 | `use_kinematic_height`   | Torso height from the support-leg chain                                   |
 
 **How far each sensor is trusted** — noise std devs; bigger means weighed less
 
-| Key                       | Meaning                                                                |
-| ------------------------- | ---------------------------------------------------------------------- |
-| `gyroscope_sigma`         | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
-| `odometry_velocity_sigma` | Walk-engine odometry velocity [m/s]                                    |
-| `gravity_sigma`           | Accelerometer gravity direction [m/s²]                                 |
-| `height_sigma`            | Torso height from the support-leg chain [m]                            |
+| Key                        | Meaning                                                                |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `gyroscope_sigma`          | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
+| `odometry_velocity_source` | `HTW_DIFFERENCE` or `SENSORS_VTW` — which signal measures `vBb`        |
+| `odometry_velocity_sigma`  | Body linear velocity measurement [m/s]; size it for the source chosen  |
+| `gravity_sigma`            | Accelerometer gravity direction [m/s²]                                 |
+| `height_sigma`             | Torso height from the support-leg chain [m]                            |
 
 **How far vision is trusted** (`measurement:`)
 
@@ -186,17 +199,17 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 
 **How fast the belief may move** (`process:`) — the dominant process noise
 
-| Key           | Meaning                                                                             |
-| ------------- | ----------------------------------------------------------------------------------- |
-| `sigma_vel`   | Body linear velocity random walk [m/s/√s]; raise if the filter lags the robot        |
-| `sigma_omega` | Body angular velocity random walk [rad/s/√s]; lower if the pose is twitchy           |
+| Key           | Meaning                                                                       |
+| ------------- | ----------------------------------------------------------------------------- |
+| `sigma_vel`   | Body linear velocity random walk [m/s/√s]; raise if the filter lags the robot |
+| `sigma_omega` | Body angular velocity random walk [rad/s/√s]; lower if the pose is twitchy    |
 
 **How much confidence a fall costs** (`fall:`)
 
-| Key                 | Meaning                                                                    |
-| ------------------- | -------------------------------------------------------------------------- |
-| `recovery_pos_std`  | Horizontal position std restored on standing up [m]                        |
-| `recovery_yaw_std`  | Yaw std restored on standing up [rad]; also reopens the association gate    |
+| Key                | Meaning                                                                  |
+| ------------------ | ------------------------------------------------------------------------ |
+| `recovery_pos_std` | Horizontal position std restored on standing up [m]                      |
+| `recovery_yaw_std` | Yaw std restored on standing up [rad]; also reopens the association gate |
 
 ## Consumes
 

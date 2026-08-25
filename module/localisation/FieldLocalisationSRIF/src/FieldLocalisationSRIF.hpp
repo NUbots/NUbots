@@ -56,7 +56,6 @@ namespace module::localisation {
      */
     namespace filter {
         using measurement::MeasurementFieldLandmarks;
-        using srif::BodyTwistSample;
         using srif::Detection;
         using srif::FieldDimensions;
         using srif::FieldMap;
@@ -187,13 +186,34 @@ namespace module::localisation {
             // --- body-rate measurements ---
             /// @brief Gyroscope noise std dev per axis [rad/s]
             double gyroscope_sigma = 0.02;
-            /// @brief Feed the walk-engine odometry velocity as a measurement of vBb.
-            bool use_odometry_velocity = true;
-            /// @brief Walk-odometry velocity noise std dev per axis [m/s].
+            /// @brief Which signal supplies the body linear velocity measurement.
             ///
-            /// Deliberately loose, comparable to the walk speed itself: the odometry slips on
-            /// foot contact and reports the gait the engine believes it is executing. As a
-            /// measurement that is evidence the filter can weigh, never truth it must accept.
+            /// Deliberately not a switch for turning the measurement off. MeasurementBodyVelocity
+            /// is the only thing that measures vBb -- gravity does not touch it and landmarks
+            /// reach it only through the pose -- so with no source at all vBb is left to the
+            /// sigmaVel random walk between vision frames, which is strictly worse than any
+            /// odometry. The only real question is which signal to believe.
+            enum class OdometryVelocitySource {
+                /// Finite difference of consecutive Sensors.Htw. Works everywhere: every platform
+                /// publishes a torso pose, so this is the universal fallback.
+                HTW_DIFFERENCE,
+                /// Sensors.vTw, rotated into the torso frame. For platforms whose odometry is a
+                /// real state estimator rather than support-leg dead reckoning -- the K1's neural
+                /// odometry, for instance. Not for the NUgus: there vTw is itself a low-passed
+                /// difference of the same Htw, x and y only with z zeroed (SensorFilter's
+                /// update_odometry), so HTW_DIFFERENCE strictly dominates it.
+                SENSORS_VTW,
+            };
+            /// @brief Where vBb is measured from. Per-robot config territory: it is a property of
+            ///        the platform's odometry, not of the game or the venue.
+            OdometryVelocitySource odometry_velocity_source = OdometryVelocitySource::HTW_DIFFERENCE;
+            /// @brief Body linear velocity measurement noise std dev per axis [m/s].
+            ///
+            /// Belongs with odometry_velocity_source, because the two sources deserve very
+            /// different numbers. For HTW_DIFFERENCE on the NUgus this is deliberately loose,
+            /// comparable to the walk speed itself: the odometry slips on foot contact and reports
+            /// the gait the engine believes it is executing. A genuine state estimator earns far
+            /// tighter. Either way it is evidence the filter can weigh, never truth it must accept.
             double odometry_velocity_sigma = 0.15;
             /// @brief Zero-velocity update noise while FALLEN (lying still) [m/s]
             double zupt_sigma = 0.02;
@@ -213,8 +233,8 @@ namespace module::localisation {
             double recovery_yaw_std = 0.6;
             /// @brief Maximum odometry sample spacing to finite-difference across [s]
             double max_odometry_gap = 0.1;
-            /// @brief Length of the rolling odometry window the velocity samples are built from [s]
-            double twist_window_seconds = 2.0;
+            /// @brief Length of the rolling odometry window vision frames are paired against [s]
+            double sensors_window_seconds = 2.0;
             /// @brief Maximum age of the odometry sample paired with a vision frame [s]
             double max_sensor_pairing_age = 0.1;
         } cfg;
@@ -224,13 +244,9 @@ namespace module::localisation {
         /// @brief Whether t0 has been captured yet
         bool have_t0 = false;
 
-        /// @brief Rolling window of recent odometry samples, newest last (bounded by twist_window_seconds)
+        /// @brief Rolling window of recent odometry samples, newest last (bounded by
+        ///        sensors_window_seconds). Each carries the velocity it was measured with.
         std::vector<filter::SensorsSample> sensors_window;
-        /// @brief Body-fixed velocity samples finite-differenced from the odometry window.
-        ///
-        /// Feeds MeasurementBodyVelocity. Not an input to the process model -- the system holds no
-        /// reference to it, and the vision reaction reads the sample nearest each frame.
-        std::vector<filter::BodyTwistSample> twist_buffer;
         /// @brief The estimator (null until the first successful initial-pose solve)
         std::unique_ptr<filter::SystemLocalisation> system;
         /// @brief Field landmark map (null until the first FieldDescription arrives)
@@ -267,17 +283,6 @@ namespace module::localisation {
          * @return The nearest sample, or nullptr if the window is empty or the nearest is too old.
          */
         [[nodiscard]] const filter::SensorsSample* nearest_sensors(double t) const;
-
-        /**
-         * @brief The body-velocity sample in the twist buffer nearest a given time.
-         *
-         * Feeds MeasurementBodyVelocity. Returns nullptr when the buffer is empty or its
-         * nearest sample is too old to describe this frame.
-         *
-         * @param t Vision capture time [s since t0]
-         * @return The nearest sample, or nullptr if there is nothing usable.
-         */
-        [[nodiscard]] const filter::BodyTwistSample* nearest_twist(double t) const;
 
         /**
          * @brief Hand confidence back to the belief on standing up again.

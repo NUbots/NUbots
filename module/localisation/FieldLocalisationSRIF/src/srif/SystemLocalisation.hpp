@@ -38,15 +38,6 @@ namespace module::localisation::srif {
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemEstimator;
 
-    /**
-     * @brief A body-fixed twist sample derived from odometry.
-     */
-    struct BodyTwistSample {
-        double t;                 ///< Sample time [s] (relative to log start)
-        Eigen::Vector3d vBb;      ///< Body-fixed translational velocity [m/s]
-        Eigen::Vector3d omegaBb;  ///< Body-fixed angular velocity [rad/s]
-    };
-
     /*
      * State contains the 6-DOF torso pose in the field frame {f}, its body-fixed
      * velocity, the gyroscope bias, and a 2-DOF camera-mount attitude bias:
@@ -316,26 +307,24 @@ namespace module::localisation::srif {
         }
 
         /**
-         * @brief Body-fixed velocity samples finite-differenced from the odometry stream.
+         * @brief Body-fixed linear velocity across a consecutive pair of odometry samples.
          *
-         * For consecutive odometry samples, the relative pose
-         * DeltaT = Twt(t1)^{-1} * Twt(t2) with Twt = Htw^{-1} yields
-         * vBb = Delta r / dt, stamped at the interval midpoint; omegaBb is
-         * log(Delta R) / dt. Samples spanning gaps larger than maxGap are skipped.
+         * DeltaT = Twt(a)^{-1} * Twt(b) with Twt = Htw^{-1}. That relative pose is already
+         * expressed in the body frame, so its translation over dt is vBb directly, with no
+         * rotation into {b} afterwards.
          *
-         * These are now *measurements* (MeasurementBodyVelocity), not a known input,
-         * so no gyroscope enters here and no bias is subtracted: the raw gyroscope is
-         * its own measurement (MeasurementGyroscope) and its bias is a state. The
-         * omegaBb field is retained for the odometry-derived angular rate, which is
-         * only of interest as a fallback when no gyroscope is available.
+         * No gyroscope enters here and no bias is subtracted: the raw gyroscope is its own
+         * measurement (MeasurementGyroscope) and its bias is a state. The odometry-derived
+         * angular rate is not computed at all -- nothing read it.
          *
-         * @param sensors Time-ordered odometry samples (absolute time [s])
-         * @param t0 Time origin subtracted from sample times [s]
+         * @param a Earlier sample
+         * @param b Later sample
          * @param maxGap Maximum sample spacing to difference across [s]
+         * @return vBb [m/s], or a non-finite vector when the pair cannot be differenced.
          */
-        static std::vector<BodyTwistSample> twistFromOdometry(const std::vector<SensorsSample>& sensors,
-                                                              double t0,
-                                                              double maxGap = 0.1);
+        static Eigen::Vector3d bodyVelocityFromOdometry(const SensorsSample& a,
+                                                        const SensorsSample& b,
+                                                        double maxGap = 0.1);
 
         /// @brief Body-fixed linear velocity of a state [m/s].
         static Eigen::Vector3d bodyVelocity(const Eigen::VectorXd& x) {

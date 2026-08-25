@@ -168,15 +168,24 @@ namespace module::localisation {
             // What the filter runs
             cfg.use_hypothesis_bank    = config["use_hypothesis_bank"].as<bool>();
             cfg.use_side_disambiguator = config["use_side_disambiguator"].as<bool>();
-            cfg.use_odometry_velocity  = config["use_odometry_velocity"].as<bool>();
             cfg.use_gravity            = config["use_gravity"].as<bool>();
             cfg.use_kinematic_height   = config["use_kinematic_height"].as<bool>();
 
             // How far each sensor is trusted
             cfg.gyroscope_sigma         = config["gyroscope_sigma"].as<double>();
             cfg.odometry_velocity_sigma = config["odometry_velocity_sigma"].as<double>();
-            cfg.gravity_sigma           = config["gravity_sigma"].as<double>();
-            cfg.height_sigma            = config["height_sigma"].as<double>();
+            const std::string source    = config["odometry_velocity_source"].as<std::string>();
+            if (source == "SENSORS_VTW") {
+                cfg.odometry_velocity_source = Config::OdometryVelocitySource::SENSORS_VTW;
+            }
+            else {
+                if (source != "HTW_DIFFERENCE") {
+                    log<ERROR>("Unknown odometry_velocity_source '", source, "'; using HTW_DIFFERENCE");
+                }
+                cfg.odometry_velocity_source = Config::OdometryVelocitySource::HTW_DIFFERENCE;
+            }
+            cfg.gravity_sigma = config["gravity_sigma"].as<double>();
+            cfg.height_sigma  = config["height_sigma"].as<double>();
 
             // How far vision is trusted
             cfg.measurement.sigmaAngular  = config["measurement"]["sigma_angular"].as<double>();
@@ -216,7 +225,7 @@ namespace module::localisation {
 
         // Maintain the rolling odometry window and rebuild the body-twist input buffer the estimator
         // predicts against. Runs ahead of the vision update (Priority::HIGH) and shares its Sync group,
-        // so twist_buffer is never mutated while a prediction is reading it.
+        // so sensors_window is never mutated while the vision reaction is reading it.
         on<Trigger<Sensors>, Sync<FieldLocalisationSRIF>, Priority::HIGH>().then([this](const Sensors& sensors) {
             if (!have_t0) {
                 t0      = sensors.timestamp;
@@ -230,21 +239,31 @@ namespace module::localisation {
             // Raw, and kept raw: the gyroscope is its own measurement of omegaBb now
             // (MeasurementGyroscope), not a substitute for the odometry's angular rate.
             s.gyroscope = sensors.gyroscope;
+
+            // The velocity this sample will hand MeasurementBodyVelocity. Resolved here so the
+            // choice of source lives in exactly one place and everything downstream just reads a
+            // velocity off the sample it already paired with. Either branch may fail to produce
+            // one -- no predecessor yet, too wide a gap, a non-finite pose -- and says so with a
+            // non-finite vBb rather than a sentinel the caller has to know about.
+            s.vBb = cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
+                        // vTw is world-frame; Htw's rotation block takes world to torso.
+                        ? Eigen::Vector3d(s.Htw.rotationMatrix * Eigen::Vector3d(sensors.vTw))
+                        : sensors_window.empty()
+                              ? Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN())
+                              : filter::SystemLocalisation::bodyVelocityFromOdometry(sensors_window.back(),
+                                                                                     s,
+                                                                                     cfg.max_odometry_gap);
+
             sensors_window.push_back(std::move(s));
 
             // Drop samples older than the configured window (keep at least two to difference across)
-            const double cutoff = sensors_window.back().t - cfg.twist_window_seconds;
+            const double cutoff = sensors_window.back().t - cfg.sensors_window_seconds;
             auto first_kept     = std::find_if(sensors_window.begin(), sensors_window.end(), [cutoff](const auto& e) {
                 return e.t >= cutoff;
             });
             if (first_kept != sensors_window.begin() && std::distance(first_kept, sensors_window.end()) >= 2) {
                 sensors_window.erase(sensors_window.begin(), first_kept);
             }
-
-            // Body-fixed velocity samples for MeasurementBodyVelocity. Nothing is a known input
-            // to the process model, so this is simply a buffer the vision reaction reads the
-            // nearest sample from.
-            twist_buffer = filter::SystemLocalisation::twistFromOdometry(sensors_window, 0.0, cfg.max_odometry_gap);
         });
 
         on<Trigger<BoundingBoxes>, Optional<With<Stability>>, Sync<FieldLocalisationSRIF>, Single>().then(
@@ -323,9 +342,10 @@ namespace module::localisation {
                     // fiction, and during a getup a scripted flail that is not locomotion. So
                     // while not upright it is replaced by a zero-velocity update.
                     if (upright) {
-                        const filter::BodyTwistSample* twist = nearest_twist(t);
-                        if (cfg.use_odometry_velocity && twist != nullptr && twist->vBb.allFinite()) {
-                            MeasurementBodyVelocity vel(t, twist->vBb, cfg.odometry_velocity_sigma);
+                        // The same paired sample the extrinsics come from, so this is the velocity
+                        // measured at capture time rather than one found in a separate buffer.
+                        if (paired->vBb.allFinite()) {
+                            MeasurementBodyVelocity vel(t, paired->vBb, cfg.odometry_velocity_sigma);
                             system->process(vel);
                         }
                     }
@@ -607,19 +627,6 @@ namespace module::localisation {
         msg->flip_requested  = result.flipRequested;
 
         emit(msg);
-    }
-
-    const filter::BodyTwistSample* FieldLocalisationSRIF::nearest_twist(double t) const {
-        const filter::BodyTwistSample* best = nullptr;
-        double best_dt                      = std::numeric_limits<double>::infinity();
-        for (const filter::BodyTwistSample& s : twist_buffer) {
-            const double dt = std::abs(s.t - t);
-            if (dt < best_dt) {
-                best_dt = dt;
-                best    = &s;
-            }
-        }
-        return best_dt <= cfg.max_sensor_pairing_age ? best : nullptr;
     }
 
     void FieldLocalisationSRIF::apply_fall_recovery(double t) {

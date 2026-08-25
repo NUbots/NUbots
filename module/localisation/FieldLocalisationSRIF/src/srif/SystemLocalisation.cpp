@@ -128,54 +128,28 @@ namespace module::localisation::srif {
         return idx;
     }
 
-    std::vector<BodyTwistSample> SystemLocalisation::twistFromOdometry(const std::vector<SensorsSample>& sensors,
-                                                                       double t0,
-                                                                       double maxGap) {
-        std::vector<BodyTwistSample> twists;
-        if (sensors.size() < 2) {
-            return twists;
+    Eigen::Vector3d SystemLocalisation::bodyVelocityFromOdometry(const SensorsSample& a,
+                                                                 const SensorsSample& b,
+                                                                 double maxGap) {
+        const Eigen::Vector3d invalid = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
+
+        const double dt = b.t - a.t;
+        if (dt <= 0 || dt > maxGap) {
+            return invalid;
         }
-        twists.reserve(sensors.size() - 1);
 
-        for (std::size_t k = 1; k < sensors.size(); ++k) {
-            const SensorsSample& a = sensors[k - 1];
-            const SensorsSample& b = sensors[k];
-            const double dt        = b.t - a.t;
-            if (dt <= 0 || dt > maxGap) {
-                continue;
-            }
-
-            // Torso pose in world: Twt = Htw^{-1}
-            Pose<double> Twta = Pose<double>(a.Htw.rotationMatrix, a.Htw.translationVector).inverse();
-            Pose<double> Twtb = Pose<double>(b.Htw.rotationMatrix, b.Htw.translationVector).inverse();
-
-            if (!Twta.translationVector.allFinite() || !Twtb.translationVector.allFinite()
-                || !Twta.rotationMatrix.allFinite() || !Twtb.rotationMatrix.allFinite()) {
-                continue;
-            }
-
-            // Relative pose of torso(b) w.r.t. torso(a): body-frame increment
-            Pose<double> dT = Twta.inverse() * Twtb;
-
-            Eigen::AngleAxisd aa(dT.rotationMatrix);
-
-            BodyTwistSample s;
-            s.t   = 0.5 * (a.t + b.t) - t0;
-            s.vBb = dT.translationVector / dt;
-            // Odometry-derived angular rate. Previously the gyroscope was substituted in
-            // here, because the walk-engine odometry attitude slips badly while turning
-            // (data2 mocap: ~150 deg of yaw lost by t=40 s on odometry alone). It is no
-            // longer substituted: the gyroscope is its own measurement of omegaBb with
-            // its own noise and its own estimated bias, and folding it into this sample
-            // would feed the same reading in twice. This field is only useful as a
-            // fallback when no gyroscope is available.
-            s.omegaBb = aa.angle() * aa.axis() / dt;
-            if (!s.vBb.allFinite() || !s.omegaBb.allFinite()) {
-                continue;
-            }
-            twists.push_back(s);
+        // Torso pose in world: Twt = Htw^{-1}
+        const Pose<double> Twta = Pose<double>(a.Htw.rotationMatrix, a.Htw.translationVector).inverse();
+        const Pose<double> Twtb = Pose<double>(b.Htw.rotationMatrix, b.Htw.translationVector).inverse();
+        if (!Twta.translationVector.allFinite() || !Twtb.translationVector.allFinite()
+            || !Twta.rotationMatrix.allFinite() || !Twtb.rotationMatrix.allFinite()) {
+            return invalid;
         }
-        return twists;
+
+        // Relative pose of torso(b) w.r.t. torso(a) is already the body-frame increment, so
+        // dividing its translation by dt gives vBb with no rotation into {b} afterwards.
+        const Eigen::Vector3d vBb = (Twta.inverse() * Twtb).translationVector / dt;
+        return vBb.allFinite() ? vBb : invalid;
     }
 
     void SystemLocalisation::resetTo(const GaussianInfo<double>& newDensity, double time) {
