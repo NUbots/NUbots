@@ -1,5 +1,5 @@
 /**
- * @file SystemLocalisation.h
+ * @file SystemLocalisation.hpp
  * @brief Defines the SystemLocalisation class for humanoid robot field localisation.
  */
 #ifndef MODULE_LOCALISATION_SRIF_SYSTEMLOCALISATION_HPP
@@ -52,32 +52,14 @@ namespace module::localisation::srif {
      * Field frame {f}: origin at centre of field on the ground plane, z up,
      * consistent with the NUbots Hfw convention.
      *
-     * Pose in {f}, velocity in {b}: the Fossen vehicle-dynamics convention
-     * (eta, nu) rather than the strapdown-INS one, which would carry velocity in
-     * {f} alongside position. Two reasons. The velocity states are a random walk,
-     * and "the robot keeps walking forward at this speed" is a far better model of
-     * a turning robot than "its field-frame velocity vector is constant" -- the
-     * latter needs a PSD sized for the turn even when walking straight. And every
-     * velocity measurement arrives body-fixed (the gyroscope directly, the walk
-     * odometry as a body-frame finite difference), so h(x) is the identity rather
-     * than Rfb^T. The frames are mixed regardless: omegaBb has to be body-fixed
-     * because that is what the gyroscope measures and what q-dot takes.
-     *
-     * A pleasant consequence: the 180 deg field mirror leaves both velocity blocks
-     * alone. v_b' = (Rz(pi) Rfb)^T Rz(pi) v_f = v_b, so mirrorState() stays a
-     * position-and-quaternion operation. Field-frame velocity would have needed
-     * its horizontal components negated alongside the position.
+     * Pose is held in {f} and velocity in {b}, the Fossen (eta, nu) convention:
+     * the velocity states are a random walk, and every velocity measurement
+     * arrives body-fixed, so h(x) is the identity rather than Rfb^T.
      *
      * Nothing is a known input. The gyroscope and the walk-engine odometry are
-     * *measurements* of omegaBb and vBb (MeasurementGyroscope,
-     * MeasurementBodyVelocity), so their noise is modelled where it belongs and
-     * the gyroscope bias is estimated rather than calibrated by heuristic. That
-     * bias is unobservable to the upstream Mahony filter, whose bias integrator is
-     * driven by the gravity error -- a cross product of two near-vertical vectors,
-     * which has no component about the vertical -- so before this nothing in the
-     * system estimated the yaw-rate bias, the one that becomes heading drift.
-     * Measured on the data2 recording it is ~0.78 deg/s, and estimating it is
-     * worth 2.5 deg of heading RMSE.
+     * measurements of omegaBb and vBb (MeasurementGyroscope,
+     * MeasurementBodyVelocity), and the gyroscope bias is estimated rather than
+     * calibrated.
      *
      * The process model is the kinematics plus a random walk on the rates:
      *
@@ -86,11 +68,8 @@ namespace module::localisation::srif {
      *   d(bGyro)/dt = dw_b,     d(deltaC)/dt  = dw_c
      *
      * The camera bias models a constant error in the kinematic torso-to-camera
-     * chain (evident in the recorded data as ground-projection errors growing
-     * with range^2, ~1 m at 4-5 m range, consistent with a 1.5-2 deg pitch
-     * bias). It is a random-walk state with very small process noise, applied
-     * on the camera side of the extrinsic transform by vision measurements:
-     *   Tfc = Tfb(x) * Tbc * R(deltaC)
+     * chain. It is a random-walk state applied on the camera side of the
+     * extrinsic transform by vision measurements: Tfc = Tfb(x) * Tbc * R(deltaC)
      */
     class SystemLocalisation : public SystemEstimator {
     public:
@@ -98,42 +77,30 @@ namespace module::localisation::srif {
          * @brief Process noise and input handling parameters.
          */
         struct Parameters {
-            // The pose states are driven by the velocity states, so their own PSDs are a
-            // small floor against collapse in weakly-observable directions rather than
-            // the main source of growth: uncertainty now reaches position by integrating
-            // the velocity uncertainty, which is where the real ignorance lives.
+            // The pose PSDs are a floor against collapse; growth comes from integrating
+            // the velocity states.
             double sigmaPosXY = 0.02;  ///< Position process noise PSD, horizontal [m/sqrt(s)]
             double sigmaPosZ  = 0.01;  ///< Position process noise PSD, vertical [m/sqrt(s)]
             double sigmaAtt   = 0.01;  ///< Roll/pitch process noise PSD [rad/sqrt(s)]
             double sigmaYaw   = 0.01;  ///< Yaw process noise PSD [rad/sqrt(s)]
 
-            // How fast the body-fixed rates are allowed to change between measurements.
-            // These are the dominant process noise now. A walking robot changes its
-            // forward speed over a step (~0.3 s), so a PSD near the walk speed itself is
-            // about right; angular velocity is measured at IMU rate so its random walk
-            // only has to cover one sample interval.
+            // How fast the body-fixed rates may change between measurements; the
+            // dominant process noise.
             double sigmaVel      = 0.35;  ///< Body linear velocity process noise PSD [m/s/sqrt(s)]
             double sigmaOmega    = 1.50;  ///< Body angular velocity process noise PSD [rad/s/sqrt(s)]
-            double sigmaGyroBias = 2e-4;  ///< Gyroscope bias random walk PSD [rad/s/sqrt(s)]: slow thermal
-                                          ///< drift only, so vision can average it out over many frames
-            double sigmaCamBias = 3e-4;   ///< Camera mount bias process noise PSD [rad/sqrt(s)] (kept small
-                                          ///< so bias cannot wander while stationary)
+            double sigmaGyroBias = 2e-4;  ///< Gyroscope bias random walk PSD [rad/s/sqrt(s)]: thermal drift only
+            double sigmaCamBias  = 3e-4;  ///< Camera mount bias process noise PSD [rad/sqrt(s)]
 
-            // While the robot is not upright the rates are not merely noisier, they are
-            // unmeasured: the walk-engine odometry describes a gait that is not
-            // happening, so MeasurementBodyVelocity is replaced by a zero-velocity
-            // update. These PSDs are what the belief decays towards meanwhile, so a fall
-            // widens honestly enough to reopen the landmark association gates on recovery.
+            // PSDs the belief decays towards while the robot is not upright, where the
+            // walk-engine odometry no longer describes real motion.
             double sigmaVelDisturbed   = 1.00;  ///< Body linear velocity PSD while not upright [m/s/sqrt(s)]
             double sigmaOmegaDisturbed = 3.00;  ///< Body angular velocity PSD while not upright [rad/s/sqrt(s)]
             double sigmaPosXYDisturbed = 0.20;  ///< Horizontal position PSD while not upright [m/sqrt(s)]
             double sigmaPosZDisturbed  = 0.20;  ///< Vertical position PSD while not upright [m/sqrt(s)]
             double sigmaAttDisturbed   = 0.20;  ///< Roll/pitch PSD while not upright [rad/sqrt(s)]
             double sigmaYawDisturbed   = 0.20;  ///< Yaw PSD while not upright [rad/sqrt(s)]
-            /// How long into a non-upright episode the PSDs above apply [s]. Past this the
-            /// robot is lying still and diffusing further would be inventing motion. Note
-            /// this bounds the PSDs ONLY -- the odometry velocity measurement stays
-            /// suppressed for the whole episode, see setPosture().
+            /// How long into a non-upright episode the PSDs above apply [s]. Bounds the
+            /// PSDs only; odometry stays suppressed for the whole episode, see setPosture().
             double disturbedWindow = 2.0;
         };
 
@@ -145,22 +112,11 @@ namespace module::localisation::srif {
         //   13..15  bGyro        gyroscope bias in {b} [rad/s]
         //   16..17  camera mount bias (roll, pitch) [rad]
         //
-        // Attitude was roll-pitch-yaw until the fall work. The Euler-rate transform
-        // is singular at pitch = +-90 deg, which is not an edge case for a falling
-        // robot -- it is on the trajectory of every topple. Passing through
-        // it landed the state on the gimbal alias (roll+180, 180-pitch, yaw+180):
-        // the same rotation, so fieldPose() and the landmark models carried on
-        // working, but every consumer reading x(5) as heading was then 180 deg out.
-        // A quaternion has no such point, so the state can sit at pitch = 90 deg for
-        // as long as the robot is face-down and measurement updates can keep running
-        // there.
-        //
-        // The cost is a fourth parameter for three degrees of freedom. quat2rot
-        // normalises, so |q| is invisible to every geometric model; the information
-        // along it comes from MeasurementQuaternionNorm alone, which is what keeps
-        // the MAP Hessian non-singular. See attitudeTangent() for the mapping used
-        // wherever a 3-DOF attitude quantity (process noise, yaw variance, a yaw
-        // inflation) has to be expressed in these four components.
+        // Attitude is a quaternion so the state stays valid through a topple, where an
+        // Euler parameterisation is singular. quat2rot normalises, so |q| is invisible
+        // to every geometric model and MeasurementQuaternionNorm supplies the only
+        // information along it. No index means "heading": see attitudeTangent() for
+        // expressing a 3-DOF attitude quantity in these four components.
         static constexpr Eigen::Index nx = 18;  ///< State dimension
 
         static constexpr Eigen::Index iPos      = 0;   ///< First position index
@@ -210,9 +166,7 @@ namespace module::localisation::srif {
         /**
          * @brief Roll, pitch and yaw of the estimated attitude, for reporting.
          *
-         * Always read heading through this rather than off a state element. The
-         * quaternion has no distinguished yaw component, and the whole point of the
-         * change is that no single index means "heading" any more.
+         * Always read heading through this: no state element is the yaw.
          *
          * @param x State vector (nx)
          * @return [roll, pitch, yaw] in radians
@@ -230,10 +184,8 @@ namespace module::localisation::srif {
          * @brief Jacobian of a body-frame rotation vector w.r.t. the quaternion states.
          *
          * A small body rotation dtheta perturbs the quaternion by dq = 0.5*Xi(q)*dtheta,
-         * so this 4x3 matrix maps 3-DOF attitude quantities into the four components
-         * and its pseudo-inverse maps them back. Everything that used to index the
-         * single yaw element -- process noise, the association gate's yaw variance,
-         * the recovery inflation -- goes through it.
+         * so this 4x3 matrix maps 3-DOF attitude quantities (process noise, yaw
+         * variance, an inflation) into the four components; its pseudo-inverse maps back.
          *
          * @param x State vector (nx)
          * @return 4x3 matrix dq/dtheta at the state's attitude
@@ -247,8 +199,8 @@ namespace module::localisation::srif {
         /**
          * @brief Jacobian mapping a field-frame rotation vector to the quaternion states.
          *
-         * dq = 0.5*Xi(q)*Rfb^T*dtheta_f. Used wherever an uncertainty is naturally
-         * stated about a field axis -- above all yaw, about field z.
+         * dq = 0.5*Xi(q)*Rfb^T*dtheta_f, for uncertainties stated about a field axis,
+         * chiefly yaw about field z.
          *
          * @param x State vector (nx)
          * @return 4x3 matrix dq/dtheta_f at the state's attitude
@@ -261,10 +213,8 @@ namespace module::localisation::srif {
         /**
          * @brief Attitude covariance as a 3x3 in the field-frame tangent [rad^2].
          *
-         * The replacement for reading P(3..5, 3..5) directly. Xi has orthonormal
-         * columns for a unit q, so the pseudo-inverse of dq/dtheta is 2*Xi^T; that
-         * maps the quaternion block of P back to three degrees of freedom, and Rfb
-         * puts them on the field axes. Element (2, 2) is the yaw variance.
+         * Maps the quaternion block of P back to three degrees of freedom on the field
+         * axes. Element (2, 2) is the yaw variance.
          *
          * @param x State mean (nx)
          * @param P State covariance (nx by nx)
@@ -278,18 +228,15 @@ namespace module::localisation::srif {
         /**
          * @brief Left inverse of attitudeTangentField: field rotation vector per unit dq.
          *
-         * Row 2 is what maps a quaternion perturbation to a heading change, so it is
-         * also what any cross-covariance between position and yaw has to go through
-         * (the Field message's reported (x, y, yaw) block, for one).
+         * Row 2 maps a quaternion perturbation to a heading change, so any position-yaw
+         * cross-covariance goes through it.
          *
          * @param x State vector (nx)
          * @return 3x4 matrix dtheta_f/dq at the state's attitude
          */
         static Eigen::Matrix<double, 3, 4> attitudeJacobian(const Eigen::VectorXd& x) {
-            // dq = 0.5*Xi*dtheta and Xi has orthonormal columns, so the left inverse
-            // is dtheta = 2*Xi^T*dq. Note that is 2*Xi^T, NOT 2*attitudeTangent^T --
-            // attitudeTangent already carries the 0.5, and folding it in twice
-            // under-reports every attitude std dev by a factor of two.
+            // Left inverse is dtheta = 2*Xi^T*dq. That is 2*Xi^T, NOT
+            // 2*attitudeTangent^T, which already carries the 0.5.
             Eigen::Vector4d q = x.segment<4>(iQuat);
             q.normalize();
             return quat2rot(q) * (2.0 * quatXi(q).transpose());
@@ -309,12 +256,7 @@ namespace module::localisation::srif {
          * @brief Body-fixed linear velocity across a consecutive pair of odometry samples.
          *
          * DeltaT = Twt(a)^{-1} * Twt(b) with Twt = Htw^{-1}. That relative pose is already
-         * expressed in the body frame, so its translation over dt is vBb directly, with no
-         * rotation into {b} afterwards.
-         *
-         * No gyroscope enters here and no bias is subtracted: the raw gyroscope is its own
-         * measurement (MeasurementGyroscope) and its bias is a state. The odometry-derived
-         * angular rate is not computed at all -- nothing read it.
+         * body-frame, so its translation over dt is vBb directly.
          *
          * @param a Earlier sample
          * @param b Later sample
@@ -343,9 +285,8 @@ namespace module::localisation::srif {
         /**
          * @brief Reset the state density and system clock (initialisation / relocalisation).
          *
-         * A reset asserts a single known belief, so it also collapses any active
-         * hypothesis mixture. Seed the bank afterwards (initialiseHypotheses) if the
-         * new belief is still symmetry-ambiguous.
+         * Collapses any active hypothesis mixture. Seed the bank afterwards
+         * (initialiseHypotheses) if the new belief is still symmetry-ambiguous.
          *
          * @param density New state density
          * @param time New system time [s]
@@ -355,32 +296,14 @@ namespace module::localisation::srif {
         /**
          * @brief Declare the robot's posture for this step.
          *
-         * Two different things follow from a fall, and they are deliberately NOT the same
-         * switch, because they expire differently:
+         * A fall has two consequences with different lifetimes, so they are separate
+         * switches. Odometry velocity is meaningless for the whole time the robot is not
+         * upright, and is suppressed by the caller, which substitutes a zero-velocity
+         * update for MeasurementBodyVelocity. This method carries the other half: the
+         * process noise switches to the `*Disturbed` PSDs for params.disturbedWindow
+         * seconds from the start of the episode, then stands down.
          *
-         *  - The twist's linear velocity is discarded. It is derived by differencing
-         *    walk-engine odometry, which while the robot is on the ground describes a gait
-         *    that is not happening -- and during a getup describes a scripted flail that is
-         *    happening but is not locomotion. That is a statement about whether the signal
-         *    means anything, and it does not become true again after some number of
-         *    seconds: it holds for the WHOLE time the robot is not upright. The
-         *    gyroscope-derived angular velocity is kept throughout, because it measures the
-         *    topple for real. That half is enforced by the caller, which substitutes a
-         *    zero-velocity update for MeasurementBodyVelocity while not upright; this
-         *    method carries only the process-noise half.
-         *
-         *  - The process noise switches to the `*Disturbed` PSDs, so the belief decays
-         *    honestly instead of coasting at walking-grade confidence. That one IS bounded:
-         *    a fall is a bounded event, and modelling a robot lying still as a 0.40 m/sqrt(s)
-         *    random walk would make the belief's width report how long it had been down
-         *    rather than how far it could have gone. It applies for params.disturbedWindow
-         *    seconds from the start of the episode and then stands down.
-         *
-         * Tying both to the same window is what let a long fall integrate the getup's
-         * odometry at nominal confidence, marching the estimate off the field with a
-         * covariance too tight for the association gate to ever recover it.
-         *
-         * This is a mode, not an event: the caller sets it every frame from the posture.
+         * A mode, not an event: the caller sets it every frame from the posture.
          *
          * @param upright True when the robot is upright
          * @param disturbedFor Seconds since the current non-upright episode began (ignored
@@ -393,11 +316,9 @@ namespace module::localisation::srif {
         /**
          * @brief Add variance to the belief without moving its mean.
          *
-         * Used on recovery from a fall. The pre-fall mean is still the best estimate
-         * available -- a fall and getup translate the torso well under a metre, far
-         * less than a global relocalisation would risk getting wrong -- but the
-         * confidence attached to it is not survivable, particularly in yaw. Applies
-         * to every live hypothesis as well as to the representative density.
+         * Used on recovery from a fall, where the pre-fall mean is still the best
+         * estimate but its confidence is not. Applies to every live hypothesis as well
+         * as to the representative density.
          *
          * @param extraVar Variance to add per state element (length nx, non-negative)
          */
@@ -406,9 +327,8 @@ namespace module::localisation::srif {
         /**
          * @brief Add a full covariance block to the belief without moving its mean.
          *
-         * The diagonal overload cannot express an attitude inflation any more: yaw
-         * uncertainty about the field z axis lands on the quaternion states as a
-         * rank-one block (attitudeTangentField), not on one element.
+         * Needed for attitude: yaw uncertainty about the field z axis lands on the
+         * quaternion states as a rank-one block (attitudeTangentField), not one element.
          *
          * @param extraCov Positive-semidefinite matrix (nx by nx) added to the covariance
          */
@@ -417,9 +337,8 @@ namespace module::localisation::srif {
         /**
          * @brief Project the attitude mean back onto the unit sphere (and w >= 0).
          *
-         * Called after every predict and every measurement update.
-         * MeasurementQuaternionNorm keeps the belief near the sphere but is a soft
-         * prior, so this is what actually holds |q| = 1.
+         * Called after every predict and every measurement update; the soft prior from
+         * MeasurementQuaternionNorm is not enough on its own to hold |q| = 1.
          */
         void normaliseQuaternion();
 
@@ -440,13 +359,9 @@ namespace module::localisation::srif {
         /**
          * @brief Per-component process-noise std devs for the quaternion block.
          *
-         * The PSDs are specified in the 3-DOF body tangent (roll/pitch and yaw), which
-         * is where they are meaningful. A small body rotation dtheta moves the
-         * quaternion by 0.5*Xi(q)*dtheta and Xi has orthonormal columns, so a tangent
-         * std of s becomes a component std of s/2. The fourth (radial) component is
-         * given the same magnitude as the attitude channels: it is invisible to every
-         * geometric model, so its only job is to leave MeasurementQuaternionNorm room
-         * to work rather than to fight it.
+         * The PSDs are specified in the 3-DOF body tangent, where a tangent std of s
+         * becomes a component std of s/2. The fourth (radial) component takes the same
+         * magnitude, leaving MeasurementQuaternionNorm room to work.
          *
          * @param sigmaAtt Roll/pitch process noise PSD [rad/sqrt(s)]
          * @param sigmaYaw Yaw process noise PSD [rad/sqrt(s)]
@@ -459,12 +374,9 @@ namespace module::localisation::srif {
         /**
          * @brief Advance the belief to @p time with no measurement.
          *
-         * Prediction otherwise only ever happens inside Event::process, so a frame
-         * that yields no usable measurement used to advance neither the state nor the
-         * clock. That is exactly what a fall produces (the camera is in the carpet and
-         * YOLO returns nothing), and it left the filter holding its pre-fall mean at
-         * its pre-fall covariance across the whole event. Predicts every hypothesis
-         * when the bank is active.
+         * Prediction otherwise only happens inside Event::process, so a frame with no
+         * usable measurement would advance neither the state nor the clock. Predicts
+         * every hypothesis when the bank is active.
          *
          * @param time Time to advance the belief to [s]
          */
@@ -475,20 +387,17 @@ namespace module::localisation::srif {
         // ---------------------------------------------------------------------
         // Hypothesis bank (multi-hypothesis field-symmetry handling)
         //
-        // The RoboCup field has a 180 deg rotational symmetry about its centre:
-        // the pose (rBFf, q) and its mirror produce identical landmark
-        // observations, so a single Gaussian cannot represent the true belief
-        // when the symmetry is unbroken. Following the B-Human multi-hypothesis
-        // approach (Rofer et al.), the belief is a weighted Gaussian mixture; each
-        // component is an independent pose density carried through the same
-        // predict/update machinery, and the weights are updated from the Laplace
-        // log-evidence each measurement reports (Measurement::logEvidence()).
+        // The RoboCup field has a 180 deg rotational symmetry about its centre, so a
+        // pose and its mirror produce identical landmark observations and a single
+        // Gaussian cannot represent the belief while the symmetry is unbroken. The
+        // belief is instead a weighted Gaussian mixture (cf. B-Human, Rofer et al.):
+        // each component is an independent pose density run through the same
+        // predict/update machinery, weighted by the Laplace log-evidence each
+        // measurement reports (Measurement::logEvidence()).
         //
-        // When no hypotheses are active (components_ empty) the estimator behaves
-        // exactly as a single-Gaussian filter over `density`. Activating the bank
-        // (initialiseHypotheses / spawnMirror) switches process() to iterate over
-        // all components; `density` then always mirrors the maximum-weight
-        // component so all existing single-Gaussian accessors keep working.
+        // With no hypotheses active (components_ empty) the estimator is exactly a
+        // single-Gaussian filter over `density`. Once the bank is active, `density`
+        // tracks the maximum-weight component so single-Gaussian accessors keep working.
         // ---------------------------------------------------------------------
 
         /**
@@ -508,10 +417,9 @@ namespace module::localisation::srif {
         /**
          * @brief Activate the mixture with the current density and its 180 deg mirror.
          *
-         * Seeds two equally weighted hypotheses (the current pose and its field
-         * mirror) so a symmetry ambiguity present at initialisation can be resolved
-         * by later asymmetric evidence. No-op inputs (single confident pose) still
-         * benefit: the wrong mirror is down-weighted and pruned automatically.
+         * Seeds two equally weighted hypotheses so a symmetry ambiguity present at
+         * initialisation can be resolved by later asymmetric evidence; the wrong mirror
+         * is down-weighted and pruned automatically.
          */
         void initialiseHypotheses();
 
@@ -524,17 +432,13 @@ namespace module::localisation::srif {
         /**
          * @brief Fold one frame of out-of-field side evidence into the mixture weights.
          *
-         * On-field landmarks cannot separate the two symmetric hypotheses (they fit
-         * their respective mirror-partner landmarks equally well), so the mixture
-         * would sit at 50/50 forever on landmark evidence alone. The asymmetric
-         * background scenery is what breaks it: @p logRatio is the per-frame
-         * log-likelihood ratio favouring the representative pose over its 180 deg
-         * mirror (SideDisambiguator's clamped own-minus-mirror score, FrameResult::
-         * sideDelta). It is added to the representative component's log-weight, so a
-         * sustained positive ratio collapses the mirror and a negative one hands
-         * leadership to it.
+         * On-field landmarks fit both symmetric hypotheses equally well, so only the
+         * asymmetric background scenery can separate them. @p logRatio (SideDisambiguator's
+         * clamped own-minus-mirror score, FrameResult::sideDelta) is added to the
+         * representative component's log-weight: a sustained positive ratio collapses the
+         * mirror, a negative one hands leadership to it.
          *
-         * No-op unless at least two hypotheses are live (nothing to disambiguate).
+         * No-op unless at least two hypotheses are live.
          *
          * @param logRatio Log-likelihood ratio own-vs-mirror for this frame [nats]
          */
@@ -543,13 +447,11 @@ namespace module::localisation::srif {
         /**
          * @brief Process an event across every active hypothesis.
          *
-         * For each component the shared system clock is rewound and the event is
-         * applied through the ordinary single-Gaussian path (predict + update),
-         * so the verified machinery is reused unchanged. Measurement events
-         * additionally accumulate their Laplace log-evidence into the component
-         * weight. Afterwards the mixture is normalised, merged, pruned and (if it
-         * has collapsed to a single uncertain component) a mirror is respawned,
-         * and `density` is set to the maximum-weight component.
+         * For each component the shared system clock is rewound and the event applied
+         * through the ordinary single-Gaussian path, with measurement events also
+         * accumulating their Laplace log-evidence into the component weight. The mixture
+         * is then normalised, merged, pruned, respawned if it has collapsed to a single
+         * uncertain component, and `density` set to the maximum-weight component.
          *
          * With no active hypotheses this is exactly `event.process(*this)`.
          *
@@ -590,9 +492,8 @@ namespace module::localisation::srif {
         static GaussianInfo<double> mirrorDensity(const GaussianInfo<double>& g);
 
     protected:
-        // No input buffer: the process model is autonomous (kinematics plus a random
-        // walk on the rates), and everything that used to be a known input is now a
-        // measurement of the corresponding state.
+        // No input buffer: the process model is autonomous, and every would-be input is
+        // a measurement of the corresponding state.
         bool diffusing_ = false;  ///< Elevated fall PSDs in force (bounded window, see setPosture)
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)

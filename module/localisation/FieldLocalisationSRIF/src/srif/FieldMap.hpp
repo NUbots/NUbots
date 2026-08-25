@@ -28,9 +28,7 @@ namespace module::localisation::srif {
      * NUbots/shared/message/support/FieldDescription.proto (message FieldDescription.FieldDimensions).
      */
     struct FieldDimensions {
-        // Populated from a message::support::FieldDescription via srif::field_dimensions()
-        // (FieldMapFromDescription.hpp), so FieldDescription.yaml is the single source of these values
-        // and the estimator core stays free of the message library.
+        // Values come from FieldDescription.yaml
         double lineWidth;             ///< Width of field lines
         double fieldLength;           ///< Touchline (sideline) length
         double fieldWidth;            ///< Goal line (baseline) length
@@ -48,12 +46,6 @@ namespace module::localisation::srif {
 
     /**
      * @brief Classification of a field landmark
-     *
-     * L_INTERSECTION, T_INTERSECTION and X_INTERSECTION mirror
-     * message::vision::FieldIntersection::IntersectionType from the NUbots codebase
-     * (NUbots/shared/message/vision/FieldIntersections.proto). GOAL_POST is an addition used to
-     * hold the four goal-post positions, which NUbots tracks separately from field-line
-     * intersections (see FieldLocalisationNLopt.cpp own_goal_posts/opp_goal_posts).
      */
     enum class LandmarkType { L_INTERSECTION, T_INTERSECTION, X_INTERSECTION, GOAL_POST };
 

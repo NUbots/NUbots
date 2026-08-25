@@ -24,10 +24,8 @@ namespace module::localisation::srif {
         /// @brief Body-fixed linear velocity [m/s], torso frame.
         ///
         /// Resolved when the sample is buffered, from whichever signal
-        /// Config::odometry_velocity_source names, so the choice of source lives in one place
-        /// and everything downstream just reads a velocity. Non-finite when none could be
-        /// formed -- the first sample, a gap too wide to difference across, a non-finite pose
-        /// -- which is how the vision reaction knows to skip the measurement.
+        /// Config::odometry_velocity_source names. Non-finite when none could be
+        /// formed.
         Eigen::Vector3d vBb;
     };
 

@@ -1,5 +1,5 @@
 /**
- * @file MeasurementFieldLandmarks.h
+ * @file MeasurementFieldLandmarks.hpp
  * @brief Vision measurement of known field landmarks from YOLO detections.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLANDMARKS_HPP
@@ -22,22 +22,15 @@
  * @class MeasurementFieldLandmarks
  * @brief Measurement event for YOLO field landmark detections (goal posts, L/T/X intersections).
  *
- * Each detection provides a unit ray in the camera frame {c}:
- *  - intersections: ray to the bounding box centre,
- *  - goal posts: ray to the bottom-centre of the bounding box (post base on the ground).
+ * Each detection gives a unit ray in the camera frame {c}: to the bounding box
+ * centre for intersections, to its bottom-centre for goal posts. Rays are
+ * associated to mapped landmarks of the same class by greedy surprisal-nearest-
+ * neighbour assignment (see associate()).
  *
- * Detections are associated to mapped landmarks of the same class by greedy
- * surprisal-nearest-neighbour (SNN) assignment against rays predicted at the
- * prior mean, inside a geometric pre-gate (see associate()).
- *
- * The likelihood for each associated pair is an isotropic Gaussian on the
- * chordal residual e = u_meas - u_pred, which agrees with an angular error
- * Gaussian to second order, mixed with uniform clutter over the sphere at a
- * per-detection weight w_j taken from the YOLO confidence:
+ * Each associated pair contributes an isotropic Gaussian on the chordal residual
+ * e = u_meas - u_pred mixed with uniform clutter over the sphere, weighted by the
+ * detection's YOLO confidence:
  *   log p = sum_j log[ w_j N(e_j; sigma^2 I) + (1 - w_j)/(4 pi) ]
- *
- * The MAP update through Measurement::update yields the Laplace-approximation
- * posterior (mean and sqrt information) in the usual way.
  */
 
 namespace module::localisation::measurement {
@@ -58,44 +51,19 @@ namespace module::localisation::measurement {
     public:
         /**
          * @brief Association and noise options.
-         *
-         * Defaults calibrated against the recorded NUbots data: ground-projected
-         * intersection detections scatter 0.3-1.0 m at 3-5 m range (5-10 deg angular)
-         * with occasional gross outliers, so the likelihood is an inlier Gaussian
-         * mixed with a uniform clutter component over the unit sphere.
          */
         struct Options {
             double sigmaAngular =
                 0.25;  ///< Inlier ray angular noise std dev [rad] (total per-frame error incl. systematic)
             double gateAngle = 0.35;  ///< Max association residual angle [rad] (~20 deg)
 
-            // The pre-gate above is a hard geometric cap, so on its own it also caps
-            // what the filter can ever recover from: a getup that leaves the robot
-            // yawed by more than gateAngle puts every predicted bearing outside it,
-            // and no amount of covariance inflation helps, because the pre-gate does
-            // not look at the covariance. Widening it with the yaw uncertainty is what
-            // makes an inflated belief actually able to re-associate. The surprisal
-            // score still decides what associates -- this only stops the cheap
-            // geometric filter from throwing the candidates away first. Normal
-            // operation is unaffected: it takes sigma_yaw > gateAngle/gateYawScale
-            // (10 deg at these defaults) before the widened gate exceeds gateAngle.
-            double gateYawScale = 2.0;  ///< Pre-gate widens to this many yaw std devs
+            /// Yaw std devs the pre-gate widens by, so an uncertain belief can re-associate
+            double gateYawScale = 2.0;
             double gateAngleMax = 1.0;  ///< Ceiling on the widened pre-gate [rad] (~57 deg)
 
             double minConfidence     = 0.5;  ///< Reject detections below this confidence outright
             double inlierProbability = 0.7;  ///< Inlier mixture weight at confidenceReference
 
-            // YOLO confidence is (roughly) the probability that a box is a true
-            // positive, which is exactly what the inlier weight of the robust
-            // mixture means -- so confidence scales that weight rather than the
-            // noise sigma. Downweighting via sigma would claim the landmark is
-            // certainly real but poorly measured; the actual failure mode of a
-            // weak detection is that it is not a landmark at all. As w -> 0 the
-            // per-detection likelihood tends to the flat clutter term, which
-            // contributes almost nothing to the gradient AND almost nothing to the
-            // Hessian, so a weak detection cannot sharpen the posterior: admitting
-            // them is safe against overconfidence in a way that simply lowering
-            // minConfidence under a fixed weight would not be.
             double confidenceReference  = 0.7;   ///< Confidence that maps to inlierProbability
             double maxInlierProbability = 0.95;  ///< Cap: no detection is ever treated as certain
         };
@@ -157,12 +125,8 @@ namespace module::localisation::measurement {
         /**
          * @brief Re-associate the detections against the system's current pose.
          *
-         * Used by the hypothesis bank so each mixture component is scored against
-         * the landmark assignment implied by its OWN pose. The 180 deg field mirror
-         * is the case that matters: re-associated at its own pose it fits the
-         * mirror-partner landmarks exactly as well as the true pose fits the
-         * originals, so on-field evidence leaves the two equally weighted (the
-         * asymmetry that separates them comes from the out-of-field map instead).
+         * Used by the hypothesis bank so each mixture component is scored against the
+         * landmark assignment implied by its own pose rather than a shared one.
          */
         void reassociate(const SystemEstimator& system) override {
             assocKeys_ = associate(system.density.mean(), system.density.cov());
@@ -170,11 +134,8 @@ namespace module::localisation::measurement {
 
     protected:
         /**
-         * @brief MAP update with iterated re-association (cf. iterative landmark matching).
-         *
-         * After the MAP optimisation, detections are re-associated at the posterior
-         * mean; if the association set changed, the prior is restored and the
-         * optimisation re-run, for at most maxAssociationIterations_ passes.
+         * @brief MAP update, re-associating at the posterior mean and re-running the
+         * optimisation from the prior if the association set changed.
          */
         virtual void update(SystemBase& system) override;
 
@@ -197,15 +158,9 @@ namespace module::localisation::measurement {
         /**
          * @brief (Re)build the associated pairs from the stored candidates at the given state.
          *
-         * Surprisal nearest neighbour (SNN): pairs are ranked by how much better the
-         * inlier component explains them than the uniform clutter component, i.e. by
-         * the surprisal (negative log predictive density, evaluated in the tangent
-         * plane of the predicted bearing) minus the clutter-crossover surprisal.
-         * Ranking on raw angle instead would ignore two things that matter here: a
-         * near landmark's predicted bearing is far more sensitive to pose error than
-         * a distant one's, and a weak detection is far more likely to be spurious --
-         * so a plain nearest-angle winner can be a low-confidence box that steals a
-         * landmark from a confident detection and leaves it unassociated.
+         * Surprisal nearest neighbour: pairs are ranked by how much better the inlier
+         * component explains them than the uniform clutter component, so ranking
+         * accounts for bearing sensitivity and detection confidence as well as angle.
          *
          * @param x State to predict the landmarks at
          * @param P State covariance, inflating each predicted bearing by the pose uncertainty
@@ -220,8 +175,8 @@ namespace module::localisation::measurement {
         Eigen::Matrix<double, 3, Eigen::Dynamic> rLFf_;   ///< Associated landmark positions in {f}
         std::vector<double> inlierWeight_;                ///< Per-column mixture inlier weight (from confidence)
         std::vector<std::pair<std::size_t, std::size_t>> assocKeys_;  ///< Last association (candidate, landmark)
-        Options options_;
-        int maxAssociationIterations_ = 1;  ///< Maximum association/optimisation passes
+        Options options_;                                             ///< Association and noise options
+        int maxAssociationIterations_ = 1;                            ///< Maximum association/optimisation passes
     };
 
     template <typename Scalar>
@@ -260,9 +215,8 @@ namespace module::localisation::measurement {
 
         Scalar logLik = Scalar(0);
         for (Eigen::Index j = 0; j < n; ++j) {
-            // Robust mixture: inlier Gaussian on the chordal residual + uniform
-            // clutter over the unit sphere (density 1/(4 pi) per steradian). The
-            // inlier weight is per-detection, set from the YOLO confidence.
+            // Inlier Gaussian on the chordal residual, mixed with uniform clutter
+            // over the unit sphere at density 1/(4 pi) per steradian
             const double w               = inlierWeight_[static_cast<std::size_t>(j)];
             const double logInlierWeight = std::log(w);
             const double logClutter      = std::log(1.0 - w) - std::log(4.0 * M_PI);

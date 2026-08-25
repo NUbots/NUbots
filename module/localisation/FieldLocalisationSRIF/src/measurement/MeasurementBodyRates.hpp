@@ -39,9 +39,6 @@ namespace module::localisation::measurement {
      *
      *   y = omegaBb + bGyro + v,   v ~ N(0, sigma^2 I3)
      *
-     * The bias is a state, so this is what makes it observable: the gyroscope sees
-     * the sum, and the landmark measurements pin omegaBb through the attitude they
-     * constrain, leaving the difference to accumulate onto the bias.
      */
     class MeasurementGyroscope : public Measurement {
     public:
@@ -85,18 +82,6 @@ namespace module::localisation::measurement {
      *
      *   y = vBb + v,   v ~ N(0, sigma^2 I3)
      *
-     * Two callers, with very different sigmas:
-     *
-     *  - the walk-engine odometry, finite-differenced from Htw. It slips on foot
-     *    contact and describes the gait the engine believes it is executing, so it
-     *    earns a loose sigma -- but as a measurement that is now something the filter
-     *    can weigh against vision rather than something it has to accept.
-     *  - a zero-velocity update while the robot is not upright. A fallen robot is not
-     *    travelling anywhere, and saying so is both the most confident measurement in
-     *    the system and the only thing stopping the pre-fall velocity from integrating
-     *    across the whole fall. Leaving it unmeasured is not the neutral choice it
-     *    looks like: it asserts the robot may still be moving at whatever it was doing
-     *    when it fell, which is the one thing it is certainly not doing.
      */
     class MeasurementBodyVelocity : public Measurement {
     public:
