@@ -100,17 +100,11 @@ namespace module::localisation {
     }
 
     /// @brief Single-channel 8-bit view of a camera frame, for FAST/ORB.
-    ///
-    /// Handles the formats the two cameras this runs on actually deliver: BGR3 and Bayer RGGB from
-    /// the hardware Camera module, RGBA from Webots. The corner detector only ever wanted intensity,
-    /// so a demosaic to colour and back would be wasted work -- Bayer is converted straight to grey.
-    ///
     /// @return False if the format is not one we can read, leaving `gray` untouched.
     static bool to_grayscale(const Image& image, cv::Mat& gray) {
         const int width  = int(image.dimensions.x());
         const int height = int(image.dimensions.y());
-        // The Mat is a view over the message's buffer; cvtColor allocates the output, so nothing
-        // here outlives the message.
+        // The Mat is a view over the message's buffer; cvtColor allocates the output.
         uint8_t* data = const_cast<uint8_t*>(image.data.data());
         switch (image.format) {
             case utility::vision::fourcc("BGR3"):
@@ -129,11 +123,8 @@ namespace module::localisation {
 
     /// @brief Build a filter VisionSample (rays in camera frame {c}) from YOLO bounding boxes.
     ///
-    /// Each BoundingBox carries the class name, the YOLO confidence, and the four corner unit rays in
-    /// {c} (ordered TL, TR, BR, BL - matching MeasurementFieldLandmarks::detectionRay, which takes the
-    /// box centre for intersections and the bottom-centre for goal posts). detectionRay also filters to
-    /// the mapped landmark classes and drops low-confidence detections, so every usable box is passed
-    /// through here and the confidence drives the robust inlier weight.
+    /// Corner rays are ordered TL, TR, BR, BL, as MeasurementFieldLandmarks::detectionRay expects.
+    /// Class filtering and the confidence threshold are applied there, not here.
     static filter::VisionSample build_vision_sample(double t, const BoundingBoxes& boxes) {
         filter::VisionSample sample;
         sample.t          = t;
@@ -162,9 +153,6 @@ namespace module::localisation {
         on<Configuration>("FieldLocalisationSRIF.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Only the knobs worth reaching for live in the yaml; everything else is a tuned constant
-            // in Config, next to the reasoning for its value. See the comment on Config.
-
             // What the filter runs
             cfg.use_hypothesis_bank    = config["use_hypothesis_bank"].as<bool>();
             cfg.use_side_disambiguator = config["use_side_disambiguator"].as<bool>();
@@ -192,8 +180,7 @@ namespace module::localisation {
             cfg.measurement.gateAngle     = config["measurement"]["gate_angle"].as<double>();
             cfg.measurement.minConfidence = config["measurement"]["min_confidence"].as<double>();
 
-            // How fast the belief may move. These two dominate: uncertainty reaches position by
-            // integrating velocity uncertainty, so the pose PSDs are only a floor against collapse.
+            // How fast the belief may move
             cfg.process.sigmaVel   = config["process"]["sigma_vel"].as<double>();
             cfg.process.sigmaOmega = config["process"]["sigma_omega"].as<double>();
 
@@ -223,9 +210,8 @@ namespace module::localisation {
             initialised = false;
         });
 
-        // Maintain the rolling odometry window and rebuild the body-twist input buffer the estimator
-        // predicts against. Runs ahead of the vision update (Priority::HIGH) and shares its Sync group,
-        // so sensors_window is never mutated while the vision reaction is reading it.
+        // Maintain the rolling odometry window. Priority::HIGH and the shared Sync group keep
+        // sensors_window from being mutated while the vision reaction reads it.
         on<Trigger<Sensors>, Sync<FieldLocalisationSRIF>, Priority::HIGH>().then([this](const Sensors& sensors) {
             if (!have_t0) {
                 t0      = sensors.timestamp;
@@ -236,17 +222,13 @@ namespace module::localisation {
             s.t             = seconds(sensors.timestamp);
             s.Htw           = to_pose(Eigen::Isometry3d(sensors.Htw));
             s.accelerometer = sensors.accelerometer;
-            // Raw, and kept raw: the gyroscope is its own measurement of omegaBb now
-            // (MeasurementGyroscope), not a substitute for the odometry's angular rate.
+            // Kept raw: the gyroscope is its own measurement (MeasurementGyroscope).
             s.gyroscope = sensors.gyroscope;
 
-            // The velocity this sample will hand MeasurementBodyVelocity. Resolved here so the
-            // choice of source lives in exactly one place and everything downstream just reads a
-            // velocity off the sample it already paired with. Either branch may fail to produce
-            // one -- no predecessor yet, too wide a gap, a non-finite pose -- and says so with a
-            // non-finite vBb rather than a sentinel the caller has to know about.
+            // The velocity this sample hands MeasurementBodyVelocity. Either branch may fail to
+            // produce one, and says so with a non-finite vBb.
             s.vBb = cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
-                        // vTw is world-frame; Htw's rotation block takes world to torso.
+                        // vTw is world-frame; Htw's rotation takes world to torso.
                         ? Eigen::Vector3d(s.Htw.rotationMatrix * Eigen::Vector3d(sensors.vTw))
                         : sensors_window.empty()
                               ? Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN())
@@ -256,7 +238,7 @@ namespace module::localisation {
 
             sensors_window.push_back(std::move(s));
 
-            // Drop samples older than the configured window (keep at least two to difference across)
+            // Drop samples older than the window, keeping at least two
             const double cutoff = sensors_window.back().t - cfg.sensors_window_seconds;
             auto first_kept     = std::find_if(sensors_window.begin(), sensors_window.end(), [cutoff](const auto& e) {
                 return e.t >= cutoff;
@@ -276,22 +258,12 @@ namespace module::localisation {
 
                 const double t = seconds(boxes.timestamp);
 
-                // Posture drives a per-model gate. Each measurement is
-                // suppressed only where its own assumption breaks: kinematic height needs the
-                // support leg on the ground, gravity needs the torso not to be accelerating.
-                // Landmarks and the gyroscope are valid face-down, and a fall is when the
-                // estimate is most at risk -- a robot that spins while toppling or getting up
-                // changes its heading, and only measurements taken during the event catch it.
-                //
-                // Absent a Stability message the robot is assumed upright, so fall handling
-                // simply never engages.
+                // Posture gates each measurement separately, where its own assumption breaks.
+                // Absent a Stability message the robot is assumed upright.
                 const bool upright = stability == nullptr || *stability > Stability::FALLING;
 
-                // Transitions are handled before any early return below, and must stay that way:
-                // a getup ends in motion blur, so the frame the robot first reads upright again
-                // often carries no usable detections. Handling it further down would skip the
-                // recovery inflation on exactly those falls. Doing it here also means setPosture
-                // sees this episode's fall_start_t rather than the previous one's.
+                // Must stay ahead of every early return below: the first upright frame after a
+                // getup often carries no usable detections.
                 if (initialised) {
                     if (!upright && was_upright) {
                         fall_start_t = t;
@@ -306,9 +278,8 @@ namespace module::localisation {
                     was_upright = upright;
                 }
 
-                // Pair the odometry to the vision capture time. The message's Hcw is at capture, so
-                // using the latest Htw instead would fold the capture-to-now torso motion into Tbc
-                // and offset every reprojection.
+                // Pair the odometry to the vision capture time: Hcw is at capture, so Htw must be
+                // too, or the capture-to-now torso motion lands in Tbc.
                 const filter::SensorsSample* paired = nearest_sensors(t);
                 if (paired == nullptr) {
                     log<DEBUG>("No odometry sample near the vision frame; skipping");
@@ -319,43 +290,32 @@ namespace module::localisation {
                 }
                 const filter::Pose<double>& Htw = paired->Htw;
 
-                // Camera pose w.r.t. torso from the kinematic chain (odometry world cancels when Htw
-                // and Hcw are from the same time): Tbc = Htw * Hcw^{-1}.
+                // Camera pose w.r.t. torso: Tbc = Htw * Hcw^{-1} (the odometry world cancels).
                 const filter::Pose<double> Tbc = Htw * to_pose(Eigen::Isometry3d(boxes.Hcw)).inverse();
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
 
-                // Body rates go in before the no-detections gate below: neither depends on YOLO
-                // finding anything, and a fallen robot's camera is in the carpet, so those are
-                // exactly the frames where an unmeasured velocity state would integrate the
-                // pre-fall gait straight off the field. Measurement::process predicts to t
-                // itself, so the predictAll further down is a zero-dt no-op once these have run.
+                // Ahead of the no-detections gate below: neither rate depends on YOLO finding
+                // anything. Measurement::process predicts to t, so the predictAll below is then a
+                // zero-dt no-op.
                 if (initialised) {
-                    // Valid whatever the posture: the gyroscope measures a topple honestly.
+                    // Valid whatever the posture.
                     if (paired->gyroscope.allFinite()) {
                         MeasurementGyroscope gyro(t, paired->gyroscope, cfg.gyroscope_sigma);
                         system->process(gyro);
                     }
 
-                    // The walk-engine odometry describes the gait the engine believes it is
-                    // executing. Upright that is loose but real information; on the ground it is
-                    // fiction, and during a getup a scripted flail that is not locomotion. So
-                    // while not upright it is replaced by a zero-velocity update.
+                    // The odometry velocity is only meaningful while upright; off the feet it is
+                    // replaced by a zero-velocity update.
                     if (upright) {
-                        // The same paired sample the extrinsics come from, so this is the velocity
-                        // measured at capture time rather than one found in a separate buffer.
                         if (paired->vBb.allFinite()) {
                             MeasurementBodyVelocity vel(t, paired->vBb, cfg.odometry_velocity_sigma);
                             system->process(vel);
                         }
                     }
                     else {
-                        // A robot on the carpet is not travelling anywhere. Saying so is what
-                        // stops the pre-fall walking velocity integrating across the whole fall.
-                        // Leaving vBb unmeasured instead is not the neutral choice it looks like:
-                        // it asserts the robot may still be moving at whatever it was doing when
-                        // it fell. Lying still it really is stationary (zupt_sigma); mid-topple
-                        // and mid-getup the torso moves, just not anywhere (zupt_dynamic_sigma).
+                        // Lying still the robot really is stationary (zupt_sigma); mid-topple and
+                        // mid-getup the torso moves, just not anywhere (zupt_dynamic_sigma).
                         const bool settled = stability != nullptr && *stability == Stability::FALLEN;
                         MeasurementBodyVelocity zupt =
                             MeasurementBodyVelocity::stationary(t, settled ? cfg.zupt_sigma : cfg.zupt_dynamic_sigma);
@@ -363,10 +323,8 @@ namespace module::localisation {
                     }
                 }
 
-                // A face-down fall produces no detections at all. Prediction otherwise happens
-                // only inside Event::process, so such a frame would advance neither the state nor
-                // the clock, and the filter would leave the fall holding its pre-fall mean at its
-                // pre-fall covariance -- confidently wrong rather than honestly uncertain.
+                // Prediction otherwise happens only inside Event::process, so a frame with no
+                // detections would advance neither the state nor the clock.
                 if (sample.detections.empty()) {
                     if (initialised) {
                         system->predictAll(t);
@@ -406,27 +364,21 @@ namespace module::localisation {
                               "deg");
                 }
 
-                // Advance to the vision capture time. The process model is autonomous, driven by
-                // the velocity states rather than by any input.
+                // Advance to the vision capture time.
                 system->predict(t);
 
-                // Unit-norm pseudo-measurement. The four attitude states carry three degrees of
-                // freedom and quat2rot normalises, so |q| is invisible to every other model here;
-                // without this the MAP Hessian is singular along it. Applied first so the rest of
-                // the frame's updates see a belief that is on the sphere.
+                // Unit-norm pseudo-measurement, without which the MAP Hessian is singular along
+                // |q|. Applied first so the frame's other updates see a belief on the sphere.
                 MeasurementQuaternionNorm quaternion_norm(t, cfg.quaternion_norm_sigma);
                 system->process(quaternion_norm);
 
-                // Landmark measurement update (routed through process() so the hypothesis bank,
-                // when active, applies it to every mixture component and reweights them).
+                // Landmark update. Routed through process() so the hypothesis bank, when active,
+                // applies it to every component and reweights them.
                 filter::MeasurementFieldLandmarks measurement(t, sample, Tbc, *map, *system, cfg.measurement);
                 system->process(measurement);
 
-                // Gravity is valid whenever the torso is not being accelerated -- true of a robot
-                // lying still on the carpet, false of one in free fall or hitting the ground,
-                // whatever its posture. Gating on the specific-force magnitude tests that
-                // condition directly, which beats gating on "upright" both during a fall and
-                // while walking.
+                // Gravity is valid whenever the torso is not being accelerated, which the
+                // specific-force magnitude tests directly. Posture is not the condition.
                 if (cfg.use_gravity && paired->accelerometer.allFinite()) {
                     constexpr double standard_gravity = 9.80665;
                     const double a_mag                = paired->accelerometer.norm();
@@ -435,10 +387,8 @@ namespace module::localisation {
                         system->process(gravity);
                     }
                 }
-                // Torso height assumes the support leg reaches the ground, so this is the one
-                // model a fall genuinely invalidates: lying down, the chain still reports a
-                // near-upright 0.44 m torso and would fight the attitude the other measurements
-                // are establishing.
+                // Torso height assumes the support leg reaches the ground, so a fall invalidates
+                // it outright.
                 if (cfg.use_kinematic_height && upright) {
                     const double height = Htw.inverse().translationVector.z();
                     if (std::isfinite(height)) {
@@ -447,8 +397,7 @@ namespace module::localisation {
                     }
                 }
 
-                // A diverged update (non-finite mean) would otherwise ship a NaN Hfw, which renders
-                // the robot at the field origin. Drop back to re-initialisation instead.
+                // A non-finite mean would ship a NaN Hfw; re-initialise instead.
                 if (!system->density.mean().allFinite()) {
                     log<WARN>("Field localisation state became non-finite; re-initialising");
                     system.reset();
@@ -459,11 +408,8 @@ namespace module::localisation {
                 emit_field(Htw, &measurement);
             });
 
-        // Out-of-field side disambiguation runs off the raw camera frame rather than the YOLO
-        // boxes: it needs the pixels for FAST/ORB, and the image carries its own lens and
-        // capture-time Hcw, so it can pair itself against the odometry exactly as the landmark
-        // path does. Kept as its own reaction (and its own Single) so a slow frame drops corner
-        // detection instead of delaying a landmark update.
+        // Runs off the raw camera frame (FAST/ORB needs the pixels). Its own reaction and its own
+        // Single, so a slow frame drops corner detection rather than delaying a landmark update.
         on<Trigger<Image>, Sync<FieldLocalisationSRIF>, Single>().then(
             "SRIF out-of-field side disambiguation",
             [this](const Image& image) { run_side_disambiguation(image); });
@@ -481,9 +427,8 @@ namespace module::localisation {
             return;
         }
 
-        // Built on the first frame, not at configuration time: the lens calibration and the image
-        // size travel with the image, so this is the first point at which they are known and
-        // correct for whichever camera is actually running.
+        // Built on the first frame, not at configuration time: the lens and image size travel
+        // with the image.
         if (side == nullptr) {
             side = std::make_unique<filter::SideDisambiguator>(
                 image.lens,
@@ -501,8 +446,8 @@ namespace module::localisation {
         }
         const filter::Pose<double> Tbc = paired->Htw * to_pose(Eigen::Isometry3d(image.Hcw)).inverse();
 
-        // Camera pose in {f} at the posterior mean, and under the mirrored state. Same kinematics
-        // both times -- only the torso pose is mirrored, which is exactly the ambiguity being tested.
+        // Camera pose in {f} at the posterior mean and under the mirrored state. Same kinematics
+        // both times; only the torso pose is mirrored.
         const Eigen::VectorXd mean = system->density.mean();
         auto camera_pose           = [&Tbc](const Eigen::VectorXd& x) {
             return filter::SystemLocalisation::fieldPose<double>(x) * Tbc
@@ -527,16 +472,12 @@ namespace module::localisation {
                                                                             filter::SystemLocalisation::heading(mean));
 
         if (cfg.use_hypothesis_bank) {
-            // Bank mode: the background evidence is the only thing that separates the two symmetric
-            // hypotheses (landmarks leave them at 50/50), so fold each frame's log-ratio into the
-            // mixture weights. The representative switching sides IS the correction, done smoothly
-            // by the weights rather than by a discontinuous state flip.
+            // Bank mode: fold each frame's log-ratio into the mixture weights. The representative
+            // switching sides is the correction, so there is no state flip.
             system->addSideLogEvidence(result.sideDelta);
 
-            // If the mirror has already been pruned and the evidence now says the surviving belief
-            // is wrong (a mid-game kidnap), re-seed the alternative so the weights have something to
-            // switch to. The cooldown stops repeated spawns while flipRequested stays latched -- the
-            // LLR takes a few seconds to climb back after a switch.
+            // If the mirror was pruned and the evidence now says the survivor is wrong, re-seed
+            // the alternative. The cooldown stops repeated spawns while flipRequested is latched.
             if (result.flipRequested && system->numHypotheses() == 1
                 && t - last_respawn_t > side->options.flipCooldown) {
                 system->spawnMirror();
@@ -545,9 +486,8 @@ namespace module::localisation {
             }
         }
         else if (result.flipRequested) {
-            // Single-hypothesis mode: the background says we are on the wrong side, so mirror the
-            // belief outright and tell the disambiguator, which negates its accumulated evidence and
-            // freezes map building while the estimator re-converges.
+            // Single-hypothesis mode: mirror the belief outright. notifyFlipApplied negates the
+            // accumulated evidence and freezes map building while the estimator re-converges.
             system->resetTo(filter::SystemLocalisation::mirrorDensity(system->density), t);
             side->notifyFlipApplied(t);
             const Eigen::VectorXd flipped = system->density.mean();
@@ -584,9 +524,8 @@ namespace module::localisation {
         msg->timestamp = image.timestamp;
         msg->Hcw       = image.Hcw;
 
-        // The status enums are declared in the same precedence order on both sides, so the mapping
-        // is positional. Static-assert the ends so a value inserted in either list is a build error
-        // rather than a silently miscoloured overlay.
+        // Positional mapping between the two status enums. The static_asserts turn a value
+        // inserted into either list into a build error rather than a miscoloured overlay.
         using FeatureStatus  = OutOfFieldFeature::Status;
         using LandmarkStatus = OutOfFieldLandmark::Status;
         static_assert(int(FeatureStatus::ON_CARPET) == filter::SideDisambiguator::FEATURE_ON_CARPET
@@ -604,8 +543,8 @@ namespace module::localisation {
             msg->features.push_back(feature);
         }
 
-        // Landmarks are sent as rays rather than pixels so NUsight can re-project them through the
-        // lens it already holds, and so a landmark that has drifted outside the image still draws.
+        // Sent as rays rather than pixels so NUsight can re-project them, and so a landmark
+        // outside the image still draws.
         const Eigen::Vector2d dimensions(double(image.dimensions.x()), double(image.dimensions.y()));
         msg->landmarks.reserve(result.landmarkViews.size());
         for (const filter::SideDisambiguator::LandmarkView& view : result.landmarkViews) {
@@ -630,28 +569,22 @@ namespace module::localisation {
     }
 
     void FieldLocalisationSRIF::apply_fall_recovery(double t) {
-        // The mean is kept: a fall and getup move the torso well under a metre, so the pre-fall
-        // position is still the best estimate available. Re-solving globally would be worse, since
-        // the grid search breaks the field symmetry using the known starting half -- a prior that
-        // is false once play is under way. What a fall destroys is confidence, above all in yaw,
-        // so that is what is handed back. The widened belief is also what reopens the landmark
-        // association gate (MeasurementFieldLandmarks::Options::gateYawScale); without it a getup
-        // that turned the robot leaves every predicted bearing outside the gate and the filter
-        // can never re-acquire.
+        // The mean is kept and only the confidence is handed back, above all in yaw. The widened
+        // belief is also what reopens the landmark association gate
+        // (MeasurementFieldLandmarks::Options::gateYawScale).
         const Eigen::VectorXd xr = system->density.mean();
         Eigen::MatrixXd extra_cov =
             Eigen::MatrixXd::Zero(filter::SystemLocalisation::nx, filter::SystemLocalisation::nx);
         extra_cov(0, 0) = extra_cov(1, 1) = cfg.recovery_pos_std * cfg.recovery_pos_std;
-        // Yaw uncertainty is about the field z axis, which lands on the quaternion states as a
-        // rank-one block rather than a single diagonal element: no element is "the yaw".
+        // Yaw is about the field z axis, which lands on the quaternion states as a rank-one block
+        // rather than a single diagonal element.
         const Eigen::Vector4d j_yaw = filter::SystemLocalisation::attitudeTangentField(xr).col(2);
         extra_cov.block<4, 4>(filter::SystemLocalisation::iQuat, filter::SystemLocalisation::iQuat) =
             cfg.recovery_yaw_std * cfg.recovery_yaw_std * j_yaw * j_yaw.transpose();
         system->inflateCovariance(extra_cov);
 
-        // A fall is also a chance to have been turned around without the landmarks noticing, and
-        // they can never notice: the two symmetric field poses fit each other's landmarks
-        // identically. Re-seed the mirror so any out-of-field evidence has something to switch to.
+        // A fall may have turned the robot around, which landmarks alone can never detect.
+        // Re-seed the mirror so out-of-field evidence has something to switch to.
         if (cfg.use_hypothesis_bank && system->numHypotheses() == 1) {
             system->spawnMirror();
         }
@@ -685,7 +618,7 @@ namespace module::localisation {
                                                    Eigen::Matrix<double, 18, 1>& eta0) const {
         constexpr Eigen::Index nx = filter::SystemLocalisation::nx;
 
-        // Roll, pitch and torso height come from the gravity-aligned kinematic chain.
+        // Roll, pitch and torso height come from the kinematic chain, unsearched.
         const Eigen::Vector3d rpy_torso = rot2rpy(Twt.rotationMatrix);
         const double roll0              = rpy_torso.x();
         const double pitch0             = rpy_torso.y();
@@ -707,8 +640,7 @@ namespace module::localisation {
             for (double y = -half_width; y <= half_width; y += cfg.grid_step_xy) {
                 for (double yaw = -M_PI; yaw < M_PI; yaw += cfg.grid_step_yaw) {
                     Eigen::VectorXd candidate(nx);
-                    // Rates start at zero: the grid solve runs on the first usable frame, and
-                    // the body-rate measurements sharpen them within a frame or two.
+                    // Rates start at zero; the body-rate measurements sharpen them quickly.
                     candidate << x, y, z0, rpy2quat(Eigen::Vector3d(roll0, pitch0, yaw)),
                         Eigen::Matrix<double, 9, 1>::Zero(), 0.0, 0.0;
                     probe.resetTo(GaussianInfo<double>::fromSqrtMoment(candidate, S_probe), sample.t);
@@ -717,8 +649,8 @@ namespace module::localisation {
                     if (measurement.numAssociated() < std::size_t(cfg.min_init_associations)) {
                         continue;
                     }
-                    // The robust likelihood already rewards inliers and floors outliers at the clutter
-                    // density, so it favours the pose that explains the most rays well.
+                    // The robust likelihood floors outliers at the clutter density, so this
+                    // favours the pose explaining the most rays well.
                     const double score = measurement.logLikelihood(candidate, probe);
                     if (score > best_score) {
                         best_score = score;
@@ -733,16 +665,10 @@ namespace module::localisation {
             return false;
         }
 
-        // Resolve the own-half/opponent-half symmetry. The mirror has an identical likelihood, so
-        // this loses no fit; it only picks the physically valid side.
-        //
-        // Own half is +x by the field-frame convention the rest of the codebase already hardcodes:
-        // our goal sits at +field_length/2 (Defend, Goalie, ReadyAttack, FieldLocalisationNLopt's
-        // own_goal_posts) and the goal we attack at -field_length/2 (WalkToBall, PenaltyShootout).
-        // The frame is defined relative to our own goal and nothing swaps it by team or half, so
-        // this is a fixed fact about the frame rather than a per-game setting -- and the rules put
-        // every robot in its own half at kickoff, which is what makes the prior true at init and
-        // false afterwards.
+        // Resolve the own-half/opponent-half symmetry. The mirror scores identically, so this
+        // loses no fit; it only picks the side the kickoff rules allow. Own half is +x, the
+        // field-frame convention the rest of the codebase hardcodes (own goal at +field_length/2).
+        // Only true at kickoff -- see the out-of-field disambiguator for the rest of the game.
         if (best_eta(0) < 0.0) {
             best_eta = filter::SystemLocalisation::mirrorState(best_eta);
         }
@@ -760,26 +686,20 @@ namespace module::localisation {
         const Eigen::Isometry3d Hfw_full = to_isometry(Tfb * Htw);
         auto field                       = std::make_unique<Field>();
 
-        // Emit the planar (ground-plane) world-to-field pose: keep (x, y) and the yaw, drop the torso
-        // height and roll/pitch. The field is a flat z=0 model, so a full SE(3) Hfw (which carries the
-        // walking torso's tilt and ~0.4 m height) tips the field lines off the plane in NUsight. Matching
-        // the NLopt convention (Hfw = Translation(x, y, 0) * Rz(yaw)) keeps them flat, and every consumer
-        // reasons about the field on the ground plane anyway.
+        // Planar world-to-field pose: keep (x, y, yaw), drop torso height and roll/pitch. The
+        // field is a flat z=0 model and every consumer reasons about it on the ground plane.
+        // Matches the NLopt convention: Hfw = Translation(x, y, 0) * Rz(yaw).
         const double yaw      = rot2rpy(Hfw_full.rotation()).z();
         Eigen::Isometry3d Hfw = Eigen::Isometry3d::Identity();
         Hfw.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hfw.translation()     = Eigen::Vector3d(Hfw_full.translation().x(), Hfw_full.translation().y(), 0.0);
         field->Hfw            = Hfw;
 
-        // TODO(future): localise the feet in the field frame as well. This emits only the torso field
-        // pose (Hfw), which is enough to place the robot, but ball passing and foot placement would
-        // benefit from knowing where each foot is on the field. The feet field poses could be derived by
-        // composing the kinematic foot frames (Sensors.Htx[L_FOOT_BASE]/[R_FOOT_BASE]) with the field
-        // pose, then emitted alongside (or added to) the Field message. Deferred - future work.
+        // TODO: emit the feet in the field frame too, for passing and foot placement. Compose
+        // Sensors.Htx[L_FOOT_BASE]/[R_FOOT_BASE] with the field pose.
 
-        // Covariance of the reported (x, y, yaw). Position is the leading 2x2 block; yaw is not a
-        // state element but a direction in the quaternion block, so both its variance and its
-        // cross-covariance with position go through row 2 of the attitude Jacobian.
+        // Covariance of the reported (x, y, yaw). Yaw is not a state element but a direction in
+        // the quaternion block, so it goes through row 2 of the attitude Jacobian.
         const Eigen::MatrixXd P           = system->density.cov();
         constexpr Eigen::Index iq         = filter::SystemLocalisation::iQuat;
         const Eigen::RowVector4d g_yaw    = filter::SystemLocalisation::attitudeJacobian(mean).row(2);
@@ -794,7 +714,7 @@ namespace module::localisation {
         field->covariance  = covariance;
         field->uncertainty = covariance.trace();
 
-        // Hypotheses as (x, y, yaw) particles (a single component in single-hypothesis mode).
+        // Hypotheses as (x, y, yaw) particles; one component in single-hypothesis mode.
         if (system->numHypotheses() > 1) {
             for (const GaussianInfo<double>& component : system->hypotheses()) {
                 const Eigen::VectorXd m = component.mean();
