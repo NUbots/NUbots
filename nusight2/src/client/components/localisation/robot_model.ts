@@ -3,6 +3,7 @@ import { observable } from "mobx";
 import { computed } from "mobx";
 import { action } from "mobx";
 
+import { Matrix3 } from "../../../shared/math/matrix3";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
@@ -165,6 +166,7 @@ export class LocalisationRobotModel {
   @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
   @observable associationLines?: Line[];
+  @observable covariance: Matrix3; // Covariance of the localisation (x, y, theta) estimate
   @observable maxAlignRadius: number;
   @observable minAlignRadius: number;
   @observable angleToFinalHeading: number;
@@ -206,6 +208,7 @@ export class LocalisationRobotModel {
     robots,
     purpose,
     associationLines,
+    covariance,
     maxAlignRadius,
     minAlignRadius,
     angleToFinalHeading,
@@ -240,6 +243,7 @@ export class LocalisationRobotModel {
     robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
     associationLines?: Line[];
+    covariance: Matrix3;
     maxAlignRadius: number;
     minAlignRadius: number;
     angleToFinalHeading: number;
@@ -281,6 +285,7 @@ export class LocalisationRobotModel {
     this.purpose = purpose;
     this.teamColour = teamColour || "blue";
     this.associationLines = associationLines;
+    this.covariance = covariance;
     this.maxAlignRadius = maxAlignRadius;
     this.minAlignRadius = minAlignRadius;
     this.angleToFinalHeading = angleToFinalHeading;
@@ -305,6 +310,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      covariance: Matrix3.of(),
       Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),

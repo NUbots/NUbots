@@ -43,6 +43,8 @@ message FieldIntersection {
     IntersectionType type = 1;
     /// Position of the intersection in world space
     vec3 rIWw = 2;
+    /// Pixel coordinates (centre of bounding box)
+    vec2 pixel_centre = 3;
 }
 
 message FieldIntersections {

@@ -39,7 +39,9 @@
 
 using message::input::Image;
 using utility::vision::project;
+using utility::vision::project_pixel;
 using utility::vision::unproject;
+using utility::vision::unproject_pixel;
 
 using Catch::Matchers::WithinAbs;
 
@@ -266,6 +268,156 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
         THEN("the error is small") {
             INFO("Un-normalised rectilinear tests");
             run_round_trip<Scalar>(lens, dimensions, false, 2e-2);
+        }
+    }
+}
+
+namespace {
+
+    /// @brief A ray at incidence theta, azimuth phi, in the camera frame (x optical, y left, z up).
+    Eigen::Vector3d ray_at(const double& theta_deg, const double& phi_deg) {
+        const double theta = theta_deg * M_PI / 180.0;
+        const double phi   = phi_deg * M_PI / 180.0;
+        return Eigen::Vector3d(std::cos(theta), std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi))
+            .normalized();
+    }
+
+    /// @brief The simulated camera: an undistorted 90 deg rectilinear pinhole at 640x480.
+    ///
+    /// NUWebots protos/robot/nugus/nugus.proto sets the Camera node's `spherical FALSE` and
+    /// `fieldOfView 1.5707`, whence focal_length = (640/2)/tan(1.5707/2)/640 = 0.5.
+    Image::Lens webots_lens() {
+        return Image::Lens{Image::Lens::Projection("RECTILINEAR"),
+                           0.5f,
+                           1.5707f,
+                           Eigen::Vector2f::Zero(),
+                           Eigen::Vector2f::Zero()};
+    }
+
+    /// @brief A real robot's fisheye: a Lensagon BF10M19828S118C calibration at 1280x1024.
+    ///
+    /// The distortion coefficients are optional so that a caller wanting an exact project/unproject
+    /// inverse (rather than the ~0.2 px the distortion polynomial pair is accurate to) can drop them.
+    Image::Lens fisheye_lens(const bool& distorted = true) {
+        return Image::Lens{
+            Image::Lens::Projection("EQUIDISTANT"),
+            0.34690945742400775f,
+            183.0f * float(M_PI) / 180.0f,
+            Eigen::Vector2f(0.02072339174622414f, -0.0011612242293956145f),
+            distorted ? Eigen::Vector2f(0.38553542593448015f, 0.1498415334589703f) : Eigen::Vector2f::Zero()};
+    }
+
+}  // namespace
+
+SCENARIO("pixel-space projection matches the width-normalised projection", "[utility][vision][projection]") {
+    GIVEN("A lens calibration and the image size in pixels") {
+        const Image::Lens lens = fisheye_lens();
+        const Eigen::Matrix<Scalar, 2, 1> pixels(1280, 1024);
+        const Eigen::Matrix<Scalar, 2, 1> normalised = pixels / pixels.x();
+
+        THEN("project_pixel is project scaled up by the image width") {
+            const Eigen::Vector3d ray                  = ray_at(35.0, 20.0);
+            const Eigen::Matrix<Scalar, 2, 1> px       = project_pixel(ray, lens, pixels);
+            const Eigen::Matrix<Scalar, 2, 1> expected = project(ray, lens, normalised) * pixels.x();
+            REQUIRE_THAT(px.x(), WithinAbs(expected.x(), 1e-9));
+            REQUIRE_THAT(px.y(), WithinAbs(expected.y(), 1e-9));
+        }
+
+        THEN("unproject_pixel is unproject scaled down by the image width") {
+            const Eigen::Matrix<Scalar, 2, 1> px(910.0, 300.0);
+            const Eigen::Vector3d ray              = unproject_pixel(px, lens, pixels);
+            const Eigen::Matrix<Scalar, 2, 1> px_n = px / pixels.x();
+            const Eigen::Vector3d expected         = unproject(px_n, lens, normalised);
+            REQUIRE_THAT((ray - expected).norm(), WithinAbs(0.0, 1e-9));
+        }
+    }
+}
+
+SCENARIO("pixel projections round-trip", "[utility][vision][projection]") {
+    GIVEN("A distortion-free equidistant fisheye") {
+        const Image::Lens lens = fisheye_lens(false);
+        const Eigen::Matrix<Scalar, 2, 1> pixels(1280, 1024);
+
+        THEN("project_pixel then unproject_pixel recovers each ray") {
+            for (double theta = 0.0; theta <= 70.0; theta += 10.0) {
+                for (double phi = 0.0; phi < 360.0; phi += 45.0) {
+                    const Eigen::Vector3d ray  = ray_at(theta, phi);
+                    const Eigen::Vector3d back = unproject_pixel(project_pixel(ray, lens, pixels), lens, pixels);
+                    REQUIRE_THAT((back - ray).norm(), WithinAbs(0.0, 1e-9));
+                }
+            }
+        }
+    }
+
+    GIVEN("The webots pinhole") {
+        const Image::Lens lens = webots_lens();
+        const Eigen::Matrix<Scalar, 2, 1> pixels(640, 480);
+
+        THEN("project_pixel and unproject_pixel are exact inverses (no distortion to approximate)") {
+            for (double theta = 0.0; theta <= 55.0; theta += 5.0) {
+                for (double phi = 0.0; phi < 360.0; phi += 45.0) {
+                    const Eigen::Vector3d ray  = ray_at(theta, phi);
+                    const Eigen::Vector3d back = unproject_pixel(project_pixel(ray, lens, pixels), lens, pixels);
+                    REQUIRE_THAT((back - ray).norm(), WithinAbs(0.0, 1e-9));
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("the projection model is a property of the camera, not a constant", "[utility][vision][projection]") {
+    GIVEN("The webots pinhole") {
+        const Image::Lens lens = webots_lens();
+        const Eigen::Matrix<Scalar, 2, 1> pixels(640, 480);
+
+        THEN("the horizontal edges of the image sit at +/- 45 deg") {
+            const Eigen::Vector3d left  = unproject_pixel(Eigen::Vector2d(0.0, 240.0), lens, pixels);
+            const Eigen::Vector3d right = unproject_pixel(Eigen::Vector2d(640.0, 240.0), lens, pixels);
+            REQUIRE_THAT(std::atan2(left.y(), left.x()), WithinAbs(M_PI / 4.0, 1e-9));
+            REQUIRE_THAT(std::atan2(right.y(), right.x()), WithinAbs(-M_PI / 4.0, 1e-9));
+        }
+
+        THEN("a ray at the horizon stays finite and lands outside the image") {
+            // tan(90 deg) is infinite; a bounds check can only reject the pixel if the projection
+            // stayed a number.
+            const Eigen::Vector2d px = project_pixel(Eigen::Vector3d(1e-4, 1.0, 0.0).normalized(), lens, pixels);
+            REQUIRE(std::isfinite(px.x()));
+            REQUIRE(std::isfinite(px.y()));
+            REQUIRE_FALSE((px.x() >= 0.0 && px.x() < pixels.x() && px.y() >= 0.0 && px.y() < pixels.y()));
+        }
+    }
+
+    GIVEN("The same ray through the fisheye and the pinhole") {
+        THEN("they disagree by degrees, so the calibration cannot be shared") {
+            // Replaying a webots frame through a fisheye calibration does not merely shift the
+            // re-projection, it bends it -- which is why the projection travels with the lens.
+            const Eigen::Matrix<Scalar, 2, 1> fisheye_px(1280, 1024);
+            const Eigen::Matrix<Scalar, 2, 1> pinhole_px(640, 480);
+            const Eigen::Vector3d ray = ray_at(40.0, 0.0);
+            const double r_fisheye    = project_pixel(ray, fisheye_lens(), fisheye_px).x() / fisheye_px.x() - 0.5;
+            const double r_pinhole    = project_pixel(ray, webots_lens(), pinhole_px).x() / pinhole_px.x() - 0.5;
+            REQUIRE(std::abs(r_fisheye - r_pinhole) > 0.05);
+        }
+    }
+
+    GIVEN("An equisolid lens") {
+        THEN("it follows r = 2 f sin(theta/2) rather than the equidistant law") {
+            // The Image message carries three projections, and a round-trip test cannot tell them
+            // apart: project and unproject would agree with each other on the wrong model. Pin the
+            // law itself so treating EQUISOLID as equidistant is a failure rather than a silence.
+            const double f     = 0.34690945742400775;
+            const double theta = 50.0 * M_PI / 180.0;
+            const double r     = utility::vision::equisolid::r(theta, f);
+            REQUIRE_THAT(r, WithinAbs(2.0 * f * std::sin(0.5 * theta), 1e-12));
+            REQUIRE_THAT(utility::vision::equisolid::theta(r, f), WithinAbs(theta, 1e-12));
+            REQUIRE(std::abs(r - utility::vision::equidistant::r(theta, f)) > 1e-3);
+        }
+
+        THEN("a radius past its horizon saturates instead of going nan") {
+            // asin is undefined past r = 2f: a pixel outside the lens circle must still unproject to
+            // something a bounds check can reject.
+            const double f = 0.34690945742400775;
+            REQUIRE_THAT(utility::vision::equisolid::theta(4.0 * f, f), WithinAbs(M_PI, 1e-12));
         }
     }
 }
