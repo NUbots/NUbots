@@ -59,27 +59,6 @@ namespace utility::gaussian_filtering {
     }
 
     /**
-     * @brief Computes a rotation matrix around the X-axis with its derivative.
-     *
-     * @tparam Scalar The scalar type for the rotation angle.
-     * @param x The rotation angle in radians.
-     * @param dRdx Output parameter for the derivative of the rotation matrix with respect to x.
-     * @return A 3x3 rotation matrix.
-     */
-    template <typename Scalar>
-    Eigen::Matrix3<Scalar> rotx(const Scalar& x, Eigen::Matrix3<Scalar>& dRdx) {
-        using std::cos, std::sin;
-        dRdx = Eigen::Matrix3<Scalar>::Zero();
-
-        dRdx(1, 1) = -sin(x);
-        dRdx(2, 1) = cos(x);
-
-        dRdx(1, 2) = -cos(x);
-        dRdx(2, 2) = -sin(x);
-        return rotx(x);
-    }
-
-    /**
      * @brief Computes a rotation matrix around the Y-axis.
      *
      * @tparam Scalar The scalar type for the rotation angle.
@@ -102,27 +81,6 @@ namespace utility::gaussian_filtering {
     }
 
     /**
-     * @brief Computes a rotation matrix around the Y-axis with its derivative.
-     *
-     * @tparam Scalar The scalar type for the rotation angle.
-     * @param x The rotation angle in radians.
-     * @param dRdx Output parameter for the derivative of the rotation matrix with respect to x.
-     * @return A 3x3 rotation matrix.
-     */
-    template <typename Scalar>
-    Eigen::Matrix3<Scalar> roty(const Scalar& x, Eigen::Matrix3<Scalar>& dRdx) {
-        using std::cos, std::sin;
-        dRdx = Eigen::Matrix3<Scalar>::Zero();
-
-        dRdx(0, 0) = -sin(x);
-        dRdx(2, 0) = -cos(x);
-
-        dRdx(0, 2) = cos(x);
-        dRdx(2, 2) = -sin(x);
-        return roty(x);
-    }
-
-    /**
      * @brief Computes a rotation matrix around the Z-axis.
      *
      * @tparam Scalar The scalar type for the rotation angle.
@@ -142,27 +100,6 @@ namespace utility::gaussian_filtering {
         R(1, 0) = sin(x);
         R(1, 1) = cos(x);
         return R;
-    }
-
-    /**
-     * @brief Computes a rotation matrix around the Z-axis with its derivative.
-     *
-     * @tparam Scalar The scalar type for the rotation angle.
-     * @param x The rotation angle in radians.
-     * @param dRdx Output parameter for the derivative of the rotation matrix with respect to x.
-     * @return A 3x3 rotation matrix.
-     */
-    template <typename Scalar>
-    Eigen::Matrix3<Scalar> rotz(const Scalar& x, Eigen::Matrix3<Scalar>& dRdx) {
-        using std::cos, std::sin;
-        dRdx = Eigen::Matrix3<Scalar>::Zero();
-
-        dRdx(0, 0) = -sin(x);
-        dRdx(1, 0) = cos(x);
-
-        dRdx(0, 1) = -cos(x);
-        dRdx(1, 1) = -sin(x);
-        return rotz(x);
     }
 
     /**
@@ -243,9 +180,10 @@ namespace utility::gaussian_filtering {
      * @brief Quaternion kinematics matrix: qdot = 0.5*quatXi(q)*omega_body.
      *
      * Follows from qdot = 0.5*q (x) (0, omega_b), the body-rate form matching
-     * Rdot = R*hatSO3(omega_b) for R = quat2rot(q). Unlike the roll-pitch-yaw rate
-     * transform TK() it has no singularity: every entry is linear in q, so a robot
-     * toppling through pitch = +-90 deg is an ordinary point on the trajectory.
+     * Rdot = R*hatSO3(omega_b) for R = quat2rot(q). Unlike the equivalent
+     * roll-pitch-yaw rate transform it has no singularity: every entry is linear in
+     * q, so a robot toppling through pitch = +-90 deg is an ordinary point on the
+     * trajectory.
      *
      * @tparam Derived The derived type of the input Eigen expression.
      * @param q Quaternion (w, x, y, z).
@@ -267,25 +205,6 @@ namespace utility::gaussian_filtering {
               -y,  x,  w;
         // clang-format on
         return Xi;
-    }
-
-    /**
-     * @brief Hamilton product of two (w, x, y, z) quaternions.
-     *
-     * @param a Left quaternion (w, x, y, z).
-     * @param b Right quaternion (w, x, y, z).
-     * @return The product a (x) b.
-     */
-    template <typename DerivedA, typename DerivedB>
-    Eigen::Vector4<typename DerivedA::Scalar> quatMultiply(const Eigen::MatrixBase<DerivedA>& a,
-                                                           const Eigen::MatrixBase<DerivedB>& b) {
-        using Scalar = typename DerivedA::Scalar;
-        Eigen::Vector4<Scalar> c;
-        c(0) = a(0) * b(0) - a(1) * b(1) - a(2) * b(2) - a(3) * b(3);
-        c(1) = a(0) * b(1) + a(1) * b(0) + a(2) * b(3) - a(3) * b(2);
-        c(2) = a(0) * b(2) - a(1) * b(3) + a(2) * b(0) + a(3) * b(1);
-        c(3) = a(0) * b(3) + a(1) * b(2) - a(2) * b(1) + a(3) * b(0);
-        return c;
     }
 
     /**
@@ -314,58 +233,6 @@ namespace utility::gaussian_filtering {
      */
     inline Eigen::Vector4d rpy2quat(const Eigen::Vector3d& Theta) {
         return rot2quat(rpy2rot(Theta));
-    }
-
-    /**
-     * @brief Computes the kinematic transformation matrix T(theta).
-     *
-     * The transformation relates body-frame angular velocities to Euler angle rates.
-     *
-     * @tparam Scalar The scalar type for computations.
-     * @param Thetanb Vector containing [roll, pitch, yaw] angles in radians.
-     * @return A 3x3 kinematic transformation matrix.
-     */
-    template <typename Scalar>
-    Eigen::Matrix<Scalar, 3, 3> TK(const Eigen::Matrix<Scalar, 3, 1>& Thetanb) {
-        Scalar phi                     = Thetanb(0);
-        Scalar theta                   = Thetanb(1);
-        Eigen::Matrix<Scalar, 3, 3> TK = Eigen::Matrix<Scalar, 3, 3>::Zero();
-        using std::cos, std::sin, std::tan;
-        Scalar cphi   = cos(phi);
-        Scalar sphi   = sin(phi);
-        Scalar ctheta = cos(theta);
-        Scalar ttheta = tan(theta);
-        TK(0, 0)      = 1;
-        TK(0, 1)      = sphi * ttheta;
-        TK(0, 2)      = cphi * ttheta;
-        TK(1, 1)      = cphi;
-        TK(1, 2)      = -sphi;
-        TK(2, 1)      = sphi / ctheta;
-        TK(2, 2)      = cphi / ctheta;
-        return TK;
-    }
-
-    /**
-     * @brief Builds the complete 6x6 Euler kinematic transformation matrix.
-     *
-     * The matrix relates body-frame velocities to the time derivative of the pose vector.
-     * J(eta) = [R_nb(theta_nb)    0]
-     *          [0                 T(theta_nb)]
-     *
-     * @tparam Scalar The scalar type for computations.
-     * @param eta The 6D pose vector [position; orientation] where orientation is [roll, pitch, yaw].
-     * @return A 6x6 kinematic transformation matrix.
-     */
-    template <typename Scalar>
-    Eigen::Matrix<Scalar, 6, 6> eulerKinematicTransformation(const Eigen::Matrix<Scalar, 6, 1>& eta) {
-        Eigen::Matrix<Scalar, 3, 1> thetanb = eta.template segment<3>(3);
-        Eigen::Matrix<Scalar, 3, 3> Rnb     = rpy2rot(thetanb);
-        Eigen::Matrix<Scalar, 3, 3> T       = TK(thetanb);
-
-        Eigen::Matrix<Scalar, 6, 6> J = Eigen::Matrix<Scalar, 6, 6>::Zero();
-        J.template block<3, 3>(0, 0)  = Rnb;
-        J.template block<3, 3>(3, 3)  = T;
-        return J;
     }
 
     /**

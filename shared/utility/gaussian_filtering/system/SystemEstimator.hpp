@@ -63,14 +63,6 @@ namespace utility::gaussian_filtering::system {
         gaussian::GaussianInfo<double> density;  ///< The current state density estimate.
 
         /**
-         * @brief Compute the estimated system dynamics.
-         * @param t Time.
-         * @param x State vector.
-         * @return The computed dynamics (state derivative).
-         */
-        virtual Eigen::VectorXd dynamicsEst(double t, const Eigen::VectorXd& x) const;
-
-        /**
          * @brief Compute the estimated system dynamics and its Jacobian.
          * @param t Time.
          * @param x State vector.

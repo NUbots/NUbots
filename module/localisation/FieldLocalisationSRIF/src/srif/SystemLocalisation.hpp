@@ -146,8 +146,8 @@ namespace module::localisation::srif {
         //   16..17  camera mount bias (roll, pitch) [rad]
         //
         // Attitude was roll-pitch-yaw until the fall work. The Euler-rate transform
-        // TK() is singular at pitch = +-90 deg, which is not an edge case for a
-        // falling robot -- it is on the trajectory of every topple. Passing through
+        // is singular at pitch = +-90 deg, which is not an edge case for a falling
+        // robot -- it is on the trajectory of every topple. Passing through
         // it landed the state on the gimbal alias (roll+180, 180-pitch, yaw+180):
         // the same rotation, so fieldPose() and the landmark models carried on
         // working, but every consumer reading x(5) as heading was then 180 deg out.
@@ -174,7 +174,6 @@ namespace module::localisation::srif {
         virtual SystemLocalisation* clone() const;
 
         virtual void predict(double time) override;
-        virtual Eigen::VectorXd dynamics(double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u) const override;
         virtual Eigen::VectorXd dynamics(double t,
                                          const Eigen::VectorXd& x,
                                          const Eigen::VectorXd& u,

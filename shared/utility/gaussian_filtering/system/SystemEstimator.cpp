@@ -57,11 +57,6 @@ namespace utility::gaussian_filtering::system {
         time_ = time;
     }
 
-    Eigen::VectorXd SystemEstimator::dynamicsEst(double t, const Eigen::VectorXd& x) const {
-        Eigen::VectorXd u = input(t, x);
-        return dynamics(t, x, u);
-    }
-
     Eigen::VectorXd SystemEstimator::dynamicsEst(double t, const Eigen::VectorXd& x, Eigen::MatrixXd& J) const {
         Eigen::VectorXd u = input(t, x);
         return dynamics(t, x, u, J);

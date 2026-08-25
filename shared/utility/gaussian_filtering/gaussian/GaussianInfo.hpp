@@ -35,7 +35,6 @@
 #include <Eigen/SVD>
 #include <cmath>
 #include <cstddef>
-#include <ctime>
 #include <numbers>
 
 #include "GaussianBase.hpp"
@@ -51,9 +50,6 @@ namespace utility::gaussian_filtering::gaussian {
     class GaussianInfo : public GaussianBase<Scalar> {
     public:
         virtual ~GaussianInfo() override = default;
-
-        using GaussianBase<Scalar>::normcdf;
-        using GaussianBase<Scalar>::chi2inv;
 
     protected:
         /**
@@ -182,55 +178,9 @@ namespace utility::gaussian_filtering::gaussian {
             return out;
         }
 
-        /**
-         * @brief Creates a GaussianInfo object from information parameters.
-         *
-         * @param eta The information vector.
-         * @param Lambda The information matrix.
-         * @return The resulting GaussianInfo object.
-         */
-        static GaussianInfo fromInfo(const Eigen::VectorX<Scalar>& eta, const Eigen::MatrixX<Scalar>& Lambda) {
-            assert(eta.size() == Lambda.cols());
-            assert(Lambda.rows() == Lambda.cols());
-
-            // Let Xi be an upper-triangular matrix such that Xi^T*Xi = Lambda
-            Eigen::LLT<Eigen::MatrixX<Scalar>, Eigen::Upper> llt(Lambda);
-            Eigen::MatrixX<Scalar> Xi = llt.matrixU();
-
-            // Solve Xi^T*nu = eta
-            Eigen::VectorX<Scalar> nu = Xi.template triangularView<Eigen::Upper>().transpose().solve(eta);
-            return fromSqrtInfo(nu, Xi);
-        }
-
         //
         // One-argument factories
         //
-
-        /**
-         * @brief Creates a GaussianInfo object from the square root of the covariance matrix.
-         *
-         * This static factory method creates a GaussianInfo object with zero mean and
-         * the given square root of the covariance matrix.
-         *
-         * @param S The square root of the covariance matrix (upper triangular).
-         * @return The resulting GaussianInfo object.
-         */
-        static GaussianInfo fromSqrtMoment(const Eigen::MatrixX<Scalar>& S) {
-            return fromSqrtMoment(Eigen::VectorX<Scalar>::Zero(S.cols()), S);
-        }
-
-        /**
-         * @brief Creates a GaussianInfo object from the covariance matrix.
-         *
-         * This static factory method creates a GaussianInfo object with zero mean and
-         * the given covariance matrix.
-         *
-         * @param P The covariance matrix.
-         * @return The resulting GaussianInfo object.
-         */
-        static GaussianInfo fromMoment(const Eigen::MatrixX<Scalar>& P) {
-            return fromMoment(Eigen::VectorX<Scalar>::Zero(P.cols()), P);
-        }
 
         /**
          * @brief Creates a GaussianInfo object from the square root information matrix.
@@ -243,19 +193,6 @@ namespace utility::gaussian_filtering::gaussian {
          */
         static GaussianInfo fromSqrtInfo(const Eigen::MatrixX<Scalar>& Xi) {
             return fromSqrtInfo(Eigen::VectorX<Scalar>::Zero(Xi.cols()), Xi);
-        }
-
-        /**
-         * @brief Creates a GaussianInfo object from the information matrix.
-         *
-         * This static factory method creates a GaussianInfo object with zero mean and
-         * the given information matrix.
-         *
-         * @param Lambda The information matrix.
-         * @return The resulting GaussianInfo object.
-         */
-        static GaussianInfo fromInfo(const Eigen::MatrixX<Scalar>& Lambda) {
-            return fromInfo(Eigen::VectorX<Scalar>::Zero(Lambda.cols()), Lambda);
         }
 
         /**
@@ -308,30 +245,6 @@ namespace utility::gaussian_filtering::gaussian {
         }
 
         /**
-         * @brief Get the information matrix of the Gaussian distribution.
-         *
-         * This method computes and returns the information matrix, which is
-         * the inverse of the covariance matrix.
-         *
-         * @return The information matrix of the distribution.
-         */
-        virtual Eigen::MatrixX<Scalar> infoMat() const override {
-            return Xi_.transpose() * Xi_;
-        }
-
-        /**
-         * @brief Get the information vector of the Gaussian distribution.
-         *
-         * This method computes and returns the information vector, which is
-         * related to the mean of the distribution.
-         *
-         * @return The information vector of the distribution.
-         */
-        virtual Eigen::VectorX<Scalar> infoVec() const override {
-            return Xi_.transpose() * nu_;
-        }
-
-        /**
          * @brief Get the square root of the information matrix.
          *
          * This method returns the square root of the information matrix,
@@ -341,44 +254,6 @@ namespace utility::gaussian_filtering::gaussian {
          */
         virtual Eigen::MatrixX<Scalar> sqrtInfoMat() const override {
             return Xi_;
-        }
-
-        /**
-         * @brief Get the square root of the information vector.
-         *
-         * This method returns the square root of the information vector,
-         * which is stored internally as nu_.
-         *
-         * @return The square root of the information vector.
-         */
-        virtual Eigen::VectorX<Scalar> sqrtInfoVec() const override {
-            return nu_;
-        }
-
-        /**
-         * @brief Create a GaussianInfo object from a set of samples.
-         *
-         * This static method constructs a GaussianInfo object by estimating the
-         * mean and square-root covariance from the provided sample data.
-         *
-         * @param X The sample data matrix, where each column represents a sample
-         *          and each row represents a dimension of the data.
-         * @return A GaussianInfo object representing the estimated Gaussian distribution.
-         *
-         * @note The method assumes that the samples are stored column-wise in the input matrix.
-         */
-        static GaussianInfo fromSamples(const Eigen::MatrixX<Scalar>& X) {
-            const Eigen::Index n = X.rows();
-            const Eigen::Index m = X.cols();
-
-            // Compute the sample mean
-            Eigen::VectorXd mu = X.rowwise().mean();
-
-            // Compute the sample square-root covariance
-            Eigen::MatrixX<Scalar> SS = std::sqrt(1.0 / (m - 1)) * (X.colwise() - mu).transpose();
-            Eigen::HouseholderQR<Eigen::Ref<Eigen::MatrixX<Scalar>>> qr(SS);  // In-place QR decomposition
-            Eigen::MatrixXd S = SS.topRows(n).template triangularView<Eigen::Upper>();
-            return GaussianInfo::fromSqrtMoment(mu, S);
         }
 
         /**
@@ -444,100 +319,6 @@ namespace utility::gaussian_filtering::gaussian {
             }
 
             return marginal(idx, idxNot);
-        }
-
-        /**
-         * @brief Given joint density p(x), return conditional density p(x(idxA) | x(idxB) = xB)
-         *
-         * This method computes the conditional density for a subset of variables given values for another subset.
-         *
-         * @tparam IndexTypeA The type of the index container for variables A
-         * @tparam IndexTypeB The type of the index container for variables B
-         * @param idxA The indices of the variables to condition on
-         * @param idxB The indices of the variables with known values
-         * @param xB The known values for variables indexed by idxB
-         * @return The conditional Gaussian distribution
-         */
-        template <typename IndexTypeA, typename IndexTypeB>
-        GaussianInfo conditional(const IndexTypeA& idxA,
-                                 const IndexTypeB& idxB,
-                                 const Eigen::VectorX<Scalar>& xB) const {
-            const std::size_t& nA = idxA.size();
-            const std::size_t& nB = idxB.size();
-            const std::size_t n   = nA + nB;
-            assert(n == dim());
-
-            // Form [Xi(:, idxA), Xi(:, idxB), nu]
-            Eigen::MatrixX<Scalar> RR(n, n + 1);
-            RR << Xi_(Eigen::all, idxA), Xi_(Eigen::all, idxB), nu_;
-            // Q-less QR yields
-            // [R1, R2, nu1;
-            //   0, R3, nu2]
-            Eigen::HouseholderQR<Eigen::Ref<Eigen::MatrixX<Scalar>>> qr(RR);  // In-place QR decomposition
-
-            // Extract R1, R2, nu1 from QR result
-            // R1 = RR(1:nA, 1:nA)
-            // R2 = RR(1:nA, nA+1:n)
-            // nu1 = RR(1:nA, n+1)
-            Eigen::MatrixX<Scalar> R1  = RR.block(0, 0, nA, nA);
-            Eigen::MatrixX<Scalar> R2  = RR.block(0, nA, nA, nB);
-            Eigen::VectorX<Scalar> nu1 = RR.block(0, n, nA, 1);
-
-            // p(x(idxA) | x(idxB) = xB) = N^-0.5(x(idxA); nu1 - R2*xB, R1)
-            GaussianInfo out(nA);
-            out.nu_ = nu1 - R2 * xB;
-            out.Xi_ = R1.template triangularView<Eigen::Upper>();
-            return out;
-        }
-
-        /**
-         * @brief Given joint density p(x), return conditional density p(x(idxA) | y) given p(x(idxB) | y) for some
-         * data y
-         *
-         * This method computes the conditional density for a subset of variables given the conditional density of
-         * another subset.
-         *
-         * @tparam IndexTypeA The type of the index container for variables A
-         * @tparam IndexTypeB The type of the index container for variables B
-         * @param idxA The indices of the variables to condition on
-         * @param idxB The indices of the variables with known conditional density
-         * @param pxB_y The conditional density p(x(idxB) | y)
-         * @return The conditional Gaussian distribution p(x(idxA) | y)
-         */
-        template <typename IndexTypeA, typename IndexTypeB>
-        GaussianInfo conditional(const IndexTypeA& idxA, const IndexTypeB& idxB, const GaussianInfo& pxB_y) const {
-            const std::size_t& nA = idxA.size();
-            const std::size_t& nB = idxB.size();
-            const std::size_t n   = nA + nB;
-            assert(n == dim());
-
-            // Form [Xi(:, idxA), Xi(:, idxB), nu]
-            Eigen::MatrixX<Scalar> RR(n, n + 1);
-            RR << Xi_(Eigen::all, idxA), Xi_(Eigen::all, idxB), nu_;
-            // Q-less QR yields
-            // [R1, R2, nu1;
-            //   0, R3, nu2]
-            Eigen::HouseholderQR<Eigen::Ref<Eigen::MatrixX<Scalar>>> qr(RR);  // In-place QR decomposition
-
-            // Form [      R2,            R1,      nu1;
-            //       pxB_y.Xi, zeros(nB, nA), pxB_y.nu]
-            Eigen::MatrixX<Scalar> SS(n, n + 1);
-            SS.topLeftCorner(nA, nB)    = RR.block(0, nA, nA, nB);                                           // R2
-            SS.block(0, nB, nA, nA)     = RR.topLeftCorner(nA, nA).template triangularView<Eigen::Upper>();  // R1
-            SS.topRightCorner(nA, 1)    = RR.block(0, n, nA, 1);                                             // nu1
-            SS.bottomLeftCorner(nB, nB) = pxB_y.Xi_;
-            SS.block(nA, nB, nB, nA)    = Eigen::MatrixX<Scalar>::Zero(nB, nA);
-            SS.bottomRightCorner(nB, 1) = pxB_y.nu_;
-            // Q-less QR yields
-            // [S1, S2, s1;
-            //   0, S3, s2]
-            Eigen::HouseholderQR<Eigen::Ref<Eigen::MatrixX<Scalar>>> qr_SS(SS);  // In-place QR decomposition
-
-            // p(x(idxA) | y) = N^-0.5(x(idxA); s2, S3)
-            GaussianInfo out(nA);
-            out.nu_ = SS.block(nB, n, nA, 1);
-            out.Xi_ = SS.block(nB, nB, nA, nA).template triangularView<Eigen::Upper>();
-            return out;
         }
 
         /**
@@ -727,49 +508,6 @@ namespace utility::gaussian_filtering::gaussian {
             Xi_.conservativeResizeLike(Eigen::MatrixX<Scalar>::Zero(n1 + n2, n1 + n2));
             Xi_.bottomRightCorner(n2, n2) = other.Xi_;
             return *this;
-        }
-
-        /**
-         * @brief Check if a given point is within the confidence region of the Gaussian distribution.
-         *
-         * This method determines whether the input vector x is within the confidence region
-         * defined by nSigma standard deviations from the mean of the Gaussian distribution.
-         *
-         * @param x The input vector to check.
-         * @param nSigma The number of standard deviations defining the confidence region (default: 3.0).
-         * @return True if the point is within the confidence region, false otherwise.
-         */
-        virtual bool isWithinConfidenceRegion(const Eigen::VectorX<Scalar>& x, double nSigma = 3.0) const override {
-            const Eigen::Index& n          = dim();
-            const double c                 = 2 * normcdf(nSigma) - 1;
-            const Scalar r2                = chi2inv(c, n);
-            const Eigen::VectorX<Scalar> w = Xi_ * x - nu_;
-            return w.squaredNorm() <= r2;
-        }
-
-        /**
-         * @brief Compute the quadric surface coefficients for a given number of standard deviations.
-         *
-         * This method calculates the coefficients of the quadric surface that represents
-         * the confidence ellipsoid of the 3D Gaussian distribution. The surface is defined
-         * for a specified number of standard deviations (nSigma).
-         *
-         * @param nSigma The number of standard deviations to use for the confidence ellipsoid (default: 3.0).
-         * @return A 4x4 matrix containing the quadric surface coefficients.
-         *
-         * @note This method assumes that the Gaussian distribution is three-dimensional.
-         */
-        Eigen::Matrix4<Scalar> quadricSurface(double nSigma = 3.0) const {
-            const Eigen::Index& n = dim();
-            assert(n == 3);
-
-            Eigen::Matrix4<Scalar> Q;
-            const double c           = 2 * normcdf(nSigma) - 1;
-            const Scalar r2          = chi2inv(c, n);
-            Eigen::VectorX<Scalar> y = -infoVec();
-            Q << infoMat(), y, y.transpose(), nu_.squaredNorm() - r2;
-
-            return Q;
         }
 
     protected:

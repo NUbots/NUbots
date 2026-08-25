@@ -54,12 +54,6 @@ namespace module::localisation::srif {
     // SystemBase's interface is shared with input-driven systems.
     Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
                                                  const Eigen::VectorXd& x,
-                                                 const Eigen::VectorXd& /*u*/) const {
-        return dynamicsLocalisationTemplated<double>(x);
-    }
-
-    Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
-                                                 const Eigen::VectorXd& x,
                                                  const Eigen::VectorXd& /*u*/,
                                                  Eigen::MatrixXd& J) const {
         using autodiff::at;

@@ -56,15 +56,6 @@ namespace utility::gaussian_filtering::system {
         virtual void predict(double time) = 0;
 
         /**
-         * @brief Compute the system dynamics.
-         * @param t The time to evaluate the dynamics at.
-         * @param x The state to evaluate the dynamics at.
-         * @param u The input to evaluate the dynamics at.
-         * @return The computed dynamics (state derivative).
-         */
-        virtual Eigen::VectorXd dynamics(double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u) const = 0;
-
-        /**
          * @brief Compute the system dynamics and its Jacobian.
          * @param t The time to evaluate the dynamics at.
          * @param x The state to evaluate the dynamics at.
