@@ -33,14 +33,10 @@
 namespace utility::gaussian_filtering {
 
     /**
-     * @brief Helper class for working with elements of \f$\mathsf{SE}(3)\f$
+     * @brief A rigid-body transform: a rotation and a translation.
      *
-     * Represents a pose as a transformation matrix \f$\mathbf{T} \in \mathsf{SE}(3)\f$:
-     * @f[
-     * \mathbf{T} = \begin{bmatrix} \mathbf{R} & \mathbf{r} \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix} \in
-     * \mathsf{SE}(3)
-     * @f]
-     * where \f$\mathbf{R} \in \mathsf{SO}(3)\f$ and \f$\mathbf{r} \in \mathbb{R}^3\f$
+     * Stands in for the 4x4 homogeneous matrix [R r; 0 1] without ever forming it,
+     * so composition and point transforms stay 3x3.
      *
      * @tparam Scalar The scalar type (default: double)
      */
@@ -49,27 +45,24 @@ namespace utility::gaussian_filtering {
         using Matrix3 = Eigen::Matrix3<Scalar>;
         using Vector3 = Eigen::Vector3<Scalar>;
 
-        Matrix3 rotationMatrix;     ///< \f$\mathbf{R} \in \mathsf{SO}(3)\f$
-        Vector3 translationVector;  ///< \f$\mathbf{r} \in \mathbb{R}^3\f$
+        Matrix3 rotationMatrix;     ///< Rab, rotating a vector from frame {b} to frame {a}
+        Vector3 translationVector;  ///< rBAa, the origin of {b} relative to {a}, expressed in {a}
 
         /**
-         * @brief Default constructor (\f$\mathbf{R} = \mathbf{I}\f$, \f$\mathbf{r} = \mathbf{0}\f$)
+         * @brief Default constructor: identity rotation, zero translation.
          */
         Pose() : rotationMatrix(Matrix3::Identity()), translationVector(Vector3::Zero()) {}
 
         /**
-         * @brief Constructor from Eigen rotation matrix and translation vector
+         * @brief Constructor from a rotation matrix and translation vector
          * @param R Rotation matrix
          * @param t Translation vector
          */
         Pose(const Matrix3& R, const Vector3& t) : rotationMatrix(R), translationVector(t) {}
 
         /**
-         * @brief Copy constructor with type conversion
-         *
-         * This constructor allows creating a Pose object from another Pose object
-         * with a different scalar type. It performs a type conversion using Eigen's
-         * cast() method.
+         * @brief Copy constructor with scalar type conversion, for switching between
+         * double and an autodiff dual type.
          *
          * @tparam OtherScalar The scalar type of the input Pose
          * @param T The input Pose object to copy and convert
@@ -80,16 +73,7 @@ namespace utility::gaussian_filtering {
             , translationVector(T.translationVector.template cast<Scalar>()) {}
 
         /**
-         * @brief Group operation of \f$\mathsf{SE}(3)\f$
-         *
-         * Computes the composition of two poses: \f$\mathbf{T}^a_c = \mathbf{T}^a_b \mathbf{T}^b_c\f$
-         * @f[
-         * \begin{bmatrix} \mathbf{R}^a_c & \mathbf{r}_{C/A}^a \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b & \mathbf{r}_{B/A}^a \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}
-         * \begin{bmatrix} \mathbf{R}^b_c & \mathbf{r}_{C/B}^b \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b \mathbf{R}^b_c & \mathbf{R}^a_b \mathbf{r}_{C/B}^b + \mathbf{r}_{B/A}^a \\
-         * \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}
-         * @f]
+         * @brief Compose two transforms: Tac = Tab * Tbc.
          *
          * @param other The other pose to compose with
          * @return The resulting composed pose
@@ -102,24 +86,7 @@ namespace utility::gaussian_filtering {
         }
 
         /**
-         * @brief Action of \f$\mathsf{SE}(3)\f$ on \f$\mathbb{P}^3\f$
-         *
-         * Transforms a point from one coordinate frame to another.
-         * Point alias: \f$\mathbf{p}_{P/A}^a = \mathbf{T}^a_b \mathbf{p}_{P/B}^b\f$
-         * @f[
-         * \begin{bmatrix} \mathbf{r}_{P/A}^a \\ 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b & \mathbf{r}_{B/A}^a \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}
-         * \begin{bmatrix} \mathbf{r}_{P/B}^b \\ 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b \mathbf{r}_{P/B}^b + \mathbf{r}_{B/A}^a \\ 1 \end{bmatrix}
-         * @f]
-         *
-         * Point alibi: \f$\mathbf{p}_{B/P}^a = \mathbf{T}^a_b \mathbf{p}_{A/P}^b\f$
-         * @f[
-         * \begin{bmatrix} \mathbf{r}_{B/P}^a \\ 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b & \mathbf{r}_{B/A}^a \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}
-         * \begin{bmatrix} \mathbf{r}_{A/P}^b \\ 1 \end{bmatrix} =
-         * \begin{bmatrix} \mathbf{R}^a_b \mathbf{r}_{A/P}^b + \mathbf{r}_{B/A}^a \\ 1 \end{bmatrix}
-         * @f]
+         * @brief Map a point into the other frame: rPAa = Rab * rPBb + rBAa.
          *
          * @param r The point to transform
          * @return The transformed point
@@ -129,15 +96,8 @@ namespace utility::gaussian_filtering {
         }
 
         /**
-         * @brief Inverse element in \f$\mathsf{SE}(3)\f$
-         *
-         * Computes the inverse of the pose: \f$(\mathbf{T}^a_b)^{-1} = \mathbf{T}^b_a\f$
-         * @f[
-         * \begin{bmatrix} \mathbf{R}^a_b & \mathbf{r}_{B/A}^a \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}^{-1} =
-         * \begin{bmatrix} \mathbf{R}^b_a & \mathbf{r}_{A/B}^b \\ \mathbf{0}^\mathsf{T} & 1 \end{bmatrix} =
-         * \begin{bmatrix} (\mathbf{R}^a_b)^\mathsf{T} & -(\mathbf{R}^a_b)^\mathsf{T} \mathbf{r}_{B/A}^a \\
-         * \mathbf{0}^\mathsf{T} & 1 \end{bmatrix}
-         * @f]
+         * @brief Inverse transform Tba, using the transpose rather than a matrix
+         * inverse since the rotation is orthonormal.
          *
          * @return The inverse pose
          */
