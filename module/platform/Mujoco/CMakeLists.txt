@@ -1,5 +1,6 @@
-# Build our NUClear module
 find_package(mujoco REQUIRED)
-find_package(X11)
+find_package(glfw3 REQUIRED)
+find_package(X11 REQUIRED)
 
-nuclear_module(LIBRARIES X11)
+# Build our NUClear module
+nuclear_module(LIBRARIES mujoco::mujoco glfw X11::X11)
