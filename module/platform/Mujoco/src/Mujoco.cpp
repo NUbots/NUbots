@@ -377,22 +377,21 @@ namespace module::platform {
                     return;
                 }
 
-                double next_sim_step = d->time + sim_delta;
-                while (d->time < next_sim_step) {
-                    // ctrl
-                    for (auto servo : servo_state) {
-                        int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.servo_name.c_str());
-                        if (joint_id == -1) {
-                            log<WARN>("Joint name not found:", servo.second.servo_name);
-                            continue;
-                        }
-                        int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.servo_name.c_str());
-                        if (actuator_id == -1) {
-                            log<WARN>("Actuator not found for joint:", servo.second.servo_name);
-                            continue;
-                        }
-                        // position control
-                        d->ctrl[actuator_id] = servo.second.goal_position;
+                for (const auto& servo : servo_state) {
+                    const int joint_id = mj_name2id(m, mjOBJ_JOINT, servo.second.servo_name.c_str());
+                    if (joint_id == -1) {
+                        log<WARN>("Joint name not found:", servo.second.servo_name);
+                        continue;
+                    }
+                    const int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR, servo.second.servo_name.c_str());
+                    if (actuator_id == -1) {
+                        log<WARN>("Actuator not found for joint:", servo.second.servo_name);
+                        continue;
+                    }
+                    // position control
+                    d->ctrl[actuator_id] = servo.second.goal_position;
+
+                    if (log_level <= DEBUG) {
                         log<DEBUG>("Joint:",
                                    servo.second.servo_name,
                                    "Goal:",
@@ -407,9 +406,39 @@ namespace module::platform {
                         emit(graph(servo.second.servo_name + " current position", d->qpos[m->jnt_qposadr[joint_id]]));
                         emit(graph(servo.second.servo_name + " control", d->ctrl[actuator_id]));
                     }
+                }
 
-                    // advance simulation
+                // Advance the simulation by the time that has actually elapsed
+                const auto step_now = NUClear::clock::now();
+                const double elapsed =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(step_now - current_real_time).count();
+                current_real_time = step_now;
+
+                // Clamp so the first tick, or a long stall, cannot ask for seconds of simulation
+                sim_time_debt += std::min(std::max(elapsed, 0.0), 0.05);
+
+                // Carry whatever is left over into the next tick
+                while (sim_time_debt >= m->opt.timestep) {
                     mj_step(m, d);
+                    sim_time_debt -= m->opt.timestep;
+                }
+
+                // Report once a second how well the simulation is keeping up with real time
+                static std::chrono::steady_clock::time_point last_report = std::chrono::steady_clock::now();
+                static double last_report_sim_time                       = d->time;
+                const auto report_now                                    = std::chrono::steady_clock::now();
+                if (report_now - last_report >= std::chrono::seconds(1)) {
+                    const double report_elapsed =
+                        std::chrono::duration_cast<std::chrono::duration<double>>(report_now - last_report).count();
+                    log<INFO>("sim time",
+                              d->time,
+                              "s, real time factor",
+                              (d->time - last_report_sim_time) / report_elapsed,
+                              ", torso height",
+                              d->qpos[2],
+                              "m");
+                    last_report          = report_now;
+                    last_report_sim_time = d->time;
                 }
 
                 // sensors

@@ -74,6 +74,8 @@ namespace module::platform {
         double max_velocity_mx64;
         double max_velocity_mx106;
 
+        /// @brief Simulation time owed to the clock but not yet stepped, carried between ticks
+        double sim_time_debt = 0;
         /// @brief The number of time ticks which have passed since the last IO::READ trigger
         double sim_delta = 0;
         /// @brief The number of milliseconds which have passed since the last IO::READ trigger
