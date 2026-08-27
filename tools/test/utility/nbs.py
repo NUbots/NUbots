@@ -28,8 +28,6 @@ import os.path
 import unittest
 from tempfile import gettempdir
 
-from numpy.lib.function_base import _select_dispatcher
-
 from utility.nbs import Encoder, LinearDecoder, MessageTypes
 
 Say = MessageTypes["message.skill.Say"].type
