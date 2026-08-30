@@ -1,4 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { Image, ImageFormat, jpegBufferToBitmap } from "@components/camera/image";
+import { ObjectFitContain } from "@components/three/object_fit";
+import { ImageView } from "@components/three/objects/image/image";
+import { ThreeFiber } from "@components/three/three_fiber";
 import { CompressedImage } from "@proto/message/output/CompressedImage";
 
 export interface CompressedImageViewProps {
@@ -6,43 +10,41 @@ export interface CompressedImageViewProps {
   children?: React.ReactNode;
 }
 
-/**
- * Renders a CompressedImage message as an image preview.
- *
- * Uses a canvas element with createImageBitmap for JPEG decoding.
- */
 export function CompressedImageView(props: CompressedImageViewProps) {
   const { msg, children } = props;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [image, setImage] = useState<Image | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !msg.data?.length) {
-      return;
-    }
-
-    const blob = new Blob([msg.data], { type: "image/jpeg" });
-    createImageBitmap(blob, { colorSpaceConversion: "none", premultiplyAlpha: "none" })
-      .then((bitmap) => {
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
-        ctx.drawImage(bitmap, 0, 0);
+    let cancelled = false;
+    jpegBufferToBitmap(msg.data).then((bitmap) => {
+      if (cancelled) {
         bitmap.close();
-      })
-      .catch(() => {
-        // Non-JPEG formats are not decoded here; show nothing
+        return;
+      }
+      setImage({
+        type: "bitmap",
+        bitmap,
+        width: msg.dimensions?.x ?? 0,
+        height: msg.dimensions?.y ?? 0,
+        format: ImageFormat.JPEG,
       });
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [msg]);
 
   return (
     <>
-      <canvas
-        ref={canvasRef}
-        className="my-0.5 max-h-60 w-full object-contain bg-black"
-        style={{ imageRendering: "pixelated" }}
-      />
+      <div className="relative my-0.5 aspect-video max-h-60 w-full">
+        <ThreeFiber orthographic>
+          {image ? (
+            <ObjectFitContain width={image.width} height={image.height}>
+              <ImageView image={image} />
+            </ObjectFitContain>
+          ) : null}
+        </ThreeFiber>
+      </div>
       {children}
     </>
   );
