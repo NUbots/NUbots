@@ -1,0 +1,89 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Time to stand still after startup before the profile begins, in seconds
+start_delay: 5.0
+
+# Time taken to linearly ramp between velocity targets, in seconds
+ramp_time: 1.5
+
+# Time each velocity target is held for once the ramp has finished, in seconds
+hold_time: 6.0
+
+# Time spent standing still between segments and stages, in seconds
+rest_time: 2.0
+
+# Time spent standing still after getting up from a fall before the next stage starts, in seconds. The
+# fall and get up already act as the pause between stages, so by default there is no extra rest. Raise
+# this if the robot needs longer to settle after a get up before it starts walking again.
+recovery_time: 0.0
+
+# If true, each segment ramps back down to a stop and rests before the next segment in the same stage.
+# If false, the segments within a stage ramp directly from one velocity target into the next and only
+# stop and rest at the end of the stage.
+rest_between_segments: true
+
+# If true the profile starts again from the first stage once the last one finishes, otherwise the robot
+# stands still once the profile is done
+loop: false
+
+# Head position held for the duration of the profile, in radians
+head:
+  yaw: 0.0
+  pitch: 0.0
+
+# The command profile, run in order. Velocities are [vx, vy, wz] in m/s and rad/s, where +vx is forwards,
+# +vy is to the left and +wz turns to the left.
+#
+# Each stage is a group of segments that are run back to back, and each segment is ramped up to over
+# `ramp_time`, held for `hold_time`, then ramped back down to a stop. If the robot falls part way through
+# a stage, the rest of that stage is abandoned and the profile picks up from the start of the next stage
+# once the robot has stood back up, so a stage is never reattempted.
+profile:
+  # Sagittal only
+  - name: sagittal
+    segments:
+      - name: forwards
+        velocity: [0.35, 0.0, 0.0]
+      - name: backwards
+        velocity: [-0.35, 0.0, 0.0]
+
+  # Lateral only
+  - name: lateral
+    segments:
+      - name: left
+        velocity: [0.0, 0.20, 0.0]
+      - name: right
+        velocity: [0.0, -0.20, 0.0]
+
+  # Turning only
+  - name: turning
+    segments:
+      - name: turn left
+        velocity: [0.0, 0.0, 0.60]
+      - name: turn right
+        velocity: [0.0, 0.0, -0.60]
+
+  # Sagittal (forwards only) combined with lateral
+  - name: sagittal + lateral
+    segments:
+      - name: forwards + left
+        velocity: [0.25, 0.15, 0.0]
+      - name: forwards + right
+        velocity: [0.25, -0.15, 0.0]
+
+  # Sagittal (forwards only) combined with turning
+  - name: sagittal + turning
+    segments:
+      - name: forwards + turn left
+        velocity: [0.25, 0.0, 0.40]
+      - name: forwards + turn right
+        velocity: [0.25, 0.0, -0.40]
+
+  # Lateral (left only) combined with turning
+  - name: lateral + turning
+    segments:
+      - name: left + turn left
+        velocity: [0.0, 0.15, 0.40]
+      - name: left + turn right
+        velocity: [0.0, 0.15, -0.40]
