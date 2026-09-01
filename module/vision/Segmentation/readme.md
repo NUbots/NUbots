@@ -11,6 +11,7 @@ The following is the arg convention for downloading new models
 ```
 
 The following will ensure that the data downloader helper &  script has the correct permissions before running. It is recommended to run the following before continuing.
+Note: ~11gb of data will downloaded
 
 ```
 chmod 777 scripts/ensure_dataset.sh
@@ -21,4 +22,3 @@ chmod 777 scripts/add_models.sh
 ./scripts/add_models.sh https://github.com/PaddlePaddle/PaddleSeg pp-lite-seg
 ./scripts/add_models.sh https://github.com/CoinCheung/BiSeNet bisenetv2
 ```
-
