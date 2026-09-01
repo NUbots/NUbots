@@ -6,17 +6,18 @@ DEST="$(pwd)/data"
 
 if [ -d "$DEST" ]; then
     echo "Dataset already exists: $DEST"
-    exit 0
+else
+    TMP=$(mktemp)
+
+    curl -L "$URL" -o "$TMP"
+    unzip -q "$TMP" "$FOLDER/*" -d .
+
+    mkdir -p "$DEST"
+    mv "$FOLDER"/* "$DEST/"
+
+    rm -rf "TORSO_21_dataset-master" "$TMP"
+
+    echo "Dataset downloaded to: $DEST"
 fi
 
-TMP=$(mktemp)
-
-curl -L "$URL" -o "$TMP"
-unzip -q "$TMP" "$FOLDER/*" -d .
-
-mkdir -p "$DEST"
-mv "$FOLDER"/* "$DEST/"
-
-rm -rf "TORSO_21_dataset-master" "$TMP"
-
-echo "Dataset downloaded to: $DEST"
+python3 download_dataset.py -a
