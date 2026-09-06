@@ -79,7 +79,7 @@ namespace module::skill {
             head_ik->time = NUClear::clock::now();
             head_ik->uPCt = uPCt;
 
-            head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
+            head_ik->servos[ServoID::NECK_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
             head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);
 
             emit<Task>(head_ik);

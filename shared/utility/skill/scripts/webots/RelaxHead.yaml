@@ -1,6 +1,6 @@
 - duration: 25
   targets:
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0
       gain: .NaN
       torque: 0

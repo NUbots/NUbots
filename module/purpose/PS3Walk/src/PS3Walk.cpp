@@ -112,7 +112,7 @@ namespace module::purpose {
                             head_pitch = static_cast<double>(-event.value) / 32767.0;
                             break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
-                            head_yaw = static_cast<double>(-event.value) / 32767.0;
+                            neck_yaw = static_cast<double>(-event.value) / 32767.0;
                             break;
                     }
                 }
@@ -317,7 +317,7 @@ namespace module::purpose {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
             if (!head_locked) {
                 // Create a unit vector in the direction the head should be pointing
-                Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
+                Eigen::Vector3d uPCt = (Eigen::AngleAxisd(neck_yaw, Eigen::Vector3d::UnitZ())
                                         * Eigen::AngleAxisd(-head_pitch, Eigen::Vector3d::UnitY()))
                                            .toRotationMatrix()
                                        * Eigen::Vector3d::UnitX();

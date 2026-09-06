@@ -102,7 +102,7 @@ namespace module::purpose {
         double head_pitch = 0.0;
 
         /// @brief stores the head yaw value
-        double head_yaw = 0.0;
+        double neck_yaw = 0.0;
 
         /// @brief Stores the previous walk command for acceleration limiting
         Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();

@@ -24,7 +24,7 @@ lens:
   fov: auto
 
 # Camera kinematics
-urdf_path: "models/robot.urdf"
+urdf_path: "models/nugus/robot.urdf"
 
 is_left_camera: true
 

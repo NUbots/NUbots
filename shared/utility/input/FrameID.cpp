@@ -50,7 +50,7 @@ namespace utility::input {
         else if (str == "L_ANKLE_PITCH")    { value = Value::L_ANKLE_PITCH; }
         else if (str == "R_ANKLE_ROLL")     { value = Value::R_ANKLE_ROLL; }
         else if (str == "L_ANKLE_ROLL")     { value = Value::L_ANKLE_ROLL; }
-        else if (str == "HEAD_YAW")         { value = Value::HEAD_YAW; }
+        else if (str == "NECK_YAW")         { value = Value::NECK_YAW; }
         else if (str == "HEAD_PITCH")       { value = Value::HEAD_PITCH; }
         else if (str == "L_FOOT_BASE")      { value = Value::L_FOOT_BASE; }
         else if (str == "R_FOOT_BASE")      { value = Value::R_FOOT_BASE; }
@@ -82,7 +82,7 @@ namespace utility::input {
             case Value::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
             case Value::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
             case Value::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
-            case Value::HEAD_YAW: return "HEAD_YAW";
+            case Value::NECK_YAW: return "NECK_YAW";
             case Value::HEAD_PITCH: return "HEAD_PITCH";
             case Value::L_FOOT_BASE: return "L_FOOT_BASE";
             case Value::R_FOOT_BASE: return "R_FOOT_BASE";

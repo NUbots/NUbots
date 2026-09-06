@@ -124,8 +124,8 @@ namespace module::platform {
         if (name == "right_shoulder_roll_sensor") { return servos.r_shoulder_roll; }
         if (name == "right_shoulder_pitch_sensor") { return servos.r_shoulder_pitch; }
         // Neck and head
-        if (name == "neck_yaw_sensor") { return servos.head_pan; }
-        if (name == "head_pitch_sensor") { return servos.head_tilt; }
+        if (name == "neck_yaw_sensor") { return servos.neck_yaw; }
+        if (name == "head_pitch_sensor") { return servos.head_pitch; }
         // clang-format on
 
         throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
@@ -269,6 +269,7 @@ namespace module::platform {
                 min_sensor_time_step = config["min_sensor_time_step"].as<int>();
                 max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
                 max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+                max_velocity_xh540   = config["max_velocity_xh540"].as<double>();
                 max_fsr_value        = config["max_fsr_value"].as<float>();
 
                 log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -393,10 +394,16 @@ namespace module::platform {
                 // fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
                 double max_velocity = 0.0;
-                if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
+                if (target.id == ServoID::R_HIP_YAW || target.id == ServoID::L_HIP_YAW) {
+                    // Hip yaw is the only MX106 servo
                     max_velocity = max_velocity_mx106;
                 }
+                else if (target.id >= ServoID::R_HIP_ROLL && target.id <= ServoID::L_ANKLE_ROLL) {
+                    // The rest of the legs (hip roll/pitch, knee, ankle pitch/roll) are XH540
+                    max_velocity = max_velocity_xh540;
+                }
                 else {
+                    // Arms and head (shoulders, elbows, neck yaw, head pitch) are MX64
                     max_velocity = max_velocity_mx64;
                 }
                 double speed = duration.count() > 0
@@ -464,7 +471,7 @@ namespace module::platform {
 
             // Clear all servo targets on reset
             for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
-                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+                targets->targets.emplace_back(NUClear::clock::now(), i, id_to_joint_name[i], 0.0, 1, 0);
             }
 
             // Emit it so it's captured by the reaction above
@@ -862,6 +869,13 @@ namespace module::platform {
                 auto& servo            = translate_servo_id(position.name, sensor_data->servo);
                 servo.present_position = position.value;
                 servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
+            }
+
+            // Joint velocity, finite-differenced from the position sensor by our nugus_controller.
+            // Keyed by the same position sensor name, so it maps to the same servo as above.
+            for (const auto& velocity : sensor_measurements.motor_velocities) {
+                auto& servo            = translate_servo_id(velocity.name, sensor_data->servo);
+                servo.present_velocity = velocity.value;
             }
 
             if (!sensor_measurements.accelerometers.empty()) {

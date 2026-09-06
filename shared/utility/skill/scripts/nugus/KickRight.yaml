@@ -1,6 +1,6 @@
 - duration: 1000
   targets:
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: -0.202534914
       gain: 10
       torque: 100
@@ -126,7 +126,7 @@
       position: -0.00613742135
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.124282785
       gain: 10
       torque: 100
@@ -216,7 +216,7 @@
       position: -0.242428154
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.119679719
       gain: 10
       torque: 100
@@ -302,7 +302,7 @@
       position: 0.141160697
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.119679719
       gain: 10
       torque: 100
@@ -384,7 +384,7 @@
       position: 0.141160697
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.119679719
       gain: 10
       torque: 100
@@ -454,7 +454,7 @@
       position: -0.253168643
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.119679719
       gain: 10
       torque: 100
@@ -508,7 +508,7 @@
       position: -0.00613742135
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.119679719
       gain: 10
       torque: 100

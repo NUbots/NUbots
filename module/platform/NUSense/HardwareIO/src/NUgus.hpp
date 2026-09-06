@@ -54,7 +54,7 @@ namespace module::platform::NUSense {
             L_ANKLE_PITCH    = 16,
             R_ANKLE_ROLL     = 17,
             L_ANKLE_ROLL     = 18,
-            HEAD_YAW         = 19,
+            NECK_YAW         = 19,
             HEAD_PITCH       = 20,
             R_FSR            = 111,  // Not yet implemented
             L_FSR            = 112,  // Not yet implemented
@@ -83,7 +83,7 @@ namespace module::platform::NUSense {
                 case ID::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
                 case ID::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
                 case ID::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
-                case ID::HEAD_YAW: return "HEAD_YAW";
+                case ID::NECK_YAW: return "NECK_YAW";
                 case ID::HEAD_PITCH: return "HEAD_PITCH";
                 case ID::R_FSR: return "R_FSR";
                 case ID::L_FSR: return "L_FSR";
