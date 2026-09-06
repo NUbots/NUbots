@@ -9,7 +9,7 @@ model:
   num_joints: 20
   obs_size: 71
   action_alpha: 1.00 # TODO: remove the filter completely
-  action_scale: 0.24722924456 # defined in mjlab training. Note: This value is slightly different for the three different servos TODO: Update the code to apply them separately.
+  action_scale: 0.24722924456 # defined in mjlab training
   gait_period: 0.7 # seconds, defined in mjlab training
 
 servos:
@@ -19,9 +19,8 @@ servos:
   arm_gains: 1.0
 
 # Command velocity magnitude (m/s and rad/s combined) below which the policy joint offsets
-# are zeroed and the robot holds the default pose. Hack to avoid unwanted policy behaviour at
-# ~zero command. TODO: tune this threshold on the real robot.
-command_velocity_threshold: 0.02
+# are zeroed and the robot holds the default pose. Hack to avoid stepping in place.
+command_velocity_threshold: 0.01
 
 default_pose: # Same as in Mujoco.yaml
   - 1.71400e+00 # Right shoulder pitch 0

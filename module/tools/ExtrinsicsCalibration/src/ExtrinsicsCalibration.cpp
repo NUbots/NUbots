@@ -101,9 +101,9 @@ namespace module::tools {
             auto nugus_model  = tinyrobotics::import_urdf<double, 20>(cfg.urdf_path);
             auto camera_frame = cfg.is_left_camera ? std::string("left_camera") : std::string("right_camera");
             auto Hpc          = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                             nugus_model.home_configuration(),
-                                                                             camera_frame,
-                                                                             std::string("head"));
+                                                                    nugus_model.home_configuration(),
+                                                                    camera_frame,
+                                                                    std::string("head"));
             Hpc_base          = Eigen::Isometry3d(Hpc.matrix());
 
             // Read the robot's current extrinsic offsets, which form the initial guess for the optimisation
@@ -114,8 +114,8 @@ namespace module::tools {
             try {
                 YAML::Node cam_cfg = YAML::LoadFile(camera_config_path);
                 current_offsets    = Eigen::Vector3d(cam_cfg["roll_offset"].as<Expression>(),
-                                                     cam_cfg["pitch_offset"].as<Expression>(),
-                                                     cam_cfg["yaw_offset"].as<Expression>());
+                                                  cam_cfg["pitch_offset"].as<Expression>(),
+                                                  cam_cfg["yaw_offset"].as<Expression>());
                 log<INFO>(fmt::format(
                     "Calibrating {} camera for {}. Initial offsets (deg): roll = {:.3f}, pitch = {:.3f}, yaw = {:.3f}",
                     cfg.camera,

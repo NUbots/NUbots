@@ -115,9 +115,9 @@ namespace module::skill {
 
             // Per-servo position limits (radians, NUbots joint order) used to clip the final
             // commanded servo positions as a safety measure against physically infeasible commands.
-            servo_limit_min  = JointVector(config["servo_limits"]["min"].as<Expression>());
-            servo_limit_max  = JointVector(config["servo_limits"]["max"].as<Expression>());
-            previous_pose    = default_pose;
+            servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
+            servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
+            previous_pose   = default_pose;
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
@@ -299,8 +299,8 @@ namespace module::skill {
                         // Apply the policy offset to the default pose, then safety-clip the result to
                         // the physical servo limits so the policy cannot command an infeasible position.
                         servo->position  = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
-                                                      servo_limit_min[i],
-                                                      servo_limit_max[i]);
+                                                     servo_limit_min[i],
+                                                     servo_limit_max[i]);
                         const float gain = i < 6 ? cfg.arm_servo_gain : cfg.leg_servo_gain;
                         servo->state     = ServoState(gain, cfg.servo_torque);
                         limbs->servos[joint_map[i].second] = *servo;
