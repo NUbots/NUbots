@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2026 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -22,23 +22,21 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 syntax = "proto3";
 
 package message.strategy;
 
-import "Transform.proto";
+/// This robot's estimate of how long a single robot would take to reach the ball
+message TimeToBallEstimate {
+    /// Player ID of the robot this estimate is for (ourselves or a teammate)
+    uint32 player_id = 1;
+    /// Estimated time to reach the ball, in seconds
+    float time_to_ball = 2;
+}
 
-/// Robot walks to position on field
-message WalkToFieldPosition {
-    /// Transform from desired robot pose {d} to field {f} space
-    iso3 Hfd = 1;
-    /// Whether to stop at the target position
-    bool stop_at_target = 2;
-    /// Per-task override for the stop-threshold (metres/radians). 0 (default) = use
-    /// WalkToFieldPosition.yaml's stop_threshold.
-    double stop_threshold_override = 3;
-    /// Per-task override for the stopped (hysteresis) threshold. 0 (default) = use
-    /// WalkToFieldPosition.yaml's stopped_threshold.
-    double stopped_threshold_override = 4;
+/// This robot's own estimate of how long it - and each teammate it can currently see - would take to
+/// reach the ball. Computed locally, so this is this robot's opinion only; teammates do not report
+/// this value about themselves.
+message TimeToBall {
+    repeated TimeToBallEstimate estimates = 1;
 }

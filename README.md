@@ -20,8 +20,6 @@ We also have generated documentation from the code available at [codedocs](https
 
 # Quick Setup
 
-IMPORTANT: [NUbridge](https://github.com/nubots/nubridge), our ROS2 bridge for this codebase, will need to be setup before running any NUbots code on the robot.
-
 1. Make sure [uv](https://docs.astral.sh/uv/getting-started/installation/) and [Docker](https://docs.docker.com/engine/install/) are setup on your computer, as our tools and compilation toolchain won't run without them.
 2. Setup the Docker build environment:
 

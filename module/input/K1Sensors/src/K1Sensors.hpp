@@ -3,6 +3,9 @@
 
 #include <Eigen/Geometry>
 #include <array>
+#include <atomic>
+#include <booster/idl/geometry_msgs/Pose.h>
+#include <booster/robot/channel/channel_factory.hpp>
 #include <memory>
 #include <mutex>
 #include <nuclear>
@@ -15,8 +18,6 @@
 
 namespace module::input {
 
-    struct PoseSharedMemory;
-
     using message::input::Sensors;
     using message::platform::RawSensors;
 
@@ -24,7 +25,7 @@ namespace module::input {
     private:
         /// @brief Stores configuration values
         struct Config {
-            std::string pose_segment;
+            std::string pose_topic;
             Eigen::Isometry3d Hhp = Eigen::Isometry3d::Identity();
             Eigen::Isometry3d Hpc = Eigen::Isometry3d::Identity();
             /// @brief Deadband below which normalized odometry components are snapped to zero, to
@@ -32,9 +33,19 @@ namespace module::input {
             double odometry_deadband = 0.0;
         } cfg;
 
+        /// @brief DDS reader for the head pose topic, created once at startup
+        booster::robot::ChannelPtr<geometry_msgs::msg::Pose> pose_channel;
+        /// @brief True once the reader exists, so a config reload can't create a second one
+        bool channel_created = false;
+
+        /// @brief Guards Hrh and have_pose, which are written from the DDS callback thread
         std::mutex pose_mutex;
-        std::unique_ptr<PoseSharedMemory> pose_shared_memory;
-        bool pose_unavailable_logged = false;
+        /// @brief Head frame in the robot base frame, from the most recent head pose message
+        Eigen::Isometry3d Hrh = Eigen::Isometry3d::Identity();
+        /// @brief False until the first head pose message arrives, while Hrh is still identity
+        bool have_pose = false;
+        /// @brief Set once the missing head pose warning has been logged
+        std::atomic<bool> pose_warned{false};
 
         std::mutex odometry_mutex;
         bool booster_odometry_has_offset = false;
@@ -49,8 +60,9 @@ namespace module::input {
         /// @brief Number of actuatable joints in the K1 robot
         static constexpr int n_servos = 22;
 
-        void connect_head_pose();
-        bool read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation);
+        /// @brief DDS callback for the head pose topic, caches the pose as Hrh
+        /// @param msg The received geometry_msgs::msg::Pose
+        void pose_handler(const void* msg);
 
         /// @brief Updates the sensors message with raw sensor data, including servo joint information
         /// @param sensors The sensors message to update

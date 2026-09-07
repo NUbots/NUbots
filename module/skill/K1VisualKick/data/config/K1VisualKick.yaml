@@ -5,3 +5,9 @@ version: 2
 # How long to let the kick run before reporting the task as done. The SDK gives no
 # completion feedback.
 kick_duration: 3.0
+# Scales the Kick task's direction-vector magnitude into the SDK's kick power/range field
+power_scale: 1.0
+# The minimum distance the ball moves from initial position to exit VisualKick
+min_ball_move_distance: 0.1
+# Fraction of the way from the robot to the ball to use as the kick reference point (1.0 = ball, 0.0 = robot)
+ball_reference_fraction: 0.8

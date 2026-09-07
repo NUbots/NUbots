@@ -129,6 +129,7 @@ export class LocalisationModel {
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
   @observable purposeLabelVisible = true;
+  @observable timeToBallVisible = true;
   @observable supportPositionVisible = false;
   @observable teammatesVisible = false;
   @observable teammateBallVisible = false;

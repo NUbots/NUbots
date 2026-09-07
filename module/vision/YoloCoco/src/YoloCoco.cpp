@@ -98,6 +98,9 @@ namespace module::vision {
                     img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                     cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
                     break;
+                case utility::vision::FOURCC::RGB3:
+                    img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                    break;
                 default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
             }
 

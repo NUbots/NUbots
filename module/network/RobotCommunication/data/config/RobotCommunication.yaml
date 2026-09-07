@@ -7,11 +7,11 @@ ball_timeout: 3
 # Override with a specific value if TC assigns a different team number at competition
 send_port: 0
 receive_port: 0
-broadcast_ip: "10.0.255.255"
+broadcast_ip: "172.168.207.255"
 udp_filter_address: ""
 
 # Maximum payload size in bytes per message
 max_message_size: 512
 
 # Maximum number of team messages per game
-max_messages_per_game: 12000
+max_messages_per_game: 60000

@@ -40,6 +40,7 @@
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/TimeToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -71,6 +72,7 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::LookForStaleFeatures;
     using message::strategy::StandStill;
+    using message::strategy::TimeToBall;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -235,6 +237,7 @@ namespace module::purpose {
                 // "teammate already going for the ball" case too, since their head start shows up as a
                 // shorter estimated time.
                 Eigen::Vector2d goal_rFf(-fd.dimensions.field_length / 2.0, 0.0);
+                std::vector<std::pair<unsigned int, double>> times_to_ball;
                 const unsigned int fastest_to_ball =
                     robots ? utility::strategy::fastest_to_ball_on_team(ball->rBWw,
                                                                         goal_rFf,
@@ -246,9 +249,19 @@ namespace module::purpose {
                                                                         cfg.estimated_turn_speed,
                                                                         cfg.attack_equidistant_time_threshold,
                                                                         global_config.player_id,
-                                                                        ignore_ids)
+                                                                        ignore_ids,
+                                                                        &times_to_ball)
                            : global_config.player_id;
                 bool is_fastest_to_ball = fastest_to_ball == global_config.player_id;
+
+                // Report every candidate's estimated time to ball for debugging/visualisation in NUsight
+                if (!times_to_ball.empty()) {
+                    auto time_to_ball_msg = std::make_unique<TimeToBall>();
+                    for (const auto& [id, time] : times_to_ball) {
+                        time_to_ball_msg->estimates.emplace_back(id, static_cast<float>(time));
+                    }
+                    emit(std::move(time_to_ball_msg));
+                }
 
                 // Determine if we need to wait for the other team to kick off
                 // If the ball moves, it is in play

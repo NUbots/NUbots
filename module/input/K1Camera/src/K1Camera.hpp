@@ -29,35 +29,60 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <booster/idl/sensor_msgs/CameraInfo.h>
+#include <booster/idl/sensor_msgs/Image.h>
+#include <booster/robot/channel/channel_factory.hpp>
 #include <atomic>
 #include <cstdint>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <nuclear>
 #include <string>
-#include <thread>
 #include <vector>
+
+#include "message/input/Image.hpp"
 
 namespace module::input {
 
     class K1Camera : public NUClear::Reactor {
     private:
         struct CameraContext {
-            std::string segment_name;
+            /// @brief DDS topic carrying sensor_msgs/Image.
+            std::string image_topic;
+            /// @brief DDS topic carrying sensor_msgs/CameraInfo, always image_topic + "/camera_info".
+            std::string info_topic;
             std::string camera_name;
             uint32_t id{0};
-            std::atomic<bool> running{true};
-            std::thread thread;
+
+            booster::robot::ChannelPtr<sensor_msgs::msg::Image> image_channel;
+            booster::robot::ChannelPtr<sensor_msgs::msg::CameraInfo> info_channel;
+
+            /// @brief Lens parameters
+            message::input::Image::Lens lens;
+            std::mutex lens_mutex;
+            /// @brief Whether CameraInfo has ever arrived, so we can warn if the topic is absent.
+            std::atomic<bool> have_camera_info{false};
+            /// @brief Whether we have already warned about an out of range capture timestamp
+            std::atomic<bool> warned_about_timestamp{false};
         };
 
-
-        std::mutex cameras_mutex;
-        std::mutex sensors_mutex;
         std::vector<std::unique_ptr<CameraContext>> cameras;
-        std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hcws;
+        /// @brief Whether the DDS channels have been created
+        bool channels_created = false;
 
-        void camera_thread(CameraContext& ctx);
-        void stop_cameras();
+        std::mutex sensors_mutex;
+        /// @brief Recent world to camera transforms
+        std::deque<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hcws;
+
+        /// @brief Handle a sensor_msgs/Image sample, converting and emitting it as an Image.
+        void image_handler(CameraContext& ctx, const void* msg);
+        /// @brief Handle a sensor_msgs/CameraInfo sample.
+        void camera_info_handler(CameraContext& ctx, const void* msg);
+        /// @brief The capture time from the message header, or our receive time if the clocks disagree.
+        NUClear::clock::time_point capture_time(CameraContext& ctx, const sensor_msgs::msg::Image& image);
+        /// @brief Find the buffered Hcw closest in time to the given timestamp.
+        Eigen::Isometry3d nearest_Hcw(const NUClear::clock::time_point& timestamp);
 
     public:
         /// @brief Called by the powerplant to build and setup the K1Camera reactor.

@@ -25,7 +25,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(booster_robotics_sdk REQUIRED)
 # Build our NUClear module
-nuclear_module(LIBRARIES Boost::headers ${OpenCV_LIBS})
+nuclear_module(LIBRARIES ${OpenCV_LIBS} booster_robotics_sdk::booster_robotics_sdk)

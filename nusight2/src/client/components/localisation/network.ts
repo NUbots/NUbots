@@ -8,6 +8,7 @@ import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot"
 import { WalkToDebug } from "@proto/message/planning/WalkPath";
 import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose";
 import { SupportPosition } from "@proto/message/purpose/SupportPosition";
+import { TimeToBall } from "@proto/message/strategy/TimeToBall";
 import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
 import { Overview } from "@proto/message/support/nusight/Overview";
 import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
@@ -51,6 +52,7 @@ export class LocalisationNetwork {
     this.network.on(WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(Purpose, this.onPurpose);
     this.network.on(SupportPosition, this.onSupportPosition);
+    this.network.on(TimeToBall, this.onTimeToBall);
     this.network.on(RobocupMessage, this.onTeamCommunication);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
@@ -140,6 +142,16 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
 
     robot.desiredSupportPosition = Vector2.from(supportPosition.position);
+  }
+
+  @action.bound
+  private onTimeToBall(robotModel: RobotModel, timeToBall: TimeToBall) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // This robot's own opinion of how long it - and each teammate it can see - would take to reach
+    // the ball, keyed by player id (self included). Kept on the observing robot's own model rather
+    // than the teammates' synthetic models since it's this robot's estimate, not the teammate's.
+    robot.timeToBallEstimates = new Map(timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]));
   }
 
   @action.bound

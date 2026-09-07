@@ -1,2 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Overrides WalkToFieldPosition's stop/stopped thresholds (metres) for Support only, so this robot is
+# considered "arrived" sooner than other purposes would be. stop_threshold also gates when Support
+# starts looking at the ball.
+stop_threshold: 0.3
+stopped_threshold: 0.6

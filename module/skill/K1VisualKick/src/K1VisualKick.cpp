@@ -26,18 +26,29 @@
  */
 #include "K1VisualKick.hpp"
 
+#include <cmath>
+#include <fmt/format.h>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/booster/BoosterKick.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/skill/Kick.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
+    using message::booster::BoosterKick;
     using message::booster::BoosterMode;
     using message::booster::K1Mode;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
     using message::skill::Kick;
     using VisualKick = message::booster::BoosterVisualKick;
     using KickVer    = message::booster::VisualKickVer;
@@ -50,27 +61,67 @@ namespace module::skill {
             cfg.version     = config["version"].as<int>() == 1 ? KickVer::V1 : KickVer::V2;
             cfg.kick_duration = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["kick_duration"].as<double>()));
+            cfg.power_scale = config["power_scale"].as<double>();
+            cfg.min_ball_move_distance = config["min_ball_move_distance"].as<double>();
+            cfg.ball_reference_fraction = config["ball_reference_fraction"].as<double>();
         });
 
         // Every lets the task re-run to check whether kick_duration has elapsed
-        on<Provide<Kick>, Every<10, Per<std::chrono::seconds>>>().then(
-            [this](const RunReason& run_reason) {
-                // The SDK kick is autonomous, so the Kick task's leg/target/direction are unused
+        on<Provide<Kick>, Every<10, Per<std::chrono::seconds>>, Trigger<Sensors>, With<Field>, With<Ball>>().then(
+            [this](const Kick& kick,
+                   const RunReason& run_reason,
+                   const Sensors& sensors,
+                   const Field& field,
+                   const Ball& ball) {
                 if (run_reason == RunReason::NEW_TASK) {
                     log<INFO>("Starting visual kick");
                     // Kicking requires movement, so request soccer mode from the Booster hardware.
                     auto mode  = std::make_unique<BoosterMode>();
                     mode->mode = K1Mode::SOCCER;
                     emit(std::move(mode));
+                    // Starting the visual kick switches the robot into the mode that accepts kick
+                    // references on rt/kick_ball, so the reference must be sent after the start.
                     auto vk     = std::make_unique<VisualKick>();
                     vk->start   = true;
                     vk->version = cfg.version;
                     emit(std::move(vk));
+
+                    initial_ball_position = ball.rBWw;
+                    const Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+                    const Eigen::Isometry3d Hrf = Hfr.inverse();
+                    const Eigen::Vector3d rBRr  = sensors.Hrw * ball.rBWw;
+                    // Reference point a fraction of the way from the robot (origin in robot frame) to the ball
+                    const Eigen::Vector3d rRefRr = rBRr * cfg.ball_reference_fraction;
+                    const Eigen::Vector3d rGRr   = Hrf * kick.target;
+
+                    auto ref                  = std::make_unique<BoosterKick>();
+                    ref->x                    = rRefRr.x();
+                    ref->y                    = rRefRr.y();
+                    ref->dir                  = std::atan2(kick.direction.y(), kick.direction.x());
+                    ref->power                = kick.direction.norm() * cfg.power_scale;
+                    ref->goal_x               = rGRr.x();
+                    ref->goal_y               = rGRr.y();
+                    ref->robot_theta_to_field = std::atan2(Hfr.linear().col(0).y(), Hfr.linear().col(0).x());
+                    emit(std::move(ref));
+
                     kick_start_time = NUClear::clock::now();
                 }
 
-                // No completion feedback from the SDK, so finish after kick_duration
-                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration) {
+                if (kick_start_time == NUClear::clock::time_point{}) {
+                    emit<Task>(std::make_unique<Continue>());
+                    return;
+                }
+
+                double current_ball_distance = (ball.rBWw - initial_ball_position).norm();
+
+                // Stop kick after set duration or ball moving past threshold distance
+                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration || current_ball_distance > cfg.min_ball_move_distance) {
+                    log<INFO>(fmt::format(
+                        "K1VisualKick done: elapsed={}s configured_duration={}s",
+                        std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
+                                                                                    - kick_start_time)
+                            .count(),
+                        std::chrono::duration_cast<std::chrono::duration<double>>(cfg.kick_duration).count()));
                     emit<Task>(std::make_unique<Done>());
                 }
                 else {
@@ -85,6 +136,7 @@ namespace module::skill {
             vk->start   = false;
             vk->version = cfg.version;
             emit(std::move(vk));
+            kick_start_time = NUClear::clock::time_point{};
         });
     }
 

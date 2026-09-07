@@ -2,12 +2,6 @@
 
 #include <cmath>
 
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/sync/interprocess_condition.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
-
 #include "extension/Configuration.hpp"
 
 #include "message/booster/BoosterModeState.hpp"
@@ -18,14 +12,14 @@
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
-#include "utility/platform/RawSensors.hpp"
 #include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/Booster/channel_factory.hpp"
+#include "utility/platform/RawSensors.hpp"
 
-
-namespace bip = boost::interprocess;
 
 namespace module::input {
 
+    using booster::robot::ChannelFactory;
     using extension::Configuration;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
@@ -41,93 +35,20 @@ namespace module::input {
     using utility::math::euler::rpy_intrinsic_to_mat;
 
 
-    // Must match the writer-side layout in NUbridge exactly (binary compatibility).
-    struct SharedPoseHeader {
-        static constexpr uint32_t MAGIC   = 0x4E42504F;  // "NBPO"
-        static constexpr uint32_t VERSION = 1;
-        uint32_t magic{MAGIC};
-        uint32_t version{VERSION};
-        bip::interprocess_mutex mutex;
-        bip::interprocess_condition has_new_data;
-        uint64_t sequence{0};
-        double position[3]{0.0, 0.0, 0.0};
-        double orientation[4]{0.0, 0.0, 0.0, 1.0};
-    };
+    void K1Sensors::pose_handler(const void* msg) {
+        const auto& pose = *static_cast<const geometry_msgs::msg::Pose*>(msg);
+        const auto& p    = pose.position();
+        const auto& q    = pose.orientation();
 
-    struct PoseSharedMemory {
-        explicit PoseSharedMemory(const std::string& segment)
-            : shm(bip::open_only, segment.c_str(), bip::read_write), region(shm, bip::read_write) {
-            header = reinterpret_cast<SharedPoseHeader*>(region.get_address());
-        }
+        log<DEBUG>("Head pose position xyz=", p.x(), p.y(), p.z(), "orientation xyzw=", q.x(), q.y(), q.z(), q.w());
 
-        bip::shared_memory_object shm;
-        bip::mapped_region region;
-        SharedPoseHeader* header = nullptr;
-    };
+        Eigen::Isometry3d H = Eigen::Isometry3d::Identity();
+        H.translation() << p.x(), p.y(), p.z();
+        H.linear() = Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z()).normalized().toRotationMatrix();
 
-    void K1Sensors::connect_head_pose() {
-        if (cfg.pose_segment.empty() || pose_shared_memory != nullptr) {
-            return;
-        }
-
-        try {
-            pose_shared_memory = std::make_unique<PoseSharedMemory>(cfg.pose_segment);
-
-            // Reject segments whose layout tag doesn't match ours (stale or mismatched
-            // NUbridge version, or a segment NUbridge hasn't initialised yet)
-            if (pose_shared_memory->header->magic != SharedPoseHeader::MAGIC
-                || pose_shared_memory->header->version != SharedPoseHeader::VERSION) {
-                pose_shared_memory.reset();
-                if (!pose_unavailable_logged) {
-                    log<WARN>("K1Sensors head_pose segment has unexpected magic/version (is NUbridge up to date?)",
-                              cfg.pose_segment);
-                    pose_unavailable_logged = true;
-                }
-                return;
-            }
-
-            pose_unavailable_logged = false;
-            log<INFO>("K1Sensors mapped head_pose segment", cfg.pose_segment);
-        }
-        catch (const bip::interprocess_exception& ex) {
-            if (!pose_unavailable_logged) {
-                log<WARN>("K1Sensors head_pose segment unavailable", cfg.pose_segment, ex.what());
-                pose_unavailable_logged = true;
-            }
-        }
-    }
-
-    bool K1Sensors::read_head_pose(std::array<double, 3>& position, std::array<double, 4>& orientation) {
         std::lock_guard<std::mutex> lock(pose_mutex);
-
-        connect_head_pose();
-        if (pose_shared_memory == nullptr) {
-            return false;
-        }
-
-        try {
-            bip::scoped_lock<bip::interprocess_mutex> pose_lock(pose_shared_memory->header->mutex, bip::try_to_lock);
-            if (!pose_lock.owns()) {
-                return false;
-            }
-
-            for (int i = 0; i < 3; ++i) {
-                position[static_cast<size_t>(i)] = pose_shared_memory->header->position[i];
-            }
-            for (int i = 0; i < 4; ++i) {
-                orientation[static_cast<size_t>(i)] = pose_shared_memory->header->orientation[i];
-            }
-            return true;
-        }
-        catch (const bip::interprocess_exception& ex) {
-            pose_shared_memory.reset();
-            if (!pose_unavailable_logged) {
-                log<WARN>("K1Sensors lost access to head_pose segment", cfg.pose_segment, ex.what());
-                pose_unavailable_logged = true;
-            }
-        }
-
-        return false;
+        Hrh       = H;
+        have_pose = true;
     }
 
     K1Sensors::K1Sensors(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -136,7 +57,15 @@ namespace module::input {
             // Use configuration here from file K1Sensors.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.pose_segment = config["head_pose"][0]["segment"].as<std::string>();
+            // The DDS reader is created once at startup, so a reload cannot re-point it at a new
+            // topic. Keep using the topic we subscribed to rather than silently ignoring the change.
+            const auto pose_topic = config["head_pose"]["topic"].as<std::string>();
+            if (channel_created && pose_topic != cfg.pose_topic) {
+                log<WARN>("head_pose topic changed but the reader already exists, restart to apply");
+            }
+            else {
+                cfg.pose_topic = pose_topic;
+            }
 
             cfg.odometry_deadband = config["odometry_deadband"].as<double>();
 
@@ -158,14 +87,23 @@ namespace module::input {
             cfg.Hhp.linear()   = rpy_intrinsic_to_mat(
                 Eigen::Vector3d(Hhp_rpy[0].as<double>(), Hhp_rpy[1].as<double>(), Hhp_rpy[2].as<double>()));
 
-            std::lock_guard<std::mutex> lock(pose_mutex);
-            pose_shared_memory.reset();
-            pose_unavailable_logged = false;
-            connect_head_pose();
-
             std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
             booster_odometry_has_offset = false;
             booster_odometry_offset     = {};
+        });
+
+
+        on<Startup>().then("Subscribe to head pose", [this] {
+            utility::platform::Booster::ensure_channel_factory();
+
+            log<INFO>("Subscribing to head pose on", cfg.pose_topic);
+
+            pose_channel = ChannelFactory::Instance()->CreateRecvChannel<geometry_msgs::msg::Pose>(
+                cfg.pose_topic,
+                [this](const void* msg) { pose_handler(msg); },
+                /* reliable = */ true);
+
+            channel_created = true;
         });
 
 
@@ -214,7 +152,7 @@ namespace module::input {
                 };
             }
 
-            // Snap tiny residuals (e.g. ~1e-10) to zero so they aren't treated as real motion
+            // Snap tiny residuals to zeroes
             for (double& v : normalized_odometry) {
                 if (std::abs(v) < cfg.odometry_deadband) {
                     v = 0.0;
@@ -232,28 +170,20 @@ namespace module::input {
             Eigen::Vector3d rpy(0.0, 0.0, normalized_odometry[2]);
             Hwr.linear() = rpy_intrinsic_to_mat(rpy);
 
-            std::array<double, 3> position{};
-            std::array<double, 4> orientation{};
-            if (read_head_pose(position, orientation)) {
-                log<DEBUG>("Head pose position xyz=",
-                           position[0],
-                           position[1],
-                           position[2],
-                           "orientation xyzw=",
-                           orientation[0],
-                           orientation[1],
-                           orientation[2],
-                           orientation[3]);
+            // Hrh: head frame in robot base frame, from the most recent head pose message.
+            Eigen::Isometry3d Hrh_now;
+            bool got_pose = false;
+            {
+                std::lock_guard<std::mutex> lock(pose_mutex);
+                Hrh_now  = Hrh;
+                got_pose = have_pose;
+            }
+            if (!got_pose && !pose_warned.exchange(true)) {
+                log<WARN>("No head pose received on", cfg.pose_topic, "- using identity");
             }
 
-            // Hrh: head frame in robot base frame (from shared memory head pose)
-            Eigen::Isometry3d Hrh = Eigen::Isometry3d::Identity();
-            Hrh.translation() << position[0], position[1], position[2];
-            Hrh.linear() =
-                Eigen::Quaterniond(orientation[3], orientation[0], orientation[1], orientation[2]).toRotationMatrix();
-
-            // Hrc: camera optical frame in robot base frame = Hrh * Hhp * Hpc
-            Eigen::Isometry3d Hrc = Hrh * cfg.Hhp * cfg.Hpc;
+            // Hrc: camera optical frame in robot base frame
+            Eigen::Isometry3d Hrc = Hrh_now * cfg.Hhp * cfg.Hpc;
 
             Eigen::Isometry3d Hwc = Hwr * Hrc;
             log<DEBUG>("Computed head pose in world frame: position xyz=",
@@ -315,6 +245,13 @@ namespace module::input {
             }
 
             emit(sensors);
+        });
+
+        on<Shutdown>().then([this] {
+            if (pose_channel != nullptr) {
+                log<INFO>("Closing head pose channel");
+                ChannelFactory::Instance()->CloseReader(cfg.pose_topic);
+            }
         });
     }
 

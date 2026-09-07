@@ -7,6 +7,7 @@
 #include "extension/Configuration.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/platform/Booster/channel_factory.hpp"
 
 namespace module::platform::Booster {
 
@@ -19,6 +20,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
+    using message::booster::BoosterKick;
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
@@ -53,7 +55,7 @@ namespace module::platform::Booster {
 
         on<Startup>().then([this]() {
             log<INFO>("Starting Booster HardwareIO");
-            ChannelFactory::Instance()->Init(0);
+            utility::platform::Booster::ensure_channel_factory();
 
             booster_client.Init();
             booster_client.ChangeMode(RobotMode::kPrepare);
@@ -84,9 +86,31 @@ namespace module::platform::Booster {
             odometer_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::Odometer>(
                 "rt/odometer_state",
                 [this](const void* msg) { odometer_handler(msg); });
+
+            kick_channel = ChannelFactory::Instance()->CreateSendChannel<brain::msg::Kick>(
+                booster::robot::b1::kTopicKickReference);
         });
 
-        on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
+        on<Shutdown>().then([this]() {
+            booster_client.ChangeMode(RobotMode::kPrepare);
+
+            log<INFO>("Closing HardwareIO channels");
+            if (low_state_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/low_state");
+            }
+            if (battery_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/battery_state");
+            }
+            if (fall_down_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/fall_down");
+            }
+            if (button_event_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/button_event");
+            }
+            if (odometer_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/odometer_state");
+            }
+        });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
             // The robot must not move in prep mode, so drop walk commands while in (or entering) prep.
@@ -151,6 +175,22 @@ namespace module::platform::Booster {
             int32_t res = booster_client.VisualKick(kick.start, version);
             if (res != 0) {
                 log<ERROR>("Failed to visual kick: " + res_code_to_string(res));
+            }
+        });
+
+        on<Trigger<BoosterKick>>().then([this](const BoosterKick& kick) {
+            brain::msg::Kick msg;
+            msg.x(kick.x);
+            msg.y(kick.y);
+            msg.dir(kick.dir);
+            msg.goal_x(kick.goal_x);
+            msg.goal_y(kick.goal_y);
+            msg.robot_theta_to_field(kick.robot_theta_to_field);
+            msg.power(kick.power);
+            log<DEBUG>("Sending kick reference: x=" + std::to_string(kick.x) + ", y=" + std::to_string(kick.y)
+                       + ", dir=" + std::to_string(kick.dir) + ", power=" + std::to_string(kick.power));
+            if (kick_channel == nullptr || !kick_channel->Write(&msg)) {
+                log<ERROR>("Failed to publish kick reference");
             }
         });
 

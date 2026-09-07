@@ -1,5 +1,5 @@
 log_level: INFO
-field_type: small # options: small, l1, l3, 5v5
+field_type: 5v5 # options: small, l1, l3, 5v5
 
 # ROBOCUP FIELD SIZES
 Units: m

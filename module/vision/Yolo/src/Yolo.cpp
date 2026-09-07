@@ -80,9 +80,10 @@ namespace module::vision {
             objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
             objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
             objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
-            objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[3].confidence_threshold = config["l_intersection_confidence_threshold"].as<double>();
+            objects[4].confidence_threshold = config["penalty_point_confidence_threshold"].as<double>();
+            objects[5].confidence_threshold = config["t_intersection_confidence_threshold"].as<double>();
+            objects[6].confidence_threshold = config["x_intersection_confidence_threshold"].as<double>();
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
@@ -150,6 +151,9 @@ namespace module::vision {
                     case utility::vision::FOURCC::RGGB:
                         img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
+                        break;
+                    case utility::vision::FOURCC::RGB3:
+                        img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
                         break;
                     case utility::vision::fourcc("RGBA"):
                         img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
@@ -324,13 +328,13 @@ namespace module::vision {
                     auto bbox        = std::make_unique<BoundingBox>();
                     bbox->name       = objects[class_id].name;
                     bbox->confidence = class_confidences[idx];
+                    bbox->colour     = objects[class_id].colour;
                     bbox->corners.push_back(top_left_ray);
                     bbox->corners.push_back(top_right_ray);
                     bbox->corners.push_back(bottom_right_ray);
                     bbox->corners.push_back(bottom_left_ray);
 
-
-                    if (objects[class_id].name == "ball") {
+                    if (objects[class_id].name == "Ball") {
                         // Get the vector in world space to check if it is in the field
                         Eigen::Vector3d rBWw = img.Hcw.inverse() * ray_to_camera_space(centre_ray);
                         // Only consider vision measurements within the green horizon, if it exists
@@ -347,11 +351,10 @@ namespace module::vision {
                         b.radius = bottom_centre_ray.dot(bottom_left_ray);
                         b.colour.fill(1.0);
                         balls->balls.push_back(b);
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "goal post") {
+                    if (objects[class_id].name == "Goalpost") {
                         Goal g;
                         g.measurements.emplace_back();
                         g.measurements.back().type = Goal::MeasurementType::CENTRE;
@@ -362,11 +365,10 @@ namespace module::vision {
                         g.side                     = Goal::Side::UNKNOWN_SIDE;
                         g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
                         goals->goals.push_back(std::move(g));
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "robot") {
+                    if (objects[class_id].name == "K1") {
                         // Get the vector in world space to check if it is in the field
                         Eigen::Vector3d rRWw = img.Hcw.inverse() * ray_to_camera_space(bottom_centre_ray);
                         // Only consider vision measurements within the green horizon, if it exists
@@ -378,12 +380,11 @@ namespace module::vision {
                         r.rRCc   = ray_to_camera_space(bottom_centre_ray);
                         r.radius = bottom_centre_ray.dot(bottom_left_ray);
                         robots->robots.push_back(r);
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "L-intersection" || objects[class_id].name == "T-intersection"
-                        || objects[class_id].name == "X-intersection") {
+                    if (objects[class_id].name == "LCross" || objects[class_id].name == "TCross"
+                        || objects[class_id].name == "XCross") {
                         FieldIntersection i;
                         // Project the centre ray onto the ground plane in world {w} space
                         Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
@@ -395,19 +396,22 @@ namespace module::vision {
                         }
 
                         i.rIWw = rIWw;
-                        if (objects[class_id].name == "L-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        if (objects[class_id].name == "LCross") {
+                            i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
                         }
-                        else if (objects[class_id].name == "T-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        else if (objects[class_id].name == "TCross") {
+                            i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
                         }
-                        else if (objects[class_id].name == "X-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        else if (objects[class_id].name == "XCross") {
+                            i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
                         }
                         field_intersections->intersections.push_back(std::move(i));
+                        bounding_boxes->bounding_boxes.push_back(*bbox);
+                    }
+
+                    // "PenaltyPoint" has no dedicated message type yet, so it is only emitted as a bounding box,
+                    // with no green-horizon filtering applied.
+                    if (objects[class_id].name == "PenaltyPoint") {
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
                 }

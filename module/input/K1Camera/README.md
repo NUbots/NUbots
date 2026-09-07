@@ -2,14 +2,24 @@
 
 ## Description
 
-Reads shared memory segments created by [NUbridge](https://github.com/NUbots/NUbridge) to read image data and camera info from the Booster K1.
-
+Subscribes directly to the Booster K1's camera topics using the [Booster Robotics
+SDK](https://github.com/BoosterRobotics/booster_robotics_sdk) (1.7) over DDS, and emits the frames as
+`message::input::Image`.
 ## Usage
 
 `data/config/K1Camera.yaml` contains the following information under `cameras`:
-- `segment`: the name of the [Boost](https://www.boost.org/) shared memory segment (usually the name of the ROS2 topic with any slashes being replaced with underscores)
-- `id`: camera ID to differentiate between images
+
+- `topic`: the DDS topic carrying `sensor_msgs/Image`. This is the ROS 2 topic path prefixed with
+  `rt/`, so ROS 2 topic `/boostercamera/head/rgb` becomes `rt/boostercamera/head/rgb`
 - `name`: name of the camera, used to differentiate between outputs
+- `id`: camera ID to differentiate between images
+
+Topics are subscribed to once at startup. Changing `topic` in the config while running will not
+re-point the subscriptions; restart the binary instead.
+
+## Consumes
+
+- `message::input::Sensors` to buffer recent `Hcw` transforms
 
 ## Emits
 
@@ -17,6 +27,6 @@ Reads shared memory segments created by [NUbridge](https://github.com/NUbots/NUb
 
 ## Dependencies
 
-- [Boost](https://www.boost.org/)
-- [NUbridge](https://github.com/NUbots/NUbridge)
-- A ROS2 system with the camera topics up and running
+- [Booster Robotics SDK](https://github.com/BoosterRobotics/booster_robotics_sdk)
+- [OpenCV](https://opencv.org/)
+- A running BoosterOS publishing the configured camera topics

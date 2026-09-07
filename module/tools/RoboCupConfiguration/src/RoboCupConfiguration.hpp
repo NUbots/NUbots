@@ -50,6 +50,8 @@ namespace module::tools {
         std::string robot_name = "";
         /// @brief The wifi interface that the robot is connected to
         std::string wifi_interface = "";
+        /// @brief Whether to use DHCP (automatic IP assignment) instead of a static IP
+        bool use_dhcp = false;
         /// @brief The IP address of the robot
         std::string ip_address = "";
         /// @brief The SSID of the wifi network that the robot is or will be connected to
@@ -71,7 +73,7 @@ namespace module::tools {
         /// @brief Display values
         struct Display {
             /// @brief Enum for options in first column
-            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
+            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, USE_DHCP, IP_ADDRESS, SSID, PASSWORD, END };
             /// @brief Enum for options in second column
             enum class Column2 { PLAYER_ID, TEAM_ID, GOALIE, FIELD_TYPE, END };
             /// @brief Column 1 padding

@@ -109,6 +109,8 @@ namespace module::localisation {
             cfg.team_guess_error         = config["team_guess_error"].as<double>();
             cfg.team_guess_default_timer = config["team_guess_default_timer"].as<double>();
 
+            cfg.max_distance_from_field = config["max_distance_from_field"].as<double>();
+
             last_time_update = NUClear::clock::now();
         });
 
@@ -134,6 +136,14 @@ namespace module::localisation {
                 }
 
                 Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                Eigen::Vector3d rBFf = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
+
+                if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
+                    || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
+                    || rBFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
+                    || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                    continue;
+                }
                 double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                 if (current_distance < lowest_distance) {
                     lowest_distance = current_distance;

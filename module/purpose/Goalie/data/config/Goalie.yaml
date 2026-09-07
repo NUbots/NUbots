@@ -12,3 +12,6 @@ goal_post_clearance: 0.35
 
 # How far forward of the goal line the goalie bows at the widest point of its strafe
 strafe_curve_depth: 0.15
+
+# Maximum time (s) to stand still and look around waiting for localisation to converge
+localise_timeout: 8

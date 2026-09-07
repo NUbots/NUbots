@@ -29,6 +29,7 @@ import { K1 } from "./r3f_components/k1";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { SupportPositionMarker } from "./r3f_components/support_position_marker";
+import { TimeToBallLabel } from "./r3f_components/time_to_ball_label";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
@@ -141,6 +142,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
             togglePurposeLabelVisibility={this.togglePurposeLabelVisibility}
+            toggleTimeToBallVisibility={this.toggleTimeToBallVisibility}
             toggleSupportPositionVisibility={this.toggleSupportPositionVisibility}
             toggleTeammatesVisibility={this.toggleTeammatesVisibility}
             toggleTeammateBallVisibility={this.toggleTeammateBallVisibility}
@@ -172,6 +174,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
             togglePurposeLabelVisibility={this.togglePurposeLabelVisibility}
+            toggleTimeToBallVisibility={this.toggleTimeToBallVisibility}
             toggleSupportPositionVisibility={this.toggleSupportPositionVisibility}
             toggleTeammatesVisibility={this.toggleTeammatesVisibility}
             toggleTeammateBallVisibility={this.toggleTeammateBallVisibility}
@@ -280,6 +283,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.togglePurposeLabelVisibility(this.props.model);
   };
 
+  private toggleTimeToBallVisibility = () => {
+    this.props.controller.toggleTimeToBallVisibility(this.props.model);
+  };
+
   private toggleSupportPositionVisibility = () => {
     this.props.controller.toggleSupportPositionVisibility(this.props.model);
   };
@@ -316,6 +323,7 @@ interface LocalisationMenuBarProps {
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
   togglePurposeLabelVisibility(): void;
+  toggleTimeToBallVisibility(): void;
   toggleSupportPositionVisibility(): void;
   toggleTeammatesVisibility(): void;
   toggleTeammateBallVisibility(): void;
@@ -421,6 +429,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         toggleWalkToDebugVisibility={props.toggleWalkToDebugVisibility}
         toggleBoundedBoxVisibility={props.toggleBoundedBoxVisibility}
         togglePurposeLabelVisibility={props.togglePurposeLabelVisibility}
+        toggleTimeToBallVisibility={props.toggleTimeToBallVisibility}
         toggleSupportPositionVisibility={props.toggleSupportPositionVisibility}
         toggleTeammatesVisibility={props.toggleTeammatesVisibility}
         toggleTeammateBallVisibility={props.toggleTeammateBallVisibility}
@@ -460,6 +469,7 @@ const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">)
       title: "Team",
       buttons: [
         { label: "Purpose", isVisible: model.purposeLabelVisible, onClick: props.togglePurposeLabelVisibility },
+        { label: "Time to Ball", isVisible: model.timeToBallVisible, onClick: props.toggleTimeToBallVisibility },
         {
           label: "Support Position",
           isVisible: model.supportPositionVisible,
@@ -611,6 +621,17 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         />
       )}
 
+      {model.timeToBallVisible && robot.Hft && robot.timeToBallEstimates.get(robot.playerId) != null && (
+        <TimeToBallLabel
+          Hft={robot.Hft}
+          playerId={-1}
+          backgroundColor={robot.color}
+          time={robot.timeToBallEstimates.get(robot.playerId)!}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      )}
+
       {model.supportPositionVisible && robot.desiredSupportPosition && (
         <SupportPositionMarker position={robot.desiredSupportPosition} color="#2979ff" />
       )}
@@ -627,6 +648,16 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
                     playerId={teammate.playerId}
                     backgroundColor={teammate.color}
                     purpose={teammate.purpose}
+                    cameraPitch={model.camera.pitch}
+                    cameraYaw={model.camera.yaw}
+                  />
+                )}
+                {model.timeToBallVisible && robot.timeToBallEstimates.get(teammate.playerId) != null && (
+                  <TimeToBallLabel
+                    Hft={teammate.Hft}
+                    playerId={teammate.playerId}
+                    backgroundColor={teammate.color}
+                    time={robot.timeToBallEstimates.get(teammate.playerId)!}
                     cameraPitch={model.camera.pitch}
                     cameraYaw={model.camera.yaw}
                   />

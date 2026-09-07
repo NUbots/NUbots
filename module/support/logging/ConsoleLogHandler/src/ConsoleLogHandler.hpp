@@ -32,6 +32,7 @@
 #include <nuclear>
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 #include "utility/support/evil/pure_evil.hpp"
 
@@ -47,6 +48,11 @@ namespace module::support::logging {
         explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+
+        struct Config {
+            bool display_timestamp = true;
+        } cfg;
+
         /**
          * Print a log to the console in a thread safe manner.
          *
@@ -55,11 +61,13 @@ namespace module::support::logging {
          * @param name          the name of the reaction that emitted the message
          * @param message       the message that was emitted
          * @param stack_trace   the stack trace of the message
+         * @param time            the time the message was emitted
          */
         void print_log(const NUClear::LogLevel& level,
                        const std::string& reactor,
                        const std::string& name,
                        const std::string& message,
+                       const NUClear::clock::time_point& time,
                        const std::vector<utility::support::evil::StackFrame>& stack_trace);
 
         /// A mutex for accessing the std::cerr stream

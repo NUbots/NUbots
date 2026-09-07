@@ -54,12 +54,26 @@ namespace module::purpose {
             Eigen::Vector2d attraction{0.0, 0.0};
             /// @brief Minimum x clamp
             double min_x{-10.0};
+            /// @brief Maximum x clamp
+            double max_x{10.0};
+            /// @brief Minimum y clamp
+            double min_y{-10.0};
+            /// @brief Maximum y clamp
+            double max_y{10.0};
         };
 
         /// @brief Stores configuration values
         struct Config {
             /// @brief Formation slots per game mode, keyed by mode name then player ID
             std::map<std::string, std::map<int, RobotSlot>> modes;
+            /// @brief Translational/angular error threshold (metres/radians) within which Support
+            ///        considers itself arrived at its target position. Passed to WalkToFieldPosition as
+            ///        a per-task override (so only Support gets this radius) and reused locally to gate
+            ///        when Support starts looking at the ball.
+            double stop_threshold = 0.0;
+            /// @brief Wider hysteresis threshold once stopped, passed as WalkToFieldPosition's
+            ///        stopped-threshold override.
+            double stopped_threshold = 0.0;
         } cfg;
 
         /// @brief Resolve this robot's formation slot for the given mode, falling back to the

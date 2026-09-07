@@ -4,6 +4,7 @@
 #include <booster/idl/b1/BatteryState.h>
 #include <booster/idl/b1/ButtonEvent.h>
 #include <booster/idl/b1/FallDownState.h>
+#include <booster/idl/b1/Kick.h>
 #include <booster/idl/b1/LowState.h>
 #include <booster/idl/b1/Odometer.h>
 #include <booster/robot/b1/b1_loco_client.hpp>
@@ -17,6 +18,7 @@
 #include "message/booster/BoosterFallDownState.hpp"
 #include "message/booster/BoosterGetUp.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
+#include "message/booster/BoosterKick.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
@@ -62,6 +64,7 @@ namespace module::platform::Booster {
         booster::robot::ChannelPtr<booster_interface::msg::FallDownState> fall_down_channel;
         booster::robot::ChannelPtr<booster_interface::msg::ButtonEventMsg> button_event_channel;
         booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
+        booster::robot::ChannelPtr<brain::msg::Kick> kick_channel;
 
         booster::robot::b1::B1LocoClient booster_client;
 

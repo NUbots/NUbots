@@ -273,29 +273,40 @@ namespace module::tools {
             utility::platform::set_robot_alias(hostname, robot_name);
         }
 
-        // Check if any of ip_address, ssid or password are empty
-        if (ip_address.empty() || ssid.empty() || password.empty()) {
+        // Check if any of the required fields are empty
+        if ((!use_dhcp && ip_address.empty()) || ssid.empty() || password.empty()) {
             display.log_message = "Configure Error: IP Address, SSID and Password must be set!";
             return;
         }
 
         /* NETWORKMANAGER CONFIG */
 
-        // Parse the IP address
-        std::stringstream ss(ip_address);
-        std::vector<std::string> ip_parts{};
-        for (std::string part; std::getline(ss, part, '.');) {
-            ip_parts.push_back(part);
+        // Build the [ipv4] section: a static address, or DHCP if requested
+        std::string ipv4_config;
+        if (use_dhcp) {
+            ipv4_config = "method=auto\n";
         }
+        else {
+            // Parse the IP address
+            std::stringstream ss(ip_address);
+            std::vector<std::string> ip_parts{};
+            for (std::string part; std::getline(ss, part, '.');) {
+                ip_parts.push_back(part);
+            }
 
-        // Check if team_id and player_id match with third and fourth parts of the IP address.
-        // This shouldn't break things, but the user should know that there may be an issue.
-        // In the lab, the IP addresses of the robots are set and may not match in this way,
-        // but at RoboCup, it is important that this format is followed
-        if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
-            display.log_message +=
-                "Warning: At RoboCup, the third position of the IP address should be the team ID and the fourth should "
-                "be the player number. ";
+            // Check if team_id and player_id match with third and fourth parts of the IP address.
+            // This shouldn't break things, but the user should know that there may be an issue.
+            // In the lab, the IP addresses of the robots are set and may not match in this way,
+            // but at RoboCup, it is important that this format is followed
+            if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
+                display.log_message += "Warning: At RoboCup, the third position of the IP address should be the "
+                                        "team ID and the fourth should be the player number. ";
+            }
+
+            ipv4_config = fmt::format("method=manual\naddress1={}/16,{}.{}.3.1\ndns=8.8.8.8;\n",
+                                      ip_address,
+                                      ip_parts[0],
+                                      ip_parts[1]);
         }
 
         // Write the nmconnection file for the RoboCup WiFi network
@@ -316,17 +327,13 @@ namespace module::tools {
             "key-mgmt=wpa-psk\n"
             "psk={}\n\n"
             "[ipv4]\n"
-            "method=manual\n"
-            "address1={}/16,{}.{}.3.1\n"
-            "dns=8.8.8.8;\n\n"
+            "{}\n"
             "[ipv6]\n"
             "method=ignore\n",
             wifi_interface,
             ssid,
             password,
-            ip_address,
-            ip_parts[0],
-            ip_parts[1]);
+            ipv4_config);
 
         display.log_message += "Files have been configured.";
     }
@@ -350,7 +357,12 @@ namespace module::tools {
                 }
             }
 
-            if (display.row_selection == int(Display::Column1::IP_ADDRESS) && !cfg.common_ips.empty()) {
+            if (display.row_selection == int(Display::Column1::USE_DHCP)) {
+                use_dhcp = !use_dhcp;
+                return;
+            }
+
+            if (display.row_selection == int(Display::Column1::IP_ADDRESS) && !use_dhcp && !cfg.common_ips.empty()) {
                 // Change the IPs to use the player_id in the "X" position
                 std::vector<std::string> player_ips{};
                 for (const auto& ip : cfg.common_ips) {
@@ -397,7 +409,11 @@ namespace module::tools {
             switch (column) {
                 case Display::Column1::ROBOT_NAME: robot_name = user_input(); break;
                 case Display::Column1::WIFI_INTERFACE: wifi_interface = user_input(); break;
-                case Display::Column1::IP_ADDRESS: ip_address = user_input(); break;
+                case Display::Column1::IP_ADDRESS:
+                    if (!use_dhcp) {
+                        ip_address = user_input();
+                    }
+                    break;
                 case Display::Column1::SSID: ssid = user_input(); break;
                 case Display::Column1::PASSWORD: password = user_input(); break;
                 default: break;
@@ -518,9 +534,12 @@ namespace module::tools {
         mvprintw(4, display.C1_PAD, ("Hostname        : " + hostname).c_str());
         mvprintw(5, display.C1_PAD, ("Robot Name      : " + robot_name).c_str());
         mvprintw(6, display.C1_PAD, ("Wifi Interface  : " + wifi_interface).c_str());
-        mvprintw(7, display.C1_PAD, ("IP Address      : " + ip_address).c_str());
-        mvprintw(8, display.C1_PAD, ("SSID            : " + ssid).c_str());
-        mvprintw(9, display.C1_PAD, ("Password        : " + password).c_str());
+        mvprintw(7, display.C1_PAD, ("Use DHCP        : " + std::string(use_dhcp ? "True" : "False")).c_str());
+        mvprintw(8,
+                 display.C1_PAD,
+                 ("IP Address      : " + (use_dhcp ? std::string("(automatic)") : ip_address)).c_str());
+        mvprintw(9, display.C1_PAD, ("SSID            : " + ssid).c_str());
+        mvprintw(10, display.C1_PAD, ("Password        : " + password).c_str());
 
         attron(A_ITALIC);
         mvprintw(2, display.C2_PAD, "Game Configuration");

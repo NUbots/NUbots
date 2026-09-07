@@ -247,6 +247,8 @@ namespace utility::strategy {
      * the higher player ID winning the tie (same convention as get_closest_bot)
      * @param self_id the ID of the robot that is calling this function
      * @param ignore_ids a list of robot IDs to ignore when determining who is fastest
+     * @param times_out if non-null, filled with the (player ID, estimated time) pair considered for
+     * every candidate (self and every non-ignored teammate), for debugging/visualisation
      *
      * @return the ID of the robot judged fastest (opponents are not considered)
      */
@@ -260,7 +262,8 @@ namespace utility::strategy {
                                          double turn_speed,
                                          double equidistant_time_threshold,
                                          unsigned int self_id,
-                                         std::vector<unsigned int> const& ignore_ids) {
+                                         std::vector<unsigned int> const& ignore_ids,
+                                         std::vector<std::pair<unsigned int, double>>* times_out = nullptr) {
         Eigen::Vector2d rBFf = (Hfw * rBWw).head<2>();
         Eigen::Vector2d rTFf = approach_point_behind_ball(rBFf, goal_rFf, distance_behind_ball);
 
@@ -310,6 +313,12 @@ namespace utility::strategy {
             bool equidistant = std::abs(candidate.time - fastest_time) < equidistant_time_threshold;
             if (equidistant && candidate.id > winner.id) {
                 winner = candidate;
+            }
+        }
+
+        if (times_out != nullptr) {
+            for (const auto& candidate : candidates) {
+                times_out->emplace_back(candidate.id, candidate.time);
             }
         }
 

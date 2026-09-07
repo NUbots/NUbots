@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <optional>
 
 #include "extension/Behaviour.hpp"
 
@@ -49,7 +50,12 @@ namespace module::purpose {
             double goal_post_clearance = 0.0;
             /// @brief How far forward of the goal line the goalie bows at the widest point of its strafe
             double strafe_curve_depth = 0.0;
+            /// @brief Maximum time to stand still and look around waiting for localisation to converge
+            std::chrono::seconds localise_timeout{0};
         } cfg;
+
+        /// @brief When the robot started standing still and looking around to localise, unset when localised
+        std::optional<NUClear::clock::time_point> look_around_start{};
 
     public:
         /// @brief Called by the powerplant to build and setup the Goalie reactor.

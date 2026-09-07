@@ -34,6 +34,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Player.hpp"
 #include "message/purpose/SupportPosition.hpp"
+#include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -50,6 +51,7 @@ namespace module::purpose {
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::purpose::SupportPosition;
+    using message::strategy::LookAtBall;
     using message::strategy::WalkToFieldPosition;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
@@ -60,7 +62,9 @@ namespace module::purpose {
 
         on<Configuration>("Support.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Support.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stop_threshold    = config["stop_threshold"].as<double>();
+            cfg.stopped_threshold = config["stopped_threshold"].as<double>();
         });
 
         on<Configuration, With<FieldDescription>>("Formation.yaml")
@@ -76,6 +80,9 @@ namespace module::purpose {
                     std::string pos = n["position"].as<std::string>();
                     double off      = n["offset"] ? n["offset"].as<double>() : 0.0;
                     if (pos == "field_min_x") return -fd.dimensions.field_length / 2.0 + off;
+                    if (pos == "field_max_x") return fd.dimensions.field_length / 2.0 + off;
+                    if (pos == "field_min_y") return -fd.dimensions.field_width / 2.0 + off;
+                    if (pos == "field_max_y") return fd.dimensions.field_width / 2.0 + off;
                     if (pos == "left_goal_area_max_x")
                         return -fd.dimensions.field_length / 2.0 + fd.dimensions.goal_area_length + off;
                     if (pos == "goal_area_min_y") return -fd.dimensions.goal_area_width / 2.0 + off;
@@ -87,6 +94,9 @@ namespace module::purpose {
                 Eigen::Vector2d default_attraction{config["defaults"]["attraction"]["x"].as<double>(),
                                                    config["defaults"]["attraction"]["y"].as<double>()};
                 double default_min_x = resolve(config["defaults"]["minX"]);
+                double default_max_x = resolve(config["defaults"]["maxX"]);
+                double default_min_y = resolve(config["defaults"]["minY"]);
+                double default_max_y = resolve(config["defaults"]["maxY"]);
 
                 cfg.modes.clear();
 
@@ -102,6 +112,15 @@ namespace module::purpose {
                     double mode_min_x = mode.second["defaults"]["minX"]
                                             ? resolve(mode.second["defaults"]["minX"])
                                             : default_min_x;
+                    double mode_max_x = mode.second["defaults"]["maxX"]
+                                            ? resolve(mode.second["defaults"]["maxX"])
+                                            : default_max_x;
+                    double mode_min_y = mode.second["defaults"]["minY"]
+                                            ? resolve(mode.second["defaults"]["minY"])
+                                            : default_min_y;
+                    double mode_max_y = mode.second["defaults"]["maxY"]
+                                            ? resolve(mode.second["defaults"]["maxY"])
+                                            : default_max_y;
 
                     for (auto robot : mode.second["robots"]) {
                         int id  = std::stoi(robot.first.as<std::string>());
@@ -114,6 +133,9 @@ namespace module::purpose {
                                                                             n["attraction"]["y"].as<double>()}
                                                           : mode_attraction;
                         slot.min_x      = n["minX"] ? resolve(n["minX"]) : mode_min_x;
+                        slot.max_x      = n["maxX"] ? resolve(n["maxX"]) : mode_max_x;
+                        slot.min_y      = n["minY"] ? resolve(n["minY"]) : mode_min_y;
+                        slot.max_y      = n["maxY"] ? resolve(n["maxY"]) : mode_max_y;
 
                         cfg.modes[mode_name][id] = slot;
                     }
@@ -135,10 +157,21 @@ namespace module::purpose {
                 if (!position)
                     return;  // no slot for this robot (or config not yet loaded)
 
-                // Flip yaw axis to work with other teams formation rules
+                // Make robot always face ball while playing
+                double yaw = M_PI;
+                if (ball && game_state.phase.value == GameState::Phase::PLAYING) {
+                    Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
+                    yaw                  = std::atan2(rBFf.y() - position->y(), rBFf.x() - position->x());
+                }
+
                 emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(*position, Eigen::Vector3d(0, 0, M_PI)),
-                    true));
+                    pos_rpy_to_transform(*position, Eigen::Vector3d(0, 0, yaw)),
+                    true,
+                    cfg.stop_threshold,
+                    cfg.stopped_threshold));
+
+                // Always track the ball with the head, regardless of game phase.
+                emit<Task>(std::make_unique<LookAtBall>());
             });
 
         // Continuously compute and emit what this robot's support position would be right now, even when
@@ -201,8 +234,10 @@ namespace module::purpose {
             // Formation.yaml uses a mirrored x-axis, so flip the ball's x to match before combining it
             // with the formation coefficients
             double ball_x = -rBFf.x();
-            position.x()  = std::max(slot.min_x, slot.offset.x() + slot.attraction.x() * ball_x);
-            position.y()  = slot.offset.y() + slot.attraction.y() * rBFf.y();
+            position.x() =
+                std::clamp(slot.offset.x() + slot.attraction.x() * ball_x, slot.min_x, slot.max_x);
+            position.y() =
+                std::clamp(slot.offset.y() + slot.attraction.y() * rBFf.y(), slot.min_y, slot.max_y);
         }
 
         // Clamp to field

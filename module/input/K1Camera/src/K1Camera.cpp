@@ -27,33 +27,21 @@
 #include "K1Camera.hpp"
 
 #include <algorithm>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/interprocess/detail/os_file_functions.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/sync/interprocess_condition.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <booster/common/dds/dds_entity.hpp>
 #include <chrono>
 #include <cmath>
-#include <cstring>
 #include <fmt/format.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <thread>
-#include <tinyrobotics/kinematics.hpp>
-#include <tinyrobotics/parser.hpp>
 
 #include "extension/Configuration.hpp"
 
-#include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/Booster/channel_factory.hpp"
+#include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
-
-namespace bip = boost::interprocess;
-
 
 namespace module::input {
 
@@ -61,35 +49,27 @@ namespace module::input {
     using message::input::Image;
     using message::input::Sensors;
     using utility::nusight::graph;
+    using utility::platform::Booster::ensure_channel_factory;
+    using utility::support::Expression;
     using utility::vision::fourcc;
 
-    // Must match the writer-side layout in NUbridge exactly (binary compatibility).
-    struct SharedImageHeader {
-        static constexpr uint32_t MAGIC   = 0x4E42494D;  // "NBIM"
-        static constexpr uint32_t VERSION = 1;
-        uint32_t magic{MAGIC};
-        uint32_t version{VERSION};
-        bip::interprocess_mutex mutex;
-        bip::interprocess_condition has_new_frame;
-        uint64_t sequence{0};
-        uint32_t data_size{0};
-        uint32_t width{0};
-        uint32_t height{0};
-        char encoding[32]{};
-        float focal_length{0.0f};
-        float fov{0.0f};
-        float centre_x{0.0f};
-        float centre_y{0.0f};
-        float k1{0.0f};
-        float k2{0.0f};
-    };
+    using booster::common::DdsExecutorDispatchMode;
+    using booster::common::DdsExecutorOverflowPolicy;
+    using booster::common::DdsReaderExecutorOptions;
+    using booster::robot::ChannelFactory;
 
-    static constexpr std::size_t MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+    /// @brief How stale a Hcw may be before it is dropped from the buffer.
+    static constexpr std::chrono::milliseconds HCW_BUFFER_DURATION{500};
+    /// @brief How far a capture timestamp may be from our own clock before we distrust it.
+    static constexpr std::chrono::seconds MAX_CLOCK_SKEW{1};
+    /// @brief How long to wait for CameraInfo before warning that the fallback lens is in use.
+    static constexpr std::chrono::seconds CAMERA_INFO_TIMEOUT{5};
 
+    /// @brief Map a ROS sensor_msgs/Image encoding string to the FOURCC code NUbots uses.
     static uint32_t ros_encoding_to_fourcc(const std::string& enc) {
         // clang-format off
-        if (enc == "rgb8")         return fourcc("RGB8");
-        if (enc == "bgr8")         return fourcc("BGR8");
+        if (enc == "rgb8")         return fourcc("RGB3");
+        if (enc == "bgr8")         return fourcc("BGR3");
         if (enc == "mono8")        return fourcc("GREY");
         if (enc == "bayer_bggr8")  return fourcc("BGGR");
         if (enc == "bayer_grbg8")  return fourcc("GRBG");
@@ -100,232 +80,226 @@ namespace module::input {
         return 0;
     }
 
-    void K1Camera::stop_cameras() {
-        std::unique_lock<std::mutex> lock(cameras_mutex);
+    Eigen::Isometry3d K1Camera::nearest_Hcw(const NUClear::clock::time_point& timestamp) {
+        std::lock_guard<std::mutex> lock(sensors_mutex);
 
-        log<INFO>("Stopping camera threads");
-
-        for (auto& cam : cameras) {
-            cam->running = false;
+        if (Hcws.empty()) {
+            return Eigen::Isometry3d::Identity();
         }
-        // Join without holding the mutex so camera threads can complete cleanly.
-        // Threads check running on each timed_wait timeout (≤100 ms), so joins are fast.
-        auto local_cameras = std::move(cameras);
-        lock.unlock();
 
-        for (auto& cam : local_cameras) {
-            if (cam->thread.joinable()) {
-                cam->thread.join();
-            }
+        auto it = std::lower_bound(Hcws.begin(), Hcws.end(), timestamp, [](const auto& a, const auto& t) {
+            return a.first < t;
+        });
+
+        if (it == Hcws.end()) {
+            return std::prev(it)->second;
+        }
+        if (it == Hcws.begin()) {
+            return it->second;
+        }
+        // Pick whichever of the two straddling samples is closer in time
+        return std::abs((it->first - timestamp).count()) < std::abs((std::prev(it)->first - timestamp).count())
+                   ? it->second
+                   : std::prev(it)->second;
+    }
+
+    void K1Camera::camera_info_handler(CameraContext& ctx, const void* msg) {
+        const auto* info = static_cast<const sensor_msgs::msg::CameraInfo*>(msg);
+
+        const auto& k = info->k();
+        if (k.size() < 6 || k[0] == 0.0) {
+            log<WARN>(fmt::format("Ignoring CameraInfo on '{}' with an unusable intrinsic matrix", ctx.info_topic));
+            return;
+        }
+
+        const float fx = static_cast<float>(k[0]);
+        const float cx = static_cast<float>(k[2]);
+        const float cy = static_cast<float>(k[5]);
+        const float w  = static_cast<float>(info->width());
+        const float h  = static_cast<float>(info->height());
+
+        if (w == 0.0f || h == 0.0f) {
+            log<WARN>(fmt::format("Ignoring CameraInfo on '{}' with zero dimensions", ctx.info_topic));
+            return;
+        }
+
+        // message::input::Image::Lens stores focal_length and centre normalised by image width
+        Image::Lens lens;
+        lens.projection   = Image::Lens::Projection::RECTILINEAR;
+        lens.focal_length = fx / w;
+        lens.fov          = 2.0f * std::atan(w / (2.0f * fx));
+        lens.centre       = Eigen::Vector2f((cx - w / 2.0f) / w, (cy - h / 2.0f) / w);
+        lens.k            = Eigen::Vector2f(info->d().size() > 0 ? static_cast<float>(info->d()[0]) : 0.0f,
+                                 info->d().size() > 1 ? static_cast<float>(info->d()[1]) : 0.0f);
+
+        {
+            std::lock_guard<std::mutex> lock(ctx.lens_mutex);
+            ctx.lens = lens;
+        }
+
+        if (!ctx.have_camera_info.exchange(true)) {
+            log<INFO>(fmt::format("Got CameraInfo for '{}': focal_length {:.4f}, fov {:.3f} rad, centre ({:.4f},"
+                                  " {:.4f})",
+                                  ctx.camera_name,
+                                  lens.focal_length,
+                                  lens.fov,
+                                  lens.centre.x(),
+                                  lens.centre.y()));
         }
     }
 
-    void K1Camera::camera_thread(CameraContext& ctx) {
-        // Outer loop: retry until the segment is available (NUbridge may start after NUbots).
-        log<INFO>(fmt::format("Starting thread for camera '{}'", ctx.camera_name));
-        while (ctx.running) {
-            try {
-                log<INFO>(fmt::format("Opening segment '{}' for camera '{}'", ctx.segment_name, ctx.camera_name));
-                // read_write is required even for the reader because interprocess_mutex and
-                // interprocess_condition must modify their internal state on lock/wait.
-                bip::shared_memory_object shm(bip::open_only, ctx.segment_name.c_str(), bip::read_write);
-                bip::mapped_region region(shm, bip::read_write);
+    NUClear::clock::time_point K1Camera::capture_time(CameraContext& ctx, const sensor_msgs::msg::Image& image) {
+        // Prefer the capture timestamp from the camera over our receive time, so the image is
+        // matched against the kinematics from when it was actually taken
+        const auto& stamp = image.header().stamp();
+        const auto now    = NUClear::clock::now();
+        const auto stamped =
+            NUClear::clock::time_point(std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::seconds(stamp.sec()) + std::chrono::nanoseconds(stamp.nanosec())));
 
-                auto* header       = reinterpret_cast<SharedImageHeader*>(region.get_address());
-                const auto* pixels = reinterpret_cast<const uint8_t*>(header + 1);
-
-                uint64_t last_sequence = 0;
-
-                log<INFO>(fmt::format("K1Camera: successfully mapped segment '{}' for camera '{}'",
-                                      ctx.segment_name,
-                                      ctx.camera_name));
-
-                // Inner loop: read frames until shutdown or segment disappears.
-                auto last_frame_time = std::chrono::steady_clock::now();
-                while (ctx.running) {
-                    uint64_t seq       = 0;
-                    uint32_t data_size = 0;
-                    uint32_t width     = 0;
-                    uint32_t height    = 0;
-                    uint32_t format    = 0;
-                    float focal_length = 0.0f;
-                    float fov          = 0.0f;
-                    float centre_x     = 0.0f;
-                    float centre_y     = 0.0f;
-                    float k1           = 0.0f;
-                    float k2           = 0.0f;
-                    std::vector<uint8_t> data;
-
-                    {
-                        bip::scoped_lock<bip::interprocess_mutex> lock(header->mutex);
-
-                        log<DEBUG>(fmt::format("Reading from {}", ctx.camera_name));
-
-                        // Use timed_wait so the running flag is rechecked every 100 ms
-                        // even if the writer stalls.
-                        while (ctx.running && header->sequence == last_sequence) {
-                            header->has_new_frame.timed_wait(lock,
-                                                             boost::posix_time::microsec_clock::universal_time()
-                                                                 + boost::posix_time::milliseconds(100));
-                            if (header->sequence == last_sequence
-                                && std::chrono::steady_clock::now() - last_frame_time > std::chrono::seconds(5)) {
-                                log<WARN>(fmt::format("K1Camera: no new frame from '{}' for 5 s — reconnecting",
-                                                      ctx.segment_name));
-                                goto reconnect;
-                            }
-                        }
-
-                        if (!ctx.running) {
-                            break;
-                        }
-
-                        seq       = header->sequence;
-                        data_size = header->data_size;
-                        width     = header->width;
-                        height    = header->height;
-
-                        const std::string encoding(header->encoding,
-                                                   strnlen(header->encoding, sizeof(header->encoding)));
-                        format = ros_encoding_to_fourcc(encoding);
-
-                        if (format == 0) {
-                            log<WARN>(fmt::format("K1Camera: {} unknown encoding '{}'", ctx.segment_name, encoding));
-                            last_sequence = seq;
-                            continue;
-                        }
-
-                        if (data_size > MAX_IMAGE_BYTES) {
-                            log<WARN>(fmt::format("K1Camera: {} data_size {} exceeds MAX_IMAGE_BYTES",
-                                                  ctx.segment_name,
-                                                  data_size));
-                            last_sequence = seq;
-                            continue;
-                        }
-
-                        focal_length = header->focal_length;
-                        fov          = header->fov;
-                        centre_x     = header->centre_x;
-                        centre_y     = header->centre_y;
-                        k1           = header->k1;
-                        k2           = header->k2;
-
-                        // Copy pixel data while holding the lock; release before emit.
-                        log<DEBUG>(fmt::format("Copying data from {}", ctx.segment_name));
-                        if (format == fourcc("NV12")) {
-                            const cv::Mat nv12(height * 3 / 2, width, CV_8UC1, const_cast<uint8_t*>(pixels));
-                            cv::Mat rgb;
-                            cv::cvtColor(nv12, rgb, cv::COLOR_YUV2RGB_NV12);
-                            cv::Mat bayer(height, width, CV_8UC1);
-                            for (uint32_t y{}; y < height; ++y) {
-                                const cv::Vec3b* rgb_row = rgb.ptr<cv::Vec3b>(y);
-                                uint8_t* bayer_row       = bayer.ptr<uint8_t>(y);
-                                for (uint32_t x{}; x < width; ++x) {
-                                    const int channel = ((y & 1) == 0) ? (((x & 1) == 0) ? 0 : 1)   // R : G
-                                                                       : (((x & 1) == 0) ? 1 : 2);  // G : B
-                                    bayer_row[x]      = rgb_row[x][channel];
-                                }
-                            }
-                            format = fourcc("RGGB");
-                            data.assign(bayer.datastart, bayer.dataend);
-                        }
-                        else {
-                            data.assign(pixels, pixels + data_size);
-                        }
-                    }
-
-                    if (last_sequence != 0 && seq != last_sequence + 1) {
-                        log<DEBUG>(
-                            fmt::format("K1Camera: {} dropped {} frame(s)", ctx.camera_name, seq - last_sequence - 1));
-                    }
-                    last_sequence   = seq;
-                    last_frame_time = std::chrono::steady_clock::now();
-
-                    auto msg               = std::make_unique<Image>();
-                    msg->format            = format;
-                    msg->dimensions.x()    = width;
-                    msg->dimensions.y()    = height;
-                    msg->data              = std::move(data);
-                    msg->id                = ctx.id;
-                    msg->name              = ctx.camera_name;
-                    msg->timestamp         = NUClear::clock::now();
-                    msg->lens.projection   = Image::Lens::Projection::RECTILINEAR;
-                    msg->lens.focal_length = focal_length;
-                    msg->lens.fov          = fov;
-                    msg->lens.centre       = {centre_x, centre_y};
-                    msg->lens.k            = {k1, k2};
-
-                    Eigen::Isometry3d Hcw = Eigen::Isometry3d::Identity();
-                    {
-                        std::lock_guard<std::mutex> lock(sensors_mutex);
-
-                        if (!Hcws.empty()) {
-                            auto Hcw_it =
-                                std::lower_bound(Hcws.begin(),
-                                                 Hcws.end(),
-                                                 std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
-                                                 [](const auto& a, const auto& b) { return a.first < b.first; });
-
-                            if (Hcw_it == Hcws.end()) {
-                                Hcw = std::prev(Hcw_it)->second;
-                            }
-                            else if (Hcw_it == Hcws.begin()) {
-                                Hcw = Hcw_it->second;
-                            }
-                            else {
-                                Hcw = std::abs((Hcw_it->first - msg->timestamp).count())
-                                              < std::abs((std::prev(Hcw_it)->first - msg->timestamp).count())
-                                          ? Hcw_it->second
-                                          : std::prev(Hcw_it)->second;
-                            }
-                        }
-                    }
-
-                    msg->Hcw = Hcw;
-                    emit(graph("Camera Pose",
-                               msg->Hcw.translation().x(),
-                               msg->Hcw.translation().y(),
-                               msg->Hcw.translation().z()));
-                    emit(msg);
-                }
-            reconnect:;
+        const auto skew = std::chrono::abs(stamped - now);
+        if (stamp.sec() == 0 || skew > MAX_CLOCK_SKEW) {
+            if (!ctx.warned_about_timestamp.exchange(true)) {
+                log<WARN>(fmt::format("Capture timestamps on '{}' are {} s from our clock, using receive time"
+                                      " instead. Check that BoosterOS and NUbots share a clock.",
+                                      ctx.image_topic,
+                                      std::chrono::duration_cast<std::chrono::duration<double>>(skew).count()));
             }
-            catch (const bip::interprocess_exception& ex) {
-                if (ctx.running) {
-                    log<WARN>(fmt::format("K1Camera: segment '{}' unavailable: {} — retrying in 500 ms",
-                                          ctx.segment_name,
-                                          ex.what()));
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                }
-            }
+            return now;
         }
+        return stamped;
+    }
+
+    void K1Camera::image_handler(CameraContext& ctx, const void* msg) {
+        const auto* image = static_cast<const sensor_msgs::msg::Image*>(msg);
+
+        const uint32_t width  = image->width();
+        const uint32_t height = image->height();
+        const auto& bytes     = image->data();
+
+        if (width == 0 || height == 0 || bytes.empty()) {
+            log<WARN>(fmt::format("Dropping empty frame from '{}'", ctx.camera_name));
+            return;
+        }
+
+        uint32_t format = ros_encoding_to_fourcc(image->encoding());
+        if (format == 0) {
+            log<WARN>(fmt::format("Unknown encoding '{}' on '{}'", image->encoding(), ctx.image_topic));
+            return;
+        }
+
+        auto out = std::make_unique<Image>();
+
+        // Convert NV12 to RGB3
+        if (format == fourcc("NV12")) {
+            const std::size_t expected = std::size_t(width) * height * 3 / 2;
+            if (bytes.size() < expected) {
+                log<WARN>(fmt::format("Dropping truncated NV12 frame from '{}': {} bytes, expected {}",
+                                      ctx.camera_name,
+                                      bytes.size(),
+                                      expected));
+                return;
+            }
+            // Size the destination first and point a Mat at it, so cvtColor writes the converted
+            // pixels straight into the message
+            out->data.resize(std::size_t(width) * height * 3);
+            const cv::Mat nv12(int(height * 3 / 2), int(width), CV_8UC1, const_cast<uint8_t*>(bytes.data()));
+            cv::Mat rgb(int(height), int(width), CV_8UC3, out->data.data());
+            cv::cvtColor(nv12, rgb, cv::COLOR_YUV2RGB_NV12);
+            format = fourcc("RGB3");
+        }
+        else {
+            out->data.assign(bytes.begin(), bytes.end());
+        }
+
+        const auto timestamp = capture_time(ctx, *image);
+
+        out->format         = format;
+        out->dimensions.x() = width;
+        out->dimensions.y() = height;
+        out->id             = ctx.id;
+        out->name           = ctx.camera_name;
+        out->timestamp      = timestamp;
+        {
+            std::lock_guard<std::mutex> lock(ctx.lens_mutex);
+            out->lens = ctx.lens;
+        }
+        out->Hcw = nearest_Hcw(timestamp);
+
+        emit(graph("Camera Pose", out->Hcw.translation().x(), out->Hcw.translation().y(), out->Hcw.translation().z()));
+        emit(out);
     }
 
     K1Camera::K1Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
-            std::lock_guard<std::mutex> lock(cameras_mutex);
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
+            // Can't reconfigure the readers once the topics have been subscribed to
+            if (channels_created) {
+                log<WARN>("Camera topics changed but readers already exist, restart to apply");
+                return;
+            }
+
+            cameras.clear();
             for (const auto& entry : cfg["cameras"]) {
-                auto ctx          = std::make_unique<CameraContext>();
-                ctx->segment_name = entry["segment"].as<std::string>();
-                ctx->camera_name  = entry["name"].as<std::string>();
-                ctx->id           = entry["id"].as<uint32_t>();
-                ctx->running      = true;
-                ctx->thread       = std::thread([this, raw = ctx.get()] { camera_thread(*raw); });
+                auto ctx         = std::make_unique<CameraContext>();
+                ctx->image_topic = entry["topic"].as<std::string>();
+                ctx->info_topic  = ctx->image_topic + "/camera_info";
+                ctx->camera_name = entry["name"].as<std::string>();
+                ctx->id          = entry["id"].as<uint32_t>();
+
                 cameras.push_back(std::move(ctx));
             }
         });
 
+        on<Startup>().then("Subscribe to cameras", [this] {
+            ensure_channel_factory();
+
+            // Setup DDS reader options
+            DdsReaderExecutorOptions image_options;
+            image_options.queue_capacity  = 1;
+            image_options.overflow_policy = DdsExecutorOverflowPolicy::kLatestOnly;
+            image_options.dispatch_mode   = DdsExecutorDispatchMode::kDedicated;
+
+            for (auto& ctx : cameras) {
+                log<INFO>(fmt::format("Subscribing to '{}' for camera '{}'", ctx->image_topic, ctx->camera_name));
+                ctx->image_channel = ChannelFactory::Instance()->CreateRecvChannel<sensor_msgs::msg::Image>(
+                    ctx->image_topic,
+                    [this, raw = ctx.get()](const void* msg) { image_handler(*raw, msg); },
+                    /* reliable = */ false,
+                    image_options);
+
+                // CameraInfo is low rate and we need every update, so take it reliably
+                ctx->info_channel = ChannelFactory::Instance()->CreateRecvChannel<sensor_msgs::msg::CameraInfo>(
+                    ctx->info_topic,
+                    [this, raw = ctx.get()](const void* msg) { camera_info_handler(*raw, msg); },
+                    /* reliable = */ true);
+            }
+
+            channels_created = true;
+        });
+
         on<Trigger<Sensors>>().then("Buffer Hcw", [this](const Sensors& sensors) {
             std::lock_guard<std::mutex> lock(sensors_mutex);
-            auto now = NUClear::clock::now();
-            Hcws.resize(std::distance(Hcws.begin(), std::remove_if(Hcws.begin(), Hcws.end(), [now](const auto& v) {
-                                          return v.first < (now - std::chrono::milliseconds(500));
-                                      })));
+            const auto cutoff = NUClear::clock::now() - HCW_BUFFER_DURATION;
+            while (!Hcws.empty() && Hcws.front().first < cutoff) {
+                Hcws.pop_front();
+            }
             Hcws.emplace_back(sensors.timestamp, Eigen::Isometry3d(sensors.Hcw));
         });
 
-        on<Shutdown>().then([this] { stop_cameras(); });
+        on<Shutdown>().then([this] {
+            log<INFO>("Closing camera channels");
+            for (auto& ctx : cameras) {
+                if (ctx->image_channel != nullptr) {
+                    ChannelFactory::Instance()->CloseReader(ctx->image_topic);
+                }
+                if (ctx->info_channel != nullptr) {
+                    ChannelFactory::Instance()->CloseReader(ctx->info_topic);
+                }
+            }
+        });
     }
 
 }  // namespace module::input
