@@ -98,8 +98,6 @@ namespace module::input {
 
             log<INFO>("Subscribing to head pose on", cfg.pose_topic);
 
-            // A Pose is tiny and low rate, so the default executor and queue are fine here. Take it
-            // reliably to match the publisher, which NUbridge subscribed to with default QoS.
             pose_channel = ChannelFactory::Instance()->CreateRecvChannel<geometry_msgs::msg::Pose>(
                 cfg.pose_topic,
                 [this](const void* msg) { pose_handler(msg); },
@@ -154,7 +152,7 @@ namespace module::input {
                 };
             }
 
-            // Snap tiny residuals (e.g. ~1e-10) to zero so they aren't treated as real motion
+            // Snap tiny residuals to zeroes
             for (double& v : normalized_odometry) {
                 if (std::abs(v) < cfg.odometry_deadband) {
                     v = 0.0;
@@ -172,8 +170,7 @@ namespace module::input {
             Eigen::Vector3d rpy(0.0, 0.0, normalized_odometry[2]);
             Hwr.linear() = rpy_intrinsic_to_mat(rpy);
 
-            // Hrh: head frame in robot base frame, from the most recent head pose message. Stays
-            // identity until the first one arrives, rather than becoming a degenerate rotation.
+            // Hrh: head frame in robot base frame, from the most recent head pose message.
             Eigen::Isometry3d Hrh_now;
             bool got_pose = false;
             {
@@ -185,7 +182,7 @@ namespace module::input {
                 log<WARN>("No head pose received on", cfg.pose_topic, "- using identity");
             }
 
-            // Hrc: camera optical frame in robot base frame = Hrh * Hhp * Hpc
+            // Hrc: camera optical frame in robot base frame
             Eigen::Isometry3d Hrc = Hrh_now * cfg.Hhp * cfg.Hpc;
 
             Eigen::Isometry3d Hwc = Hwr * Hrc;

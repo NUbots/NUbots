@@ -157,9 +157,7 @@ namespace module::purpose {
                 if (!position)
                     return;  // no slot for this robot (or config not yet loaded)
 
-                // While playing, keep the body facing the ball so the robot can react quickly. Outside
-                // of play (e.g. walking out to a kickoff formation spot in READY), use the formation's
-                // fixed heading instead - the head still tracks the ball via LookAtBall either way.
+                // Make robot always face ball while playing
                 double yaw = M_PI;
                 if (ball && game_state.phase.value == GameState::Phase::PLAYING) {
                     Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;

@@ -136,7 +136,6 @@ namespace module::planning {
                 }
 
                 // COMPUTE KICK TARGET (field space) AND DIRECTION (robot-relative vector toward it)
-                // Field space -> robot space
                 const Eigen::Isometry3d Hrf = sensors.Hrw * field.Hfw.inverse();
                 // Transform the goal into robot space, then difference against the already robot-relative
                 // ball position so the translation cancels correctly (both points are in the same frame)
