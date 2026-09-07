@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package message.booster;
+
+import "Vector.proto";
+
+message BoosterWalk {
+    vec3 velocity = 1;
+}

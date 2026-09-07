@@ -59,25 +59,25 @@ namespace module::skill {
                         return;
                     }
 
-                    log<DEBUG>("KickWalk module received a kick request for leg: ", kick.leg);
+                    log<DEBUG>("KickWalk module received a kick request.");
 
                     // Slow approach
                     Eigen::Vector3d walk_velocity =
                         Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
-                    emit<Task>(std::make_unique<Walk>(walk_velocity, true, kick.leg));
+                    emit<Task>(std::make_unique<Walk>(walk_velocity, true));
                 }
                 // The wait triggered the provider
                 else if (run_reason == RunReason::SUBTASK_DONE && !walk.done) {
                     // Slow approach
-                    log<DEBUG>("KickWalk module received a kick request for leg: ", kick.leg);
+                    log<DEBUG>("KickWalk module received a kick request.");
                     Eigen::Vector3d walk_velocity =
                         Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
-                    emit<Task>(std::make_unique<Walk>(walk_velocity, true, kick.leg));
+                    emit<Task>(std::make_unique<Walk>(walk_velocity, true));
                 }
 
                 // If the walk says the kick is done, emit a Done task
                 if (run_reason == RunReason::SUBTASK_DONE) {
-                    log<DEBUG>("KickWalk step completed, kick done for leg: ", kick.leg);
+                    log<DEBUG>("KickWalk step completed.");
                     last_kick_end = NUClear::clock::now();
                     emit<Task>(std::make_unique<Done>());
                     return;

@@ -33,12 +33,10 @@ namespace module::localisation {
 
     using message::support::FieldDescription;
     using message::vision::FieldIntersections;
-    using message::vision::FieldLines;
     using message::vision::Goals;
 
     void FieldLocalisationNLopt::uncertainty_reset(const FieldDescription& fd,
-                                                   const FieldLines& field_lines,
-                                                   const std::shared_ptr<const FieldIntersections>& field_intersections,
+                                                   const FieldIntersections& field_intersections,
                                                    const std::shared_ptr<const Goals>& goals,
                                                    const Eigen::Isometry3d& Hrw) {
         // Get robot position in field space
@@ -79,11 +77,8 @@ namespace module::localisation {
                 // Add hypotheses for each position with all compass and diagonal headings
                 // Calculate cost using NLopt
                 for (const auto& angle : angles) {
-                    hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
-                                                                        field_lines.rPWw,
-                                                                        field_intersections,
-                                                                        goals,
-                                                                        true));
+                    hypotheses.emplace_back(
+                        run_field_line_optimisation(Eigen::Vector3d(x, y, angle), field_intersections, goals, true));
                 }
             }
         }
@@ -119,11 +114,8 @@ namespace module::localisation {
                 // Add hypotheses for each position with all compass and diagonal headings
                 // Calculate cost using NLopt
                 for (const auto& angle : angles) {
-                    hypotheses.emplace_back(run_field_line_optimisation(Eigen::Vector3d(x, y, angle),
-                                                                        field_lines.rPWw,
-                                                                        field_intersections,
-                                                                        goals,
-                                                                        true));
+                    hypotheses.emplace_back(
+                        run_field_line_optimisation(Eigen::Vector3d(x, y, angle), field_intersections, goals, true));
                 }
             }
         }

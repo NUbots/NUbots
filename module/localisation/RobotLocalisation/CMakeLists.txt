@@ -27,3 +27,8 @@ SOFTWARE.
 
 # Build our NUClear module
 nuclear_module()
+
+set_source_files_properties(
+    src/RobotLocalisation.cpp
+    PROPERTIES COMPILE_OPTIONS "-O0"
+)

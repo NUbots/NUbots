@@ -86,6 +86,8 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+
+            cfg.use_booster_odometry = config["use_booster_odometry"].as<bool>();
         });
 
         on<Startup>().then([this] {
@@ -100,13 +102,15 @@ namespace module::input {
            Optional<With<Sensors>>,
            With<Stability>,
            Optional<With<RobotPoseGroundTruth>>,
+           Optional<With<BoosterOdometry>>,
            Single,
            Priority::HIGH>()
             .then("Main Sensors Loop",
                   [this](const RawSensors& raw_sensors,
                          const std::shared_ptr<const Sensors>& previous_sensors,
                          const Stability& stability,
-                         const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth) {
+                         const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                         const std::shared_ptr<const BoosterOdometry>& booster_odometry) {
                       auto sensors = std::make_unique<Sensors>();
 
                       // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -116,7 +120,12 @@ namespace module::input {
                       update_kinematics(sensors, raw_sensors);
 
                       // Odometry (Htw and Hrw)
-                      update_odometry(sensors, previous_sensors, raw_sensors, stability, robot_pose_ground_truth);
+                      update_odometry(sensors,
+                                      previous_sensors,
+                                      raw_sensors,
+                                      stability,
+                                      robot_pose_ground_truth,
+                                      booster_odometry);
 
                       // Graph debug information
                       if (log_level <= DEBUG) {

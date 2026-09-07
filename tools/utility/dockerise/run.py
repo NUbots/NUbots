@@ -98,10 +98,10 @@ def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache):
 
     # Rebuild the image if we are rebuilding
     if rebuild:
-        platform.build(repository, target)
+        platform.build(repository, target, defaults.local_user, os.getuid(), False)
 
     # Find the current target for this platform
-    target = target if target != "selected" else platform.selected(repository, defaults.local_user)
+    target = target if target != "selected_k1" else platform.selected(repository, defaults.local_user)
 
     # Ensure the build volume exists and clean it if necessary
     build_volume_name = f"{repository}_{target}_{defaults.local_user}_build"
@@ -174,6 +174,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "stdout",
             "--attach",
             "stderr",
+            "--platform",
+            "linux/amd64",
             "--hostname",
             docker_hostname,
             "--interactive",
@@ -185,7 +187,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "--group-add",
             "dialout",
             "--group-add",
-            "video_host",
+            "video",
             "--group-add",
             "render_host",
             "--privileged",

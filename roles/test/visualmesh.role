@@ -13,9 +13,9 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors
-  input::Camera
+  input::K1Camera
   platform::${SUBCONTROLLER}::HardwareIO
-  input::SensorFilter # VisualMesh uses odometry
+  input::K1Sensors # VisualMesh uses odometry
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector

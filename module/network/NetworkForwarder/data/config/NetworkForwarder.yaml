@@ -9,7 +9,7 @@ log_level: INFO
 targets:
   nusight:
     # Overview packets for the overview screen
-    message.support.nusight.Overview: false
+    message.support.nusight.Overview: true
     message.support.FieldDescription: false
     message.support.nuclear.ReactionProfiles: false
 
@@ -33,8 +33,11 @@ targets:
 
     # Localisation Messages
     message.localisation.Ball: true
-    message.localisation.Field: true
+    message.localisation.Field: false
     message.localisation.Robots: true
+
+    # Team communication (UDP broadcast) - used to debug what's actually on the wire between robots
+    message.input.Message: true
 
     # Log messages
     message.nuclear.LogMessage: false
@@ -42,6 +45,8 @@ targets:
 
     # Behaviour
     message.purpose.Purpose: true
+    message.purpose.SupportPosition: true
+    message.strategy.TimeToBall: true
     message.planning.WalkToDebug: true
     message.strategy.WalkInsideBoundedBox: true
     message.behaviour.state.WalkState: true

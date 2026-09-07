@@ -77,10 +77,12 @@ export class SensorsSimulator extends Simulator {
         { presentPosition: 0 },
         { presentPosition: 0.1 * Math.cos(t) },
         { presentPosition: 0.1 * Math.cos(t / 3) + 0.4 },
+        { presentPosition: 0 },
+        { presentPosition: 0 },
       ],
       timestamp: {
         seconds: BigInt(Math.floor(time)),
-        nanos: (time - Math.floor(time)) * 1e9,
+        nanos: Math.floor((time - Math.floor(time)) * 1e9),
       },
     }).toBinary();
 

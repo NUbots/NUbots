@@ -9,6 +9,7 @@ import { Vector3 } from "../../../../../shared/math/vector3";
 import { memoize } from "../../../../base/memoize";
 import { BrowserSystemClock } from "../../../../time/browser_clock";
 import { RobotModel } from "../../../robot/model";
+import { LocalisationRobotModel } from "../../robot_model";
 
 export class DashboardRobotModel {
   // Parameters that influence the display
@@ -142,6 +143,13 @@ export class DashboardRobotModel {
       walkCommand: Vector3.of(),
     });
   });
+
+  // The purpose (soccer position) the robot has decided to take. Sourced from the same Purpose
+  // message that drives the on-field purpose label, so it matches what that toggle shows.
+  @computed
+  get purpose(): string {
+    return LocalisationRobotModel.of(this.robot).purpose || "unknown";
+  }
 
   @computed
   get connected(): boolean {

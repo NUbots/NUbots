@@ -6,6 +6,7 @@ nuclear_role(
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # support::logging::MessageLogHandler
   # Configuration
   actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::SoccerConfig # Field description
@@ -17,15 +18,16 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors and network (input)
-  input::SensorFilter
-  input::Camera
+  input::K1Sensors
+  input::K1Camera
   input::GameController
+  # input::WhistleDetection
   network::RobotCommunication
   # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
+  # vision::VisualMesh
+  # vision::GreenHorizonDetector
   # vision::BallDetector
-  vision::FieldLineDetector
+  # vision::FieldLineDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
@@ -38,10 +40,11 @@ nuclear_role(
   actuation::Servos
   actuation::FootController
   # Skills
-  skill::Walk
-  skill::KickWalk
-  skill::GetUp
-  skill::Look
+  skill::K1Walk
+  # skill::KickWalk
+  skill::K1VisualKick
+  skill::K1GetUp
+  skill::K1Look
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -65,5 +68,5 @@ nuclear_role(
   purpose::Support
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-  # Datalogging support::logging::DataLogging
+  # support::logging::DataLogging
 )

@@ -16,7 +16,7 @@ Incluide this role to track other robots on the field.
 
 - `message::vision::Robots` uses the robot position estimates from vision
 - `message::input::RoboCup` uses teammate position from their WiFi message
-- `message::vision::GreenHorizon` uses the GreenHorizon to manage tracked robots
+- `message::input::Image` uses the FOV and image bounds from the camera information
 - `message::localisation::Field` uses the field transformation matrix Hfw to get the location of the tracked robots in field space
 - `message::support::FieldDescription` uses the field dimensions to determine whether the robot is outside the field (plus a given distance outside the field)
 - `message::input::GameState` to get the robot's team colour for visualisation in NUsight

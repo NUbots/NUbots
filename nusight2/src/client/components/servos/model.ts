@@ -28,6 +28,8 @@ export const ServoNames: { [key: number]: string } = {
   17: "L_ANKLE_ROLL",
   18: "HEAD_YAW",
   19: "HEAD_PITCH",
+  20: "R_ELBOW_YAW",
+  21: "L_ELBOW_YAW",
 };
 
 // Hardware error constants from RawSensors.proto

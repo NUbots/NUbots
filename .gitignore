@@ -79,6 +79,7 @@ packer/build.pwi
 log
 log/*
 nsga2-output/*
+log.txt
 
 # ScriptTuner autosaves
 /.scripttuner/

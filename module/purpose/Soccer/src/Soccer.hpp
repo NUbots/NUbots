@@ -31,6 +31,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/input/GameState.hpp"
+
 namespace module::purpose {
 
     struct EnableIdle {};
@@ -50,6 +52,14 @@ namespace module::purpose {
 
         /// @brief Idle state of the robot
         bool idle = false;
+
+        /// @brief Whether a brief stop ("Stop Play") is currently in effect. Used to detect transitions so the
+        /// robot ceases all motion when a stop is called and resumes when it is cleared.
+        bool stopped = false;
+
+        /// @brief The last observed game phase, used to detect transitions (e.g. leaving READY so the
+        /// robot can switch the Booster into soccer/movement mode)
+        message::input::GameState::Phase previous_phase = message::input::GameState::Phase::UNKNOWN_PHASE;
 
         /// @brief A high-level update rate for the director tree
         static constexpr size_t BEHAVIOUR_UPDATE_RATE = 25;
