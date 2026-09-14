@@ -1,0 +1,7 @@
+path: ../torso21-yolo/
+train: train/images
+val: val/images
+names:
+  0: ball
+  1: goalpost
+  2: robot
