@@ -114,3 +114,87 @@ python3 yolo11-seg-train.py infer --weights checkpoints/yolo11_seg_best.pt --ima
 python3 yolo26-seg-train.py infer --weights checkpoints/yolo26_seg_best.pt --images img1.jpg img2.jpg img3.jpg
 
 Saves prediction overlays to inference_samples/.
+
+
+
+# TORSO-21 → YOLO-seg / RF-DETR: Convert & Run
+
+## 1. Download TORSO-21
+
+git clone https://github.com/bit-bots/TORSO_21_dataset.git
+cd TORSO_21_dataset
+poetry install --without=dev --no-root
+./scripts/download_dataset.py --all
+
+This gives you `data/reality/train/` and `data/reality/test/`, each with an
+`annotations.yaml` and an `images/` folder.
+
+---
+
+## 2A. Convert to YOLO-seg format
+
+TORSO-21's native labels are bounding boxes (not polygons) for ball/robot/goalpost.
+`torso21_to_yolo.py` converts each box into a 4-corner rectangle polygon — good
+enough to validate the pipeline, not true segmentation ground truth.
+
+python3 torso21_to_yolo.py --data-root data/reality/train --out torso21-yolo/train
+python3 torso21_to_yolo.py --data-root data/reality/test  --out torso21-yolo/val
+
+Result:
+torso21-yolo/
+├── train/
+│   ├── images/
+│   └── labels/
+└── val/
+    ├── images/
+    └── labels/
+
+Write data.yaml (use an absolute path):
+
+# torso21-yolo/data.yaml
+path: /absolute/path/to/torso21-yolo
+train: train/images
+val: val/images
+names:
+  0: ball
+  1: goalpost
+  2: robot
+
+Sanity check before training:
+ls torso21-yolo/train/images torso21-yolo/train/labels
+ls torso21-yolo/val/images   torso21-yolo/val/labels
+
+---
+
+## 2B. Convert to COCO format (for RF-DETR)
+
+RF-DETR expects COCO segmentation format instead. `torso21_to_coco.py` does
+the same box-to-rectangle-polygon conversion, just writing COCO JSON.
+
+Important: RF-DETR requires the validation folder to be named exactly
+"valid", not "val". This is a Roboflow export convention - get this wrong
+and you'll hit "Could not detect dataset format" even though everything else
+is correct.
+
+python3 torso21_to_coco.py --data-root data/reality/train --out torso21-coco/train
+python3 torso21_to_coco.py --data-root data/reality/test  --out torso21-coco/valid
+
+Result:
+torso21-coco/
+├── train/
+│   ├── _annotations.coco.json
+│   └── *.png (images)
+└── valid/
+    ├── _annotations.coco.json
+    └── *.png (images)
+
+Sanity check:
+ls torso21-coco/train/ torso21-coco/valid/
+
+---
+
+## 3A. Basic test run - YOLO-seg (pipeline check, not real training)
+
+Low epoch count - this just confirms training/logging/checkpointing work end to end:
+
+python3
