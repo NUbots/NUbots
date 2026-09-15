@@ -32,6 +32,9 @@ Render a "black box" diagram for one or more NUClear modules.
 The left side of the image lists everything the module reacts to (Trigger, With, Provide, Every, Configuration, ...)
 and the right side lists everything it emits (emit, emit<Task>, Needs, ...). Every protobuf message is broken down
 into its fields and their types by reading the .proto definitions in shared/message and nuclear/message/proto.
+Input fields that are never referenced anywhere in the module's sources (no `.field` / `->field` / `["key"]` /
+`::VALUE` token) are dimmed. That is a plain token search: a field name shared by several messages counts
+as used if any of them is touched, and a message handed whole to a utility function outside the module looks unused.
 
 Example:
     ./b blackbox localisation/BallLocalisation skill/Walk
@@ -267,6 +270,9 @@ class ModuleInfo:
     outputs: list
     config_files: list
     text: str
+    members: set = field(default_factory=set)  # every `x.name` / `x->name` token in the module sources
+    keys: set = field(default_factory=set)  # every `["name"]` token (config lookups)
+    scopes: set = field(default_factory=set)  # every `Foo::name` token (enum values)
 
 
 def strip_cpp_comments(text):
@@ -556,6 +562,9 @@ def scan_module(module_dir, rel_name):
         outputs=dedupe(outputs),
         config_files=[p.label for p in inputs if p.role == "config"],
         text=text,
+        members=set(re.findall(r"(?:\.|->)\s*(\w+)", text)),
+        keys=set(re.findall(r'\[\s*"(\w+)"\s*\]', text)),
+        scopes=set(re.findall(r"::\s*(\w+)", text)),
     )
 
 
@@ -631,6 +640,7 @@ class Row:
     type: str
     kind: str  # scalar | message | enum | neutron | value | yaml
     doc: str = ""
+    used: bool = True  # False -> dimmed: no reference to this field anywhere in the module sources
 
 
 @dataclass
@@ -755,7 +765,30 @@ def local_struct_rows(name, text):
     return rows
 
 
-def build_card(port, index, module, depth):
+def mark_usage(rows, module, yaml=False):
+    """Flag rows whose name never appears as a member / config key / enum value token in the module sources.
+
+    This is a plain token search, so a field shared by several messages (timestamp, id, ...) counts as used if any
+    of them is touched, and a message handed whole to a utility function outside the module looks untouched.
+    """
+    for r in rows:
+        if r.kind == "value":
+            r.used = r.name in module.scopes
+        elif r.kind == "yaml" or (r.kind == "message" and yaml):
+            r.used = r.name in module.keys or r.name in module.members
+        else:
+            r.used = r.name in module.members
+    return rows
+
+
+def build_card(port, index, module, depth, usage=False):
+    card = _build_card(port, index, module, depth)
+    if usage:
+        mark_usage(card.rows, module, yaml=port.role == "config")
+    return card
+
+
+def _build_card(port, index, module, depth):
     accent, role_label, _ = ROLES[port.role]
     tags = ([role_label] if port.role not in ("every", "lifecycle", "other", "unknown") else []) + port.tags
     if port.extra:
@@ -1123,19 +1156,16 @@ def draw_card(cv, fonts, card, opts):
             ind = r.indent * 16
             tcol = THEME.get(r.kind, THEME["scalar"])
             tw = fonts.width(r.type, "mono", L["field"])
-            cv.text(x + w - pad, cy + 3, r.type, "mono", L["field"], tcol, anchor="ra")
             max_name_w = w - 2 * pad - tw - 14 - ind
             name_col = THEME["text"] if r.kind != "value" else THEME["value"]
+            if not r.used:
+                tcol = name_col = THEME["faint"]
+            cv.text(x + w - pad, cy + 3, r.type, "mono", L["field"], tcol, anchor="ra")
             if r.indent:
                 cv.text(x + pad + 4 + ind - 12, cy + 3, "└", "mono", L["field"], THEME["faint"])
-            cv.text(
-                x + pad + 4 + ind,
-                cy + 3,
-                fit_text(fonts, r.name, "mono", L["field"], max_name_w),
-                "mono",
-                L["field"],
-                name_col,
-            )
+            name = fit_text(fonts, r.name, "mono", L["field"], max_name_w)
+            nx = x + pad + 4 + ind
+            cv.text(nx, cy + 3, name, "mono", L["field"], name_col)
             cy += L["row_h"]
             if opts.docs and r.doc:
                 cv.text(
@@ -1208,7 +1238,7 @@ def draw_box(cv, fonts, module, bx, by, bw, bh, n_in, n_out):
 
 
 def render_module(module, index, opts, fonts, out_dir):
-    in_cards = [build_card(p, index, module, opts.depth) for p in module.inputs]
+    in_cards = [build_card(p, index, module, opts.depth, usage=opts.usage) for p in module.inputs]
     out_cards = [build_card(p, index, module, opts.depth) for p in module.outputs]
 
     for c in in_cards + out_cards:
@@ -1323,11 +1353,17 @@ def register(command):
     command.add_argument("-d", "--depth", type=int, default=1, help="How deep to expand nested messages (default 1)")
     command.add_argument("--max-fields", type=int, default=28, help="Maximum rows shown per message")
     command.add_argument("--docs", action="store_true", help="Show /// doc comments under each field")
+    command.add_argument(
+        "--no-usage",
+        dest="usage",
+        action="store_false",
+        help="Don't dim input fields that are never referenced in the module sources",
+    )
     command.add_argument("--columns", type=int, default=0, help="Force N card columns per side (default auto)")
     command.add_argument("--scale", type=float, default=2.0, help="PNG pixel density multiplier (default 2)")
 
 
-def run(modules, all, list, output, fmt, depth, max_fields, docs, columns, scale, **kwargs):
+def run(modules, all, list, output, fmt, depth, max_fields, docs, usage, columns, scale, **kwargs):
     modules_path = os.path.join(b.project_dir, "module")
     if list:
         for m in all_modules(modules_path):
@@ -1342,11 +1378,12 @@ def run(modules, all, list, output, fmt, depth, max_fields, docs, columns, scale
         pass
 
     opts = Opts()
-    opts.fmt, opts.depth, opts.max_fields, opts.docs, opts.columns, opts.scale = (
+    opts.fmt, opts.depth, opts.max_fields, opts.docs, opts.usage, opts.columns, opts.scale = (
         fmt,
         depth,
         max_fields,
         docs,
+        usage,
         columns,
         scale,
     )
