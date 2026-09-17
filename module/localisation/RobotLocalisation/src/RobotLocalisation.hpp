@@ -32,10 +32,10 @@
 
 #include "RobotModel.hpp"
 
+#include "message/input/Image.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/support/FieldDescription.hpp"
-#include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/filter/UKF.hpp"
 
@@ -64,6 +64,10 @@ namespace module::localisation {
             double association_distance = 0.0;
             /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
+            /// @brief How long (seconds) without a comms message before a teammate is removed. Teammates are
+            /// pruned on comms staleness rather than the vision-driven missed_count, since they are frequently
+            /// outside camera view but still broadcasting - see prediction() and maintenance().
+            double teammate_timeout = 0.0;
             /// @brief The maximum distance a robot can be outside the field before it is ignored
             double max_distance_from_field = 0.0;
             /// @brief The maximum cost for a localisation to be considered valid
@@ -87,6 +91,9 @@ namespace module::localisation {
             /// If it is not a teammate, this will be 0
             bool teammate                     = false;
             message::purpose::Purpose purpose = message::purpose::Purpose();
+            /// @brief The last time a comms message was received for this teammate. Only meaningful when
+            /// teammate is true.
+            NUClear::clock::time_point last_comms_time = NUClear::clock::now();
 
             /// @brief Constructor that sets the state for the UKF
             /// @param initial_rRWw The initial position of the robot in world coordinates
@@ -148,10 +155,10 @@ namespace module::localisation {
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
-        /// @param horizon The green horizon from the vision system, to determine if a robot is in view
+        /// @param image The most recent camera image, used to determine if a robot is within the camera's view
         /// @param field The field localisation, used to determine location of the tracked robot on field
         /// @param field_desc Field description, used to get the length and width of the field
-        void maintenance(const message::vision::GreenHorizon& horizon,
+        void maintenance(const message::input::Image& image,
                          const message::localisation::Field& field,
                          const message::support::FieldDescription& field_desc);
 

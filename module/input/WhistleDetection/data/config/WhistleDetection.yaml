@@ -1,0 +1,42 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+use_whistle_detection: true # should this module emit a Whistle message? true: yes, false: no. Note: it will still run and log the whistle detection, but it won't emit a Whistle message to the system.
+
+# ALSA capture device name. Use "default" or a specific device like "hw:0,0".
+device: "hw:1,0"
+
+# Capture sample rate in Hz. 16000 covers the full whistle range (2-5 kHz) with
+# comfortable headroom to Nyquist (8 kHz).
+sample_rate: 16000
+
+# FFT window size in samples (must be a power of two).
+# 1024 samples at 16 kHz = 64 ms windows, matching the NaoDevils WhistleNet input size.
+fft_size: 1024
+
+# Whistle frequency band bounds in Hz.
+# Referee whistles typically fall in the 2.5-4 kHz range; we use slightly wider bounds
+# to tolerate acoustic variation and room reflections.
+freq_min: 1500.0
+freq_max: 4500.0
+
+# Fraction of total spectral power that must lie in [freq_min, freq_max] to flag a frame
+# as whistle-like.  For broadband noise the in-band fraction is ~0.31 (2.5 kHz / 8 kHz
+# Nyquist); a clear whistle pushes this well above 0.5.
+band_ratio_threshold: 0.80
+
+# Minimum absolute in-band power (linear, not dB) to avoid triggering on near-silence.
+# Tune this for the robot's microphone gain.
+min_band_energy: 1.0e-6
+
+# Number of consecutive FFT frames that must exceed the threshold before a Whistle event
+# is emitted.  At 50% overlap each frame represents 32 ms of new audio, so 3 frames ≈
+# 96 ms of sustained whistle-like signal.
+confirm_frames: 2
+
+# Minimum time in milliseconds between successive Whistle events (prevents re-triggering
+# on the tail of the same whistle).
+cooldown_ms: 1500
+
+# it detects the NUsense beep as a whistle, so the first second or two have to be ignored.
+startup_delay: 1000

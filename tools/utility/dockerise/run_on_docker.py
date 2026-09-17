@@ -33,7 +33,7 @@ from .run import run
 
 
 def run_on_docker(_func=None, image=None, **kwargs):
-    image = defaults.image_name("selected") if image is None else image
+    image = defaults.image_name("selected_k1") if image is None else image
 
     # Someone just used the decorator with no arguments they want to run on our default image
     if isinstance(_func, types.FunctionType):

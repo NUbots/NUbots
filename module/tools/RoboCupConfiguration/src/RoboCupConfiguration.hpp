@@ -40,6 +40,8 @@ namespace module::tools {
             std::map<std::string, std::string> wifi_networks{};
             /// @brief Common IPs to toggle
             std::vector<std::string> common_ips{};
+            /// @brief Available field preset names, read from FieldDescription.yaml
+            std::vector<std::string> field_preset_names{};
         } cfg;
 
         /// @brief The hostname of the robot
@@ -48,6 +50,8 @@ namespace module::tools {
         std::string robot_name = "";
         /// @brief The wifi interface that the robot is connected to
         std::string wifi_interface = "";
+        /// @brief Whether to use DHCP (automatic IP assignment) instead of a static IP
+        bool use_dhcp = false;
         /// @brief The IP address of the robot
         std::string ip_address = "";
         /// @brief The SSID of the wifi network that the robot is or will be connected to
@@ -64,13 +68,14 @@ namespace module::tools {
         static const int MAX_PLAYER_ID = 6;
         /// @brief Whether the robot is a goalie or not
         bool is_goalie = false;
-
+        /// @brief The selected field type preset
+        std::string field_type = "small";
         /// @brief Display values
         struct Display {
             /// @brief Enum for options in first column
-            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, IP_ADDRESS, SSID, PASSWORD, END };
+            enum class Column1 { ROBOT_NAME, WIFI_INTERFACE, USE_DHCP, IP_ADDRESS, SSID, PASSWORD, END };
             /// @brief Enum for options in second column
-            enum class Column2 { PLAYER_ID, TEAM_ID, GOALIE, END };
+            enum class Column2 { PLAYER_ID, TEAM_ID, GOALIE, FIELD_TYPE, END };
             /// @brief Column 1 padding
             static const size_t C1_PAD = 2;
             /// @brief Column 1 selection position
@@ -97,6 +102,16 @@ namespace module::tools {
 
         /// @brief Displays the screen with any updated values to the user
         void refresh_view();
+
+        /// @brief Draws a centred popup box with a message (eg "Connecting...") over the current view.
+        /// The popup remains on screen until the next refresh_view() call.
+        /// @param message The message to display in the popup
+        void draw_popup(const std::string& message);
+
+        /// @brief Draws a popup with the given message and blocks until the user presses y/n
+        /// @param message The confirmation message to display
+        /// @return True if the user confirmed with y, false if they declined with n
+        bool confirm_prompt(const std::string& message);
 
         /// @brief Functionality for the user to edit a field in the display
         void edit_selection();

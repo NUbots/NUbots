@@ -1,2 +1,7 @@
 # Log level of DEBUG will print out compression rates
 log_level: INFO
+
+compressors:
+  - name: turbojpeg
+    quality: 75
+    concurrent: 2

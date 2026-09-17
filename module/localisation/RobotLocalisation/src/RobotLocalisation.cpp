@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -31,12 +31,14 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/RoboCup.hpp"
+#include "message/input/Image.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/vision/projection.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::localisation {
@@ -51,16 +53,16 @@ namespace module::localisation {
 
     using message::eye::DataPoint;
     using message::input::GameState;
-    using message::input::RoboCup;
+    using message::input::Image;
+    using message::input::Message;
     using message::localisation::Field;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::support::FieldDescription;
-    using message::vision::GreenHorizon;
 
-    using utility::math::geometry::point_in_convex_hull;
     using utility::nusight::graph;
     using utility::support::Expression;
+    using utility::vision::project;
 
     RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -80,16 +82,17 @@ namespace module::localisation {
             cfg.max_missed_count                = config["max_missed_count"].as<int>();
             cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
             cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
+            cfg.teammate_timeout                = config["teammate_timeout"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
-           With<GreenHorizon>,
+           With<Image>,
            With<Field>,
            With<FieldDescription>,
            Sync<RobotLocalisation>>()
-            .then([this](const GreenHorizon& horizon, const Field& field, const FieldDescription& field_desc) {
+            .then([this](const Image& image, const Field& field, const FieldDescription& field_desc) {
                 // **Run maintenance step**
-                maintenance(horizon, field, field_desc);
+                maintenance(image, field, field_desc);
 
                 // **Debugging output**
                 debug_info();
@@ -114,14 +117,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const RoboCup& robocup, const Field& field) {
-                // Do not consider a teammate's localisation if their cost is too high
-                if (robocup.current_pose.cost > cfg.max_localisation_cost) {
-                    log<DEBUG>("Teammate's localisation cost is too high, not processing.");
-                    return;
-                }
-
+        on<Trigger<Message>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const Message& robocup, const Field& field) {
                 // **Run prediction step**
                 prediction();
 
@@ -129,7 +126,13 @@ namespace module::localisation {
                 // RoboCup messages come from teammates. Their position is in field space, so convert to world.
                 std::vector<Eigen::Vector3d> robots_rRWw{
                     (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
-                auto purpose = std::make_unique<Purpose>(robocup.purpose);
+                auto purpose = std::make_unique<Purpose>();
+                // Set the purpose message with the teammate's player id and whether they are going for the ball
+                purpose->player_id = robocup.current_pose.player_id;
+                purpose->purpose   = robocup.going_for_ball ? SoccerPosition::ATTACK : SoccerPosition::SUPPORT;
+                // Teammates only count in strategy decisions if active, so mark them active unless penalised
+                purpose->active    = robocup.state != PenaltyState::PENALISED;
+
                 // Run data association step
                 data_association(robots_rRWw, purpose);
             });
@@ -160,7 +163,14 @@ namespace module::localisation {
                 std::chrono::duration_cast<std::chrono::duration<double>>(now - tracked_robot.last_time_update).count();
             tracked_robot.last_time_update = now;
             tracked_robot.ukf.time(dt);
-            tracked_robot.seen = false;
+
+            // Vision runs far more often than teammates broadcast (every camera frame vs 2 Hz), so resetting
+            // seen here would almost always clobber it again before the next comms message arrives while the
+            // teammate is outside camera view. Teammates are instead kept alive by comms staleness in
+            // maintenance(), so leave their seen/missed_count alone here.
+            if (!tracked_robot.teammate) {
+                tracked_robot.seen = false;
+            }
         }
     }
 
@@ -191,8 +201,9 @@ namespace module::localisation {
                 teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                           cfg.ukf.noise.measurement.position,
                                           MeasurementType::ROBOT_POSITION());
-                teammate_itr->seen    = true;
-                teammate_itr->purpose = *purpose;
+                teammate_itr->seen           = true;
+                teammate_itr->purpose        = *purpose;
+                teammate_itr->last_comms_time = NUClear::clock::now();
 
                 continue;
             }
@@ -224,7 +235,7 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::maintenance(const GreenHorizon& horizon,
+    void RobotLocalisation::maintenance(const Image& image,
                                         const Field& field,
                                         const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
@@ -237,10 +248,21 @@ namespace module::localisation {
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
-            // If a tracked robot has moved outside of view, keep it as seen so we don't lose it
-            // A robot is outside of view if it is not within the green horizon
-            // TODO (tom): It may be better to use fov and image size to determine if a robot should be seen
-            if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+            // If a tracked robot has moved outside of the camera's field of view, keep it as seen so we don't
+            // lose it. Project the robot's world position into the camera's pixel space and check whether it
+            // falls outside the image bounds.
+            Eigen::Vector3d rRCc = image.Hcw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+
+            bool in_view = false;
+            if (rRCc.x() > 0.0) {  // in front of the camera
+                Eigen::Vector2d dimensions      = Eigen::Vector2d(image.dimensions.x(), image.dimensions.y());
+                Eigen::Vector2d norm_dimensions = dimensions / dimensions.x();
+                Eigen::Vector2d pixel           = project(rRCc.normalized(), image.lens, norm_dimensions);
+                in_view                         = pixel.x() >= 0.0 && pixel.x() < norm_dimensions.x()
+                                 && pixel.y() >= 0.0 && pixel.y() < norm_dimensions.y();
+            }
+
+            if (!in_view) {
                 tracked_robot.seen = true;
             }
 
@@ -253,12 +275,13 @@ namespace module::localisation {
                 continue;
             }
 
-            // Check if this robot is too close to any kept robot
-            if (std::any_of(new_tracked_robots.begin(), new_tracked_robots.end(), [&](const auto& other_robot) {
-                    return (tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance;
-                })) {
-                log<DEBUG>(fmt::format("Removing robot {} due to proximity", tracked_robot.id));
-                continue;
+            for (const auto& other_robot : new_tracked_robots) {
+                if ((tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance) {
+                    log<DEBUG>(fmt::format("Removing robot {} due to proximity to robot {}",
+                                           tracked_robot.id,
+                                           other_robot.id));
+                    continue;
+                }
             }
 
             Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);

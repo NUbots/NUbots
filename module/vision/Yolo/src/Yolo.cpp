@@ -43,6 +43,7 @@
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/vision/TensorRT.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
@@ -79,13 +80,14 @@ namespace module::vision {
             objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
             objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
             objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
-            objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            objects[3].confidence_threshold = config["l_intersection_confidence_threshold"].as<double>();
+            objects[4].confidence_threshold = config["penalty_point_confidence_threshold"].as<double>();
+            objects[5].confidence_threshold = config["t_intersection_confidence_threshold"].as<double>();
+            objects[6].confidence_threshold = config["x_intersection_confidence_threshold"].as<double>();
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
-            // Compile the model and create inference request object
+            // Load and compile the model
             try {
                 std::string model_path = config["model_path"].as<std::string>();
                 std::string device     = config["device"].as<std::string>();
@@ -93,23 +95,37 @@ namespace module::vision {
                 log<INFO>("Loading YOLO model from: ", model_path);
                 log<INFO>("Using device: ", device);
 
-                ov::Core core{};
-
-                // Try to fallback to CPU if GPU fails
+                // Try TensorRT first, building the engine from the ONNX model on this device.
+                // The built engine is cached on disk, so this is only slow the first time.
                 try {
-                    compiled_model = core.compile_model(model_path, device);
+                    log<INFO>("Building TensorRT engine from: ", model_path);
+                    trt = std::make_unique<utility::vision::TensorRT>(model_path);
+                    log<INFO>("TensorRT engine ready");
                 }
                 catch (const std::exception& e) {
-                    if (device == "GPU") {
-                        log<WARN>("Failed to compile model on GPU, falling back to CPU: ", e.what());
-                        compiled_model = core.compile_model(model_path, "CPU");
+                    trt.reset();
+                    log<WARN>("TensorRT unavailable: ", e.what());
+                    log<INFO>("Falling back to OpenVINO");
+
+                    // Fall back to OpenVINO
+                    ov::Core core{};
+
+                    try {
+                        compiled_model = core.compile_model(model_path, device);
                     }
-                    else {
-                        throw;
+                    catch (const std::exception& ov_e) {
+                        if (device == "GPU") {
+                            log<WARN>("Failed to compile model on GPU, falling back to CPU: ", ov_e.what());
+                            compiled_model = core.compile_model(model_path, "CPU");
+                        }
+                        else {
+                            throw;
+                        }
                     }
+
+                    infer_request = compiled_model.create_infer_request();
                 }
 
-                infer_request = compiled_model.create_infer_request();
                 log<INFO>("Model loaded successfully");
             }
             catch (const std::exception& e) {
@@ -136,6 +152,9 @@ namespace module::vision {
                         img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
                         break;
+                    case utility::vision::FOURCC::RGB3:
+                        img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                        break;
                     case utility::vision::fourcc("RGBA"):
                         img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
@@ -148,40 +167,73 @@ namespace module::vision {
                 cv::Mat letterbox_img = cv::Mat::zeros(max, max, CV_8UC3);
                 img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
 
-                // Get input port for model with one input and check expected dimensions
-                auto input_port  = compiled_model.input();
-                auto input_shape = input_port.get_shape();
+                // Use the model's expected input size, assuming NCHW format
+                int model_input_size                          = 640;
+                const ov::Output<const ov::Node>* input_port = nullptr;
+                if (trt != nullptr) {
+                    model_input_size = static_cast<int>(trt->input_shape()[2]);
+                }
+                else {
+                    // Get input port for model with one input and check expected dimensions
+                    input_port       = &compiled_model.input();
+                    model_input_size = static_cast<int>(input_port->get_shape()[2]);
+                }
 
-                // Use the model's expected input size
-                int model_input_size = static_cast<int>(input_shape[2]);  // Assuming NCHW format
-                cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
+                cv::Mat blob = cv::dnn::blobFromImage(letterbox_img,
                                                       1.0 / 255.0,
                                                       cv::Size(model_input_size, model_input_size),
                                                       cv::Scalar(),
                                                       true);
 
-                // -------- Feed the blob into the input node of the Model -------
-                // Create tensor and copy data instead of using external memory pointer
-                ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape());
-                std::memcpy(input_tensor.data<float>(), blob.ptr<float>(), input_tensor.get_byte_size());
-
-                // Set input tensor for model with one input
-                infer_request.set_input_tensor(input_tensor);
-
                 // -------- Perform Inference --------
-                try {
-                    infer_request.infer();
+                std::vector<float> output_data;
+                // Output tensor shape [1, channels, detections], where channels is 4 box values + class scores
+                int out_channels   = 0;
+                int out_detections = 0;
+
+                if (trt != nullptr) {
+                    // TensorRT inference
+                    try {
+                        float* blob_ptr = blob.ptr<float>();
+                        output_data     = trt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
+                        out_channels    = static_cast<int>(trt->output_shape()[1]);
+                        out_detections  = static_cast<int>(trt->output_shape()[2]);
+                    }
+                    catch (const std::exception& e) {
+                        log<ERROR>("TensorRT inference failed: ", e.what());
+                        return;
+                    }
                 }
-                catch (const std::exception& e) {
-                    log<ERROR>("Inference failed: ", e.what());
-                    return;
+                else {
+                    // OpenVINO inference
+                    try {
+                        // Create tensor and copy data instead of using external memory pointer
+                        ov::Tensor input_tensor(input_port->get_element_type(), input_port->get_shape());
+                        std::memcpy(input_tensor.data<float>(), blob.ptr<float>(), input_tensor.get_byte_size());
+
+                        // Set input tensor for model with one input
+                        infer_request.set_input_tensor(input_tensor);
+
+                        infer_request.infer();
+                        auto output    = infer_request.get_output_tensor(0);
+                        out_channels   = static_cast<int>(output.get_shape()[1]);
+                        out_detections = static_cast<int>(output.get_shape()[2]);
+
+                        // Copy output data
+                        float* data = output.data<float>();
+                        output_data.assign(data, data + output.get_byte_size() / sizeof(float));
+                    }
+                    catch (const std::exception& e) {
+                        log<ERROR>("OpenVINO inference failed: ", e.what());
+                        return;
+                    }
                 }
-                auto output = infer_request.get_output_tensor(0);
 
                 // -------- Postprocess the result --------
-                float* data = output.data<float>();
-                cv::Mat output_buffer(output.get_shape()[1], output.get_shape()[2], CV_32F, data);
-                transpose(output_buffer, output_buffer);  //[8400,84]
+                // The output tensor is [1, channels, detections] in memory, so wrap it as
+                // [channels, detections] and transpose to get one detection per row
+                cv::Mat output_buffer(out_channels, out_detections, CV_32F, output_data.data());
+                transpose(output_buffer, output_buffer);
                 std::vector<int> class_ids;
                 std::vector<float> class_confidences;
                 std::vector<cv::Rect> boxes;
@@ -191,7 +243,7 @@ namespace module::vision {
 
                 // Figure out the bbox, class_id and class_score
                 for (int i = 0; i < output_buffer.rows; i++) {
-                    cv::Mat objects_scores = output_buffer.row(i).colRange(4, 10);
+                    cv::Mat objects_scores = output_buffer.row(i).colRange(4, out_channels);
                     cv::Point class_id;
                     double confidence;
                     cv::minMaxLoc(objects_scores, 0, &confidence, 0, &class_id);
@@ -256,6 +308,11 @@ namespace module::vision {
                     // Get the class id associated with the detected object
                     int class_id = class_ids[idx];
 
+                    // Skip if below per-class confidence threshold
+                    if (class_confidences[idx] <= objects[class_id].confidence_threshold) {
+                        continue;
+                    }
+
                     // Convert the bounding box points to unit vectors (rays) in the camera {c} space
                     Eigen::Vector3d top_left_ray  = pix_to_ray(boxes[idx].x, boxes[idx].y);
                     Eigen::Vector3d top_right_ray = pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y);
@@ -271,13 +328,13 @@ namespace module::vision {
                     auto bbox        = std::make_unique<BoundingBox>();
                     bbox->name       = objects[class_id].name;
                     bbox->confidence = class_confidences[idx];
+                    bbox->colour     = objects[class_id].colour;
                     bbox->corners.push_back(top_left_ray);
                     bbox->corners.push_back(top_right_ray);
                     bbox->corners.push_back(bottom_right_ray);
                     bbox->corners.push_back(bottom_left_ray);
 
-
-                    if (objects[class_id].name == "ball") {
+                    if (objects[class_id].name == "Ball") {
                         // Get the vector in world space to check if it is in the field
                         Eigen::Vector3d rBWw = img.Hcw.inverse() * ray_to_camera_space(centre_ray);
                         // Only consider vision measurements within the green horizon, if it exists
@@ -294,11 +351,10 @@ namespace module::vision {
                         b.radius = bottom_centre_ray.dot(bottom_left_ray);
                         b.colour.fill(1.0);
                         balls->balls.push_back(b);
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "goal post") {
+                    if (objects[class_id].name == "Goalpost") {
                         Goal g;
                         g.measurements.emplace_back();
                         g.measurements.back().type = Goal::MeasurementType::CENTRE;
@@ -309,11 +365,10 @@ namespace module::vision {
                         g.side                     = Goal::Side::UNKNOWN_SIDE;
                         g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
                         goals->goals.push_back(std::move(g));
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "robot") {
+                    if (objects[class_id].name == "K1") {
                         // Get the vector in world space to check if it is in the field
                         Eigen::Vector3d rRWw = img.Hcw.inverse() * ray_to_camera_space(bottom_centre_ray);
                         // Only consider vision measurements within the green horizon, if it exists
@@ -325,12 +380,11 @@ namespace module::vision {
                         r.rRCc   = ray_to_camera_space(bottom_centre_ray);
                         r.radius = bottom_centre_ray.dot(bottom_left_ray);
                         robots->robots.push_back(r);
-                        bbox->colour = objects[class_id].colour;
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
 
-                    if (objects[class_id].name == "L-intersection" || objects[class_id].name == "T-intersection"
-                        || objects[class_id].name == "X-intersection") {
+                    if (objects[class_id].name == "LCross" || objects[class_id].name == "TCross"
+                        || objects[class_id].name == "XCross") {
                         FieldIntersection i;
                         // Project the centre ray onto the ground plane in world {w} space
                         Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
@@ -342,19 +396,22 @@ namespace module::vision {
                         }
 
                         i.rIWw = rIWw;
-                        if (objects[class_id].name == "L-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        if (objects[class_id].name == "LCross") {
+                            i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
                         }
-                        else if (objects[class_id].name == "T-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        else if (objects[class_id].name == "TCross") {
+                            i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
                         }
-                        else if (objects[class_id].name == "X-intersection") {
-                            i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
-                            bbox->colour = objects[class_id].colour;
+                        else if (objects[class_id].name == "XCross") {
+                            i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
                         }
                         field_intersections->intersections.push_back(std::move(i));
+                        bounding_boxes->bounding_boxes.push_back(*bbox);
+                    }
+
+                    // "PenaltyPoint" has no dedicated message type yet, so it is only emitted as a bounding box,
+                    // with no green-horizon filtering applied.
+                    if (objects[class_id].name == "PenaltyPoint") {
                         bounding_boxes->bounding_boxes.push_back(*bbox);
                     }
                 }

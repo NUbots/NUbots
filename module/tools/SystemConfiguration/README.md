@@ -6,6 +6,12 @@ This module is used to ensure that the configuration that is running on a device
 
 It goes through several steps to ensure the system is setup correctly
 
+### Hostname configuration
+
+Since we don't install the OS ourselves for the K1, we have to change the hostname here. This can be done by passing the `--hostname` argument, i.e. `./systemconfiguration --hostname booster1`.
+
+This only needs to be done the first time `systemconfiguration` is ever run, as the hostname change will persist.
+
 ### Filesystem
 
 The system will look through each file in the `system/default` directory.
@@ -42,10 +48,6 @@ The system will then go through the list of configuration entries for systems an
 
 If `generate_locale` is set in the `SystemConfiguration.yaml` then `locale-gen` is called to ensure that system locales have been generated
 
-### Grub
-
-If `generate_grub` is set in the `SystemConfiguration.yaml` then `grub-mkconfig` is called to ensure that the grub configuration file is up to date
-
 ### Message Of The Day
 
 The message of the day file is regenerated to ensure it has the correct contents
@@ -57,10 +59,6 @@ Both the hostname and the hosts file are regenerated with the correct contents
 ### Groups
 
 The user is then added to all groups listed in the `SystemConfiguration.yaml`, if the user is not currently a member of them
-
-### ZSH
-
-Zprezto is now installed and the appropriate symlinks are made. The users' default shell is also changed to zsh
 
 ### Python
 
