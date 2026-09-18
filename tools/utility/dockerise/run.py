@@ -166,6 +166,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "docker",
             "container",
             "run",
+            "--platform",
+            "linux/amd64",
             "--rm",
             "--tty",
             "--attach",
