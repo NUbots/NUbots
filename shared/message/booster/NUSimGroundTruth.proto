@@ -1,0 +1,83 @@
+// MIT License
+//
+// Copyright (c) 2026 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.booster;
+
+import "google/protobuf/timestamp.proto";
+import "Transform.proto";
+import "Vector.proto";
+
+// NUSim-only messages for validating estimators against the simulator and driving repeatable ball
+// scenarios. They mirror the NUSim DDS topics rt/nusim/gt/ball, rt/nusim/gt/robot and
+// rt/nusim/ball_command (NUSim module/SdkBridge/PROTOCOL.md §6), bridged by input::NUSimGroundTruth.
+// A real robot never produces them.
+//
+// Frames: {s} is the simulator world (the scene's field frame, fixed); {t} is the torso (Trunk).
+// Neither is the NUbots odometry world {w}: compare through the robot frame {r} instead.
+
+/// Ground-truth ball state from NUSim (rt/nusim/gt/ball)
+message NUSimBallGroundTruth {
+    /// Wall-clock time the physics snapshot was taken
+    google.protobuf.Timestamp timestamp = 1;
+    /// Ball centre in the simulator world {s}
+    vec3 rBSs = 2;
+    /// Ball centre velocity in {s}
+    vec3 vBs = 3;
+    /// Ball spin in {s}
+    vec3 omegaBs = 4;
+}
+
+/// Ground-truth robot torso (Trunk) state from NUSim (rt/nusim/gt/robot)
+message NUSimRobotGroundTruth {
+    /// Wall-clock time the physics snapshot was taken
+    google.protobuf.Timestamp timestamp = 1;
+    /// Torso {t} to simulator world {s}
+    iso3 Hst = 2;
+    /// Torso linear velocity in {s}
+    vec3 vTs = 3;
+    /// Torso angular velocity in {s}
+    vec3 omegaTs = 4;
+}
+
+/// Place the NUSim ball and set its velocity (rt/nusim/ball_command)
+message NUSimBallCommand {
+    enum Frame {
+        /// The simulator world {s}
+        WORLD = 0;
+        /// The yaw-only frame at the torso's ground projection (x forward, z up), i.e. {r}
+        ROBOT = 1;
+    }
+    Frame frame = 1;
+    /// Ball centre; a negative z rests it on the floor at its radius
+    vec3 position = 2;
+    /// Ball centre velocity
+    vec3 velocity = 3;
+    /// Ball spin; ignored when rolling is set
+    vec3 angular_velocity = 4;
+    /// Derive the spin for rolling without slipping from the velocity
+    bool rolling = 5;
+}

@@ -1,0 +1,7 @@
+log_level: INFO
+
+# NUSim-only DDS topics (NUSim module/SdkBridge/PROTOCOL.md §6). Leave as is unless NUSim changes.
+topics:
+  ball: rt/nusim/gt/ball
+  robot: rt/nusim/gt/robot
+  ball_command: rt/nusim/ball_command
