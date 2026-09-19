@@ -69,6 +69,11 @@ namespace module::localisation {
                 double confirm_radius = 0.3;
                 /// @brief Seconds without an accepted detection before the track may jump to a new ball
                 double reacquire_after = 0.5;
+                /// @brief Weight of the newest innovation in the running innovation average (0-1]
+                double manoeuvre_smoothing = 0.5;
+                /// @brief Normalised size of the running innovation average above which the ball is taken to be
+                /// accelerating (kicked or deflected) and the velocity covariance is opened up
+                double manoeuvre_threshold = 3.0;
             } association{};
             /// @brief Whether or not to use teammate balls
             bool use_r2r_balls = false;
@@ -95,6 +100,9 @@ namespace module::localisation {
         NUClear::clock::time_point filter_time{};
         /// @brief Image time of the last detection the track accepted
         NUClear::clock::time_point last_accept_time{};
+        /// @brief Running average of the innovations: a kicked ball keeps producing innovations in the same
+        /// direction, which the average picks up long before any single one leaves the gate
+        Eigen::Vector2d innovation_bias = Eigen::Vector2d::Zero();
         /// @brief Detections from the previous image and its time, used to confirm kicks and re-acquisitions
         std::vector<Candidate> previous_candidates{};
         NUClear::clock::time_point previous_time{};

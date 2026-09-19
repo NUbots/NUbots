@@ -6,10 +6,12 @@ log_level: INFO
 ukf:
   noise:
     measurement:
-      # Detection position standard deviation (m): base + per_metre * range from the camera. Vision error
-      # grows roughly in proportion to range (about 10% of it in NUSim, Sep 2026).
-      base: 0.05
-      per_metre: 0.1
+      # Detection position standard deviation (m): base + per_metre * range from the camera. This is the
+      # frame-to-frame jitter, not the detector's slowly varying bias: in NUSim (Sep 2026) the jitter was 1-5 cm
+      # (larger with range) while the bias reached 0.1-0.3 m. Sizing this to the bias makes the filter distrust
+      # every detection and its velocity crawl after a kick. Kept a little above NUSim's jitter for real images.
+      base: 0.03
+      per_metre: 0.02
     process:
       # White-noise-acceleration spectral density (m^2/s^3): how quickly the ball's velocity may drift between
       # detections (friction, bumps). Kicks are handled by the association below, not by this noise.
@@ -39,6 +41,12 @@ association:
   confirm_radius: 0.3
   # Seconds without an accepted detection before the track may jump to a different confirmed detection
   reacquire_after: 0.5
+  # Manoeuvre detection: a running average of the innovations (newest weighted by manoeuvre_smoothing). A kick
+  # that stays inside the gate still produces innovations that keep pointing the same way; when the average's
+  # normalised size passes manoeuvre_threshold the velocity covariance is opened up by kick_velocity_std.
+  # With smoothing 0.5 a steady ball's average is ~chi^2(2)/3, so 3.0 is about its 99th percentile.
+  manoeuvre_smoothing: 0.5
+  manoeuvre_threshold: 3.0
 
 # Robot to robot communication parameters
 use_r2r_balls: true

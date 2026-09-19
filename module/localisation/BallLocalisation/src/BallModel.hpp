@@ -94,22 +94,14 @@ namespace module::localisation {
         /// between updates. Kicks are handled by the filter's association logic, not by this noise.
         Scalar acceleration_noise = Scalar(1);
 
-        /// Constant rolling deceleration (m/s^2) from rolling resistance, applied against the velocity
-        Scalar rolling_deceleration = Scalar(0);
-
         [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar delta_T) const {
             StateVec new_state(state);
 
-            // Rolling resistance slows the ball at a constant rate until it stops (it never reverses)
-            const Scalar speed = state.vBw.norm();
-            Scalar scale       = Scalar(1);
-            if (speed > Scalar(1e-6)) {
-                scale = std::max(Scalar(0), Scalar(1) - rolling_deceleration * delta_T / speed);
-            }
-            new_state.vBw = state.vBw * scale;
-
-            // Integrate the position with the average velocity over the step
-            new_state.rBWw += Scalar(0.5) * (state.vBw + new_state.vBw) * delta_T;
+            // Constant velocity. Rolling deceleration is applied to the mean by BallLocalisation, not here. The sigma
+            // points sit very close to the mean (alpha 0.1), so pushing them through the deceleration pulls all of a
+            // slow ball's points towards zero speed. That shrinks the velocity variance every step and leaves the
+            // filter too sure a resting ball will stay still.
+            new_state.rBWw += state.vBw * delta_T;
 
             return new_state;
         }
