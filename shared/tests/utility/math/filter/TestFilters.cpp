@@ -26,10 +26,13 @@
  */
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <array>
 #include <catch2/catch_test_macros.hpp>
+#include <cmath>
 #include <utility>
 
+#include "ConstantVelocityModel.hpp"
 #include "VanDerPolModel.hpp"
 
 #include "utility/math/filter/KalmanFilter.hpp"
@@ -121,6 +124,51 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
 
     REQUIRE(percentage_x1 <= 30.0);
+}
+
+
+TEST_CASE("The UKF matches the Kalman filter on a linear model", "[utility][math][filter][UKF]") {
+
+    using Model = shared::tests::ConstantVelocityModel<double>;
+    using utility::math::filter::UKF;
+
+    const double deltaT = 1.0 / 30.0;
+    const Eigen::Matrix<double, 1, 1> R(0.05 * 0.05);
+    const Eigen::RowVector2d H(1.0, 0.0);
+
+    // Correlated priors of both signs: the sigma points must reproduce the correlation, not just the variances
+    for (const double correlation : {0.0136, -0.0136}) {
+        Eigen::Vector2d kf_mean(1.5, -0.5);
+        Eigen::Matrix2d kf_covariance;
+        kf_covariance << 0.01, correlation, correlation, 0.09;
+
+        UKF<double, shared::tests::ConstantVelocityModel> ukf;
+        ukf.model.acceleration_noise = 2.0;
+        ukf.set_state(kf_mean, kf_covariance);
+
+        for (int i = 0; i < 60; ++i) {
+            // A ball that rests, then rolls away at 3 m/s
+            const double t = i * deltaT;
+            const Eigen::Matrix<double, 1, 1> z(1.5 - 3.0 * std::max(0.0, t - 0.5) + 0.02 * std::sin(7.0 * t));
+
+            ukf.measure(z, R);
+            const Eigen::Vector2d K = kf_covariance * H.transpose() / (H * kf_covariance * H.transpose() + R)(0, 0);
+            kf_mean += K * (z - H * kf_mean);
+            kf_covariance = (Eigen::Matrix2d::Identity() - K * H) * kf_covariance;
+
+            INFO("Correlation " << correlation << ", step " << i);
+            REQUIRE(ukf.get_state().isApprox(kf_mean, 1e-9));
+            REQUIRE(ukf.get_covariance().isApprox(kf_covariance, 1e-9));
+
+            ukf.time(deltaT);
+            const Eigen::Matrix2d F = Model::transition(deltaT);
+            kf_mean                 = F * kf_mean;
+            kf_covariance           = F * kf_covariance * F.transpose() + ukf.model.noise(deltaT);
+
+            REQUIRE(ukf.get_state().isApprox(kf_mean, 1e-9));
+            REQUIRE(ukf.get_covariance().isApprox(kf_covariance, 1e-9));
+        }
+    }
 }
 
 
