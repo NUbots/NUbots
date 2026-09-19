@@ -1,28 +1,44 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# UKF config
+# Constant-velocity UKF on the ball's world position and velocity, updated in image time. Validated against
+# NUSim ground truth with tools::BallLocalisationBenchmark (nusim/ballvalidation role).
 ukf:
   noise:
     measurement:
-      ball_position: [0.1, 0.1]
+      # Detection position standard deviation (m): base + per_metre * range from the camera. Vision error
+      # grows roughly in proportion to range (about 10% of it in NUSim, Sep 2026).
+      base: 0.05
+      per_metre: 0.1
     process:
-      position: [1e-2, 1e-2]
-      velocity: [1e-2, 1e-2]
+      # White-noise-acceleration spectral density (m^2/s^3): how quickly the ball's velocity may drift between
+      # detections (friction, bumps). Kicks are handled by the association below, not by this noise.
+      acceleration: 2.0
 
   initial:
-    mean:
-      position: [5.0, 0.0]
-      velocity: [0.0, 0.0]
+    # Covariance the filter (re)starts with when it acquires a ball: position (m^2), velocity ((m/s)^2).
+    # The velocity is unknown at acquisition, so start it wide.
     covariance:
-      position: [1e-3, 1e-3]
-      velocity: [1e-3, 1e-3]
+      position: [0.1, 0.1]
+      velocity: [4.0, 4.0]
 
-# Maximum distance a ball can be from current mean to be accepted as a measurement
-acceptance_radius: 2
+motion:
+  # Rolling resistance deceleration (m/s^2), applied against the velocity until the ball stops.
+  # NUSim's ball slows at about 0.5 m/s^2; real turf is C_r * g with C_r around 0.05.
+  rolling_deceleration: 0.5
 
-# Maximum number of ball rejections before acceptance
-max_rejections: 25
+association:
+  # Squared Mahalanobis distance within which a detection updates the track (chi^2, 2 dof, 99%)
+  gate: 9.21
+  # Fastest the ball can travel (m/s). A detection outside the gate is taken as a kick only if the ball could
+  # have got there since it was last accepted and the previous image saw it nearby too.
+  max_ball_speed: 8.0
+  # Velocity standard deviation (m/s) opened up on a kick, so the track can follow the new velocity
+  kick_velocity_std: 4.0
+  # Extra distance (m) a detection may move between consecutive images and still confirm itself
+  confirm_radius: 0.3
+  # Seconds without an accepted detection before the track may jump to a different confirmed detection
+  reacquire_after: 0.5
 
 # Robot to robot communication parameters
 use_r2r_balls: true

@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <algorithm>
 
 namespace module::localisation {
 
@@ -89,14 +90,26 @@ namespace module::localisation {
 
         using StateMat = Eigen::Matrix<Scalar, size, size>;
 
-        StateVec process_noise{};
+        /// White-noise-acceleration spectral density (m^2/s^3): how quickly the ball's velocity may change
+        /// between updates. Kicks are handled by the filter's association logic, not by this noise.
+        Scalar acceleration_noise = Scalar(1);
+
+        /// Constant rolling deceleration (m/s^2) from rolling resistance, applied against the velocity
+        Scalar rolling_deceleration = Scalar(0);
 
         [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar delta_T) const {
-
             StateVec new_state(state);
 
-            // Update position based on velocity
-            new_state.rBWw += new_state.vBw * delta_T;
+            // Rolling resistance slows the ball at a constant rate until it stops (it never reverses)
+            const Scalar speed = state.vBw.norm();
+            Scalar scale       = Scalar(1);
+            if (speed > Scalar(1e-6)) {
+                scale = std::max(Scalar(0), Scalar(1) - rolling_deceleration * delta_T / speed);
+            }
+            new_state.vBw = state.vBw * scale;
+
+            // Integrate the position with the average velocity over the step
+            new_state.rBWw += Scalar(0.5) * (state.vBw + new_state.vBw) * delta_T;
 
             return new_state;
         }
@@ -116,8 +129,20 @@ namespace module::localisation {
             return state;
         }
 
+        /// Discrete white-noise-acceleration process noise: per axis q * [[dt^3/3, dt^2/2], [dt^2/2, dt]]
         [[nodiscard]] Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
-            return process_noise.asDiagonal() * deltaT;
+            const Scalar q                      = acceleration_noise;
+            const Scalar t2                     = deltaT * deltaT;
+            Eigen::Matrix<Scalar, size, size> Q = Eigen::Matrix<Scalar, size, size>::Zero();
+            for (int axis = 0; axis < 2; ++axis) {
+                const int p = StateVec::PX + axis;
+                const int v = StateVec::VX + axis;
+                Q(p, p)     = q * t2 * deltaT / Scalar(3);
+                Q(p, v)     = q * t2 / Scalar(2);
+                Q(v, p)     = q * t2 / Scalar(2);
+                Q(v, v)     = q * deltaT;
+            }
+            return Q;
         }
     };
 }  // namespace module::localisation

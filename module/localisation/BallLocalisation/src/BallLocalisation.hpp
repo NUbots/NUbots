@@ -28,7 +28,9 @@
 #ifndef MODULE_LOCALISATION_BALLLOCALISATION_HPP
 #define MODULE_LOCALISATION_BALLLOCALISATION_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
+#include <vector>
 
 #include "BallModel.hpp"
 
@@ -39,49 +41,35 @@
 
 namespace module::localisation {
 
-    using VisionBalls = message::vision::Balls;
-
     class BallLocalisation : public NUClear::Reactor {
     private:
         struct Config {
             Config() = default;
-            /// @brief UKF config
             struct UKF {
-                struct Noise {
-                    Noise() = default;
-                    struct Measurement {
-                        Eigen::Matrix2d position = Eigen::Matrix2d::Zero();
-                    } measurement{};
-                    struct Process {
-                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
-                    } process{};
-                } noise{};
-                struct Initial {
-                    Initial() = default;
-                    struct Mean {
-                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
-                    } mean{};
-                    struct Covariance {
-                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
-                    } covariance{};
-                } initial{};
+                /// @brief Detection position standard deviation (m): base + per_metre * range from the camera
+                double measurement_base      = 0.05;
+                double measurement_per_metre = 0.1;
+                /// @brief White-noise-acceleration spectral density (m^2/s^3)
+                double acceleration_noise = 1.0;
+                /// @brief Rolling deceleration of the ball (m/s^2)
+                double rolling_deceleration = 0.0;
+                /// @brief Covariance the filter restarts with when it (re)acquires a ball
+                BallModel<double>::StateVec initial_covariance{};
             } ukf{};
-
-            /// @brief Initial state of the for the UKF filter
-            BallModel<double>::StateVec initial_mean;
-
-            /// @brief Initial covariance of the for the UKF filter
-            BallModel<double>::StateVec initial_covariance;
-
-            /// @brief Acceptance radius for a ball measurement
-            double acceptance_radius = 0.0;
-
-            /// @brief Maximum number of detections of a ball not being accepted before it is accepted
-            int max_rejections = 0;
-
+            struct Association {
+                /// @brief Squared Mahalanobis distance below which a detection updates the track
+                double gate = 9.21;
+                /// @brief Fastest the ball can travel (m/s): a detection outside the gate but reachable since
+                /// the last accepted one, and confirmed by the previous frame, is taken as a kick
+                double max_ball_speed = 8.0;
+                /// @brief Velocity standard deviation (m/s) injected when a kick is detected
+                double kick_velocity_std = 4.0;
+                /// @brief How far (m) a detection may move between consecutive frames and still confirm itself,
+                /// on top of max_ball_speed times the frame interval
+                double confirm_radius = 0.3;
+                /// @brief Seconds without an accepted detection before the track may jump to a new ball
+                double reacquire_after = 0.5;
+            } association{};
             /// @brief Whether or not to use teammate balls
             bool use_r2r_balls = false;
             /// @brief Timeout on stale teammate ball guesses
@@ -92,16 +80,26 @@ namespace module::localisation {
             double team_guess_default_timer = 0.0;
             /// @brief Maximum distance from the field that a ball can be before it is ignored
             double max_distance_from_field = 0.0;
-
         } cfg;
 
-        /// @brief Rejection count
-        int rejection_count = 0;
+        /// @brief A ball detection in world space, ready for association
+        struct Candidate {
+            Eigen::Vector2d rBWw = Eigen::Vector2d::Zero();
+            /// @brief Measurement standard deviation (m) for this detection
+            double sigma = 0.0;
+        };
 
-        /// @brief Whether or not this is the first time we have seen a ball
-        bool first_ball_seen = true;
+        /// @brief Whether the filter is tracking a ball at all (false until the first confirmed detection)
+        bool tracking = false;
+        /// @brief Image time the filter state refers to
+        NUClear::clock::time_point filter_time{};
+        /// @brief Image time of the last detection the track accepted
+        NUClear::clock::time_point last_accept_time{};
+        /// @brief Detections from the previous image and its time, used to confirm kicks and re-acquisitions
+        std::vector<Candidate> previous_candidates{};
+        NUClear::clock::time_point previous_time{};
 
-        /// @brief The time of the last time update
+        /// @brief The time we last emitted a ball of our own (the teammate-ball fallback waits on it)
         NUClear::clock::time_point last_time_update;
 
         /// @brief The reactions that update the ball estimate. Disabled while input::NUSimGroundTruth is providing
@@ -112,8 +110,13 @@ namespace module::localisation {
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
 
+        /// @brief Restart the track at a detection with zero velocity and the reacquisition covariance
+        void reset_track(const Candidate& candidate, const NUClear::clock::time_point& time);
+
+        /// @brief Whether a detection has a counterpart in the previous image it could have moved from
+        [[nodiscard]] bool confirmed(const Candidate& candidate, const NUClear::clock::time_point& time) const;
+
         /// @brief Calculates ball position using robot to robot communication
-        /// @param average_rBFf The average position of the ball in field space
         /// @return Whether the teammate ball is a valid guess and the average position of the ball in field space
         std::pair<bool, Eigen::Vector3d> get_average_team_rBFf();
 
@@ -124,6 +127,7 @@ namespace module::localisation {
             /// @brief The position of the ball in field space
             Eigen::Vector3d rBFf = Eigen::Vector3d::Zero();
         };
+
         /// @brief A vector of guesses from teammates, where the index is the player ID - 1
         std::vector<TeamGuess> team_guesses{};
 
