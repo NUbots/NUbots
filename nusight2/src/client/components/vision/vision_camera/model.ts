@@ -9,6 +9,7 @@ import { BoundingBoxesModel } from "./bounding_boxes";
 import { GoalModel } from "./goals";
 import { GreenHorizonModel } from "./green_horizon";
 import { OtherRobotsModel } from "./other_robots";
+import { OutOfFieldModel } from "./out_of_field";
 import { VisualMeshModel } from "./visual_mesh";
 
 type DrawOptions = CameraDefaultDrawOptions & {
@@ -18,6 +19,7 @@ type DrawOptions = CameraDefaultDrawOptions & {
   drawGoals: boolean;
   drawRobots: boolean;
   drawBoundingBoxes: boolean;
+  drawOutOfField: boolean;
 };
 
 export interface VisionCameraModelOpts {
@@ -31,6 +33,7 @@ export interface VisionCameraModelOpts {
   goals?: GoalModel[];
   robots?: OtherRobotsModel[];
   boundingBoxes?: BoundingBoxesModel[];
+  outOfField?: OutOfFieldModel;
   selected?: boolean;
 }
 
@@ -47,6 +50,7 @@ export class VisionCameraModel implements CameraModel {
   @observable.ref goals?: GoalModel[];
   @observable.ref robots?: OtherRobotsModel[];
   @observable.ref boundingBoxes?: BoundingBoxesModel[];
+  @observable.ref outOfField?: OutOfFieldModel;
 
   @observable drawOptions: DrawOptions;
 
@@ -61,6 +65,7 @@ export class VisionCameraModel implements CameraModel {
     this.goals = opts.goals;
     this.robots = opts.robots;
     this.boundingBoxes = opts.boundingBoxes;
+    this.outOfField = opts.outOfField;
     this.drawOptions = opts.drawOptions;
     this.selected = opts.selected ?? false;
   }
@@ -79,6 +84,7 @@ export class VisionCameraModel implements CameraModel {
         drawGoals: true,
         drawRobots: true,
         drawBoundingBoxes: true,
+        drawOutOfField: true,
       },
     });
   }
@@ -94,6 +100,7 @@ export class VisionCameraModel implements CameraModel {
     this.goals = that.goals;
     this.robots = that.robots;
     this.boundingBoxes = that.boundingBoxes;
+    this.outOfField = that.outOfField;
     return this;
   }
 }

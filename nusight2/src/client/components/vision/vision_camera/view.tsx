@@ -75,6 +75,11 @@ export class VisionCameraView extends Component<VisionCameraViewProps> {
         enabled: drawOptions.drawBoundingBoxes,
         toggle: action(() => (drawOptions.drawBoundingBoxes = !drawOptions.drawBoundingBoxes)),
       },
+      {
+        label: "Out of Field",
+        enabled: drawOptions.drawOutOfField,
+        toggle: action(() => (drawOptions.drawOutOfField = !drawOptions.drawOutOfField)),
+      },
     ];
   }
 }
