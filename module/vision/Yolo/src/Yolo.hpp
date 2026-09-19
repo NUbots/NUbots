@@ -28,6 +28,7 @@
 #define MODULE_VISION_YOLO_HPP
 
 #include <Eigen/Core>
+#include <atomic>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
 
@@ -50,6 +51,9 @@ namespace module::vision {
 
         /// @brief Whether the model backend initialised successfully
         bool model_loaded = false;
+
+        /// @brief Ball radius (m) from the FieldDescription, 0 until one arrives
+        std::atomic<double> ball_radius{0.0};
 
         /// @brief Object struct for storing name and colour
         struct Object {

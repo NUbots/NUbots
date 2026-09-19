@@ -27,6 +27,8 @@ NOTE: If you are running a model for the first time on a robot using the TensorR
 ## Consumes
 
 - `message::input::Image` the image to run the YOLO on.
+- `message::support::FieldDescription` (optional) the ball radius, so ball detections are placed at the ball's centre
+  height.
 
 ## Emits
 
