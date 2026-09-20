@@ -90,6 +90,14 @@ message DirectorState {
         uint64 parent_provider = 4;
         /// The ids of the tasks that this group wants to run/is running
         repeated DirectorTask subtasks = 5;
+
+        message LastRun {
+            /// If the reaction failed to run (unsatisfied with/single etc)
+            bool failed = 1;
+        }
+
+        /// Metadata about the last run
+        LastRun last_run = 6;
     }
 
     /// Groups of providers
