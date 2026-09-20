@@ -23,7 +23,7 @@ def train(args):
 
 
 def test(args):
-    model = RFDETRSegNano(pretrain_weights=args.weights)
+    model = RFDETRSegNano(pretrain_weights=args.weights, trust_checkpoint=True)
     model.optimize_for_inference()  # exports/optimizes before benchmarking latency
     import time
     val_images = list((Path(args.data) / "valid").glob("*.jpg"))[:10]
