@@ -1,2 +1,3 @@
 #!/bin/bash
-exec "$(dirname "$0")/nuclear/b.py" "$@"
+dir="$(dirname "$0")"
+exec uv run --project "$dir" "$dir/nuclear/b.py" "$@"
