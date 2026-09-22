@@ -148,9 +148,8 @@ namespace module::skill {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
-        on<Stop<WalkTask>>().then([this] {
-            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
-        });
+        on<Stop<WalkTask>>().then(
+            [this] { emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero())); });
 
         // Policy update at UPDATE_FREQUENCY
         on<Provide<WalkTask>,
