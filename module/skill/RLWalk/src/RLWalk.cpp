@@ -90,12 +90,7 @@ namespace module::skill {
             // Load model configuration
             cfg.model_path         = config["model"]["path"].as<std::string>();
             cfg.device             = config["model"]["device"].as<std::string>();
-            cfg.input_name         = config["model"]["input_name"].as<std::string>();
-            cfg.output_name        = config["model"]["output_name"].as<std::string>();
-            cfg.num_joints         = config["model"]["num_joints"].as<int>();
-            cfg.obs_size           = config["model"]["obs_size"].as<int>();
             cfg.servo_torque       = config["servos"]["torque"].as<float>();
-            cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
             cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
             cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();
@@ -110,7 +105,6 @@ namespace module::skill {
             // Commanded positions are clipped to these (rad, NUbots order)
             servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
             servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
-            previous_pose   = default_pose;
 
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));

@@ -4,17 +4,12 @@ log_level: INFO
 model:
   path: model.onnx
   device: CPU
-  input_name: obs
-  output_name: actions
-  num_joints: 20
-  obs_size: 71
   action_scale: 0.24722924456 # From mjlab training
   gait_period: 0.7 # s, from mjlab training
 
 servos:
   torque: 100.0
   leg_gains: 9.0
-  head_gains: 1.0
   arm_gains: 1.0
 
 # Command speed (m/s and rad/s combined) below which the default pose is held instead of the policy's

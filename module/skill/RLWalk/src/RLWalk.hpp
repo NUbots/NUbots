@@ -11,7 +11,6 @@
 namespace module::skill {
 
     /// @brief Observation vector sizes
-    static constexpr int ACC_SIZE       = 3;
     static constexpr int GYRO_SIZE      = 3;
     static constexpr int GRAVITY_SIZE   = 3;
     static constexpr int JOINT_POS_SIZE = 20;
@@ -24,8 +23,6 @@ namespace module::skill {
     using ObservationVector = Eigen::Matrix<double, TOTAL_OBS_SIZE, 1>;
     /// @brief Fixed-size joint vector type
     using JointVector = Eigen::Matrix<double, JOINT_POS_SIZE, 1>;
-    /// @brief Fixed-size command vector type
-    using CommandVector = Eigen::Matrix<double, COMMAND_SIZE, 1>;
 
     class RLWalk : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -33,24 +30,12 @@ namespace module::skill {
         struct Config {
             /// @brief Path to the ONNX model file
             std::string model_path;
-            /// @brief Path to the PyTorch model file for normalisation
-            std::string pt_model_path;
             /// @brief Device to run inference on (CPU, GPU, etc.)
             std::string device;
-            /// @brief Input tensor name in the ONNX model
-            std::string input_name;
-            /// @brief Output tensor name in the ONNX model
-            std::string output_name;
-            /// @brief Number of joints in the model output
-            int num_joints;
-            /// @brief Size of the observation vector
-            int obs_size;
             /// @brief Servo torque value to send to nusense
             float servo_torque;
             /// @brief Servo proportional gain for leg and hip joints
             float leg_servo_gain;
-            /// @brief Servo proportional gain for head joints
-            float head_servo_gain;
             /// @brief Servo proportional gain for arm joints
             float arm_servo_gain;
             /// @brief Scale factor to convert inference outputs to joint angles
@@ -64,12 +49,6 @@ namespace module::skill {
         /// @brief OpenVINO compiled model and inference request
         ov::CompiledModel compiled_model{};
         ov::InferRequest infer_request{};
-
-        /// @brief Current phase of the walk (0-1)
-        double phase;
-
-        /// @brief Whether the model is initialized
-        bool model_initialized;
 
         /// @brief Frequency of walk engine updates
         static constexpr int UPDATE_FREQUENCY = 50;
@@ -92,9 +71,6 @@ namespace module::skill {
         /// @brief Per-servo position limits (rad, NUbots order) the commands are clipped to
         JointVector servo_limit_min;
         JointVector servo_limit_max;
-
-        /// @brief Last joint positions for inference
-        JointVector previous_pose;
 
         // Control-loop timing diagnostics
         /// @brief Whether a baseline tick has been sampled
@@ -121,9 +97,6 @@ namespace module::skill {
         explicit RLWalk(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// @brief Initialize the OpenVINO model
-        void initialize_model();
-
         /// @brief Run inference with the current observation
         /// @param observation The current observation vector
         /// @return The model's output (joint angles)
