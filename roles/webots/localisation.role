@@ -29,7 +29,7 @@ nuclear_role(
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
-  localisation::FieldLocalisationNLopt
+  localisation::FieldLocalisationSRIF
   localisation::RobotLocalisation
   # Director
   extension::Director
