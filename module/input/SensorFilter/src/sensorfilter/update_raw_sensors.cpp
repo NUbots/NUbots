@@ -69,7 +69,7 @@ namespace module::input {
                 log<DEBUG>("Suspected encoder error on servo ", id, ": Using last known good position.");
             }
 
-            // Determine the current velocity with potential fallback to the last know good velocity
+            // Fall back to the last known good velocity on an encoder error
             double current_velocity = raw_servo.present_velocity;
             if (previous_sensors && (hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
                 current_velocity = previous_sensors->servo[id].present_velocity;

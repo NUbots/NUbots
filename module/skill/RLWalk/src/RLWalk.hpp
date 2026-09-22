@@ -57,8 +57,7 @@ namespace module::skill {
             double nugus_action_scale;
             /// @brief Gait period used in the phase calculation
             double gait_period;
-            /// @brief Command velocity magnitude below which the policy joint offsets are zeroed,
-            /// holding the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
+            /// @brief Command speed below which the default pose is held instead of the policy's offsets
             double command_velocity_threshold;
         } cfg;
 
@@ -78,13 +77,10 @@ namespace module::skill {
         /// @brief Fixed control timestep (seconds) corresponding to UPDATE_FREQUENCY
         static constexpr double STEP_DT = 1.0 / UPDATE_FREQUENCY;
 
-        /// @brief Gap (seconds) since the previous timing tick beyond which the control loop is treated
-        /// as having paused (e.g. the walk was pre-empted by a get-up). On resume the timing diagnostics
-        /// re-baseline instead of reporting a spurious low frequency / huge drift across the gap.
-        static constexpr double MAX_TICK_GAP = STEP_DT * 5.0;  // 0.1s, i.e. ~5 missed control steps
+        /// @brief Tick gap (s) treated as a pause, after which the timing diagnostics re-baseline
+        static constexpr double MAX_TICK_GAP = STEP_DT * 5.0;
 
-        /// @brief Number of control steps executed since the walk started. Used to advance the
-        /// gait phase deterministically as control_step * STEP_DT rather than from wall-clock time.
+        /// @brief Control steps since the walk started; drives the gait phase
         uint64_t control_step = 0;
 
         /// @brief Last action taken by the model
@@ -93,35 +89,32 @@ namespace module::skill {
         /// @brief Default pose for the robot
         JointVector default_pose;
 
-        /// @brief Lower per-servo position limits used to clip the final commanded servo positions as a safety measure
+        /// @brief Per-servo position limits (rad, NUbots order) the commands are clipped to
         JointVector servo_limit_min;
-        /// @brief Upper per-servo position limits used to clip the final commanded servo positions as a safety measure
         JointVector servo_limit_max;
 
         /// @brief Last joint positions for inference
         JointVector previous_pose;
 
-        // Control-loop timing diagnostics params
-        /// @brief Whether a previous tick has been sampled (false until the first stable tick).
+        // Control-loop timing diagnostics
+        /// @brief Whether a baseline tick has been sampled
         bool have_timing_sample = false;
-        /// @brief Timestamps of the previous tick on each clock, used to compute the per-tick period.
+        /// @brief Previous tick on each clock
         NUClear::clock::time_point last_tick_nuclear{};
         std::chrono::steady_clock::time_point last_tick_steady{};
-        /// @brief Timestamps at the first stable tick, used to compute cumulative gait-clock drift.
+        /// @brief Baseline tick on each clock, for the gait-clock drift
         NUClear::clock::time_point walk_start_nuclear{};
         std::chrono::steady_clock::time_point walk_start_steady{};
-        /// @brief Value of control_step when the current timing baseline was established. Gait-clock drift
-        /// is measured from here so it stays meaningful after a re-baseline following a pause.
+        /// @brief control_step at the baseline tick
         uint64_t timing_control_step_start = 0;
-        /// @brief Time of the last rolling-summary log, used to throttle the summary to timing_report_period.
+        /// @brief When the rolling summary was last logged
         NUClear::clock::time_point last_timing_report{};
-        /// @brief Running statistics on the NUClear-clock per-tick period (seconds), since the walk started.
+        /// @brief Running statistics on the NUClear-clock tick period (s) since the baseline
         uint64_t timing_samples     = 0;
         double timing_period_sum    = 0.0;
         double timing_period_sq_sum = 0.0;
         double timing_period_min    = 0.0;
         double timing_period_max    = 0.0;
-
 
     public:
         /// @brief Called by the powerplant to build and setup the RLWalk reactor.
@@ -136,11 +129,10 @@ namespace module::skill {
         /// @return The model's output (joint angles)
         JointVector run_inference(const ObservationVector& observation);
 
-        /// @brief Function to measure the actual control-loop frequency according to the nuclear clock and steady wall
-        /// clock
+        /// @brief Graph and log the control-loop period and gait-clock drift against the NUClear and steady clocks
         void debug_loop_timing();
 
-        /// @brief Reset all control-loop timing diagnostic state. Called when a walk starts.
+        /// @brief Reset the timing diagnostics, when a walk starts
         void reset_loop_timing();
     };
 

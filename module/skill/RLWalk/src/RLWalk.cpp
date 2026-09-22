@@ -62,22 +62,20 @@ namespace module::skill {
         return state;
     }
 
-    // Comes from the XML on the mjlab training side.
+    // mjlab joint order (from the training model's XML) to NUbots ServoID order
     std::vector<int> mj_to_nubots_order = {7, 9, 11, 13, 15, 17, 6, 8, 10, 12, 14, 16, 18, 19, 1, 3, 5, 0, 2, 4};
     inline Eigen::Matrix<double, 20, 1> mjlab_to_nubots(const Eigen::Matrix<double, 20, 1>& mjlab_joint_offsets) {
         Eigen::Matrix<double, 20, 1> nubots_joint_offsets = Eigen::Matrix<double, 20, 1>::Zero();
-        // Convert from MJlabs order to NUbots order
         for (int i = 0; i < mjlab_joint_offsets.size(); ++i) {
             nubots_joint_offsets(mj_to_nubots_order[i]) = mjlab_joint_offsets(i);
         }
         return nubots_joint_offsets;
     }
 
-    // The inverse mapping of the above
+    // NUbots ServoID order to mjlab joint order
     std::vector<int> nubots_to_mj_order = {17, 14, 18, 15, 19, 16, 6, 0, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5, 12, 13};
     inline Eigen::Matrix<double, 20, 1> nubots_to_mjlab(const Eigen::Matrix<double, 20, 1>& nubots_joints) {
         Eigen::Matrix<double, 20, 1> mjlab_joints = Eigen::Matrix<double, 20, 1>::Zero();
-        // Convert from NUbots order to Mjlab's expected order
         for (int i = 0; i < nubots_joints.size(); ++i) {
             mjlab_joints(nubots_to_mj_order[i]) = nubots_joints(i);
         }
@@ -87,7 +85,6 @@ namespace module::skill {
     RLWalk::RLWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("RLWalk.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file RLWalk.yaml
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
@@ -101,20 +98,16 @@ namespace module::skill {
             cfg.head_servo_gain    = config["servos"]["head_gains"].as<float>();
             cfg.leg_servo_gain     = config["servos"]["leg_gains"].as<float>();
             cfg.arm_servo_gain     = config["servos"]["arm_gains"].as<float>();
-            cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();  // Defined in mjlab training.
-            cfg.gait_period        = config["model"]["gait_period"].as<double>();   // Defined in mjlab training.
+            cfg.nugus_action_scale = config["model"]["action_scale"].as<double>();
+            cfg.gait_period        = config["model"]["gait_period"].as<double>();
 
-            // Command velocity magnitude below which the policy joint offsets are zeroed so the
-            // robot holds the default pose. Hack to avoid unwanted policy behaviour at ~zero command.
             cfg.command_velocity_threshold = config["command_velocity_threshold"].as<double>();
 
-            // Initialize vectors
             last_action = JointVector::Zero();
 
             default_pose = JointVector(config["default_pose"].as<Expression>());
 
-            // Per-servo position limits (radians, NUbots joint order) used to clip the final
-            // commanded servo positions as a safety measure against physically infeasible commands.
+            // Commanded positions are clipped to these (rad, NUbots order)
             servo_limit_min = JointVector(config["servo_limits"]["min"].as<Expression>());
             servo_limit_max = JointVector(config["servo_limits"]["max"].as<Expression>());
             previous_pose   = default_pose;
@@ -122,14 +115,13 @@ namespace module::skill {
             // Walk-related behaviours rely on an initial stability message
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
-            // Compile the model and create inference request object
+            // Compile the model, falling back to CPU if the GPU fails
             try {
                 log<INFO>("Loading RLWalk model from: ", cfg.model_path);
                 log<INFO>("Using device: ", cfg.device);
 
                 ov::Core core{};
 
-                // Try to fallback to CPU if GPU fails
                 try {
                     compiled_model = core.compile_model(cfg.model_path, cfg.device);
                 }
@@ -153,25 +145,20 @@ namespace module::skill {
             }
         });
 
-        // Start - Runs every time the Walk provider starts
+        // Each walk starts the gait phase, and the timing diagnostics, from zero
         on<Start<WalkTask>>().then([this]() {
-            // Reset the control step counter so the gait phase starts from zero on each walk start
             control_step = 0;
-            // If debugging, reset the loop-timing diagnostics so each walk is measured from a clean baseline
             if (log_level <= DEBUG) {
                 reset_loop_timing();
             }
-            // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
-        // Stop - Runs every time the Walk task is removed
         on<Stop<WalkTask>>().then([this] {
-            // Emit a stopped state as we are now not walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
-        // Main loop - Updates the walk engine at fixed frequency
+        // Policy update at UPDATE_FREQUENCY
         on<Provide<WalkTask>,
            With<Sensors>,
            With<Stability>,
@@ -182,19 +169,18 @@ namespace module::skill {
                          const RunReason& run_reason,
                          const Sensors& sensors,
                          const Stability& stability) {
-                // Keep policy updates at deterministic frequency (50 Hz)
+                // Step only on the Every tick, not when the task changes
                 if (run_reason != RunReason::OTHER_TRIGGER) {
                     return;
                 }
 
                 // Only run if we're in a stable state
                 if (stability >= Stability::DYNAMIC) {
-                    // Debug the actual loop frequency
                     if (log_level <= DEBUG) {
                         debug_loop_timing();
                     }
 
-                    // Construct observation vector
+                    // Observation, in the training layout (TOTAL_OBS_SIZE)
                     ObservationVector observation;
                     int idx = 0;
 
@@ -208,7 +194,7 @@ namespace module::skill {
                     };
                     idx += GYRO_SIZE;
 
-                    // Gravity/Accelerometer data in body frame (3)
+                    // Gravity in the torso frame (3)
                     const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
                     Eigen::Vector3d gravity                = sensors.Htw.rotation() * g_world;
                     observation.segment<GRAVITY_SIZE>(idx) = gravity;
@@ -218,12 +204,11 @@ namespace module::skill {
                     };
                     idx += GRAVITY_SIZE;
 
-                    // Joint relative positions and velocities (40) in Mujoco's Tree-Traversal order
+                    // Joint positions relative to the default pose (20) and velocities (20), in mjlab order
                     auto temp_sensors             = std::make_unique<Sensors>();
                     temp_sensors->servo           = sensors.servo;
                     JointStateVectors joint_state = sensors_to_joint_state(temp_sensors);
 
-                    // Positions
                     JointVector current_joints_rel_mj        = nubots_to_mjlab(joint_state.position - default_pose);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_joints_rel_mj;
                     if (log_level <= DEBUG) {
@@ -231,7 +216,6 @@ namespace module::skill {
                     };
                     idx += JOINT_POS_SIZE;
 
-                    // Velocities
                     JointVector current_velocities_mj        = nubots_to_mjlab(joint_state.velocity);
                     observation.segment<JOINT_POS_SIZE>(idx) = current_velocities_mj;
                     if (log_level <= DEBUG) {
@@ -239,7 +223,7 @@ namespace module::skill {
                     };
                     idx += JOINT_POS_SIZE;
 
-                    // Last action (20) in Mujoco's Tree-Traversal order without scaling or offsets applied
+                    // Last raw action (20), in mjlab order
                     observation.segment<JOINT_POS_SIZE>(idx) = last_action;
                     idx += JOINT_POS_SIZE;
 
@@ -253,15 +237,12 @@ namespace module::skill {
                     }
                     idx += COMMAND_SIZE;
 
-                    // Phase (2). Advance the gait phase from the control-step count and fixed control
-                    // timestep (control_step * STEP_DT) rather than wall-clock time. This is
-                    // deterministic, monotonic, and immune to clock jitter/jumps and scheduling delays.
+                    // Gait phase (2), from the control step count so wall-clock jitter can't move it
                     const double elapsed = static_cast<double>(control_step) * STEP_DT;
                     const double phase   = std::fmod(elapsed / cfg.gait_period, 1.0);
                     observation.segment<PHASE_SIZE>(idx) =
                         Eigen::Vector2d(std::sin(2 * M_PI * phase), std::cos(2 * M_PI * phase));
                     idx += PHASE_SIZE;
-                    // Advance the gait clock by one control step for the next update
                     ++control_step;
 
                     // Run inference
@@ -270,17 +251,15 @@ namespace module::skill {
                         emit(graph("Raw joint action from inference", inference_output_raw.transpose()));
                     };
 
-                    // Store the action in mjlab order without scaling or offsets.
+                    // Kept raw, in mjlab order, for the next observation
                     last_action = inference_output_raw;
 
                     const JointVector joint_offsets_mj = inference_output_raw * cfg.nugus_action_scale;
 
-                    // Convert into NUbots order, apply scaling
                     JointVector joint_offsets_scaled_nubots = mjlab_to_nubots(joint_offsets_mj);
 
-                    // Hack: when the command velocity is below a threshold, zero the offsets so the
-                    // robot holds the default pose. This side-steps unwanted policy behaviour at
-                    // ~zero command. TODO: replace with an improved policy trained for zero command.
+                    // Hold the default pose at ~zero command, where the policy steps in place.
+                    // TODO: train the policy for zero command instead
                     if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold) {
                         joint_offsets_scaled_nubots = JointVector::Zero();
                     }
@@ -289,15 +268,13 @@ namespace module::skill {
                         emit(graph("Scaled joint offsets in NUbots order", joint_offsets_scaled_nubots.transpose()));
                     }
 
-                    // Emit servo commands for the limbs only. The policy outputs 20 joints, but the
-                    // head (indices 18, 19) is owned by skill::Look — emitting a full Body task would
-                    // conflict on the Head resource and cause the Director to deny the whole task.
+                    // Limbs only: the head (18, 19) belongs to skill::Look, and claiming it too would get
+                    // the whole task denied
                     auto limbs = std::make_unique<Limbs>();
                     for (int i = 0; i < 18; ++i) {
                         auto servo  = std::make_unique<ServoCommand>();
                         servo->time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-                        // Apply the policy offset to the default pose, then safety-clip the result to
-                        // the physical servo limits so the policy cannot command an infeasible position.
+                        // Default pose plus the policy offset, clipped to the servo limits
                         servo->position  = std::clamp(default_pose[i] + joint_offsets_scaled_nubots[i],
                                                      servo_limit_min[i],
                                                      servo_limit_max[i]);
@@ -307,7 +284,6 @@ namespace module::skill {
                     }
                     emit<Task>(limbs);
 
-                    // Emit walk state
                     auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,
                                                                   walk_task.velocity_target,
                                                                   0.0);  // Phase not used
@@ -333,7 +309,7 @@ namespace module::skill {
             input_data[i] = static_cast<float>(observation[i]);
         }
 
-        // Create & set input tensor
+        // Input tensor
         ov::Shape input_shape = {1, static_cast<size_t>(TOTAL_OBS_SIZE)};
         ov::Tensor input_tensor(ov::element::f32, input_shape, input_data.data());
         infer_request.set_input_tensor(input_tensor);
@@ -374,20 +350,16 @@ namespace module::skill {
     }
 
     void RLWalk::debug_loop_timing() {
-        // Sample both clocks as close together as possible.
+        // Sample both clocks as close together as possible
         const NUClear::clock::time_point now_nuclear           = NUClear::clock::now();
         const std::chrono::steady_clock::time_point now_steady = std::chrono::steady_clock::now();
 
-        // Detect a discontinuity: this loop only ticks while walking, so if the walk is pre-empted by
-        // another task (e.g. a get-up) the timing baseline freezes and the gap since the previous tick
-        // far exceeds the control period. Measuring period/frequency/drift across that gap would report
-        // broken information, so treat the current tick as a fresh baseline instead.
+        // A gap over MAX_TICK_GAP means the walk was paused (e.g. pre-empted by a get-up): re-baseline
+        // rather than measure across it
         const bool gap_detected =
             have_timing_sample && std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count() > MAX_TICK_GAP;
 
-        // First stable tick of this walk, or the first tick after a pause: (re)establish the baseline,
-        // resetting the running statistics so they describe only the current continuous run. Nothing to
-        // compare against yet, so return without emitting a sample.
+        // (Re)start the baseline; nothing to compare against yet
         if (!have_timing_sample || gap_detected) {
             have_timing_sample        = true;
             last_tick_nuclear         = now_nuclear;
@@ -404,14 +376,13 @@ namespace module::skill {
             return;
         }
 
-        // Per-tick period on each clock (seconds).
+        // Per-tick period on each clock (s)
         const double dt_nuclear = std::chrono::duration<double>(now_nuclear - last_tick_nuclear).count();
         const double dt_steady  = std::chrono::duration<double>(now_steady - last_tick_steady).count();
         last_tick_nuclear       = now_nuclear;
         last_tick_steady        = now_steady;
 
-        // Metrics. Gait-clock elapsed is measured from the control step at the current baseline so it
-        // stays aligned with the wall-clock elapsed below after a re-baseline.
+        // Gait-clock time since the baseline, against both clocks
         const double model_elapsed        = static_cast<double>(control_step - timing_control_step_start) * STEP_DT;
         const double elapsed_nuclear      = std::chrono::duration<double>(now_nuclear - walk_start_nuclear).count();
         const double elapsed_steady       = std::chrono::duration<double>(now_steady - walk_start_steady).count();
@@ -419,7 +390,7 @@ namespace module::skill {
         const double drift_steady         = model_elapsed - elapsed_steady;
         const double drift_nuclear_steady = elapsed_nuclear - elapsed_steady;
 
-        // Update running statistics on the NUClear-clock period.
+        // Running statistics on the NUClear-clock period
         ++timing_samples;
         timing_period_sum += dt_nuclear;
         timing_period_sq_sum += dt_nuclear * dt_nuclear;

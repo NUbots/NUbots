@@ -871,8 +871,7 @@ namespace module::platform {
                 servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
             }
 
-            // Joint velocity, finite-differenced from the position sensor by our nugus_controller.
-            // Keyed by the same position sensor name, so it maps to the same servo as above.
+            // Joint velocity from nugus_controller (finite-differenced position), keyed by the position sensor name
             for (const auto& velocity : sensor_measurements.motor_velocities) {
                 auto& servo            = translate_servo_id(velocity.name, sensor_data->servo);
                 servo.present_velocity = velocity.value;

@@ -8,9 +8,8 @@ model:
   output_name: actions
   num_joints: 20
   obs_size: 71
-  action_alpha: 1.00 # TODO: remove the filter completely
-  action_scale: 0.24722924456 # defined in mjlab training.
-  gait_period: 0.7 # seconds, defined in mjlab training
+  action_scale: 0.24722924456 # From mjlab training
+  gait_period: 0.7 # s, from mjlab training
 
 servos:
   torque: 100.0
@@ -18,11 +17,11 @@ servos:
   head_gains: 1.0
   arm_gains: 1.0
 
-# Command velocity magnitude (m/s and rad/s combined) below which the policy joint offsets
-# are zeroed and the robot holds the default pose. Hack to avoid stepping in place. TODO: investigate
+# Command speed (m/s and rad/s combined) below which the default pose is held instead of the policy's
+# offsets. Works around the policy stepping in place at zero command.
 command_velocity_threshold: 0.01
 
-default_pose: # Same as in Mujoco.yaml
+default_pose: # Training default pose (NUbots order)
   - 1.71400e+00 # Right shoulder pitch 0
   - 1.71600e+00 # Left shoulder pitch 1
   - -1.98000e-01 # Right shoulder roll 2
@@ -44,8 +43,7 @@ default_pose: # Same as in Mujoco.yaml
   - 0.00000e+00 # Neck yaw 18
   - 0.00000e+00 # Head pitch 19
 
-# Per-servo position limits (radians). The final commanded servo
-# position is clipped to [min, max] as a safety measure
+# Per-servo position limits (rad, NUbots order) the commanded positions are clipped to
 servo_limits:
   min:
     - 0.4 # Right shoulder pitch 0
