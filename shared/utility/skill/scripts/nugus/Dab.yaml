@@ -1,6 +1,6 @@
 - duration: 1000
   targets:
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: -0.00273743575
       gain: 6
       torque: 100
@@ -146,7 +146,7 @@
       position: -2.3330164
       gain: 10
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0.981767833
       gain: 10
       torque: 100

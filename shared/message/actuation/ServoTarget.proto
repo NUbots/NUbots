@@ -38,16 +38,18 @@ message ServoTarget {
     google.protobuf.Timestamp time = 1;
     /// The ID of the servo being controlled
     uint32 id = 2;
+
+    string name = 3;
     /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
     /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
     /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
     /// triggered as set in Alarm LED/Shutdown
-    float position = 3;
+    float position = 4;
     /// Proportional gain. In proportion to the servo's position error. Gain
     /// values are in range 0~254. K_p : p_gain / 8
-    float gain = 4;
+    float gain = 5;
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque = 5;
+    float torque = 6;
 }
 
 message ServoTargets {

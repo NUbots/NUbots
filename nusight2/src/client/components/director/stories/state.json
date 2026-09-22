@@ -348,7 +348,7 @@
       "parentProvider": "427"
     },
     "8119807754543996117": {
-      "type": "message::actuation::HeadYaw",
+      "type": "message::actuation::NeckYaw",
       "providerIds": ["425"],
       "activeProvider": "425",
       "parentProvider": "431"

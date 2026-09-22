@@ -46,4 +46,4 @@ velocity_low_pass:
 use_ground_truth: false
 
 # Path to URDF file
-urdf_path: "models/robot.urdf"
+urdf_path: "models/nugus/robot.urdf"

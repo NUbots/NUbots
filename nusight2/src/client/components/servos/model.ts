@@ -26,7 +26,7 @@ export const ServoNames: { [key: number]: string } = {
   15: "L_ANKLE_PITCH",
   16: "R_ANKLE_ROLL",
   17: "L_ANKLE_ROLL",
-  18: "HEAD_YAW",
+  18: "NECK_YAW",
   19: "HEAD_PITCH",
 };
 
