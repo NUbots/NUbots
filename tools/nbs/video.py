@@ -37,7 +37,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
-from utility.nbs import LinearDecoder
+from utility.nbs import LinearDecoder, resolve_nbs_paths
 
 from .images import decode_image
 from .images.fourcc import fourcc_to_string
@@ -59,7 +59,11 @@ def register(command):
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to extract the videos from")
-    command.add_argument("--output", "-o", default=os.getcwd(), help="The folder to create the videos in")
+    command.add_argument(
+        "--output",
+        "-o",
+        help="The folder to create the videos in. Defaults to a videos folder alongside the first input file",
+    )
     command.add_argument("--quality", "-q", default="30M", help="The quality to encode the videos at")
     command.add_argument(
         "--encoder",
@@ -112,6 +116,11 @@ def packetise_stream(decoder):
 
 
 def run(files, output, encoder, quality, unix_ts, source, **kwargs):
+    files = resolve_nbs_paths(files)
+
+    # Default: write the videos to a "videos" subfolder alongside the input
+    if output is None:
+        output = os.path.join(os.path.dirname(files[0]), "videos")
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
