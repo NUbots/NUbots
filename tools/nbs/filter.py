@@ -27,10 +27,11 @@
 #
 
 import fnmatch
+import os
 
 from tqdm import tqdm
 
-from utility.nbs import Encoder, LinearDecoder
+from utility.nbs import Encoder, LinearDecoder, resolve_nbs_paths
 
 
 def register(command):
@@ -52,29 +53,19 @@ def register(command):
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to filter")
     command.add_argument("-k", "--keep", action="append", help="A message pattern to keep")
     command.add_argument("-r", "--remove", action="append", help="A message pattern to remove")
-    command.add_argument("-o", "--output", help="The output file to store the filtered nbs in")
+    command.add_argument(
+        "-o",
+        "--output",
+        help="The output file to store the filtered nbs in. If a directory is given, each "
+        "input file is filtered separately into that directory, keeping its original filename."
+        " Default is a 'filtered' subfolder.",
+    )
 
 
-def run(files, keep, remove, output, **kwargs):
-    # If we don't have a output, choose a default output name
-    if output is None:
-        output = "filtered.nbs"
-
-    # If no remove was provided, we assume we remove all
-    if remove is None:
-        if keep is None:
-            print("You must provide either something to remove or keep")
-            exit(1)
-        else:
-            remove = ["*"]
-
-    # If we didn't provide any keep arguments we at least need to ignore them
-    if keep is None:
-        keep = []
-
+def _filter_to(input_files, output, keep, remove):
     with Encoder(output) as out:
         for packet in tqdm(
-            LinearDecoder(*files, show_progress=True),
+            LinearDecoder(*input_files, show_progress=True),
             unit="packet",
             unit_scale=True,
             dynamic_ncols=True,
@@ -95,6 +86,43 @@ def run(files, keep, remove, output, **kwargs):
             # If it's still valid write it to the new file
             if valid:
                 out.write(packet.emit_timestamp, packet.msg)
+
+
+def run(files, keep, remove, output, **kwargs):
+    # If no remove was provided, we assume we remove all
+    if remove is None:
+        if keep is None:
+            print("You must provide either something to remove or keep")
+            exit(1)
+        else:
+            remove = ["*"]
+
+    # If we didn't provide any keep arguments we at least need to ignore them
+    if keep is None:
+        keep = []
+
+    nbs_files = resolve_nbs_paths(files)
+    if not nbs_files:
+        print("No .nbs files found")
+        exit(1)
+
+    if output is not None:
+        if output.endswith(os.sep) or output.endswith("/") or os.path.isdir(output):
+            # Directory output: filter each input file separately, keeping its name
+            os.makedirs(output, exist_ok=True)
+            for f in nbs_files:
+                out_path = os.path.join(output, os.path.basename(f))
+                _filter_to([f], out_path, keep, remove)
+        else:
+            # Explicit output file path: merge all inputs into one output
+            _filter_to(nbs_files, output, keep, remove)
+    else:
+        # Default: write each input to a "filtered" subfolder alongside it
+        for f in nbs_files:
+            out_dir = os.path.join(os.path.dirname(f), "filtered")
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, os.path.basename(f))
+            _filter_to([f], out_path, keep, remove)
 
 
 def match_pattern(packet, pattern):

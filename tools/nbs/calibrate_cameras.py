@@ -119,11 +119,12 @@ def packetise_stream(decoder):
                 "timestamp": (packet.msg.timestamp.seconds, packet.msg.timestamp.nanos),
                 "data": packet.msg.data,
                 "format": packet.msg.format,
+                "dimensions": (packet.msg.dimensions.x, packet.msg.dimensions.y),
             }
 
 
 def process_frame(item, rows, cols):
-    data = decode_image(item["data"], item["format"])
+    data = decode_image(item["data"], item["format"], item["dimensions"])
 
     if len(data) == 1:
         img = data[0]["image"].numpy()
