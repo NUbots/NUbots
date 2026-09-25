@@ -173,7 +173,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Tight convergence tolerance; sqrt(epsilon) is the loose alternative
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
@@ -331,7 +331,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Loose convergence tolerance; 2*epsilon is the tight alternative
             const Scalar LambdaSqThreshold = std::sqrt(std::numeric_limits<Scalar>::epsilon());
             if (std::fabs(LambdaSq) < LambdaSqThreshold && v(0) > 0.0) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
@@ -489,7 +489,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Tight convergence tolerance; sqrt(epsilon) is the loose alternative
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
@@ -653,7 +653,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Tight convergence tolerance; sqrt(epsilon) is the loose alternative
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
@@ -834,7 +834,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Tight convergence tolerance; sqrt(epsilon) is the loose alternative
             const Scalar LambdaSqThreshold = 2 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(LambdaSq) < LambdaSqThreshold) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
@@ -1017,7 +1017,7 @@ namespace utility::gaussian_filtering::funcmin {
             // Between the loose sqrt(epsilon) and tight 2*epsilon tolerances used elsewhere
             const Scalar NewtonDecrSqThreshold = 1e3 * std::numeric_limits<Scalar>::epsilon();
             if (std::fabs(NewtonDecrSq) < NewtonDecrSqThreshold) {
-                NUClear::log<NUClear::LogLevel::DEBUG>(
+                NUClear::log<NUClear::LogLevel::TRACE>(
                     fmt::format("Converged: Newton decrement below threshold in {} iterations", i));
                 return 0;
             }
