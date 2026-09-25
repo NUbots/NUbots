@@ -30,7 +30,7 @@ from . import defaults
 
 
 def register(func, image=None, **kwargs):
-    image = defaults.image_name("selected") if image is None else image
+    image = defaults.image_name("selected_k1") if image is None else image
 
     def _register(command):
 

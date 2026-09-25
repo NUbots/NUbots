@@ -92,6 +92,10 @@ namespace module::strategy {
             /// @brief Acceptable heading error threshold for kicking
             double err_z_ok = 0.0;
 
+            /// @brief Ball range below which the robot orbits the ball (Adjust) to fix its approach angle, instead
+            /// of using the backoff-based fine approach
+            double adjust_range_threshold = 0.0;
+
         } cfg;
 
         std::optional<Eigen::Vector3d> dribble_path_obstacle(const std::vector<Eigen::Vector3d>& all_obstacles,

@@ -25,7 +25,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 find_package(OpenCV REQUIRED)
-set(OpenVINO_DIR /usr/local/lib/cmake)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  message(STATUS "Cross compiling, using OpenVINO_DIR for target system")
+  set(OpenVINO_DIR /l4t/targetfs/usr/local/runtime/cmake)
+  set(TBB_DIR /l4t/targetfs/usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
+else()
+  set(OpenVINO_DIR /usr/local/runtime/cmake)
+  set(TBB_DIR /usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
+endif()
 find_package(OpenVINO REQUIRED)
 find_package(TBB REQUIRED)
 

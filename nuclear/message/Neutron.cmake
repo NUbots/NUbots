@@ -20,7 +20,14 @@ set(py_out "${CMAKE_CURRENT_BINARY_DIR}/python")
 set(dep_out "${CMAKE_CURRENT_BINARY_DIR}/dependencies")
 
 # We need protobuf and python to generate the neutron messages
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG)
+if(Protobuf_FOUND)
+  set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc")
+  set(PROTOBUF_PROTOC_EXECUTABLE "/usr/bin/protoc")
+else()
+  message(WARNING "Falling back to cmake FindProtobuf as Protobuf was not found via CONFIG")
+  find_package(Protobuf REQUIRED)
+endif()
 find_package(Python3 REQUIRED)
 
 # We need eigen for neutron messages
@@ -32,7 +39,7 @@ foreach(proto ${builtin_protobufs})
   get_filename_component(file_we ${proto} NAME_WE)
 
   add_custom_command(
-    OUTPUT ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${py_out}/${file_we}_pb2.py ${dep_out}/${file_we}.d
+    OUTPUT ${py_out}/${file_we}_pb2.py ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${dep_out}/${file_we}.d
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${pb_out} --python_out=${py_out}
             --dependency_out=${dep_out}/${file_we}.d -I${builtin_dir} ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto

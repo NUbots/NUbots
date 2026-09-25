@@ -10,7 +10,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   # Sensors and network (input)
   input::SensorFilter
-  input::Camera
+  input::K1Camera
   input::GameController
   # Vision
   vision::VisualMesh

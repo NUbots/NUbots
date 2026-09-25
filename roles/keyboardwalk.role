@@ -11,7 +11,7 @@ nuclear_role(
   network::NetworkForwarder
   network::PlotJuggler
   # Sensors
-  input::SensorFilter
+  input::K1Sensors
   # Director
   extension::Director
   # Servos
@@ -19,10 +19,9 @@ nuclear_role(
   actuation::Kinematics
   actuation::FootController
   # Skills
-  skill::Walk
-  skill::KickWalk
-  skill::GetUp
-  skill::Look
+  skill::K1Walk
+  skill::K1GetUp
+  skill::K1Look
   # Planners
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
@@ -31,6 +30,7 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  output::Overview
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
 )

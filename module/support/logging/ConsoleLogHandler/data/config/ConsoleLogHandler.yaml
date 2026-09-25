@@ -1,0 +1,2 @@
+# Whether to display timestamps alongside logs
+display_timestamp: true

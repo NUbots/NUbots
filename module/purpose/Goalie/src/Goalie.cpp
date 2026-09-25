@@ -39,6 +39,7 @@
 #include "message/purpose/Purpose.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
+#include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 #include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
     using message::strategy::LookAtBall;
+    using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
     using message::strategy::Who;
     using message::support::FieldDescription;
@@ -77,8 +79,12 @@ namespace module::purpose {
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
             this->log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.equidistant_threshold = config["equidistant_threshold"].as<double>();
-            cfg.ball_threshold        = config["ball_threshold"].as<double>();
+            cfg.equidistant_threshold      = config["equidistant_threshold"].as<double>();
+            cfg.ball_threshold             = config["ball_threshold"].as<double>();
+            cfg.waiting_distance_from_line = config["waiting_distance_from_line"].as<double>();
+            cfg.goal_post_clearance        = config["goal_post_clearance"].as<double>();
+            cfg.strafe_curve_depth         = config["strafe_curve_depth"].as<double>();
+            cfg.localise_timeout           = std::chrono::seconds(config["localise_timeout"].as<int>());
         });
 
         on<Provide<GoalieTask>,
@@ -97,27 +103,49 @@ namespace module::purpose {
                          const GameState& game_state,
                          const GlobalConfig& global_config,
                          const FieldDescription& fd) {
-                // If play is stopped, do nothing
+                // If play is stopped, stand still
                 if (game_state.stopped) {
-                    log<DEBUG>("Play is stopped, do nothing.");
+                    log<DEBUG>("Play is stopped, standing still.");
+                    emit<Task>(std::make_unique<StandStill>());
                     return;
+                }
+
+                // Do not play until localisation has converged, e.g. when re-entering an already-playing
+                // game after being unpenalised or restarted. Stand still and scan for field features so
+                // the goalie doesn't walk to the wrong goal with a wrong or unconverged pose.
+                if (!field.localised) {
+                    // Start the timer the first time we notice we are not localised
+                    if (!look_around_start) {
+                        look_around_start = NUClear::clock::now();
+                    }
+                    // Only stand and look around for a limited time, then give up and play anyway
+                    if (NUClear::clock::now() - *look_around_start < cfg.localise_timeout) {
+                        log<DEBUG>("Not localised, standing still and looking around to localise.");
+                        emit(std::make_unique<Purpose>(global_config.player_id,
+                                                       SoccerPosition::UNKNOWN,
+                                                       true,
+                                                       false,
+                                                       game_state.team.team_colour));
+                        emit<Task>(std::make_unique<LookAround>(), 1);
+                        emit<Task>(std::make_unique<StandStill>(), 1);
+                        return;
+                    }
+                    log<DEBUG>("Look around timed out without localising, playing anyway.");
+                }
+                else {
+                    // Localised, reset the timer for the next time localisation is lost
+                    look_around_start.reset();
                 }
 
                 // Determine if the game is in a set play situation
                 bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                 && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                // If it's the opponent's set play, freeze until the ball is free
-                // Ball is free when secondary_time expires or the ball has moved
-                if (set_play && !game_state.our_kick_off) {
-                    log<DEBUG>("Opponent set play, waiting for ball to be free.");
-                    return;
-                }
-
-                bool teammates_exist = std::find_if(robots->robots.begin(),
-                                                    robots->robots.end(),
-                                                    [](const auto& robot) { return robot.teammate; })
-                                       != robots->robots.end();
+                bool teammates_exist = robots
+                                       && std::find_if(robots->robots.begin(),
+                                                       robots->robots.end(),
+                                                       [](const auto& robot) { return robot.teammate; })
+                                              != robots->robots.end();
 
                 // Act like a field player
                 if (!teammates_exist) {
@@ -132,7 +160,9 @@ namespace module::purpose {
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
-                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line,
+                                         0.0,
+                                         0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("No ball message, waiting in middle of goals.");
@@ -150,15 +180,16 @@ namespace module::purpose {
                                                true,
                                                game_state.team.team_colour));
 
-                // If the ball is in the defending third, play
-                Eigen::Vector3d rBFf     = field.Hfw * ball->rBWw;
-                double defending_third_x = fd.dimensions.field_length / 3.0;
-                if (rBFf.x() < defending_third_x) {
-                    // Not in defending third, just stay in spot and keep looking
-                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                // If the ball is in our half, play
+                Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
+                if (rBFf.x() < 0.0) {
+                    // Not in our half, just stay in spot and keep looking
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line,
+                                         0.0,
+                                         0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
-                    log<DEBUG>("Ball not in defending third, waiting in middle of goals.");
+                    log<DEBUG>("Ball not in our half, waiting in middle of goals.");
 
                     return;
                 }
@@ -174,7 +205,7 @@ namespace module::purpose {
                     }
                 }
 
-                // The ball is in the defending third, so we can play
+                // The ball is in our half, so we can play
                 const unsigned int closest_to_ball =
                     robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
                                                                         *robots,
@@ -196,24 +227,27 @@ namespace module::purpose {
                                                                   cfg.equidistant_threshold,
                                                                   global_config.player_id,
                                                                   ignore_ids);
-                // The ball is in the defending third, and we are closest to the ball, defend the goals!
+                // The ball is in our half, and we are closest to the ball, defend the goals!
                 if (is_closest && !set_play) {
                     log<DEBUG>("Goalie is attacking.");
                     emit<Task>(std::make_unique<Attack>(ball_pos));
                     return;
                 }
 
-                if (is_closest && set_play) {
-                    log<DEBUG>("Goalie is in the best position to take the set play, readying attack.");
+                // Only ready to take the set play if it is ours, otherwise fall through and defend the goals
+                if (is_closest && set_play && game_state.our_kick_off) {
+                    log<DEBUG>("Goalie is in the best position to take our set play, readying attack.");
                     emit<Task>(std::make_unique<ReadyAttack>());
+                    return;
                 }
 
-                // We are not the closest, but the ball is in the defending third, so we should defend the goals.
-                // To do this we stay within the goals on the goal line, but in the spot closest to the ball
-                // Clamp the y position to the goal line
-                double y_position =
-                    std::clamp(rBFf.y(), -fd.dimensions.goal_width / 2.0, fd.dimensions.goal_width / 2.0);
-                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, y_position, 0.0);
+                // We are not the closest, but the ball is in our half, so we should defend the goals.
+                // To do this we stay within the goals, following the ball's y position but bowing forward off the
+                // line in a parabola as we approach the posts, and staying cfg.goal_post_clearance away from them
+                double y_max = fd.dimensions.goal_width / 2.0 - cfg.goal_post_clearance;
+                double y_position = std::clamp(rBFf.y(), -y_max, y_max);
+                double x_offset   = cfg.strafe_curve_depth * (y_position / y_max) * (y_position / y_max);
+                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - x_offset, y_position, 0.0);
                 Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
             });
@@ -225,7 +259,7 @@ namespace module::purpose {
            When<Phase, std::equal_to, Phase::READY>>()
             .then([this](const FieldDescription& fd, const GameState& game_state, const GlobalConfig& global_config) {
                 // Walk to middle of goals
-                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0, 0.0, 0.0);
+                Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line, 0.0, 0.0);
                 Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                 emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
 

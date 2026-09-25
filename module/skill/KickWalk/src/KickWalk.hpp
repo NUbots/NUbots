@@ -31,10 +31,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/input/LimbID.hpp"
-
 namespace module::skill {
-    using utility::input::LimbID;
 
     class KickWalk : public ::extension::behaviour::BehaviourReactor {
     private:

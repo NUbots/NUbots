@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message.booster;
+
+import "message/booster/BoosterMode.proto";
+
+// The Booster's current movement mode, emitted by the Booster HardwareIO so other modules can
+// query which mode the robot is currently in.
+message BoosterModeState {
+    K1Mode mode = 1;
+}

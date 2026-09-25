@@ -11,7 +11,13 @@ interface WalkPathGoalProps {
   motors: ServoMotorSet;
 }
 
-const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
+const k1UrdfPath = "/robot-models/k1/robot.urdf";
+
+const setJointValue = (joints: any, names: string[], value: number) => {
+  for (const name of names) {
+    joints?.[name]?.setJointValue(value);
+  }
+};
 
 export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
@@ -19,7 +25,7 @@ export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) 
   // Load the URDF model only once
   React.useEffect(() => {
     const loader = new URDFLoader();
-    loader.load(nugusUrdfPath, (robot: URDFRobot) => {
+    loader.load(k1UrdfPath, (robot: URDFRobot) => {
       if (robotRef.current) {
         robotRef.current.add(robot);
       }
@@ -56,26 +62,30 @@ export const WalkPathGoal: React.FC<WalkPathGoalProps> = ({ Hfd, Hft, motors }) 
       const joints = (robotRef.current?.children[0] as any)?.joints;
       // Update robot's joints
       if (joints) {
-        joints?.head_pitch.setJointValue(motors.headTilt.angle);
-        joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
-        joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
-        joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
-        joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
-        joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
-        joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
-        joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
-        joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
-        joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
-        joints?.neck_yaw.setJointValue(motors.headPan.angle);
-        joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
-        joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
-        joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
-        joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
-        joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
-        joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
-        joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
-        joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
-        joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+        setJointValue(joints, ["Head_pitch", "head_pitch"], motors.headTilt.angle);
+        setJointValue(joints, ["AAHead_yaw", "neck_yaw"], motors.headPan.angle);
+
+        setJointValue(joints, ["ALeft_Shoulder_Pitch", "left_shoulder_pitch"], motors.leftShoulderPitch.angle);
+        setJointValue(joints, ["Left_Shoulder_Roll", "left_shoulder_roll"], motors.leftShoulderRoll.angle);
+        setJointValue(joints, ["Left_Elbow_Pitch", "left_elbow_pitch"], motors.leftElbow.angle);
+
+        setJointValue(joints, ["ARight_Shoulder_Pitch", "right_shoulder_pitch"], motors.rightShoulderPitch.angle);
+        setJointValue(joints, ["Right_Shoulder_Roll", "right_shoulder_roll"], motors.rightShoulderRoll.angle);
+        setJointValue(joints, ["Right_Elbow_Pitch", "right_elbow_pitch"], motors.rightElbow.angle);
+
+        setJointValue(joints, ["Left_Hip_Pitch", "left_hip_pitch"], motors.leftHipPitch.angle);
+        setJointValue(joints, ["Left_Hip_Roll", "left_hip_roll"], motors.leftHipRoll.angle);
+        setJointValue(joints, ["Left_Hip_Yaw", "left_hip_yaw"], motors.leftHipYaw.angle);
+        setJointValue(joints, ["Left_Knee_Pitch", "left_knee_pitch"], motors.leftKnee.angle);
+        setJointValue(joints, ["Left_Ankle_Pitch", "left_ankle_pitch"], motors.leftAnklePitch.angle);
+        setJointValue(joints, ["Left_Ankle_Roll", "left_ankle_roll"], motors.leftAnkleRoll.angle);
+
+        setJointValue(joints, ["Right_Hip_Pitch", "right_hip_pitch"], motors.rightHipPitch.angle);
+        setJointValue(joints, ["Right_Hip_Roll", "right_hip_roll"], motors.rightHipRoll.angle);
+        setJointValue(joints, ["Right_Hip_Yaw", "right_hip_yaw"], motors.rightHipYaw.angle);
+        setJointValue(joints, ["Right_Knee_Pitch", "right_knee_pitch"], motors.rightKnee.angle);
+        setJointValue(joints, ["Right_Ankle_Pitch", "right_ankle_pitch"], motors.rightAnklePitch.angle);
+        setJointValue(joints, ["Right_Ankle_Roll", "right_ankle_roll"], motors.rightAnkleRoll.angle);
       }
       robotRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {

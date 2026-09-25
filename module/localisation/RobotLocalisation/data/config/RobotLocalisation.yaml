@@ -18,6 +18,10 @@ association_distance: 0.5
 
 max_missed_count: 25
 
+# How long (seconds) without a comms message before a teammate is considered gone. Teammates broadcast
+# at 2 Hz (see RobotCommunication.yaml), so this allows for a handful of dropped packets.
+teammate_timeout: 3
+
 max_distance_from_field: 1.0
 
 max_localisation_cost: 2.0

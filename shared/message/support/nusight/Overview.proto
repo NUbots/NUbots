@@ -29,6 +29,7 @@ package message.support.nusight;
 
 import "google/protobuf/timestamp.proto";
 import "message/input/GameState.proto";
+import "message/purpose/Purpose.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
@@ -72,4 +73,6 @@ message Overview {
     /// {x, y, omega} - x and y are the target to walk to and omega is the
     /// required rotational velocity about the z axis. In torso space
     fvec3 walk_command = 18;
+    /// The role (soccer position) the robot has decided to take, e.g. ATTACK, DEFEND, SUPPORT
+    purpose.SoccerPosition role = 19;
 }

@@ -35,3 +35,6 @@ team_guess_error: 0.5
 
 # Maximimum time in seconds where we have not seen the ball before defaulting to team guesses
 team_guess_default_timer: 2.0
+
+# Maximum distance in meters from the field that a ball can be before it is ignored
+max_distance_from_field: 1.0

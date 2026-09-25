@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package message.booster;
+
+enum FallDownStateType {
+    IS_READY      = 0;
+    IS_FALLING    = 1;
+    HAS_FALLEN    = 2;
+    IS_GETTING_UP = 3;
+}
+
+message BoosterFallDownState {
+    FallDownStateType fall_down_state    = 1;
+    bool              is_recovery_available = 2;
+}

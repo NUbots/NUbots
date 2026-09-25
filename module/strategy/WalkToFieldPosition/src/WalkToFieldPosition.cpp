@@ -54,7 +54,11 @@ namespace module::strategy {
             cfg.stopped_threshold = config["stopped_threshold"].as<double>();
         });
 
-        on<Start<WalkToFieldPositionTask>>().then([this] { current_threshold = cfg.stop_threshold; });
+        on<Start<WalkToFieldPositionTask>>().then([this](const WalkToFieldPositionTask& walk_to_field_position) {
+            current_threshold = walk_to_field_position.stop_threshold_override > 0.0
+                                     ? walk_to_field_position.stop_threshold_override
+                                     : cfg.stop_threshold;
+        });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
@@ -77,7 +81,9 @@ namespace module::strategy {
                     && walk_to_field_position.stop_at_target) {
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     // Increase the threshold to the stopped threshold to prevent oscillations
-                    current_threshold = cfg.stopped_threshold;
+                    current_threshold = walk_to_field_position.stopped_threshold_override > 0.0
+                                             ? walk_to_field_position.stopped_threshold_override
+                                             : cfg.stopped_threshold;
                     log<DEBUG>("Stopped at field position");
                 }
                 else {

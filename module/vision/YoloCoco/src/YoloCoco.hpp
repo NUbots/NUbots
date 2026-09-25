@@ -32,6 +32,8 @@
 #include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 
+#include "utility/vision/TensorRT.hpp"
+
 namespace module::vision {
 
     class YoloCoco : public NUClear::Reactor {
@@ -43,6 +45,9 @@ namespace module::vision {
             /// @brief NMS confidence (score) threshold for filtering out low confidence detections
             double nms_score_threshold = 0.5;
         } cfg;
+
+        /// @brief TensorRT engine built from the ONNX model, nullptr when falling back to OpenVINO
+        std::unique_ptr<utility::vision::TensorRT> trt{};
 
         /// @brief OpenVINO compiled model, used to create inference request object
         ov::CompiledModel compiled_model{};

@@ -7,3 +7,13 @@ log_level: INFO
 #   spotlight:
 #     distance: the distance range for the spotlight mesh to be generated for
 #     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
+cameras:
+  Left Camera:
+    concurrent: 1
+    network: config/networks/LabNetwork.yaml
+    engine: cpu
+    cache_directory: "./vision_cache/"
+    classifier:
+      height: [0.5, 1.0]
+      max_distance: 10
+      intersection_tolerance: 0.25
