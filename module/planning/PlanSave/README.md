@@ -44,13 +44,13 @@ Choosing a spot takes about 20 ms on a desktop CPU (2,000 spots × 451 shots × 
 
 ```sh
 # In mjlab, at the commit the policy was trained at
-python -m mjlab.tasks.goalkeeper.scripts.measure_envelope --checkpoint logs/rsl_rl/k1_block/<run>/model_<n>.pt --num-envs 1024 --steps 6000
+uv run src/mjlab/tasks/goalkeeper/scripts/measure_envelope.py --checkpoint logs/rsl_rl/k1_block/<run>/model_<n>.pt --num-envs 1024 --steps 6000
 # Here
 # (writes SaveCapability.yaml beside it too; needs numpy, scipy and PyYAML, as in mjlab's environment)
 python3 tools/policy/make_save_envelope.py <run>/envelope.csv -o module/planning/PlanSave/data/config/SaveEnvelope.yaml --name "<run>"
 ```
 
-The current envelope is goalkeeper run 12 (wandb `zrhfjas8`, `model_2999`, measured at mjlab `0dd3d95f0`): 26,245 shots from the task's "full" level. Crossings are within ±0.8 m of the keeper, speeds 1.5–4 m/s, from 2–4.5 m. It saved 69.9% of the on-target shots inside the grid, and fell during 5.9%. `measure_envelope` writes shots that end in a fall as off target, so `make_save_envelope.py` counts them back in as failed on-target shots (see its docstring).
+The current envelope is the standing-start retrain (wandb `ckfpijgo`, `model_4999`, trained and measured at mjlab `bb0bd9951`): 25,777 shots from the task's "full" level. Crossings are within ±0.8 m of the keeper, speeds 1.5–4 m/s, from 2–4.5 m. It saved 63.6% of the on-target shots inside the grid, and fell during 4.1% (run 12: 69.9% and 5.9%). `measure_envelope` writes shots that end in a fall as off target, so `make_save_envelope.py` counts them back in as failed on-target shots (see its docstring).
 
 ## Usage
 
@@ -78,6 +78,8 @@ The current envelope is goalkeeper run 12 (wandb `zrhfjas8`, `model_2999`, measu
 - A ball filter that publishes covariance (`localisation::BallLocalisation` from `tumminello/ball-ukf-fixes` on)
 
 ## Results in NUSim
+
+These results are for run 12 and its envelope. The `ckfpijgo` retrain hasn't been benchmarked yet.
 
 `tools::GoalieShotBenchmark` (roles/nusim/goalieshots.role) rolled 40 shots from the mjlab "full" level at the goalie through the full stack, on 22 Sep 2026. With ground-truth field localisation, it saved 28 of 40 on-target shots (70%, against 68% in mjlab for run 12), with no falls. PlanSave blocked all 40, a median 0.23 s after the kick (10–90%: 0.17–0.31 s). At the commit, `dy` was off by 0.05 m RMS, against a σ of 0.93 m. So the envelope's expected saves (17 of 40) are conservative, mostly from the too-wide σ.
 

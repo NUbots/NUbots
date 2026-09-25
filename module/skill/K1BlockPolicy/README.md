@@ -18,7 +18,7 @@ The policy is trained in the mjlab goalkeeper task, which must produce a graph m
 - Emit a `message::skill::Block` Task and re-emit it every tick with the latest command.
 - `purpose::Tester`'s `block_policy_priority` emits an inactive `Block` for smoke testing.
 
-`model_path` points at run 12 of the mjlab goalkeeper task (`k1_block_run12_zrhfjas8.onnx`, wandb `zrhfjas8`, 25-frame history). `planning::PlanSave` holds an envelope measured from this exact file and checks its SHA-256, so swapping the policy means re-measuring the envelope.
+`model_path` points at a retrain of the mjlab goalkeeper task (`k1_block_run12_moving_ckfpijgo.onnx`, wandb `ckfpijgo`, `model_4999`, 25-frame history). It was trained from scratch on standing starts (`Mjlab-Block-Booster-K1` at mjlab `bb0bd9951`). Despite the file name, it was not trained on the walking hand-off (`Mjlab-Block-Moving-Booster-K1`). Run 12 (`k1_block_run12_zrhfjas8.onnx`, wandb `zrhfjas8`) is still here for comparison. `planning::PlanSave` holds an envelope measured from this exact file and checks its SHA-256, so swapping the policy means re-measuring the envelope.
 
 For smoke tests, the hold-stance placeholder `k1_block_hold_stance_T1.onnx` (with `history_window: 1`) outputs zero actions, so the robot holds `default_pose`. Regenerate it, for example for a different history window, with:
 

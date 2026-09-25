@@ -3,12 +3,14 @@ log_level: INFO
 # K1 block (save) policy, trained in the mjlab goalkeeper task. Observation/action contract v0
 # is documented in this module's README.md; the ONNX must match it exactly (checked on load).
 #
-# Run 12 of the goalkeeper task (wandb zrhfjas8, run12-clear-sparse, model_2999, mjlab 0dd3d95f0).
+# Goalkeeper task retrained from scratch on standing starts (Mjlab-Block-Booster-K1, wandb ckfpijgo,
+# model_4999, mjlab bb0bd9951). Despite the file name it was not trained on the walking hand-off
+# (Mjlab-Block-Moving-Booster-K1). Run 12 (k1_block_run12_zrhfjas8.onnx) is kept for comparison.
 # planning::PlanSave checks this file's SHA-256 against its envelope, so replacing the policy means
 # re-measuring the envelope (see module/planning/PlanSave/README.md).
 # The hold-stance placeholder (k1_block_hold_stance_T1.onnx, history_window: 1) is still here for
 # smoke tests; see the README.
-model_path: "k1_block_run12_zrhfjas8.onnx"
+model_path: "k1_block_run12_moving_ckfpijgo.onnx"
 
 # Run inference on the GPU with TensorRT. Falls back to OpenVINO CPU automatically when no CUDA
 # device is visible, so this is safe to leave on.
