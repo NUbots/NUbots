@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,43 +24,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_PURPOSE_GOALIE_HPP
-#define MODULE_PURPOSE_GOALIE_HPP
+#ifndef MODULE_PURPOSE_PLAYGOALIE_HPP
+#define MODULE_PURPOSE_PLAYGOALIE_HPP
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 #include <nuclear>
-#include <optional>
 
 #include "extension/Behaviour.hpp"
 
 namespace module::purpose {
 
-    class Goalie : public ::extension::behaviour::BehaviourReactor {
+    class PlayGoalie : public ::extension::behaviour::BehaviourReactor {
     private:
+        /// @brief Starts (or restarts) playing goalie, after the start delay
+        struct StartPlaying {};
+
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The distance in front of the goal line the goalie waits at by default
-            double waiting_distance_from_line = 0.0;
-            /// @brief The minimum distance to keep from the goal posts while strafing along the goal line
-            double goal_post_clearance = 0.0;
-            /// @brief How far forward of the goal line the goalie bows at the widest point of its strafe
-            double strafe_curve_depth = 0.0;
-            /// @brief Maximum time to stand still and look around waiting for localisation to converge
-            std::chrono::seconds localise_timeout{0};
-            /// @brief Priority of the Save task (planning::PlanSave) over the positioning walk while defending, 0 to
-            /// only position
-            int save_priority = 0;
+            /// @brief Delay in seconds before the goalie starts playing, at startup and after the middle button
+            int start_delay = 0;
         } cfg;
 
-        /// @brief When the robot started standing still and looking around to localise, unset when localised
-        std::optional<NUClear::clock::time_point> look_around_start{};
+        /// @brief Whether the left button has paused the goalie
+        bool paused = false;
 
     public:
-        /// @brief Called by the powerplant to build and setup the Goalie reactor.
-        explicit Goalie(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the PlayGoalie reactor.
+        explicit PlayGoalie(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::purpose
 
-#endif  // MODULE_PURPOSE_GOALIE_HPP
+#endif  // MODULE_PURPOSE_PLAYGOALIE_HPP

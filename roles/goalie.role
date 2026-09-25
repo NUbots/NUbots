@@ -1,0 +1,62 @@
+# Real robot goalie without GameController: purpose::PlayGoalie plays purpose::Goalie as in a game, in normal play.
+# The goalie never goes for the ball, so it stays in the penalty area; planning::PlanSave positions it there and
+# switches to the block policy (skill::K1BlockPolicy) when a shot comes. The block needs the CUSTOM-mode policy
+# skills, so the walk and get-up are K1WalkPolicy and K1GetUpPolicy, not robocup.role's SDK K1Walk and K1GetUp.
+# Start the robot where FieldLocalisationNLopt's starting_side expects it, as at the start of a game; it walks to the
+# goal. The left button pauses it and the middle button restarts it (see PlayGoalie's README).
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  support::logging::DataLogging # Records what PlanSavePlayback replays (see DataLogging.yaml)
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig # Field description
+  support::configuration::GlobalConfig
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  output::ImageCompressor
+  # Sensors
+  input::K1Sensors
+  input::K1Camera
+  # Vision
+  vision::Yolo
+  # Localisation
+  localisation::FieldLocalisationNLopt
+  localisation::FieldLocalisationSRIF
+  localisation::BallLocalisation
+  localisation::RobotLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::K1Servos # Director-arbitrated sink for the K1 low-level channel (walk/block/getup subsumption)
+  actuation::FootController
+  # Skills
+  skill::K1WalkPolicy # ONNX walk inference -> LowCmd
+  skill::K1BlockPolicy # ONNX block (save) inference -> LowCmd (provides skill::Block)
+  skill::K1GetUpPolicy # ONNX get-up inference -> LowCmd
+  skill::K1Look
+  # Planners
+  planning::PlanWalkPath
+  planning::PlanLook
+  planning::PlanSave # Shot prediction + block envelope -> skill::Block, and positioning in the penalty area
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  strategy::WalkToFieldPosition
+  strategy::StrategiseLook
+  strategy::FindObject
+  # Purposes
+  purpose::PlayGoalie
+  purpose::Goalie
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+)

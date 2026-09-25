@@ -30,10 +30,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/localisation/Robot.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/planning/Save.hpp"
 #include "message/purpose/Player.hpp"
@@ -42,12 +40,10 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
-#include "message/strategy/Who.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/math/euler.hpp"
-#include "utility/strategy/soccer_strategy.hpp"
 
 namespace module::purpose {
     using extension::Configuration;
@@ -56,21 +52,15 @@ namespace module::purpose {
     using GoalieTask = message::purpose::Goalie;
 
     using message::input::GameState;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::localisation::Robots;
     using message::planning::LookAround;
     using message::planning::Save;
-    using message::purpose::Attack;
-    using message::purpose::FieldPlayer;
     using message::purpose::Purpose;
-    using message::purpose::ReadyAttack;
     using message::purpose::SoccerPosition;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
-    using message::strategy::Who;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
 
@@ -80,9 +70,7 @@ namespace module::purpose {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.equidistant_threshold      = config["equidistant_threshold"].as<double>();
-            cfg.ball_threshold             = config["ball_threshold"].as<double>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
             cfg.waiting_distance_from_line = config["waiting_distance_from_line"].as<double>();
             cfg.goal_post_clearance        = config["goal_post_clearance"].as<double>();
             cfg.strafe_curve_depth         = config["strafe_curve_depth"].as<double>();
@@ -92,16 +80,12 @@ namespace module::purpose {
 
         on<Provide<GoalieTask>,
            Optional<With<Ball>>,
-           Optional<With<Robots>>,
-           With<Sensors>,
            With<Field>,
            With<GameState>,
            With<GlobalConfig>,
            With<FieldDescription>,
            When<Phase, std::equal_to, Phase::PLAYING>>()
             .then([this](const std::shared_ptr<const Ball>& ball,
-                         const std::shared_ptr<const Robots>& robots,
-                         const Sensors& sensors,
                          const Field& field,
                          const GameState& game_state,
                          const GlobalConfig& global_config,
@@ -138,23 +122,6 @@ namespace module::purpose {
                 else {
                     // Localised, reset the timer for the next time localisation is lost
                     look_around_start.reset();
-                }
-
-                // Determine if the game is in a set play situation
-                bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
-                                && game_state.mode.value <= GameState::Mode::THROW_IN;
-
-                bool teammates_exist = robots
-                                       && std::find_if(robots->robots.begin(),
-                                                       robots->robots.end(),
-                                                       [](const auto& robot) { return robot.teammate; })
-                                              != robots->robots.end();
-
-                // Act like a field player
-                if (!teammates_exist) {
-                    log<DEBUG>("No teammates, act as field player.");
-                    emit<Task>(std::make_unique<FieldPlayer>());
-                    return;
                 }
 
                 // General tasks
@@ -197,56 +164,9 @@ namespace module::purpose {
                     return;
                 }
 
-                // Make an ignore list with inactive teammates
-                std::vector<unsigned int> ignore_ids{};
-                // Add inactive robots to the ignore list
-                if (robots) {
-                    for (const auto& robot : robots->robots) {
-                        if (robot.teammate && !robot.purpose.active) {
-                            ignore_ids.push_back(robot.purpose.player_id);
-                        }
-                    }
-                }
-
-                // The ball is in our half, so we can play
-                const unsigned int closest_to_ball =
-                    robots ? utility::strategy::closest_to_ball_on_team(ball->rBWw,
-                                                                        *robots,
-                                                                        field.Hfw,
-                                                                        sensors.Hrw,
-                                                                        cfg.equidistant_threshold,
-                                                                        global_config.player_id,
-                                                                        ignore_ids)
-                           : global_config.player_id;
-                bool is_closest = closest_to_ball == global_config.player_id;
-
-                // Find who has the ball, if any
-                // If there are no robots, use an empty vector
-                Who ball_pos = utility::strategy::ball_possession(ball->rBWw,
-                                                                  (robots ? *robots : Robots{}),
-                                                                  field.Hfw,
-                                                                  sensors.Hrw,
-                                                                  cfg.ball_threshold,
-                                                                  cfg.equidistant_threshold,
-                                                                  global_config.player_id,
-                                                                  ignore_ids);
-                // The ball is in our half, and we are closest to the ball, defend the goals!
-                if (is_closest && !set_play) {
-                    log<DEBUG>("Goalie is attacking.");
-                    emit<Task>(std::make_unique<Attack>(ball_pos));
-                    return;
-                }
-
-                // Only ready to take the set play if it is ours, otherwise fall through and defend the goals
-                if (is_closest && set_play && game_state.our_kick_off) {
-                    log<DEBUG>("Goalie is in the best position to take our set play, readying attack.");
-                    emit<Task>(std::make_unique<ReadyAttack>());
-                    return;
-                }
-
-                // We are not the closest, but the ball is in our half, so we should defend the goals.
-                // PlanSave takes over from the positioning walk below when the ball comes near or a shot is on its
-                // way, so it runs above it
+                // The ball is in our half, so defend the goal. The goalie never goes for the ball, so it never leaves
+                // the penalty area: PlanSave positions it inside the area and takes over from the positioning walk
+                // below when a shot is on its way, so it runs above it
                 if (cfg.save_priority > 0) {
                     emit<Task>(std::make_unique<Save>(), cfg.save_priority);
                 }

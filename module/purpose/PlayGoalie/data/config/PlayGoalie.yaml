@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Delay in seconds before the goalie starts playing, at startup and after the middle button resumes it
+start_delay: 5

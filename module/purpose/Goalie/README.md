@@ -6,9 +6,7 @@ Play soccer in the goalie position.
 
 In the ready state, walks to the goals.
 
-In the playing state, the goalie will typically stay within the goals unless the ball enters our half. In this case, it will either kick it back out (if the closest player) or it will stay between the ball and goals if another player is closer. In penalty states, it will freeze when appropriate and position for attacking if the ball is in our half and it is the closest to the ball.
-
-If there are no teammates, it will act as a normal FieldPlayer.
+In the playing state, the goalie never goes for the ball, so it never leaves the penalty area, even when it is the closest robot or has no teammates. While the ball is in the opponents' half it waits in the middle of the goal. While the ball is in our half it strafes along the goal line with the ball and emits `Save`, so `planning::PlanSave` positions it inside the penalty area and blocks shots with the block policy. Without PlanSave in the role (or with `save_priority: 0`), the strafe alone positions it.
 
 If the ball is not visible it will look around without moving.
 
@@ -22,8 +20,6 @@ Add this module to the role and emit a Goalie Task.
 - `message::input::GameState` to get information about the state of the game, including penalties
 - `message::input::GameState::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
 - `message::localisation::Ball` for determining if the ball is in our half, and act appropriately.
-- `message::localisation::Robots` to determine where team mates are.
-- `message::input::Sensors` to include ourself in possession and distance calculations
 - `message::localisation::Field` to calculate in field space.
 - `message::support::GlobalConfig` to get our own player ID.
 - `message::support::FieldDescription` to calculate where the goals are for positioning.
@@ -34,9 +30,7 @@ Add this module to the role and emit a Goalie Task.
 - `message::planning:::LookAround` a Task requesting to look around for the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
 - `message::strategy::WalkToFieldPosition` Task requesting to walk to position on field, for positioning at the goals
-- `message::strategy::Attack` tells the robot to act as the attacking player when the ball is close to the goals
-- `message::strategy::ReadyAttack` tells the robot to get ready to attack, but something is preventing it from actually attacking (penalty positioning, kick off).
-- `message::purpose::FieldPlayer` a task telling the robot to be a field player, when there are no teammates.
+- `message::planning::Save` a Task requesting `planning::PlanSave` to guard the goal, while the ball is in our half
 - `message::purpose::Purpose` information on the position the robot is playing (goalie), its ID and active state.
 
 ## Dependencies
