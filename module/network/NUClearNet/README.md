@@ -41,7 +41,7 @@ The default address for this is `239.226.152.162`
 
 ### Port
 
-The default port for NUClearNet is 7447.
+The default port is 7467, as a Booster process already uses 7447 on the K1.
 You can use different ports if you want to make several distinct NUClearNet networks on the same device.
 
 ## Consumes
