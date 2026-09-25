@@ -224,7 +224,9 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 ## Emits
 
 - `message::localisation::Field` — planar `Hfw`, `(x, y, yaw)` covariance, `uncertainty` (its trace),
-  hypothesis `particles`, and `cost` (mean chordal angular residual of the associated rays [rad])
+  hypothesis `particles`, `cost` (mean chordal angular residual of the associated rays [rad]), and
+  `localised`, set while the position and yaw std are under `Config::localised_pos_std` and
+  `localised_yaw_std` (FieldPlayer and Goalie stand and look around until it is)
 - `message::vision::OutOfFieldFeatures` — per-frame out-of-field working state for the NUsight vision
   pane: every detected corner and every predicted landmark as a ray in `{c}` with its association
   outcome, plus the accumulated own-vs-mirror log-likelihood ratio. Display only; nothing in the

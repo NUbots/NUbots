@@ -713,6 +713,9 @@ namespace module::localisation {
         // clang-format on
         field->covariance  = covariance;
         field->uncertainty = covariance.trace();
+        // Behaviours (FieldPlayer, Goalie) stand and look around until this is set
+        field->localised = std::sqrt(P(0, 0) + P(1, 1)) < cfg.localised_pos_std
+                           && std::sqrt(var_yaw) < cfg.localised_yaw_std;
 
         // Hypotheses as (x, y, yaw) particles; one component in single-hypothesis mode.
         if (system->num_hypotheses() > 1) {

@@ -106,6 +106,12 @@ namespace module::localisation {
             double grid_step_yaw = 18.0 * M_PI / 180.0;
             /// @brief Minimum landmark associations to trust an initial grid solve
             int min_init_associations = 4;
+            /// @brief Field.localised is set while the reported horizontal position std (sqrt of
+            ///        the xy covariance trace) is below this [m] and the yaw std below
+            ///        localised_yaw_std [rad]. Both sit under the widths a fresh grid solve and a
+            ///        fall recovery hand the belief, so either must be confirmed by vision first.
+            double localised_pos_std = 0.5;
+            double localised_yaw_std = 0.35;
             /// @brief Enable the multi-hypothesis (field-symmetry) Gaussian mixture bank
             bool use_hypothesis_bank = false;
             /// @brief Enable out-of-field side disambiguation (see SideDisambiguator)
