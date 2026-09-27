@@ -64,13 +64,13 @@ def register(command):
         "-o",
         help="The folder to create the videos in. Defaults to a videos folder alongside the first input file",
     )
-    command.add_argument("--quality", "-q", default="30M", help="The quality to encode the videos at")
+    command.add_argument("--quality", "-q", default="30M", help="The quality to encode the videos at. Default=30M")
     command.add_argument(
         "--encoder",
         "-e",
         default="h264_nvenc",
         choices=["libx264", "libopenh264", "h264_nvenc"],
-        help="The encoder to use when encoding video",
+        help="The encoder to use when encoding video. Default=h264_nvenv",
     )
     command.add_argument(
         "--unix_ts",
@@ -82,7 +82,7 @@ def register(command):
         "-s",
         default="compressed",
         choices=sorted(source_types.keys()),
-        help="Which images to make the videos from. Either compressed, raw or both.",
+        help="Which images to make the videos from. Either compressed, raw or both. Default=compressed",
     )
 
 
