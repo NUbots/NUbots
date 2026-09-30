@@ -12,7 +12,7 @@ log_level: INFO
 # The older mujoco_playground checkpoints (k1_walk*.onnx, 79-obs / 22-action, single frame)
 # are NOT loadable against this module: the module refuses any graph whose I/O sizes do not
 # match the configured contract.
-model_path: "k1_walk_mjlab_t98yksya.onnx"
+model_path: "k1_walk_mjlab_ynapuyo5.onnx"
 
 # Run inference on the GPU with TensorRT. Falls back to OpenVINO CPU automatically when no
 # CUDA device is visible (the container needs --gpus), so this is safe to leave on. The
@@ -33,7 +33,7 @@ policy_joints: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
 # The base linear velocity the policy observes comes from the Booster controller's odometry twist
 # (rt/odom, BoosterOdometryTwist, body frame). A twist older than this (s), or none at all, is
 # observed as zero and warned about: rt/odom is published at the controller's rate.
-linear_velocity_max_age: 0.1
+linear_velocity_max_age: 0.1 # remove
 
 # Commanded pose ramps from the measured pose into the policy target over this window (s).
 # Training starts every episode from the default pose; deployment enters CUSTOM from wherever

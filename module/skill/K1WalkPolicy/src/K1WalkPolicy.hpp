@@ -1,18 +1,19 @@
 #ifndef MODULE_SKILL_K1WALKPOLICY_HPP
 #define MODULE_SKILL_K1WALKPOLICY_HPP
 
+#include <Eigen/Core>
 #include <array>
 #include <cstdint>
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <Eigen/Core>
 #include <nuclear>
 #include <openvino/openvino.hpp>
 #include <string>
 #include <vector>
 
 #include "extension/Behaviour.hpp"
+
 #include "utility/vision/TensorRT.hpp"
 
 namespace module::skill {
@@ -80,10 +81,10 @@ namespace module::skill {
             std::array<double, JOINT_COUNT> joint_upper{};
         } cfg;
 
-        /// Length of one observation frame: linear velocity(3) + gyro(3) + gravity(3)
+        /// Length of one observation frame: gyro(3) + gravity(3)
         /// + 3 * n_policy_joints + command(3)
         [[nodiscard]] std::size_t frame_dim() const {
-            return 9 + 3 * cfg.policy_joints.size() + COMMAND_DIM;
+            return 6 + 3 * cfg.policy_joints.size() + COMMAND_DIM;
         }
 
         /// Load the ONNX and check its input/output sizes against the configured contract

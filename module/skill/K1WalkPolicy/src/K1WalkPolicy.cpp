@@ -1,5 +1,6 @@
 #include "K1WalkPolicy.hpp"
 
+#include <Eigen/Geometry>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -9,7 +10,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-#include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
 
@@ -75,7 +75,7 @@ namespace module::skill {
         constexpr std::chrono::seconds MODE_RETRY_PERIOD{1};
 
         // How often a missing or stale base linear velocity may be warned about
-        constexpr std::chrono::seconds LINEAR_VELOCITY_WARNING_PERIOD{2};
+        constexpr std::chrono::seconds LINEAR_VELOCITY_WARNING_PERIOD{2};  // remove
 
         template <std::size_t N>
         std::array<double, N> load_joint_array(const Configuration& config, const char* key) {
@@ -181,7 +181,8 @@ namespace module::skill {
         // trunk's IMU site measures it
         on<Trigger<BoosterOdometryTwist>>().then([this](const BoosterOdometryTwist& twist) {
             const std::lock_guard<std::mutex> lock(linear_velocity_mutex);
-            linear_velocity      = twist.linear;
+            linear_velocity = twist.linear;
+            emit(graph("base velocity", linear_velocity.x(), linear_velocity.y(), linear_velocity.z()));
             linear_velocity_time = NUClear::clock::now();
             have_linear_velocity = true;
         });
@@ -286,8 +287,11 @@ namespace module::skill {
                 // Rate-limited: at 50 Hz a per-tick warning would bury the log it is warning about
                 if (now - last_timing_report > TIMING_REPORT_PERIOD) {
                     if (off_rate_ticks > 0) {
-                        log<WARN>("K1WalkPolicy missed the trained 50 Hz on", off_rate_ticks, "of the last",
-                                  tick - timing_report_tick, "ticks; the observation window spans the wrong duration");
+                        log<WARN>("K1WalkPolicy missed the trained 50 Hz on",
+                                  off_rate_ticks,
+                                  "of the last",
+                                  tick - timing_report_tick,
+                                  "ticks; the observation window spans the wrong duration");
                     }
                     off_rate_ticks     = 0;
                     timing_report_tick = tick;
@@ -311,10 +315,9 @@ namespace module::skill {
                 Eigen::Vector3d base_velocity = Eigen::Vector3d::Zero();
                 {
                     const std::lock_guard<std::mutex> lock(linear_velocity_mutex);
-                    const bool fresh =
-                        have_linear_velocity
-                        && std::chrono::duration<double>(now - linear_velocity_time).count()
-                               <= cfg.linear_velocity_max_age;
+                    const bool fresh = have_linear_velocity
+                                       && std::chrono::duration<double>(now - linear_velocity_time).count()
+                                              <= cfg.linear_velocity_max_age;
                     if (fresh) {
                         base_velocity = linear_velocity;
                     }
@@ -325,9 +328,9 @@ namespace module::skill {
                                   "s: the walk policy is observing zero");
                     }
                 }
-                frame.push_back(static_cast<float>(base_velocity.x()));
-                frame.push_back(static_cast<float>(base_velocity.y()));
-                frame.push_back(static_cast<float>(base_velocity.z()));
+                // frame.push_back(static_cast<float>(base_velocity.x()));
+                // frame.push_back(static_cast<float>(base_velocity.y()));
+                // frame.push_back(static_cast<float>(base_velocity.z()));
 
                 // [3:6] gyro, body frame
                 frame.push_back(raw.gyroscope.x());
@@ -387,8 +390,7 @@ namespace module::skill {
                 if (log_level <= NUClear::LogLevel::TRACE) {
                     std::ostringstream line;
                     line << "WALKOBS " << tick << " mode=" << last_mode
-                         << " t=" << std::chrono::duration<double>(now.time_since_epoch()).count()
-                         << " dt=" << tick_dt;
+                         << " t=" << std::chrono::duration<double>(now.time_since_epoch()).count() << " dt=" << tick_dt;
                     for (const float v : frame) {
                         line << ' ' << v;
                     }
@@ -456,9 +458,9 @@ namespace module::skill {
                     out << "K1WalkPolicy sim2real"
                         // The command the planner actually asked for. Training's final envelope is
                         // vx [-1.0, 2.0], vy [-0.8, 0.8], wz [-2.0, 2.0].
-                        << " cmd=[" << cmd.x() << ',' << cmd.y() << ',' << cmd.z() << ']'
-                        << " base_velocity=[" << base_velocity.x() << ',' << base_velocity.y() << ','
-                        << base_velocity.z() << ']' << " clamped=" << clamped;
+                        << " cmd=[" << cmd.x() << ',' << cmd.y() << ',' << cmd.z() << ']' << " base_velocity=["
+                        << base_velocity.x() << ',' << base_velocity.y() << ',' << base_velocity.z() << ']'
+                        << " clamped=" << clamped;
                     std::ostringstream action_stream;
                     std::ostringstream joint_pos_rel_stream;
                     std::ostringstream joint_vel_stream;
@@ -476,9 +478,9 @@ namespace module::skill {
                         joint_vel_stream << servos[j]->present_velocity;
                         cmd_q_stream << cmd_q[j];
                     }
-                    out << " action=[" << action_stream.str() << ']' << " joint_pos_rel=["
-                        << joint_pos_rel_stream.str() << ']' << " joint_vel=[" << joint_vel_stream.str() << ']'
-                        << " cmd_q=[" << cmd_q_stream.str() << ']';
+                    out << " action=[" << action_stream.str() << ']' << " joint_pos_rel=[" << joint_pos_rel_stream.str()
+                        << ']' << " joint_vel=[" << joint_vel_stream.str() << ']' << " cmd_q=[" << cmd_q_stream.str()
+                        << ']';
                     log<DEBUG>(out.str());
                 }
 
