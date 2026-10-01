@@ -1,11 +1,14 @@
 #include "K1Sensors.hpp"
 
+#include <chrono>
 #include <cmath>
+#include <limits>
 
 #include "extension/Configuration.hpp"
 
 #include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
+#include "message/booster/BoosterOdometryTwist.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
@@ -23,6 +26,7 @@ namespace module::input {
     using extension::Configuration;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
+    using message::booster::BoosterOdometryTwist;
     using message::input::ButtonLeftDown;
     using message::input::ButtonLeftUp;
     using message::input::ButtonMiddleDown;
@@ -67,7 +71,9 @@ namespace module::input {
                 cfg.pose_topic = pose_topic;
             }
 
-            cfg.odometry_deadband = config["odometry_deadband"].as<double>();
+            cfg.odometry_deadband      = config["odometry_deadband"].as<double>();
+            cfg.odometry_twist_max_age = std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["odometry_twist_max_age"].as<double>()));
 
             // Hpc: pitch frame to camera optical frame
             const auto& Hpc_config = config["Hpc"];
@@ -131,121 +137,134 @@ namespace module::input {
         });
 
 
-        on<Trigger<RawSensors>, With<BoosterOdometry>>().then([this](const RawSensors& raw_sensors,
-                                                                     const BoosterOdometry& odo) {
-            std::array<double, 3> normalized_odometry{};
-            {
-                std::lock_guard<std::mutex> lock(odometry_mutex);
-                if (!booster_odometry_has_offset) {
-                    booster_odometry_offset     = {odo.x, odo.y, odo.theta};
-                    booster_odometry_has_offset = true;
-                    log<INFO>("K1Sensors stored BoosterOdometry zero offset",
-                              booster_odometry_offset[0],
-                              booster_odometry_offset[1],
-                              booster_odometry_offset[2]);
+        on<Trigger<RawSensors>, With<BoosterOdometry>, Optional<With<BoosterOdometryTwist>>>().then(
+            [this](const RawSensors& raw_sensors,
+                   const BoosterOdometry& odo,
+                   const std::shared_ptr<const BoosterOdometryTwist>& twist) {
+                std::array<double, 3> normalized_odometry{};
+                {
+                    std::lock_guard<std::mutex> lock(odometry_mutex);
+                    if (!booster_odometry_has_offset) {
+                        booster_odometry_offset     = {odo.x, odo.y, odo.theta};
+                        booster_odometry_has_offset = true;
+                        log<INFO>("K1Sensors stored BoosterOdometry zero offset",
+                                  booster_odometry_offset[0],
+                                  booster_odometry_offset[1],
+                                  booster_odometry_offset[2]);
+                    }
+
+                    normalized_odometry = {
+                        odo.x - booster_odometry_offset[0],
+                        odo.y - booster_odometry_offset[1],
+                        odo.theta - booster_odometry_offset[2],
+                    };
                 }
 
-                normalized_odometry = {
-                    odo.x - booster_odometry_offset[0],
-                    odo.y - booster_odometry_offset[1],
-                    odo.theta - booster_odometry_offset[2],
-                };
-            }
-
-            // Snap tiny residuals to zeroes
-            for (double& v : normalized_odometry) {
-                if (std::abs(v) < cfg.odometry_deadband) {
-                    v = 0.0;
+                // Snap tiny residuals to zeroes
+                for (double& v : normalized_odometry) {
+                    if (std::abs(v) < cfg.odometry_deadband) {
+                        v = 0.0;
+                    }
                 }
-            }
 
-            log<DEBUG>("Received odometry: x=" + std::to_string(odo.x) + ", y=" + std::to_string(odo.y) + ", theta="
-                       + std::to_string(odo.theta) + " normalized x=" + std::to_string(normalized_odometry[0]) + ", y="
-                       + std::to_string(normalized_odometry[1]) + ", theta=" + std::to_string(normalized_odometry[2]));
-
-
-            Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-            Hwr.translation() << normalized_odometry[0], normalized_odometry[1], 0.0;
-            // Convert yaw to rotation matrix
-            Eigen::Vector3d rpy(0.0, 0.0, normalized_odometry[2]);
-            Hwr.linear() = rpy_intrinsic_to_mat(rpy);
-
-            // Hrh: head frame in robot base frame, from the most recent head pose message.
-            Eigen::Isometry3d Hrh_now;
-            bool got_pose = false;
-            {
-                std::lock_guard<std::mutex> lock(pose_mutex);
-                Hrh_now  = Hrh;
-                got_pose = have_pose;
-            }
-            if (!got_pose && !pose_warned.exchange(true)) {
-                log<WARN>("No head pose received on", cfg.pose_topic, "- using identity");
-            }
-
-            // Hrc: camera optical frame in robot base frame
-            Eigen::Isometry3d Hrc = Hrh_now * cfg.Hhp * cfg.Hpc;
-
-            Eigen::Isometry3d Hwc = Hwr * Hrc;
-            log<DEBUG>("Computed head pose in world frame: position xyz=",
-                       Hwc.translation().x(),
-                       Hwc.translation().y(),
-                       Hwc.translation().z(),
-                       "orientation xyzw=",
-                       Eigen::Quaterniond(Hwc.linear()).x(),
-                       Eigen::Quaterniond(Hwc.linear()).y(),
-                       Eigen::Quaterniond(Hwc.linear()).z(),
-                       Eigen::Quaterniond(Hwc.linear()).w());
+                log<DEBUG>("Received odometry: x=" + std::to_string(odo.x) + ", y=" + std::to_string(odo.y) + ", theta="
+                           + std::to_string(odo.theta) + " normalized x=" + std::to_string(normalized_odometry[0])
+                           + ", y=" + std::to_string(normalized_odometry[1])
+                           + ", theta=" + std::to_string(normalized_odometry[2]));
 
 
-            // Populate and emit the Sensors message
-            auto sensors       = std::make_unique<Sensors>();
-            sensors->timestamp = raw_sensors.timestamp;
-            sensors->Hcw       = Hwc.inverse();
-            sensors->Hrw       = Hwr.inverse();
+                Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+                Hwr.translation() << normalized_odometry[0], normalized_odometry[1], 0.0;
+                // Convert yaw to rotation matrix
+                Eigen::Vector3d rpy(0.0, 0.0, normalized_odometry[2]);
+                Hwr.linear() = rpy_intrinsic_to_mat(rpy);
 
-            // Update raw sensor data including servo/joint information
-            update_raw_sensors(sensors, raw_sensors);
-
-            // Compute Htw using forward kinematics.
-            // compute_Htp gives Htp: Head_2 pitch_link in Trunk (base) frame.
-            // Full chain: camera_optical(c) → pitch_link(p) → Trunk(t)
-            //   Htc = Htp * Hpc
-            // Then: Htw = Htc * Hcw  (world → camera_optical → Trunk)
-            {
-                const Eigen::Isometry3d Htp = compute_Htp(sensors);
-                const Eigen::Isometry3d Htc = Htp * cfg.Hpc;
-                sensors->Htw                = Htc * sensors->Hcw;
-            }
-
-            bool new_left_down   = raw_sensors.buttons.left;
-            bool new_middle_down = raw_sensors.buttons.middle;
-
-            if (left_down != new_left_down) {
-                left_down = new_left_down;
-                if (left_down) {
-                    log<INFO>("Left Button Down");
-                    emit<Scope::INLINE>(std::make_unique<ButtonLeftDown>());
+                // Hrh: head frame in robot base frame, from the most recent head pose message.
+                Eigen::Isometry3d Hrh_now;
+                bool got_pose = false;
+                {
+                    std::lock_guard<std::mutex> lock(pose_mutex);
+                    Hrh_now  = Hrh;
+                    got_pose = have_pose;
                 }
-                else {
-                    log<INFO>("Left Button Up");
-                    emit<Scope::INLINE>(std::make_unique<ButtonLeftUp>());
+                if (!got_pose && !pose_warned.exchange(true)) {
+                    log<WARN>("No head pose received on", cfg.pose_topic, "- using identity");
                 }
-            }
 
-            if (middle_down != new_middle_down) {
-                middle_down = new_middle_down;
-                if (middle_down) {
-                    log<INFO>("Middle Button Down");
-                    emit<Scope::INLINE>(std::make_unique<ButtonMiddleDown>());
-                }
-                else {
-                    log<INFO>("Middle Button Up");
-                    emit<Scope::INLINE>(std::make_unique<ButtonMiddleUp>());
-                }
-            }
+                // Hrc: camera optical frame in robot base frame
+                Eigen::Isometry3d Hrc = Hrh_now * cfg.Hhp * cfg.Hpc;
 
-            emit(sensors);
-        });
+                Eigen::Isometry3d Hwc = Hwr * Hrc;
+                log<DEBUG>("Computed head pose in world frame: position xyz=",
+                           Hwc.translation().x(),
+                           Hwc.translation().y(),
+                           Hwc.translation().z(),
+                           "orientation xyzw=",
+                           Eigen::Quaterniond(Hwc.linear()).x(),
+                           Eigen::Quaterniond(Hwc.linear()).y(),
+                           Eigen::Quaterniond(Hwc.linear()).z(),
+                           Eigen::Quaterniond(Hwc.linear()).w());
+
+
+                // Populate and emit the Sensors message
+                auto sensors       = std::make_unique<Sensors>();
+                sensors->timestamp = raw_sensors.timestamp;
+                sensors->Hcw       = Hwc.inverse();
+                sensors->Hrw       = Hwr.inverse();
+
+                // Update raw sensor data including servo/joint information
+                update_raw_sensors(sensors, raw_sensors);
+
+                // Compute Htw using forward kinematics.
+                // compute_Htp gives Htp: Head_2 pitch_link in Trunk (base) frame.
+                // Full chain: camera_optical(c) → pitch_link(p) → Trunk(t)
+                //   Htc = Htp * Hpc
+                // Then: Htw = Htc * Hcw  (world → camera_optical → Trunk)
+                {
+                    const Eigen::Isometry3d Htp = compute_Htp(sensors);
+                    const Eigen::Isometry3d Htc = Htp * cfg.Hpc;
+                    sensors->Htw                = Htc * sensors->Hcw;
+                }
+
+                // rt/odom publishes velocity in body frame, vTw is this rotated into world frame. Without a recent
+                // twist it is NaN
+                sensors->vTw = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
+                if (twist != nullptr && raw_sensors.timestamp - twist->timestamp <= cfg.odometry_twist_max_age) {
+                    sensors->vTw = Eigen::Isometry3d(sensors->Htw).inverse().linear() * Eigen::Vector3d(twist->linear);
+                }
+                else if (!twist_warned.exchange(true)) {
+                    log<WARN>("No recent odometry twist from rt/odom - Sensors.vTw is not measured");
+                }
+
+                bool new_left_down   = raw_sensors.buttons.left;
+                bool new_middle_down = raw_sensors.buttons.middle;
+
+                if (left_down != new_left_down) {
+                    left_down = new_left_down;
+                    if (left_down) {
+                        log<INFO>("Left Button Down");
+                        emit<Scope::INLINE>(std::make_unique<ButtonLeftDown>());
+                    }
+                    else {
+                        log<INFO>("Left Button Up");
+                        emit<Scope::INLINE>(std::make_unique<ButtonLeftUp>());
+                    }
+                }
+
+                if (middle_down != new_middle_down) {
+                    middle_down = new_middle_down;
+                    if (middle_down) {
+                        log<INFO>("Middle Button Down");
+                        emit<Scope::INLINE>(std::make_unique<ButtonMiddleDown>());
+                    }
+                    else {
+                        log<INFO>("Middle Button Up");
+                        emit<Scope::INLINE>(std::make_unique<ButtonMiddleUp>());
+                    }
+                }
+
+                emit(sensors);
+            });
 
         on<Shutdown>().then([this] {
             if (pose_channel != nullptr) {

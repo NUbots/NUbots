@@ -24,6 +24,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
+    using message::booster::BoosterOdometryTwist;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
@@ -89,6 +90,11 @@ namespace module::platform::Booster {
 
             kick_channel = ChannelFactory::Instance()->CreateSendChannel<brain::msg::Kick>(
                 booster::robot::b1::kTopicKickReference);
+
+            // The controller's full ROS odometry; rt/odometer_state above has only its planar pose
+            ros_odometry_channel = ChannelFactory::Instance()->CreateRecvChannel<nav_msgs::msg::Odometry>(
+                booster::robot::b1::kTopicRosOdometer,
+                [this](const void* msg) { ros_odometry_handler(msg); });
         });
 
         on<Shutdown>().then([this]() {
@@ -109,6 +115,9 @@ namespace module::platform::Booster {
             }
             if (odometer_channel != nullptr) {
                 ChannelFactory::Instance()->CloseReader("rt/odometer_state");
+            }
+            if (ros_odometry_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader(booster::robot::b1::kTopicRosOdometer);
             }
         });
 
@@ -379,6 +388,25 @@ namespace module::platform::Booster {
         out->theta          = odo_msg->theta();
         log<DEBUG>("Received odometry: x=" + std::to_string(out->x) + ", y=" + std::to_string(out->y)
                    + ", theta=" + std::to_string(out->theta));
+        emit(out);
+    }
+
+    void HardwareIO::ros_odometry_handler(const void* msg) {
+        const auto* odom  = static_cast<const nav_msgs::msg::Odometry*>(msg);
+        const auto& twist = odom->twist().twist();
+
+        // Which frames the controller publishes in is not documented, so leave a record of them
+        if (!ros_odometry_frames_logged.exchange(true)) {
+            log<INFO>("Receiving " + booster::robot::b1::kTopicRosOdometer + " odometry: pose in frame '"
+                      + odom->header().frame_id() + "', twist in frame '" + odom->child_frame_id() + "'");
+        }
+
+        auto out            = std::make_unique<BoosterOdometryTwist>();
+        out->timestamp      = NUClear::clock::now();
+        out->linear         = Eigen::Vector3d(twist.linear().x(), twist.linear().y(), twist.linear().z());
+        out->angular        = Eigen::Vector3d(twist.angular().x(), twist.angular().y(), twist.angular().z());
+        out->frame_id       = odom->header().frame_id();
+        out->child_frame_id = odom->child_frame_id();
         emit(out);
     }
 

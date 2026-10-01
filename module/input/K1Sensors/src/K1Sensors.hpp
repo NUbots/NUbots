@@ -31,6 +31,8 @@ namespace module::input {
             /// @brief Deadband below which normalized odometry components are snapped to zero, to
             /// avoid tiny floating-point residuals (e.g. ~1e-10) being treated as real motion
             double odometry_deadband = 0.0;
+            /// @brief Oldest odometry twist used for vTw; older than this, vTw is left unmeasured
+            NUClear::clock::duration odometry_twist_max_age{};
         } cfg;
 
         /// @brief DDS reader for the head pose topic, created once at startup
@@ -46,6 +48,8 @@ namespace module::input {
         bool have_pose = false;
         /// @brief Set once the missing head pose warning has been logged
         std::atomic<bool> pose_warned{false};
+        /// @brief Set once the missing odometry twist warning has been logged
+        std::atomic<bool> twist_warned{false};
 
         std::mutex odometry_mutex;
         bool booster_odometry_has_offset = false;

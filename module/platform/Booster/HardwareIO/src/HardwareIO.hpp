@@ -1,12 +1,14 @@
 #ifndef MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
 #define MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
 
+#include <atomic>
 #include <booster/idl/b1/BatteryState.h>
 #include <booster/idl/b1/ButtonEvent.h>
 #include <booster/idl/b1/FallDownState.h>
 #include <booster/idl/b1/Kick.h>
 #include <booster/idl/b1/LowState.h>
 #include <booster/idl/b1/Odometer.h>
+#include <booster/idl/nav_msgs/Odometry.h>
 #include <booster/robot/b1/b1_loco_client.hpp>
 #include <booster/robot/channel/channel_factory.hpp>
 #include <mutex>
@@ -22,6 +24,7 @@
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
+#include "message/booster/BoosterOdometryTwist.hpp"
 #include "message/booster/BoosterVisualKick.hpp"
 #include "message/booster/BoosterWalk.hpp"
 #include "message/localisation/Field.hpp"
@@ -65,6 +68,10 @@ namespace module::platform::Booster {
         booster::robot::ChannelPtr<booster_interface::msg::ButtonEventMsg> button_event_channel;
         booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
         booster::robot::ChannelPtr<brain::msg::Kick> kick_channel;
+        booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ros_odometry_channel;
+
+        /// @brief Set once the frames of the first rt/odom message have been logged
+        std::atomic<bool> ros_odometry_frames_logged{false};
 
         booster::robot::b1::B1LocoClient booster_client;
 
@@ -73,6 +80,7 @@ namespace module::platform::Booster {
         void battery_handler(const void* msg);
         void button_event_handler(const void* msg);
         void odometer_handler(const void* msg);
+        void ros_odometry_handler(const void* msg);
 
         /// Query the robot's current motion mode from the SDK and publish it as a BoosterModeState so
         /// other modules can read the actual mode the robot is in.

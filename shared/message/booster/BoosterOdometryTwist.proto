@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package message.booster;
+
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+
+// Velocity reported by the Booster controller's ROS odometry (rt/odom, nav_msgs/Odometry).
+// rt/odometer_state (BoosterOdometry) carries only the planar pose; this is the twist half of the
+// full odometry, used to fill Sensors.vTw.
+message BoosterOdometryTwist {
+    google.protobuf.Timestamp timestamp = 1;  // When NUbots received it
+    vec3 linear                         = 2;  // Linear velocity in child_frame_id (m/s)
+    vec3 angular                        = 3;  // Angular velocity in child_frame_id (rad/s)
+    string frame_id                     = 4;  // Frame the odometry pose is in (header.frame_id)
+    string child_frame_id               = 5;  // Frame the twist is in, the body frame by ROS convention
+}
