@@ -30,9 +30,8 @@
 #include <Eigen/Core>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
 
-#include "utility/vision/TensorRT.hpp"
+#include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::vision {
 
@@ -46,14 +45,8 @@ namespace module::vision {
             double nms_score_threshold = 0.5;
         } cfg;
 
-        /// @brief TensorRT engine built from the ONNX model, nullptr when falling back to OpenVINO
-        std::unique_ptr<utility::vision::TensorRT> trt{};
-
-        /// @brief OpenVINO compiled model, used to create inference request object
-        ov::CompiledModel compiled_model{};
-
-        /// @brief Inference request, used to run the model (inference)
-        ov::InferRequest infer_request{};
+        /// @brief ONNX Runtime session used to run the YOLO model
+        std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
 
         /// @brief Object struct for storing name and colour
         struct Object {

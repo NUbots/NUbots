@@ -43,7 +43,6 @@
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
-#include "utility/vision/TensorRT.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
@@ -87,45 +86,13 @@ namespace module::vision {
             cfg.nms_threshold               = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
 
-            // Load and compile the model
+            // Load the model
             try {
                 std::string model_path = config["model_path"].as<std::string>();
                 std::string device     = config["device"].as<std::string>();
 
-                log<INFO>("Loading YOLO model from: ", model_path);
-                log<INFO>("Using device: ", device);
-
-                // Try TensorRT first, building the engine from the ONNX model on this device.
-                // The built engine is cached on disk, so this is only slow the first time.
-                try {
-                    log<INFO>("Building TensorRT engine from: ", model_path);
-                    trt = std::make_unique<utility::vision::TensorRT>(model_path);
-                    log<INFO>("TensorRT engine ready");
-                }
-                catch (const std::exception& e) {
-                    trt.reset();
-                    log<WARN>("TensorRT unavailable: ", e.what());
-                    log<INFO>("Falling back to OpenVINO");
-
-                    // Fall back to OpenVINO
-                    ov::Core core{};
-
-                    try {
-                        compiled_model = core.compile_model(model_path, device);
-                    }
-                    catch (const std::exception& ov_e) {
-                        if (device == "GPU") {
-                            log<WARN>("Failed to compile model on GPU, falling back to CPU: ", ov_e.what());
-                            compiled_model = core.compile_model(model_path, "CPU");
-                        }
-                        else {
-                            throw;
-                        }
-                    }
-
-                    infer_request = compiled_model.create_infer_request();
-                }
-
+                log<INFO>("Loading YOLO model from: ", model_path, " on ", device);
+                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(model_path, device);
                 log<INFO>("Model loaded successfully");
             }
             catch (const std::exception& e) {
@@ -168,16 +135,7 @@ namespace module::vision {
                 img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
 
                 // Use the model's expected input size, assuming NCHW format
-                int model_input_size                          = 640;
-                const ov::Output<const ov::Node>* input_port = nullptr;
-                if (trt != nullptr) {
-                    model_input_size = static_cast<int>(trt->input_shape()[2]);
-                }
-                else {
-                    // Get input port for model with one input and check expected dimensions
-                    input_port       = &compiled_model.input();
-                    model_input_size = static_cast<int>(input_port->get_shape()[2]);
-                }
+                int model_input_size = static_cast<int>(onnx_rt->input_shape()[2]);
 
                 cv::Mat blob = cv::dnn::blobFromImage(letterbox_img,
                                                       1.0 / 255.0,
@@ -191,42 +149,16 @@ namespace module::vision {
                 int out_channels   = 0;
                 int out_detections = 0;
 
-                if (trt != nullptr) {
-                    // TensorRT inference
-                    try {
-                        float* blob_ptr = blob.ptr<float>();
-                        output_data     = trt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
-                        out_channels    = static_cast<int>(trt->output_shape()[1]);
-                        out_detections  = static_cast<int>(trt->output_shape()[2]);
-                    }
-                    catch (const std::exception& e) {
-                        log<ERROR>("TensorRT inference failed: ", e.what());
-                        return;
-                    }
+                // ONNX Runtime inference
+                try {
+                    float* blob_ptr = blob.ptr<float>();
+                    output_data     = onnx_rt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
+                    out_channels    = static_cast<int>(onnx_rt->output_shape()[1]);
+                    out_detections  = static_cast<int>(onnx_rt->output_shape()[2]);
                 }
-                else {
-                    // OpenVINO inference
-                    try {
-                        // Create tensor and copy data instead of using external memory pointer
-                        ov::Tensor input_tensor(input_port->get_element_type(), input_port->get_shape());
-                        std::memcpy(input_tensor.data<float>(), blob.ptr<float>(), input_tensor.get_byte_size());
-
-                        // Set input tensor for model with one input
-                        infer_request.set_input_tensor(input_tensor);
-
-                        infer_request.infer();
-                        auto output    = infer_request.get_output_tensor(0);
-                        out_channels   = static_cast<int>(output.get_shape()[1]);
-                        out_detections = static_cast<int>(output.get_shape()[2]);
-
-                        // Copy output data
-                        float* data = output.data<float>();
-                        output_data.assign(data, data + output.get_byte_size() / sizeof(float));
-                    }
-                    catch (const std::exception& e) {
-                        log<ERROR>("OpenVINO inference failed: ", e.what());
-                        return;
-                    }
+                catch (const std::exception& e) {
+                    log<ERROR>("ONNX Runtime inference failed: ", e.what());
+                    return;
                 }
 
                 // -------- Postprocess the result --------

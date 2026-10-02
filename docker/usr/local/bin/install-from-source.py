@@ -102,7 +102,7 @@ def detect_build_system(args, extracted_path):
     if args.build_system is not None:
         return args.build_system, configure_path
 
-    for root, _, files in os.walk(configure_path):
+    for root, dirs, files in os.walk(configure_path):
         if "CMakeLists.txt" in files:
             return "cmake", root
         if "meson.build" in files:
@@ -115,6 +115,8 @@ def detect_build_system(args, extracted_path):
             return "make", root
         if "setup.py" in files:
             return "python", root
+        if "include" in dirs and "lib" in dirs:
+            return "library", root
     raise "Unable to determine build system to use"
 
 
@@ -291,6 +293,13 @@ def handle_python(archive, args, env):
         check=True,
     )
 
+def handle_library(archive, args, env):
+    for folder in ("include", "lib"):
+        source = os.path.join(args.configure_path, folder)
+        destination = os.path.join(args.prefix, folder)
+        if os.path.isdir(source):
+            shutil.copytree(source, destination, dirs_exist_ok=True)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("")
@@ -402,6 +411,7 @@ if __name__ == "__main__":
         "make": handle_make,
         "meson": handle_meson,
         "python": handle_python,
+        "library": handle_library,
     }[args.method](archive, args, env)
 
     # Build was successful, purge the build folder
