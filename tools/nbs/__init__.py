@@ -9,4 +9,5 @@ b.dependencies.register(
     "pyyaml",
     "tqdm",
     "ruamel.yaml",
+    "matplotlib",
 )
