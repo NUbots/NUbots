@@ -100,7 +100,7 @@ namespace module::network {
                     // Bind our new handle
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
-                            std::string remote_addr = p.remote.address;
+                            std::string remote_addr = p.remote.address().first;
 
                             // Apply filtering of packets if udp_filter_address is set in config
                             if (!cfg.udp_filter_address.empty() && remote_addr != cfg.udp_filter_address) {
