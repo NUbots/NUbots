@@ -46,9 +46,11 @@ def ensure_docker():
 
     cprint("Docker is not currently running.", "red", attrs=["bold"])
     if sys.platform == "darwin":
-        cprint("Ensure Docker Desktop is currently running, and Rosetta is turned on.","red", attrs=["bold"])
+        cprint("Ensure Docker Desktop is currently running, and Rosetta is turned on.", "red", attrs=["bold"])
     elif "microsoft" in os.uname().release.lower():
-        cprint("Ensure Docker Desktop is currently running, and that WSL2 integration is enabled.","red", attrs=["bold"])
+        cprint(
+            "Ensure Docker Desktop is currently running, and that WSL2 integration is enabled.", "red", attrs=["bold"]
+        )
     else:
-        cprint("Ensure the docker daemon is running (systemctl enable --now docker).","red", attrs=["bold"])
+        cprint("Ensure the docker daemon is running (systemctl enable --now docker).", "red", attrs=["bold"])
     exit(1)
