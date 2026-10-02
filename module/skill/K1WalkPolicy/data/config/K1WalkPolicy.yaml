@@ -12,7 +12,7 @@ log_level: INFO
 # The older mujoco_playground checkpoints (k1_walk*.onnx, 79-obs / 22-action, single frame)
 # are NOT loadable against this module: the module refuses any graph whose I/O sizes do not
 # match the configured contract.
-model_path: "k1_walk_mjlab_ynapuyo5.onnx"
+model_path: "k1_walk_mjlab_scxhlicv.onnx"
 
 # Run inference on the GPU with TensorRT. Falls back to OpenVINO CPU automatically when no
 # CUDA device is visible (the container needs --gpus), so this is safe to leave on. The
