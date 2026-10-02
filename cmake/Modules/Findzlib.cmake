@@ -1,6 +1,6 @@
 include(ToolchainLibraryFinder)
 ToolchainLibraryFinder(
-  NAME zlib
+  NAME ZLIB
   HEADER zlib.h
   LIBRARY z
 )

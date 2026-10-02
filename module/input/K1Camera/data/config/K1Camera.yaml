@@ -1,0 +1,11 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Camera info:
+# topic: Low-level topic for SDK to subscribe to
+# name: Name of the camera
+# id: ID of the camera
+cameras:
+  - topic: rt/boostercamera/head/rgb
+    name: Left Camera
+    id: 0

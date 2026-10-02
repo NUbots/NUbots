@@ -11,13 +11,11 @@ find_package(fmt REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC fmt::fmt)
 
 find_package(zstr REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC zstr::zstr)
+find_package(ZLIB REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC zstr::zstr ZLIB::ZLIB)
 
 find_package(mio REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC mio::mio)
-
-find_package(Aravis REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC Aravis::Aravis)
 
 find_package(tinyxml2 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC tinyxml2::tinyxml2)
@@ -36,6 +34,10 @@ target_link_libraries(nuclear_utility PUBLIC ALSA::ALSA)
 
 find_package(Lame REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
+
+find_package(onnxruntime REQUIRED)
+target_link_libraries(nuclear_utility PRIVATE onnxruntime::onnxruntime)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)

@@ -53,7 +53,7 @@ def internalise_image(tag, username=local_user):
     is_internal = (
         len(split) == 2
         and split[0] in [image, f"{username}/{image}"]
-        and (split[1] in platform.list() or split[1] == "selected")
+        and (split[1] in platform.list() or split[1] == "selected_k1")
     )
 
     if is_internal:

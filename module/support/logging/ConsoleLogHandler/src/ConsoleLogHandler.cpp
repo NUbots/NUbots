@@ -27,6 +27,8 @@
 
 #include "ConsoleLogHandler.hpp"
 
+#include "extension/Configuration.hpp"
+
 #include <iostream>
 #include <regex>
 
@@ -35,16 +37,28 @@
 
 namespace module::support::logging {
 
+    using extension::Configuration;
     using NUClear::message::LogMessage;
     using NUClear::message::ReactionStatistics;
     using utility::strutil::Colour;
+
 
     void ConsoleLogHandler::print_log(const NUClear::LogLevel& level,
                                       const std::string& reactor,
                                       const std::string& name,
                                       const std::string& message,
+                                      const NUClear::clock::time_point& time,
                                       const std::vector<utility::support::evil::StackFrame>& stack_trace) {
         std::lock_guard<std::mutex> lock(mutex);
+
+        if (cfg.display_timestamp){
+            // Output the time
+            std::time_t t = NUClear::clock::to_time_t(time);
+            std::tm tm    = *std::localtime(&t);
+            char buffer[100];
+            std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &tm);
+            std::cerr << "[" << buffer << "] ";
+        }
 
         // Remove the namespace from the Reactor with a regex
         auto simple_reactor = std::regex_replace(reactor, std::regex("[A-Za-z_][A-Za-z0-9_]+::"), "");
@@ -89,6 +103,11 @@ namespace module::support::logging {
 
     ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
+
+        on<Configuration>("ConsoleLogHandler.yaml").then([this](const Configuration& config) {
+            cfg.display_timestamp = config["display_timestamp"].as<bool>();
+        });
+
         on<Trigger<ReactionStatistics>, Inline::ALWAYS>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
 
@@ -102,7 +121,7 @@ namespace module::support::logging {
                 // Make sure we are on the thread that the exception was thrown on otherwise this will not work
                 auto stack_trace = utility::support::evil::last_exception_stack_trace();
 
-                print_log(NUClear::LogLevel::FATAL, reactor, name, msg, stack_trace);
+                print_log(NUClear::LogLevel::FATAL, reactor, name, msg, NUClear::clock::now(), stack_trace);
             }
         });
 
@@ -118,7 +137,7 @@ namespace module::support::logging {
             std::string reactor = ids != nullptr ? ids->reactor : "NUClear::PowerPlant";
             std::string name    = ids != nullptr ? ids->name : "";
 
-            print_log(message.level, reactor, name, message.message, {});
+            print_log(message.level, reactor, name, message.message, NUClear::clock::now(), {});
         });
     }
 

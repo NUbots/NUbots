@@ -26,6 +26,7 @@
  */
 #include "SystemConfiguration.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
@@ -38,10 +39,14 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/platform/aliases.hpp"
+
 namespace module::tools {
 
     using extension::Configuration;
     namespace fs = std::filesystem;
+    using NUClear::message::CommandLineArguments;
+
 
     [[nodiscard]] bool files_equal(const fs::path& a, const fs::path& b) {
         // If both files exist and are the same size
@@ -123,247 +128,294 @@ namespace module::tools {
             exit(1);
         }
 
-        on<Configuration>("SystemConfiguration.yaml").then([this](const Configuration& config) {
-            log_level = config["log_level"].as<NUClear::LogLevel>();
+        on<Configuration, Optional<With<CommandLineArguments>>>("SystemConfiguration.yaml")
+            .then([this](const Configuration& config, const std::shared_ptr<const CommandLineArguments>& cli) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // The current user
-            std::string user = config["user"].as<std::string>();
+                // The current user
+                std::string user = config["user"].as<std::string>();
+                fs::path home    = "/home" / fs::path(user);
 
-            // Get the hostname
-            std::string hostname = config.hostname;
+                // Get the hostname, optionally overridden via --hostname <name>
+                std::string hostname = config.hostname;
+                if (cli) {
+                    auto it = std::find(cli->begin(), cli->end(), "--hostname");
+                    if (it != cli->end() && std::next(it) != cli->end()) {
+                        hostname = *std::next(it);
+                        log<INFO>(fmt::format("Overwriting hostname to {}", hostname));
+                        std::ofstream hostname_file("/etc/hostname", std::ios::trunc);
+                        hostname_file << hostname << '\n';
+                    }
+                }
 
-            // The base path that stores the files
-            fs::path base_path = "system";
+                // The base path that stores the files
+                fs::path base_path = "system";
 
-            // Our default, and platform specific paths
-            fs::path default_path = base_path / "default";
-            fs::path device_path  = base_path / hostname;
+                // Our default, and platform specific paths
+                fs::path default_path = base_path / "default";
+                fs::path device_path  = base_path / hostname;
 
-            /******************************
-             * SYSTEM CONFIGURATION FILES *
-             ******************************/
-            log<INFO>(
-                fmt::format("Scanning for system files in {} and {}", default_path.string(), device_path.string()));
-            for (const auto& p : fs::recursive_directory_iterator(default_path)) {
-                if (p.is_regular_file()) {
-                    fs::path in_file  = p.path();
-                    fs::path relative = fs::relative(in_file, default_path);
+                /******************************
+                 * SYSTEM CONFIGURATION FILES *
+                 ******************************/
+                log<INFO>(
+                    fmt::format("Scanning for system files in {} and {}", default_path.string(), device_path.string()));
+                for (const auto& p : fs::recursive_directory_iterator(default_path)) {
+                    if (p.is_regular_file()) {
+                        fs::path in_file  = p.path();
+                        fs::path relative = fs::relative(in_file, default_path);
 
-                    fs::path default_file = default_path / relative;
-                    fs::path device_file  = device_path / relative;
-                    fs::path out_file     = "/" / relative;
+                        fs::path default_file = default_path / relative;
+                        fs::path device_file  = device_path / relative;
+                        fs::path out_file     = "/" / relative;
 
-                    // If we have a device specific override use that
-                    if (fs::is_regular_file(device_file)) {
-                        in_file = device_file;
-                        log<TRACE>(fmt::format("Using {} config for {}", hostname, out_file.string()));
+                        // If we have a device specific override use that
+                        if (fs::is_regular_file(device_file)) {
+                            in_file = device_file;
+                            log<TRACE>(fmt::format("Using {} config for {}", hostname, out_file.string()));
+                        }
+                        else {
+                            in_file = default_file;
+                            log<TRACE>(fmt::format("Using default config for {}", out_file.string()));
+                        }
+
+                        // If they are not the same, overwrite the old file with the new one
+                        if (!files_equal(in_file, out_file)) {
+                            log<DEBUG>(fmt::format("Updating file {}", out_file.string()));
+                            fs::create_directories(out_file.parent_path());
+                            fs::copy_file(in_file, out_file, fs::copy_options::overwrite_existing);
+                        }
+                    }
+                }
+
+                /*********************
+                 * NETWORK MANAGER   *
+                 *********************/
+                log<INFO>("Setting NetworkManager connection file permissions and reloading");
+                const fs::path nm_connections = "/etc/NetworkManager/system-connections";
+                if (fs::is_directory(nm_connections)) {
+                    for (const auto& p : fs::directory_iterator(nm_connections)) {
+                        if (p.is_regular_file()) {
+                            fs::permissions(p.path(),
+                                            fs::perms::owner_read | fs::perms::owner_write,
+                                            fs::perm_options::replace);
+                        }
+                    }
+                }
+                std::system("nmcli connection reload");
+
+                const std::string connection   = config["connection"].as<std::string>();
+                const fs::path connection_file = nm_connections / (connection + ".nmconnection");
+                if (fs::is_regular_file(connection_file)) {
+                    log<INFO>(fmt::format("Activating connection {}", connection));
+                    std::system(fmt::format("nmcli connection up {}", connection).c_str());
+                }
+                else {
+                    log<WARN>(fmt::format("Connection profile {} not found, skipping activation", connection));
+                }
+
+                /***************
+                 * PERMISSIONS *
+                 ***************/
+                log<INFO>("Applying permissions changes from configuration");
+                for (const auto& c : config["permissions"].config) {
+
+                    fs::path path = c.first.as<std::string>();
+                    log<TRACE>(fmt::format("Checking file permissions for {}", path.string()));
+
+                    if (fs::is_regular_file(path)) {
+                        // Apply permissions
+                        fs::perms old_perms = fs::status(path).permissions();
+                        fs::perms new_perms = static_cast<fs::perms>(c.second.as<int>());
+
+                        if (old_perms != new_perms) {
+                            log<INFO>(fmt::format("Changing permissions on {} from {} to {}",
+                                                  path.string(),
+                                                  permissions_to_string(old_perms),
+                                                  permissions_to_string(new_perms)));
+                            fs::permissions(path, new_perms);
+                        }
                     }
                     else {
-                        in_file = default_file;
-                        log<TRACE>(fmt::format("Using default config for {}", out_file.string()));
-                    }
-
-                    // If they are not the same, overwrite the old file with the new one
-                    if (!files_equal(in_file, out_file)) {
-                        log<DEBUG>(fmt::format("Updating file {}", out_file.string()));
-                        fs::create_directories(out_file.parent_path());
-                        fs::copy_file(in_file, out_file, fs::copy_options::overwrite_existing);
+                        log<ERROR>(fmt::format("{} is not a regular file", path.string()));
                     }
                 }
-            }
 
-            /***************
-             * PERMISSIONS *
-             ***************/
-            log<INFO>("Applying permissions changes from configuration");
-            for (const auto& c : config["permissions"].config) {
-
-                fs::path path = c.first.as<std::string>();
-                log<TRACE>(fmt::format("Checking file permissions for {}", path.string()));
-
-                if (fs::is_regular_file(path)) {
-                    // Apply permissions
-                    fs::perms old_perms = fs::status(path).permissions();
-                    fs::perms new_perms = static_cast<fs::perms>(c.second.as<int>());
-
-                    if (old_perms != new_perms) {
-                        log<INFO>(fmt::format("Changing permissions on {} from {} to {}",
-                                              path.string(),
-                                              permissions_to_string(old_perms),
-                                              permissions_to_string(new_perms)));
-                        fs::permissions(path, new_perms);
-                    }
-                }
-                else {
-                    log<ERROR>(fmt::format("{} is not a regular file", path.string()));
-                }
-            }
-
-            /************
-             * SYMLINKS *
-             ************/
-            log<INFO>("Ensuring relevant symlinks exist");
-            for (const auto& l : config["links"].config) {
-                std::string target = l.first.as<std::string>();
-                std::string link   = l.second.as<std::string>();
-                symlink(link, target);
-            }
-
-            /**********
-             * PACMAN *
-             **********/
-            log<INFO>("Ensuring relevant pacman packages are installed");
-            log<DEBUG>("Updating existing packages and upgrading");
-            std::system("pacman -Syyuu --noconfirm --needed --overwrite \\*");
-            for (const auto& c : config["pacman"].config) {
-                std::string package = c.as<std::string>();
-                log<TRACE>(fmt::format("Checking package {}", package));
-                if (std::system(fmt::format("pacman -Qi {} &>/dev/null", package).c_str()) != 0) {
-                    log<DEBUG>(fmt::format("Installing pacman package {}", package));
-                    std::system(fmt::format("pacman -S --noconfirm --needed {}", package).c_str());
-                }
-            }
-
-            /***********
-             * SYSTEMD *
-             ***********/
-            log<INFO>("Ensuring relevant systemd services are started");
-            for (const auto& c : config["systemd"].config) {
-                std::string unit = c.as<std::string>();
-                log<TRACE>(fmt::format("Checking systemd unit {}", unit));
-                if (std::system(fmt::format("systemctl is-enabled --quiet {}", unit).c_str()) != 0) {
-                    log<DEBUG>(fmt::format("Enabling systemd unit {}", unit));
-                    std::system(fmt::format("systemctl enable {}", unit).c_str());
-                }
-            }
-
-            /**********
-             * LOCALE *
-             **********/
-            if (config["generate_locale"].as<bool>()) {
-                log<INFO>("Ensuring locales are generated");
-                std::system("locale-gen");
-            }
-
-            /********
-             * GRUB *
-             ********/
-            if (config["generate_grub"].as<bool>()) {
-                log<INFO>("Ensuring grub config is generated");
-                std::system("grub-mkconfig -o /boot/grub/grub.cfg");
-            }
-
-            /********
-             * MOTD *
-             ********/
-            log<INFO>("Ensuring motd is generated");
-            std::ofstream ofs_motd("/etc/motd");
-            std::ifstream ifs_logo("system/default/etc/motd");
-            ofs_motd << ifs_logo.rdbuf() << big_text(hostname);
-            ofs_motd.close();
-            ifs_logo.close();
-
-            /*********
-             * HOSTS *
-             *********/
-            log<INFO>("Ensuring hosts is generated");
-            std::ofstream ofs_hosts("/etc/hosts");
-            ofs_hosts << "127.0.0.1       localhost" << std::endl;
-            ofs_hosts << "::1             localhost" << std::endl;
-            ofs_hosts << "127.0.1.1       " << hostname << std::endl;
-            ofs_hosts.close();
-
-            /**********
-             * GROUPS *
-             **********/
-            log<INFO>("Ensuring relevant groups exist");
-            std::string groups(utility::file::loadFromFile("/etc/group"));
-            for (const auto& g : config["groups"].config) {
-                std::string group = g.as<std::string>();
-                log<TRACE>(fmt::format("Checking group {} for user {}", group, user));
-
-                auto pos = groups.find(group);
-                if (pos == std::string::npos) {
-                    log<INFO>(fmt::format("Group {} doesn't exist. Creating it and adding user {}", group, user));
-                    std::system(fmt::format("groupadd {}", group).c_str());
-                    std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
-                }
-                else {
-                    auto eol = groups.find("\n", pos);
-                    if (groups.substr(pos, eol - pos).find(user) == std::string::npos) {
-                        log<INFO>(fmt::format("Adding user {} to group {}", user, group));
-                        std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
-                    }
-                }
-            }
-
-            /*******
-             * ZSH *
-             *******/
-            log<INFO>("Ensuring zsh is configured");
-            fs::path home         = fs::path("/home") / user;
-            fs::path zprezto_root = home / ".zprezto";
-            if (!fs::exists(zprezto_root)) {
-                log<INFO>(fmt::format("Cloning zprezto to {}", zprezto_root.string()));
-                std::system(fmt::format("git clone --recursive https://github.com/sorin-ionescu/prezto.git {}",
-                                        zprezto_root.string())
-                                .c_str());
-            }
-            else {
-                log<INFO>(fmt::format("Pulling latest zprezto in {}", zprezto_root.string()));
-                std::system(fmt::format("git -C {} pull --recurse-submodules=yes", zprezto_root.string()).c_str());
-            }
-
-            log<INFO>("Making zprezto symlinks");
-            for (const auto& p : fs::directory_iterator(zprezto_root / "runcoms")) {
-                if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
-                    fs::path target = p.path();
-                    fs::path link   = home / fmt::format(".{}", p.path().filename().string());
+                /************
+                 * SYMLINKS *
+                 ************/
+                log<INFO>("Ensuring relevant symlinks exist");
+                for (const auto& l : config["links"].config) {
+                    std::string target = l.first.as<std::string>();
+                    std::string link   = l.second.as<std::string>();
                     symlink(link, target);
                 }
-            }
 
-            log<INFO>("Changing user shell to zsh");
-            std::system(fmt::format("chsh -s /usr/bin/zsh {}", user).c_str());
-
-            log<INFO>("Appending fuzzy find scripts to zshrc");
-            std::ifstream ifs_zshrc(home / ".zshrc");
-            std::string line;
-            bool fuzzy_found = false;
-            while (std::getline(ifs_zshrc, line)) {
-                if (line.compare("# Source the fuzzy find scripts") == 0) {
-                    fuzzy_found = true;
-                    break;
+                /**********
+                 * APT *
+                 **********/
+                log<INFO>("Ensuring relevant APT packages are installed");
+                log<DEBUG>("Updating existing packages and upgrading");
+                std::system("apt-get update && apt-get upgrade -y");
+                for (const auto& c : config["apt"].config) {
+                    std::string package = c.as<std::string>();
+                    log<TRACE>(fmt::format("Checking package {}", package));
+                    if (std::system(fmt::format("dpkg -s {} &>/dev/null", package).c_str()) != 0) {
+                        log<DEBUG>(fmt::format("Installing APT package {}", package));
+                        std::system(fmt::format("apt-get install --yes {}", package).c_str());
+                    }
                 }
-            }
-            ifs_zshrc.close();
 
-            if (!fuzzy_found) {
-                std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
-                ofs_zshrc << std::endl
-                          << "# Source the fuzzy find scripts" << std::endl
-                          << "source /usr/share/fzf/key-bindings.zsh" << std::endl
-                          << "source /usr/share/fzf/completion.zsh" << std::endl;
-                ofs_zshrc.close();
-            }
+                /***********
+                 * SYSTEMD *
+                 ***********/
+                log<INFO>("Ensuring relevant systemd services are started");
+                for (const auto& c : config["systemd"].config) {
+                    std::string unit = c.as<std::string>();
+                    log<TRACE>(fmt::format("Checking systemd unit {}", unit));
+                    if (std::system(fmt::format("systemctl is-enabled --quiet {}", unit).c_str()) != 0) {
+                        log<DEBUG>(fmt::format("Enabling systemd unit {}", unit));
+                        std::system(fmt::format("systemctl enable {}", unit).c_str());
+                    }
+                }
 
-            /**********
-             * PYTHON *
-             **********/
-            // Make sure python checks /usr/local for packages
-            std::system(
-                R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+                /**********
+                 * LOCALE *
+                 **********/
+                if (config["generate_locale"].as<bool>()) {
+                    log<INFO>("Ensuring locales are generated");
+                    std::system("locale-gen");
+                }
+
+                /********
+                 * MOTD *
+                 ********/
+                log<INFO>("Ensuring motd is generated");
+                std::ofstream ofs_motd("/etc/motd");
+                std::ifstream ifs_logo("system/default/etc/motd");
+                ofs_motd << ifs_logo.rdbuf() << big_text(hostname);
+                ofs_motd.close();
+                ifs_logo.close();
+
+                /*********************
+                 * BOOSTER ROBOT INFO *
+                 *********************/
+                log<INFO>("Updating Booster robot nickname");
+                {
+                    const fs::path robot_info_path = config["robot_info_path"].as<std::string>();
+                    std::string robot_name         = utility::platform::get_robot_alias(hostname);
+                    if (!robot_name.empty()) {
+                        robot_name[0] = std::toupper(static_cast<unsigned char>(robot_name[0]));
+                    }
+                    else {
+                        robot_name    = hostname;
+                        robot_name[0] = std::toupper(static_cast<unsigned char>(robot_name[0]));
+                        log<WARN>(fmt::format("No alias found for {}, using hostname as nickname", hostname));
+                    }
+                    const std::string nickname_line = fmt::format("Nickname: {} [NUbots]", robot_name);
+
+                    std::ifstream ifs_robot_info(robot_info_path);
+                    std::ostringstream updated;
+                    bool found        = false;
+                    std::string rline = {};
+                    while (std::getline(ifs_robot_info, rline)) {
+                        if (rline.rfind("Nickname:", 0) == 0) {
+                            updated << nickname_line << '\n';
+                            found = true;
+                        }
+                        else {
+                            updated << rline << '\n';
+                        }
+                    }
+                    ifs_robot_info.close();
+                    if (!found) {
+                        updated << nickname_line << '\n';
+                    }
+                    std::ofstream ofs_robot_info(robot_info_path, std::ios::trunc);
+                    ofs_robot_info << updated.str();
+                    ofs_robot_info.close();
+                }
+
+                /*********
+                 * HOSTS *
+                 *********/
+                log<INFO>("Ensuring hosts is generated");
+                std::ofstream ofs_hosts("/etc/hosts");
+                ofs_hosts << "127.0.0.1       localhost" << std::endl;
+                ofs_hosts << "::1             localhost" << std::endl;
+                ofs_hosts << "127.0.1.1       " << hostname << std::endl;
+                ofs_hosts.close();
+
+                /**********
+                 * GROUPS *
+                 **********/
+                log<INFO>("Ensuring relevant groups exist");
+                std::string groups(utility::file::loadFromFile("/etc/group"));
+                for (const auto& g : config["groups"].config) {
+                    std::string group = g.as<std::string>();
+                    log<TRACE>(fmt::format("Checking group {} for user {}", group, user));
+
+                    auto pos = groups.find(group);
+                    if (pos == std::string::npos) {
+                        log<INFO>(fmt::format("Group {} doesn't exist. Creating it and adding user {}", group, user));
+                        std::system(fmt::format("groupadd {}", group).c_str());
+                        std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                    }
+                    else {
+                        auto eol = groups.find("\n", pos);
+                        if (groups.substr(pos, eol - pos).find(user) == std::string::npos) {
+                            log<INFO>(fmt::format("Adding user {} to group {}", user, group));
+                            std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                        }
+                    }
+                }
+
+                /*******
+                 * ZSH *
+                 *******/
+                log<INFO>("Appending fuzzy find scripts to bashrc");
+                std::ifstream ifs_bashrc(home / ".bashrc");
+                std::string line;
+                bool fuzzy_found = false;
+                while (std::getline(ifs_bashrc, line)) {
+                    if (line.compare("# Source the fuzzy find scripts") == 0) {
+                        fuzzy_found = true;
+                        break;
+                    }
+                }
+                ifs_bashrc.close();
+
+                if (!fuzzy_found) {
+                    std::ofstream ofs_bashrc(home / ".bashrc",
+                                             std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+                    ofs_bashrc << std::endl
+                               << "# Source the fuzzy find scripts" << std::endl
+                               << "source /usr/share/fzf/key-bindings.bash" << std::endl
+                               << "source /usr/share/fzf/completion.bash" << std::endl;
+                    ofs_bashrc.close();
+                }
+
+                /**********
+                 * PYTHON *
+                 **********/
+                // Make sure python checks /usr/local for packages
+                std::system(
+                    R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
             > $(python -c "import site; print(site.getsitepackages()[0],'/local.pth',sep='')"))X");
 
-            /***********
-             * CLEANUP *
-             ***********/
-            log<INFO>("Ensuring correct ownership is maintained");
-            log<INFO>(fmt::format("Forcing ownership to {0}:{0} in {1}", user, home.string()));
-            std::system(fmt::format("chown -R {0}:{0} {1}", user, home.string()).c_str());
-            log<INFO>(fmt::format("Forcing ownership to {0}:{0} in /usr/local", user));
-            std::system(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
-        });
+                /***********
+                 * CLEANUP *
+                 ***********/
+                log<INFO>("Ensuring correct ownership is maintained");
+                log<INFO>(fmt::format("Forcing ownership to {0}:{0} in {1}", user, home.string()));
+                std::system(fmt::format("chown -R {0}:{0} {1}", user, home.string()).c_str());
+                log<INFO>(fmt::format("Forcing ownership to {0}:{0} in /usr/local", user));
+                std::system(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
+
+                if (cli && std::find(cli->begin(), cli->end(), "--hostname") != cli->end()) {
+                    log<WARN>("Hostname change will be reflected next time you SSH into this robot.");
+                }
+            });
 
         // Exit here once all the reactions have run
         exit(0);

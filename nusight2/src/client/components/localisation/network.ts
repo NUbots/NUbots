@@ -1,11 +1,14 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
+import { Message as RobocupMessage } from "@proto/message/input/Robocup";
 import { Sensors } from "@proto/message/input/Sensors";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
 import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
 import { WalkToDebug } from "@proto/message/planning/WalkPath";
 import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose";
+import { SupportPosition } from "@proto/message/purpose/SupportPosition";
+import { TimeToBall } from "@proto/message/strategy/TimeToBall";
 import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
 import { Overview } from "@proto/message/support/nusight/Overview";
 import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
@@ -21,6 +24,7 @@ import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
+import { Vector4 } from "../../../shared/math/vector4";
 import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
@@ -47,6 +51,9 @@ export class LocalisationNetwork {
     this.network.on(FieldIntersections, this.onFieldIntersections);
     this.network.on(WalkInsideBoundedBox, this.WalkInsideBoundedBox);
     this.network.on(Purpose, this.onPurpose);
+    this.network.on(SupportPosition, this.onSupportPosition);
+    this.network.on(TimeToBall, this.onTimeToBall);
+    this.network.on(RobocupMessage, this.onTeamCommunication);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
   }
@@ -131,6 +138,79 @@ export class LocalisationNetwork {
   }
 
   @action.bound
+  private onSupportPosition(robotModel: RobotModel, supportPosition: SupportPosition) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    robot.desiredSupportPosition = Vector2.from(supportPosition.position);
+  }
+
+  @action.bound
+  private onTimeToBall(robotModel: RobotModel, timeToBall: TimeToBall) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // This robot's own opinion of how long it - and each teammate it can see - would take to reach
+    // the ball, keyed by player id (self included). Kept on the observing robot's own model rather
+    // than the teammates' synthetic models since it's this robot's estimate, not the teammate's.
+    robot.timeToBallEstimates = new Map(timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]));
+  }
+
+  @action.bound
+  private onTeamCommunication(robotModel: RobotModel, message: RobocupMessage) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    const pose = message.currentPose;
+    if (!pose || pose.playerId === 0) {
+      // player_id 0 means "unknown" - don't render it.
+      return;
+    }
+
+    // Reuse a stable synthetic RobotModel per player id so LocalisationRobotModel.of(...) below
+    // keeps returning the same instance (it's memoized by object identity), letting us render
+    // teammates with the exact same <K1>/<PurposeLabel> components used for our own robot.
+    let teammate = robot.teammates.get(pose.playerId);
+    if (!teammate) {
+      teammate = LocalisationRobotModel.of(
+        RobotModel.of({
+          id: `teammate-${pose.playerId}`,
+          connected: true,
+          type: robotModel.type,
+          enabled: true,
+          name: `Teammate ${pose.playerId}`,
+          address: "",
+          port: 0,
+        }),
+      );
+      robot.teammates.set(pose.playerId, teammate);
+    }
+
+    const x = pose.position?.x ?? 0;
+    const y = pose.position?.y ?? 0;
+    const yaw = pose.position?.z ?? 0;
+    // Undo RobotCommunication.cpp's mixed-team-protocol 180 degree rotation (negate x and y,
+    // rotate yaw by pi) applied before broadcasting, so teammates render in their true on-field
+    // position and orientation.
+    const rotation = Matrix4.fromRotationZ(yaw + Math.PI);
+    const Hft = new Matrix4(rotation.x, rotation.y, rotation.z, new Vector4(-x, -y, 0, 1));
+
+    // This model's own Hfw defaults to identity, so setting Htw/Hcw to Hft's inverse makes its
+    // computed Hft/Hfc equal the broadcast pose directly.
+    teammate.Htw = Hft.invert();
+    teammate.Hcw = Hft.invert();
+    teammate.playerId = pose.playerId;
+    teammate.purpose = message.goingForBall ? "GOING FOR BALL" : "";
+
+    // The ball position this teammate is reporting, if it has actually seen one (age is -1 when
+    // the ball hasn't been seen). Reuses the same rBFf computed getter and <Ball> component as our
+    // own ball by storing the already field-space (and x/y-unflipped) position as "world space" on
+    // this synthetic model, whose Hfw is identity - same trick used for Htw/Hcw above.
+    const ball = message.ball;
+    if (ball?.position && ball.age >= 0) {
+      teammate.ball = { rBWw: new Vector3(-ball.position.x, -ball.position.y, ball.position.z) };
+    } else {
+      teammate.ball = undefined;
+    }
+  }
+
+  @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
@@ -198,6 +278,9 @@ export class LocalisationNetwork {
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Hrw = Matrix4.from(sensors.Hrw);
+    if (sensors.Hcw) {
+      robot.Hcw = Matrix4.from(sensors.Hcw);
+    }
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
@@ -220,6 +303,8 @@ export class LocalisationNetwork {
     robot.motors.leftAnkleRoll.angle = sensors.servo[17].presentPosition!;
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
+    robot.motors.rightElbowYaw.angle = sensors.servo[20].presentPosition!;
+    robot.motors.leftElbowYaw.angle = sensors.servo[21].presentPosition!;
   };
 
   @action.bound

@@ -1,14 +1,14 @@
 # Known USB devices which are allowed to be connected to the robot without the
 # robocup service not restarting. In the form (vendor:product), like lsusb.
 
-# Internal USB hubs
+# Grabbed from the K1
+
+0bda:8153 # Realtek Semiconductor Corp. RTL8153 Gigabit Ethernet Adapter
+05e3:0626 # Genesys Logic, Inc. USB3.1 Hub
 1d6b:0003 # Linux Foundation 3.0 root hub
+8087:0032 # Intel Corp. AX210 Bluetooth
+05e3:0610 # Genesys Logic, Inc. Hub
+1d6b:a4a7 # Linux Foundation NationalChip Uac Speaker
+0d8c:0012 # C-Media Electronics, Inc. USB Audio Device
+05e3:0610 # Genesys Logic, Inc. Hub
 1d6b:0002 # Linux Foundation 2.0 root hub
-# WiFi/Bluetooth adapter
-8087:0033 # Intel Corp.
-# Camera
-1e10:4000 # Point Grey Research, Inc. Blackfly S BFS-U3-13Y3C
-# OpenCR
-0403:6001 # Future Technology Devices International, Ltd FT232 Serial (UART) IC
-# NUSense
-0483:5740 # STMicroelectronics Virtual COM Port

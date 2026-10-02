@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package message.booster;
+
+enum K1Mode {
+    DAMP = 0;
+    PREP = 1;
+    WALK = 2;
+    CUSTOM = 3;
+    SOCCER = 4;
+}
+
+message BoosterMode {
+    K1Mode mode = 1;
+}
