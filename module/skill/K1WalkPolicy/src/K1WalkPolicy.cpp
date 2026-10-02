@@ -21,6 +21,7 @@
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometryTwist.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -42,6 +43,7 @@ namespace module::skill {
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometryTwist;
     using message::booster::K1Mode;
+    using message::input::Sensors;
     using message::platform::RawSensors;
     using WalkTask = message::skill::Walk;
 
@@ -222,11 +224,17 @@ namespace module::skill {
 
         // 50 Hz inference loop, matching the training control rate (0.02 s). The simulator/robot
         // PD-tracks the latest LowCmd between ticks.
-        on<Provide<WalkTask>, Every<50, Per<std::chrono::seconds>>, With<RawSensors>, With<Stability>, Single>().then(
-            [this](const WalkTask& walk,
-                   const RunReason& run_reason,
-                   const RawSensors& raw,
-                   const Stability& stability) {
+        on<Provide<WalkTask>,
+           Every<50, Per<std::chrono::seconds>>,
+           With<RawSensors>,
+           With<Sensors>,
+           With<Stability>,
+           Single>()
+            .then([this](const WalkTask& walk,
+                         const RunReason& run_reason,
+                         const RawSensors& raw,
+                         const Sensors& sensors,
+                         const Stability& stability) {
                 if (!model_loaded) {
                     return;
                 }
@@ -303,7 +311,7 @@ namespace module::skill {
                     emit(graph("Policy loop period (s)", tick_dt));
                 }
 
-                const auto servos = servos_of(raw);
+                const auto servos = servos_of(raw);  // FIXME we shouldn't be using raw sensors
 
                 // --- observation frame (72 floats; see README.md) ---
                 std::vector<float> frame{};
@@ -333,18 +341,22 @@ namespace module::skill {
                 // frame.push_back(static_cast<float>(base_velocity.z()));
 
                 // [3:6] gyro, body frame
-                frame.push_back(raw.gyroscope.x());
-                frame.push_back(raw.gyroscope.y());
-                frame.push_back(raw.gyroscope.z());
+                frame.push_back(sensors.gyroscope.x());
+                frame.push_back(sensors.gyroscope.y());
+                frame.push_back(sensors.gyroscope.z());
 
                 // [6:9] projected gravity: world (0,0,-1) in the body frame, from the firmware
                 // attitude estimate
-                const Eigen::Matrix3d Rwt =
-                    rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
-                const Eigen::Vector3d gravity = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
+
+                // const Eigen::Matrix3d Rwt =
+                //     rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
+                // const Eigen::Vector3d gravity = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
+                const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
+                Eigen::Vector3d gravity = sensors.Htw.rotation() * g_world;
                 frame.push_back(static_cast<float>(gravity.x()));
                 frame.push_back(static_cast<float>(gravity.y()));
                 frame.push_back(static_cast<float>(gravity.z()));
+                log<INFO>("gravity", gravity.x(), gravity.y(), gravity.z());
 
                 // [9:29] q - default_pose, [29:49] dq, both over the policy joints only
                 for (const std::size_t j : cfg.policy_joints) {
