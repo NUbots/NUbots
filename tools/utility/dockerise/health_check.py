@@ -41,10 +41,13 @@ def ensure_docker():
         cprint("Docker is not installed (could not find `docker` on PATH).", "red", attrs=["bold"])
         exit(1)
 
-    if subprocess.run(["docker", "info"], stdout=DEVNULL, stderr=DEVNULL).returncode == 0:
+    result = subprocess.run(["docker", "info"], capture_output=True, text=True)
+    if result.returncode == 0:
         return
 
-    cprint("Docker is not currently running.", "red", attrs=["bold"])
+    cprint("Docker is unavailable.", "red", attrs=["bold"])
+    if result.stderr:
+        print(result.stderr.strip(), file=sys.stderr)
     if sys.platform == "darwin":
         cprint("Ensure Docker Desktop is currently running, and Rosetta is turned on.", "red", attrs=["bold"])
     elif "microsoft" in os.uname().release.lower():
