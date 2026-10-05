@@ -8,6 +8,13 @@ from pathlib import Path
 
 from rfdetr import RFDETRSegNano
 
+import torch
+
+if not torch.cuda.is_available():
+    raise RuntimeError("CUDA GPU is not available!")
+
+print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+
 
 def train(args):
     model = RFDETRSegNano()
