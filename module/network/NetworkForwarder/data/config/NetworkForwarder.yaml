@@ -30,6 +30,7 @@ targets:
     message.vision.VisualMesh: false
     message.vision.FieldIntersections: true
     message.vision.BoundingBoxes: true
+    message.vision.OutOfFieldFeatures: true
 
     # Localisation Messages
     message.localisation.Ball: true

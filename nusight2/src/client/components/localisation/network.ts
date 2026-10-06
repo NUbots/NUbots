@@ -72,6 +72,9 @@ export class LocalisationNetwork {
     // Keep field-frame orientation fixed across team colours.
     robot.Hfw = Matrix4.from(field.Hfw);
 
+    // Rz(pi) acts as -I on the (x, y) block, so the position covariance is invariant under the
+    // red-team flip applied to Hfw above and needs no corresponding transform.
+    robot.covariance = Matrix3.from(field.covariance);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
     robot.associationLines = field.associationLines.map((line) => ({
       start: Vector3.from(line.start),
@@ -199,7 +202,6 @@ export class LocalisationNetwork {
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Hrw = Matrix4.from(sensors.Hrw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
-
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!;
     robot.motors.rightShoulderRoll.angle = sensors.servo[2].presentPosition!;
@@ -221,7 +223,6 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!;
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!;
   };
-
   @action.bound
   private onWalkState(robotModel: RobotModel, walk_state: WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
