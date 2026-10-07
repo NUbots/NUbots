@@ -1,6 +1,10 @@
 #include "K1GetUpPolicy.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <numeric>
+#include <stdexcept>
 #include <vector>
 
 #include "extension/Configuration.hpp"
@@ -42,6 +46,13 @@ namespace module::skill {
             return out;
         }
 
+        /// Number of elements in a tensor shape
+        std::size_t numel(const std::vector<int64_t>& shape) {
+            return std::accumulate(shape.begin(), shape.end(), std::size_t{1}, [](std::size_t n, int64_t d) {
+                return n * static_cast<std::size_t>(d);
+            });
+        }
+
     }  // namespace
 
     K1GetUpPolicy::K1GetUpPolicy(std::unique_ptr<NUClear::Environment> environment)
@@ -51,7 +62,7 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             cfg.model_path          = config["model_path"].as<std::string>();
-            cfg.use_tensorrt          = config["use_tensorrt"].as<bool>();
+            cfg.device              = config["device"].as<std::string>();
             cfg.upright_angle       = config["upright_angle"].as<double>();
             cfg.upright_time        = config["upright_time"].as<double>();
             cfg.knee_extended_angle = config["knee_extended_angle"].as<double>();
@@ -66,24 +77,34 @@ namespace module::skill {
                 s *= action_scale;
             }
 
+            // GPU first, CPU as the fallback so a machine without a CUDA device (or with a driver
+            // mismatch) still runs. fp16 is off, as for the other policies: the actions drive servos
+            // directly.
+            model_loaded = false;
+            onnx_rt.reset();
             try {
+                std::string device = cfg.device;
                 try {
-                    trt          = std::make_unique<utility::vision::TensorRT>(cfg.model_path);
-                    use_tensorrt = true;
-                    log<INFO>("Loaded get-up policy with TensorRT", cfg.model_path);
+                    onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
                 }
-                catch (const std::exception& trt_error) {
-                    trt.reset();
-                    use_tensorrt = false;
-                    log<WARN>("TensorRT unavailable for get-up policy, falling back to OpenVINO", trt_error.what());
-                    compiled_model = core.compile_model(cfg.model_path, "CPU");
-                    infer_request  = compiled_model.create_infer_request();
-                    log<INFO>("Loaded get-up policy with OpenVINO", cfg.model_path);
+                catch (const std::exception& e) {
+                    if (device != "gpu") {
+                        throw;
+                    }
+                    log<INFO>("TensorRT unavailable, falling back to the CPU:", e.what());
+                    device  = "cpu";
+                    onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
                 }
-                model_loaded   = true;
+                if (numel(onnx_rt->input_shape()) != OBS_DIM || numel(onnx_rt->output_shape()) != JOINT_COUNT) {
+                    throw std::runtime_error("ONNX I/O is " + std::to_string(numel(onnx_rt->input_shape())) + " -> "
+                                             + std::to_string(numel(onnx_rt->output_shape())) + " but expected "
+                                             + std::to_string(OBS_DIM) + " -> " + std::to_string(JOINT_COUNT));
+                }
+                model_loaded = true;
+                log<INFO>("Loaded get-up policy on", device, cfg.model_path);
             }
             catch (const std::exception& e) {
-                model_loaded = false;
+                onnx_rt.reset();
                 log<ERROR>("Failed to load get-up policy", cfg.model_path, e.what());
             }
         });
@@ -153,22 +174,8 @@ namespace module::skill {
                 }
 
                 // --- inference ---
-                if (use_tensorrt && trt != nullptr) {
-                    const std::vector<float> input(obs.begin(), obs.end());
-                    const std::vector<float> action = trt->infer(input);
-                    if (action.size() != JOINT_COUNT) {
-                        throw std::runtime_error("Get-up policy TensorRT output size mismatch");
-                    }
-                    std::copy(action.begin(), action.end(), last_action.begin());
-                }
-                else {
-                    ov::Tensor input(ov::element::f32, {1, OBS_DIM});
-                    std::copy(obs.begin(), obs.end(), input.data<float>());
-                    infer_request.set_input_tensor(input);
-                    infer_request.infer();
-                    const float* action = infer_request.get_output_tensor(0).data<float>();
-                    std::copy(action, action + JOINT_COUNT, last_action.begin());
-                }
+                const std::vector<float> action = onnx_rt->infer(std::vector<float>(obs.begin(), obs.end()));
+                std::copy(action.begin(), action.end(), last_action.begin());
 
                 // --- action -> low-level joint command: offsets on the CURRENT pose ---
                 auto low      = std::make_unique<BoosterLowCmd>();

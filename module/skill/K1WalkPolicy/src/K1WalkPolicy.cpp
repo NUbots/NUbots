@@ -126,7 +126,7 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             cfg.model_path             = config["model_path"].as<std::string>();
-            cfg.use_tensorrt           = config["use_tensorrt"].as<bool>();
+            cfg.device                 = config["device"].as<std::string>();
             cfg.history_window         = config["history_window"].as<std::size_t>();
             cfg.gait_clock             = config["gait_clock"].as<bool>();
             cfg.gait_period            = config["gait_period"].as<double>();
@@ -501,7 +501,7 @@ namespace module::skill {
 
     void K1WalkPolicy::load_model() {
         model_loaded = false;
-        trt.reset();
+        onnx_rt.reset();
 
         const std::size_t expected_in  = cfg.history_window * frame_dim();
         const std::size_t expected_out = cfg.policy_joints.size();
@@ -514,48 +514,33 @@ namespace module::skill {
             }
         };
 
-        // TensorRT first, OpenVINO CPU as the fallback. A contract mismatch is fatal either way:
-        // falling back would only load the same wrong graph on a different device.
-        if (cfg.use_tensorrt) {
+        // A contract mismatch is fatal on any device: falling back would only load the same wrong
+        // graph on the CPU. FP16 is off, see K1WalkPolicy.yaml.
+        try {
+            std::string device = cfg.device;
             try {
-                trt = std::make_unique<utility::vision::TensorRT>(cfg.model_path, false);
+                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
             }
             catch (const std::exception& e) {
-                trt.reset();
-                log<INFO>("TensorRT unavailable, falling back to OpenVINO:", e.what());
+                if (device != "gpu") {
+                    throw;
+                }
+                log<INFO>("TensorRT unavailable, falling back to the CPU:", e.what());
+                device  = "cpu";
+                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
             }
-        }
-
-        try {
-            if (trt) {
-                check(numel(trt->input_shape()), numel(trt->output_shape()));
-                log<INFO>("Loaded walk policy (TensorRT)", cfg.model_path);
-            }
-            else {
-                compiled_model = core.compile_model(cfg.model_path, "CPU");
-                check(numel(compiled_model.input().get_shape()), numel(compiled_model.output().get_shape()));
-                infer_request = compiled_model.create_infer_request();
-                log<INFO>("Loaded walk policy (OpenVINO CPU)", cfg.model_path);
-            }
+            check(numel(onnx_rt->input_shape()), numel(onnx_rt->output_shape()));
             model_loaded = true;
+            log<INFO>("Loaded walk policy on", device, cfg.model_path);
         }
         catch (const std::exception& e) {
-            trt.reset();
+            onnx_rt.reset();
             log<ERROR>("Failed to load walk policy", cfg.model_path, e.what());
         }
     }
 
     std::vector<float> K1WalkPolicy::infer(const std::vector<float>& input) {
-        if (trt) {
-            return trt->infer(input);
-        }
-        ov::Tensor tensor(ov::element::f32, {1, input.size()});
-        std::copy(input.begin(), input.end(), tensor.data<float>());
-        infer_request.set_input_tensor(tensor);
-        infer_request.infer();
-        const ov::Tensor output = infer_request.get_output_tensor(0);
-        const float* data       = output.data<float>();
-        return std::vector<float>(data, data + output.get_size());
+        return onnx_rt->infer(input);
     }
 
 }  // namespace module::skill

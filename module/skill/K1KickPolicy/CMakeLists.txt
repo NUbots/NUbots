@@ -24,16 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-  message(STATUS "Cross compiling, using OpenVINO_DIR for target system")
-  set(OpenVINO_DIR /l4t/targetfs/usr/local/runtime/cmake)
-  set(TBB_DIR /l4t/targetfs/usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
-else()
-  set(OpenVINO_DIR /usr/local/runtime/cmake)
-  set(TBB_DIR /usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
-endif()
-find_package(OpenVINO REQUIRED)
-find_package(TBB REQUIRED)
 
 # Build our NUClear module
-nuclear_module(LIBRARIES TBB::tbb openvino::runtime)
+nuclear_module()

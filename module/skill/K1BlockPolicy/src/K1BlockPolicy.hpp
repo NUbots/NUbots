@@ -32,13 +32,12 @@
 #include <deque>
 #include <memory>
 #include <nuclear>
-#include <openvino/openvino.hpp>
 #include <string>
 #include <vector>
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/vision/TensorRT.hpp"
+#include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::skill {
 
@@ -66,9 +65,9 @@ namespace module::skill {
     private:
         struct Config {
             std::string model_path;
-            /// Run inference with TensorRT (GPU), falling back to OpenVINO CPU when false or when
-            /// the engine cannot be built
-            bool use_tensorrt = false;
+            /// Inference device: "gpu" (ONNX Runtime's TensorRT execution provider, falling back to
+            /// the CPU when it cannot be set up) or "cpu"
+            std::string device = "cpu";
             /// Number of frames in the observation window fed to the ONNX (1 = no history). The
             /// input is time-major, oldest frame first: [1, history_window * frame_dim]
             std::size_t history_window = 1;
@@ -104,11 +103,8 @@ namespace module::skill {
         /// Run the network on a flat observation window, returning n_policy_joints actions
         std::vector<float> infer(const std::vector<float>& input);
 
-        /// TensorRT engine, nullptr when running on the OpenVINO fallback
-        std::unique_ptr<utility::vision::TensorRT> trt{};
-        ov::Core core{};
-        ov::CompiledModel compiled_model;
-        ov::InferRequest infer_request;
+        /// ONNX Runtime session for the policy, nullptr until a model loads
+        std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
         bool model_loaded = false;
 
         /// Previous raw policy output (policy order), fed back as the last-action observation

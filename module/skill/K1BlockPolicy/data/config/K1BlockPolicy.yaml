@@ -8,9 +8,11 @@ log_level: INFO
 # smoke-test the hand-off, CUSTOM mode, head tracking and release before a real policy lands.
 model_path: "k1_block_hold_stance_T1.onnx"
 
-# Run inference on the GPU with TensorRT. Falls back to OpenVINO CPU automatically when no CUDA
-# device is visible, so this is safe to leave on.
-use_tensorrt: true
+# Inference device: cpu, or gpu (ONNX Runtime's TensorRT execution provider). gpu falls back
+# to the CPU automatically when TensorRT cannot be set up, e.g. no CUDA device is visible, so
+# this is safe to leave on. The engine is built FP32: the graph is small, so FP16 buys nothing
+# and the actions drive servos directly.
+device: gpu
 
 # Frames in the observation window (1 = no history). Must match the ONNX input:
 # [1, history_window * (6 + 3 * len(policy_joints) + 4)].

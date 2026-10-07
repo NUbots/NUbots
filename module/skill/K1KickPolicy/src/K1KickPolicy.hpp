@@ -7,12 +7,11 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
-#include <openvino/openvino.hpp>
 #include <string>
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/vision/TensorRT.hpp"
+#include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::skill {
 
@@ -39,9 +38,9 @@ namespace module::skill {
     private:
         struct Config {
             std::string model_path;
-            /// Run inference with TensorRT (GPU). Falls back to OpenVINO CPU when false, or
-            /// when the engine cannot be built (no CUDA device, driver mismatch, ...).
-            bool use_tensorrt = false;
+            /// Inference device: "gpu" (ONNX Runtime's TensorRT execution provider, falling back to
+            /// the CPU when it cannot be set up, e.g. no CUDA device) or "cpu"
+            std::string device = "cpu";
             /// @brief how long to run the policy before the Kick Task reports Done (s)
             double kick_duration = 4.0;
             /// @brief ignore ball estimates below this localisation confidence
@@ -67,11 +66,8 @@ namespace module::skill {
             std::array<double, JOINT_COUNT> default_pose{};
         } cfg;
 
-        /// TensorRT engine, nullptr when running on the OpenVINO fallback
-        std::unique_ptr<utility::vision::TensorRT> trt{};
-        ov::Core core{};
-        ov::CompiledModel compiled_model;
-        ov::InferRequest infer_request;
+        /// ONNX Runtime session for the policy, nullptr until a model loads
+        std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
         bool model_loaded = false;
 
         std::array<float, JOINT_COUNT> last_action{};

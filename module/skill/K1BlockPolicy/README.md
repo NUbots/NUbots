@@ -80,7 +80,7 @@ The head (indices 0–1) is **not** policy controlled. It tracks the latest `Boo
 | Output | `actions` | `[1, 20]` | float32 |
 
 - The observation normalisation is baked into the graph, and the output is the deterministic action. mjlab's exporter does both.
-- The module checks both sizes on load and refuses a mismatched graph, even on the OpenVINO fallback.
+- The module checks both sizes on load and refuses a mismatched graph, even on the CPU fallback.
 
 ### Action
 
@@ -107,4 +107,4 @@ The head (indices 0–1) is **not** policy controlled. It tracks the latest `Boo
 ## Dependencies
 
 - Director
-- OpenVINO, and TensorRT through `utility::vision::TensorRT`
+- ONNX Runtime through `utility::onnx::ONNXRuntime`

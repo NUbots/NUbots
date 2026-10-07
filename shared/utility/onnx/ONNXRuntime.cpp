@@ -87,7 +87,7 @@ namespace utility::onnx {
         size_t output_count = 0;
     };
 
-    ONNXRuntime::ONNXRuntime(const std::string& onnx_path, const std::string& device_type)
+    ONNXRuntime::ONNXRuntime(const std::string& onnx_path, const std::string& device_type, bool fp16)
         : impl(std::make_unique<Impl>()) {
         // The Env registers ORT's default logger, which loading the TensorRT EP below logs through
         Ort::Env& env = shared_env();
@@ -101,6 +101,7 @@ namespace utility::onnx {
             std::unique_ptr<OrtTensorRTProviderOptionsV2, decltype(api.ReleaseTensorRTProviderOptions)> trt_guard(
                 trt,
                 api.ReleaseTensorRTProviderOptions);
+            option_values[0] = fp16 ? "1" : "0";  // trt_fp16_enable
             Ort::ThrowOnError(api.UpdateTensorRTProviderOptions(trt, option_keys.data(), option_values.data(), option_keys.size()));
             session_options.AppendExecutionProvider_TensorRT_V2(*trt);
         }

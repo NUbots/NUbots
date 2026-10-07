@@ -28,8 +28,8 @@ stack, and the robot/simulator only tracks servo joint commands.
 
 The observation/action contract is **configured, not hardcoded**, because the checkpoints
 that have flown on this robot do not share one. `K1WalkPolicy.yaml` pins it and
-`load_model()` refuses any graph whose input/output element counts disagree, on TensorRT and
-on the OpenVINO fallback alike.
+`load_model()` refuses any graph whose input/output element counts disagree, on the GPU and
+on the CPU fallback alike.
 
 The shipped checkpoint is trained in
 [booster_mjlab](https://github.com/IntelligentRoboticsLab/booster_mjlab), task

@@ -16,11 +16,12 @@ log_level: INFO
 # and default pose. See README.md.
 model_path: "k1_walk_mjlab_poi732yy_29999.onnx"
 
-# Run inference on the GPU with TensorRT. Falls back to OpenVINO CPU automatically when no
-# CUDA device is visible (the container needs --gpus), so this is safe to leave on. The
-# engine is built FP32: the graph is under a megabyte, so FP16 buys nothing and the baked-in
-# normalizer divides by per-element standard deviations.
-use_tensorrt: true
+# Inference device: cpu, or gpu (ONNX Runtime's TensorRT execution provider). gpu falls back
+# to the CPU automatically when TensorRT cannot be set up, e.g. no CUDA device is visible (the
+# container needs --gpus), so this is safe to leave on. The engine is built FP32: the graph is
+# under a megabyte, so FP16 buys nothing and the baked-in normalizer divides by per-element
+# standard deviations.
+device: gpu
 
 # Observation window length, in control steps. This policy has no observation history
 # (mjlab observation_terms_history_length is 0 for every term), so the input is a single
