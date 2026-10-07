@@ -110,8 +110,7 @@ namespace module::planning::walk_path {
             }
         }
 
-        result.velocity.z() =
-            std::clamp(p.k_theta * result.desired_heading, -p.max_velocity.z(), p.max_velocity.z());
+        result.velocity.z() = std::clamp(p.k_theta * result.desired_heading, -p.max_velocity.z(), p.max_velocity.z());
 
         return result;
     }
@@ -136,27 +135,34 @@ namespace module::planning::walk_path {
         return {x, v.y() * s, angular};
     }
 
-    /// @brief Applies the walk controller's command dead-zone per axis: commands below zero_tolerance are snapped to
-    /// zero, other commands too small for the controller to respond to are bumped up to min_velocity, and everything
-    /// is clamped to max_velocity.
+    /// @brief Applies the walk controller's command dead-zone. The RL walk stands still for any command too small to
+    /// start stepping, and never turns on the spot: a pure rotation leaves it standing however fast it is.
+    /// - Axes below zero_tolerance are snapped to zero, and an all-zero command is a stop.
+    /// - A translation inside the ellipse with semi-axes min_velocity.x and min_velocity.y is scaled up onto it,
+    ///   preserving the direction of travel. Once stepping, the walk tracks small turns, so vtheta passes through.
+    /// - A turn with no translation is an on-the-spot turn: it gets the forward velocity turn_velocity_x the walk needs
+    ///   to step, and at least min_velocity.z.
+    /// Everything is clamped to max_velocity.
     inline Eigen::Vector3d apply_dead_zone(const Eigen::Vector3d& v,
                                            const Eigen::Vector3d& min_velocity,
                                            const Eigen::Vector3d& zero_tolerance,
-                                           const Eigen::Vector3d& max_velocity) {
-        Eigen::Vector3d out = Eigen::Vector3d::Zero();
-        for (int i = 0; i < 3; ++i) {
-            const double u = v(i);
-            if (std::abs(u) < zero_tolerance(i)) {
-                out(i) = 0.0;
-            }
-            else if (std::abs(u) < min_velocity(i)) {
-                out(i) = std::copysign(min_velocity(i), u);
-            }
-            else {
-                out(i) = std::clamp(u, -max_velocity(i), max_velocity(i));
+                                           const Eigen::Vector3d& max_velocity,
+                                           const double turn_velocity_x) {
+        Eigen::Vector3d out = (v.array().abs() < zero_tolerance.array()).select(0.0, v);
+
+        if (!out.head<2>().isZero()) {
+            // Elliptical norm of the translation relative to the minimum: below 1 the walk would not step
+            const double e = std::hypot(out.x() / min_velocity.x(), out.y() / min_velocity.y());
+            if (e < 1.0) {
+                out.head<2>() /= e;
             }
         }
-        return out;
+        else if (out.z() != 0.0) {
+            out.x() = turn_velocity_x;
+            out.z() = std::copysign(std::max(std::abs(out.z()), min_velocity.z()), out.z());
+        }
+
+        return out.cwiseMax(-max_velocity).cwiseMin(max_velocity);
     }
 
 }  // namespace module::planning::walk_path

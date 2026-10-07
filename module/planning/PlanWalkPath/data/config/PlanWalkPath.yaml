@@ -8,8 +8,12 @@ log_level: INFO
 max_velocity: [0.8, 0.5, 1.0]
 # Maximum backward speed (m/s), fast backward walking is unstable
 max_backward_velocity: 0.15
-# Minimum effective command per axis, smaller nonzero commands are bumped up to these
-min_velocity: [0.3, 0.3, 0.25]
+# The walk policy (poi732yy) stands still for a command too small to start stepping, measured from standing in NUSim
+# (2026-10-07): vx 0.3 stands and 0.35 delivers 0.29, vy 0.4 stands and 0.45 delivers 0.46, and a pure rotation stands
+# however fast (even 1.5 rad/s). It turns on the spot given a little forward velocity: (0.2, 0, 1.0) delivers
+# (0.11, 0, 0.91). Translations are bumped onto the ellipse with semi-axes min_velocity x and y, and a turn with no
+# translation gets rotate_velocity_x and at least min_velocity z.
+min_velocity: [0.35, 0.45, 1.0]
 # Smoothed commands with per-axis magnitude below this are treated as a stop
 zero_tolerance: [0.05, 0.05, 0.05]
 
@@ -22,9 +26,9 @@ min_align_radius: 0.4 # Radius [m] within which fully aligned with the target he
 max_angle_error: 45 * pi / 180 # Heading error above which we only rotate on the spot
 min_angle_error: 20 * pi / 180 # Heading error below which full forward speed is allowed
 
-# Rotate on the spot tuning values
+# Rotate on the spot tuning values. rotate_velocity_x is also given to any turn with no translation (see min_velocity)
 rotate_velocity: 1.0
-rotate_velocity_x: 0.0
+rotate_velocity_x: 0.2
 rotate_velocity_y: 0.0
 
 # Rotate around ball tuning values. Orbit kinematics give vy = -vtheta * pivot_radius, keep

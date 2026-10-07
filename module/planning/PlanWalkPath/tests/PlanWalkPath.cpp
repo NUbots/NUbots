@@ -142,23 +142,58 @@ TEST_CASE("Velocity goes to zero at the target", "[walk_to_velocity]") {
     CHECK(result.velocity.norm() == Approx(0.0));
 }
 
-TEST_CASE("Dead zone snaps, bumps and clamps per axis", "[apply_dead_zone]") {
-    const Eigen::Vector3d min_v(0.3, 0.3, 0.25);
+TEST_CASE("Dead zone snaps, bumps and clamps translation", "[apply_dead_zone]") {
+    const Eigen::Vector3d min_v(0.35, 0.45, 1.0);
+    const Eigen::Vector3d zero_tol(0.05, 0.05, 0.05);
+    const Eigen::Vector3d max_v(1.0, 0.5, 1.0);
+    const double turn_x = 0.2;
+
+    auto dz = [&](double x) {
+        return apply_dead_zone(Eigen::Vector3d(x, 0.0, 0.0), min_v, zero_tol, max_v, turn_x).x();
+    };
+
+    CHECK(dz(0.0) == Approx(0.0));     // a stop stays a stop
+    CHECK(dz(0.03) == Approx(0.0));    // below zero tolerance -> stop
+    CHECK(dz(0.1) == Approx(0.35));    // in the dead zone -> bumped to minimum
+    CHECK(dz(-0.1) == Approx(-0.35));  // sign preserved
+    CHECK(dz(0.5) == Approx(0.5));     // normal command passes through
+    CHECK(dz(1.5) == Approx(1.0));     // clamped to maximum
+    CHECK(apply_dead_zone(Eigen::Vector3d(0.03, 0.0, 0.03), min_v, zero_tol, max_v, turn_x).isZero());
+}
+
+TEST_CASE("Dead zone bumps a small translation onto the minimum ellipse, keeping its direction", "[apply_dead_zone]") {
+    const Eigen::Vector3d min_v(0.35, 0.45, 1.0);
     const Eigen::Vector3d zero_tol(0.05, 0.05, 0.05);
     const Eigen::Vector3d max_v(1.0, 0.5, 1.0);
 
-    auto dz = [&](double x) { return apply_dead_zone(Eigen::Vector3d(x, 0.0, 0.0), min_v, zero_tol, max_v).x(); };
+    const Eigen::Vector3d in(0.2, 0.06, 0.1);
+    const Eigen::Vector3d out = apply_dead_zone(in, min_v, zero_tol, max_v, 0.2);
 
-    CHECK(dz(0.0) == Approx(0.0));
-    CHECK(dz(0.03) == Approx(0.0));    // below zero tolerance -> stop
-    CHECK(dz(0.1) == Approx(0.3));     // in the dead zone -> bumped to minimum
-    CHECK(dz(-0.1) == Approx(-0.3));   // sign preserved
-    CHECK(dz(0.5) == Approx(0.5));     // normal command passes through
-    CHECK(dz(1.5) == Approx(1.0));     // clamped to maximum
+    // On the ellipse
+    CHECK(std::hypot(out.x() / min_v.x(), out.y() / min_v.y()) == Approx(1.0));
+    // Same direction of travel
+    CHECK(std::atan2(out.y(), out.x()) == Approx(std::atan2(in.y(), in.x())));
+    // The walk tracks small turns once stepping, so the turn is not bumped
+    CHECK(out.z() == Approx(0.1));
 
-    // Each axis uses its own thresholds
-    const Eigen::Vector3d out = apply_dead_zone(Eigen::Vector3d(0.1, 0.1, 0.1), min_v, zero_tol, max_v);
-    CHECK(out.z() == Approx(0.25));
+    // A translation already outside the ellipse passes through
+    const Eigen::Vector3d fast(0.4, 0.1, -0.2);
+    CHECK((apply_dead_zone(fast, min_v, zero_tol, max_v, 0.2) - fast).norm() == Approx(0.0));
+}
+
+TEST_CASE("Dead zone turns a pure rotation into an on-the-spot turn the walk steps for", "[apply_dead_zone]") {
+    const Eigen::Vector3d min_v(0.35, 0.45, 1.0);
+    const Eigen::Vector3d zero_tol(0.05, 0.05, 0.05);
+    const Eigen::Vector3d max_v(1.0, 0.5, 1.0);
+
+    const Eigen::Vector3d left = apply_dead_zone(Eigen::Vector3d(0.02, 0.0, 0.3), min_v, zero_tol, max_v, 0.2);
+    CHECK(left.x() == Approx(0.2));
+    CHECK(left.y() == Approx(0.0));
+    CHECK(left.z() == Approx(1.0));
+
+    const Eigen::Vector3d right = apply_dead_zone(Eigen::Vector3d(0.0, 0.0, -0.6), min_v, zero_tol, max_v, 0.2);
+    CHECK(right.x() == Approx(0.2));
+    CHECK(right.z() == Approx(-1.0));
 }
 
 TEST_CASE("Constrain velocity preserves translation direction when scaling", "[constrain_velocity]") {
