@@ -89,6 +89,10 @@ namespace module::strategy {
                 else {
                     log<DEBUG>("Walking to field position");
                     emit<Task>(std::make_unique<WalkTo>(Hrd));
+                    // Walking again (pushed off, or a new target), so go back to the tighter threshold to stop at
+                    current_threshold = walk_to_field_position.stop_threshold_override > 0.0
+                                            ? walk_to_field_position.stop_threshold_override
+                                            : cfg.stop_threshold;
                 }
             });
     }
