@@ -24,33 +24,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_VISION_TENSORRT_HPP
-#define UTILITY_VISION_TENSORRT_HPP
+#ifndef UTILITY_ONNX_ONNXRUNTIME_HPP
+#define UTILITY_ONNX_ONNXRUNTIME_HPP
 
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace utility::vision {
+namespace utility::onnx {
 
-    /// Runs inference with TensorRT on an engine built from an ONNX model.
-    ///
-    /// Serialized engine plans are only valid for the exact GPU and TensorRT build that created them, so rather
-    /// than shipping precompiled plans the engine is built from the ONNX model on the device it will run on. The
-    /// resulting plan is cached on disk next to the model (keyed on the TensorRT version), so the build cost is
-    /// only paid the first time a model is loaded.
-    class TensorRT {
+    /// Runs inference with ONNX Runtime on a single-input, single-output model
+    class ONNXRuntime {
     public:
-        /// Build (or load from cache) a TensorRT engine for the given ONNX model.
+        /// Load an ONNX model for inference
         /// @param onnx_path Path to the ONNX model file
-        /// @param fp16 Build the engine with FP16 precision if the device supports it
-        /// @throws std::runtime_error if the model cannot be parsed or the engine cannot be built
-        explicit TensorRT(const std::string& onnx_path, bool fp16 = true);
-        ~TensorRT();
+        /// @param device_type "cpu", or "gpu" to use the TensorRT execution provider
+        /// @throws std::runtime_error if the model cannot be loaded or device_type is unknown
+        explicit ONNXRuntime(const std::string& onnx_path, const std::string& device_type);
+        ~ONNXRuntime();
 
-        TensorRT(const TensorRT&)            = delete;
-        TensorRT& operator=(const TensorRT&) = delete;
+        ONNXRuntime(const ONNXRuntime&)            = delete;
+        ONNXRuntime& operator=(const ONNXRuntime&) = delete;
 
         /// Shape of the model's input tensor, e.g. {1, 3, 640, 640}
         [[nodiscard]] const std::vector<int64_t>& input_shape() const;
@@ -58,7 +53,7 @@ namespace utility::vision {
         /// Shape of the model's output tensor, e.g. {1, 10, 8400}
         [[nodiscard]] const std::vector<int64_t>& output_shape() const;
 
-        /// Run inference on the engine
+        /// Run inference on the model
         /// @param input Input tensor data, must match the input tensor's element count
         /// @return Output tensor data
         std::vector<float> infer(const std::vector<float>& input);
@@ -66,8 +61,25 @@ namespace utility::vision {
     private:
         struct Impl;
         std::unique_ptr<Impl> impl;
+        // The API for the TensorRT EP takes in option keys and values as separate arrays
+        // Configuration options are available at:
+        // https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html#configurations
+        std::vector<const char*> option_keys = {
+            "trt_fp16_enable",
+            "trt_engine_cache_enable",
+            "trt_engine_cache_path",
+            "trt_timing_cache_enable",
+            "trt_timing_cache_path",
+        };
+        std::vector<const char*> option_values = {
+            "1",
+            "1",
+            "/tmp/onnx_trt_cache",
+            "1",
+            "/tmp/onnx_trt_cache",
+        };
     };
 
-}  // namespace utility::vision
+}  // namespace utility::onnx
 
-#endif  // UTILITY_VISION_TENSORRT_HPP
+#endif  // UTILITY_ONNX_ONNXRUNTIME_HPP

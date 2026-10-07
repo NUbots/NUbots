@@ -48,8 +48,7 @@ namespace module::input {
     class K1Camera : public NUClear::Reactor {
     private:
         struct CameraContext {
-            /// @brief DDS topic carrying sensor_msgs/Image. This is the ROS 2 topic name prefixed
-            /// with "rt/", e.g. "rt/boostercamera/head/rgb".
+            /// @brief DDS topic carrying sensor_msgs/Image.
             std::string image_topic;
             /// @brief DDS topic carrying sensor_msgs/CameraInfo, always image_topic + "/camera_info".
             std::string info_topic;
@@ -59,30 +58,26 @@ namespace module::input {
             booster::robot::ChannelPtr<sensor_msgs::msg::Image> image_channel;
             booster::robot::ChannelPtr<sensor_msgs::msg::CameraInfo> info_channel;
 
-            /// @brief Lens parameters, seeded from configuration and overwritten once CameraInfo
-            /// arrives on info_topic. Read by the image callback, written by the CameraInfo callback.
+            /// @brief Lens parameters
             message::input::Image::Lens lens;
             std::mutex lens_mutex;
             /// @brief Whether CameraInfo has ever arrived, so we can warn if the topic is absent.
             std::atomic<bool> have_camera_info{false};
-            /// @brief Whether we have already warned about an out of range capture timestamp, so a
-            /// clock mismatch does not spam the log at frame rate.
+            /// @brief Whether we have already warned about an out of range capture timestamp
             std::atomic<bool> warned_about_timestamp{false};
         };
 
         std::vector<std::unique_ptr<CameraContext>> cameras;
-        /// @brief Whether the DDS channels have been created, so a config reload does not
-        /// create a second set of readers for the same topics.
+        /// @brief Whether the DDS channels have been created
         bool channels_created = false;
 
         std::mutex sensors_mutex;
-        /// @brief Recent world to camera transforms, so each image can be matched to the transform
-        /// closest to its capture time. Ordered by time, so expired entries are always a prefix.
+        /// @brief Recent world to camera transforms
         std::deque<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hcws;
 
         /// @brief Handle a sensor_msgs/Image sample, converting and emitting it as an Image.
         void image_handler(CameraContext& ctx, const void* msg);
-        /// @brief Handle a sensor_msgs/CameraInfo sample, updating the cached lens parameters.
+        /// @brief Handle a sensor_msgs/CameraInfo sample.
         void camera_info_handler(CameraContext& ctx, const void* msg);
         /// @brief The capture time from the message header, or our receive time if the clocks disagree.
         NUClear::clock::time_point capture_time(CameraContext& ctx, const sensor_msgs::msg::Image& image);

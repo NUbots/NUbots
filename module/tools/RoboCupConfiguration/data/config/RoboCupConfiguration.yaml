@@ -3,10 +3,10 @@ log_level: INFO
 
 # Map of possible ssid and passwords
 wifi_networks:
-  HSL_E: "HSL?!HSL?!"
-  HSL_F: "HSL?!HSL?!"
-  HSL_G: "HSL?!HSL?!"
-  HSL_H: "HSL?!HSL?!"
+  # HSL_E: "HSL?!HSL?!"
+  # HSL_F: "HSL?!HSL?!"
+  # HSL_G: "HSL?!HSL?!"
+  # HSL_H: "HSL?!HSL?!"
   Football-4-1: "12345678"
   Football-4-2: "12345678"
   FBL-F5V5-1: "12345678"

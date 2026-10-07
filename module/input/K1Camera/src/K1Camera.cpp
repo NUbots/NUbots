@@ -65,9 +65,6 @@ namespace module::input {
     /// @brief How long to wait for CameraInfo before warning that the fallback lens is in use.
     static constexpr std::chrono::seconds CAMERA_INFO_TIMEOUT{5};
 
-    /// @brief Emitted with a delay at startup to trigger the one shot CameraInfo arrival check.
-    struct CheckCameraInfo {};
-
     /// @brief Map a ROS sensor_msgs/Image encoding string to the FOURCC code NUbots uses.
     static uint32_t ros_encoding_to_fourcc(const std::string& enc) {
         // clang-format off
@@ -193,9 +190,8 @@ namespace module::input {
 
         auto out = std::make_unique<Image>();
 
+        // Convert NV12 to RGB3
         if (format == fourcc("NV12")) {
-            // NV12 is the K1 head camera's native format. Convert to RGB once here so downstream
-            // vision modules get the full colour information.
             const std::size_t expected = std::size_t(width) * height * 3 / 2;
             if (bytes.size() < expected) {
                 log<WARN>(fmt::format("Dropping truncated NV12 frame from '{}': {} bytes, expected {}",
@@ -205,8 +201,7 @@ namespace module::input {
                 return;
             }
             // Size the destination first and point a Mat at it, so cvtColor writes the converted
-            // pixels straight into the message. cv::Mat::create is a no-op when the Mat already
-            // matches the requested size and type, so this saves a full frame allocate and copy.
+            // pixels straight into the message
             out->data.resize(std::size_t(width) * height * 3);
             const cv::Mat nv12(int(height * 3 / 2), int(width), CV_8UC1, const_cast<uint8_t*>(bytes.data()));
             cv::Mat rgb(int(height), int(width), CV_8UC3, out->data.data());
@@ -240,8 +235,7 @@ namespace module::input {
         on<Configuration>("K1Camera.yaml").then([this](const Configuration& cfg) {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
-            // DDS readers are created once at startup, so a reload cannot re-point them at new
-            // topics. Ignore the camera list rather than silently leaking a second set of readers.
+            // Can't reconfigure the readers once the topics have been subscribed to
             if (channels_created) {
                 log<WARN>("Camera topics changed but readers already exist, restart to apply");
                 return;
@@ -255,17 +249,6 @@ namespace module::input {
                 ctx->camera_name = entry["name"].as<std::string>();
                 ctx->id          = entry["id"].as<uint32_t>();
 
-                // Optional, and used only until CameraInfo arrives on info_topic. Unlike
-                // module/input/Camera these values are already normalised by the image width, so
-                // there is no renormalisation step here.
-                if (const auto& lens = entry["lens"]) {
-                    ctx->lens = Image::Lens{lens["projection"].as<std::string>(),
-                                            float(lens["focal_length"].as<Expression>()),
-                                            float(lens["fov"].as<Expression>()),
-                                            Eigen::Vector2f(lens["centre"].as<Expression>()),
-                                            Eigen::Vector2f(lens["k"].as<Expression>())};
-                }
-
                 cameras.push_back(std::move(ctx));
             }
         });
@@ -273,10 +256,7 @@ namespace module::input {
         on<Startup>().then("Subscribe to cameras", [this] {
             ensure_channel_factory();
 
-            // A camera stream is high rate and each frame is large, so give each its own executor
-            // thread and only ever keep the newest frame. Sharing the default executor would delay
-            // the other DDS subscribers in this process (HardwareIO's servo state), and a deeper
-            // queue would trade dropped frames for growing latency.
+            // Setup DDS reader options
             DdsReaderExecutorOptions image_options;
             image_options.queue_capacity  = 1;
             image_options.overflow_policy = DdsExecutorOverflowPolicy::kLatestOnly;
@@ -298,19 +278,6 @@ namespace module::input {
             }
 
             channels_created = true;
-            emit<Scope::DELAY>(std::make_unique<CheckCameraInfo>(), CAMERA_INFO_TIMEOUT);
-        });
-
-        // One shot check that the intrinsics we are using came from the robot and not the fallback
-        on<Trigger<CheckCameraInfo>>().then("Check CameraInfo", [this] {
-            for (const auto& ctx : cameras) {
-                if (!ctx->have_camera_info) {
-                    log<WARN>(fmt::format("No CameraInfo on '{}' after {} s, using the lens parameters from"
-                                          " K1Camera.yaml. Projection will be wrong if they are not calibrated.",
-                                          ctx->info_topic,
-                                          CAMERA_INFO_TIMEOUT.count()));
-                }
-            }
         });
 
         on<Trigger<Sensors>>().then("Buffer Hcw", [this](const Sensors& sensors) {

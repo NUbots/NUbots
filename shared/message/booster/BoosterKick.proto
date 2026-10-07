@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package message.booster;
+
+// Kick reference for the Booster controller's onboard kick behaviour (rt/kick_ball).
+// Only accepted while a BoosterVisualKick is active. Fields mirror the SDK's brain::msg::Kick.
+message BoosterKick {
+    double x                    = 1;  // Ball position relative to the robot, x (m)
+    double y                    = 2;  // Ball position relative to the robot, y (m)
+    double dir                  = 3;  // Desired kick direction relative to the robot (rad)
+    double goal_x               = 4;  // Target goal position relative to the robot, x (m)
+    double goal_y               = 5;  // Target goal position relative to the robot, y (m)
+    double robot_theta_to_field = 6;  // Robot heading relative to the field (rad)
+    double power                = 7;  // Desired kick power/range
+}

@@ -20,6 +20,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
+    using message::booster::BoosterKick;
     using message::booster::BoosterLowCmd;
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
@@ -95,9 +96,34 @@ namespace module::platform::Booster {
 
             low_cmd_channel =
                 ChannelFactory::Instance()->CreateSendChannel<booster_interface::msg::LowCmd>("rt/joint_ctrl");
+
+            kick_channel = ChannelFactory::Instance()->CreateSendChannel<brain::msg::Kick>(
+                booster::robot::b1::kTopicKickReference);
         });
 
-        on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
+        on<Shutdown>().then([this]() {
+            booster_client.ChangeMode(RobotMode::kPrepare);
+
+            log<INFO>("Closing HardwareIO channels");
+            if (low_state_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/low_state");
+            }
+            if (battery_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/battery_state");
+            }
+            if (fall_down_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/fall_down");
+            }
+            if (button_event_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/button_event");
+            }
+            if (odometer_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/odometer_state");
+            }
+            if (ros_odometry_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader(booster::robot::b1::kTopicRosOdometer);
+            }
+        });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
             // The robot must not move in prep mode, so drop walk commands while in (or entering) prep.
@@ -187,6 +213,22 @@ namespace module::platform::Booster {
             low.motor_cmd(std::move(motors));
             if (low_cmd_channel == nullptr || !low_cmd_channel->Write(&low)) {
                 log<WARN>("Failed to write LowCmd to rt/joint_ctrl");
+            }
+        });
+
+        on<Trigger<BoosterKick>>().then([this](const BoosterKick& kick) {
+            brain::msg::Kick msg;
+            msg.x(kick.x);
+            msg.y(kick.y);
+            msg.dir(kick.dir);
+            msg.goal_x(kick.goal_x);
+            msg.goal_y(kick.goal_y);
+            msg.robot_theta_to_field(kick.robot_theta_to_field);
+            msg.power(kick.power);
+            log<DEBUG>("Sending kick reference: x=" + std::to_string(kick.x) + ", y=" + std::to_string(kick.y)
+                       + ", dir=" + std::to_string(kick.dir) + ", power=" + std::to_string(kick.power));
+            if (kick_channel == nullptr || !kick_channel->Write(&msg)) {
+                log<ERROR>("Failed to publish kick reference");
             }
         });
 

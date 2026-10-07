@@ -5,6 +5,7 @@
 #include <booster/idl/b1/BatteryState.h>
 #include <booster/idl/b1/ButtonEvent.h>
 #include <booster/idl/b1/FallDownState.h>
+#include <booster/idl/b1/Kick.h>
 #include <booster/idl/b1/LowCmd.h>
 #include <booster/idl/b1/LowState.h>
 #include <booster/idl/b1/Odometer.h>
@@ -20,6 +21,7 @@
 #include "message/booster/BoosterFallDownState.hpp"
 #include "message/booster/BoosterGetUp.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
+#include "message/booster/BoosterKick.hpp"
 #include "message/booster/BoosterLowCmd.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
@@ -69,6 +71,7 @@ namespace module::platform::Booster {
         booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ros_odometry_channel;
         booster::robot::ChannelPtr<booster_interface::msg::LowCmd> low_cmd_channel;
+        booster::robot::ChannelPtr<brain::msg::Kick> kick_channel;
 
         /// @brief Set once the frames of the first rt/odom message have been logged
         std::atomic<bool> ros_odometry_frames_logged{false};

@@ -17,11 +17,10 @@ messages:
   # Vision
   message.vision.Balls: true
   message.vision.Goals: true
-  message.vision.GreenHorizon: true
-  message.vision.FieldLines: true
+  message.vision.GreenHorizon: false
+  message.vision.FieldLines: false
   message.vision.FieldIntersections: true
-  message.support.FieldDescription: true
-  message.vision.VisualMesh: true
+  message.vision.VisualMesh: false
   message.vision.BoundingBoxes: true
   # Odometry and Localisation
   message.localisation.Ball: true
