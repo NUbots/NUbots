@@ -25,7 +25,9 @@ min_angle_error: 20 * pi / 180 # Minimum angle error for which maximum translati
 strafe_gain: 0.4
 
 # Radius around obstacles to avoid
-obstacle_radius: 0.8
+obstacle_radius: 0.9
+# Minimum x target for obstacle avoidance in robot coordinates
+min_avoidance_x: 0.05
 
 # Exponential smoothing time constant for the [x,y,theta]-velocity (set to [0,0,0] to disable smoothing)
 tau: [1.0, 1.0, 3.0]
