@@ -71,7 +71,7 @@ servos:
     direction: -1
     offset: 0.006
     simulated: false
-  - # [18] HEAD_YAW
+  - # [18] NECK_YAW
     direction: 1
     offset: 0.227
     simulated: false

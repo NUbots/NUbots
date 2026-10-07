@@ -25,7 +25,7 @@ mahony:
 yaw_filter:
   # Complementary filter coefficient (0-1)
   # Higher values give more weight to kinematic measurement, lower values to gyroscope prediction
-  alpha: 0.01
+  alpha: 0.001
   # Bias learning rate (0-1)
   # Higher values allow faster bias adaptation, lower values provide more stability
   # The filter automatically estimates and corrects for gyroscope bias drift

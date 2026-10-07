@@ -124,7 +124,7 @@ message NUSense {
      *  15 : l_ankle_pitch
      *  16 : r_ankle_roll
      *  17 : l_ankle_roll
-     *  18 : head_yaw
+     *  18 : neck_yaw
      *  19 : head_pitch
      */
     map<uint32, Servo> servo_map    = 1;

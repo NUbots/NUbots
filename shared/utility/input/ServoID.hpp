@@ -54,7 +54,7 @@ namespace utility::input {
             L_ANKLE_PITCH    = 15,
             R_ANKLE_ROLL     = 16,
             L_ANKLE_ROLL     = 17,
-            HEAD_YAW         = 18,
+            NECK_YAW         = 18,
             HEAD_PITCH       = 19,
             NUMBER_OF_SERVOS = 20
         };

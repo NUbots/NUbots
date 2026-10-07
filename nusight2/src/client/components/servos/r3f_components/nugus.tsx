@@ -27,7 +27,7 @@ const jointToServoId: { [key: string]: number } = {
   left_ankle_pitch: 15, // L_ANKLE_PITCH
   right_ankle_roll: 16, // R_ANKLE_ROLL
   left_ankle_roll: 17, // L_ANKLE_ROLL
-  neck_yaw: 18, // HEAD_YAW
+  neck_yaw: 18, // NECK_YAW
   head_pitch: 19, // HEAD_PITCH
 };
 

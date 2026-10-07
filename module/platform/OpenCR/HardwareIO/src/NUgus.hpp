@@ -81,7 +81,7 @@ namespace module::platform::OpenCR {
             L_ANKLE_PITCH    = 16,
             R_ANKLE_ROLL     = 17,
             L_ANKLE_ROLL     = 18,
-            HEAD_YAW         = 19,
+            NECK_YAW         = 19,
             HEAD_PITCH       = 20,
             R_FSR            = 111,
             L_FSR            = 112,
@@ -108,7 +108,7 @@ namespace module::platform::OpenCR {
         MX106 L_ANKLE_PITCH;
         MX106 R_ANKLE_ROLL;
         MX106 L_ANKLE_ROLL;
-        MX64 HEAD_YAW;
+        MX64 NECK_YAW;
         MX64 HEAD_PITCH;
 
         /// @brief Get a reference to the DynamixelDevice with the given ID
@@ -135,7 +135,7 @@ namespace module::platform::OpenCR {
                 case ID::L_ANKLE_PITCH: return L_ANKLE_PITCH;
                 case ID::R_ANKLE_ROLL: return R_ANKLE_ROLL;
                 case ID::L_ANKLE_ROLL: return L_ANKLE_ROLL;
-                case ID::HEAD_YAW: return HEAD_YAW;
+                case ID::NECK_YAW: return NECK_YAW;
                 case ID::HEAD_PITCH: return HEAD_PITCH;
                 default: throw std::runtime_error("Unknown device id");
             }
@@ -151,7 +151,7 @@ namespace module::platform::OpenCR {
                     uint8_t(ID::L_HIP_ROLL),       uint8_t(ID::R_HIP_PITCH),      uint8_t(ID::L_HIP_PITCH),
                     uint8_t(ID::R_KNEE),           uint8_t(ID::L_KNEE),           uint8_t(ID::R_ANKLE_PITCH),
                     uint8_t(ID::L_ANKLE_PITCH),    uint8_t(ID::R_ANKLE_ROLL),     uint8_t(ID::L_ANKLE_ROLL),
-                    uint8_t(ID::HEAD_YAW),         uint8_t(ID::HEAD_PITCH)};
+                    uint8_t(ID::NECK_YAW),         uint8_t(ID::HEAD_PITCH)};
         }
 
         constexpr std::string device_name(ID id) const {
@@ -175,7 +175,7 @@ namespace module::platform::OpenCR {
                 case ID::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
                 case ID::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
                 case ID::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
-                case ID::HEAD_YAW: return "HEAD_YAW";
+                case ID::NECK_YAW: return "NECK_YAW";
                 case ID::HEAD_PITCH: return "HEAD_PITCH";
                 case ID::R_FSR: return "R_FSR";
                 case ID::L_FSR: return "L_FSR";

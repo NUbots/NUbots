@@ -194,7 +194,7 @@ namespace module::actuation {
                     if (joint.first == ServoID::HEAD_PITCH) {
                         joint.second = utility::math::clamp(min_pitch, joint.second, max_pitch);
                     }
-                    else if (joint.first == ServoID::HEAD_YAW) {
+                    else if (joint.first == ServoID::NECK_YAW) {
                         joint.second = utility::math::clamp(min_yaw, joint.second, max_yaw);
                     }
                 }
