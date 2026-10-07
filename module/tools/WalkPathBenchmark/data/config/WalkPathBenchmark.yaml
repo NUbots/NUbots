@@ -29,8 +29,12 @@ trial_timeout: 40
 # The robot is at the target within this position (m) and heading (rad) error
 reach_position_error: 0.2
 reach_heading_error: 0.2
-# Seconds the robot must stay at the target to finish the trial
+# Seconds the robot must stay at the target to finish the trial. The trial also finishes (as SHORT, a failure) once
+# the robot has stayed at rest outside the target this long: the torso slower than rest_speed (m/s) and turning
+# slower than rest_turn_rate (rad/s)
 settle_time: 2.0
+rest_speed: 0.05
+rest_turn_rate: 0.1
 # Torso height (m) below which the robot counts as fallen
 fall_height: 0.3
 

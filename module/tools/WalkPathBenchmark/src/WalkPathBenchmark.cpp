@@ -108,6 +108,8 @@ namespace module::tools {
             cfg.reach_position_error   = config["reach_position_error"].as<double>();
             cfg.reach_heading_error    = config["reach_heading_error"].as<Expression>();
             cfg.settle_time            = config["settle_time"].as<double>();
+            cfg.rest_speed             = config["rest_speed"].as<double>();
+            cfg.rest_turn_rate         = config["rest_turn_rate"].as<double>();
             cfg.fall_height            = config["fall_height"].as<double>();
             cfg.ground_truth_field     = config["ground_truth_field"].as<bool>();
             cfg.fall_recovery_priority = config["fall_recovery_priority"].as<int>();
@@ -269,11 +271,19 @@ namespace module::tools {
                 }
                 trial.settle_start = at_target ? (trial.settle_start < 0.0 ? t : trial.settle_start) : -1.0;
 
+                // At rest: the walk has stopped (or never started) wherever the robot is
+                const bool at_rest = !fallen && Eigen::Vector3d(gt.vTs).head<2>().norm() < cfg.rest_speed
+                                     && std::abs(Eigen::Vector3d(gt.omegaTs).z()) < cfg.rest_turn_rate;
+                trial.rest_start   = at_rest ? (trial.rest_start < 0.0 ? t : trial.rest_start) : -1.0;
+
                 if (trial.settle_start >= 0.0 && t - trial.settle_start >= cfg.settle_time) {
-                    finish_trial(pose, true);
+                    finish_trial(pose, Outcome::OK);
+                }
+                else if (trial.rest_start >= 0.0 && t - trial.rest_start >= cfg.settle_time) {
+                    finish_trial(pose, Outcome::SHORT);
                 }
                 else if (t > cfg.trial_timeout) {
-                    finish_trial(pose, false);
+                    finish_trial(pose, Outcome::TIMEOUT);
                 }
             });
     }
@@ -309,10 +319,12 @@ namespace module::tools {
                               target.z()));
     }
 
-    void WalkPathBenchmark::finish_trial(const Eigen::Vector3d& pose, const bool succeeded) {
-        const auto& target = targets[trial_index];
-        const double duration =
-            succeeded ? trial.settle_start : std::chrono::duration<double>(NUClear::clock::now() - trial.start).count();
+    void WalkPathBenchmark::finish_trial(const Eigen::Vector3d& pose, const Outcome outcome) {
+        const auto& target    = targets[trial_index];
+        const double duration = outcome == Outcome::OK ? trial.settle_start
+                                : outcome == Outcome::SHORT
+                                    ? trial.rest_start
+                                    : std::chrono::duration<double>(NUClear::clock::now() - trial.start).count();
         const double distance = position_error(trial.start_pose, target);
         const double pos_err  = position_error(pose, target);
         const double yaw_err  = heading_error(pose, target);
@@ -321,7 +333,9 @@ namespace module::tools {
             fmt::format("TRIAL {} {} dist={:.2f} turn={:.2f} time={:.2f} reach={:.2f} pos_err={:.3f} "
                         "yaw_err={:.3f} path={:.2f} path_ratio={:.2f} max_err_after_reach={:.3f} falls={}",
                         trial_index,
-                        succeeded ? "OK" : "TIMEOUT",
+                        outcome == Outcome::OK      ? "OK"
+                        : outcome == Outcome::SHORT ? "SHORT"
+                                                    : "TIMEOUT",
                         distance,
                         heading_error(trial.start_pose, target),
                         duration,
@@ -337,7 +351,7 @@ namespace module::tools {
         total_pos_error += pos_err;
         total_head_error += yaw_err;
         total_falls += trial.falls;
-        failures += succeeded ? 0 : 1;
+        failures += outcome == Outcome::OK ? 0 : 1;
 
         if (++trial_index < targets.size()) {
             start_trial(pose);

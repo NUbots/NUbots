@@ -63,6 +63,10 @@ namespace module::tools {
             double reach_heading_error = 0.0;
             /// @brief Seconds the robot must stay at the target for the trial to finish
             double settle_time = 0.0;
+            /// @brief Torso speed (m/s) below which the robot is at rest
+            double rest_speed = 0.0;
+            /// @brief Torso turn rate (rad/s) below which the robot is at rest
+            double rest_turn_rate = 0.0;
             /// @brief Torso height (m) below which the robot counts as fallen
             double fall_height = 0.0;
             /// @brief Emit the Field from NUSim ground truth (field frame = NUSim world), replacing localisation
@@ -104,6 +108,8 @@ namespace module::tools {
             double reach_time = -1.0;
             /// @brief Seconds at which the robot entered its final stay at the target, negative while outside it
             double settle_start = -1.0;
+            /// @brief Seconds at which the robot came to rest, negative while moving
+            double rest_start = -1.0;
             /// @brief Largest position error after first reaching the target (overshoot / drift)
             double max_error_after_reach = 0.0;
             int falls                    = 0;
@@ -135,8 +141,10 @@ namespace module::tools {
         void begin_trials(const Eigen::Vector3d& pose);
         /// @brief Begins the trial at trial_index from the robot's current pose
         void start_trial(const Eigen::Vector3d& pose);
+        /// @brief How a trial ended: settled at the target, came to rest outside it, or ran out of time
+        enum class Outcome { OK, SHORT, TIMEOUT };
         /// @brief Logs and accumulates the result of the trial in progress, then moves on
-        void finish_trial(const Eigen::Vector3d& pose, bool succeeded);
+        void finish_trial(const Eigen::Vector3d& pose, Outcome outcome);
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkPathBenchmark reactor.

@@ -10,10 +10,12 @@ With `ground_truth_field` on, it also emits the `Field` from ground truth (the f
 localisation error does not mask the planner's behaviour. Run NUSim with `--keyframe kickoff`: the robot starts at (-3, 0) and the targets are relative to its start pose.
 
 Each trial finishes once the robot has stayed within `reach_position_error` and `reach_heading_error` of the target
-for `settle_time`, or fails after `trial_timeout`. One `TRIAL` line is logged per trial and a `SUMMARY` line at the
+for `settle_time`. It fails as `SHORT` if the robot comes to rest outside the target for `settle_time`, and as
+`TIMEOUT` after `trial_timeout`. One `TRIAL` line is logged per trial and a `SUMMARY` line at the
 end:
 
-- `time`: seconds until the robot entered its final stay at the target (the trial time on a timeout)
+- `time`: seconds until the robot entered its final stay at the target (came to rest when `SHORT`, the trial time
+  on a timeout)
 - `reach`: seconds until it first reached the target
 - `pos_err`, `yaw_err`: error when the trial finished
 - `path`, `path_ratio`: distance walked, and its ratio to the straight-line distance
