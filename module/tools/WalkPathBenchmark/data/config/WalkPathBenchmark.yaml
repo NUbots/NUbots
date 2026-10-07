@@ -1,0 +1,57 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Seconds after startup before the first trial (lets the walk policy and odometry come up)
+start_delay: 8
+
+# Interpret the targets relative to the robot's pose when the trials start, rather than in the field frame
+relative_targets: true
+
+# NUSim world position [x, y] the ball is moved to before starting, so it is out of the way. [] leaves it.
+park_ball: [5.0, 3.5]
+
+# Target poses [x (m), y (m), theta (rad)], walked to in order, each trial starting where the previous one ended.
+# Covers a long straight walk, a target behind, pure sideways, a diagonal with a heading change, a short step back,
+# a long diagonal ending reversed, a turn on the spot and a walk across. With NUSim's `kickoff` keyframe (robot at
+# (-3, 0) facing +x) these stay in our half, clear of the parked ball.
+targets:
+  - [3.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 1.0, 0.0]
+  - [1.5, -1.0, pi / 2]
+  - [1.5, -1.4, pi / 2]
+  - [-1.0, 2.0, pi]
+  - [-1.0, 2.0, 0.0]
+  - [2.0, 2.0, -pi / 2]
+
+# Seconds before a trial is abandoned as a failure
+trial_timeout: 40
+# The robot is at the target within this position (m) and heading (rad) error
+reach_position_error: 0.2
+reach_heading_error: 0.2
+# Seconds the robot must stay at the target to finish the trial
+settle_time: 2.0
+# Torso height (m) below which the robot counts as fallen
+fall_height: 0.3
+
+# Emit the Field from NUSim ground truth instead of running localisation (field frame = NUSim world). Remove the
+# localisation modules from the role when this is on. With it off, the role's localisation must agree with the NUSim
+# world frame, as trials are scored in the NUSim world.
+ground_truth_field: true
+
+# Priority of the FallRecovery task, above the walk (priority 1) so get-up can run
+fall_recovery_priority: 3
+
+# Shut down once every trial has run
+shutdown_when_done: true
+
+# Per-tick trajectory CSV (relative to the working directory), empty to disable
+csv_path: "recordings/walk_path_benchmark.csv"
+
+# Open-loop command sweep, run before the trials: each command [vx, vy, wz] is held for `duration` seconds and the
+# delivered body-frame velocity averaged over the last `measure` seconds, to map what the walk actually delivers.
+# Leave `commands` empty to skip it.
+sweep:
+  commands: []
+  duration: 5.0
+  measure: 3.0
