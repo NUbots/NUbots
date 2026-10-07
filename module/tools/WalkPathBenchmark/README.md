@@ -33,7 +33,8 @@ role:
 ```
 
 Configure the targets and thresholds in `WalkPathBenchmark.yaml`. The per-tick trajectory and walk command go to
-`csv_path`.
+`csv_directory`, one CSV per run named by its local start time as DataLogging names its recordings
+(`recordings/walk_path_benchmark/YYYYMMDDTHH_MM_SS.csv`).
 
 ## Consumes
 

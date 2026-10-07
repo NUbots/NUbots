@@ -28,6 +28,7 @@
 #define MODULE_TOOLS_WALKPATHBENCHMARK_HPP
 
 #include <Eigen/Core>
+#include <filesystem>
 #include <fstream>
 #include <nuclear>
 #include <vector>
@@ -75,8 +76,9 @@ namespace module::tools {
             int fall_recovery_priority = 0;
             /// @brief Shut down the powerplant once every trial has run
             bool shutdown_when_done = false;
-            /// @brief Path of the per-tick trajectory CSV, empty to disable
-            std::string csv_path{};
+            /// @brief Directory for the per-tick trajectory CSVs, one per run named by its local start time, empty
+            /// to disable
+            std::filesystem::path csv_directory{};
         } cfg;
 
         /// @brief When the reactor started, for the start delay

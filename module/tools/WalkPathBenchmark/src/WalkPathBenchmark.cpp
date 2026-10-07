@@ -28,7 +28,11 @@
 
 #include <Eigen/Geometry>
 #include <cmath>
+#include <ctime>
+#include <filesystem>
 #include <fmt/format.h>
+#include <iomanip>
+#include <sstream>
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -61,6 +65,15 @@ namespace module::tools {
     using utility::support::Expression;
 
     namespace {
+
+        /// @brief Local time as a file name, as DataLogging names its recordings
+        std::string formatted_time() {
+            std::time_t now     = time(nullptr);
+            std::tm system_time = *localtime(&now);
+            std::stringstream time;
+            time << std::put_time(&system_time, "%Y%m%dT%H_%M_%S");
+            return time.str();
+        }
 
         /// @brief Planar pose [x, y, yaw] of an isometry's ground projection
         Eigen::Vector3d planar(const Eigen::Isometry3d& H) {
@@ -114,13 +127,17 @@ namespace module::tools {
             cfg.ground_truth_field     = config["ground_truth_field"].as<bool>();
             cfg.fall_recovery_priority = config["fall_recovery_priority"].as<int>();
             cfg.shutdown_when_done     = config["shutdown_when_done"].as<bool>();
-            cfg.csv_path               = config["csv_path"].as<std::string>();
+            cfg.csv_directory          = config["csv_directory"].as<std::string>();
         });
 
         on<Startup>().then([this] {
             startup_time = NUClear::clock::now();
-            if (!cfg.csv_path.empty()) {
-                csv.open(cfg.csv_path);
+            if (!cfg.csv_directory.empty()) {
+                // One CSV per run, named by its start time
+                std::filesystem::create_directories(cfg.csv_directory);
+                const std::filesystem::path path = cfg.csv_directory / fmt::format("{}.csv", formatted_time());
+                csv.open(path);
+                log<INFO>("Writing the trajectory to", path.string());
                 csv << "t,trial,x,y,yaw,z,target_x,target_y,target_yaw,cmd_vx,cmd_vy,cmd_wz\n";
             }
         });

@@ -49,8 +49,9 @@ fall_recovery_priority: 3
 # Shut down once every trial has run
 shutdown_when_done: true
 
-# Per-tick trajectory CSV (relative to the working directory), empty to disable
-csv_path: "recordings/walk_path_benchmark.csv"
+# Directory for the per-tick trajectory CSVs (relative to the working directory), empty to disable. Each run writes
+# <csv_directory>/YYYYMMDDTHH_MM_SS.csv, named by its local start time as DataLogging names its recordings
+csv_directory: "recordings/walk_path_benchmark"
 
 # Open-loop command sweep, run before the trials: each command [vx, vy, wz] is held for `duration` seconds and the
 # delivered body-frame velocity averaged over the last `measure` seconds, to map what the walk actually delivers.
