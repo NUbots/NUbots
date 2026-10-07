@@ -2,10 +2,12 @@
 log_level: INFO
 
 # Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
-# vx capped at 0.8: the deployed walk policy serves 0.62 m/s at a 0.8 command and stalls
-# outright at 1.0 (measured, NUSim surface sweep 2026-08-12), so commanding past its
-# ceiling asks for a velocity it answers by standing still.
-max_velocity: [0.8, 0.5, 1.0]
+# The walk policy (poi732yy, trained to vx [-1.5, 1.75], vy +-1.75, wz +-1.5) tracks these in NUSim (2026-10-07): vx 1.0
+# delivers 0.97 and 1.2 delivers 1.15, still 0.91 while turning at 1.0 rad/s; vy 0.5 delivers 0.41-0.53; a 1.5 rad/s
+# turn delivers 1.5-1.6, on the spot (with rotate_velocity_x) or at speed. On the walk-to-pose benchmark
+# (tools::WalkPathBenchmark) [1.0, 0.5, 1.5] took 34 s against 41 s for [0.8, 0.5, 1.0], with no falls; vx 1.2 was no
+# faster. These are simulator numbers, so check them on the robot.
+max_velocity: [1.0, 0.5, 1.5]
 # Maximum backward speed (m/s), fast backward walking is unstable
 max_backward_velocity: 0.15
 # The walk policy (poi732yy) stands still for a command too small to start stepping, measured from standing in NUSim
