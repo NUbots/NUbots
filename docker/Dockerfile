@@ -433,6 +433,24 @@ RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tag
     --jobs $(nproc) \
     -DBUILD_SHARED_LIBS=ON
 
+# acados (with HPIPM and BLASFEO), the optimal control solver MPCWalkPath's generated code runs on. Static archives, so
+# nothing extra has to be deployed. GitHub's release archives leave out the submodules, so it is cloned with the two it
+# builds from. The version must match the one module/planning/MPCWalkPath/codegen/generate_solver.py generates for.
+# acados picks BLASFEO's kernels from the *host* processor, which is wrong when cross compiling, so they are set here:
+# AVX2 (Haswell and later) for generic, Cortex-A76 for the Orin NX's Cortex-A78AE cores.
+RUN BLASFEO_TARGET=$([ "${platform}" = "orinnx" ] && echo "ARMV8A_ARM_CORTEX_A76" || echo "X64_INTEL_HASWELL") && \
+    git clone --quiet --depth 1 --branch v0.6.0 https://github.com/acados/acados.git /tmp/acados && \
+    git -C /tmp/acados submodule update --init --quiet external/blasfeo external/hpipm && \
+    tar -czf /tmp/acados.tar.gz -C /tmp acados && \
+    install-from-source /tmp/acados.tar.gz \
+    --jobs $(nproc) \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DACADOS_WITH_QPOASES=OFF \
+    -DACADOS_SILENT=ON \
+    -DBLASFEO_TARGET=${BLASFEO_TARGET} \
+    -DHPIPM_TARGET=GENERIC && \
+    rm -rf /tmp/acados /tmp/acados.tar.gz
+
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
     doxygen \
