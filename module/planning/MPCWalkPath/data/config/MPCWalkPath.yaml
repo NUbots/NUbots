@@ -1,0 +1,56 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Velocity limits, the same as PlanWalkPath.yaml (see its notes on how they were measured in NUSim)
+# Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
+max_velocity: [1.0, 0.5, 1.5]
+# Maximum backward speed (m/s), fast backward walking is unstable
+max_backward_velocity: 0.15
+# Maximum change of the command per second [m/s², m/s², rad/s²]. Replaces PlanWalkPath's exponential smoothing. A
+# first guess, from the walk-mpc prototype.
+max_acceleration: [1.0, 1.0, 2.0]
+
+# Cost weights, from the walk-mpc prototype (MPC-1). See the README for the cost function.
+# Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
+w_position: 1.0
+huber_delta: 0.2
+# Final-heading error, faded in within about heading_radius (m) of the target
+w_heading: 1.0
+heading_radius: 0.6
+# Facing the direction of travel far from the target. 0 leaves the heading free there.
+w_face: 0.0
+# Command magnitude and change of command between steps, per axis [vx, vy, vtheta]
+w_effort: [0.01, 0.01, 0.01]
+w_rate: [1.0, 1.0, 0.5]
+
+# Clearance kept from other robots (m), as PlanWalkPath's obstacle_radius
+obstacle_radius: 0.8
+# Penalty on getting inside an obstacle's clearance. The constraint is soft, so the problem stays solvable when the
+# robot is already inside one.
+w_slack: 1000.0
+
+# SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
+max_iterations: 10
+# Seconds. A solve that takes longer, or fails, sends PlanWalkPath's control law's command instead.
+time_budget: 0.05
+# Seconds without a WalkTo after which the next solve starts from standing still
+stale_time: 0.5
+
+# The walk policy stands still for commands too small to start stepping. With this on, the command is shaped by
+# PlanWalkPath's dead zone before it is sent (the values below are PlanWalkPath.yaml's): small translations are bumped
+# onto the min_velocity ellipse, and a turn with no translation gets rotate_velocity_x forward. Without it the MPC
+# plans commands inside the dead zone and stalls short of the target, as the MPC knows nothing about the policy's
+# response (that is MPC-2).
+dead_zone_compensation: true
+min_velocity: [0.35, 0.45, 1.0]
+zero_tolerance: [0.05, 0.05, 0.05]
+rotate_velocity_x: 0.2
+
+# The fallback, PlanWalkPath's WalkTo control law, with the velocity limits above (values from PlanWalkPath.yaml)
+fallback:
+  k_translation: 1.5 # (1/s) translational speed per metre of distance to target
+  k_theta: 2.0 # (1/s) angular velocity per radian of heading error
+  max_align_radius: 1.5 # Radius [m] to begin omnidirectional approach and aligning with target heading
+  min_align_radius: 0.4 # Radius [m] within which fully aligned with the target heading
+  max_angle_error: 45 * pi / 180 # Heading error above which we only rotate on the spot
+  min_angle_error: 20 * pi / 180 # Heading error below which full forward speed is allowed
