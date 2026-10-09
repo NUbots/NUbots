@@ -30,7 +30,8 @@
 #include <Eigen/Core>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
+
+#include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::vision {
 
@@ -44,11 +45,8 @@ namespace module::vision {
             double nms_score_threshold = 0.5;
         } cfg;
 
-        /// @brief OpenVINO compiled model, used to create inference request object
-        ov::CompiledModel compiled_model{};
-
-        /// @brief Inference request, used to run the model (inference)
-        ov::InferRequest infer_request{};
+        /// @brief ONNX Runtime session used to run the YOLO model
+        std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
 
         /// @brief Object struct for storing name and colour
         struct Object {

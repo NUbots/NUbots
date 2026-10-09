@@ -13,7 +13,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Sensors for button testing
-  input::SensorFilter
+  input::K1Sensors
   # GameController communications
   input::GameController
   # Platform

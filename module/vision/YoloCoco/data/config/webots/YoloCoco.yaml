@@ -9,6 +9,3 @@ nms_threshold: 0.5
 
 # NMS confidence (score) threshold for filtering out low confidence detections
 nms_score_threshold: 0.1
-
-# OpenVino device (CPU, GPU)
-device: CPU

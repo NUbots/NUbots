@@ -248,7 +248,7 @@ namespace module::purpose {
         std::lock_guard<std::mutex> lock(mutex);
 
         // Print the message source
-        wprintw(window.get(), source.c_str());
+        wprintw(window.get(), "%s", source.c_str());
 
         // Print the log level if it is enabled
         if (print_level) {

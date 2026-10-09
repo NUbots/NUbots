@@ -26,18 +26,17 @@
 # SOFTWARE.
 #
 
+import getpass
 import os
 import shutil
 import subprocess
+import tempfile
 
 from termcolor import cprint
 
 from utility.dockerise import run_on_docker
 
 TEMP_FOLDER = "temp"
-CONFIG_FOLDER = "/home/nubots/config"
-RECORDINGS_FOLDER = "/home/nubots/recordings"
-SCRIPTS_FOLDER = "/home/nubots/scripts"
 
 TARGETS = ("config", "recordings", "scripts", "all")
 
@@ -57,13 +56,13 @@ def register(command):
     command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
 
 
-def rsync_from(host, user, remote_folder, local_folder):
+def rsync_from(host, user, remote_folder, local_folder, ssh_cmd="ssh"):
     subprocess.run(
         [
             "rsync",
             "-aP",  # partial progression, archive mode
             "-e",  # specify the remote shell to use
-            "ssh",
+            ssh_cmd,
             # trailing slash on the source makes rsync copy the folder's contents,
             # not the folder itself (avoids recordings/recordings/)
             f"{user}@{host}:{remote_folder.rstrip('/')}/",
@@ -73,14 +72,14 @@ def rsync_from(host, user, remote_folder, local_folder):
     )
 
 
-def retrieve_and_merge(host, user, remote_folder, generic_parent):
+def retrieve_and_merge(host, user, remote_folder, generic_parent, ssh_cmd="ssh"):
     """
     Retrieve remote_folder into TEMP_FOLDER, copy each file over its best local
     match (parent folder name first, then generic_parent), then delete TEMP_FOLDER.
     """
     cprint(f"Retrieving from {host}:{remote_folder} to {TEMP_FOLDER}/", "green")
 
-    rsync_from(host, user, remote_folder, TEMP_FOLDER)
+    rsync_from(host, user, remote_folder, TEMP_FOLDER, ssh_cmd)
 
     # list every file in TEMP_FOLDER
 
@@ -141,13 +140,13 @@ def retrieve_and_merge(host, user, remote_folder, generic_parent):
     shutil.rmtree(TEMP_FOLDER)
 
 
-def retrieve_recordings(host, user):
+def retrieve_recordings(host, user, remote_folder, ssh_cmd="ssh"):
     """
     Copy all the recordings back ONLY if the user wants it (these can be chunky bois)
     """
-    cprint(f"Retrieving recordings from {host}:{RECORDINGS_FOLDER} to recordings/", "green")
+    cprint(f"Retrieving recordings from {host}:{remote_folder} to recordings/", "green")
 
-    rsync_from(host, user, RECORDINGS_FOLDER, "recordings")
+    rsync_from(host, user, remote_folder, "recordings", ssh_cmd)
 
 
 @run_on_docker
@@ -155,19 +154,59 @@ def run(host, target, user=None, **kwargs):
     # Replace hostname with its IP address if the hostname is already known
     num_robots = 4
     host = {
-        "{}{}".format(prefix, num): "10.1.1.{}".format(num)
+        "{}{}".format(prefix, num): "10.1.2.{}".format(num)
         for num in range(1, num_robots + 1)
-        for prefix in ("nugus", "n", "i", "igus")
+        for prefix in ("booster")
     }.get(host, host)
+
+    # Setup a shared SSH ControlMaster connection so that every rsync call
+    # reuses one authenticated session instead of prompting for the password each time
+    pw = getpass.getpass("Enter SSH password to use: ")
+
+    control_path = os.path.join(tempfile.gettempdir(), "retrieve-ssh-{}-{}".format(user, host))
+    ssh_cmd = "ssh -o ControlPath={}".format(control_path)
+
+    # Feed the password to the master connection via SSH_ASKPASS so it is only typed once
+    with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as askpass:
+        askpass.write('#!/bin/sh\necho "$SSH_PASSWORD"\n')
+    os.chmod(askpass.name, 0o700)
+    try:
+        subprocess.run(
+            [
+                "ssh",
+                "-o",
+                "ControlMaster=auto",
+                "-o",
+                "ControlPath={}".format(control_path),
+                "-o",
+                "ControlPersist=10m",
+                "-fN",
+                "{}@{}".format(user, host),
+            ],
+            env=dict(
+                os.environ,
+                SSH_ASKPASS=askpass.name,
+                SSH_ASKPASS_REQUIRE="force",
+                SSH_PASSWORD=pw,
+                DISPLAY=os.environ.get("DISPLAY", "none"),
+            ),
+            stdin=subprocess.DEVNULL,
+            start_new_session=True,
+            check=True,
+        )
+    finally:
+        os.unlink(askpass.name)
+
+    home_folder = f"/home/{user}"
 
     # STAGE 1: copy all the configs back from the robot
     if target in ("config", "all"):
-        retrieve_and_merge(host, user, CONFIG_FOLDER, "config")
+        retrieve_and_merge(host, user, f"{home_folder}/config", "config", ssh_cmd)
 
     # STAGE 2: copy all the recordings back
     if target in ("recordings", "all"):
-        retrieve_recordings(host, user)
+        retrieve_recordings(host, user, f"{home_folder}/recordings", ssh_cmd)
 
     # STAGE 3: copy all the scripts back, filtered very similar to the configs
     if target in ("scripts", "all"):
-        retrieve_and_merge(host, user, SCRIPTS_FOLDER, "nugus")
+        retrieve_and_merge(host, user, f"{home_folder}/scripts", "nugus", ssh_cmd)

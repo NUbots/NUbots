@@ -25,9 +25,11 @@ import { FieldObjects } from "./r3f_components/field_objects";
 import { FieldPoints } from "./r3f_components/field_points";
 import { GoalLabels } from "./r3f_components/goal_labels";
 import { GridView } from "./r3f_components/grid";
-import { Nugus } from "./r3f_components/nugus";
+import { K1 } from "./r3f_components/k1";
 import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
+import { SupportPositionMarker } from "./r3f_components/support_position_marker";
+import { TimeToBallLabel } from "./r3f_components/time_to_ball_label";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
@@ -43,7 +45,9 @@ type LocalisationViewProps = {
 
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
-  { label: "Robocup", value: "robocup" },
+  { label: "Robocup (Small)", value: "robocup_small" },
+  { label: "Robocup (Large)", value: "robocup_large" },
+  { label: "Robocup (5v5)", value: "robocup_5v5" },
 ];
 
 // Apply the interfaces to the component's props
@@ -137,6 +141,11 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            togglePurposeLabelVisibility={this.togglePurposeLabelVisibility}
+            toggleTimeToBallVisibility={this.toggleTimeToBallVisibility}
+            toggleSupportPositionVisibility={this.toggleSupportPositionVisibility}
+            toggleTeammatesVisibility={this.toggleTeammatesVisibility}
+            toggleTeammateBallVisibility={this.toggleTeammateBallVisibility}
             toggleDashboardVisibility={this.toggleDashboardVisibility}
           ></LocalisationMenuBar>
         </div>
@@ -164,6 +173,11 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
+            togglePurposeLabelVisibility={this.togglePurposeLabelVisibility}
+            toggleTimeToBallVisibility={this.toggleTimeToBallVisibility}
+            toggleSupportPositionVisibility={this.toggleSupportPositionVisibility}
+            toggleTeammatesVisibility={this.toggleTeammatesVisibility}
+            toggleTeammateBallVisibility={this.toggleTeammateBallVisibility}
             toggleDashboardVisibility={this.toggleDashboardVisibility}
           />
         </div>
@@ -265,6 +279,26 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleBoundedBoxVisibility(this.props.model);
   };
 
+  private togglePurposeLabelVisibility = () => {
+    this.props.controller.togglePurposeLabelVisibility(this.props.model);
+  };
+
+  private toggleTimeToBallVisibility = () => {
+    this.props.controller.toggleTimeToBallVisibility(this.props.model);
+  };
+
+  private toggleSupportPositionVisibility = () => {
+    this.props.controller.toggleSupportPositionVisibility(this.props.model);
+  };
+
+  private toggleTeammatesVisibility = () => {
+    this.props.controller.toggleTeammatesVisibility(this.props.model);
+  };
+
+  private toggleTeammateBallVisibility = () => {
+    this.props.controller.toggleTeammateBallVisibility(this.props.model);
+  };
+
   private toggleDashboardVisibility = () => {
     this.props.controller.toggleDashboardVisibility(this.props.model);
   };
@@ -288,6 +322,11 @@ interface LocalisationMenuBarProps {
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
+  togglePurposeLabelVisibility(): void;
+  toggleTimeToBallVisibility(): void;
+  toggleSupportPositionVisibility(): void;
+  toggleTeammatesVisibility(): void;
+  toggleTeammateBallVisibility(): void;
   toggleDashboardVisibility(): void;
 }
 
@@ -297,10 +336,9 @@ const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean })
       className={`
         w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm font-medium
         transition-all duration-150 ease-out
-        ${
-          props.isVisible
-            ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
-            : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
+        ${props.isVisible
+          ? "bg-auto-primary/20 text-auto-primary border border-auto-primary/30"
+          : "bg-auto-surface-2 text-auto-on-surface border border-auto-outline hover:bg-auto-surface-3"
         }
         focus:outline-none focus:ring-1 focus:ring-auto-primary
         active:scale-[0.98]
@@ -390,6 +428,11 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         toggleFieldIntersectionsVisibility={props.toggleFieldIntersectionsVisibility}
         toggleWalkToDebugVisibility={props.toggleWalkToDebugVisibility}
         toggleBoundedBoxVisibility={props.toggleBoundedBoxVisibility}
+        togglePurposeLabelVisibility={props.togglePurposeLabelVisibility}
+        toggleTimeToBallVisibility={props.toggleTimeToBallVisibility}
+        toggleSupportPositionVisibility={props.toggleSupportPositionVisibility}
+        toggleTeammatesVisibility={props.toggleTeammatesVisibility}
+        toggleTeammateBallVisibility={props.toggleTeammateBallVisibility}
         toggleDashboardVisibility={props.toggleDashboardVisibility}
       />
     </Menu>
@@ -420,6 +463,24 @@ const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">)
         { label: "Robots", isVisible: model.robotVisible, onClick: props.toggleRobotVisibility },
         { label: "Balls", isVisible: model.ballVisible, onClick: props.toggleBallVisibility },
         { label: "Goals", isVisible: model.goalsVisible, onClick: props.toggleGoalVisibility },
+      ],
+    },
+    {
+      title: "Team",
+      buttons: [
+        { label: "Purpose", isVisible: model.purposeLabelVisible, onClick: props.togglePurposeLabelVisibility },
+        { label: "Time to Ball", isVisible: model.timeToBallVisible, onClick: props.toggleTimeToBallVisibility },
+        {
+          label: "Support Position",
+          isVisible: model.supportPositionVisible,
+          onClick: props.toggleSupportPositionVisibility,
+        },
+        { label: "Teammates", isVisible: model.teammatesVisible, onClick: props.toggleTeammatesVisibility },
+        {
+          label: "Teammate Ball",
+          isVisible: model.teammateBallVisible,
+          onClick: props.toggleTeammateBallVisibility,
+        },
       ],
     },
     {
@@ -502,7 +563,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
   return (
     <object3D key={robot.id}>
-      <Nugus model={robot} />
+      <K1 model={robot} />
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
@@ -549,7 +610,7 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
         />
       )}
 
-      {robot.Hft && robot.purpose && (
+      {model.purposeLabelVisible && robot.Hft && robot.purpose && (
         <PurposeLabel
           Hft={robot.Hft}
           playerId={robot.playerId}
@@ -559,6 +620,55 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
           cameraYaw={model.camera.yaw}
         />
       )}
+
+      {model.timeToBallVisible && robot.Hft && robot.timeToBallEstimates.get(robot.playerId) != null && (
+        <TimeToBallLabel
+          Hft={robot.Hft}
+          playerId={-1}
+          backgroundColor={robot.color}
+          time={robot.timeToBallEstimates.get(robot.playerId)!}
+          cameraPitch={model.camera.pitch}
+          cameraYaw={model.camera.yaw}
+        />
+      )}
+
+      {model.supportPositionVisible && robot.desiredSupportPosition && (
+        <SupportPositionMarker position={robot.desiredSupportPosition} color="#2979ff" />
+      )}
+
+      {(model.teammatesVisible || model.teammateBallVisible) &&
+        Array.from(robot.teammates.values()).map((teammate) => (
+          <object3D key={teammate.id}>
+            {model.teammatesVisible && (
+              <>
+                <K1 model={teammate} />
+                {teammate.purpose && (
+                  <PurposeLabel
+                    Hft={teammate.Hft}
+                    playerId={teammate.playerId}
+                    backgroundColor={teammate.color}
+                    purpose={teammate.purpose}
+                    cameraPitch={model.camera.pitch}
+                    cameraYaw={model.camera.yaw}
+                  />
+                )}
+                {model.timeToBallVisible && robot.timeToBallEstimates.get(teammate.playerId) != null && (
+                  <TimeToBallLabel
+                    Hft={teammate.Hft}
+                    playerId={teammate.playerId}
+                    backgroundColor={teammate.color}
+                    time={robot.timeToBallEstimates.get(teammate.playerId)!}
+                    cameraPitch={model.camera.pitch}
+                    cameraYaw={model.camera.yaw}
+                  />
+                )}
+              </>
+            )}
+            {model.teammateBallVisible && teammate.rBFf && (
+              <Ball position={teammate.rBFf.toArray()} scale={teammate.rBFf.z} />
+            )}
+          </object3D>
+        ))}
 
       {model.walkToDebugVisible && robot.Hfd && <WalkPathGoal Hfd={robot.Hfd} Hft={robot.Hft} motors={robot.motors} />}
 
@@ -697,6 +807,7 @@ export class DashboardPanel extends Component<DashboardPanelProps> {
                         penalised={model.penalised}
                         penalty={model.penalty}
                         phase={model.phase}
+                        purpose={model.purpose}
                         title={model.title}
                         walkCommand={model.walkCommand}
                       />

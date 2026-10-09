@@ -30,7 +30,8 @@
 #include <Eigen/Core>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
-#include <openvino/openvino.hpp>
+
+#include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::vision {
 
@@ -44,11 +45,8 @@ namespace module::vision {
             double nms_score_threshold = 0.5;
         } cfg;
 
-        /// @brief OpenVINO compiled model, used to create inference request object
-        ov::CompiledModel compiled_model{};
-
-        /// @brief Inference request, used to run the model (inference)
-        ov::InferRequest infer_request{};
+        /// @brief ONNX Runtime session used to run the YOLO model
+        std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
 
         /// @brief Object struct for storing name and colour
         struct Object {
@@ -60,13 +58,14 @@ namespace module::vision {
             double confidence_threshold = 0.0;
         };
 
-        /// @brief The objects that the Yolo model can detect
-        std::vector<Object> objects = {{"ball", Eigen::Vector4d(1, 1, 1, 1), 0.0},
-                                       {"goal post", Eigen::Vector4d(1, 0, 1, 1), 0.0},
-                                       {"robot", Eigen::Vector4d(1, 0.5, 0, 1), 0.0},
-                                       {"L-intersection", Eigen::Vector4d(1, 0, 0, 1), 0.0},
-                                       {"T-intersection", Eigen::Vector4d(0, 1, 0, 1), 0.0},
-                                       {"X-intersection", Eigen::Vector4d(0, 0, 1, 1), 0.0}};
+        /// @brief The objects that the Yolo model can detect, in the exact order of the model's output classes.
+        std::vector<Object> objects = {{"Ball", Eigen::Vector4d(1, 1, 1, 1), 0.0},
+                                       {"Goalpost", Eigen::Vector4d(1, 0, 1, 1), 0.0},
+                                       {"K1", Eigen::Vector4d(1, 0.5, 0, 1), 0.0},
+                                       {"LCross", Eigen::Vector4d(1, 0, 0, 1), 0.0},
+                                       {"PenaltyPoint", Eigen::Vector4d(0, 1, 1, 1), 0.0},
+                                       {"TCross", Eigen::Vector4d(0, 1, 0, 1), 0.0},
+                                       {"XCross", Eigen::Vector4d(0, 0, 1, 1), 0.0}};
 
 
     public:

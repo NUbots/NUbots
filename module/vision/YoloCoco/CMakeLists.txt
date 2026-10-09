@@ -25,9 +25,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 find_package(OpenCV REQUIRED)
-set(OpenVINO_DIR /usr/local/lib/cmake)
-find_package(OpenVINO REQUIRED)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  set(TBB_DIR /l4t/targetfs/usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
+else()
+  set(TBB_DIR /usr/local/runtime/3rdparty/tbb/lib/cmake/TBB/)
+endif()
 find_package(TBB REQUIRED)
 
 # Build our NUClear module
-nuclear_module(LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES})
+nuclear_module(LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb)

@@ -1,0 +1,10 @@
+# Per-robot overrides for K1Sensors. Everything not listed here comes from the
+# default config/K1Sensors.yaml.
+
+# Transform from pitch frame to camera optical frame. Camera mounting varies
+# between robots, so this is calibrated individually.
+# translation: [x, y, z] in metres
+# rotation_rpy: [roll, pitch, yaw] in radians
+Hpc:
+  translation: [0.065, 0.035, 0.0915]
+  rotation_rpy: [-0.0425, 0.0175, -0.09]

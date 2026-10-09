@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -34,7 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/eye/DataPoint.hpp"
-#include "message/input/RoboCup.hpp"
+#include "message/input/Robocup.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -52,7 +52,7 @@ namespace module::localisation {
     using VisionBall  = message::vision::Ball;
 
     using message::eye::DataPoint;
-    using message::input::RoboCup;
+    using message::input::Message;
     using message::localisation::Field;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
@@ -109,6 +109,8 @@ namespace module::localisation {
             cfg.team_guess_error         = config["team_guess_error"].as<double>();
             cfg.team_guess_default_timer = config["team_guess_default_timer"].as<double>();
 
+            cfg.max_distance_from_field = config["max_distance_from_field"].as<double>();
+
             last_time_update = NUClear::clock::now();
         });
 
@@ -134,6 +136,14 @@ namespace module::localisation {
                 }
 
                 Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                Eigen::Vector3d rBFf = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
+
+                if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
+                    || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
+                    || rBFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
+                    || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                    continue;
+                }
                 double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                 if (current_distance < lowest_distance) {
                     lowest_distance = current_distance;
@@ -220,14 +230,14 @@ namespace module::localisation {
         });
 
         // Stores ball positions received from teammates
-        on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
+        on<Trigger<Message>, With<Field>>().then([this](const Message& robocup, const Field& field) {
             if (!cfg.use_r2r_balls) {
                 return;
             }
 
-            // This occurs when the ball position is an echo - ignore echos
-            if (robocup.ball.confidence == 0.0) {
-                // If the ball has no confidence, then we don't care about it
+            // This occurs when the ball has not been seen
+            if (robocup.ball.age < 0.0f) {
+                // If the ball has not been seen, then we don't care about it
                 return;
             }
 

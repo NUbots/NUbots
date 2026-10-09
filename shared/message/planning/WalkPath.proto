@@ -52,6 +52,12 @@ message PivotAroundPoint {
     bool clockwise = 1;
 }
 
+/// Orbit the ball to fix the robot's approach angle before committing to a kick approach
+message Adjust {
+    /// Desired heading from the ball toward the kick target, in field space
+    double kick_dir = 1;
+}
+
 /// Debug information for walk to planning
 message WalkToDebug {
     /// Transform from desired robot pose {d} to robot {r} space

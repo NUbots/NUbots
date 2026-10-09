@@ -6,14 +6,14 @@ import { ServosRobotModel } from "../robot_model";
 import { Axes } from "./axes";
 import { CameraControls } from "./camera";
 import { Grid } from "./grid";
-import { Nugus } from "./nugus";
+import { K1 } from "./k1";
 
 const RobotComponents: React.FC<{ robot: ServosRobotModel }> = ({ robot }) => {
   if (!robot.visible) return null;
 
   return (
     <object3D key={robot.id} rotation={[-Math.PI / 2, 0, -Math.PI / 2]} scale={[5, 5, 5]}>
-      <Nugus model={robot} />
+      <K1 model={robot} />
     </object3D>
   );
 };
