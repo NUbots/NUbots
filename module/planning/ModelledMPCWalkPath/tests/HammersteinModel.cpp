@@ -53,12 +53,12 @@ namespace {
 // f(u) = L·u + d + Σ c·|u + t| and the linear blocks b/(1 − p·q⁻¹)
 TEST_CASE("The steady state matches the reference evaluation of the model", "[HammersteinModel]") {
     const HammersteinModel model = k1_model();
-    check(model.steady_state({0.5, 0.0, 0.0}), {0.4714056989, 0.0065041348, 0.0192937658});
-    check(model.steady_state({0.0, 0.4, 0.0}), {-1.2916039672e-04, 2.5927576113e-01, 5.6410022903e-02});
-    check(model.steady_state({0.0, 0.0, 1.0}), {0.0041717311, 0.0018117946, 0.8068369214});
-    check(model.steady_state({0.6, -0.3, 0.8}), {0.5755000936, -0.0363614376, 0.586711045});
-    // Backwards at PlanWalkPath's limit is inside the policy's backward dead zone
-    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.0398226607, 0.0016347742, 0.0192902692});
+    check(model.steady_state({0.5, 0.0, 0.0}), {0.4715746421, 0.0088096914, 0.0274948243});
+    check(model.steady_state({0.0, 0.4, 0.0}), {-4.6955658255e-05, 2.5809500454e-01, -1.6257429290e-01});
+    check(model.steady_state({0.0, 0.0, 1.0}), {0.0039891821, 0.1104240211, 0.7402838297});
+    check(model.steady_state({0.6, -0.3, 0.8}), {0.5804763464, 0.0415748046, 0.5862061464});
+    // Backwards at PlanWalkPath's limit, where the policy delivers about half the command
+    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.0793791554, -0.0036597669, 0.013577107});
 }
 
 TEST_CASE("The step response matches the reference evaluation of the model", "[HammersteinModel]") {
@@ -68,13 +68,13 @@ TEST_CASE("The step response matches the reference evaluation of the model", "[H
     for (int k = 1; k <= 25; ++k) {
         z = model.step(z, u);
         if (k == 1) {
-            check(HammersteinModel::delivered(z), {0.0349543334, 0.0163349146, 0.0260755956});
+            check(HammersteinModel::delivered(z), {0.0089105503, 0.0012978265, 0.0435768469});
         }
         if (k == 10) {
-            check(HammersteinModel::delivered(z), {0.2510800637, 0.0033702294, 0.0256403759});
+            check(HammersteinModel::delivered(z), {0.2865482216, 0.0105914148, 0.0506139357});
         }
         if (k == 25) {
-            check(HammersteinModel::delivered(z), {4.3240123227e-01, -1.7014743385e-04, 1.1877031936e-02});
+            check(HammersteinModel::delivered(z), {0.452557851, 0.0196424772, 0.0248603899});
         }
     }
 }

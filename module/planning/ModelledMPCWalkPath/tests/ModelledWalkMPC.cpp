@@ -177,15 +177,15 @@ namespace {
 
 TEST_CASE("The first command matches the prototype's", "[ModelledWalkMPC]") {
     // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999979, 0.0999999235,
-    // -0.1402893543], at the iteration cap. Also checks that the configured limits, envelope and model survive the
+    // build_ocp) from standing, with the same configuration and initial guess: [0.099999952, 0.0999950927,
+    // -0.1228938974], at the iteration cap. Also checks that the configured limits, envelope and model survive the
     // solver's reset.
     ModelledWalkMPC mpc{k1_config()};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
-    CHECK(solution.command.x() == Approx(0.0999999979).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.0999999235).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1402893543).margin(1e-4));
+    CHECK(solution.command.x() == Approx(0.099999952).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.0999950927).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.1228938974).margin(1e-4));
 }
 
 TEST_CASE("Arrives at every goal against the model, within the limits", "[ModelledWalkMPC]") {
@@ -227,8 +227,9 @@ TEST_CASE("The estimate advances in whole model samples and carries the remainde
     mpc.advance(0.03);  // two more
     CHECK((mpc.delivered_velocity() - HammersteinModel::delivered(z)).norm() < 1e-12);
 
-    // Held long enough, it settles to the steady state (the slowest path, ω←vy, has a 15 s time constant)
-    mpc.advance(1000.0);
+    // Held long enough, it settles to the steady state (the slowest paths, vy←ω and ω←vy, have time constants of
+    // about 100 s)
+    mpc.advance(5000.0);
     CHECK((mpc.delivered_velocity() - cfg.model.steady_state(Eigen::Vector3d(0.6, 0.0, 0.0))).norm() < 1e-6);
 
     mpc.reset();

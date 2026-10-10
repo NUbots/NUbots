@@ -60,24 +60,34 @@ MATLAB isn't needed):
 
 ```bash
 uv run --no-project --with mat-io python module/planning/ModelledMPCWalkPath/codegen/import_model.py \
-    ~/walkmodel-identification/hammerstein_no_gate_model_k1.mat --policy "poi732yy (k1_walk_mjlab_poi732yy_29999.onnx)"
+    ~/walkmodel-identification/hammerstein_no_gate_model_noChirp_noRamp.mat --policy "poi732yy (k1_walk_mjlab_poi732yy_29999.onnx)"
 ```
 
 A refitted model with the same structure (sample time, 6 breakpoints, first-order paths) only needs re-importing; the
-import refuses anything else. The form of the piecewise-linear map isn't documented by MATLAB: it was the one whose
-steady state matched the poi732yy policy's measured steady-state velocity grid (walk-mpc's
-`data/k1_poi732yy_response.json`, RMSE 0.04 m/s, 0.07 m/s and 0.12 rad/s within |command| ≤ 1).
+import refuses anything else, including a Hammerstein-Wiener model (one with an output map), which the generated
+solver doesn't have. The form of the piecewise-linear map isn't documented by MATLAB: it was the one whose steady state
+matched the poi732yy policy's measured steady-state velocity grid (walk-mpc's `data/k1_poi732yy_response.json`), for
+the first fit on this policy.
+
+The model is `hammerstein_no_gate_model_noChirp_noRamp.mat`, fitted without the chirp and ramp runs. Against the
+evaluation's sweeps and grids (below), averaged over the same window as the evaluation, it is about as good as the
+first fit (`hammerstein_no_gate_model_k1.mat`), a little better on vx and a little worse on ω, and on the 4 s step
+profiles about the same.
 
 Things to know about this fit:
 
-- The fitted ω map has two narrow non-monotonic notches, where a larger turn command turns slower (between −0.473 and
-  −0.458, and between 0.437 and 0.484). They are local minima the solver gets stuck in: it held ω at −0.474 and turned
-  the robot past the target heading. The solver's model smooths the maps' kinks, |x| ≈ √(x² + ε²), with
-  `kink_smoothing` per command axis: 0.05 on ω merges the notches' breakpoints (the map moves by at most 0.03 rad/s),
-  and 0.01 on vx and vy keeps their dead-zone edges sharp. The estimate below uses the unsmoothed model.
-- With no gate, the model drifts at zero command (ω 0.018 rad/s, vy 0.003 m/s), so at the target the MPC holds the
-  robot with a small command, about (0, −0.025, −0.026), well inside the policy's dead zones.
-- The ω←vy path has a 15 s time constant (a pole at 0.9987), and vy←ω a negative pole (−0.34). Both carry little.
+- The solver's model smooths the maps' kinks, |x| ≈ √(x² + ε²), with `kink_smoothing` per command axis, because a
+  non-monotonic notch in a map is a local minimum the solver gets stuck in. The first fit's ω map had two narrow ones,
+  where a larger turn command turns slower (between −0.473 and −0.458, and between 0.437 and 0.484): the solver held ω
+  at −0.474 and turned the robot past the target heading, and 0.05 on ω merges them (the map moves by at most
+  0.03 rad/s). This fit's main-axis maps are monotonic within the limits; 0.01 on vx and vy keeps their dead-zone edges
+  sharp. The estimate below uses the unsmoothed model.
+- With no gate, the model drifts at zero command (ω 0.012 rad/s, vy −0.004 m/s), so at the target the MPC holds the
+  robot with a small command, about (0, 0.011, −0.019), well inside the policy's dead zones.
+- The ω←vy and vy←ω paths have time constants of about 100 s (poles at 0.9998). Over the horizon they carry little,
+  but their steady states are large and wrong: walking sideways at 0.4 m/s for minutes, the model would turn at
+  −0.16 rad/s. Over the evaluation's minute their error is 0.07 rad/s (0.04 for the first fit). The estimate (below)
+  is reset whenever the walk starts again, so it only gets there in a long, continuous walk.
 
 ## The capability envelope
 
@@ -90,7 +100,7 @@ take in the badly tracked commands near zero (the dead zones, and turning on the
 and cut the corners the policy doesn't deliver, mainly walking backwards and sideways at once: (−1.5, 1.5) gives
 (−0.83, 0.62) m/s, where the model, whose axes simply add, predicts (−1.26, 1.21). The velocity limits are the
 envelope's extent along each axis, clipped to the range the model was identified on (`identified_range`, beyond which
-its maps extrapolate; past 1.72 m/s its vy map turns back down): vx from −1.5 to 1.75 m/s, vy ±1.4 m/s and ω ±1.5
+its maps extrapolate; past 1.6 m/s its vy map turns back down): vx from −1.5 to 1.75 m/s, vy ±1.4 m/s and ω ±1.5
 rad/s.
 
 ```bash
@@ -106,8 +116,9 @@ writes both (`--tolerance` and `--edges` change the fit). Things to know:
   measured: the envelope is the intersection of the three planes' octagons.
 - The evaluation is the policy in mjlab with no randomisation, and only the commands, not how fast they change, so
   `max_acceleration` is still MPCWalkPath's.
-- Against the evaluation's steady-state sweeps, the model is within about 0.05 m/s on vx from −1.75 to 2 m/s and on
-  vy outside its dead zone up to ±1.5 m/s, but it under-predicts turning above about 0.75 rad/s by 10–20 %, and its
+- Against the evaluation's steady-state sweeps, the model is within about 0.05 m/s on vx from −1.5 to 2 m/s and
+  within 0.1 m/s on vy outside its dead zone up to ±1.5 m/s, but it under-predicts turning above about 0.75 rad/s by
+  10–20 %, and its
   lateral dead zone (±0.33 m/s) doesn't appear in the sweep (0.25 m/s gives 0.2 m/s after a minute), so it probably
   stands for the slow start of walking sideways from standing in the identification runs.
 
@@ -149,17 +160,21 @@ WalkPathBenchmark's 13 trials (fresh NUSim per run, 10 October 2026):
 | ModelledMPCWalkPath, PlanWalkPath's limits                | 10/13, 7/13  | 75.7, 84.2 s | 0.141, 0.161 m      |
 | ModelledMPCWalkPath, PlanWalkPath's limits, backward 0.35 | 11/13        | 74.9 s       | 0.091 m             |
 | ModelledMPCWalkPath, capability envelope (two runs)       | 12/13, 11/13 | 51.0, 50.4 s | 0.080, 0.082 m      |
+| ModelledMPCWalkPath, envelope, noChirp_noRamp fit         | 11/13, 11/13 | 48.1, 50.8 s | 0.108, 0.080 m      |
 
 - With the envelope it is about a third quicker than the others and no less accurate, with no falls, using the whole
-  envelope (commands up to 1.75 m/s forward, 1.5 m/s back, 1.4 m/s sideways and 1.5 rad/s) and never leaving it.
+  envelope (commands up to 1.75 m/s forward, 1.5 m/s back, 1.4 m/s sideways and 1.5 rad/s) and never leaving it. The
+  rows above the last are the first fit; the two fits are within the spread between runs.
 - With PlanWalkPath's limits, most failures were stalls short of a target behind the robot: the backward limit of
   0.15 m/s is inside the policy's backward dead zone, the model knows it (it predicts −0.04 m/s; NUSim's robot doesn't
   move at all), and the horizon is too short to see that turning round would be quicker. PlanWalkPath and MPCWalkPath
   don't stall there because PlanWalkPath's dead zone bumps small backward commands to −0.35 m/s, past their backward
   limit.
 - The remaining failures end turning on the spot: WalkToFieldPosition stops the walk within 0.15 rad, and the robot,
-  still turning, coasts out of the benchmark's 0.2 rad. The model's ω responds within about 0.02 s, so the MPC turns
-  at speed until the last moment.
+  still turning, coasts out of the benchmark's 0.2 rad. The model's ω responds within about 0.03 s, so the MPC turns
+  at speed until the last moment. Once, the next trial then failed without moving: WalkToFieldPosition, once stopped,
+  only walks again past 0.4 m or 0.4 rad (`stopped_threshold`), and resets that only on a new task, not a new target,
+  and the next target was 0.27 m and 0.37 rad away.
 - The model was identified in mjlab, and NUSim's robot doesn't follow it exactly: it turned at about 0.94 rad/s for a
   1.5 rad/s command, where the model predicts 1.37. The estimate is open loop; correcting it with a measured velocity
   is a next step.
