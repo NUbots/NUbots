@@ -1,0 +1,240 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Command limits, the same as PlanWalkPath.yaml and MPCWalkPath.yaml, until the policy's capability envelope is measured
+# Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
+max_velocity: [1.0, 0.5, 1.5]
+# Maximum backward command (m/s), fast backward walking is unstable
+max_backward_velocity: 0.15
+# Maximum change of the command per second [m/s², m/s², rad/s²], as MPCWalkPath.yaml
+max_acceleration: [1.0, 1.0, 2.0]
+
+# Cost weights, MPCWalkPath's. See the README for the cost function.
+# Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
+w_position: 1.0
+huber_delta: 0.2
+# Final-heading error, faded in within about heading_radius (m) of the target
+w_heading: 1.0
+heading_radius: 0.6
+# Facing the direction of travel far from the target. 0 leaves the heading free there.
+w_face: 0.0
+# Delivered velocity magnitude (predicted by the model) and change of command between steps, per axis [vx, vy, vtheta]
+w_effort: [0.01, 0.01, 0.01]
+w_rate: [1.0, 1.0, 0.5]
+
+# Clearance kept from other robots (m), as PlanWalkPath's obstacle_radius
+obstacle_radius: 0.8
+# Penalty on getting inside an obstacle's clearance. The constraint is soft, so the problem stays solvable when the
+# robot is already inside one.
+w_slack: 1000.0
+
+# Width over which the solver's model smooths the piecewise-linear maps' kinks, for the paths of each command axis
+# [vx, vy, vtheta], in command units. Wide enough on vtheta to merge the fitted turn map's close breakpoints
+# (-0.473/-0.458 and 0.437/0.484), between which a larger turn command turns slower: left in, they stall the solver
+# (a local minimum it can't leave), e.g. still turning past the target heading. Narrow on vx and vy, whose maps are
+# monotonic, to keep the dead zones' edges sharp. The estimate of the robot's state uses the unsmoothed model.
+kink_smoothing: [0.01, 0.01, 0.05]
+
+# SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
+max_iterations: 10
+# Seconds. A solve that takes longer, or fails, sends PlanWalkPath's control law's command instead.
+time_budget: 0.05
+# Seconds without a WalkTo after which the next solve starts from standing still
+stale_time: 0.5
+
+# The fallback, PlanWalkPath's WalkTo control law and dead zone, with the limits above (values from PlanWalkPath.yaml)
+fallback:
+  k_translation: 1.5 # (1/s) translational speed per metre of distance to target
+  k_theta: 2.0 # (1/s) angular velocity per radian of heading error
+  max_align_radius: 1.5 # Radius [m] to begin omnidirectional approach and aligning with target heading
+  min_align_radius: 0.4 # Radius [m] within which fully aligned with the target heading
+  max_angle_error: 45 * pi / 180 # Heading error above which we only rotate on the spot
+  min_angle_error: 20 * pi / 180 # Heading error below which full forward speed is allowed
+  min_velocity: [0.35, 0.45, 1.0] # Smaller nonzero commands are bumped up to these
+  zero_tolerance: [0.05, 0.05, 0.05] # Commands below this per-axis magnitude are snapped to zero
+  rotate_velocity_x: 0.2 # Forward velocity given to a turn with no translation
+
+# ---- The walk policy's response model. Written by codegen/import_model.py: edit by re-importing. ----
+# The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which the
+# MPC plans with. One path per (output, command); each output is the sum of its three paths' lag states z:
+#   z⁺ = pole·z + gain·f(command) every sample_time
+#   f(u) = linear·u + offset + Σₙ coef[n]·|u + translation[n]|
+model:
+  source: hammerstein_no_gate_model_k1.mat (sha256 f61407be63bb…)
+  policy: poi732yy (k1_walk_mjlab_poi732yy_29999.onnx)
+  sample_time: 0.02
+  paths:
+    vx:
+      vx:
+        gain: 1.0
+        pole: 0.9441499292736885
+        linear: 0.03976276880256944
+        offset: 0.008404549662752534
+        coef:
+          - 0.008538436344677
+          - 0.031356311322088694
+          - -0.0515200280653164
+          - 0.030696651590164232
+          - -0.010384116019732843
+          - -0.007119058904432799
+        translation:
+          - 1.126833460548117
+          - 0.2422313978313971
+          - 0.1878851030693519
+          - -0.17631851133337853
+          - -0.4502440384227087
+          - -1.2339175422093551
+      vy:
+        gain: 1.0
+        pole: 0.937355817341659
+        linear: 0.0024988737588581707
+        offset: -0.021253505044810835
+        coef:
+          - 0.0046353631445259745
+          - -0.004371531753905024
+          - -0.0004654441831404914
+          - 0.0034789331890177247
+          - -0.007728145228525391
+          - 0.01357364878377919
+        translation:
+          - 1.0709815249908528
+          - 0.5250569437567174
+          - 0.13152975705198033
+          - 0.3806475326876718
+          - -0.711122519767566
+          - -0.966398143088165
+      wz:
+        gain: 1.0
+        pole: 0.6455231423351732
+        linear: -0.00885466703511397
+        offset: 0.022953828140294195
+        coef:
+          - -0.0044160801110289215
+          - 0.007031832562109544
+          - -0.00958515070451905
+          - -0.01690462514412943
+          - 0.03213472032239667
+          - -0.01339708777170305
+        translation:
+          - -3.9255470441639715
+          - 0.3755103611884904
+          - 0.01078697168115227
+          - -0.312888082615446
+          - -0.37535800960397386
+          - -0.7491226943927164
+    vy:
+      vx:
+        gain: 1.0
+        pole: 0.9637027692950448
+        linear: 0.0017358743349017033
+        offset: 0.0010054273633564653
+        coef:
+          - 0.0009281402170363351
+          - 0.0006971561882997178
+          - -0.0008054324403881864
+          - 0.0013205230635725354
+          - -0.0034192863395446933
+          - 0.0001850607107726515
+        translation:
+          - 3.594400742783462
+          - 0.21808828446957212
+          - 0.2188867858454626
+          - 1.6196234411236357
+          - 1.4520059759767197
+          - -0.8757536017535774
+      vy:
+        gain: 1.0
+        pole: 0.9415376761911858
+        linear: -0.19203735683639558
+        offset: 0.28485276978703117
+        coef:
+          - 0.039310042933318516
+          - 0.09630453336970263
+          - -0.11884434489105927
+          - 0.09023792892954005
+          - -0.07163932325259048
+          - -0.2006339692819862
+        translation:
+          - 1.5227139260279965
+          - 0.449607763991281
+          - 0.3678696344968875
+          - -0.3319061194823744
+          - -0.4604655816576203
+          - -1.7172133203596036
+      wz:
+        gain: 1.0
+        pole: -0.34088295751949904
+        linear: -0.03844554829553564
+        offset: -0.09175802258790706
+        coef:
+          - 0.1809067414924826
+          - -0.043741943732209784
+          - -0.1596849826258337
+          - 0.08350316566093131
+          - -0.3515378866428944
+          - 0.3822116820092486
+        translation:
+          - 0.687619394550713
+          - 0.37551349206165335
+          - 0.7498582720534396
+          - 1.1267298368248926
+          - -0.7434978140456012
+          - -0.7550997787732731
+    wz:
+      vx:
+        gain: 1.0
+        pole: 0.9105197805597574
+        linear: -0.00043501629862514093
+        offset: -0.0056129814378857125
+        coef:
+          - -0.0020083028963474225
+          - 0.0010122937190083403
+          - -0.0018149490330162563
+          - 0.0037872841239867034
+          - -0.007707353148951558
+          - 0.00471474785276742
+        translation:
+          - 0.7679272229896499
+          - 0.9756140666670727
+          - 0.023793404786615523
+          - -0.2136971506960954
+          - -0.6244245749431129
+          - -1.1551892224501157
+      vy:
+        gain: 1.0
+        pole: 0.9986915467127896
+        linear: 8.081044386031904e-05
+        offset: -4.50695693377996e-05
+        coef:
+          - -0.0002093274520886302
+          - 0.00020825940937279475
+          - 0.0008872765139940964
+          - -0.0008353360733017188
+          - -0.00027402211943054506
+          - 0.00023992559973063125
+        translation:
+          - 0.56396771007749
+          - 0.5305742161111876
+          - -0.022855056132275984
+          - -0.036778728167606314
+          - -0.3334614484752128
+          - -0.7335619416377541
+      wz:
+        gain: 1.0
+        pole: 0.44311200115476657
+        linear: 0.19595915630782904
+        offset: 0.004002479432770117
+        coef:
+          - 0.20195110383865608
+          - -0.7362611361832838
+          - 0.616155791065649
+          - -0.3469136407209756
+          - 0.4681627259717809
+          - -0.18996798672052623
+        translation:
+          - 1.5148995642408014
+          - 0.4731821580906723
+          - 0.4577036663489489
+          - -0.43696228258182623
+          - -0.483487965908428
+          - -1.5161084552550674
