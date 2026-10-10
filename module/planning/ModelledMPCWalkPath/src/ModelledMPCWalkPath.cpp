@@ -83,6 +83,10 @@ namespace module::planning {
                 cfg.mpc.obstacle_radius = config["obstacle_radius"].as<double>();
                 cfg.mpc.w_slack         = config["w_slack"].as<double>();
 
+                // The capability envelope
+                cfg.mpc.envelope   = modelled_walk_mpc::envelope_from_yaml(config["envelope"]);
+                cfg.mpc.w_envelope = config["w_envelope"].as<double>();
+
                 // The policy's response
                 cfg.mpc.model          = HammersteinModel::from_yaml(config["model"]);
                 cfg.mpc.kink_smoothing = config["kink_smoothing"].as<Expression>();
@@ -214,6 +218,7 @@ namespace module::planning {
                 emit(graph("MPC Solve Time (ms)", solution.solve_time * 1e3));
                 emit(graph("MPC Iterations", solution.iterations));
                 emit(graph("MPC Fallback", use_fallback ? 1.0 : 0.0));
+                emit(graph("MPC Envelope Violation", mpc->envelope_violation(command)));
                 if (!solution.states.empty()) {
                     const Eigen::Vector3d& end = solution.states.back();
                     emit(graph("MPC Horizon End", end.x(), end.y(), end.z()));

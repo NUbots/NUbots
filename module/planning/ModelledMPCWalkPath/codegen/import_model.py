@@ -122,14 +122,16 @@ def read(mat_path):
                 "coef": coef,
                 "translation": translation,
             }
-    return ts, paths
+    # The command amplitude the identification runs spanned, per axis: beyond it the maps are extrapolated
+    identified_range = np.ravel(data["umax"]).astype(float) if "umax" in data else None
+    return ts, paths, identified_range
 
 
 def number(x):
     return repr(float(x))
 
 
-def to_yaml(ts, paths, source, policy):
+def to_yaml(ts, paths, identified_range, source, policy):
     lines = [
         MARKER,
         "# The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which the",
@@ -142,6 +144,11 @@ def to_yaml(ts, paths, source, policy):
     if policy:
         lines.append(f"  policy: {policy}")
     lines.append(f"  sample_time: {number(ts)}")
+    if identified_range is not None:
+        lines.append(
+            "  # The command amplitude per axis [vx, vy, wz] the identification spanned: the maps extrapolate beyond"
+        )
+        lines.append(f"  identified_range: [{', '.join(number(v) for v in identified_range)}]")
     lines.append("  paths:")
     for output in AXES:
         lines.append(f"    {output}:")
@@ -168,9 +175,9 @@ def main():
     )
     args = parser.parse_args()
 
-    ts, paths = read(args.mat)
+    ts, paths, identified_range = read(args.mat)
     digest = hashlib.sha256(args.mat.read_bytes()).hexdigest()[:12]
-    block = to_yaml(ts, paths, f"{args.mat.name} (sha256 {digest}…)", args.policy)
+    block = to_yaml(ts, paths, identified_range, f"{args.mat.name} (sha256 {digest}…)", args.policy)
 
     text = args.config.read_text()
     head = text.split(MARKER)[0].rstrip("\n")

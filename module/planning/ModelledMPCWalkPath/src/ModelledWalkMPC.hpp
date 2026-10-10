@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 #include "HammersteinModel.hpp"
 
@@ -37,6 +38,16 @@
 struct modelled_mpc_walk_path_solver_capsule;
 
 namespace module::planning::modelled_walk_mpc {
+
+    /// @brief One edge of the capability envelope: the constraint normal·command ≤ bound
+    struct EnvelopeRow {
+        Eigen::Vector3d normal = Eigen::Vector3d::Zero();
+        double bound           = 0.0;
+    };
+
+    /// @brief Reads the capability envelope from its configuration (written by codegen/import_envelope.py), a list of
+    /// rows [n_vx, n_vy, n_wz, d]
+    std::vector<EnvelopeRow> envelope_from_yaml(const YAML::Node& node);
 
     /// @brief Tuning of the MPC. The horizon, its step, the model's structure and the number of obstacle slots are
     /// fixed by the generated solver (codegen/generate_solver.py); everything here can change at runtime.
@@ -68,6 +79,12 @@ namespace module::planning::modelled_walk_mpc {
         /// @brief Linear penalty on getting inside an obstacle's clearance (the quadratic penalty is 1)
         double w_slack = 1000.0;
 
+        /// @brief The capability envelope: the commands the policy is known to deliver, at most ENVELOPE_ROWS rows.
+        /// Empty leaves only the velocity limits.
+        std::vector<EnvelopeRow> envelope{};
+        /// @brief Linear penalty on commands outside the envelope (the quadratic penalty is 1)
+        double w_envelope = 1000.0;
+
         /// @brief The policy's response the MPC plans with
         HammersteinModel model{};
         /// @brief Width over which the solver's model smooths the kinks of the paths of each command axis
@@ -87,6 +104,9 @@ namespace module::planning::modelled_walk_mpc {
         int status = -1;
         /// @brief SQP iterations used
         int iterations = 0;
+        /// @brief How far the command is outside the capability envelope, the largest normal·command − bound (≤ 0
+        /// inside)
+        double envelope_violation = 0.0;
         /// @brief Wall-clock time of the solve (s)
         double solve_time = 0.0;
         /// @brief Predicted poses (x, y, theta) over the horizon, in the robot frame at the time of the solve
@@ -116,6 +136,8 @@ namespace module::planning::modelled_walk_mpc {
         static const int MAX_OBSTACLES;
         /// @brief The model's sample time the solver was generated for (s)
         static const double MODEL_TS;
+        /// @brief Rows the capability envelope can have
+        static const int ENVELOPE_ROWS;
 
         explicit ModelledWalkMPC(const Config& config);
         ~ModelledWalkMPC();
@@ -124,8 +146,8 @@ namespace module::planning::modelled_walk_mpc {
         ModelledWalkMPC(ModelledWalkMPC&&)                 = delete;
         ModelledWalkMPC& operator=(ModelledWalkMPC&&)      = delete;
 
-        /// @brief Applies new tuning and model. Throws if the model's sample time isn't the one the solver was
-        /// generated for.
+        /// @brief Applies new tuning, model and envelope. Throws if the model's sample time isn't the one the solver
+        /// was generated for, or the envelope has too many rows.
         void configure(const Config& config);
 
         /// @brief Forgets the previous command, the solution and the model's state: the next solve starts from
@@ -158,6 +180,9 @@ namespace module::planning::modelled_walk_mpc {
 
         /// @brief Clips a command to the velocity limits
         [[nodiscard]] Eigen::Vector3d clip_to_limits(const Eigen::Vector3d& command) const;
+
+        /// @brief How far a command is outside the capability envelope (≤ 0 inside, -infinity without one)
+        [[nodiscard]] double envelope_violation(const Eigen::Vector3d& command) const;
 
     private:
         /// @brief Sets the parameters every stage shares (weights, model and obstacles), for every stage

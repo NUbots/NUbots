@@ -1,11 +1,12 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Command limits, the same as PlanWalkPath.yaml and MPCWalkPath.yaml, until the policy's capability envelope is measured
+# Command limits: the capability envelope's extent along each axis, clipped to the range the response model was
+# identified on. Written by codegen/import_envelope.py, with the envelope below.
 # Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
-max_velocity: [1.0, 0.5, 1.5]
-# Maximum backward command (m/s), fast backward walking is unstable
-max_backward_velocity: 0.15
+max_velocity: [1.75, 1.4, 1.5]
+# Maximum backward command (m/s)
+max_backward_velocity: 1.5
 # Maximum change of the command per second [m/s², m/s², rad/s²], as MPCWalkPath.yaml
 max_acceleration: [1.0, 1.0, 2.0]
 
@@ -27,6 +28,10 @@ obstacle_radius: 0.8
 # Penalty on getting inside an obstacle's clearance. The constraint is soft, so the problem stays solvable when the
 # robot is already inside one.
 w_slack: 1000.0
+
+# Penalty on commands outside the capability envelope (below). The envelope is soft, so a command sent from outside it
+# (e.g. the fallback's) can't make the problem unsolvable.
+w_envelope: 1000.0
 
 # Width over which the solver's model smooths the piecewise-linear maps' kinks, for the paths of each command axis
 # [vx, vy, vtheta], in command units. Wide enough on vtheta to merge the fitted turn map's close breakpoints
@@ -54,6 +59,42 @@ fallback:
   zero_tolerance: [0.05, 0.05, 0.05] # Commands below this per-axis magnitude are snapped to zero
   rotate_velocity_x: 0.2 # Forward velocity given to a turn with no translation
 
+# ---- The capability envelope. Written by codegen/import_envelope.py: edit by re-importing. ----
+# Fitted to k1-poi732yy-evaluation: the commands the policy survived and tracked to within 0.2 m/s and rad/s in steady
+# state, as one polygon per command plane. Each row [n_vx, n_vy, n_wz, d] is the constraint n_vx·vx + n_vy·vy +
+# n_wz·wz ≤ d on the command, held softly (w_envelope).
+#   vx × vy (grid_vx_vy_poi732yy, wz = 0): 794 of 1681 commands kept, 85 of the 879 inside the polygon not
+#   vx × wz (grid_vx_wz_poi732yy, vy = 0): 1173 of 1681 commands kept, 112 of the 1285 inside the polygon not
+#   vy × wz (grid_vy_wz_poi732yy, vx = 0.2): 1045 of 1681 commands kept, 91 of the 1136 inside the polygon not
+envelope:
+  # vx × vy
+  - [1, 0, 0, 2]
+  - [0.707107, 0.707107, 0, 1.76777]
+  - [0, 1, 0, 1.5]
+  - [-0.707107, 0.707107, 0, 1.41421]
+  - [-1, 0, 0, 1.5]
+  - [-0.707107, -0.707107, 0, 1.48492]
+  - [0, -1, 0, 1.4]
+  - [0.707107, -0.707107, 0, 1.69706]
+  # vx × wz
+  - [1, 0, 0, 2]
+  - [0.707107, 0, 0.707107, 1.9799]
+  - [0, 0, 1, 2]
+  - [-0.707107, 0, 0.707107, 2.05061]
+  - [-1, 0, 0, 1.5]
+  - [-0.707107, 0, -0.707107, 2.05061]
+  - [0, 0, -1, 2]
+  - [0.707107, 0, -0.707107, 2.05061]
+  # vy × wz
+  - [0, 1, 0, 1.5]
+  - [0, 0.707107, 0.707107, 2.05061]
+  - [0, 0, 1, 2]
+  - [0, -0.707107, 0.707107, 1.90919]
+  - [0, -1, 0, 1.4]
+  - [0, -0.707107, -0.707107, 1.9799]
+  - [0, 0, -1, 2]
+  - [0, 0.707107, -0.707107, 2.05061]
+
 # ---- The walk policy's response model. Written by codegen/import_model.py: edit by re-importing. ----
 # The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which the
 # MPC plans with. One path per (output, command); each output is the sum of its three paths' lag states z:
@@ -63,6 +104,8 @@ model:
   source: hammerstein_no_gate_model_k1.mat (sha256 f61407be63bb…)
   policy: poi732yy (k1_walk_mjlab_poi732yy_29999.onnx)
   sample_time: 0.02
+  # The command amplitude per axis [vx, vy, wz] the identification spanned: the maps extrapolate beyond
+  identified_range: [1.75, 1.75, 1.5]
   paths:
     vx:
       vx:

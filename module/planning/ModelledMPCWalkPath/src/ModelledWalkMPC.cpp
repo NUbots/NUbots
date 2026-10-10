@@ -30,6 +30,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 
 #include "acados_c/ocp_nlp_interface.h"
@@ -42,6 +43,7 @@ namespace module::planning::modelled_walk_mpc {
     const double ModelledWalkMPC::DT         = MODELLED_MPC_WALK_PATH_DT;
     const int ModelledWalkMPC::MAX_OBSTACLES = MODELLED_MPC_WALK_PATH_MAX_OBSTACLES;
     const double ModelledWalkMPC::MODEL_TS   = MODELLED_MPC_WALK_PATH_MODEL_TS;
+    const int ModelledWalkMPC::ENVELOPE_ROWS = MODELLED_MPC_WALK_PATH_ENVELOPE_ROWS;
 
     static_assert(MODELLED_MPC_WALK_PATH_NX == 15 && MODELLED_MPC_WALK_PATH_NU == 3,
                   "ModelledWalkMPC expects the state (pose, lags, command)");
@@ -66,6 +68,18 @@ namespace module::planning::modelled_walk_mpc {
         }
 
     }  // namespace
+
+    std::vector<EnvelopeRow> envelope_from_yaml(const YAML::Node& node) {
+        std::vector<EnvelopeRow> rows{};
+        for (const auto& r : node) {
+            const auto v = r.as<std::vector<double>>();
+            if (v.size() != 4) {
+                throw std::runtime_error("ModelledMPCWalkPath: an envelope row is [n_vx, n_vy, n_wz, d]");
+            }
+            rows.push_back({Eigen::Vector3d(v[0], v[1], v[2]), v[3]});
+        }
+        return rows;
+    }
 
     std::string Solution::status_string() const {
         switch (status) {
@@ -103,6 +117,10 @@ namespace module::planning::modelled_walk_mpc {
                                      + std::to_string(config.model.sample_time)
                                      + " s, but the solver was generated for " + std::to_string(MODEL_TS) + " s");
         }
+        if (int(config.envelope.size()) > ENVELOPE_ROWS) {
+            throw std::runtime_error("ModelledMPCWalkPath: the envelope has " + std::to_string(config.envelope.size())
+                                     + " rows, but the solver was generated for " + std::to_string(ENVELOPE_ROWS));
+        }
         cfg                        = config;
         ocp_nlp_config* nlp_config = modelled_mpc_walk_path_acados_get_nlp_config(capsule);
         ocp_nlp_dims* nlp_dims     = modelled_mpc_walk_path_acados_get_nlp_dims(capsule);
@@ -124,8 +142,36 @@ namespace module::planning::modelled_walk_mpc {
             ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "ubx", ubx.data());
         }
 
-        // Slack penalty on the obstacle constraints (stages 1..N; stage 0 has none)
-        std::vector<double> zu(MAX_OBSTACLES, cfg.w_slack);
+        // The capability envelope on the command part of the state, at stages 1..N; unused rows, and every row at
+        // stage 0 (pinned to the current state, which may be outside after a fallback), are switched off
+        constexpr double big = 1e9;
+        const int nx         = MODELLED_MPC_WALK_PATH_NX;
+        std::vector<double> C(ENVELOPE_ROWS * nx, 0.0);  // column major
+        std::vector<double> lg(ENVELOPE_ROWS, -big);
+        std::vector<double> ug(ENVELOPE_ROWS, big);
+        std::vector<double> ug_off(ENVELOPE_ROWS, big);
+        for (int r = 0; r < int(cfg.envelope.size()); ++r) {
+            for (int i = 0; i < 3; ++i) {
+                C[(MODELLED_MPC_WALK_PATH_S_COMMAND + i) * ENVELOPE_ROWS + r] = cfg.envelope[r].normal[i];
+            }
+            ug[r] = cfg.envelope[r].bound;
+        }
+        for (int k = 0; k <= N; ++k) {
+            ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "C", C.data());
+            ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "lg", lg.data());
+            ocp_nlp_constraints_model_set(nlp_config,
+                                          nlp_dims,
+                                          nlp_in,
+                                          nlp_out,
+                                          k,
+                                          "ug",
+                                          k == 0 ? ug_off.data() : ug.data());
+        }
+
+        // Slack penalties: the envelope's at every stage, then the obstacles' at stages 1..N (stage 0 has none)
+        std::vector<double> zu(ENVELOPE_ROWS, cfg.w_envelope);
+        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "zu", zu.data());
+        zu.resize(ENVELOPE_ROWS + MAX_OBSTACLES, cfg.w_slack);
         for (int k = 1; k <= N; ++k) {
             ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, k, "zu", zu.data());
         }
@@ -162,6 +208,14 @@ namespace module::planning::modelled_walk_mpc {
     Eigen::Vector3d ModelledWalkMPC::clip_to_limits(const Eigen::Vector3d& command) const {
         const Eigen::Vector3d lo(-cfg.max_backward_velocity, -cfg.max_velocity.y(), -cfg.max_velocity.z());
         return command.cwiseMax(lo).cwiseMin(cfg.max_velocity);
+    }
+
+    double ModelledWalkMPC::envelope_violation(const Eigen::Vector3d& command) const {
+        double violation = -std::numeric_limits<double>::infinity();
+        for (const auto& row : cfg.envelope) {
+            violation = std::max(violation, row.normal.dot(command) - row.bound);
+        }
+        return violation;
     }
 
     void ModelledWalkMPC::set_previous_command(const Eigen::Vector3d& command) {
@@ -326,6 +380,7 @@ namespace module::planning::modelled_walk_mpc {
         // tolerance
         const Eigen::Vector3d a_max = cfg.max_acceleration * DT;
         solution.command            = clip_to_limits(s[1].tail<3>().cwiseMax(u_prev - a_max).cwiseMin(u_prev + a_max));
+        solution.envelope_violation = envelope_violation(solution.command);
         a_guess                     = a;
         u_prev                      = solution.command;
         return solution;

@@ -37,16 +37,24 @@
 
 using Catch::Approx;
 using module::planning::modelled_walk_mpc::Config;
+using module::planning::modelled_walk_mpc::envelope_from_yaml;
+using module::planning::modelled_walk_mpc::EnvelopeRow;
 using module::planning::modelled_walk_mpc::HammersteinModel;
 using module::planning::modelled_walk_mpc::ModelledWalkMPC;
 
 namespace {
 
-    /// @brief The defaults (the module's configuration's tuning) with the K1 model from the module's configuration
-    /// (tests run in the build directory, where it is copied)
+    /// @brief The defaults (the module's configuration's tuning) with the K1's limits, capability envelope and model
+    /// from the module's configuration (tests run in the build directory, where it is copied)
     Config k1_config() {
+        const YAML::Node config = YAML::LoadFile("config/ModelledMPCWalkPath.yaml");
         Config cfg{};
-        cfg.model = HammersteinModel::from_yaml(YAML::LoadFile("config/ModelledMPCWalkPath.yaml")["model"]);
+        const auto max_velocity   = config["max_velocity"].as<std::vector<double>>();
+        cfg.max_velocity          = Eigen::Vector3d(max_velocity[0], max_velocity[1], max_velocity[2]);
+        cfg.max_backward_velocity = config["max_backward_velocity"].as<double>();
+        cfg.envelope              = envelope_from_yaml(config["envelope"]);
+        cfg.w_envelope            = config["w_envelope"].as<double>();
+        cfg.model                 = HammersteinModel::from_yaml(config["model"]);
         return cfg;
     }
 
@@ -58,13 +66,14 @@ namespace {
     };
 
     struct Run {
-        double arrival_time          = -1.0;  // -1 if it never arrived
-        double min_clearance         = std::numeric_limits<double>::infinity();
-        Eigen::Vector3d peak_rate    = Eigen::Vector3d::Zero();
-        Eigen::Vector3d peak_command = Eigen::Vector3d::Zero();
-        double min_vx                = 0.0;
-        double max_estimate_error    = 0.0;
-        int failures                 = 0;
+        double arrival_time           = -1.0;  // -1 if it never arrived
+        double min_clearance          = std::numeric_limits<double>::infinity();
+        Eigen::Vector3d peak_rate     = Eigen::Vector3d::Zero();
+        Eigen::Vector3d peak_command  = Eigen::Vector3d::Zero();
+        double min_vx                 = 0.0;
+        double max_estimate_error     = 0.0;
+        double max_envelope_violation = -std::numeric_limits<double>::infinity();
+        int failures                  = 0;
     };
 
     /// @brief Closed loop against the model itself as the robot (unsmoothed, at its own sample time): the planner at
@@ -112,10 +121,11 @@ namespace {
                 command.setZero();
                 mpc.set_previous_command(command);
             }
-            run.peak_rate    = run.peak_rate.cwiseMax((command - sent).cwiseAbs() / ModelledWalkMPC::DT);
-            run.peak_command = run.peak_command.cwiseMax(command.cwiseAbs());
-            run.min_vx       = std::min(run.min_vx, command.x());
-            sent             = command;
+            run.peak_rate              = run.peak_rate.cwiseMax((command - sent).cwiseAbs() / ModelledWalkMPC::DT);
+            run.peak_command           = run.peak_command.cwiseMax(command.cwiseAbs());
+            run.min_vx                 = std::min(run.min_vx, command.x());
+            run.max_envelope_violation = std::max(run.max_envelope_violation, mpc.envelope_violation(command));
+            sent                       = command;
 
             for (int k = 0; k < substeps; ++k) {
                 const Eigen::Vector3d v = HammersteinModel::delivered(z);
@@ -159,20 +169,23 @@ namespace {
         // Moves smaller than the policy's dead zones: the MPC has to step past them and back
         {"sidestep_0.3m", {0.0, 0.3, 0.0}},
         {"ahead_0.15m", {0.15, 0.0, 0.0}},
+        // A step back, which the policy delivers once the command is past its backward dead zone
+        {"back_0.3m", {-0.3, 0.0, 0.0}},
     };
 
 }  // namespace
 
 TEST_CASE("The first command matches the prototype's", "[ModelledWalkMPC]") {
     // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the same initial guess: [0.0999999982, 0.0999999633, -0.1332770503], at the
-    // iteration cap. Also checks that the configured limits and model survive the solver's reset.
+    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999979, 0.0999999235,
+    // -0.1402893543], at the iteration cap. Also checks that the configured limits, envelope and model survive the
+    // solver's reset.
     ModelledWalkMPC mpc{k1_config()};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
-    CHECK(solution.command.x() == Approx(0.0999999982).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.0999999633).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1332770503).margin(1e-4));
+    CHECK(solution.command.x() == Approx(0.0999999979).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.0999999235).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.1402893543).margin(1e-4));
 }
 
 TEST_CASE("Arrives at every goal against the model, within the limits", "[ModelledWalkMPC]") {
@@ -188,6 +201,8 @@ TEST_CASE("Arrives at every goal against the model, within the limits", "[Modell
         CHECK(run.peak_command.y() <= cfg.max_velocity.y() + 1e-9);
         CHECK(run.peak_command.z() <= cfg.max_velocity.z() + 1e-9);
         CHECK(run.min_vx >= -cfg.max_backward_velocity - 1e-9);
+        // The envelope is soft, but its penalty keeps the commands inside it
+        CHECK(run.max_envelope_violation <= 1e-3);
         CHECK(run.peak_rate.x() <= cfg.max_acceleration.x() + 1e-6);
         CHECK(run.peak_rate.y() <= cfg.max_acceleration.y() + 1e-6);
         CHECK(run.peak_rate.z() <= cfg.max_acceleration.z() + 1e-6);
@@ -221,11 +236,30 @@ TEST_CASE("The estimate advances in whole model samples and carries the remainde
     CHECK(mpc.previous_command().isZero());
 }
 
-TEST_CASE("A model with another sample time is refused", "[ModelledWalkMPC]") {
+TEST_CASE("A model with another sample time, or an envelope with too many rows, is refused", "[ModelledWalkMPC]") {
     Config cfg = k1_config();
     ModelledWalkMPC mpc{cfg};
-    cfg.model.sample_time = 0.01;
-    CHECK_THROWS_AS(mpc.configure(cfg), std::runtime_error);
+
+    Config other_ts            = cfg;
+    other_ts.model.sample_time = 0.01;
+    CHECK_THROWS_AS(mpc.configure(other_ts), std::runtime_error);
+
+    Config too_many = cfg;
+    too_many.envelope.resize(ModelledWalkMPC::ENVELOPE_ROWS + 1, EnvelopeRow{Eigen::Vector3d::UnitX(), 1.0});
+    CHECK_THROWS_AS(mpc.configure(too_many), std::runtime_error);
+}
+
+TEST_CASE("The envelope holds the commands inside it", "[ModelledWalkMPC]") {
+    // Walking far ahead goes to the forward limit; tightening the envelope's forward edge (its first row) to vx ≤ 0.8
+    // holds it there
+    Config cfg = k1_config();
+    REQUIRE(cfg.envelope.front().normal == Eigen::Vector3d::UnitX());
+    cfg.envelope.front().bound = 0.8;
+    ModelledWalkMPC mpc{cfg};
+    const Run run = simulate(mpc, cfg.model, {"ahead_4m", {4.0, 0.0, 0.0}});
+    CHECK(run.arrival_time >= 0.0);
+    CHECK(run.peak_command.x() <= 0.8 + 1e-3);
+    CHECK(run.peak_command.x() > 0.75);
 }
 
 TEST_CASE("Non-finite input fails without changing the state, and the next solve recovers", "[ModelledWalkMPC]") {

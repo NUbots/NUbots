@@ -541,6 +541,68 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
 
 
 
+    // slacks initial
+    double* zlu0_mem = calloc(4*NS0, sizeof(double));
+    double* Zl_0 = zlu0_mem+NS0*0;
+    double* Zu_0 = zlu0_mem+NS0*1;
+    double* zl_0 = zlu0_mem+NS0*2;
+    double* zu_0 = zlu0_mem+NS0*3;
+
+    // change only the non-zero elements:
+    Zu_0[0] = 1;
+    Zu_0[1] = 1;
+    Zu_0[2] = 1;
+    Zu_0[3] = 1;
+    Zu_0[4] = 1;
+    Zu_0[5] = 1;
+    Zu_0[6] = 1;
+    Zu_0[7] = 1;
+    Zu_0[8] = 1;
+    Zu_0[9] = 1;
+    Zu_0[10] = 1;
+    Zu_0[11] = 1;
+    Zu_0[12] = 1;
+    Zu_0[13] = 1;
+    Zu_0[14] = 1;
+    Zu_0[15] = 1;
+    Zu_0[16] = 1;
+    Zu_0[17] = 1;
+    Zu_0[18] = 1;
+    Zu_0[19] = 1;
+    Zu_0[20] = 1;
+    Zu_0[21] = 1;
+    Zu_0[22] = 1;
+    Zu_0[23] = 1;
+    zu_0[0] = 1000;
+    zu_0[1] = 1000;
+    zu_0[2] = 1000;
+    zu_0[3] = 1000;
+    zu_0[4] = 1000;
+    zu_0[5] = 1000;
+    zu_0[6] = 1000;
+    zu_0[7] = 1000;
+    zu_0[8] = 1000;
+    zu_0[9] = 1000;
+    zu_0[10] = 1000;
+    zu_0[11] = 1000;
+    zu_0[12] = 1000;
+    zu_0[13] = 1000;
+    zu_0[14] = 1000;
+    zu_0[15] = 1000;
+    zu_0[16] = 1000;
+    zu_0[17] = 1000;
+    zu_0[18] = 1000;
+    zu_0[19] = 1000;
+    zu_0[20] = 1000;
+    zu_0[21] = 1000;
+    zu_0[22] = 1000;
+    zu_0[23] = 1000;
+
+    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "Zl", Zl_0);
+    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "Zu", Zu_0);
+    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "zl", zl_0);
+    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "zu", zu_0);
+    free(zlu0_mem);
     // slacks
     double* zlumem = calloc(4*NS, sizeof(double));
     double* Zl = zlumem+NS*0;
@@ -552,10 +614,58 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     Zu[1] = 1;
     Zu[2] = 1;
     Zu[3] = 1;
+    Zu[4] = 1;
+    Zu[5] = 1;
+    Zu[6] = 1;
+    Zu[7] = 1;
+    Zu[8] = 1;
+    Zu[9] = 1;
+    Zu[10] = 1;
+    Zu[11] = 1;
+    Zu[12] = 1;
+    Zu[13] = 1;
+    Zu[14] = 1;
+    Zu[15] = 1;
+    Zu[16] = 1;
+    Zu[17] = 1;
+    Zu[18] = 1;
+    Zu[19] = 1;
+    Zu[20] = 1;
+    Zu[21] = 1;
+    Zu[22] = 1;
+    Zu[23] = 1;
+    Zu[24] = 1;
+    Zu[25] = 1;
+    Zu[26] = 1;
+    Zu[27] = 1;
     zu[0] = 1000;
     zu[1] = 1000;
     zu[2] = 1000;
     zu[3] = 1000;
+    zu[4] = 1000;
+    zu[5] = 1000;
+    zu[6] = 1000;
+    zu[7] = 1000;
+    zu[8] = 1000;
+    zu[9] = 1000;
+    zu[10] = 1000;
+    zu[11] = 1000;
+    zu[12] = 1000;
+    zu[13] = 1000;
+    zu[14] = 1000;
+    zu[15] = 1000;
+    zu[16] = 1000;
+    zu[17] = 1000;
+    zu[18] = 1000;
+    zu[19] = 1000;
+    zu[20] = 1000;
+    zu[21] = 1000;
+    zu[22] = 1000;
+    zu[23] = 1000;
+    zu[24] = 1000;
+    zu[25] = 1000;
+    zu[26] = 1000;
+    zu[27] = 1000;
 
     for (int i = 1; i < N; i++)
     {
@@ -579,10 +689,58 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     Zu_e[1] = 1;
     Zu_e[2] = 1;
     Zu_e[3] = 1;
+    Zu_e[4] = 1;
+    Zu_e[5] = 1;
+    Zu_e[6] = 1;
+    Zu_e[7] = 1;
+    Zu_e[8] = 1;
+    Zu_e[9] = 1;
+    Zu_e[10] = 1;
+    Zu_e[11] = 1;
+    Zu_e[12] = 1;
+    Zu_e[13] = 1;
+    Zu_e[14] = 1;
+    Zu_e[15] = 1;
+    Zu_e[16] = 1;
+    Zu_e[17] = 1;
+    Zu_e[18] = 1;
+    Zu_e[19] = 1;
+    Zu_e[20] = 1;
+    Zu_e[21] = 1;
+    Zu_e[22] = 1;
+    Zu_e[23] = 1;
+    Zu_e[24] = 1;
+    Zu_e[25] = 1;
+    Zu_e[26] = 1;
+    Zu_e[27] = 1;
     zu_e[0] = 1000;
     zu_e[1] = 1000;
     zu_e[2] = 1000;
     zu_e[3] = 1000;
+    zu_e[4] = 1000;
+    zu_e[5] = 1000;
+    zu_e[6] = 1000;
+    zu_e[7] = 1000;
+    zu_e[8] = 1000;
+    zu_e[9] = 1000;
+    zu_e[10] = 1000;
+    zu_e[11] = 1000;
+    zu_e[12] = 1000;
+    zu_e[13] = 1000;
+    zu_e[14] = 1000;
+    zu_e[15] = 1000;
+    zu_e[16] = 1000;
+    zu_e[17] = 1000;
+    zu_e[18] = 1000;
+    zu_e[19] = 1000;
+    zu_e[20] = 1000;
+    zu_e[21] = 1000;
+    zu_e[22] = 1000;
+    zu_e[23] = 1000;
+    zu_e[24] = 1000;
+    zu_e[25] = 1000;
+    zu_e[26] = 1000;
+    zu_e[27] = 1000;
 
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "Zl", Zl_e);
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "Zu", Zu_e);
@@ -678,8 +836,135 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     free(lubu);
 
 
+    // set up general constraints for stage 0 to N-1
+    double* D = calloc(NG*NU, sizeof(double));
+    double* C = calloc(NG*NX, sizeof(double));
+    double* lug = calloc(2*NG, sizeof(double));
+    double* lg = lug;
+    double* ug = lug + NG;
+    C[0+NG * 12] = 1;
+    C[1+NG * 13] = 1;
+    C[2+NG * 14] = 1;
+    C[3+NG * 12] = 1;
+    C[4+NG * 13] = 1;
+    C[5+NG * 14] = 1;
+    C[6+NG * 12] = 1;
+    C[7+NG * 13] = 1;
+    C[8+NG * 14] = 1;
+    C[9+NG * 12] = 1;
+    C[10+NG * 13] = 1;
+    C[11+NG * 14] = 1;
+    C[12+NG * 12] = 1;
+    C[13+NG * 13] = 1;
+    C[14+NG * 14] = 1;
+    C[15+NG * 12] = 1;
+    C[16+NG * 13] = 1;
+    C[17+NG * 14] = 1;
+    C[18+NG * 12] = 1;
+    C[19+NG * 13] = 1;
+    C[20+NG * 14] = 1;
+    C[21+NG * 12] = 1;
+    C[22+NG * 13] = 1;
+    C[23+NG * 14] = 1;
+    lg[0] = -1000000000;
+    lg[1] = -1000000000;
+    lg[2] = -1000000000;
+    lg[3] = -1000000000;
+    lg[4] = -1000000000;
+    lg[5] = -1000000000;
+    lg[6] = -1000000000;
+    lg[7] = -1000000000;
+    lg[8] = -1000000000;
+    lg[9] = -1000000000;
+    lg[10] = -1000000000;
+    lg[11] = -1000000000;
+    lg[12] = -1000000000;
+    lg[13] = -1000000000;
+    lg[14] = -1000000000;
+    lg[15] = -1000000000;
+    lg[16] = -1000000000;
+    lg[17] = -1000000000;
+    lg[18] = -1000000000;
+    lg[19] = -1000000000;
+    lg[20] = -1000000000;
+    lg[21] = -1000000000;
+    lg[22] = -1000000000;
+    lg[23] = -1000000000;
+    ug[0] = 1000000000;
+    ug[1] = 1000000000;
+    ug[2] = 1000000000;
+    ug[3] = 1000000000;
+    ug[4] = 1000000000;
+    ug[5] = 1000000000;
+    ug[6] = 1000000000;
+    ug[7] = 1000000000;
+    ug[8] = 1000000000;
+    ug[9] = 1000000000;
+    ug[10] = 1000000000;
+    ug[11] = 1000000000;
+    ug[12] = 1000000000;
+    ug[13] = 1000000000;
+    ug[14] = 1000000000;
+    ug[15] = 1000000000;
+    ug[16] = 1000000000;
+    ug[17] = 1000000000;
+    ug[18] = 1000000000;
+    ug[19] = 1000000000;
+    ug[20] = 1000000000;
+    ug[21] = 1000000000;
+    ug[22] = 1000000000;
+    ug[23] = 1000000000;
+
+    for (int i = 0; i < N; i++)
+    {
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "D", D);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "C", C);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "lg", lg);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "ug", ug);
+    }
+    free(D);
+    free(C);
+    free(lug);
 
 
+    // set up soft bounds for general linear constraints
+    int* idxsg = malloc(NSG * sizeof(int));
+    idxsg[0] = 0;
+    idxsg[1] = 1;
+    idxsg[2] = 2;
+    idxsg[3] = 3;
+    idxsg[4] = 4;
+    idxsg[5] = 5;
+    idxsg[6] = 6;
+    idxsg[7] = 7;
+    idxsg[8] = 8;
+    idxsg[9] = 9;
+    idxsg[10] = 10;
+    idxsg[11] = 11;
+    idxsg[12] = 12;
+    idxsg[13] = 13;
+    idxsg[14] = 14;
+    idxsg[15] = 15;
+    idxsg[16] = 16;
+    idxsg[17] = 17;
+    idxsg[18] = 18;
+    idxsg[19] = 19;
+    idxsg[20] = 20;
+    idxsg[21] = 21;
+    idxsg[22] = 22;
+    idxsg[23] = 23;
+    double* lusg = calloc(2*NSG, sizeof(double));
+    double* lsg = lusg;
+    double* usg = lusg + NSG;
+
+    for (int i = 0; i < N; i++)
+    {
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "idxsg", idxsg);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "lsg", lsg);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "usg", usg);
+    }
+    free(idxsg);
+    free(lusg);
 
 
     /* Path constraints */
@@ -777,6 +1062,89 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     free(lubx_e);
 
 
+    // set up general constraints for last stage
+    double* C_e = calloc(NGN*NX, sizeof(double));
+    double* lug_e = calloc(2*NGN, sizeof(double));
+    double* lg_e = lug_e;
+    double* ug_e = lug_e + NGN;
+    C_e[0+NGN * 12] = 1;
+    C_e[1+NGN * 13] = 1;
+    C_e[2+NGN * 14] = 1;
+    C_e[3+NGN * 12] = 1;
+    C_e[4+NGN * 13] = 1;
+    C_e[5+NGN * 14] = 1;
+    C_e[6+NGN * 12] = 1;
+    C_e[7+NGN * 13] = 1;
+    C_e[8+NGN * 14] = 1;
+    C_e[9+NGN * 12] = 1;
+    C_e[10+NGN * 13] = 1;
+    C_e[11+NGN * 14] = 1;
+    C_e[12+NGN * 12] = 1;
+    C_e[13+NGN * 13] = 1;
+    C_e[14+NGN * 14] = 1;
+    C_e[15+NGN * 12] = 1;
+    C_e[16+NGN * 13] = 1;
+    C_e[17+NGN * 14] = 1;
+    C_e[18+NGN * 12] = 1;
+    C_e[19+NGN * 13] = 1;
+    C_e[20+NGN * 14] = 1;
+    C_e[21+NGN * 12] = 1;
+    C_e[22+NGN * 13] = 1;
+    C_e[23+NGN * 14] = 1;
+    lg_e[0] = -1000000000;
+    ug_e[0] = 1000000000;
+    lg_e[1] = -1000000000;
+    ug_e[1] = 1000000000;
+    lg_e[2] = -1000000000;
+    ug_e[2] = 1000000000;
+    lg_e[3] = -1000000000;
+    ug_e[3] = 1000000000;
+    lg_e[4] = -1000000000;
+    ug_e[4] = 1000000000;
+    lg_e[5] = -1000000000;
+    ug_e[5] = 1000000000;
+    lg_e[6] = -1000000000;
+    ug_e[6] = 1000000000;
+    lg_e[7] = -1000000000;
+    ug_e[7] = 1000000000;
+    lg_e[8] = -1000000000;
+    ug_e[8] = 1000000000;
+    lg_e[9] = -1000000000;
+    ug_e[9] = 1000000000;
+    lg_e[10] = -1000000000;
+    ug_e[10] = 1000000000;
+    lg_e[11] = -1000000000;
+    ug_e[11] = 1000000000;
+    lg_e[12] = -1000000000;
+    ug_e[12] = 1000000000;
+    lg_e[13] = -1000000000;
+    ug_e[13] = 1000000000;
+    lg_e[14] = -1000000000;
+    ug_e[14] = 1000000000;
+    lg_e[15] = -1000000000;
+    ug_e[15] = 1000000000;
+    lg_e[16] = -1000000000;
+    ug_e[16] = 1000000000;
+    lg_e[17] = -1000000000;
+    ug_e[17] = 1000000000;
+    lg_e[18] = -1000000000;
+    ug_e[18] = 1000000000;
+    lg_e[19] = -1000000000;
+    ug_e[19] = 1000000000;
+    lg_e[20] = -1000000000;
+    ug_e[20] = 1000000000;
+    lg_e[21] = -1000000000;
+    ug_e[21] = 1000000000;
+    lg_e[22] = -1000000000;
+    ug_e[22] = 1000000000;
+    lg_e[23] = -1000000000;
+    ug_e[23] = 1000000000;
+
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "C", C_e);
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "lg", lg_e);
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "ug", ug_e);
+    free(C_e);
+    free(lug_e);
 
 
     // set up nonlinear constraints for last stage
@@ -801,6 +1169,41 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
 
 
 
+    // set up soft bounds for general linear constraints
+    int* idxsg_e = calloc(NSGN, sizeof(int));
+    idxsg_e[0] = 0;
+    idxsg_e[1] = 1;
+    idxsg_e[2] = 2;
+    idxsg_e[3] = 3;
+    idxsg_e[4] = 4;
+    idxsg_e[5] = 5;
+    idxsg_e[6] = 6;
+    idxsg_e[7] = 7;
+    idxsg_e[8] = 8;
+    idxsg_e[9] = 9;
+    idxsg_e[10] = 10;
+    idxsg_e[11] = 11;
+    idxsg_e[12] = 12;
+    idxsg_e[13] = 13;
+    idxsg_e[14] = 14;
+    idxsg_e[15] = 15;
+    idxsg_e[16] = 16;
+    idxsg_e[17] = 17;
+    idxsg_e[18] = 18;
+    idxsg_e[19] = 19;
+    idxsg_e[20] = 20;
+    idxsg_e[21] = 21;
+    idxsg_e[22] = 22;
+    idxsg_e[23] = 23;
+    double* lusg_e = calloc(2*NSGN, sizeof(double));
+    double* lsg_e = lusg_e;
+    double* usg_e = lusg_e + NSGN;
+
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "idxsg", idxsg_e);
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "lsg", lsg_e);
+    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, N, "usg", usg_e);
+    free(idxsg_e);
+    free(lusg_e);
 
 
     // set up soft bounds for nonlinear constraints

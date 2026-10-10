@@ -41,6 +41,7 @@ the robot frame at the time of the solve, over N steps of dt:
     minimise  Σₖ w_pos·ρ(‖pₖ − p*‖) + w_head·hₖ(θₖ) + Σᵢ w_eff,i·vₖ,ᵢ² + Σᵢ w_rate,i·(aₖ,ᵢ·dt)² + slack penalty
 
     subject to  velocity limits on u_prev at stages 1..N, acceleration limits on a,
+                nᵢ·u_prev ≤ dᵢ at stages 1..N, the capability envelope (soft, L1 + L2 penalty on the slack)
                 ‖pₖ − oⱼ‖² ≥ r² for each active obstacle j (soft, L1 + L2 penalty on the slack)
 
 The costs are MPC-1's (see MPCWalkPath's generator), except that effort is on the delivered velocity v rather than the
@@ -58,7 +59,11 @@ The model's parameters are per-stage parameters (written into the module's confi
 refitted model of the same structure needs no regeneration. Its structure is fixed here:
 MODEL_TS, UNITS breakpoints per path, first-order paths with a one-step delay.
 
-Only N, dt, the model's structure and the number of obstacle slots are fixed by the generated code. Run with a Python
+The capability envelope is ENVELOPE_ROWS linear constraints on the command (written into the module's configuration
+by import_envelope.py); their coefficients are set at runtime, and unused rows are switched off.
+
+Only N, dt, the model's structure, the number of envelope rows and the number of obstacle slots are fixed by the
+generated code. Run with a Python
 environment that has casadi and acados_template, from the same acados release the Docker image builds (see
 ACADOS_VERSION below), e.g. walk-mpc's:
 
@@ -81,6 +86,7 @@ NAME = "modelled_mpc_walk_path"
 HORIZON = 25  # steps
 DT = 0.1  # s, also the planner period
 MAX_OBSTACLES = 4  # obstacle slots, unused ones are switched off
+ENVELOPE_ROWS = 24  # linear constraints on the command, unused ones are switched off
 
 # The Hammerstein model's structure
 MODEL_TS = 0.02  # s, the model's sample time (the policy's control period)
@@ -209,15 +215,30 @@ def build_ocp():
     ocp.constraints.lbx_e, ocp.constraints.ubx_e = -np.ones(3), np.ones(3)
     ocp.constraints.x0 = np.zeros(NX)
 
+    # The capability envelope, C·s ≤ ug on the command part of the state, soft. Placeholder rows: the module sets the
+    # real ones from its configuration (and switches them off at stage 0, which is pinned to the current state).
     big = 1e9
+    r = ENVELOPE_ROWS
+    envelope = np.zeros((r, NX))
+    envelope[:, S_COMMAND : S_COMMAND + 3] = np.tile(np.eye(3), (r // 3 + 1, 1))[:r]
+    for suffix in ("", "_e"):
+        setattr(ocp.constraints, "C" + suffix, envelope)
+        setattr(ocp.constraints, "lg" + suffix, -big * np.ones(r))
+        setattr(ocp.constraints, "ug" + suffix, big * np.ones(r))
+        setattr(ocp.constraints, "idxsg" + suffix, np.arange(r))
+    ocp.constraints.D = np.zeros((r, 3))
+    # Stage 0 has the envelope's slacks only; stages 1..N have the envelope's, then the obstacles'
+    ocp.cost.zl_0, ocp.cost.zu_0 = np.zeros(r), 1000.0 * np.ones(r)  # set from the configuration's w_envelope
+    ocp.cost.Zl_0, ocp.cost.Zu_0 = np.zeros(r), np.ones(r)
+
     for suffix in ("", "_e"):
         setattr(ocp.constraints, "lh" + suffix, -big * np.ones(m))
         setattr(ocp.constraints, "uh" + suffix, np.zeros(m))
         setattr(ocp.constraints, "idxsh" + suffix, np.arange(m))
-        setattr(ocp.cost, "zl" + suffix, np.zeros(m))
-        setattr(ocp.cost, "zu" + suffix, 1000.0 * np.ones(m))  # set from the configuration's w_slack
-        setattr(ocp.cost, "Zl" + suffix, np.zeros(m))
-        setattr(ocp.cost, "Zu" + suffix, np.ones(m))
+        setattr(ocp.cost, "zl" + suffix, np.zeros(r + m))
+        setattr(ocp.cost, "zu" + suffix, 1000.0 * np.ones(r + m))  # set from w_envelope and w_slack
+        setattr(ocp.cost, "Zl" + suffix, np.zeros(r + m))
+        setattr(ocp.cost, "Zu" + suffix, np.ones(r + m))
 
     so = ocp.solver_options
     so.integrator_type = "DISCRETE"
@@ -240,6 +261,7 @@ LAYOUT_HEADER = """\
 
 #define MODELLED_MPC_WALK_PATH_DT {dt}
 #define MODELLED_MPC_WALK_PATH_MAX_OBSTACLES {m}
+#define MODELLED_MPC_WALK_PATH_ENVELOPE_ROWS {rows}
 
 /* The Hammerstein model's structure */
 #define MODELLED_MPC_WALK_PATH_MODEL_TS {ts}
@@ -297,6 +319,7 @@ def main():
             version=ACADOS_VERSION,
             dt=DT,
             m=MAX_OBSTACLES,
+            rows=ENVELOPE_ROWS,
             ts=MODEL_TS,
             substeps=SUBSTEPS,
             units=UNITS,
