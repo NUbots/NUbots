@@ -113,7 +113,8 @@ namespace module::skill {
 
         /// Drop the history window, the action feedback and the gait phase. Called whenever the
         /// next tick cannot continue the previous one: a new walk task, or a resumption after the
-        /// get-up policy owned the low-level channel.
+        /// get-up policy owned the low-level channel. Every reaction runs under Sync<K1WalkPolicy>:
+        /// a Start<WalkTask> clearing the window mid-tick fed the network an empty input.
         void reset_policy_state();
 
         /// ONNX Runtime session for the policy, nullptr until a model loads

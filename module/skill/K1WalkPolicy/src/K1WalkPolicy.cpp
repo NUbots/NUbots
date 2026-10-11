@@ -122,7 +122,7 @@ namespace module::skill {
     K1WalkPolicy::K1WalkPolicy(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("K1WalkPolicy.yaml").then([this](const Configuration& config) {
+        on<Configuration, Sync<K1WalkPolicy>>("K1WalkPolicy.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             cfg.model_path             = config["model_path"].as<std::string>();
@@ -186,17 +186,17 @@ namespace module::skill {
 
         // Cached rather than a With<>: BoosterModeState only exists on the real HardwareIO path,
         // and a With<> would silently stop the whole walk provider in NUSim.
-        on<Trigger<BoosterModeState>>().then([this](const BoosterModeState& state) {  //
+        on<Trigger<BoosterModeState>, Sync<K1WalkPolicy>>().then([this](const BoosterModeState& state) {  //
             last_mode = int(state.mode);
         });
 
         // The policy does not own the head: track whatever the look skills last asked for
-        on<Trigger<BoosterHeadRot>>().then([this](const BoosterHeadRot& head) {
+        on<Trigger<BoosterHeadRot>, Sync<K1WalkPolicy>>().then([this](const BoosterHeadRot& head) {
             head_target.x() = std::clamp(head.rot.x(), -HEAD_YAW_LIMIT, HEAD_YAW_LIMIT);
             head_target.y() = std::clamp(head.rot.y(), HEAD_PITCH_MIN, HEAD_PITCH_MAX);
         });
 
-        on<Start<WalkTask>>().then([this]() {
+        on<Start<WalkTask>, Sync<K1WalkPolicy>>().then([this]() {
             // Never take the robot into CUSTOM with nothing to stream: with no LowCmd arriving the
             // robot holds stale torques and collapses.
             if (!model_loaded) {
@@ -217,7 +217,7 @@ namespace module::skill {
             last_walk_command = Eigen::Vector3d::Zero();
         });
 
-        on<Stop<WalkTask>>().then([this] {
+        on<Stop<WalkTask>, Sync<K1WalkPolicy>>().then([this] {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
             last_walk_state   = int(WalkState::State::STOPPED);
             last_walk_command = Eigen::Vector3d::Zero();
@@ -225,11 +225,16 @@ namespace module::skill {
 
         // 50 Hz inference loop, matching the training control rate (0.02 s). The simulator/robot
         // PD-tracks the latest LowCmd between ticks.
-        on<Provide<WalkTask>, Every<50, Per<std::chrono::seconds>>, With<RawSensors>, With<Stability>, Single>().then(
-            [this](const WalkTask& walk,
-                   const RunReason& run_reason,
-                   const RawSensors& raw,
-                   const Stability& stability) {
+        on<Provide<WalkTask>,
+           Every<50, Per<std::chrono::seconds>>,
+           With<RawSensors>,
+           With<Stability>,
+           Single,
+           Sync<K1WalkPolicy>>()
+            .then([this](const WalkTask& walk,
+                         const RunReason& run_reason,
+                         const RawSensors& raw,
+                         const Stability& stability) {
                 if (!model_loaded) {
                     return;
                 }
