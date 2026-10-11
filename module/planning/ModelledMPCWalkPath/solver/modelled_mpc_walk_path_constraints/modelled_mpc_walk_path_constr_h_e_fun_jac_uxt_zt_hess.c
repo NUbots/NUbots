@@ -57,21 +57,21 @@ extern "C" {
 
 casadi_real casadi_sq(casadi_real x) { return x*x;}
 
-static const casadi_int casadi_s0[3] = {15, 1, 1};
+static const casadi_int casadi_s0[3] = {16, 1, 1};
 static const casadi_int casadi_s1[3] = {0, 1, 1};
 static const casadi_int casadi_s2[3] = {4, 1, 1};
-static const casadi_int casadi_s3[3] = {175, 1, 1};
+static const casadi_int casadi_s3[3] = {191, 1, 1};
 static const casadi_int casadi_s4[15] = 
-  {15, 4, 0, 2, 4, 6, 8, 0,
+  {16, 4, 0, 2, 4, 6, 8, 0,
   1, 0, 1, 0, 1, 0, 1};
-static const casadi_int casadi_s5[20] = 
-  {15, 15, 0, 1, 2, 2, 2, 2,
+static const casadi_int casadi_s5[21] = 
+  {16, 16, 0, 1, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 0, 1};
+  2, 2, 2, 0, 1};
 static const casadi_int casadi_s6[3] = {4, 0, 1};
 static const casadi_int casadi_s7[3] = {0, 0, 1};
 
-/* modelled_mpc_walk_path_constr_h_e_fun_jac_uxt_zt_hess:(i0[15],i1[0],i2[4],i3[0],i4[175])->(o0[4],o1[15x4,8nz],o2[15x15,2nz],o3[4x0],o4[]) */
+/* modelled_mpc_walk_path_constr_h_e_fun_jac_uxt_zt_hess:(i0[16],i1[0],i2[4],i3[0],i4[191])->(o0[4],o1[16x4,8nz],o2[16x16,2nz],o3[4x0],o4[]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
   casadi_real a00, a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11;
   casadi_real a12, a13, a14;

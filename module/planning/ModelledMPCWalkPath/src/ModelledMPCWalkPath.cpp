@@ -84,7 +84,10 @@ namespace module::planning {
                 cfg.mpc.w_slack         = config["w_slack"].as<double>();
 
                 // The capability envelope
-                cfg.mpc.envelope   = modelled_walk_mpc::envelope_from_yaml(config["envelope"]);
+                cfg.mpc.envelope = modelled_walk_mpc::envelope_from_yaml(config["envelope"]);
+                for (auto& row : cfg.mpc.envelope) {
+                    row.bound *= config["envelope_scale"].as<double>();
+                }
                 cfg.mpc.w_envelope = config["w_envelope"].as<double>();
 
                 // The policy's response

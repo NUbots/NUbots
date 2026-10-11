@@ -36,13 +36,13 @@
 #include "acados_c/ocp_nlp_interface.h"
 #include "acados_c/external_function_interface.h"
 
-#define MODELLED_MPC_WALK_PATH_NX     15
+#define MODELLED_MPC_WALK_PATH_NX     16
 #define MODELLED_MPC_WALK_PATH_NZ     0
 #define MODELLED_MPC_WALK_PATH_NU     3
-#define MODELLED_MPC_WALK_PATH_NP     175
+#define MODELLED_MPC_WALK_PATH_NP     191
 #define MODELLED_MPC_WALK_PATH_NP_GLOBAL     0
 #define MODELLED_MPC_WALK_PATH_NBX    3
-#define MODELLED_MPC_WALK_PATH_NBX0   15
+#define MODELLED_MPC_WALK_PATH_NBX0   16
 #define MODELLED_MPC_WALK_PATH_NBU    3
 #define MODELLED_MPC_WALK_PATH_NSBX   0
 #define MODELLED_MPC_WALK_PATH_NSBU   0

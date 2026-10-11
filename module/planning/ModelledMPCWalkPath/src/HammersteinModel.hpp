@@ -57,18 +57,25 @@ namespace module::planning::modelled_walk_mpc {
     };
 
     /// @brief The walk policy's identified response: from the velocity command to the gait-averaged delivered
-    /// velocity. One path per (output axis, command axis), and each output is the sum of its three paths' lag states.
-    /// This is MATLAB's idnlhw with idPiecewiseLinear input maps, nb = nf = nk = 1 and no output map.
+    /// velocity. One path per (output axis, command axis), plus one to ω from the product ω·|vx| of the commands, and
+    /// each output is the sum of its paths' lag states. This is MATLAB's idnlhw with idPiecewiseLinear input maps,
+    /// nb = nf = nk = 1 and no output map.
     struct HammersteinModel {
-        /// @brief One lag state per path, output-major: vx←(vx, vy, ω), vy←(vx, vy, ω), ω←(vx, vy, ω)
-        using Lags = Eigen::Matrix<double, 9, 1>;
+        /// @brief Paths: the nine (output, command) ones, then the product path
+        static constexpr int PATHS = 10;
+        /// @brief The ω←ω·|vx| path
+        static constexpr int PRODUCT = 9;
+
+        /// @brief One lag state per path, output-major: vx←(vx, vy, ω), vy←(vx, vy, ω), ω←(vx, vy, ω), then ω←ω·|vx|
+        using Lags = Eigen::Matrix<double, PATHS, 1>;
 
         /// @brief Sample time (s)
         double sample_time = 0.02;
-        /// @brief paths[3·output + command]
-        std::array<HammersteinPath, 9> paths{};
+        /// @brief paths[3·output + command], then paths[PRODUCT]
+        std::array<HammersteinPath, PATHS> paths{};
 
-        /// @brief Reads the model from its configuration (written by codegen/import_model.py)
+        /// @brief Reads the model from its configuration (written by codegen/import_model.py). A model without the
+        /// product path (paths.wz.wz_abs_vx) has it zero.
         static HammersteinModel from_yaml(const YAML::Node& node);
 
         /// @brief The delivered velocity [vx, vy, ω] the lag states give

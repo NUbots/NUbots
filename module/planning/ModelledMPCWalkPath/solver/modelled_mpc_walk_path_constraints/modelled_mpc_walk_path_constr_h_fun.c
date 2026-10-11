@@ -54,13 +54,13 @@ extern "C" {
 
 casadi_real casadi_sq(casadi_real x) { return x*x;}
 
-static const casadi_int casadi_s0[3] = {15, 1, 1};
+static const casadi_int casadi_s0[3] = {16, 1, 1};
 static const casadi_int casadi_s1[3] = {3, 1, 1};
 static const casadi_int casadi_s2[3] = {0, 1, 1};
-static const casadi_int casadi_s3[3] = {175, 1, 1};
+static const casadi_int casadi_s3[3] = {191, 1, 1};
 static const casadi_int casadi_s4[3] = {4, 1, 1};
 
-/* modelled_mpc_walk_path_constr_h_fun:(i0[15],i1[3],i2[0],i3[175])->(o0[4]) */
+/* modelled_mpc_walk_path_constr_h_fun:(i0[16],i1[3],i2[0],i3[191])->(o0[4]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
   casadi_real a0, a1, a2, a3, a4, a5;
   a0=arg[3]? arg[3][24] : 0;

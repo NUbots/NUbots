@@ -53,12 +53,12 @@ extern "C" {
 
 casadi_real casadi_sq(casadi_real x) { return x*x;}
 
-static const casadi_int casadi_s0[3] = {15, 1, 1};
+static const casadi_int casadi_s0[3] = {16, 1, 1};
 static const casadi_int casadi_s1[3] = {0, 1, 1};
-static const casadi_int casadi_s2[3] = {175, 1, 1};
+static const casadi_int casadi_s2[3] = {191, 1, 1};
 static const casadi_int casadi_s3[3] = {1, 1, 1};
 
-/* modelled_mpc_walk_path_cost_ext_cost_e_fun_jac:(i0[15],i1[0],i2[0],i3[175])->(o0,o1[15]) */
+/* modelled_mpc_walk_path_cost_ext_cost_e_fun_jac:(i0[16],i1[0],i2[0],i3[191])->(o0,o1[16]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
   casadi_real a00, a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11;
   casadi_real a12, a13, a14, a15, a16, a17;
@@ -123,6 +123,8 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   a16=(a16+a17);
   a17=arg[0]? arg[0][11] : 0;
   a16=(a16+a17);
+  a17=arg[0]? arg[0][12] : 0;
+  a16=(a16+a17);
   a17=casadi_sq(a16);
   a17=(a15*a17);
   a08=(a08+a17);
@@ -159,10 +161,11 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   if (res[1]!=0) res[1][9]=a16;
   if (res[1]!=0) res[1][10]=a16;
   if (res[1]!=0) res[1][11]=a16;
-  a16=0.;
   if (res[1]!=0) res[1][12]=a16;
+  a16=0.;
   if (res[1]!=0) res[1][13]=a16;
   if (res[1]!=0) res[1][14]=a16;
+  if (res[1]!=0) res[1][15]=a16;
   return 0;
 }
 

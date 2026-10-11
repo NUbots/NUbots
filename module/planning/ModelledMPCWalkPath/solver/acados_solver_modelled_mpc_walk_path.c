@@ -248,7 +248,7 @@ static ocp_nlp_dims* modelled_mpc_walk_path_acados_create_setup_dimensions(model
     nsbx[0] = 0;
     ns[0] = NS0;
     
-    nbxe[0] = 15;
+    nbxe[0] = 16;
     
     ny[0] = NY0;
     nh[0] = NH0;
@@ -768,6 +768,7 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     idxbx0[12] = 12;
     idxbx0[13] = 13;
     idxbx0[14] = 14;
+    idxbx0[15] = 15;
 
     double* lubx0 = calloc(2*NBX0, sizeof(double));
     double* lbx0 = lubx0;
@@ -780,7 +781,7 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     free(idxbx0);
     free(lubx0);
     // idxbxe_0
-    int* idxbxe_0 = malloc(15 * sizeof(int));
+    int* idxbxe_0 = malloc(16 * sizeof(int));
     idxbxe_0[0] = 0;
     idxbxe_0[1] = 1;
     idxbxe_0[2] = 2;
@@ -796,6 +797,7 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     idxbxe_0[12] = 12;
     idxbxe_0[13] = 13;
     idxbxe_0[14] = 14;
+    idxbxe_0[15] = 15;
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, 0, "idxbxe", idxbxe_0);
     free(idxbxe_0);
 
@@ -842,30 +844,30 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     double* lug = calloc(2*NG, sizeof(double));
     double* lg = lug;
     double* ug = lug + NG;
-    C[0+NG * 12] = 1;
-    C[1+NG * 13] = 1;
-    C[2+NG * 14] = 1;
-    C[3+NG * 12] = 1;
-    C[4+NG * 13] = 1;
-    C[5+NG * 14] = 1;
-    C[6+NG * 12] = 1;
-    C[7+NG * 13] = 1;
-    C[8+NG * 14] = 1;
-    C[9+NG * 12] = 1;
-    C[10+NG * 13] = 1;
-    C[11+NG * 14] = 1;
-    C[12+NG * 12] = 1;
-    C[13+NG * 13] = 1;
-    C[14+NG * 14] = 1;
-    C[15+NG * 12] = 1;
-    C[16+NG * 13] = 1;
-    C[17+NG * 14] = 1;
-    C[18+NG * 12] = 1;
-    C[19+NG * 13] = 1;
-    C[20+NG * 14] = 1;
-    C[21+NG * 12] = 1;
-    C[22+NG * 13] = 1;
-    C[23+NG * 14] = 1;
+    C[0+NG * 13] = 1;
+    C[1+NG * 14] = 1;
+    C[2+NG * 15] = 1;
+    C[3+NG * 13] = 1;
+    C[4+NG * 14] = 1;
+    C[5+NG * 15] = 1;
+    C[6+NG * 13] = 1;
+    C[7+NG * 14] = 1;
+    C[8+NG * 15] = 1;
+    C[9+NG * 13] = 1;
+    C[10+NG * 14] = 1;
+    C[11+NG * 15] = 1;
+    C[12+NG * 13] = 1;
+    C[13+NG * 14] = 1;
+    C[14+NG * 15] = 1;
+    C[15+NG * 13] = 1;
+    C[16+NG * 14] = 1;
+    C[17+NG * 15] = 1;
+    C[18+NG * 13] = 1;
+    C[19+NG * 14] = 1;
+    C[20+NG * 15] = 1;
+    C[21+NG * 13] = 1;
+    C[22+NG * 14] = 1;
+    C[23+NG * 15] = 1;
     lg[0] = -1000000000;
     lg[1] = -1000000000;
     lg[2] = -1000000000;
@@ -971,9 +973,9 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
 
     // x
     int* idxbx = malloc(NBX * sizeof(int));
-    idxbx[0] = 12;
-    idxbx[1] = 13;
-    idxbx[2] = 14;
+    idxbx[0] = 13;
+    idxbx[1] = 14;
+    idxbx[2] = 15;
     double* lubx = calloc(2*NBX, sizeof(double));
     double* lbx = lubx;
     double* ubx = lubx + NBX;
@@ -1043,9 +1045,9 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     // set up bounds for last stage
     // x
     int* idxbx_e = malloc(NBXN * sizeof(int));
-    idxbx_e[0] = 12;
-    idxbx_e[1] = 13;
-    idxbx_e[2] = 14;
+    idxbx_e[0] = 13;
+    idxbx_e[1] = 14;
+    idxbx_e[2] = 15;
     double* lubx_e = calloc(2*NBXN, sizeof(double));
     double* lbx_e = lubx_e;
     double* ubx_e = lubx_e + NBXN;
@@ -1067,30 +1069,30 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
     double* lug_e = calloc(2*NGN, sizeof(double));
     double* lg_e = lug_e;
     double* ug_e = lug_e + NGN;
-    C_e[0+NGN * 12] = 1;
-    C_e[1+NGN * 13] = 1;
-    C_e[2+NGN * 14] = 1;
-    C_e[3+NGN * 12] = 1;
-    C_e[4+NGN * 13] = 1;
-    C_e[5+NGN * 14] = 1;
-    C_e[6+NGN * 12] = 1;
-    C_e[7+NGN * 13] = 1;
-    C_e[8+NGN * 14] = 1;
-    C_e[9+NGN * 12] = 1;
-    C_e[10+NGN * 13] = 1;
-    C_e[11+NGN * 14] = 1;
-    C_e[12+NGN * 12] = 1;
-    C_e[13+NGN * 13] = 1;
-    C_e[14+NGN * 14] = 1;
-    C_e[15+NGN * 12] = 1;
-    C_e[16+NGN * 13] = 1;
-    C_e[17+NGN * 14] = 1;
-    C_e[18+NGN * 12] = 1;
-    C_e[19+NGN * 13] = 1;
-    C_e[20+NGN * 14] = 1;
-    C_e[21+NGN * 12] = 1;
-    C_e[22+NGN * 13] = 1;
-    C_e[23+NGN * 14] = 1;
+    C_e[0+NGN * 13] = 1;
+    C_e[1+NGN * 14] = 1;
+    C_e[2+NGN * 15] = 1;
+    C_e[3+NGN * 13] = 1;
+    C_e[4+NGN * 14] = 1;
+    C_e[5+NGN * 15] = 1;
+    C_e[6+NGN * 13] = 1;
+    C_e[7+NGN * 14] = 1;
+    C_e[8+NGN * 15] = 1;
+    C_e[9+NGN * 13] = 1;
+    C_e[10+NGN * 14] = 1;
+    C_e[11+NGN * 15] = 1;
+    C_e[12+NGN * 13] = 1;
+    C_e[13+NGN * 14] = 1;
+    C_e[14+NGN * 15] = 1;
+    C_e[15+NGN * 13] = 1;
+    C_e[16+NGN * 14] = 1;
+    C_e[17+NGN * 15] = 1;
+    C_e[18+NGN * 13] = 1;
+    C_e[19+NGN * 14] = 1;
+    C_e[20+NGN * 15] = 1;
+    C_e[21+NGN * 13] = 1;
+    C_e[22+NGN * 14] = 1;
+    C_e[23+NGN * 15] = 1;
     lg_e[0] = -1000000000;
     ug_e[0] = 1000000000;
     lg_e[1] = -1000000000;
@@ -1699,7 +1701,7 @@ int modelled_mpc_walk_path_acados_update_params(modelled_mpc_walk_path_solver_ca
 {
     int solver_status = 0;
 
-    int casadi_np = 175;
+    int casadi_np = 191;
     if (casadi_np != np) {
         printf("acados_update_params: trying to set %i parameters for external functions."
             " External function has %i parameters. Exiting.\n", np, casadi_np);

@@ -27,16 +27,22 @@
 #
 """Import an identified Hammerstein model of the walk policy into ModelledMPCWalkPath's configuration.
 
-Reads the .mat that walkmodel-identification's fitting saves (a cell array `models` of three MISO idnlhw objects, one
-per output vx, vy, wz, plus Ts and gateThr) without MATLAB, using the mat-io package, which decodes MATLAB's class
+Reads the .mat that walkmodel-identification's fitting saves (a cell array `models` of three idnlhw objects, one per
+output vx, vy, wz, plus Ts and gateThr) without MATLAB, using the mat-io package, which decodes MATLAB's class
 objects. It checks the model has the structure the generated solver assumes, then rewrites the `model:` section at the
 end of data/config/ModelledMPCWalkPath.yaml:
 
     uv run --no-project --with mat-io python module/planning/ModelledMPCWalkPath/codegen/import_model.py \\
         ~/walkmodel-identification/hammerstein_no_gate_model_k1.mat --policy poi732yy
 
+`--output wz=other.mat` takes an output's model (all its paths) from another fit instead, to combine fits that each
+model some outputs better.
+
 Each path is idnlhw's input nonlinearity for one command axis (an idPiecewiseLinear) and the linear block from it to
-the output, B/F with nb = nf = nk = 1. idPiecewiseLinear stores its map as
+the output, B/F with nb = nf = nk = 1. The models can be MISO (each output from all three commands) or take only some
+of the commands (SISO: each output from its own); a command a model doesn't take gets a zero path, so the solver's
+layout of all nine paths stays. The wz model can also take the product cmd_wz*|cmd_vx| (the turn delivered depending
+on walking), the solver's tenth path wz_abs_vx, zero for a model without it. idPiecewiseLinear stores its map as
 
     f(u) = LinearCoef·u + OutputOffset + Σₙ OutputCoef[n]·|u + Translation[n]|
 
@@ -56,6 +62,9 @@ import numpy as np
 MODEL_TS = 0.02
 UNITS = 6
 AXES = ("vx", "vy", "wz")
+# The solver's product path: wz from cmd_wz·|cmd_vx|, written as the wz model's input of this name
+PRODUCT = ("wz", "wz_abs_vx")
+PRODUCT_INPUT = "cmd_wz*|cmd_vx|"
 MARKER = "# ---- The walk policy's response model. Written by codegen/import_model.py: edit by re-importing. ----"
 
 
@@ -63,7 +72,13 @@ def scalar(x):
     return float(np.ravel(x)[0])
 
 
+def zero_path():
+    zeros = np.zeros(UNITS)
+    return {"gain": 0.0, "pole": 0.0, "linear": 0.0, "offset": 0.0, "coef": zeros, "translation": zeros}
+
+
 def read(mat_path):
+    """The model's sample time, paths {(output, command): parameters} and identified range"""
     import matio
 
     data = matio.load_from_mat(str(mat_path))
@@ -76,15 +91,27 @@ def read(mat_path):
     models = list(np.ravel(data["models"]))
     if len(models) != 3:
         raise SystemExit(f"expected 3 models (vx, vy, wz), got {len(models)}")
-    paths = {}
+    paths = {(output, command): zero_path() for output in AXES for command in AXES}
+    paths[PRODUCT] = zero_path()
+    read_idnlhw(models, ts, paths)
+    # The command amplitude the identification runs spanned, per axis: beyond it the maps are extrapolated
+    identified_range = np.ravel(data["umax"]).astype(float) if "umax" in data else None
+    return ts, paths, identified_range
+
+
+def read_idnlhw(models, ts, paths):
+    """Fills paths from idnlhw objects"""
     for i, model in enumerate(models):
         if model.classname != "idnlhw":
             raise SystemExit(f"model {i} is a {model.classname}, not an idnlhw")
         p = model.properties
         output = str(np.ravel(p["OutputName_"])[0])
         inputs = [str(x) for x in np.ravel(p["InputName_"])]
-        if output != AXES[i] or inputs != ["cmd_" + a for a in AXES]:
-            raise SystemExit(f"model {i} maps {inputs} to {output}, expected cmd_vx, cmd_vy, cmd_wz to {AXES[i]}")
+        commands = ["cmd_" + a for a in AXES] + ([PRODUCT_INPUT] if AXES[i] == PRODUCT[0] else [])
+        if output != AXES[i] or not set(inputs) <= set(commands) or len(set(inputs)) != len(inputs) or not inputs:
+            raise SystemExit(
+                f"model {i} maps {inputs} to {output}, expected some of {', '.join(commands)} to {AXES[i]}"
+            )
         if p["OutputNonlinearity_"].classname != "idUnitGain":
             raise SystemExit(f"{output} has an output nonlinearity ({p['OutputNonlinearity_'].classname})")
         if abs(scalar(p["Ts_"]) - ts) > 1e-12:
@@ -98,7 +125,14 @@ def read(mat_path):
         if not np.all(np.ravel(p["nk_"]) == 1):
             raise SystemExit(f"{output}'s delays are {np.ravel(p['nk_'])}, expected 1")
 
-        for j, command in enumerate(AXES):
+        names = {command: "cmd_" + command for command in AXES}
+        if output == PRODUCT[0]:
+            names[PRODUCT[1]] = PRODUCT_INPUT
+        for command, name in names.items():
+            if name not in inputs:
+                # The model doesn't take this command: it has no effect on this output
+                continue
+            j = inputs.index(name)
             nl = np.ravel(p["InputNonlinearity_"])[j]
             if nl.classname != "idPiecewiseLinear":
                 raise SystemExit(f"{output}←{command} is a {nl.classname}, not an idPiecewiseLinear")
@@ -122,9 +156,6 @@ def read(mat_path):
                 "coef": coef,
                 "translation": translation,
             }
-    # The command amplitude the identification runs spanned, per axis: beyond it the maps are extrapolated
-    identified_range = np.ravel(data["umax"]).astype(float) if "umax" in data else None
-    return ts, paths, identified_range
 
 
 def number(x):
@@ -135,7 +166,8 @@ def to_yaml(ts, paths, identified_range, source, policy):
     lines = [
         MARKER,
         "# The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which the",
-        "# MPC plans with. One path per (output, command); each output is the sum of its three paths' lag states z:",
+        "# MPC plans with. One path per (output, command), and wz_abs_vx to wz from the product wz·|vx| of the commands;",
+        "# each output is the sum of its paths' lag states z:",
         "#   z⁺ = pole·z + gain·f(command) every sample_time",
         "#   f(u) = linear·u + offset + Σₙ coef[n]·|u + translation[n]|",
         "model:",
@@ -152,7 +184,7 @@ def to_yaml(ts, paths, identified_range, source, policy):
     lines.append("  paths:")
     for output in AXES:
         lines.append(f"    {output}:")
-        for command in AXES:
+        for command in AXES + ((PRODUCT[1],) if output == PRODUCT[0] else ()):
             q = paths[(output, command)]
             lines.append(f"      {command}:")
             for key in ("gain", "pole", "linear", "offset"):
@@ -173,16 +205,39 @@ def main():
         type=Path,
         default=Path(__file__).resolve().parents[1] / "data" / "config" / "ModelledMPCWalkPath.yaml",
     )
+    parser.add_argument(
+        "--output",
+        action="append",
+        default=[],
+        metavar="OUTPUT=MAT",
+        help="take this output's model from another .mat (repeatable)",
+    )
     args = parser.parse_args()
 
+    describe = lambda mat: f"{mat.name} (sha256 {hashlib.sha256(mat.read_bytes()).hexdigest()[:12]}…)"
     ts, paths, identified_range = read(args.mat)
-    digest = hashlib.sha256(args.mat.read_bytes()).hexdigest()[:12]
-    block = to_yaml(ts, paths, identified_range, f"{args.mat.name} (sha256 {digest}…)", args.policy)
+    sources = [describe(args.mat)]
+    for spec in args.output:
+        output, _, mat = spec.partition("=")
+        if output not in AXES or not mat:
+            raise SystemExit(f"--output {spec}: expected one of {', '.join(AXES)}=file.mat")
+        mat = Path(mat).expanduser()
+        _, other, other_range = read(mat)
+        for key in other:
+            if key[0] == output:
+                paths[key] = other[key]
+        if identified_range is not None and other_range is not None:
+            identified_range = np.minimum(identified_range, other_range)
+        sources.append(f"{output} from {describe(mat)}")
+    block = to_yaml(ts, paths, identified_range, ", ".join(sources), args.policy)
 
     text = args.config.read_text()
     head = text.split(MARKER)[0].rstrip("\n")
     args.config.write_text(head + "\n\n" + block)
     for (output, command), q in paths.items():
+        if q["gain"] == 0:
+            print(f"{output}←{command}: none")
+            continue
         tau = -ts / np.log(abs(q["pole"])) if q["pole"] != 0 else 0.0
         print(f"{output}←{command}: pole {q['pole']:+.4f} (τ {tau:.2f} s)")
     print(f"Wrote the model to {args.config}")

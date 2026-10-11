@@ -53,12 +53,32 @@ namespace {
 // f(u) = L·u + d + Σ c·|u + t| and the linear blocks b/(1 − p·q⁻¹)
 TEST_CASE("The steady state matches the reference evaluation of the model", "[HammersteinModel]") {
     const HammersteinModel model = k1_model();
-    check(model.steady_state({0.5, 0.0, 0.0}), {0.4715746421, 0.0088096914, 0.0274948243});
-    check(model.steady_state({0.0, 0.4, 0.0}), {-4.6955658255e-05, 2.5809500454e-01, -1.6257429290e-01});
-    check(model.steady_state({0.0, 0.0, 1.0}), {0.0039891821, 0.1104240211, 0.7402838297});
-    check(model.steady_state({0.6, -0.3, 0.8}), {0.5804763464, 0.0415748046, 0.5862061464});
-    // Backwards at PlanWalkPath's limit, where the policy delivers about half the command
-    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.0793791554, -0.0036597669, 0.013577107});
+    check(model.steady_state({0.5, 0.0, 0.0}), {0.45564513076, 0.0044679114877, 0.0048116700078});
+    check(model.steady_state({0.0, 0.4, 0.0}), {0.0075811649402, 0.22070424661, 0.0048116700078});
+    check(model.steady_state({0.0, 0.0, 1.0}), {0.0075811649402, 0.0044679114877, 0.4797848082});
+    check(model.steady_state({0.6, -0.3, 0.8}), {0.56933830264, -0.035084026427, 0.71306695625});
+    // Backwards at PlanWalkPath's limit, which is inside the policy's backward dead zone
+    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.05153969807, 0.0044679114877, 0.0048116700078});
+    // Turning while walking, through the product path
+    check(model.steady_state({1.0, 0.0, 0.5}), {1.0112084806, 0.0044679114877, 0.61611755088});
+    check(model.steady_state({0.0, 0.0, 0.5}), {0.0075811649402, 0.0044679114877, 0.17989727742});
+}
+
+TEST_CASE("The product path turns by the turn command scaled by the forward speed's size", "[HammersteinModel]") {
+    const HammersteinModel model = k1_model();
+    // Forwards or backwards turn the same, and differently from turning on the spot
+    CHECK(model.steady_state({1.0, 0.0, 0.5}).z() == Approx(model.steady_state({-1.0, 0.0, 0.5}).z()).margin(1e-12));
+    CHECK(std::abs(model.steady_state({1.0, 0.0, 0.5}).z() - model.steady_state({0.0, 0.0, 0.5}).z()) > 0.1);
+    // Without a turn command the product path has only its offset, whatever the forward speed
+    HammersteinModel no_product                      = model;
+    no_product.paths[HammersteinModel::PRODUCT].gain = 0.0;
+    const double offset                              = model.paths[HammersteinModel::PRODUCT].gain
+                          * model.paths[HammersteinModel::PRODUCT].input(0.0)
+                          / (1.0 - model.paths[HammersteinModel::PRODUCT].pole);
+    for (const double vx : {0.0, 0.5, -1.0}) {
+        CHECK(model.steady_state({vx, 0.0, 0.0}).z() - no_product.steady_state({vx, 0.0, 0.0}).z()
+              == Approx(offset).margin(1e-12));
+    }
 }
 
 TEST_CASE("The step response matches the reference evaluation of the model", "[HammersteinModel]") {
@@ -68,13 +88,13 @@ TEST_CASE("The step response matches the reference evaluation of the model", "[H
     for (int k = 1; k <= 25; ++k) {
         z = model.step(z, u);
         if (k == 1) {
-            check(HammersteinModel::delivered(z), {0.0089105503, 0.0012978265, 0.0435768469});
+            check(HammersteinModel::delivered(z), {0.029837879979, 0.00029973648391, 0.021029889699});
         }
         if (k == 10) {
-            check(HammersteinModel::delivered(z), {0.2865482216, 0.0105914148, 0.0506139357});
+            check(HammersteinModel::delivered(z), {0.23699703489, 0.0022368147532, 0.018563300313});
         }
         if (k == 25) {
-            check(HammersteinModel::delivered(z), {0.452557851, 0.0196424772, 0.0248603899});
+            check(HammersteinModel::delivered(z), {0.42111889369, 0.0036806134661, 0.0094121206789});
         }
     }
 }
@@ -82,7 +102,7 @@ TEST_CASE("The step response matches the reference evaluation of the model", "[H
 TEST_CASE("n samples in closed form are n single samples", "[HammersteinModel]") {
     const HammersteinModel model = k1_model();
     HammersteinModel::Lags start;
-    start << 0.1, -0.05, 0.02, 0.0, 0.3, -0.01, 0.01, 0.0, 0.4;
+    start << 0.1, -0.05, 0.02, 0.0, 0.3, -0.01, 0.01, 0.0, 0.4, 0.05;
     const Eigen::Vector3d u(0.7, -0.4, 0.9);
     HammersteinModel::Lags z = start;
     for (int k = 0; k < 37; ++k) {

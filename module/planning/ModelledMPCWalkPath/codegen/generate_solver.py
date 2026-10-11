@@ -31,12 +31,14 @@ The problem is MPC-2: MPCWalkPath's walk MPC (MPC-1), planning with an identifie
 policy responds to its velocity command instead of assuming the command is delivered. Every 10 Hz tick it solves, in
 the robot frame at the time of the solve, over N steps of dt:
 
-    state   s = (x, y, θ, z, u_prev)      pose, the model's 9 lag states, and the command applied in the previous step
+    state   s = (x, y, θ, z, u_prev)      pose, the model's 10 lag states, and the command applied in the previous step
     input   a = (ax, ay, aω)              the change of command per second
     step    u = u_prev + a·dt             command held during the step, then dt/Ts model steps of
                 v = Σⱼ zᵢⱼ                                     delivered velocity (vx, vy, ω), per output axis i
                 pose⁺ = pose + Ts·(R(θ + ω·Ts/2)·(vx, vy), ω)
                 zᵢⱼ⁺ = pᵢⱼ·zᵢⱼ + bᵢⱼ·fᵢⱼ(uⱼ)                  the Hammerstein model, one path per (output i, command j)
+                z×⁺ = p×·z× + b×·f×(uω·|ux|)               and one more to ω, from the turn command scaled by the
+                                                               forward one (the turn delivered depends on walking)
 
     minimise  Σₖ w_pos·ρ(‖pₖ − p*‖) + w_head·hₖ(θₖ) + Σᵢ w_eff,i·vₖ,ᵢ² + Σᵢ w_rate,i·(aₖ,ᵢ·dt)² + slack penalty
 
@@ -51,9 +53,10 @@ The model is MATLAB's idnlhw with a piecewise-linear input nonlinearity per path
 
     fᵢⱼ(u) = Lᵢⱼ·u + dᵢⱼ + Σₙ cᵢⱼₙ·|u + tᵢⱼₙ|        (breakpoints at −tᵢⱼₙ)
 
-Its kinks are smoothed here, |x| ≈ √(x² + εⱼ²) with a width εⱼ per command axis, so the solver's exact Hessian is
-defined everywhere. A wider ε also merges breakpoints that are close together, which removes narrow non-monotonic
-notches a fit can leave (a larger command delivering less), as those are local minima the solver gets stuck in.
+Its kinks are smoothed here, |x| ≈ √(x² + εⱼ²) with a width εⱼ per command axis (ω's for the product path's map, and
+vx's for its |ux|), so the solver's exact Hessian is defined everywhere. A wider ε also merges breakpoints that are close
+together, which removes narrow non-monotonic notches a fit can leave (a larger command delivering less), as those are
+local minima the solver gets stuck in.
 
 The model's parameters are per-stage parameters (written into the module's configuration by import_model.py), so a
 refitted model of the same structure needs no regeneration. Its structure is fixed here:
@@ -92,7 +95,8 @@ ENVELOPE_ROWS = 24  # linear constraints on the command, unused ones are switche
 MODEL_TS = 0.02  # s, the model's sample time (the policy's control period)
 SUBSTEPS = round(DT / MODEL_TS)
 UNITS = 6  # breakpoints of each path's piecewise-linear map
-PATHS = 9  # one per (output axis, command axis), output-major: vx←(vx, vy, ω), vy←(...), ω←(...)
+PATHS = 10  # one per (output axis, command axis), output-major: vx←(vx, vy, ω), vy←(...), ω←(...), then ω←ω·|vx|
+PRODUCT = 9  # the ω←ω·|vx| path
 
 # One path's parameters, at P_MODEL + PATH_SIZE·path
 PATH_GAIN = 0  # b, the linear block's numerator
@@ -133,15 +137,26 @@ def path_input(q, u, eps):
     return q[PATH_LINEAR] * u + q[PATH_OFFSET] + ca.dot(coef, ca.sqrt((u + translation) ** 2 + eps**2))
 
 
+def path_command(n, u, eps):
+    """The command into path n: its command axis, or for the product path ω·|vx| with |vx| smoothed over vx's eps"""
+    return u[2] * ca.sqrt(u[0] ** 2 + eps[0] ** 2) if n == PRODUCT else u[n % 3]
+
+
+def kink_axis(n):
+    """The command axis whose kink smoothing path n's map takes: ω's for the product path"""
+    return 2 if n == PRODUCT else n % 3
+
+
 def step(pose, z, u, model, eps):
     """One model step: the pose moves with the delivered velocity, then the lags take the command"""
-    v = ca.vertcat(*[ca.sum1(z[3 * i : 3 * i + 3]) for i in range(3)])
+    v = delivered(z)
     heading = pose[2] + v[2] * MODEL_TS / 2
     c, s = ca.cos(heading), ca.sin(heading)
     pose = pose + MODEL_TS * ca.vertcat(c * v[0] - s * v[1], s * v[0] + c * v[1], v[2])
     z = ca.vertcat(
         *[
-            model[n, PATH_POLE] * z[n] + model[n, PATH_GAIN] * path_input(model[n, :].T, u[n % 3], eps[n % 3])
+            model[n, PATH_POLE] * z[n]
+            + model[n, PATH_GAIN] * path_input(model[n, :].T, path_command(n, u, eps), eps[kink_axis(n)])
             for n in range(PATHS)
         ]
     )
@@ -149,7 +164,7 @@ def step(pose, z, u, model, eps):
 
 
 def delivered(z):
-    return ca.vertcat(*[ca.sum1(z[3 * i : 3 * i + 3]) for i in range(3)])
+    return ca.vertcat(ca.sum1(z[0:3]), ca.sum1(z[3:6]), ca.sum1(z[6:9]) + z[PRODUCT])
 
 
 def build_ocp():
@@ -268,6 +283,7 @@ LAYOUT_HEADER = """\
 #define MODELLED_MPC_WALK_PATH_SUBSTEPS {substeps}
 #define MODELLED_MPC_WALK_PATH_UNITS {units}
 #define MODELLED_MPC_WALK_PATH_PATHS {paths}
+#define MODELLED_MPC_WALK_PATH_PRODUCT {product}
 
 /* One path's parameters, at P_MODEL + PATH_SIZE * path */
 {path}
@@ -324,6 +340,7 @@ def main():
             substeps=SUBSTEPS,
             units=UNITS,
             paths=PATHS,
+            product=PRODUCT,
             path=defines("PATH_"),
             indices=defines("P_"),
             state=defines("S_"),

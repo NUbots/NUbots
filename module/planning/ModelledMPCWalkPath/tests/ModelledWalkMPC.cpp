@@ -54,6 +54,8 @@ namespace {
         cfg.max_backward_velocity = config["max_backward_velocity"].as<double>();
         cfg.envelope              = envelope_from_yaml(config["envelope"]);
         cfg.w_envelope            = config["w_envelope"].as<double>();
+        const auto kink_smoothing = config["kink_smoothing"].as<std::vector<double>>();
+        cfg.kink_smoothing        = Eigen::Vector3d(kink_smoothing[0], kink_smoothing[1], kink_smoothing[2]);
         cfg.model                 = HammersteinModel::from_yaml(config["model"]);
         return cfg;
     }
@@ -161,7 +163,6 @@ namespace {
         {"fine_approach", {0.3, 0.1, 20.0 * M_PI / 180.0}},
         {"lateral_turned", {0.5, 1.5, M_PI / 2}},
         {"behind_reversed", {-3.0, 0.0, M_PI}},
-        // Turns through the turn map's fitted notch near -0.47 rad/s, which stalled the solver before kink_smoothing
         {"far_diagonal", {4.0, 3.0, -M_PI / 2}},
         {"turn_in_place", {0.0, 0.0, M_PI / 2}},
         {"obstacle_in_path", {4.0, 0.0, 0.0}, {{2.0, 0.1}}},
@@ -177,15 +178,28 @@ namespace {
 
 TEST_CASE("The first command matches the prototype's", "[ModelledWalkMPC]") {
     // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the same configuration and initial guess: [0.099999952, 0.0999950927,
-    // -0.1228938974], at the iteration cap. Also checks that the configured limits, envelope and model survive the
+    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999968, 0.0999999963,
+    // -0.1731474474], at the iteration cap. Also checks that the configured limits, envelope and model survive the
     // solver's reset.
     ModelledWalkMPC mpc{k1_config()};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
-    CHECK(solution.command.x() == Approx(0.099999952).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.0999950927).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1228938974).margin(1e-4));
+    CHECK(solution.command.x() == Approx(0.1).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.0999999963).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.1731474474).margin(1e-4));
+}
+
+TEST_CASE("From cold, a goal straight ahead is walked to without turning", "[ModelledWalkMPC]") {
+    // The cold start guesses a turn only when the robot has to turn round: the policy delivers small turns, and a
+    // solve at the iteration cap follows the guess
+    ModelledWalkMPC mpc{k1_config()};
+    const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.0, 0.0), {});
+    REQUIRE(solution.success);
+    CHECK(solution.command.x() > 0.0);
+    // (The old guess, a turn whichever way the goal was, gave a first command of 0.16 rad/s here). What's left
+    // cancels the model's drift at a zero command, about 0.005 m/s sideways and 0.005 rad/s.
+    CHECK(std::abs(solution.command.y()) < 1e-2);
+    CHECK(std::abs(solution.command.z()) < 1e-2);
 }
 
 TEST_CASE("Arrives at every goal against the model, within the limits", "[ModelledWalkMPC]") {
@@ -227,8 +241,8 @@ TEST_CASE("The estimate advances in whole model samples and carries the remainde
     mpc.advance(0.03);  // two more
     CHECK((mpc.delivered_velocity() - HammersteinModel::delivered(z)).norm() < 1e-12);
 
-    // Held long enough, it settles to the steady state (the slowest paths, vy←ω and ω←vy, have time constants of
-    // about 100 s)
+    // Held long enough, it settles to the steady state (long enough too for a MISO fit's slow cross paths, whose time
+    // constants have been up to about 100 s)
     mpc.advance(5000.0);
     CHECK((mpc.delivered_velocity() - cfg.model.steady_state(Eigen::Vector3d(0.6, 0.0, 0.0))).norm() < 1e-6);
 

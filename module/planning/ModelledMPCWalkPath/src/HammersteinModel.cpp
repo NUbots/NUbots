@@ -36,6 +36,38 @@ namespace module::planning::modelled_walk_mpc {
 
     namespace {
         const std::array<std::string, 3> AXES = {"vx", "vy", "wz"};
+
+        /// @brief The command into path n: its command axis, or ω·|vx| for the product path
+        double path_command(const int n, const Eigen::Vector3d& u) {
+            return n == HammersteinModel::PRODUCT ? u.z() * std::abs(u.x()) : u[n % 3];
+        }
+
+        /// @brief As the solver sees it: |vx| smoothed over vx's kink smoothing
+        double path_command(const int n, const Eigen::Vector3d& u, const Eigen::Vector3d& eps) {
+            return n == HammersteinModel::PRODUCT ? u.z() * std::sqrt(u.x() * u.x() + eps.x() * eps.x()) : u[n % 3];
+        }
+
+        /// @brief The command axis whose kink smoothing path n's map takes: ω's for the product path
+        int kink_axis(const int n) {
+            return n == HammersteinModel::PRODUCT ? 2 : n % 3;
+        }
+
+        HammersteinPath read_path(const YAML::Node& p, const std::string& name) {
+            HammersteinPath path{};
+            path.gain              = p["gain"].as<double>();
+            path.pole              = p["pole"].as<double>();
+            path.linear            = p["linear"].as<double>();
+            path.offset            = p["offset"].as<double>();
+            const auto coef        = p["coef"].as<std::vector<double>>();
+            const auto translation = p["translation"].as<std::vector<double>>();
+            if (int(coef.size()) != HammersteinPath::UNITS || int(translation.size()) != HammersteinPath::UNITS) {
+                throw std::runtime_error("HammersteinModel: path " + name + " needs "
+                                         + std::to_string(HammersteinPath::UNITS) + " breakpoints");
+            }
+            std::copy(coef.begin(), coef.end(), path.coef.begin());
+            std::copy(translation.begin(), translation.end(), path.translation.begin());
+            return path;
+        }
     }  // namespace
 
     double HammersteinPath::input(const double u) const {
@@ -60,33 +92,23 @@ namespace module::planning::modelled_walk_mpc {
         model.sample_time = node["sample_time"].as<double>();
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
-                const YAML::Node p     = node["paths"][AXES[i]][AXES[j]];
-                HammersteinPath& path  = model.paths[3 * i + j];
-                path.gain              = p["gain"].as<double>();
-                path.pole              = p["pole"].as<double>();
-                path.linear            = p["linear"].as<double>();
-                path.offset            = p["offset"].as<double>();
-                const auto coef        = p["coef"].as<std::vector<double>>();
-                const auto translation = p["translation"].as<std::vector<double>>();
-                if (int(coef.size()) != HammersteinPath::UNITS || int(translation.size()) != HammersteinPath::UNITS) {
-                    throw std::runtime_error("HammersteinModel: path " + AXES[i] + "←" + AXES[j] + " needs "
-                                             + std::to_string(HammersteinPath::UNITS) + " breakpoints");
-                }
-                std::copy(coef.begin(), coef.end(), path.coef.begin());
-                std::copy(translation.begin(), translation.end(), path.translation.begin());
+                model.paths[3 * i + j] = read_path(node["paths"][AXES[i]][AXES[j]], AXES[i] + "←" + AXES[j]);
             }
+        }
+        if (const YAML::Node product = node["paths"]["wz"]["wz_abs_vx"]) {
+            model.paths[PRODUCT] = read_path(product, "wz←wz·|vx|");
         }
         return model;
     }
 
     Eigen::Vector3d HammersteinModel::delivered(const Lags& z) {
-        return {z.segment<3>(0).sum(), z.segment<3>(3).sum(), z.segment<3>(6).sum()};
+        return {z.segment<3>(0).sum(), z.segment<3>(3).sum(), z.segment<3>(6).sum() + z[PRODUCT]};
     }
 
     HammersteinModel::Lags HammersteinModel::step(const Lags& z, const Eigen::Vector3d& u) const {
         Lags next;
-        for (int n = 0; n < 9; ++n) {
-            next[n] = paths[n].pole * z[n] + paths[n].gain * paths[n].input(u[n % 3]);
+        for (int n = 0; n < PATHS; ++n) {
+            next[n] = paths[n].pole * z[n] + paths[n].gain * paths[n].input(path_command(n, u));
         }
         return next;
     }
@@ -94,11 +116,11 @@ namespace module::planning::modelled_walk_mpc {
     HammersteinModel::Lags HammersteinModel::step(const Lags& z, const Eigen::Vector3d& u, const int n) const {
         // z after n samples of z⁺ = p·z + w is pⁿ·z + (1 + p + ... + pⁿ⁻¹)·w
         Lags next;
-        for (int i = 0; i < 9; ++i) {
+        for (int i = 0; i < PATHS; ++i) {
             const double p      = paths[i].pole;
             const double pn     = std::pow(p, n);
             const double series = std::abs(1.0 - p) > 1e-12 ? (1.0 - pn) / (1.0 - p) : double(n);
-            next[i]             = pn * z[i] + series * paths[i].gain * paths[i].input(u[i % 3]);
+            next[i]             = pn * z[i] + series * paths[i].gain * paths[i].input(path_command(i, u));
         }
         return next;
     }
@@ -107,16 +129,16 @@ namespace module::planning::modelled_walk_mpc {
                                                   const Eigen::Vector3d& u,
                                                   const Eigen::Vector3d& eps) const {
         Lags next;
-        for (int n = 0; n < 9; ++n) {
-            next[n] = paths[n].pole * z[n] + paths[n].gain * paths[n].input(u[n % 3], eps[n % 3]);
+        for (int n = 0; n < PATHS; ++n) {
+            next[n] = paths[n].pole * z[n] + paths[n].gain * paths[n].input(path_command(n, u, eps), eps[kink_axis(n)]);
         }
         return next;
     }
 
     Eigen::Vector3d HammersteinModel::steady_state(const Eigen::Vector3d& u) const {
         Lags z;
-        for (int n = 0; n < 9; ++n) {
-            z[n] = paths[n].gain * paths[n].input(u[n % 3]) / (1.0 - paths[n].pole);
+        for (int n = 0; n < PATHS; ++n) {
+            z[n] = paths[n].gain * paths[n].input(path_command(n, u)) / (1.0 - paths[n].pole);
         }
         return delivered(z);
     }

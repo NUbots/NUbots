@@ -45,9 +45,11 @@ namespace module::planning::modelled_walk_mpc {
     const double ModelledWalkMPC::MODEL_TS   = MODELLED_MPC_WALK_PATH_MODEL_TS;
     const int ModelledWalkMPC::ENVELOPE_ROWS = MODELLED_MPC_WALK_PATH_ENVELOPE_ROWS;
 
-    static_assert(MODELLED_MPC_WALK_PATH_NX == 15 && MODELLED_MPC_WALK_PATH_NU == 3,
+    static_assert(MODELLED_MPC_WALK_PATH_NX == 3 + HammersteinModel::PATHS + 3 && MODELLED_MPC_WALK_PATH_NU == 3,
                   "ModelledWalkMPC expects the state (pose, lags, command)");
-    static_assert(MODELLED_MPC_WALK_PATH_PATHS == 9 && MODELLED_MPC_WALK_PATH_UNITS == HammersteinPath::UNITS,
+    static_assert(MODELLED_MPC_WALK_PATH_PATHS == HammersteinModel::PATHS
+                      && MODELLED_MPC_WALK_PATH_PRODUCT == HammersteinModel::PRODUCT
+                      && MODELLED_MPC_WALK_PATH_UNITS == HammersteinPath::UNITS,
                   "The generated solver's model structure doesn't match HammersteinModel's");
 
     namespace {
@@ -278,9 +280,11 @@ namespace module::planning::modelled_walk_mpc {
             obstacles.resize(MAX_OBSTACLES);
         }
 
-        // Initial guess: the last solution's inputs shifted by one step, or, from cold, a gentle turn towards the
-        // target. With the target exactly behind, or a final heading exactly opposite, turning left and right are
-        // equally good and the gradient is zero, so a solver started from standing still can stay there.
+        // Initial guess: the last solution's inputs shifted by one step, or, from cold, standing still, with a gentle
+        // turn towards the target when it needs turning round. With the target exactly behind, or a final heading
+        // exactly opposite, turning left and right are equally good and the gradient is zero, so a solver started from
+        // standing still can stay there. A smaller turn isn't guessed: the robot delivers it, and a solve at the
+        // iteration cap would follow it off a straight walk.
         if (int(a_guess.size()) == N) {
             std::rotate(a_guess.begin(), a_guess.begin() + 1, a_guess.end());
             a_guess.back().setZero();
@@ -288,9 +292,12 @@ namespace module::planning::modelled_walk_mpc {
         else {
             a_guess.assign(N, Eigen::Vector3d::Zero());
             const double distance = target.head<2>().norm();
-            const double turn_to  = distance > cfg.heading_radius ? std::atan2(target.y(), target.x()) : target.z();
-            const double sign     = wrap(turn_to) < 0.0 ? -1.0 : 1.0;
-            a_guess[0].z()        = std::clamp(sign * 0.3 / DT, -cfg.max_acceleration.z(), cfg.max_acceleration.z());
+            const double turn_to =
+                wrap(distance > cfg.heading_radius ? std::atan2(target.y(), target.x()) : target.z());
+            if (std::abs(turn_to) > M_PI / 2) {
+                const double sign = turn_to < 0.0 ? -1.0 : 1.0;
+                a_guess[0].z()    = std::clamp(sign * 0.3 / DT, -cfg.max_acceleration.z(), cfg.max_acceleration.z());
+            }
         }
 
         // Roll the guess out from the current state, through the solver's (smoothed) model
@@ -299,7 +306,7 @@ namespace module::planning::modelled_walk_mpc {
         for (int k = 0; k < N; ++k) {
             const Eigen::Vector3d u  = s_guess[k].tail<3>() + a_guess[k] * DT;
             Eigen::Vector3d pose     = s_guess[k].head<3>();
-            HammersteinModel::Lags z = s_guess[k].segment<9>(MODELLED_MPC_WALK_PATH_S_LAG);
+            HammersteinModel::Lags z = s_guess[k].segment<HammersteinModel::PATHS>(MODELLED_MPC_WALK_PATH_S_LAG);
             for (int m = 0; m < MODELLED_MPC_WALK_PATH_SUBSTEPS; ++m) {
                 pose = move(pose, HammersteinModel::delivered(z), MODEL_TS);
                 z    = cfg.model.step(z, u, cfg.kink_smoothing);
@@ -364,7 +371,7 @@ namespace module::planning::modelled_walk_mpc {
         for (int k = 0; k <= N; ++k) {
             solution.states.emplace_back(s[k].head<3>());
             solution.velocities.emplace_back(
-                HammersteinModel::delivered(s[k].segment<9>(MODELLED_MPC_WALK_PATH_S_LAG)));
+                HammersteinModel::delivered(s[k].segment<HammersteinModel::PATHS>(MODELLED_MPC_WALK_PATH_S_LAG)));
             if (k > 0) {
                 solution.commands.emplace_back(s[k].tail<3>());
             }

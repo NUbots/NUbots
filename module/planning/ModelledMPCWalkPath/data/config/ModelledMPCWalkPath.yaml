@@ -32,13 +32,16 @@ w_slack: 1000.0
 # Penalty on commands outside the capability envelope (below). The envelope is soft, so a command sent from outside it
 # (e.g. the fallback's) can't make the problem unsolvable.
 w_envelope: 1000.0
+# Shrinks the capability envelope (below) towards standing still: each row's bound d is multiplied by this, so 0.9
+# keeps the commands 10 % inside the edges the policy was measured to track
+envelope_scale: 1.0
 
 # Width over which the solver's model smooths the piecewise-linear maps' kinks, for the paths of each command axis
-# [vx, vy, vtheta], in command units. Wide enough on vtheta to merge the fitted turn map's close breakpoints
-# (-0.473/-0.458 and 0.437/0.484), between which a larger turn command turns slower: left in, they stall the solver
-# (a local minimum it can't leave), e.g. still turning past the target heading. Narrow on vx and vy, whose maps are
-# monotonic, to keep the dead zones' edges sharp. The estimate of the robot's state uses the unsmoothed model.
-kink_smoothing: [0.01, 0.01, 0.05]
+# [vx, vy, vtheta], in command units. A map that isn't monotonic (a larger command delivering less) is a local minimum
+# the solver can't leave, so it needs to be wide enough to merge close breakpoints that make one: on vy, the fitted
+# map's notch between -0.288 and -0.271 m/s, which otherwise traps a sidestep at -0.287. Narrow keeps the dead zones'
+# edges sharp. The estimate of the robot's state uses the unsmoothed model.
+kink_smoothing: [0.01, 0.03, 0.05]
 
 # SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
 max_iterations: 10
@@ -97,11 +100,12 @@ envelope:
 
 # ---- The walk policy's response model. Written by codegen/import_model.py: edit by re-importing. ----
 # The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which the
-# MPC plans with. One path per (output, command); each output is the sum of its three paths' lag states z:
+# MPC plans with. One path per (output, command), and wz_abs_vx to wz from the product wz·|vx| of the commands;
+# each output is the sum of its paths' lag states z:
 #   z⁺ = pole·z + gain·f(command) every sample_time
 #   f(u) = linear·u + offset + Σₙ coef[n]·|u + translation[n]|
 model:
-  source: hammerstein_no_gate_model_noChirp_noRamp.mat (sha256 1aef5eabe17b…)
+  source: hammerstein_siso_model_k1v2_wzProduct.mat (sha256 b693dae56474…)
   policy: poi732yy (k1_walk_mjlab_poi732yy_29999.onnx)
   sample_time: 0.02
   # The command amplitude per axis [vx, vy, wz] the identification spanned: the maps extrapolate beyond
@@ -110,174 +114,193 @@ model:
     vx:
       vx:
         gain: 1.0
-        pole: 0.9437532920367836
-        linear: 0.04259845686252875
-        offset: -0.0031686948919943205
+        pole: 0.9475920031368227
+        linear: 0.0405507278413211
+        offset: 0.0009358542014135157
         coef:
-          - 0.010953450566193238
-          - -0.0039973516392505706
-          - -0.015928423895350166
-          - 0.023733199202886017
-          - -0.0072787582776389975
-          - -0.006258401303039221
+          - 0.006820904344624559
+          - 0.01163151650659484
+          - -0.027361324670737847
+          - 0.018862875676307143
+          - -0.0011972097690022467
+          - -0.007882404485045626
         translation:
-          - 0.9877734823585287
-          - 0.7720014601795675
-          - 0.12000825447884417
-          - -0.18073233497300917
-          - -0.4759470450221633
-          - -1.1395757794164036
+          - 1.2064556408573355
+          - 0.142246136320223
+          - 0.1531448181205104
+          - -0.16726034166648512
+          - -0.717595571736557
+          - -1.0818844510749681
       vy:
-        gain: 1.0
-        pole: 0.43568361027535973
-        linear: 0.02361913881809787
-        offset: -0.3108214607977801
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - 0.03314737246275841
-          - -0.06920188546085128
-          - 0.055315175529694116
-          - 0.012325470917164474
-          - -0.03200368044639708
-          - 0.06275318158035295
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - 0.8028018245818619
-          - 0.4077323827643498
-          - 0.39816856658909067
-          - -1.34726036412992
-          - -0.46130139055220093
-          - -0.8751094891048773
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
       wz:
-        gain: 1.0
-        pole: 0.5531936299357278
-        linear: -0.007229675551634241
-        offset: 0.21641426217683268
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - -0.012201339790950918
-          - 0.022685015994197612
-          - -0.011936683113538616
-          - -0.027872363724040016
-          - 0.05311847447838005
-          - -0.027144056915252023
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - 0.32177311359451377
-          - 0.37318850039975127
-          - 0.061866885262432884
-          - -0.224676705094257
-          - -0.3750735565966464
-          - -0.730257780156202
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
     vy:
       vx:
-        gain: 1.0
-        pole: 0.9720129668935168
-        linear: 0.0037198298764860175
-        offset: 0.004043442814709748
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - -0.01906765112191677
-          - 0.01555698730067392
-          - -0.04288144250300381
-          - 0.002269542118434491
-          - 0.02616139148186295
-          - 0.014697328750206995
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - 1.1937329434107544
-          - 1.1677721232717981
-          - -0.73348389951154
-          - -0.4177239090010412
-          - -0.6769147498227736
-          - -0.8805288632375395
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
       vy:
         gain: 1.0
-        pole: 0.945314852175134
-        linear: -0.05376309697162574
-        offset: -0.03157040442974315
+        pole: 0.9329135134531187
+        linear: -0.02818932952077109
+        offset: 0.08981076088490499
         coef:
-          - 0.060183065111059184
-          - 0.09849079078590633
-          - -0.12107193868127354
-          - 0.07822529490575374
-          - -0.06058319320800522
-          - -0.03719575956291707
+          - 0.03230479004638498
+          - -0.08754262724326525
+          - 0.04820401121934094
+          - 0.09531427890473343
+          - -0.07410079166389168
+          - -0.0673679118953657
         translation:
-          - 1.606458147867149
-          - 0.45027704129248447
-          - 0.3678449145879556
-          - -0.3171102955728739
-          - -0.4828870696310832
-          - -1.6016676376792656
+          - 1.029866810879789
+          - 0.2878094815678292
+          - 0.2713679406731921
+          - -0.34683887639480504
+          - -0.4850294071423897
+          - -1.5999266106777998
       wz:
-        gain: 1.0
-        pole: 0.9998369750981488
-        linear: -0.00021668406313289775
-        offset: 0.00028139460261484477
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - 0.0010348214517494946
-          - -0.0007856926341057005
-          - 0.0013376177445827114
-          - -0.0015825683580619945
-          - 4.579060299682293e-05
-          - -0.00023110479774725512
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - 0.41195436777274774
-          - 0.42319300240907515
-          - 0.2633015496704957
-          - 0.273623898038381
-          - -0.4996455642556412
-          - -1.376822968233656
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
     wz:
       vx:
-        gain: 1.0
-        pole: 0.9302201366047324
-        linear: 0.0027307931905911345
-        offset: -0.010582689902828119
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - -0.0011174196753712382
-          - -0.00012016352084359107
-          - -0.003857877489387784
-          - 0.0026835734079707295
-          - -0.004400149144677439
-          - 0.007756151340563984
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - 0.4876026906793769
-          - 6.395056860562327
-          - -0.40592243896204344
-          - -0.10042585464809085
-          - -0.7309538358162532
-          - -1.2926797930590486
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
       vy:
-        gain: 1.0
-        pole: 0.999800595884048
-        linear: 6.113652152779123e-06
-        offset: -7.616599732593658e-06
+        gain: 0.0
+        pole: 0.0
+        linear: 0.0
+        offset: 0.0
         coef:
-          - -0.0009347357841216449
-          - 0.003740101298743636
-          - 0.0019978372929217673
-          - 0.0010111142131002653
-          - -0.005712450272716902
-          - -9.630853807583268e-05
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         translation:
-          - -0.41052194856891344
-          - -0.3694276539384718
-          - -0.22756579442105318
-          - -0.20090295282289294
-          - -0.2872312984761317
-          - -0.052267590508421696
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
       wz:
         gain: 1.0
-        pole: 0.4656095876632262
-        linear: 0.729138198395233
-        offset: 0.04221848745046184
+        pole: 0.3091453386962013
+        linear: 0.9526816544162053
+        offset: 0.007094722496075391
         coef:
-          - -0.17782750918829254
-          - -0.05761277319641631
-          - 0.01832159838003394
-          - -0.009959588114476906
-          - 0.05924653560101882
-          - 0.12233857323840315
+          - -0.2885740984838132
+          - -0.1640635409283502
+          - 0.11753945345122922
+          - -0.022599324527138868
+          - -0.0010927978526459783
+          - 0.3519739300609913
         translation:
-          - 1.2199511806328764
-          - 0.39681211027165314
-          - 5.246667717297061
-          - -0.07050948179267769
-          - -0.43239983061889453
-          - -1.0276966866698303
+          - 0.761079853140603
+          - 0.36814823591144696
+          - 0.31611813337616773
+          - 2.0393730449941123
+          - 3.6237536204832144
+          - -0.8775193513858978
+      wz_abs_vx:
+        gain: 1.0
+        pole: 0.9295994387847052
+        linear: -0.02359768348033392
+        offset: 0.002165962065180062
+        coef:
+          - 0.012126668325974633
+          - 0.008542643849958795
+          - 0.06639269231906737
+          - -0.062080029333139525
+          - -0.013357996436708463
+          - -0.013776835177364912
+        translation:
+          - 0.6463105954952643
+          - 0.619921590868565
+          - 0.15177053511348196
+          - -0.13249502774344882
+          - -0.5613306153334631
+          - -0.8464377701566836
