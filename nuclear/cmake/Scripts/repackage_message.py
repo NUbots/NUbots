@@ -36,4 +36,6 @@ with open(input_file, "r") as f:
     code = f.read()
 
 with open(output_file, "w") as f:
-    f.write(re.sub(r"package\s+message", "package protobuf.message", code))
+    code = re.sub(r"\.message\.", ".protobuf.message.", code)
+    code = re.sub(r"package\s+message", "package protobuf.message", code)
+    f.write(code)

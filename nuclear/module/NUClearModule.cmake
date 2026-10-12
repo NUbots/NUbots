@@ -37,6 +37,7 @@ function(NUCLEAR_MODULE)
     file(
       GLOB_RECURSE
       src
+      CONFIGURE_DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp"
       "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cc"
       "${CMAKE_CURRENT_SOURCE_DIR}/src/**.c"
