@@ -1,0 +1,98 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Seconds after startup before the first track (lets the walk policy and odometry come up)
+start_delay: 8
+
+# Interpret the tracks relative to the robot's pose when the benchmark starts, rather than in the field frame
+relative_targets: true
+
+# NUSim world position [x, y] the ball is moved to before starting, so it is out of the way. [] leaves it.
+park_ball: [5.0, 3.5]
+
+# Moving targets, run in order. Each track's target waits at its start until the robot has approached it (see
+# `approach`), then moves along its segments and is scored while it moves. `start` is where it starts [x (m), y (m)]
+# and the direction it first travels (rad). The robot is asked to hold the travel direction plus `heading_offset`
+# (default 0: face the way the target is going, as when dribbling).
+#
+# Each segment: `speed` (m/s) at its start, `acceleration` (m/s², the speed changes at this rate and a negative one
+# stops the target, which then stays put until the segment ends), `curvature` (rad/m, the travel direction turns
+# this much per metre, positive left: 1/radius), `turn` (rad, the travel direction turns this much at the segment's
+# start, π doubles back) and `duration` (s). All but `duration` default to 0, so `{duration: 2}` holds still.
+#
+# With NUSim's `kickoff` keyframe (robot at (-3, 0) facing +x) these stay in our half, clear of the parked ball, and
+# each starts within 2 m of where the one before ends.
+tracks:
+  # A straight walk at a dribbling pace
+  - name: straight
+    start: [0.5, 0.0, 0.0]
+    segments:
+      - { speed: 0.6, duration: 8 }
+      - { duration: 2 }
+  # Half a circle of radius 2 m, turning left
+  - name: arc
+    start: [5.3, 0.0, pi / 2]
+    segments:
+      - { speed: 0.5, curvature: 0.5, duration: 4 * pi }
+      - { duration: 2 }
+  # Walking alongside the target, facing across its path
+  - name: sideways
+    start: [1.3, -1.0, 0.0]
+    heading_offset: pi / 2
+    segments:
+      - { speed: 0.4, duration: 8 }
+      - { duration: 2 }
+  # A kicked ball rolling to a stop: 2.4 m in 4 s, then still
+  - name: roll
+    start: [4.5, -1.0, pi]
+    segments:
+      - { speed: 1.2, acceleration: -0.3, duration: 6 }
+  # Out and back, doubling back without stopping
+  - name: reversal
+    start: [2.0, -2.0, 0.0]
+    segments:
+      - { speed: 0.5, duration: 5 }
+      - { speed: 0.5, turn: pi, duration: 5 }
+      - { duration: 2 }
+  # Weaving left and right of a straight line, 1.2 rad each way
+  - name: weave
+    start: [0.5, -3.0, 0.0]
+    segments:
+      - { speed: 0.5, curvature: 0.8, duration: 1.5 }
+      - { speed: 0.5, curvature: -0.8, duration: 3 }
+      - { speed: 0.5, curvature: 0.8, duration: 3 }
+      - { speed: 0.5, curvature: -0.8, duration: 3 }
+      - { speed: 0.5, curvature: 0.8, duration: 1.5 }
+      - { duration: 2 }
+
+# The tracks are run once per scale, in order. A scale runs every track that many times faster over the same ground
+# (speeds × s, accelerations × s², durations ÷ s), so the paths stay where they are.
+speed_scales: [1.0, 1.5]
+
+# Before each track, the target waits at its start until the robot has stayed within these errors (m and rad) for
+# settle_time seconds, or for at most timeout seconds. The approach isn't scored.
+approach:
+  position_error: 0.3
+  heading_error: 0.3
+  settle_time: 1.0
+  timeout: 30
+
+# Position error (m) beyond which the robot counts as having lost the target, for the `lost` share of ticks
+lost_distance: 0.5
+
+# Torso height (m) below which the robot counts as fallen
+fall_height: 0.3
+
+# Emit the Field from NUSim ground truth instead of running localisation (field frame = NUSim world). Remove the
+# localisation modules from the role when this is on.
+ground_truth_field: true
+
+# Priority of the FallRecovery task, above the walk (priority 1) so get-up can run
+fall_recovery_priority: 3
+
+# Shut down once every track has run
+shutdown_when_done: true
+
+# Directory for the per-tick trajectory CSVs (relative to the working directory), empty to disable. Each run writes
+# <csv_directory>/YYYYMMDDTHH_MM_SS.csv, named by its local start time as DataLogging names its recordings
+csv_directory: "recordings/walk_track_benchmark"
