@@ -47,3 +47,10 @@ use_ground_truth: false
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
+
+# Neural Odometry configuration
+neural_odom:
+  use_neural_odometry: true
+  model_path: "autoodom_mlp.onnx"
+  device: "CPU"
+  zero_velocity_threshold: 0.01
