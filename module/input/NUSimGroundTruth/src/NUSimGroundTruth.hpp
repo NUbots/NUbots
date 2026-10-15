@@ -32,12 +32,16 @@
 #include <nuclear>
 #include <string>
 
+#include "message/booster/NUSimGroundTruth.hpp"
+
 namespace module::input {
 
     /// Bridges NUSim's test surface into NUClear: ground truth for the ball and the robot torso in
     /// (rt/nusim/gt/ball, rt/nusim/gt/robot -> message::booster::NUSimBallGroundTruth /
-    /// NUSimRobotGroundTruth), and ball commands out (message::booster::NUSimBallCommand ->
-    /// rt/nusim/ball_command). Only useful against NUSim; on a real robot the topics never appear.
+    /// NUSimRobotGroundTruth), ball commands out (message::booster::NUSimBallCommand ->
+    /// rt/nusim/ball_command), and a target marker for the viewer out (message::booster::NUSimTargetMarker,
+    /// or the walk planners' target -> rt/nusim/target_marker). Only useful against NUSim; on a real robot
+    /// the topics never appear.
     class NUSimGroundTruth : public NUClear::Reactor {
     public:
         explicit NUSimGroundTruth(std::unique_ptr<NUClear::Environment> environment);
@@ -47,14 +51,20 @@ namespace module::input {
             std::string ball_topic;
             std::string robot_topic;
             std::string command_topic;
+            std::string marker_topic;
+            /// Show the walk planners' target (from WalkToDebug) as the marker
+            bool show_walk_target = true;
         } cfg;
 
         void ball_handler(const void* msg);
         void robot_handler(const void* msg);
+        /// Writes the marker to rt/nusim/target_marker
+        void send_marker(const message::booster::NUSimTargetMarker& marker);
 
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ball_channel;
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> robot_channel;
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> command_channel;
+        booster::robot::ChannelPtr<nav_msgs::msg::Odometry> marker_channel;
     };
 
 }  // namespace module::input

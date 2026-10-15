@@ -5,3 +5,8 @@ topics:
   ball: rt/nusim/gt/ball
   robot: rt/nusim/gt/robot
   ball_command: rt/nusim/ball_command
+  target_marker: rt/nusim/target_marker
+
+# Show the walk planners' target (WalkToDebug, from PlanWalkPath, MPCWalkPath or ModelledMPCWalkPath) as a marker in
+# NUSim's viewer: an orange disc with an arrow along the target heading. The robot's camera never sees it.
+show_walk_target: true

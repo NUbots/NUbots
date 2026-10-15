@@ -28,10 +28,12 @@
 
 #include <Eigen/Geometry>
 #include <chrono>
+#include <cmath>
 
 #include "extension/Configuration.hpp"
 
 #include "message/booster/NUSimGroundTruth.hpp"
+#include "message/planning/WalkPath.hpp"
 
 #include "utility/platform/Booster/channel_factory.hpp"
 
@@ -42,6 +44,8 @@ namespace module::input {
     using message::booster::NUSimBallCommand;
     using message::booster::NUSimBallGroundTruth;
     using message::booster::NUSimRobotGroundTruth;
+    using message::booster::NUSimTargetMarker;
+    using message::planning::WalkToDebug;
 
     using booster::robot::ChannelFactory;
     using utility::platform::Booster::ensure_channel_factory;
@@ -72,10 +76,12 @@ namespace module::input {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("NUSimGroundTruth.yaml").then([this](const Configuration& config) {
-            log_level         = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_topic    = config["topics"]["ball"].as<std::string>();
-            cfg.robot_topic   = config["topics"]["robot"].as<std::string>();
-            cfg.command_topic = config["topics"]["ball_command"].as<std::string>();
+            log_level            = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ball_topic       = config["topics"]["ball"].as<std::string>();
+            cfg.robot_topic      = config["topics"]["robot"].as<std::string>();
+            cfg.command_topic    = config["topics"]["ball_command"].as<std::string>();
+            cfg.marker_topic     = config["topics"]["target_marker"].as<std::string>();
+            cfg.show_walk_target = config["show_walk_target"].as<bool>();
         });
 
         on<Startup>().then("Subscribe to NUSim ground truth", [this] {
@@ -90,6 +96,7 @@ namespace module::input {
                 [this](const void* msg) { robot_handler(msg); },
                 /* reliable = */ false);
             command_channel = ChannelFactory::Instance()->CreateSendChannel<nav_msgs::msg::Odometry>(cfg.command_topic);
+            marker_channel  = ChannelFactory::Instance()->CreateSendChannel<nav_msgs::msg::Odometry>(cfg.marker_topic);
             log<INFO>("Listening for NUSim ground truth on", cfg.ball_topic, "and", cfg.robot_topic);
         });
 
@@ -111,6 +118,47 @@ namespace module::input {
                 log<WARN>("Failed to write the ball command to", cfg.command_topic);
             }
         });
+
+        on<Trigger<NUSimTargetMarker>>().then([this](const NUSimTargetMarker& marker) { send_marker(marker); });
+
+        // The walk planners' target (PlanWalkPath, MPCWalkPath and ModelledMPCWalkPath all emit WalkToDebug), in the
+        // robot frame
+        on<Trigger<WalkToDebug>>().then([this](const WalkToDebug& debug) {
+            if (!cfg.show_walk_target) {
+                return;
+            }
+            const Eigen::Isometry3d Hrd(debug.Hrd);
+            NUSimTargetMarker marker;
+            marker.frame = NUSimTargetMarker::Frame::ROBOT;
+            marker.pose  = Eigen::Vector3d(Hrd.translation().x(),
+                                          Hrd.translation().y(),
+                                          std::atan2(Hrd.linear()(1, 0), Hrd.linear()(0, 0)));
+            send_marker(marker);
+        });
+
+        // Don't leave the last target in the viewer once NUbots stops
+        on<Shutdown>().then([this] {
+            NUSimTargetMarker marker;
+            marker.hidden = true;
+            send_marker(marker);
+        });
+    }
+
+    void NUSimGroundTruth::send_marker(const NUSimTargetMarker& marker) {
+        if (marker_channel == nullptr) {
+            return;
+        }
+        nav_msgs::msg::Odometry odom;
+        odom.header().frame_id(marker.frame == NUSimTargetMarker::Frame::ROBOT ? "robot" : "world");
+        odom.child_frame_id(marker.hidden ? "hidden" : "");
+        const Eigen::Vector3d pose(marker.pose);
+        odom.pose().pose().position().x(pose.x());
+        odom.pose().pose().position().y(pose.y());
+        odom.pose().pose().orientation().w(std::cos(pose.z() / 2.0));
+        odom.pose().pose().orientation().z(std::sin(pose.z() / 2.0));
+        if (!marker_channel->Write(&odom)) {
+            log<WARN>("Failed to write the target marker to", cfg.marker_topic);
+        }
     }
 
     void NUSimGroundTruth::ball_handler(const void* msg) {

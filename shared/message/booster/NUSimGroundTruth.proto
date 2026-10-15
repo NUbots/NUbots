@@ -31,9 +31,10 @@ import "google/protobuf/timestamp.proto";
 import "Transform.proto";
 import "Vector.proto";
 
-// NUSim-only messages for validating estimators against the simulator and driving repeatable ball
-// scenarios. They mirror the NUSim DDS topics rt/nusim/gt/ball, rt/nusim/gt/robot and
-// rt/nusim/ball_command (NUSim module/SdkBridge/PROTOCOL.md §6), bridged by input::NUSimGroundTruth.
+// NUSim-only messages for validating estimators against the simulator, driving repeatable ball
+// scenarios and showing a target in the viewer. They mirror the NUSim DDS topics rt/nusim/gt/ball,
+// rt/nusim/gt/robot, rt/nusim/ball_command and rt/nusim/target_marker (NUSim
+// module/SdkBridge/PROTOCOL.md §6), bridged by input::NUSimGroundTruth.
 // A real robot never produces them.
 //
 // Frames: {s} is the simulator world (the scene's field frame, fixed); {t} is the torso (Trunk).
@@ -80,4 +81,21 @@ message NUSimBallCommand {
     vec3 angular_velocity = 4;
     /// Derive the spin for rolling without slipping from the velocity
     bool rolling = 5;
+}
+
+/// Show a target pose as a marker in NUSim's viewer window (rt/nusim/target_marker). The robot's
+/// camera never renders it.
+message NUSimTargetMarker {
+    enum Frame {
+        /// The simulator world {s}
+        WORLD = 0;
+        /// The yaw-only frame at the torso's ground projection (x forward, z up), i.e. {r}. NUSim
+        /// fixes the marker in the world at the robot's pose when it arrives.
+        ROBOT = 1;
+    }
+    Frame frame = 1;
+    /// Target position x, y (m) and heading (rad) in the frame
+    vec3 pose = 2;
+    /// Remove the marker instead
+    bool hidden = 3;
 }
