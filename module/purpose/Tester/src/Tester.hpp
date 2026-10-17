@@ -72,6 +72,8 @@ namespace module::purpose {
             int audiogpt_listen_duration = 0;
             /// @brief Delay in seconds before creating director tree
             int start_delay = 0;
+
+            int avoid_robot_priority = 0;
         } cfg;
 
         /// @brief The rate the tasks will emit, to drive the rest of the system
