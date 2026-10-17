@@ -30,7 +30,13 @@
 #include <Eigen/Core>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
+
+// Prevent macro collision with OpenVINO's Level::ERR
+#ifdef ERR
+#undef ERR
+#endif
 #include <openvino/openvino.hpp>
+
 
 namespace module::vision {
 
