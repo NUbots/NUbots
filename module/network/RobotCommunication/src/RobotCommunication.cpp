@@ -228,6 +228,19 @@ namespace module::network {
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
                         msg->current_pose.cost       = field->cost;
+
+                        // NUbots extension: the same field-frame torso pose, but as a full 3D
+                        // isometry rather than current_pose's flattened [x, y, θ]. This lets
+                        // NUsight (and our own robots) render this robot's actual posture rather
+                        // than just a flat position and heading.
+                        msg->nubots.Hft = Hft.cast<float>();
+                    }
+
+                    // NUbots extension: servo angles, so this robot's posture can be rendered
+                    // (e.g. bent knees, raised arms) rather than just a standing default pose.
+                    // In the same order as message.input.Sensors.servo.
+                    for (size_t i = 0; i < msg->nubots.servos.size() && i < sensors->servo.size(); ++i) {
+                        msg->nubots.servos[i] = sensors->servo[i].present_position;
                     }
                 }
 

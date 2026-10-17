@@ -25,10 +25,11 @@ export class NUsightSession {
   readonly clients = new Set<NUsightSessionClient>();
 
   /**
-   * A NUClearNet client connection used for sending and receiving messages
-   * by clients in this session.
+   * The independent network connections used for sending and receiving messages by clients in
+   * this session (e.g. the real NUClearNet connection, plus any UDP side channels). Each is its
+   * own connection in its own right — none of them are treated as "the main one".
    */
-  readonly nuclearnetClient: NUClearNetClient;
+  readonly nuclearnetClients: NUClearNetClient[];
 
   /** Holds the scrubbers loaded by clients in this session */
   readonly scrubberSet: ScrubberSet;
@@ -48,9 +49,9 @@ export class NUsightSession {
   /** Clean up function for modules installed into the session */
   private cleanUpModules: () => void;
 
-  /** Create a new NUsightSession with the given NUClearNet connection */
-  constructor(nuclearnetClient: NUClearNetClient, moduleCreators: ServerModuleCreator[]) {
-    this.nuclearnetClient = nuclearnetClient;
+  /** Create a new NUsightSession with the given network connections */
+  constructor(nuclearnetClients: NUClearNetClient[], moduleCreators: ServerModuleCreator[]) {
+    this.nuclearnetClients = nuclearnetClients;
     this.scrubberSet = ScrubberSet.of();
     this.network = new NUsightSessionNetwork(this);
 
@@ -58,15 +59,15 @@ export class NUsightSession {
     this.cleanUpModules = compose(moduleCreators.map((createModule) => createModule(this)));
   }
 
-  static of(nuclearnetClient: NUClearNetClient) {
-    return new NUsightSession(nuclearnetClient, [createNbsScrubber, createFilePicker]);
+  static of(nuclearnetClients: NUClearNetClient[]) {
+    return new NUsightSession(nuclearnetClients, [createNbsScrubber, createFilePicker]);
   }
 
   /** Add a client for the given connection to the session */
   addClient(clientConnection: ClientConnection): Readonly<NUsightSessionClient> {
     // Create and add a client for the connection
     const client = NUsightSessionClient.of(nextClientId++, clientConnection, {
-      nuclearnetClient: this.nuclearnetClient,
+      nuclearnetClients: this.nuclearnetClients,
       scrubberSet: this.scrubberSet,
       session: this,
     });
