@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <vector>
 
 #include "extension/Behaviour.hpp"
 
@@ -78,6 +79,8 @@ namespace module::planning {
 
             /// @brief Radius to avoid obstacles
             double obstacle_radius = 0.0;
+            /// @brief Minimum x value for obstacle avoidance targets in robot coordinates
+            double min_avoidance_x = 0.0;
 
             /// @brief Exponential smoothing time constant for the [x,y,theta]-velocity
             /// @note  Set to [0, 0, 0] to functionally disable smoothing
@@ -100,6 +103,9 @@ namespace module::planning {
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0.0;
+
+        /// @brief List of goalpost and goal net proxy obstacle positions in field coordinates
+        std::vector<Eigen::Vector3d> goal_obstacles{};
 
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};

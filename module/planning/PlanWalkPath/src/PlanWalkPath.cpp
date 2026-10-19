@@ -26,6 +26,8 @@
  */
 #include "PlanWalkPath.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <ranges>
 
 #include "extension/Behaviour.hpp"
@@ -33,10 +35,11 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
-#include "message/strategy/StandStill.hpp"
+#include "message/support/FieldDescription.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -51,6 +54,7 @@ namespace module::planning {
 
     using message::behaviour::state::Stability;
     using message::input::Sensors;
+    using message::localisation::Field;
     using message::localisation::Robots;
     using message::planning::PivotAroundPoint;
     using message::planning::TurnOnSpot;
@@ -58,9 +62,7 @@ namespace module::planning {
     using message::planning::WalkTo;
     using message::planning::WalkToDebug;
     using message::skill::Walk;
-    using message::strategy::StandStill;
-
-    using message::strategy::StandStill;
+    using message::support::FieldDescription;
 
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -98,6 +100,7 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
+            cfg.min_avoidance_x = config["min_avoidance_x"].as<double>();
 
             // Exponential smoothing configuration
             cfg.tau = config["tau"].as<Expression>();
@@ -111,6 +114,20 @@ namespace module::planning {
             cfg.starting_velocity = config["starting_velocity"].as<Expression>();
         });
 
+        on<Startup, Trigger<FieldDescription>>().then("Update Goal Obstacles", [this](const FieldDescription& fd) {
+            auto add_goalpost_obstacles = [this, &fd](const Eigen::Vector2d& post) {
+                // const double net_x_direction = post.x() > 0.0 ? 1.0 : -1.0;
+                const Eigen::Vector3d goalpost(post.x(), post.y(), 0.0);
+
+                goal_obstacles.emplace_back(goalpost);
+            };
+
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y()));
+            add_goalpost_obstacles(Eigen::Vector2d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y()));
+        });
+
         on<Trigger<Stability>>().then([this](const Stability& new_stability) {
             // If transitioning from FALLEN to DYNAMIC stability state, reset smoothed walk command
             if ((stability == Stability::FALLEN && new_stability == Stability::DYNAMIC)
@@ -122,8 +139,11 @@ namespace module::planning {
             stability = new_stability;
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        on<Provide<WalkTo>, Optional<With<Robots>>, With<Field>, With<Sensors>>().then(
+            [this](const WalkTo& walk_to,
+                   const std::shared_ptr<const Robots>& robots,
+                   const Field& field,
+                   const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;
@@ -135,48 +155,64 @@ namespace module::planning {
                 // Calculate the angle between the robot and the final desired heading
                 double angle_to_final_heading = vector_to_bearing(Hrd.linear().col(0).head(2));
 
+                std::vector<Eigen::Vector2d> all_obstacles{};
+
+                // Add goalposts and net proxy points to the list of obstacles to avoid
+                const Eigen::Isometry3d Hwf = field.Hfw.inverse();
+                for (const auto& goal_obstacle : goal_obstacles) {
+                    const Eigen::Vector3d rFRr = Hrw * Hwf * goal_obstacle;
+                    // log<DEBUG>("Goal obstacle in robot frame:", rFRr.head(2).transpose());
+                    all_obstacles.emplace_back(rFRr.head(2));
+                }
+
                 // If there are robots, check if they're in the way
                 if (robots) {
+                    // log<DEBUG>("Adding", robots->robots.size(), "robots as obstacles");
                     // Get the positions of all robots in the world
-                    std::vector<Eigen::Vector2d> all_obstacles{};
                     for (const auto& robot : robots->robots) {
                         all_obstacles.emplace_back((Hrw * robot.rRWw).head(2));
                     }
-                    // Sort obstacles based on distance from the robot
-                    std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
-                    // Get the obstacles in the way of the current path
-                    const auto obstacles = get_obstacles(all_obstacles, rDRr);
+                }
 
-                    // If there are obstacles in the way, walk around them
-                    if (!obstacles.empty()) {
-                        log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                // Sort obstacles based on distance from the robot
+                std::ranges::sort(all_obstacles, {}, &Eigen::Vector2d::squaredNorm);
+                // Get the obstacles in the way of the current path
+                const auto obstacles = get_obstacles(all_obstacles, rDRr);
 
-                        // Calculate a perpendicular vector to the direction of the target point
-                        const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
+                // If there are obstacles in the way, walk around them
+                if (!obstacles.empty()) {
+                    // log<DEBUG>("Path planning around", obstacles.size(), "obstacles.");
+                    const double min_avoidance_x = std::min(cfg.min_avoidance_x, rDRr.x());
 
-                        // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
-                        auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
+                    // Calculate a perpendicular vector to the direction of the target point
+                    const Eigen::Vector2d perp(rDRr.normalized().y(), -rDRr.normalized().x());
 
-                        // Most positive and negative projections of the obstacles to find the two candidate target
-                        // paths. Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note
-                        // this can cause us to slightly clip into the obstacle radius, especially if the obstacle is
-                        // very close to the target
-                        const Eigen::Vector2d left =
-                            *std::ranges::min_element(obstacles, {}, proj) - perp * cfg.obstacle_radius;
-                        const Eigen::Vector2d right =
-                            *std::ranges::max_element(obstacles, {}, proj) + perp * cfg.obstacle_radius;
+                    // Projection onto the perpendicular vector tells us how "out of the way" an obstacle is
+                    auto proj = [&perp](const Eigen::Vector2d& v) { return v.dot(perp); };
 
-                        // Total path length by traversing the triangle from the robot->obstacle->original target
-                        auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
+                    // Most positive and negative projections of the obstacles to find the two candidate target
+                    // paths. Target is the vector to the obstacle, adjusted outwards by the obstacle radius, note
+                    // this can cause us to slightly clip into the obstacle radius, especially if the obstacle is
+                    // very close to the target
+                    const Eigen::Vector2d left =
+                        *std::ranges::min_element(obstacles, {}, proj) - perp * cfg.obstacle_radius;
+                    const Eigen::Vector2d right =
+                        *std::ranges::max_element(obstacles, {}, proj) + perp * cfg.obstacle_radius;
 
-                        // Take the shorter path
-                        rDRr = path(left) < path(right) ? left : right;
+                    // Total path length by traversing the triangle from the robot->obstacle->original target
+                    auto path = [&rDRr](const Eigen::Vector2d& v) { return (v - rDRr).norm() + v.norm(); };
 
-                        // Angle to the target point may have changed after adjusting for obstacles
-                        angle_to_target = vector_to_bearing(rDRr);
-                        // Final heading should now point toward the original target point from the adjusted target
-                        angle_to_final_heading = vector_to_bearing(Hrd.translation().head(2) - rDRr);
+                    // Take the shorter path around the obstacle group
+                    log<DEBUG>("Choosing path around obstacle based on path length");
+                    rDRr = path(left) < path(right) ? left : right;
+                    if (rDRr.x() < min_avoidance_x) {
+                        rDRr.x() = min_avoidance_x;
                     }
+
+                    // Angle to the target point may have changed after adjusting for obstacles
+                    angle_to_target = vector_to_bearing(rDRr);
+                    // Final heading should now point toward the original target point from the adjusted target
+                    angle_to_final_heading = vector_to_bearing(Hrd.translation().head(2) - rDRr);
                 }
 
                 // Straight to max magnitude, smoother handles ramping up
@@ -323,8 +359,7 @@ namespace module::planning {
         for (const Eigen::Vector2d& obstacle : all_obstacles) {
             // If the obstacle is close to the group, add it to the group
             if (std::ranges::any_of(avoid_obstacles, [&](const Eigen::Vector2d& ao) {
-                    return (obstacle - ao).norm()
-                           < cfg.obstacle_radius * 3;  // 3 represents two obstacles and the robot
+                    return (obstacle - ao).norm() < cfg.obstacle_radius * 3;  // 3 represents 2 obstacles and the robot
                 })) {
                 avoid_obstacles.push_back(obstacle);
             }
