@@ -29,6 +29,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/ServoOffsets.hpp"
+#include "message/actuation/ServoRanges.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -37,6 +38,7 @@ namespace module::actuation {
     using extension::Configuration;
     using message::actuation::KinematicsModel;
     using message::actuation::ServoOffsets;
+    using message::actuation::ServoRanges;
     using utility::support::Expression;
 
     KinematicsConfiguration::KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment)
@@ -56,6 +58,15 @@ namespace module::actuation {
                                               config["servos"][i]["simulated"].as<bool>());
             }
             emit(offsets);
+        });
+
+        on<Configuration>("Ranges.yaml").then([this](const Configuration& config) {
+            auto ranges = std::make_unique<ServoRanges>();
+            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                ranges->ranges.emplace_back(config["servos"][i]["max"].as<Expression>(),
+                                            config["servos"][i]["min"].as<Expression>());
+            }
+            emit(ranges);
         });
     }
 
