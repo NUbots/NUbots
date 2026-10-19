@@ -72,7 +72,13 @@ namespace module::extension {
                 group.active_task     = nullptr;
                 group.active_provider = nullptr;
 
-                // Updatae the group information to reflect that this provider group is no longer running
+                // Store the current subtasks first so that further remove tasks can't see them anymore
+                // We are removing our subtasks now and removing them later
+                auto subtasks = group.subtasks;
+                group.subtasks.clear();
+                group.watch_handles.clear();
+
+                // Update the group information to reflect that this provider group is no longer running
                 group.update_data();
 
                 // If anyone was pushing this group they can't push anymore since we are not active
@@ -81,6 +87,7 @@ namespace module::extension {
                     auto pusher = providers.at(group.pushing_task->requester_id)->group;
                     reevaluate_group(pusher);
                 }
+                group.pushing_task = nullptr;
 
                 auto subtasks = group.subtasks;
                 group.subtasks.clear();

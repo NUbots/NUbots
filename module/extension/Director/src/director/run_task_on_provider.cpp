@@ -52,7 +52,16 @@ namespace module::extension {
                     group.active_provider = provider;
 
                     auto lock = group.update_data(RunReason::STARTED);
-                    powerplant.submit(provider->reaction->get_task());
+
+                    auto task = provider->reaction->get_task();
+
+                    if (!task) {
+                        provider->group.failed = true;
+                    }
+                    else {
+                        provider->group.failed = false;
+                        powerplant.submit(std::move(task));
+                    }
                 }
             }
         }
