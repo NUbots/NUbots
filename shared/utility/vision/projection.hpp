@@ -31,6 +31,7 @@
 // https://wiki.panotools.org/Fisheye_Projection
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <cmath>
 
 #include "message/input/Image.hpp"
@@ -57,7 +58,10 @@ namespace utility::vision {
 
         template <typename T>
         inline T theta(const T& r, const T& f) {
-            return T(2.0) * std::asin(r / (T(2.0) * f));
+            // Past r = 2f this model has no solution (it is the horizon of an equisolid lens), and asin
+            // would be nan. Saturating there keeps a pixel outside the lens circle mapping to a ray that
+            // a bounds check can reject, rather than poisoning everything downstream with nan.
+            return T(2.0) * std::asin(std::clamp(r / (T(2.0) * f), T(-1.0), T(1.0)));
         }
     }  // namespace equisolid
 
@@ -178,9 +182,12 @@ namespace utility::vision {
         const Lens& lens,
         const Eigen::Matrix<T, 2, 1>& dimensions) {
 
-        const T f          = lens.focal_length;
-        const T theta      = std::acos(ray.x());
-        const T rsin_theta = T(1) / std::sqrt(T(1) - ray.x() * ray.x());
+        const T f = lens.focal_length;
+        // A ray that has been rotated into the camera frame is only unit length to within rounding, so
+        // clamp before acos rather than let a component a few ulp outside [-1, 1] produce nan
+        const T x          = std::clamp(T(ray.x()), T(-1), T(1));
+        const T theta      = std::acos(x);
+        const T rsin_theta = T(1) / std::sqrt(T(1) - x * x);
         T r_u;
         switch (lens.projection.value) {
             case Lens::Projection::RECTILINEAR: r_u = rectilinear::r(theta, f); break;
@@ -195,8 +202,8 @@ namespace utility::vision {
         // Sometimes x is greater than one due to floating point error, this almost certainly means that we are
         // facing directly forward
         Eigen::Matrix<T, 2, 1> screen =
-            ray.x() >= T(1) ? Eigen::Matrix<T, 2, 1>::Zero()
-                            : Eigen::Matrix<T, 2, 1>(r_d * ray.y() * rsin_theta, r_d * ray.z() * rsin_theta);
+            x >= T(1) ? Eigen::Matrix<T, 2, 1>::Zero()
+                      : Eigen::Matrix<T, 2, 1>(r_d * ray.y() * rsin_theta, r_d * ray.z() * rsin_theta);
 
         // Apply our offset to move into image space (0 at top left, x to the right, y down)
         // Then apply the offset to the centre of our lens
@@ -247,6 +254,58 @@ namespace utility::vision {
         const T sin_theta = std::sin(theta);
 
         return Eigen::Matrix<T, 3, 1>(std::cos(theta), sin_theta * screen.x() / r_d, sin_theta * screen.y() / r_d);
+    }
+
+    /**
+     * @brief Projects a unit vector into a pixel coordinate for a width-normalised lens.
+     *
+     * @details
+     *  project() works in whatever units the lens parameters are expressed in. The lens carried on a
+     *  message::input::Image is normalised by the image width, so its natural output is a width-normalised
+     *  pixel and its natural `dimensions` are {1, height/width}. Callers that hold real pixels (image
+     *  processing, drawing onto a frame) want neither. This does that conversion in one place: pass the
+     *  message's lens and the image dimensions in pixels, get a pixel back.
+     *
+     * @tparam T the scalar type used for calculations and storage (normally one of float or double)
+     *
+     * @param ray        the unit vector to project, in camera space (x forward, y left, z up)
+     * @param lens       the width-normalised lens parameters, as carried on message::input::Image
+     * @param dimensions the dimensions of the image in pixels {width, height}
+     *
+     * @return the pixel coordinate this vector projects into, (0,0) at the top left, x right, y down
+     */
+    template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time, typename Lens>
+    Eigen::Matrix<T, 2, 1> project_pixel(
+        const Eigen::Matrix<T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time>& ray,
+        const Lens& lens,
+        const Eigen::Matrix<T, 2, 1>& dimensions) {
+
+        const Eigen::Matrix<T, 2, 1> normalised = dimensions / dimensions.x();
+        return project(ray, lens, normalised) * dimensions.x();
+    }
+
+    /**
+     * @brief Unprojects a pixel coordinate into a unit vector for a width-normalised lens.
+     *
+     * @details
+     *  The pixel-space counterpart of unproject(), for the same reason as project_pixel().
+     *
+     * @tparam T the scalar type used for calculations and storage (normally one of float or double)
+     *
+     * @param px         the pixel coordinate to unproject, (0,0) at the top left, x right, y down
+     * @param lens       the width-normalised lens parameters, as carried on message::input::Image
+     * @param dimensions the dimensions of the image in pixels {width, height}
+     *
+     * @return the unit vector this pixel represents in camera space (x forward, y left, z up)
+     */
+    template <typename T, typename Lens>
+    Eigen::Matrix<T, 3, 1> unproject_pixel(const Eigen::Matrix<T, 2, 1>& px,
+                                           const Lens& lens,
+                                           const Eigen::Matrix<T, 2, 1>& dimensions) {
+
+        const Eigen::Matrix<T, 2, 1> normalised = dimensions / dimensions.x();
+        const Eigen::Matrix<T, 2, 1> px_n       = px / dimensions.x();
+        return unproject(px_n, lens, normalised);
     }
 
 }  // namespace utility::vision

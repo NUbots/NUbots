@@ -1,0 +1,56 @@
+log_level: INFO
+
+# Parameters that change with the robot, the venue or the game. Everything else is in
+# struct Config in FieldLocalisationSRIF.hpp.
+
+# --- What the filter runs ------------------------------------------------------------------------
+
+# Multi-hypothesis (field-symmetry) Gaussian mixture bank. Off keeps a single Gaussian.
+# TODO: decide whether to keep this at all.
+use_hypothesis_bank: false
+
+# Out-of-field side disambiguation: scores the current pose against its 180 deg mirror using
+# background scenery. Costs roughly 4 ms per camera frame.
+# TODO: confirm timing, and the interaction with use_hypothesis_bank.
+use_side_disambiguator: true
+
+# Accelerometer gravity-direction measurement of torso roll/pitch.
+# TODO: compare on/off and remove if unneeded.
+use_gravity: true
+
+# Forward-kinematic torso height. Suppressed automatically while the robot is not upright.
+# TODO: test how bad turning this off actually is.
+use_kinematic_height: true
+
+# --- How far each sensor is trusted (noise standard deviations) -----------------------------------
+# TODO: replace with measured values where possible.
+
+gyroscope_sigma: 0.02 # [rad/s] per axis
+
+# Which signal measures the body linear velocity vBb.
+#   HTW_DIFFERENCE - finite difference of consecutive Sensors.Htw. Available on every platform.
+#   SENSORS_VTW    - Sensors.vTw rotated into the torso frame. For platforms whose odometry is a
+#                    real state estimator.
+odometry_velocity_source: HTW_DIFFERENCE
+
+odometry_velocity_sigma: 0.15 # body linear velocity [m/s] per axis; size it for the source above
+gravity_sigma: 1.0 # accelerometer gravity-direction noise [m/s^2] (TODO: why so large?)
+height_sigma: 0.02 # kinematic torso-height noise [m]
+
+# --- How far vision is trusted --------------------------------------------------------------------
+measurement:
+  sigma_angular: 0.25 # inlier ray angular noise [rad]
+  gate_angle: 0.35 # max association residual angle [rad]; widened at runtime by the yaw std
+  min_confidence: 0.5 # YOLO confidence below which a detection is discarded
+
+# --- How fast the belief may move -----------------------------------------------------------------
+# Raise if the filter lags the robot, lower if the pose is twitchy.
+process:
+  sigma_vel: 0.35 # body linear velocity random walk [m/s/sqrt(s)]
+  sigma_omega: 1.50 # body angular velocity random walk [rad/s/sqrt(s)]
+
+# --- How much confidence a fall costs -------------------------------------------------------------
+# Restored on standing up. Also reopens the landmark association gate.
+fall:
+  recovery_pos_std: 0.5 # horizontal position std [m]
+  recovery_yaw_std: 0.6 # yaw std [rad]
