@@ -76,7 +76,7 @@ namespace module::input {
                     on<UDP::Broadcast>(cfg.data_port).then("NatNet Data", [this](const UDP::Packet& packet) {
                         // Test if we are "connected" to this remote
                         // And if we are we can use the data
-                        std::string address = packet.remote.address;
+                        std::string address = packet.remote.address().first;
                         if (remote == address && version != 0) {
                             process(packet.payload);
                         }
