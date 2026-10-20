@@ -90,8 +90,7 @@ namespace module::planning {
                 }
                 cfg.mpc.w_envelope = config["w_envelope"].as<double>();
 
-                // The policy's response
-                cfg.mpc.model          = HammersteinModel::from_yaml(config["model"]);
+                // How the model's kinks are smoothed for the solver (the model is ModelledMPCWalkPathModel.yaml)
                 cfg.mpc.kink_smoothing = config["kink_smoothing"].as<Expression>();
 
                 // Solver
@@ -112,12 +111,16 @@ namespace module::planning {
                 cfg.fallback_zero_tolerance        = config["fallback"]["zero_tolerance"].as<Expression>();
                 cfg.fallback_rotate_velocity_x     = config["fallback"]["rotate_velocity_x"].as<double>();
 
-                if (mpc == nullptr) {
-                    mpc = std::make_unique<ModelledWalkMPC>(cfg.mpc);
-                }
-                else {
-                    mpc->configure(cfg.mpc);
-                }
+                have_config = true;
+                configure_mpc();
+            });
+
+        // The walk policy's response model, exported from walkmodel-identification's fit
+        on<Configuration, Sync<ModelledMPCWalkPath>>("ModelledMPCWalkPathModel.yaml")
+            .then([this](const Configuration& config) {
+                cfg.mpc.model = HammersteinModel::from_yaml(config.config);
+                have_model    = true;
+                configure_mpc();
             });
 
         on<Trigger<Stability>, Sync<ModelledMPCWalkPath>>().then([this](const Stability& new_stability) {
@@ -244,6 +247,18 @@ namespace module::planning {
                 fallbacks = 0;
             }
         });
+    }
+
+    void ModelledMPCWalkPath::configure_mpc() {
+        if (!have_config || !have_model) {
+            return;
+        }
+        if (mpc == nullptr) {
+            mpc = std::make_unique<ModelledWalkMPC>(cfg.mpc);
+        }
+        else {
+            mpc->configure(cfg.mpc);
+        }
     }
 
 }  // namespace module::planning

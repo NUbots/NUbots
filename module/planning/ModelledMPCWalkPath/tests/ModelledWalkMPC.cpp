@@ -56,7 +56,7 @@ namespace {
         cfg.w_envelope            = config["w_envelope"].as<double>();
         const auto kink_smoothing = config["kink_smoothing"].as<std::vector<double>>();
         cfg.kink_smoothing        = Eigen::Vector3d(kink_smoothing[0], kink_smoothing[1], kink_smoothing[2]);
-        cfg.model                 = HammersteinModel::from_yaml(config["model"]);
+        cfg.model                 = HammersteinModel::from_yaml(YAML::LoadFile("config/ModelledMPCWalkPathModel.yaml"));
         return cfg;
     }
 

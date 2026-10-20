@@ -58,8 +58,9 @@ vx's for its |ux|), so the solver's exact Hessian is defined everywhere. A wider
 together, which removes narrow non-monotonic notches a fit can leave (a larger command delivering less), as those are
 local minima the solver gets stuck in.
 
-The model's parameters are per-stage parameters (written into the module's configuration by import_model.py), so a
-refitted model of the same structure needs no regeneration. Its structure is fixed here:
+The model's parameters are per-stage parameters (read from ModelledMPCWalkPathModel.yaml, which
+walkmodel-identification exports), so a refitted model of the same structure needs no regeneration. Its structure is
+fixed here:
 MODEL_TS, UNITS breakpoints per path, first-order paths with a one-step delay.
 
 The capability envelope is ENVELOPE_ROWS linear constraints on the command (written into the module's configuration

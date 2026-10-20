@@ -38,7 +38,7 @@ namespace {
 
     /// @brief The K1 model in the module's configuration (tests run in the build directory, where it is copied)
     HammersteinModel k1_model() {
-        return HammersteinModel::from_yaml(YAML::LoadFile("config/ModelledMPCWalkPath.yaml")["model"]);
+        return HammersteinModel::from_yaml(YAML::LoadFile("config/ModelledMPCWalkPathModel.yaml"));
     }
 
     void check(const Eigen::Vector3d& actual, const Eigen::Vector3d& expected) {

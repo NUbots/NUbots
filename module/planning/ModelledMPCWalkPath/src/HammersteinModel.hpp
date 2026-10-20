@@ -74,7 +74,7 @@ namespace module::planning::modelled_walk_mpc {
         /// @brief paths[3·output + command], then paths[PRODUCT]
         std::array<HammersteinPath, PATHS> paths{};
 
-        /// @brief Reads the model from its configuration (written by codegen/import_model.py). A model without the
+        /// @brief Reads the model from its configuration (ModelledMPCWalkPathModel.yaml). A model without the
         /// product path (paths.wz.wz_abs_vx) has it zero.
         static HammersteinModel from_yaml(const YAML::Node& node);
 

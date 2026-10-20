@@ -63,7 +63,10 @@ namespace module::planning {
             double fallback_rotate_velocity_x = 0.0;
         } cfg;
 
-        /// @brief The MPC, created on the first configuration
+        /// @brief Whether ModelledMPCWalkPath.yaml and ModelledMPCWalkPathModel.yaml have been read
+        bool have_config = false;
+        bool have_model  = false;
+        /// @brief The MPC, created once both configuration files have been read
         std::unique_ptr<modelled_walk_mpc::ModelledWalkMPC> mpc{};
         /// @brief When the last WalkTo was planned, to tell a fresh request from a continuing one
         NUClear::clock::time_point last_plan_time{};
@@ -73,6 +76,9 @@ namespace module::planning {
         int fallbacks = 0;
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};
+
+        /// @brief Creates or reconfigures the MPC, once both configuration files have been read
+        void configure_mpc();
 
     public:
         /// @brief Called by the powerplant to build and setup the ModelledMPCWalkPath reactor.

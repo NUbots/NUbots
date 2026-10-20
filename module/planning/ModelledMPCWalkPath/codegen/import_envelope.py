@@ -58,7 +58,6 @@ AXES = ("vx", "vy", "wz")
 PLANES = (("vx", "vy"), ("vx", "wz"), ("vy", "wz"))
 ROWS = 24  # the generated solver's envelope rows (generate_solver.py's ENVELOPE_ROWS)
 MARKER = "# ---- The capability envelope. Written by codegen/import_envelope.py: edit by re-importing. ----"
-MODEL_MARKER = "# ---- The walk policy's response model."
 
 
 def grid(evaluation, a, b):
@@ -115,11 +114,17 @@ def main():
         type=Path,
         default=Path(__file__).resolve().parents[1] / "data" / "config" / "ModelledMPCWalkPath.yaml",
     )
+    parser.add_argument(
+        "--model",
+        type=Path,
+        default=Path(__file__).resolve().parents[1] / "data" / "config" / "ModelledMPCWalkPathModel.yaml",
+        help="the response model, for its identified_range",
+    )
     args = parser.parse_args()
 
     rows, comments, extent = fit(args.evaluation, args.tolerance, args.edges)
     text = args.config.read_text()
-    match = re.search(r"identified_range: \[([^\]]*)\]", text)
+    match = re.search(r"(?m)^identified_range: \[([^\]]*)\]", args.model.read_text())
     identified = np.array([float(v) for v in match.group(1).split(",")]) if match else np.full(3, np.inf)
 
     forward = [min(extent["vx"][1], identified[0])]
@@ -142,10 +147,9 @@ def main():
             block.append(f"  # {PLANES[k // args.edges][0]} × {PLANES[k // args.edges][1]}")
         block.append(f"  - [{', '.join(number(v) for v in row)}]")
 
-    # The envelope sits between the configuration and the model
-    head, model = text.split(MODEL_MARKER, 1)
-    head = head.split(MARKER)[0].rstrip("\n")
-    args.config.write_text(head + "\n\n" + "\n".join(block) + "\n\n" + MODEL_MARKER + model)
+    # The envelope is the end of the configuration
+    head = text.split(MARKER)[0].rstrip("\n")
+    args.config.write_text(head + "\n\n" + "\n".join(block) + "\n")
     print("\n".join(comments))
     print(f"max_velocity {np.round(forward, 3)}, max_backward_velocity {backward:.3f}")
     print(f"Wrote {len(rows)} envelope rows to {args.config}")

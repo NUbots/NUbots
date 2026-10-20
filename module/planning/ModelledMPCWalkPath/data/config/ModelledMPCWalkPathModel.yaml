@@ -1,0 +1,205 @@
+# The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command, which
+# ModelledMPCWalkPath plans with. Written by walkmodel-identification's exportHammersteinYaml.m: re-export rather
+# than edit.
+# Source: hammerstein_siso_model_k1v2_wzProduct.mat
+# One path per (output, command), and wz_abs_vx to wz from the product wz·|vx| of the commands; each output
+# is the sum of its paths' lag states z:
+#   z⁺ = pole·z + gain·f(command) every sample_time
+#   f(u) = linear·u + offset + Σₙ coef[n]·|u + translation[n]|
+sample_time: 0.02
+# The command amplitude per axis [vx, vy, wz] the identification spanned: the maps extrapolate beyond
+identified_range: [1.75, 1.75, 1.5]
+paths:
+  vx:
+    vx:
+      gain: 1
+      pole: 0.9475920031368227
+      linear: 0.0405507278413211
+      offset: 0.0009358542014135157
+      coef:
+        - 0.006820904344624559
+        - 0.01163151650659484
+        - -0.027361324670737847
+        - 0.018862875676307143
+        - -0.0011972097690022467
+        - -0.007882404485045626
+      translation:
+        - 1.2064556408573355
+        - 0.142246136320223
+        - 0.1531448181205104
+        - -0.16726034166648512
+        - -0.717595571736557
+        - -1.0818844510749681
+    vy:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    wz:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+  vy:
+    vx:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    vy:
+      gain: 1
+      pole: 0.9329135134531187
+      linear: -0.02818932952077109
+      offset: 0.08981076088490499
+      coef:
+        - 0.03230479004638498
+        - -0.08754262724326525
+        - 0.04820401121934094
+        - 0.09531427890473343
+        - -0.07410079166389168
+        - -0.0673679118953657
+      translation:
+        - 1.029866810879789
+        - 0.2878094815678292
+        - 0.2713679406731921
+        - -0.34683887639480504
+        - -0.4850294071423897
+        - -1.5999266106777998
+    wz:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+  wz:
+    vx:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    vy:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    wz:
+      gain: 1
+      pole: 0.3091453386962013
+      linear: 0.9526816544162053
+      offset: 0.007094722496075391
+      coef:
+        - -0.2885740984838132
+        - -0.1640635409283502
+        - 0.11753945345122922
+        - -0.022599324527138868
+        - -0.0010927978526459783
+        - 0.3519739300609913
+      translation:
+        - 0.761079853140603
+        - 0.36814823591144696
+        - 0.31611813337616773
+        - 2.0393730449941123
+        - 3.6237536204832144
+        - -0.8775193513858978
+    wz_abs_vx:
+      gain: 1
+      pole: 0.9295994387847052
+      linear: -0.02359768348033392
+      offset: 0.002165962065180062
+      coef:
+        - 0.012126668325974633
+        - 0.008542643849958795
+        - 0.06639269231906737
+        - -0.062080029333139525
+        - -0.013357996436708463
+        - -0.013776835177364912
+      translation:
+        - 0.6463105954952643
+        - 0.619921590868565
+        - 0.15177053511348196
+        - -0.13249502774344882
+        - -0.5613306153334631
+        - -0.8464377701566836
