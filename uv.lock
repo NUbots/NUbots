@@ -108,6 +108,35 @@ wheels = [
 ]
 
 [[package]]
+name = "casadi"
+version = "3.8.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c5/7a/4d3c8edfbddaedc0a99b64f8154a7169b951ac2462e2f30474aac5c1ee2a/casadi-3.8.1.tar.gz", hash = "sha256:04141daf3ab7934f881a476294bf965173d1599412db0baf19f65341a612f217", size = 6471066, upload-time = "2026-09-16T07:14:25.974Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/e5/331310431bbfe0f31aa20d367dc5595c106fc68e182d31e349104673c5f3/casadi-3.8.1-cp310-none-macosx_11_0_arm64.whl", hash = "sha256:c4ae559ebf1ff549ac9d7a957950e210f71ffca6dce8d96b71cbdb5ad5ef916c", size = 52018186, upload-time = "2026-09-16T06:13:58.015Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/ba/09529597a7c84ce6d394d9487432f0315cb8756a4f50978561c59dd32b59/casadi-3.8.1-cp310-none-macosx_11_0_x86_64.macosx_11_0_intel.whl", hash = "sha256:8d62efb5e6b39299c6da37553515faddfdc7965c30f797f472d9b2cf5cac2ef4", size = 53831865, upload-time = "2026-09-16T06:14:35.971Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/67/4d685192eb7ed780bae72bfc90415b8241ce5e675365a367441e04a1a38b/casadi-3.8.1-cp310-none-manylinux2014_aarch64.whl", hash = "sha256:e3ce6e5b9d38917ae0b538c0db839f4016f51aef739cf92ca621a2067e413413", size = 54187085, upload-time = "2026-09-16T06:15:12.806Z" },
+    { url = "https://files.pythonhosted.org/packages/28/25/ab5717064264b71af4d13cf44ebede485a641ae017fa8013308079b748c5/casadi-3.8.1-cp310-none-manylinux2014_i686.whl", hash = "sha256:3290b1fd3a3f5284e66b110d5acd8733e915e6c2bd38e985966764fe230a69c4", size = 83544889, upload-time = "2026-09-16T06:16:06.334Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/02/487a7cfb7c53dd95c504d92e217bf152530031711fa3fd2fc2e2c27a8638/casadi-3.8.1-cp310-none-manylinux2014_x86_64.whl", hash = "sha256:b53e139e72e3f203af9dbdcc74a7ac459c55e96398d12b7637cd4f85ddb5fa8b", size = 88535429, upload-time = "2026-09-16T06:17:06.179Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/22/2fce778a6c6ccacc857d8aeb5b39d5ec6373f6f7dd018140be41470ca0f0/casadi-3.8.1-cp310-none-manylinux_2_28_aarch64.whl", hash = "sha256:ecdfc6096c15c1c5187b2c90711f8655019cc0e72634653f94db8d964db26d0c", size = 56736091, upload-time = "2026-09-16T06:17:43.736Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/a4/d1a802ba457a0a49b2eb0c3d47b0edc2e3e7b0a9dc8551a23edf7a41e364/casadi-3.8.1-cp310-none-manylinux_2_28_x86_64.whl", hash = "sha256:d61686b0a3e1902811a461f14d8f9a1ae072899fc7ce59be10633f02b590b7fb", size = 89401965, upload-time = "2026-09-16T06:18:40.708Z" },
+    { url = "https://files.pythonhosted.org/packages/8b/7f/56bd533b055c7086ed764c3b33cc16b53607601a96939ec6b772fa9e50b0/casadi-3.8.1-cp310-none-win_amd64.whl", hash = "sha256:4507f07d0c22777ad3a5f9f716b5a5899b5a958f90631818a00f28de34d64c3c", size = 57673410, upload-time = "2026-09-16T06:19:17.943Z" },
+    { url = "https://files.pythonhosted.org/packages/21/a8/5a61763109d40c6fed835cdc906a2a4a9c11ce8977b9d311bec0424e5f2f/casadi-3.8.1-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:67bb7c3fd247cd840521d820aba9d7021d4d60d61732861d53ada20844a9410a", size = 52036464, upload-time = "2026-09-16T06:19:52.434Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/7b/312ac1a9eaeaca9dd92f4bfc5b703cb2449ca1c20557664e7524bb5a1542/casadi-3.8.1-cp311-abi3-macosx_11_0_x86_64.macosx_11_0_intel.whl", hash = "sha256:1d3a4f124b28cd4bd0e4218777ab6e8ee204c74a9a8db86cbd21d76703b9c96a", size = 53657225, upload-time = "2026-09-16T06:20:28.097Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/c0/07f34c91d1a9a7a278611f36c212462daaec5d3680731afbbc515b7f68dd/casadi-3.8.1-cp311-abi3-manylinux2014_aarch64.whl", hash = "sha256:dd7c359faa65c1ab77e3ddfe179fa725ff28f4c9f9b1c90a95e7a7bb3495be5d", size = 54202846, upload-time = "2026-09-16T06:21:02.986Z" },
+    { url = "https://files.pythonhosted.org/packages/63/95/e78db537ed7ec4bc637ee493050fa4b1bcaa5aa96093b2fbf3bb8cb83007/casadi-3.8.1-cp311-abi3-manylinux2014_i686.whl", hash = "sha256:110714f57e36e5f9b917de7af6d00cfd41e46ad16f9d265da9965c18a152206d", size = 83550406, upload-time = "2026-09-16T06:21:58.653Z" },
+    { url = "https://files.pythonhosted.org/packages/54/38/80f9d07c6ed55392524e786dc5391f1e068cb9d7a6a13343750c68141f1d/casadi-3.8.1-cp311-abi3-manylinux2014_x86_64.whl", hash = "sha256:c9d161e1427dc306a34ad33bccd25e70d8dd863bad2ee3b4194afb5f0d8d2c8d", size = 88536827, upload-time = "2026-09-16T06:22:55.477Z" },
+    { url = "https://files.pythonhosted.org/packages/b7/b8/3847f0b2c67eb5c12aa0540d780f1dbda965e3376e31b6c1682f54be564c/casadi-3.8.1-cp311-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:61e53644a4a00965a45a5170b2b26e12489952a106aab0ef5118cbcfb772de65", size = 56740071, upload-time = "2026-09-16T06:23:32.389Z" },
+    { url = "https://files.pythonhosted.org/packages/63/88/79cdbd539a62e971b881dd5d598c2b65ab5c646e7d58fe5ba22f2cad5e13/casadi-3.8.1-cp311-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:99c32594513bec827ba51e6b24f6d84bb94abbf95f7fe9c2b924f62bec3e02ea", size = 89403549, upload-time = "2026-09-16T06:24:31.399Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/5b/62721e8962acc2385829ac51a938ce0213e86981fda158ee03c6335d6040/casadi-3.8.1-cp311-abi3-win_amd64.whl", hash = "sha256:7376d81ef20b65e021cc74ff729fea6b37db0a5f6392876130d0cbbc99dc226c", size = 57655196, upload-time = "2026-09-16T06:25:09.021Z" },
+]
+
+[[package]]
 name = "casefy"
 version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -990,6 +1019,7 @@ version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "black" },
+    { name = "casadi" },
     { name = "casefy" },
     { name = "cmakelang" },
     { name = "colorama" },
@@ -1023,6 +1053,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "black", specifier = "==24.10.0" },
+    { name = "casadi", specifier = ">=3.8.1" },
     { name = "casefy", specifier = "==1.1.0" },
     { name = "cmakelang", specifier = "==0.6.13" },
     { name = "colorama", specifier = "==0.4.6" },
