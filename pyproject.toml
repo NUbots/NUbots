@@ -45,6 +45,7 @@ dependencies = [
     "si-prefix==1.3.3",
     "Pillow==11.1.0",
     "fabric==3.2.3",
+    "matplotlib>=3.10.9",
 ]
 
 [tool.uv.workspace]
