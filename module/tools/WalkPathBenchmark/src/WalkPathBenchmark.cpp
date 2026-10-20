@@ -37,8 +37,8 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/booster/NUSimGroundTruth.hpp"
-#include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/skill/Walk.hpp"
@@ -52,9 +52,9 @@ namespace module::tools {
 
     using extension::Configuration;
 
+    using message::behaviour::state::WalkState;
     using message::booster::NUSimBallCommand;
     using message::booster::NUSimRobotGroundTruth;
-    using message::eye::DataPoint;
     using message::input::Sensors;
     using message::localisation::Field;
     using message::skill::Walk;
@@ -138,16 +138,14 @@ namespace module::tools {
                 const std::filesystem::path path = cfg.csv_directory / fmt::format("{}.csv", formatted_time());
                 csv.open(path);
                 log<INFO>("Writing the trajectory to", path.string());
-                csv << "t,trial,x,y,yaw,z,target_x,target_y,target_yaw,cmd_vx,cmd_vy,cmd_wz\n";
+                csv << "t,trial,x,y,yaw,z,target_x,target_y,target_yaw,err_x,err_y,err_yaw,cmd_vx,cmd_vy,cmd_wz\n";
             }
         });
 
-        // The commanded walk after PlanWalkPath's smoothing and dead zone
-        on<Trigger<DataPoint>>().then([this](const DataPoint& point) {
-            if (point.label == "Walk Command" && point.value.size() == 3) {
-                walk_command = Eigen::Vector3d(point.value[0], point.value[1], point.value[2]);
-            }
-        });
+        // The velocity of the Walk task the walk skill is running, whichever planner or strategy sent it (including the
+        // zero WalkToFieldPosition sends once at the target, which bypasses the planner), and zero once it stops
+        on<Trigger<WalkState>>().then(
+            [this](const WalkState& walk_state) { walk_command = Eigen::Vector3d(walk_state.velocity_target); });
 
         // Ground-truth localisation: the field frame is NUSim's world, so Hfw = Hfr * Hrw with Hfr from ground truth
         on<Trigger<Sensors>, With<NUSimRobotGroundTruth>>().then(
@@ -252,17 +250,27 @@ namespace module::tools {
                 const double yaw_err = heading_error(pose, target);
 
                 if (csv.is_open()) {
+                    // Unwrap the yaw against the previous row so it is continuous through ±pi, and write the target
+                    // yaw on the same branch, nearest the robot's yaw, so target_yaw - yaw is the signed error
+                    csv_yaw = std::isnan(csv_yaw) ? pose.z() : csv_yaw + std::remainder(pose.z() - csv_yaw, 2.0 * M_PI);
+                    const Eigen::Vector3d error(target.x() - pose.x(),
+                                                target.y() - pose.y(),
+                                                std::remainder(target.z() - pose.z(), 2.0 * M_PI));
                     csv << fmt::format(
-                        "{:.2f},{},{:.4f},{:.4f},{:.4f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n",
+                        "{:.2f},{},{:.4f},{:.4f},{:.4f},{:.3f},{:.3f},{:.3f},{:.4f},{:.4f},{:.4f},{:.4f},"
+                        "{:.3f},{:.3f},{:.3f}\n",
                         t,
                         trial_index,
                         pose.x(),
                         pose.y(),
-                        pose.z(),
+                        csv_yaw,
                         height,
                         target.x(),
                         target.y(),
-                        target.z(),
+                        csv_yaw + error.z(),
+                        error.x(),
+                        error.y(),
+                        error.z(),
                         walk_command.x(),
                         walk_command.y(),
                         walk_command.z());

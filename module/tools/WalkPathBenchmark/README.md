@@ -34,13 +34,15 @@ role:
 
 Configure the targets and thresholds in `WalkPathBenchmark.yaml`. The per-tick trajectory and walk command go to
 `csv_directory`, one CSV per run named by its local start time as DataLogging names its recordings
-(`recordings/walk_path_benchmark/YYYYMMDDTHH_MM_SS.csv`).
+(`recordings/walk_path_benchmark/YYYYMMDDTHH_MM_SS.csv`). `yaw` is unwrapped to stay continuous through ±π, and
+`target_yaw` is written on the branch nearest it. `err_x`, `err_y` and `err_yaw` are the signed target − robot errors in
+the field frame, with `err_yaw` wrapped to [-π, π].
 
 ## Consumes
 
 - `message::booster::NUSimRobotGroundTruth` the robot's true pose
 - `message::input::Sensors` for Hrw, to build the ground-truth Field
-- `message::eye::DataPoint` the "Walk Command" graph from PlanWalkPath, for the CSV
+- `message::behaviour::state::WalkState` the velocity of the Walk task the walk skill is running, for the CSV
 
 ## Emits
 

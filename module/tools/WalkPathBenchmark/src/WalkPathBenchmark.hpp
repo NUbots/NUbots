@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <nuclear>
 #include <vector>
 
@@ -131,11 +132,13 @@ namespace module::tools {
         int total_falls         = 0;
         int failures            = 0;
 
-        /// @brief Latest commanded walk velocity (post smoothing and dead zone)
+        /// @brief Velocity of the Walk task the walk skill is running, from its latest WalkState
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Trajectory output
         std::ofstream csv{};
+        /// @brief Yaw last written to the CSV, unwrapped so it stays continuous through ±pi. NaN before the first row
+        double csv_yaw = std::numeric_limits<double>::quiet_NaN();
 
         /// @brief Begins holding the sweep command at sweep_index
         void start_sweep();
