@@ -16,6 +16,11 @@ Figures:
     error_over_time.png    err_x and err_y (left axis, m) and err_yaw (right axis, rad) over every trial
     command_over_time.png  cmd_vx and cmd_vy (left axis, m/s) and cmd_wz (right axis, rad/s) over every trial
 
+Then it prints the steady-state error: each trial's error averaged over its last --settle-time seconds (the window the
+benchmark ends a trial on, at the target or at rest), and its RMSE over the trials for each axis. The benchmark only
+ends a trial early once the robot has settled, so a trial that ran to --trial-timeout hadn't, and is left out of the
+RMSE.
+
 Usage:
     python3 tools/analysis/plot_walkbenchmark_error.py recordings/walk_path_benchmark/20261020T22_24_30.csv
 """
@@ -178,12 +183,83 @@ def plot_command_over_time(data: dict[str, np.ndarray], out_dir: pathlib.Path) -
     )
 
 
+# WalkPathBenchmark.yaml's settle_time and trial_timeout
+SETTLE_TIME = 2.0
+TRIAL_TIMEOUT = 40.0
+
+
+def steady_state_error(data: dict[str, np.ndarray], settle_time: float, trial_timeout: float) -> list[dict]:
+    """Per trial: the error averaged over its last settle_time seconds, the robot's net speed then, and whether the
+    trial settled (ended before trial_timeout, less a tick of slack)"""
+    trials = []
+    for index in np.unique(data["trial"]):
+        rows = data["trial"] == index
+        t = data["t"][rows]
+        window = t >= t[-1] - settle_time
+        tw = t[window]
+        # Net planar speed over the window, from the ground-truth path. Net displacement rather than path length, as
+        # the torso sways from step to step even while stepping on the spot
+        xw, yw = data["x"][rows][window], data["y"][rows][window]
+        speed = np.hypot(xw[-1] - xw[0], yw[-1] - yw[0]) / (tw[-1] - tw[0]) if tw[-1] > tw[0] else 0.0
+        trials.append(
+            {
+                "trial": int(index),
+                "err_x": float(np.mean(data["err_x"][rows][window])),
+                "err_y": float(np.mean(data["err_y"][rows][window])),
+                "err_yaw": float(np.mean(data["err_yaw"][rows][window])),
+                "speed": float(speed),
+                "settled": bool(t[-1] < trial_timeout - 0.2),
+            }
+        )
+    return trials
+
+
+def print_steady_state(trials: list[dict], settle_time: float) -> None:
+    print(f"\nSteady-state error, averaged over each trial's last {settle_time:g} s (target - robot)")
+    print(
+        f"{'trial':>5}  {'err_x (m)':>10}  {'err_y (m)':>10}  {'dist (m)':>9}  {'err_yaw (rad)':>13}  {'speed (m/s)':>11}"
+    )
+    for trial in trials:
+        dist = np.hypot(trial["err_x"], trial["err_y"])
+        note = "" if trial["settled"] else "  timed out, left out"
+        print(
+            f"{'T' + str(trial['trial']):>5}  {trial['err_x']:>+10.3f}  {trial['err_y']:>+10.3f}  {dist:>9.3f}  "
+            f"{trial['err_yaw']:>+13.3f}  {trial['speed']:>11.3f}{note}"
+        )
+
+    settled = [trial for trial in trials if trial["settled"]]
+    if not settled:
+        print("\nNo trial settled, so there is no steady-state RMSE")
+        return
+    rmse = {
+        axis: float(np.sqrt(np.mean([trial[axis] ** 2 for trial in settled]))) for axis in ("err_x", "err_y", "err_yaw")
+    }
+    rmse_dist = float(np.sqrt(np.mean([trial["err_x"] ** 2 + trial["err_y"] ** 2 for trial in settled])))
+    print(f"\nSteady-state RMSE over {len(settled)} of {len(trials)} trials")
+    print(f"  x        {rmse['err_x']:.3f} m")
+    print(f"  y        {rmse['err_y']:.3f} m")
+    print(f"  position {rmse_dist:.3f} m")
+    print(f"  yaw      {rmse['err_yaw']:.3f} rad ({np.degrees(rmse['err_yaw']):.1f} deg)")
+
+
 FIGURES = [plot_error_over_time, plot_command_over_time]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("csv", type=pathlib.Path, help="WalkPathBenchmark trajectory CSV")
+    parser.add_argument(
+        "--settle-time",
+        type=float,
+        default=SETTLE_TIME,
+        help="Seconds at the end of each trial the steady-state error is averaged over (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--trial-timeout",
+        type=float,
+        default=TRIAL_TIMEOUT,
+        help="The benchmark's trial_timeout (s): a trial that ran this long never settled (default: %(default)s)",
+    )
     args = parser.parse_args()
 
     if not args.csv.is_file():
@@ -196,6 +272,8 @@ def main() -> int:
 
     for figure in FIGURES:
         print(f"Wrote {figure(data, out_dir)}")
+
+    print_steady_state(steady_state_error(data, args.settle_time, args.trial_timeout), args.settle_time)
     return 0
 
 
