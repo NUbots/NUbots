@@ -178,15 +178,15 @@ namespace {
 
 TEST_CASE("The first command matches the prototype's", "[ModelledWalkMPC]") {
     // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999968, 0.0999999963,
-    // -0.1731474474], at the iteration cap. Also checks that the configured limits, envelope and model survive the
+    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999993, 0.0999999986,
+    // -0.1670205471], at the iteration cap. Also checks that the configured limits, envelope and model survive the
     // solver's reset.
     ModelledWalkMPC mpc{k1_config()};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
     CHECK(solution.command.x() == Approx(0.1).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.0999999963).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1731474474).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.0999999986).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.1670205471).margin(1e-4));
 }
 
 TEST_CASE("From cold, a goal straight ahead is walked to without turning", "[ModelledWalkMPC]") {

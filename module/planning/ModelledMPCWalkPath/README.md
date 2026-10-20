@@ -61,7 +61,7 @@ writes next to the `.mat` it saves (`functions/exportHammersteinYaml.m`). To use
 `data/config/ModelledMPCWalkPathModel.yaml`. An existing `.mat` is exported in MATLAB with
 
 ```matlab
-exportHammersteinYaml("ModelledMPCWalkPathModel.yaml", load("hammerstein_siso_model_k1v2_wzProduct.mat"))
+exportHammersteinYaml("ModelledMPCWalkPathModel.yaml", load("hammerstein_siso_model_k1v2_27combinedRuns_wzProduct.mat"))
 ```
 
 A refitted model with the same structure (sample time, 6 breakpoints, first-order paths) needs no regeneration; the
@@ -70,27 +70,27 @@ doesn't have. The map's form is idPiecewiseLinear's stored one (its `soevaluate1
 parameters reproduce the model's simulation. To combine outputs from different fits, replace entries of `models` before
 exporting. Nothing checks that the model was identified on the policy K1WalkPolicy runs: matching them is up to you.
 
-The model is `hammerstein_siso_model_k1v2_wzProduct.mat`, identified on the poi732yy policy in simulation: SISO (each
-output from its own command), with the ω·|vx|
-path. The policy turns in two regimes. Standing, it barely turns below about 0.5 rad/s and jumps to nearly the full
-rate between 1.0 and 1.1 rad/s; walking, it delivers 82–96 % of the command. A single ω map can't fit both, and the
-SISO fits without the product dipped where they split the difference (a larger command turning slower, between about
-0.65 and 0.98 rad/s), which stalled the solver. The product path lets the walking regime be modelled separately.
-Against the evaluation's sweeps and grids (below), averaged over the same 60 s window as the evaluation, its ω error is
-0.04–0.13 rad/s, against 0.12–0.19 for the earlier MISO fit (`hammerstein_no_gate_model_noChirp_noRamp.mat`), and its
-vx and vy are about as good. It still doesn't capture the standing dead zone: it predicts 0.18 rad/s for a 0.5 rad/s
-turn on the spot. Having no cross paths, it doesn't know that walking in two directions at once delivers less of each;
-the capability envelope cuts the worst of those commands.
+The model is `hammerstein_siso_model_k1v2_27combinedRuns_wzProduct.mat`, fitted by `fit_SISO_hammerstein.m` on the
+k1v2_27combinedRuns dataset: SISO (each output from its own command, so paths 0, 4 and 8, with time constants of
+0.36 s, 0.29 s and 0.02 s), and the ω·|vx| path (0.16 s). The policy turns in two regimes: standing, it barely turns at
+small commands, and walking, it delivers most of the command. A single ω map can't fit both, and SISO fits without the
+product dipped where they split the difference (a larger command turning slower), which stalled the solver. The product
+path lets the walking regime be modelled separately: the model's steady ω for a 0.5 rad/s command is 0.17 rad/s on the
+spot and 0.50 rad/s walking at 0.5 m/s. Having no cross paths, it doesn't know that walking in two directions at once
+delivers less of each; the capability envelope cuts the worst of those commands.
 
 Things to know about this fit:
 
 - The solver's model smooths the maps' kinks, |x| ≈ √(x² + ε²), with `kink_smoothing` per command axis, because a
-  non-monotonic notch in a map is a local minimum the solver gets stuck in. This fit's vy map has a narrow one between
-  −0.288 and −0.271 m/s, which held a sidestep at −0.287 m/s short of an obstacle; 0.03 on vy merges it. 0.05 on ω
-  (also the product path's map) and 0.01 on vx keep the maps within a few hundredths of the fit and the dead-zone
-  edges sharp. The product's |vx| is smoothed with vx's width. The estimate below uses the unsmoothed model.
-- With no gate, the model drifts at zero command (about 0.005 m/s sideways and 0.005 rad/s), so at the target the MPC
-  holds the robot with a small command well inside the policy's dead zones.
+  non-monotonic notch in a map is a local minimum the solver gets stuck in. 0.05 on ω (also the product path's map) and
+  0.01 on vx keep the maps within a few hundredths of the fit and the dead-zone edges sharp. The product's |vx| is
+  smoothed with vx's width. The estimate below uses the unsmoothed model.
+- The vy map has a notch between −0.326 and −0.243 m/s (−0.3 m/s delivers less than −0.15), wider than the 0.03 of vy
+  smoothing was set for on the previous fit, so a sidestep near −0.3 m/s can stall there.
+- The product path's map falls beyond |ω·vx| ≈ 0.84, so at a 1.5 rad/s turn the model turns slower walking at 1 m/s
+  (1.34 rad/s) than at 0.5 m/s (1.59 rad/s).
+- With no gate, the model drifts at zero command (−0.006 m/s forward, 0.008 m/s sideways and −0.016 rad/s), so at the
+  target the MPC holds the robot with a small command inside the policy's dead zones.
 - From cold, the solver's initial guess turns gently towards the target only when it has to turn round (more than 90°).
   A smaller turn isn't guessed: the policy delivers it, and a solve at the iteration cap would follow it off a straight
   walk.

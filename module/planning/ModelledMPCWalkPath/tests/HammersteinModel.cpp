@@ -53,15 +53,15 @@ namespace {
 // f(u) = L·u + d + Σ c·|u + t| and the linear blocks b/(1 − p·q⁻¹)
 TEST_CASE("The steady state matches the reference evaluation of the model", "[HammersteinModel]") {
     const HammersteinModel model = k1_model();
-    check(model.steady_state({0.5, 0.0, 0.0}), {0.45564513076, 0.0044679114877, 0.0048116700078});
-    check(model.steady_state({0.0, 0.4, 0.0}), {0.0075811649402, 0.22070424661, 0.0048116700078});
-    check(model.steady_state({0.0, 0.0, 1.0}), {0.0075811649402, 0.0044679114877, 0.4797848082});
-    check(model.steady_state({0.6, -0.3, 0.8}), {0.56933830264, -0.035084026427, 0.71306695625});
+    check(model.steady_state({0.5, 0.0, 0.0}), {0.44688131275, 0.0081835565559, -0.015905269936});
+    check(model.steady_state({0.0, 0.4, 0.0}), {-0.0056257616909, 0.08505209494, -0.015905269936});
+    check(model.steady_state({0.0, 0.0, 1.0}), {-0.0056257616909, 0.0081835565559, 0.4698390133});
+    check(model.steady_state({0.6, -0.3, 0.8}), {0.55661529979, -0.0055604374688, 0.66848022733});
     // Backwards at PlanWalkPath's limit, which is inside the policy's backward dead zone
-    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.05153969807, 0.0044679114877, 0.0048116700078});
+    check(model.steady_state({-0.15, 0.0, 0.0}), {-0.050296061296, 0.0081835565559, -0.015905269936});
     // Turning while walking, through the product path
-    check(model.steady_state({1.0, 0.0, 0.5}), {1.0112084806, 0.0044679114877, 0.61611755088});
-    check(model.steady_state({0.0, 0.0, 0.5}), {0.0075811649402, 0.0044679114877, 0.17989727742});
+    check(model.steady_state({1.0, 0.0, 0.5}), {0.99555124798, 0.0081835565559, 0.55812940592});
+    check(model.steady_state({0.0, 0.0, 0.5}), {-0.0056257616909, 0.0081835565559, 0.17083095165});
 }
 
 TEST_CASE("The product path turns by the turn command scaled by the forward speed's size", "[HammersteinModel]") {
@@ -88,13 +88,13 @@ TEST_CASE("The step response matches the reference evaluation of the model", "[H
     for (int k = 1; k <= 25; ++k) {
         z = model.step(z, u);
         if (k == 1) {
-            check(HammersteinModel::delivered(z), {0.029837879979, 0.00029973648391, 0.021029889699});
+            check(HammersteinModel::delivered(z), {0.030018815475, 0.00054324116965, 0.011503460048});
         }
         if (k == 10) {
-            check(HammersteinModel::delivered(z), {0.23699703489, 0.0022368147532, 0.018563300313});
+            check(HammersteinModel::delivered(z), {0.23688536729, 0.004066052178, -0.0039476217047});
         }
         if (k == 25) {
-            check(HammersteinModel::delivered(z), {0.42111889369, 0.0036806134661, 0.0094121206789});
+            check(HammersteinModel::delivered(z), {0.4174196924, 0.0067140482612, -0.013994467297});
         }
     }
 }
