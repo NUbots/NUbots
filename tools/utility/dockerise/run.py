@@ -288,12 +288,30 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
 
         docker_args.extend(["--network", network])
 
+        # Share the host IPC namespace so FastDDS shared-memory transport (SHM +
+        # data-sharing segments in /dev/shm) reaches other host-IPC containers,
+        # e.g. the NUSim K1 simulator. Without this, DDS discovery succeeds over
+        # UDP but segment opens fail ("Failed to open segment ... -> Function
+        # open_and_init_shared_segment_notification") and RPCs time out.
+        if _is_linux():
+            docker_args.extend(["--ipc", "host"])
+
         # Environment variables
         # This should be specified as VAR1=VALUE1,VAR2=VALUE2
-        if kwargs["environment"] is not None:
-            key_pairs = [["--env", key_pair] for key_pair in kwargs["environment"].split(",")]
+        user_env = kwargs["environment"] if kwargs["environment"] is not None else ""
+        if user_env:
+            key_pairs = [["--env", key_pair] for key_pair in user_env.split(",")]
             for key_pair in key_pairs:
                 docker_args.extend(key_pair)
+
+        # The Booster SDK refuses to create its DDS participant without a profiles file
+        # (participant profile "booster_dds"); default to the repo's copy so `./b run
+        # <role>` works against NUSim/the robot without remembering the flag.
+        if "FASTRTPS_DEFAULT_PROFILES_FILE" not in user_env:
+            docker_args.extend([
+                "--env",
+                f"FASTRTPS_DEFAULT_PROFILES_FILE=/home/{defaults.image_user}/{defaults.directory}/tools/fastdds_default_profiles.xml",
+            ])
 
         # Add the ports
         for port in ports:

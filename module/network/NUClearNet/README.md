@@ -39,6 +39,8 @@ In multicast mode you set either an IPv4 or IPv6 multicast address.
 Then provided your network correctly routes multicast packets it will connect to all other NUClearNet nodes that share the same multicast address.
 The default address for this is `239.226.152.162`
 
+The base config uses broadcast on the robot subnet. The `nusim/behaviour` and `nusim/localisation` roles override this with the multicast group (`config/bin/nusim/<role>/NUClearNet.yaml`), since under NUSim the stack runs on the same machine as NUsight.
+
 ### Port
 
 The default port is 7467, as a Booster process already uses 7447 on the K1.

@@ -188,6 +188,11 @@ message RawSensors {
     /// Ground truth from a simulator
     webots.RobotPoseGroundTruth robot_pose_ground_truth = 12;
     FanWarning                  fan_warning             = 13;
+
+    /// Torso attitude estimate (roll, pitch, yaw in radians) from the platform's onboard
+    /// IMU filter (e.g. the Booster firmware's LowState imu rpy). Zero if the platform
+    /// provides no attitude estimate.
+    fvec3 imu_rpy = 14;
 }
 
 // Reset sensors and servo targets in Webots

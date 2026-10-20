@@ -1,0 +1,43 @@
+// MIT License
+//
+// Copyright (c) 2026 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.actuation;
+
+import "message/booster/BoosterLowCmd.proto";
+
+/**
+ * Whole-body K1 low-level actuation Task. Wraps a BoosterLowCmd so the Director
+ * can arbitrate ownership of the K1's single low-level channel between the walk,
+ * kick and get-up policies by priority (subsumption: get-up > kick > walk). The
+ * module::actuation::K1Servos provider forwards the winning requester's command
+ * to the platform as a raw BoosterLowCmd (nubridge / Booster HardwareIO). This is
+ * the K1/Booster analogue of the NUgus ServoTarget path, which K1 does not use.
+ */
+message K1Servos {
+    /// The low-level joint command (per-motor q/dq/tau/kp/kd/weight) to actuate.
+    booster.BoosterLowCmd command = 1;
+}

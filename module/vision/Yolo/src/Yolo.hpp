@@ -48,6 +48,9 @@ namespace module::vision {
         /// @brief ONNX Runtime session used to run the YOLO model
         std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};
 
+        /// @brief Whether the model backend initialised successfully
+        bool model_loaded = false;
+
         /// @brief Object struct for storing name and colour
         struct Object {
             /// @brief Class name

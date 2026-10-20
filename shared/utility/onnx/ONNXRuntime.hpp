@@ -64,6 +64,8 @@ namespace utility::onnx {
         // The API for the TensorRT EP takes in option keys and values as separate arrays
         // Configuration options are available at:
         // https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html#configurations
+        // The cache path is relative to the working directory (the build directory under ./b run) so built engines
+        // persist across runs instead of being rebuilt on every launch
         std::vector<const char*> option_keys = {
             "trt_fp16_enable",
             "trt_engine_cache_enable",
@@ -74,9 +76,9 @@ namespace utility::onnx {
         std::vector<const char*> option_values = {
             "1",
             "1",
-            "/tmp/onnx_trt_cache",
+            "trt_cache",
             "1",
-            "/tmp/onnx_trt_cache",
+            "trt_cache",
         };
     };
 

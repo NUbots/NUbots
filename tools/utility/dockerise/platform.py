@@ -60,7 +60,8 @@ def selected(image, username):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
+            # sorted() alone: the list() platform helper below shadows the builtin
+            platform = sorted(names)[0]
             print(f"        The platform chosen will be {platform}")
             return platform
 
@@ -159,7 +160,7 @@ def build(image, platform, username, uid, reset):
             "--build-arg",
             f"user_uid={uid}",
             "--output=type=docker",
-            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
+            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform_arg}",
             f"--cache-to=type=inline",
             dockerdir,
         ]

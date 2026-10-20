@@ -22,7 +22,7 @@ Note that inference using non-NVIDIA GPUs is currently unsupported.
 
 Include this module to detect balls, goals, robots, field line intersections and penalty points in images.
 
-NOTE: If you are running a model for the first time on a robot using the TensorRT execution provider, it may take a few minutes for the model to load, as the EP parses the ONNX file into a format that TensorRT can run. This does not happen on subsequent runs.
+NOTE: If you are running a model for the first time on a robot using the TensorRT execution provider, it may take a few minutes for the model to load, as the EP parses the ONNX file into a format that TensorRT can run. This does not happen on subsequent runs, as the built engine is cached in `trt_cache/` relative to the working directory (the build directory when using `./b run`). Delete that directory to force a rebuild.
 
 ## Consumes
 

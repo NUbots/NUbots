@@ -94,16 +94,22 @@ namespace module::vision {
                 log<INFO>("Loading YOLO model from: ", model_path, " on ", device);
                 onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(model_path, device);
                 log<INFO>("Model loaded successfully");
+                model_loaded = true;
             }
             catch (const std::exception& e) {
+                model_loaded = false;
                 log<ERROR>("Failed to load YOLO model: ", e.what());
-                throw;
+                log<ERROR>("YOLO inference disabled until a valid model is configured");
             }
         });
 
         on<Trigger<Image>, Optional<With<GreenHorizon>>, Single>().then(
             "Yolo Main Loop",
             [this](const Image& img, const std::shared_ptr<const GreenHorizon>& horizon) {
+                if (!model_loaded) {
+                    return;
+                }
+
                 // Start timer for benchmarking
                 auto start = std::chrono::high_resolution_clock::now();
 
@@ -125,6 +131,10 @@ namespace module::vision {
                     case utility::vision::fourcc("RGBA"):
                         img_cv = cv::Mat(height, width, CV_8UC4, const_cast<uint8_t*>(img.data.data()));
                         cv::cvtColor(img_cv, img_cv, cv::COLOR_RGBA2BGR);
+                        break;
+                    case utility::vision::fourcc("RGB8"):  // packed 8-bit RGB (e.g. the NUSim camera bridge)
+                        img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                        cv::cvtColor(img_cv, img_cv, cv::COLOR_RGB2BGR);
                         break;
                     default: log<WARN>("Image format not supported: ", utility::vision::fourcc(img.format)); return;
                 }

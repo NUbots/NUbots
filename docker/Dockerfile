@@ -239,6 +239,15 @@ RUN install-package -p ${platform} \
     libnvinfer-dev \
     libnvonnxparsers-dev
 
+# Runtime libraries the x64 GPU ONNXRuntime build links its CUDA and TensorRT providers against
+# (the TensorRT provider also loads the CUDA provider). On Jetson these come from JetPack on the device instead
+RUN if [ "${platform}" = "generic" ]; then \
+        install-package \
+            libcudnn9-cuda-12 \
+            libcurand-12-5 \
+            libcufft-12-5 ;\
+    fi
+
 
 # ONNXRuntime (headers + libs); on Jetson the libs are replaced by the GPU wheel's below
 RUN . /root/.dep_env && \
