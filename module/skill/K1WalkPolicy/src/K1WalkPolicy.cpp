@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <fmt/format.h>
 #include <iomanip>
+#include <limits>
 #include <numeric>
 #include <set>
 #include <sstream>
@@ -115,6 +117,9 @@ namespace module::skill {
         have_last_tick = false;
 
         off_rate_ticks     = 0;
+        director_runs      = 0;
+        min_tick_dt        = std::numeric_limits<double>::infinity();
+        max_tick_dt        = 0.0;
         timing_report_tick = tick;
         last_timing_report = NUClear::clock::now();
     }
@@ -224,18 +229,34 @@ namespace module::skill {
         });
 
         // 50 Hz inference loop, matching the training control rate (0.02 s). The simulator/robot
-        // PD-tracks the latest LowCmd between ticks.
+        // PD-tracks the latest LowCmd between ticks. High priority so a busy thread pool (e.g. NUSim
+        // on the same machine) queues the tick ahead of planners and logging rather than late.
         on<Provide<WalkTask>,
            Every<50, Per<std::chrono::seconds>>,
            With<RawSensors>,
            With<Stability>,
            Single,
-           Sync<K1WalkPolicy>>()
+           Sync<K1WalkPolicy>,
+           Priority::HIGH>()
             .then([this](const WalkTask& walk,
                          const RunReason& run_reason,
                          const RawSensors& raw,
                          const Stability& stability) {
                 if (!model_loaded) {
+                    return;
+                }
+
+                // The Director also runs this provider whenever the Walk task is re-emitted (NEW_TASK, at the
+                // planner's rate) and on other Director events, in between the 50 Hz ticks. Stepping the policy then
+                // would put an extra short tick in its history and break the trained period for the ticks around it,
+                // so step only on the timer: keep the current LowCmd and let the next tick read the new command.
+                if (run_reason != RunReason::OTHER_TRIGGER) {
+                    if (walk.kick && run_reason == RunReason::NEW_TASK) {
+                        kick_start_time = NUClear::clock::now();
+                        log<INFO>("K1WalkPolicy starting in-walk kick");
+                    }
+                    ++director_runs;
+                    emit<Task>(std::make_unique<Continue>());
                     return;
                 }
                 // While fallen/recovering the get-up policy owns the low-level channel
@@ -267,10 +288,6 @@ namespace module::skill {
                 // velocity burst held for kick_duration (same emulation as skill::K1Walk).
                 Eigen::Vector3d cmd = walk.velocity_target;
                 if (walk.kick) {
-                    if (run_reason == RunReason::NEW_TASK) {
-                        kick_start_time = NUClear::clock::now();
-                        log<INFO>("K1WalkPolicy starting in-walk kick");
-                    }
                     if (NUClear::clock::now() - kick_start_time > cfg.kick_duration) {
                         log<INFO>("K1WalkPolicy in-walk kick complete");
                         emit<Task>(std::make_unique<Done>());
@@ -289,7 +306,9 @@ namespace module::skill {
                 if (have_last_tick) {
                     tick_dt = std::chrono::duration<double>(now - last_tick_time).count();
                     off_rate_ticks += std::abs(tick_dt - NOMINAL_TICK_DT) > TICK_DT_TOLERANCE ? 1 : 0;
-                    tick_dt = utility::math::clamp(MIN_TICK_DT, tick_dt, MAX_TICK_DT);
+                    min_tick_dt = std::min(min_tick_dt, tick_dt);
+                    max_tick_dt = std::max(max_tick_dt, tick_dt);
+                    tick_dt     = utility::math::clamp(MIN_TICK_DT, tick_dt, MAX_TICK_DT);
                 }
                 last_tick_time = now;
                 have_last_tick = true;
@@ -297,10 +316,20 @@ namespace module::skill {
                 // Rate-limited: at 50 Hz a per-tick warning would bury the log it is warning about
                 if (now - last_timing_report > TIMING_REPORT_PERIOD) {
                     if (off_rate_ticks > 0) {
-                        log<WARN>("K1WalkPolicy missed the trained 50 Hz on", off_rate_ticks, "of the last",
-                                  tick - timing_report_tick, "ticks; the policy is seeing the wrong dynamics");
+                        log<WARN>(
+                            fmt::format("K1WalkPolicy missed the trained 50 Hz on {} of the last {} ticks "
+                                        "(period {:.1f}-{:.1f} ms, {} Director runs skipped); the policy is "
+                                        "seeing the wrong dynamics",
+                                        off_rate_ticks,
+                                        tick - timing_report_tick,
+                                        min_tick_dt * 1e3,
+                                        max_tick_dt * 1e3,
+                                        director_runs));
                     }
                     off_rate_ticks     = 0;
+                    director_runs      = 0;
+                    min_tick_dt        = std::numeric_limits<double>::infinity();
+                    max_tick_dt        = 0.0;
                     timing_report_tick = tick;
                     last_timing_report = now;
                 }

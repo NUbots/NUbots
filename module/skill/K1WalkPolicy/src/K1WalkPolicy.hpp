@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
+#include <limits>
 #include <memory>
 #include <Eigen/Core>
 #include <nuclear>
@@ -140,6 +141,10 @@ namespace module::skill {
         /// tick/time the current summary window started at
         std::uint64_t off_rate_ticks     = 0;
         std::uint64_t timing_report_tick = 0;
+        /// Shortest and longest tick period, and Director (non-timer) runs skipped, in the current summary window
+        double min_tick_dt          = std::numeric_limits<double>::infinity();
+        double max_tick_dt          = 0.0;
+        std::uint64_t director_runs = 0;
         NUClear::clock::time_point last_timing_report{};
 
         /// When the current walk task entered CUSTOM (drives the hand-off blend)
