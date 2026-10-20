@@ -203,11 +203,12 @@ namespace module::planning {
                 // an Every-driven WalkProposal provider never fires under the Director)
                 emit_smoothed_walk(velocity_target);
 
-                // Emit debugging information for visualisation and monitoring
+                // Emit debugging information for visualisation and monitoring. Hrd is the pose being walked to, with
+                // its final heading (not the heading the control law is turning to now), as the MPC planners send
                 auto debug_information                       = std::make_unique<WalkToDebug>();
                 debug_information->Hrd.translation().head(2) = rDRr;
                 debug_information->Hrd.linear() =
-                    rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, result.desired_heading));
+                    rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, angle_to_final_heading));
                 debug_information->min_align_radius        = cfg.walk_to.min_align_radius;
                 debug_information->max_align_radius        = cfg.walk_to.max_align_radius;
                 debug_information->min_angle_error         = cfg.walk_to.min_angle_error;
