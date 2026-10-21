@@ -33,10 +33,13 @@
 #include <stdexcept>
 
 #include "Problem.hpp"
-#include "ocp/AcadosOcp.hpp"
-#include "ocp/OcpFunctions.hpp"
+
+#include "utility/ocp/AcadosOcp.hpp"
+#include "utility/ocp/OcpFunctions.hpp"
 
 namespace module::planning::inverted_walk_mpc {
+
+    namespace ocp = utility::ocp;
 
     const int InvertedWalkMPC::N             = Problem::N;
     const double InvertedWalkMPC::DT         = Problem::DT;

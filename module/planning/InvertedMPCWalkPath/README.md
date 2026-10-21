@@ -96,7 +96,7 @@ Things to know:
 The problem is solved with [acados](https://github.com/acados/acados)' SQP (exact Hessian, HPIPM for the QPs, merit
 backtracking, at most `max_iterations` iterations). The problem is C++ in `src/Problem.hpp`: its dynamics, costs and
 obstacle constraints are templated on their scalar type, and [autodiff](https://autodiff.github.io) differentiates them
-for the solver (`src/ocp/OcpFunctions.hpp`), which `src/ocp/AcadosOcp` sets up through acados' C interface. There is no
+for the solver (`shared/utility/ocp/OcpFunctions.hpp`), which `utility::ocp::AcadosOcp` sets up through acados' C interface. There is no
 generated code. Only the horizon (25 × 0.1 s), the number of obstacle slots (4) and the number of envelope rows (24)
 are fixed in `Problem.hpp`; everything else is set from `InvertedMPCWalkPath.yaml` and the response.
 

@@ -30,16 +30,18 @@
 #include <Eigen/Core>
 #include <array>
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
-// Forward declaration of the generated acados solver, so including this header doesn't pull in acados
-struct mpc_walk_path_solver_capsule;
+namespace utility::ocp {
+    class AcadosOcp;
+}  // namespace utility::ocp
 
 namespace module::planning::walk_mpc {
 
-    /// @brief Tuning of the MPC. The horizon, its step and the number of obstacle slots are fixed by the generated
-    /// solver (codegen/generate_solver.py); everything here can change at runtime.
+    /// @brief Tuning of the MPC. The horizon, its step and the number of obstacle slots are fixed by the problem
+    /// (Problem.hpp); everything here can change at runtime.
     struct Config {
         /// @brief Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
         Eigen::Vector3d max_velocity = Eigen::Vector3d(1.0, 0.5, 1.5);
@@ -138,7 +140,7 @@ namespace module::planning::walk_mpc {
         /// @brief Sets the parameters every stage shares (weights and obstacles) into params, for every stage
         void fill_shared_parameters(const std::vector<Eigen::Vector2d>& obstacles);
 
-        mpc_walk_path_solver_capsule* capsule = nullptr;
+        std::unique_ptr<utility::ocp::AcadosOcp> ocp;
         Config cfg{};
 
         /// @brief Last command sent

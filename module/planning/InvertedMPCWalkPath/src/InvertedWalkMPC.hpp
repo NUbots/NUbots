@@ -34,11 +34,11 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-namespace module::planning::inverted_walk_mpc {
+namespace utility::ocp {
+    class AcadosOcp;
+}  // namespace utility::ocp
 
-    namespace ocp {
-        class AcadosOcp;
-    }  // namespace ocp
+namespace module::planning::inverted_walk_mpc {
 
     /// @brief One edge of the capability envelope: the constraint normal·velocity ≤ bound
     struct EnvelopeRow {
@@ -164,7 +164,7 @@ namespace module::planning::inverted_walk_mpc {
         /// @brief Sets the parameters every stage shares (weights and obstacles) into params, for every stage
         void fill_shared_parameters(const std::vector<Eigen::Vector2d>& obstacles);
 
-        std::unique_ptr<ocp::AcadosOcp> ocp;
+        std::unique_ptr<utility::ocp::AcadosOcp> ocp;
         Config cfg{};
 
         /// @brief Last velocity planned (or delivered by a fallback)

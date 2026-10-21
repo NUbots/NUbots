@@ -51,7 +51,7 @@ namespace module::planning::inverted_walk_mpc {
     ///
     /// gₖ (the heading fade-in) and βₖ (the bearing to the target) are computed by the caller from the initial guess,
     /// so they are parameters. Every function is generic in its scalar type, so autodiff differentiates it for the
-    /// solver (ocp::ProblemFunctions).
+    /// solver (utility::ocp::ProblemFunctions).
     struct Problem {
         /// @brief Steps in the horizon
         static constexpr int N = 25;

@@ -31,7 +31,7 @@
 
 #include "acados_c/external_function_interface.h"
 
-namespace module::planning::inverted_walk_mpc::ocp {
+namespace utility::ocp {
 
     namespace {
 
@@ -206,6 +206,9 @@ namespace module::planning::inverted_walk_mpc::ocp {
         // of the soft constraints is used)
         for (int k = 0; k <= N; ++k) {
             const int ns = v_ns[k];
+            if (ns == 0) {
+                continue;  // acados refuses the null pointers empty vectors give
+            }
             std::vector<double> zeros(ns, 0.0), ones(ns, 1.0), z(ns, DEFAULT_SLACK_PENALTY);
             ocp_nlp_cost_model_set(config, dims, in, k, "Zl", zeros.data());
             ocp_nlp_cost_model_set(config, dims, in, k, "Zu", ones.data());
@@ -228,10 +231,13 @@ namespace module::planning::inverted_walk_mpc::ocp {
         std::vector<double> lh(nh, -BIG), uh(nh, 0.0);
         std::vector<int> idxsh = iota(nh);
         for (int k = 0; k <= N; ++k) {
-            if (k > 0) {
+            // acados refuses null pointers, which empty vectors give, so constraints a stage doesn't have are skipped
+            if (k > 0 && nb > 0) {
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "idxbx", idxbx.data());
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "lbx", lbx.data());
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "ubx", ubx.data());
+            }
+            if (k > 0 && nh > 0) {
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "lh", lh.data());
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "uh", uh.data());
                 ocp_nlp_constraints_model_set(config, dims, in, out, k, "idxsh", idxsh.data());
@@ -321,4 +327,4 @@ namespace module::planning::inverted_walk_mpc::ocp {
         return iterations;
     }
 
-}  // namespace module::planning::inverted_walk_mpc::ocp
+}  // namespace utility::ocp

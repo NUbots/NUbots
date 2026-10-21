@@ -25,8 +25,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-# acados (with HPIPM and BLASFEO) solves the MPC; autodiff (header only) differentiates its problem
-find_package(acados REQUIRED)
-
-# Build our NUClear module
-nuclear_module(LIBRARIES acados::acados)
+# Build our NUClear module. acados and autodiff come with utility/ocp.
+nuclear_module()

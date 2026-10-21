@@ -433,9 +433,10 @@ RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tag
     --jobs $(nproc) \
     -DBUILD_SHARED_LIBS=ON
 
-# acados (with HPIPM and BLASFEO), the optimal control solver MPCWalkPath's generated code runs on. Static archives, so
-# nothing extra has to be deployed. GitHub's release archives leave out the submodules, so it is cloned with the two it
-# builds from. The version must match the one module/planning/MPCWalkPath/codegen/generate_solver.py generates for.
+# acados (with HPIPM and BLASFEO), the optimal control solver the walk MPCs run on. Static archives, so nothing extra
+# has to be deployed. GitHub's release archives leave out the submodules, so it is cloned with the two it builds from.
+# The version must match the one module/planning/ModelledMPCWalkPath/codegen/generate_solver.py generates for, and
+# shared/utility/ocp uses acados's C interface, so a new version needs its option names checked.
 # acados picks BLASFEO's kernels from the *host* processor, which is wrong when cross compiling, so they are set here:
 # AVX2 (Haswell and later) for generic, Cortex-A76 for the Orin NX's Cortex-A78AE cores.
 RUN BLASFEO_TARGET=$([ "${platform}" = "orinnx" ] && echo "ARMV8A_ARM_CORTEX_A76" || echo "X64_INTEL_HASWELL") && \

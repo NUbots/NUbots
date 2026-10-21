@@ -133,11 +133,10 @@ namespace {
 }  // namespace
 
 TEST_CASE("The first command matches acados's Python interface's", "[WalkMPC]") {
-    // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the default configuration and the same initial guess: [0.4843033884,
-    // 0.1614601513, -0.1161816337], at the iteration cap (it converges in 13 iterations, to within 2e-4 of this). Also
-    // checks that the configured limits survive the solver's reset (resetting its numerical values puts the generated
-    // placeholder limits back, which turned at 1 rad/s).
+    // The same problem solved through acados's Python interface (acados_template, from the CasADi generator this
+    // module used to be built from) from standing, with the default configuration and the same initial guess:
+    // [0.4843033884, 0.1614601513, -0.1161816337], at the iteration cap (it converges in 13 iterations, to within 2e-4
+    // of this). Also checks that the configured limits survive the solver's reset.
     WalkMPC mpc{};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);

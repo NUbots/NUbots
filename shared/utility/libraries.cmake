@@ -38,6 +38,10 @@ target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 find_package(onnxruntime REQUIRED)
 target_link_libraries(nuclear_utility PRIVATE onnxruntime::onnxruntime)
 
+# acados (with HPIPM and BLASFEO) for utility/ocp; autodiff is header only
+find_package(acados REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC acados::acados)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)

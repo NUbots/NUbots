@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_ACADOSOCP_HPP
-#define MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_ACADOSOCP_HPP
+#ifndef UTILITY_OCP_ACADOSOCP_HPP
+#define UTILITY_OCP_ACADOSOCP_HPP
 
 #include <vector>
 
@@ -33,7 +33,7 @@
 #include "acados/utils/external_function_generic.h"
 #include "acados_c/ocp_nlp_interface.h"
 
-namespace module::planning::inverted_walk_mpc::ocp {
+namespace utility::ocp {
 
     /// @brief The structure of the problem: what is fixed once the solver is created. Every number in it (bounds,
     /// constraint matrices, slack penalties, parameters) is set afterwards through the acados handles.
@@ -96,6 +96,6 @@ namespace module::planning::inverted_walk_mpc::ocp {
         std::vector<external_function_external_param_casadi> wrappers{};
     };
 
-}  // namespace module::planning::inverted_walk_mpc::ocp
+}  // namespace utility::ocp
 
-#endif  // MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_ACADOSOCP_HPP
+#endif  // UTILITY_OCP_ACADOSOCP_HPP

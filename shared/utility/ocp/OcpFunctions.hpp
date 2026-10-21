@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_OCPFUNCTIONS_HPP
-#define MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_OCPFUNCTIONS_HPP
+#ifndef UTILITY_OCP_OCPFUNCTIONS_HPP
+#define UTILITY_OCP_OCPFUNCTIONS_HPP
 
 #include <Eigen/Core>
 #include <array>
@@ -33,7 +33,7 @@
 #include <autodiff/forward/dual/eigen.hpp>
 #include <cstddef>
 
-namespace module::planning::inverted_walk_mpc::ocp {
+namespace utility::ocp {
 
     /// @brief One of the functions acados evaluates, in the C calling convention of a CasADi-generated function,
     /// which acados's external_function_external_param_casadi wraps: the function, its workspace size, the sparsity
@@ -378,6 +378,6 @@ namespace module::planning::inverted_walk_mpc::ocp {
         }
     };
 
-}  // namespace module::planning::inverted_walk_mpc::ocp
+}  // namespace utility::ocp
 
-#endif  // MODULE_PLANNING_INVERTEDMPCWALKPATH_OCP_OCPFUNCTIONS_HPP
+#endif  // UTILITY_OCP_OCPFUNCTIONS_HPP
