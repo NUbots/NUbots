@@ -1,0 +1,97 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Velocity limits, the values of PlanWalkPath's, MPCWalkPath's and ModelledMPCWalkPath's, on the planned velocity: the
+# velocity the robot is to deliver, not the command that delivers it, which can be larger (up to the evaluation's
+# commands, ±2). The MPC also plans only velocities the evaluation's commands delivered.
+# Maximum velocity per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
+max_velocity: [1.75, 1.4, 1.5]
+# Maximum backward velocity (m/s)
+max_backward_velocity: 1.5
+
+# Cost weights, MPCWalkPath's. See the README for the cost function. The MPC plans the velocity the robot delivers.
+# Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
+w_position: 1.0
+huber_delta: 0.2
+# Final-heading error, faded in within about heading_radius (m) of the target
+w_heading: 1.0
+heading_radius: 0.6
+# Facing the direction of travel far from the target. 0 leaves the heading free there.
+w_face: 0.0
+# Planned velocity and its change between steps, per axis [vx, vy, vtheta]. As in MPCWalkPath, w_rate is what makes
+# the plan slow down before the target, as the MPC assumes the robot delivers what it plans at once.
+w_effort: [0.01, 0.01, 0.01]
+w_rate: [1.0, 1.0, 0.5]
+
+# Clearance kept from other robots (m), as PlanWalkPath's obstacle_radius
+obstacle_radius: 0.8
+# Penalty on getting inside an obstacle's clearance. The constraint is soft, so the problem stays solvable when the
+# robot is already inside one.
+w_slack: 1000.0
+
+# Penalty on planned velocities outside the capability envelope (below). The envelope is soft, so a velocity from
+# outside it (after a fallback) can't make the problem unsolvable.
+w_envelope: 1000.0
+# Shrinks the capability envelope (below) towards standing still: each row's bound d is multiplied by this
+envelope_scale: 1.0
+
+# Planned velocities below this magnitude, per axis [vx (m/s), vy (m/s), vtheta (rad/s)], are taken as zero before
+# finding the command, so the robot stands still at the target rather than stepping out of the policy's standing
+# region to correct a few millimetres
+zero_tolerance: [0.02, 0.02, 0.02]
+
+# SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
+max_iterations: 10
+# Seconds. A solve that takes longer, or fails, sends PlanWalkPath's control law's command instead.
+time_budget: 0.05
+# Seconds without a WalkTo after which the next solve starts from standing still
+stale_time: 0.5
+
+# The fallback, PlanWalkPath's WalkTo control law and dead zone, with the limits above on its commands, as in
+# PlanWalkPath (values from PlanWalkPath.yaml)
+fallback:
+  k_translation: 1.5 # (1/s) translational speed per metre of distance to target
+  k_theta: 2.0 # (1/s) angular velocity per radian of heading error
+  max_align_radius: 1.5 # Radius [m] to begin omnidirectional approach and aligning with target heading
+  min_align_radius: 0.4 # Radius [m] within which fully aligned with the target heading
+  max_angle_error: 45 * pi / 180 # Heading error above which we only rotate on the spot
+  min_angle_error: 20 * pi / 180 # Heading error below which full forward speed is allowed
+  min_velocity: [0.35, 0.45, 1.0] # Smaller nonzero commands are bumped up to these
+  zero_tolerance: [0.05, 0.05, 0.05] # Commands below this per-axis magnitude are snapped to zero
+  rotate_velocity_x: 0.2 # Forward velocity given to a turn with no translation
+
+# ---- The capability envelope. Written by codegen/import_response.py: edit by re-importing. ----
+# Fitted to k1-poi732yy: the velocities the policy delivered in steady state for the commands on the grids, as one
+# polygon per plane. Each row [n_vx, n_vy, n_wz, d] is the constraint n_vx·vx + n_vy·vy + n_wz·wz ≤ d on the planned
+# velocity, held softly (w_envelope).
+#   vx × vy (grid_vx_vy_poi732yy, wz commanded 0): 1681 commands
+#   vx × wz (grid_vx_wz_poi732yy, vy commanded 0): 1681 commands
+#   vy × wz (grid_vy_wz_poi732yy, vx commanded 0.2): 1681 commands
+envelope:
+  # vx × vy
+  - [1, 0, 0, 1.82]
+  - [0.707107, 0.707107, 0, 2.07687]
+  - [0, 1, 0, 1.48269]
+  - [-0.707107, 0.707107, 0, 1.33044]
+  - [-1, 0, 0, 1.45188]
+  - [-0.707107, -0.707107, 0, 1.38503]
+  - [0, -1, 0, 1.4376]
+  - [0.707107, -0.707107, 0, 2.0128]
+  # vx × wz
+  - [1, 0, 0, 1.81537]
+  - [0.707107, 0, 0.707107, 2.22046]
+  - [0, 0, 1, 2.06153]
+  - [-0.707107, 0, 0.707107, 2.18552]
+  - [-1, 0, 0, 1.45993]
+  - [-0.707107, 0, -0.707107, 2.16794]
+  - [0, 0, -1, 2.04176]
+  - [0.707107, 0, -0.707107, 2.22019]
+  # vy × wz
+  - [0, 1, 0, 1.48634]
+  - [0, 0.707107, 0.707107, 1.99724]
+  - [0, 0, 1, 2.05952]
+  - [0, -0.707107, 0.707107, 2.10671]
+  - [0, -1, 0, 1.45088]
+  - [0, -0.707107, -0.707107, 2.01843]
+  - [0, 0, -1, 2.10282]
+  - [0, 0.707107, -0.707107, 2.14164]
