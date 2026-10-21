@@ -173,6 +173,18 @@ namespace module::planning::modelled_walk_mpc {
 
         int max_iter = std::max(1, cfg.max_iterations);
         ocp_nlp_solver_opts_set(nlp_config, modelled_mpc_walk_path_acados_get_nlp_opts(capsule), "max_iter", &max_iter);
+        // Before each iteration the SQP predicts its time as the slowest of this solve's iterations so far, and stops
+        // if it would end past the limit
+        double time_limit = std::max(0.0, cfg.time_limit);
+        ocp_nlp_timeout_heuristic_t heuristic = MAX_CALL;
+        ocp_nlp_solver_opts_set(nlp_config,
+                                modelled_mpc_walk_path_acados_get_nlp_opts(capsule),
+                                "timeout_max_time",
+                                &time_limit);
+        ocp_nlp_solver_opts_set(nlp_config,
+                                modelled_mpc_walk_path_acados_get_nlp_opts(capsule),
+                                "timeout_heuristic",
+                                &heuristic);
 
         // A new configuration can make the old warm start infeasible
         a_guess.clear();
@@ -355,8 +367,10 @@ namespace module::planning::modelled_walk_mpc {
         const bool solution_finite = std::ranges::all_of(a, [](const auto& v) { return v.allFinite(); })
                                      && std::ranges::all_of(s, [](const auto& v) { return v.allFinite(); });
         // 0 is converged; 2 is the iteration cap, which is how the solver is used (the iterate is still feasible
-        // with respect to the bounds)
-        solution.success = (solution.status == 0 || solution.status == 2) && solution_finite;
+        // with respect to the bounds), and 7 the time limit, the same once an iteration has been taken (before
+        // that, the iterate is the initial guess)
+        const bool stopped_early = solution.status == 2 || (solution.status == 7 && solution.iterations > 0);
+        solution.success         = (solution.status == 0 || stopped_early) && solution_finite;
 
         solution.states.reserve(N + 1);
         solution.velocities.reserve(N + 1);

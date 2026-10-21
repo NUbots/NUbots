@@ -43,7 +43,9 @@ kink_smoothing: [0.01, 0.06, 0.05]
 
 # SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
 max_iterations: 10
-# Seconds. A solve that takes longer, or fails, sends PlanWalkPath's control law's command instead.
+# Seconds. The solver stops before an iteration that would take it past this, and its iterate is sent, as at the
+# iteration cap. A solve that fails, or overshoots anyway (one iteration can't be interrupted), sends PlanWalkPath's
+# control law's command instead.
 time_budget: 0.05
 # Seconds without a WalkTo after which the next solve starts from standing still
 stale_time: 0.5

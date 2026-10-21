@@ -90,15 +90,20 @@ namespace module::planning::modelled_walk_mpc {
 
         /// @brief SQP iterations per solve. Reaching the cap isn't a failure: the iterate is used.
         int max_iterations = 10;
+        /// @brief Seconds. The SQP stops before an iteration that would take the solve past this, and the iterate is
+        /// used as at the iteration cap. 0 for no limit.
+        double time_limit = 0.0;
     };
 
     /// @brief What one solve produced
     struct Solution {
         /// @brief Command to send now [vx, vy, vtheta], within the velocity limits
         Eigen::Vector3d command = Eigen::Vector3d::Zero();
-        /// @brief Whether the command is usable: the solve converged or stopped at its iteration cap
+        /// @brief Whether the command is usable: the solve converged, or stopped at its iteration cap or time limit
+        /// after at least one iteration
         bool success = false;
-        /// @brief acados status (0 success, 2 iteration cap, see acados/utils/types.h), or -1 for non-finite input
+        /// @brief acados status (0 success, 2 iteration cap, 7 time limit, see acados/utils/types.h), or -1 for
+        /// non-finite input
         int status = -1;
         /// @brief SQP iterations used
         int iterations = 0;

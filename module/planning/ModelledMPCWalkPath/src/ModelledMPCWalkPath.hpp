@@ -49,7 +49,8 @@ namespace module::planning {
         struct Config {
             /// @brief The MPC's limits, tuning and model
             modelled_walk_mpc::Config mpc{};
-            /// @brief Seconds. A solve that takes longer, or fails, sends the fallback's command instead
+            /// @brief Seconds. The solver stops before an iteration that would take it past this and its iterate is
+            /// sent. A solve that fails, or still overshoots, sends the fallback's command instead
             double time_budget = 0.05;
             /// @brief Seconds without a WalkTo after which the next solve starts from standing still
             double stale_time = 0.5;
@@ -74,6 +75,8 @@ namespace module::planning {
         Eigen::Vector3d last_walk_command = Eigen::Vector3d::Zero();
         /// @brief Solves that fell back to PlanWalkPath's control law since the last log
         int fallbacks = 0;
+        /// @brief Solves stopped at time_budget, whose iterate was sent, since the last log
+        int timeouts = 0;
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};
 

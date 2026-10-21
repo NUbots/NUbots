@@ -95,6 +95,7 @@ namespace module::planning {
                 // Solver
                 cfg.mpc.max_iterations = config["max_iterations"].as<int>();
                 cfg.time_budget        = config["time_budget"].as<double>();
+                cfg.mpc.time_limit     = cfg.time_budget;
                 cfg.stale_time         = config["stale_time"].as<double>();
 
                 // Fallback (PlanWalkPath's WalkTo control law and dead zone), with the MPC's velocity limits
@@ -183,6 +184,9 @@ namespace module::planning {
 
                 Eigen::Vector3d command = solution.command;
                 const bool use_fallback = !solution.success || solution.solve_time > cfg.time_budget;
+                if (solution.success && solution.status == 7) {
+                    ++timeouts;
+                }
                 if (use_fallback) {
                     // PlanWalkPath's control law, then PlanWalkPath's dead zone, as the walk stands still for commands
                     // too small to start stepping
@@ -218,6 +222,7 @@ namespace module::planning {
                 emit(graph("MPC Solve Time (ms)", solution.solve_time * 1e3));
                 emit(graph("MPC Iterations", solution.iterations));
                 emit(graph("MPC Fallback", use_fallback ? 1.0 : 0.0));
+                emit(graph("MPC Timeout", solution.status == 7 ? 1.0 : 0.0));
                 emit(graph("MPC Envelope Violation", mpc->envelope_violation(command)));
                 if (!solution.states.empty()) {
                     const Eigen::Vector3d& end = solution.states.back();
@@ -239,6 +244,10 @@ namespace module::planning {
             if (fallbacks > 0) {
                 log<WARN>("MPC fell back to PlanWalkPath's control law", fallbacks, "times in the last 10 s");
                 fallbacks = 0;
+            }
+            if (timeouts > 0) {
+                log<INFO>("MPC stopped at time_budget and used its iterate", timeouts, "times in the last 10 s");
+                timeouts = 0;
             }
         });
     }

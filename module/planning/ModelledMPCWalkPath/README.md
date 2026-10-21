@@ -152,9 +152,11 @@ It needs casadi and the `acados_template` of the acados release the Docker image
 
 The first command from standing matches the problem solved through acados's Python interface, and against the model
 as the robot it reaches every test goal, including 0.3 m sidesteps and 0.15 m steps forward that sit inside the dead
-zones. Solves take 3–22 ms on a desktop with the envelope (2–10 ms without). If a solve fails, or runs over
-`time_budget`, PlanWalkPath's `WalkTo` control law is sent instead, through PlanWalkPath's dead zone, as PlanWalkPath
-would.
+zones. Solves take 3–22 ms on a desktop with the envelope (2–10 ms without), and about 27 ms on average in
+WalkPathBenchmark alongside NUSim. The SQP stops before an iteration that would take it past `time_budget` and its
+iterate is sent, as at the iteration cap. If a solve fails, stops before its first iteration, or overshoots anyway (an
+iteration can't be interrupted), PlanWalkPath's `WalkTo` control law is sent instead, through PlanWalkPath's dead zone,
+as PlanWalkPath would.
 
 ## In NUSim
 
