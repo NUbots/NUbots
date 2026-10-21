@@ -36,8 +36,9 @@ zone (`walk_path::apply_dead_zone`):
   `min_velocity` z;
 - clamps everything to `max_velocity`.
 
-`min_velocity` and `max_velocity` are measured from the policy in NUSim; `tools::WalkPathBenchmark` measures the
-policy (its command sweep) and scores the whole walk to a pose against ground truth.
+`min_velocity` is measured from the policy in NUSim, and `max_velocity` and `max_backward_velocity` are
+ModelledMPCWalkPath's, the extent of the policy's capability envelope along each axis; `tools::WalkPathBenchmark`
+measures the policy (its command sweep) and scores the whole walk to a pose against ground truth.
 
 The smoother is reset when the robot recovers from a fall (Stability transition to DYNAMIC) so a
 stale command cannot produce a velocity spike on resume.
