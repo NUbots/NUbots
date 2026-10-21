@@ -1360,7 +1360,7 @@ static void modelled_mpc_walk_path_acados_create_set_opts(modelled_mpc_walk_path
     ocp_nlp_solver_opts_set(nlp_config, nlp_opts, "levenberg_marquardt", &levenberg_marquardt);
 
     /* options QP solver */
-    int qp_solver_cond_N;const int qp_solver_cond_N_ori = 25;
+    int qp_solver_cond_N;const int qp_solver_cond_N_ori = 5;
     qp_solver_cond_N = N < qp_solver_cond_N_ori ? N : qp_solver_cond_N_ori; // use the minimum value here
     ocp_nlp_solver_opts_set(nlp_config, nlp_opts, "qp_cond_N", &qp_solver_cond_N);
     double reg_epsilon = 0.0001;

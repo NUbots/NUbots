@@ -258,6 +258,9 @@ def build_ocp():
     so = ocp.solver_options
     so.integrator_type = "DISCRETE"
     so.qp_solver = "PARTIAL_CONDENSING_HPIPM"
+    # Condensed into 5 blocks of 5 steps: HPIPM iterations take ~15 % less time than over the 25 uncondensed stages
+    # in WalkPathBenchmark (blocks of 3-12 steps are about the same; full condensing is ~60 % slower)
+    so.qp_solver_cond_N = 5
     so.hessian_approx = "EXACT"
     so.regularize_method = "MIRROR"
     so.levenberg_marquardt = 0.0
