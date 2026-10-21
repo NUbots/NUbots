@@ -39,15 +39,19 @@ solves, in the robot frame at the time of the solve, over N steps of dt:
               ρ(d) = δ²(√(1 + d²/δ²) − 1)                                    pseudo-Huber distance
               hₖ(θ) = gₖ(1 − cos(θ − θ*)) + (w_face/w_head)(1 − gₖ)(1 − cos(θ − βₖ))   heading, faded in near the target
 
-    subject to  velocity limits on s[3:] at stages 1..N, acceleration limits on a,
+    subject to  velocity limits on s[3:] at stages 1..N,
                 ‖pₖ − oⱼ‖² ≥ r² for each active obstacle j (soft, L1 + L2 penalty on the slack)
 
 gₖ (the heading fade-in) and βₖ (the bearing to the target) are computed by the caller from the initial guess, so
 they are parameters. The last pose has no command, so acados's terminal cost costs it with the stage weights.
 
+The change of command a is unbounded: the walk policy keeps the robot stable for any command, so only w_rate shapes
+how fast the command changes. w_rate is needed across the whole horizon, as without a model of the robot's response
+it is what makes the plan slow down before the target rather than assume the robot can stop instantly.
+
 Only N, dt and the number of obstacle slots are fixed by the generated code. Everything that is tuned lives in the
-module's configuration: the cost weights and obstacle radius are per-stage parameters, the velocity and acceleration
-limits are bounds, the slack penalty is a cost setting, and the SQP iteration cap is a solver option.
+module's configuration: the cost weights and obstacle radius are per-stage parameters, the velocity limits are
+bounds, the slack penalty is a cost setting, and the SQP iteration cap is a solver option.
 
 Run with a Python environment that has casadi and acados_template, from the same acados release the Docker image
 builds (see ACADOS_VERSION below), e.g. walk-mpc's:
@@ -149,8 +153,6 @@ def build_ocp():
     ocp.parameter_values = np.zeros(NP)
 
     # Placeholder limits: the module sets the real ones from its configuration before every solve
-    ocp.constraints.idxbu = np.arange(3)
-    ocp.constraints.lbu, ocp.constraints.ubu = -np.ones(3), np.ones(3)
     ocp.constraints.idxbx = np.array([3, 4, 5])
     ocp.constraints.lbx, ocp.constraints.ubx = -np.ones(3), np.ones(3)
     ocp.constraints.idxbx_e = np.array([3, 4, 5])

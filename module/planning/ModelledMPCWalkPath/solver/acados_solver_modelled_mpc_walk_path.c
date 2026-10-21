@@ -813,29 +813,6 @@ void modelled_mpc_walk_path_acados_create_setup_nlp_in_numerical_values(modelled
 
 
     /* constraints that are the same for initial and intermediate */
-    // u
-    int* idxbu = malloc(NBU * sizeof(int));
-    idxbu[0] = 0;
-    idxbu[1] = 1;
-    idxbu[2] = 2;
-    double* lubu = calloc(2*NBU, sizeof(double));
-    double* lbu = lubu;
-    double* ubu = lubu + NBU;
-    lbu[0] = -1;
-    ubu[0] = 1;
-    lbu[1] = -1;
-    ubu[1] = 1;
-    lbu[2] = -1;
-    ubu[2] = 1;
-
-    for (int i = 0; i < N; i++)
-    {
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "idxbu", idxbu);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "lbu", lbu);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, i, "ubu", ubu);
-    }
-    free(idxbu);
-    free(lubu);
 
 
     // set up general constraints for stage 0 to N-1

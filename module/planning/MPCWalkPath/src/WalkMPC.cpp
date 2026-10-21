@@ -107,16 +107,9 @@ namespace module::planning::walk_mpc {
         ocp_nlp_in* nlp_in         = mpc_walk_path_acados_get_nlp_in(capsule);
         ocp_nlp_out* nlp_out       = mpc_walk_path_acados_get_nlp_out(capsule);
 
-        // Acceleration limits on the input, at every stage with an input
-        std::array<double, 3> lbu{-cfg.max_acceleration.x(), -cfg.max_acceleration.y(), -cfg.max_acceleration.z()};
-        std::array<double, 3> ubu{cfg.max_acceleration.x(), cfg.max_acceleration.y(), cfg.max_acceleration.z()};
         // Velocity limits on the command part of the state, at stages 1..N (stage 0 is pinned to the current state)
         std::array<double, 3> lbx{-cfg.max_backward_velocity, -cfg.max_velocity.y(), -cfg.max_velocity.z()};
         std::array<double, 3> ubx{cfg.max_velocity.x(), cfg.max_velocity.y(), cfg.max_velocity.z()};
-        for (int k = 0; k < N; ++k) {
-            ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "lbu", lbu.data());
-            ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "ubu", ubu.data());
-        }
         for (int k = 1; k <= N; ++k) {
             ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "lbx", lbx.data());
             ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, nlp_out, k, "ubx", ubx.data());
@@ -205,7 +198,7 @@ namespace module::planning::walk_mpc {
             const double distance = target.head<2>().norm();
             const double turn_to  = distance > cfg.heading_radius ? std::atan2(target.y(), target.x()) : target.z();
             const double sign     = wrap(turn_to) < 0.0 ? -1.0 : 1.0;
-            a_guess[0].z()        = std::clamp(sign * 0.3 / DT, -cfg.max_acceleration.z(), cfg.max_acceleration.z());
+            a_guess[0].z()        = sign * 0.3 / DT;
         }
 
         // Roll the guess out from the current state
@@ -284,10 +277,9 @@ namespace module::planning::walk_mpc {
 
         // The command applied in the first step, clipped so it is exactly within the limits despite the solver's
         // tolerance
-        const Eigen::Vector3d a_max = cfg.max_acceleration * DT;
-        solution.command            = clip_to_limits(s[1].tail<3>().cwiseMax(u_prev - a_max).cwiseMin(u_prev + a_max));
-        a_guess                     = a;
-        u_prev                      = solution.command;
+        solution.command = clip_to_limits(s[1].tail<3>());
+        a_guess          = a;
+        u_prev           = solution.command;
         return solution;
     }
 

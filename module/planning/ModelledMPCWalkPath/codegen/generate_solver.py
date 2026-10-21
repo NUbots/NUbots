@@ -42,12 +42,13 @@ the robot frame at the time of the solve, over N steps of dt:
 
     minimise  Σₖ w_pos·ρ(‖pₖ − p*‖) + w_head·hₖ(θₖ) + Σᵢ w_eff,i·vₖ,ᵢ² + Σᵢ w_rate,i·(aₖ,ᵢ·dt)² + slack penalty
 
-    subject to  velocity limits on u_prev at stages 1..N, acceleration limits on a,
+    subject to  velocity limits on u_prev at stages 1..N,
                 nᵢ·u_prev ≤ dᵢ at stages 1..N, the capability envelope (soft, L1 + L2 penalty on the slack)
                 ‖pₖ − oⱼ‖² ≥ r² for each active obstacle j (soft, L1 + L2 penalty on the slack)
 
 The costs are MPC-1's (see MPCWalkPath's generator), except that effort is on the delivered velocity v rather than the
-command, as the command's size says little about what the robot does with it.
+command, as the command's size says little about what the robot does with it. As in MPC-1, the change of command a is
+unbounded (the walk policy keeps the robot stable for any command) and only w_rate shapes it.
 
 The model is MATLAB's idnlhw with a piecewise-linear input nonlinearity per path and nb = nf = nk = 1:
 
@@ -223,8 +224,6 @@ def build_ocp():
 
     # Placeholder limits: the module sets the real ones from its configuration
     command = np.arange(S_COMMAND, S_COMMAND + 3)
-    ocp.constraints.idxbu = np.arange(3)
-    ocp.constraints.lbu, ocp.constraints.ubu = -np.ones(3), np.ones(3)
     ocp.constraints.idxbx = command
     ocp.constraints.lbx, ocp.constraints.ubx = -np.ones(3), np.ones(3)
     ocp.constraints.idxbx_e = command

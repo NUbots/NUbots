@@ -17,11 +17,10 @@ step    u = s[3:] + a·dt,  pose⁺ = RK4(pose, u, dt)        omnidirectional ki
 minimise  Σₖ w_position·ρ(‖pₖ − p*‖)                          pseudo-Huber distance to the target
            + w_heading·gₖ·(1 − cos(θₖ − θ*))                   final heading, faded in near the target
            + w_face·(1 − gₖ)·(1 − cos(θₖ − βₖ))                facing the direction of travel far away
-           + Σᵢ w_effort,i·uₖ,ᵢ² + Σᵢ w_rate,i·(aₖ,ᵢ·dt)²       effort and smoothness
+           + Σᵢ w_effort,i·uₖ,ᵢ² + Σᵢ w_rate,i·(aₖ,ᵢ·dt)²       effort and smoothness (replaces PlanWalkPath's smoothing)
            + slack penalty                                     soft obstacle clearance
 
 subject to  −max_backward_velocity ≤ vx ≤ max_velocity.x,  |vy| ≤ max_velocity.y,  |ω| ≤ max_velocity.z
-            |a| ≤ max_acceleration                              (replaces PlanWalkPath's smoothing)
             ‖pₖ − oⱼ‖² ≥ obstacle_radius² − sₖⱼ,  sₖⱼ ≥ 0        other robots, soft
 ```
 
@@ -39,7 +38,13 @@ small turn towards the target, which breaks the tie when the target is exactly b
 The command sent then goes through PlanWalkPath's dead zone (`dead_zone_compensation`), as the walk policy stands still
 for commands too small to start stepping. The MPC itself knows nothing about the policy's response; planning with an
 identified model of it is MPC-2. If a solve fails, or runs over `time_budget`, PlanWalkPath's `WalkTo` control law is
-sent instead, held to the acceleration limits so the switch is smooth.
+sent instead.
+
+The change of command is unbounded: the walk policy keeps the robot stable for whatever it is commanded, so the
+`w_rate` cost alone shapes it. That cost is needed on every step of the horizon. Tested on the walk-to-pose benchmark
+in NUSim (2026-10-21), with no rate cost the MPC, which assumes the robot can stop instantly, reached the target at
+1.3 m/s and settled 0.23 m from it (steady-state RMSE, against 0.15 m with `w_rate`); costing only the first step's
+change, from the command sent last, let it put off every change to a later step, and it never settled at all.
 
 ## The solver
 

@@ -49,7 +49,6 @@ namespace {
     struct Run {
         std::optional<double> arrival_time{};
         double min_clearance         = std::numeric_limits<double>::infinity();
-        Eigen::Vector3d peak_rate    = Eigen::Vector3d::Zero();
         Eigen::Vector3d peak_command = Eigen::Vector3d::Zero();
         double min_vx                = 0.0;
         int failures                 = 0;
@@ -60,7 +59,6 @@ namespace {
     Run simulate(WalkMPC& mpc, const Scenario& scenario, const double duration = 30.0) {
         Run run{};
         Eigen::Vector3d pose = Eigen::Vector3d::Zero();
-        Eigen::Vector3d sent = Eigen::Vector3d::Zero();
         double inside_since  = -1.0;  // when the robot last entered the target, -1 while outside
         const int substeps   = 5;
         const double dt      = WalkMPC::DT / substeps;
@@ -90,10 +88,8 @@ namespace {
                 command.setZero();
                 mpc.set_previous_command(command);
             }
-            run.peak_rate    = run.peak_rate.cwiseMax((command - sent).cwiseAbs() / WalkMPC::DT);
             run.peak_command = run.peak_command.cwiseMax(command.cwiseAbs());
             run.min_vx       = std::min(run.min_vx, command.x());
-            sent             = command;
 
             for (int k = 0; k < substeps; ++k) {
                 const double cc = std::cos(pose.z());
@@ -136,17 +132,18 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("The first command matches the walk-mpc prototype's", "[WalkMPC]") {
-    // walk-mpc's AcadosWalkMPC with MPCConfig(max_velocity=(1.0, 0.5, 1.5)), from standing, converged:
-    // [0.1, 0.09999999, -0.1622366]. Also checks that the configured limits survive the solver's reset (resetting its
-    // numerical values puts the generated placeholder limits back, which turned at 1 rad/s and 1 rad/s²).
+TEST_CASE("The first command matches acados's Python interface's", "[WalkMPC]") {
+    // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
+    // build_ocp) from standing, with the default configuration and the same initial guess: [0.4843033884,
+    // 0.1614601513, -0.1161816337], at the iteration cap (it converges in 13 iterations, to within 2e-4 of this). Also
+    // checks that the configured limits survive the solver's reset (resetting its numerical values puts the generated
+    // placeholder limits back, which turned at 1 rad/s).
     WalkMPC mpc{};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
-    CHECK(solution.status == 0);
-    CHECK(solution.command.x() == Approx(0.1).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.1).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1622366).margin(1e-4));
+    CHECK(solution.command.x() == Approx(0.4843033884).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.1614601513).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.1161816337).margin(1e-4));
 }
 
 TEST_CASE("Arrives at every basic goal on an ideal robot, within the limits", "[WalkMPC]") {
@@ -162,9 +159,6 @@ TEST_CASE("Arrives at every basic goal on an ideal robot, within the limits", "[
         CHECK(run.peak_command.y() <= cfg.max_velocity.y() + 1e-9);
         CHECK(run.peak_command.z() <= cfg.max_velocity.z() + 1e-9);
         CHECK(run.min_vx >= -cfg.max_backward_velocity - 1e-9);
-        CHECK(run.peak_rate.x() <= cfg.max_acceleration.x() + 1e-6);
-        CHECK(run.peak_rate.y() <= cfg.max_acceleration.y() + 1e-6);
-        CHECK(run.peak_rate.z() <= cfg.max_acceleration.z() + 1e-6);
         if (!scenario.obstacles.empty()) {
             CHECK(run.min_clearance >= cfg.obstacle_radius - 0.05);
         }
@@ -172,7 +166,7 @@ TEST_CASE("Arrives at every basic goal on an ideal robot, within the limits", "[
 }
 
 TEST_CASE("Uses the full turn rate it is configured with", "[WalkMPC]") {
-    // Turning on the spot by pi/2 at 1.5 rad/s and 2 rad/s² takes about 1.5 s; at the placeholder 1 rad/s it took 2.1
+    // Turning on the spot by pi/2 at 1.5 rad/s takes about 1.5 s; at the placeholder 1 rad/s it took 2.1
     WalkMPC mpc{};
     const Run run = simulate(mpc, {"turn_in_place", {0.0, 0.0, M_PI / 2}});
     REQUIRE(run.arrival_time.has_value());
@@ -209,16 +203,20 @@ TEST_CASE("Non-finite input fails without changing the state, and the next solve
     CHECK(good.command.allFinite());
 }
 
-TEST_CASE("set_previous_command clips to the velocity limits and anchors the acceleration limits", "[WalkMPC]") {
+TEST_CASE("set_previous_command clips to the velocity limits and anchors the rate cost", "[WalkMPC]") {
     const Config cfg{};
     WalkMPC mpc{cfg};
     mpc.set_previous_command(Eigen::Vector3d(5.0, -5.0, 5.0));
     CHECK(mpc.previous_command().isApprox(
         Eigen::Vector3d(cfg.max_velocity.x(), -cfg.max_velocity.y(), cfg.max_velocity.z())));
 
-    // From full speed forward, a target behind can only be reached by slowing at the acceleration limit
+    // The rate cost is measured from the previous command, so from full speed forward the robot slows towards a target
+    // behind it more gently than it starts towards it from standing
     mpc.set_previous_command(Eigen::Vector3d(cfg.max_velocity.x(), 0.0, 0.0));
-    const auto solution = mpc.solve(Eigen::Vector3d(-2.0, 0.0, 0.0), {});
-    REQUIRE(solution.success);
-    CHECK(solution.command.x() >= cfg.max_velocity.x() - cfg.max_acceleration.x() * WalkMPC::DT - 1e-9);
+    const auto from_full_speed = mpc.solve(Eigen::Vector3d(-2.0, 0.0, 0.0), {});
+    REQUIRE(from_full_speed.success);
+    mpc.reset();
+    const auto from_standing = mpc.solve(Eigen::Vector3d(-2.0, 0.0, 0.0), {});
+    REQUIRE(from_standing.success);
+    CHECK(from_full_speed.command.x() > from_standing.command.x() + 0.1);
 }

@@ -7,8 +7,6 @@ log_level: INFO
 max_velocity: [1.75, 1.4, 1.5]
 # Maximum backward command (m/s)
 max_backward_velocity: 1.5
-# Maximum change of the command per second [m/s², m/s², rad/s²], as MPCWalkPath.yaml
-max_acceleration: [1.0, 1.0, 2.0]
 
 # Cost weights, MPCWalkPath's. See the README for the cost function.
 # Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
@@ -39,9 +37,9 @@ envelope_scale: 1.0
 # Width over which the solver's model smooths the piecewise-linear maps' kinks, for the paths of each command axis
 # [vx, vy, vtheta], in command units. A map that isn't monotonic (a larger command delivering less) is a local minimum
 # the solver can't leave, so it needs to be wide enough to merge close breakpoints that make one: on vy, the fitted
-# map's notch between -0.288 and -0.271 m/s, which otherwise traps a sidestep at -0.287. Narrow keeps the dead zones'
-# edges sharp. The estimate of the robot's state uses the unsmoothed model.
-kink_smoothing: [0.01, 0.03, 0.05]
+# map's notch between -0.326 and -0.243 m/s, which 0.03 left in and which trapped a sidestep at -0.306 m/s. Narrow keeps
+# the dead zones' edges sharp. The estimate of the robot's state uses the unsmoothed model.
+kink_smoothing: [0.01, 0.06, 0.05]
 
 # SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
 max_iterations: 10

@@ -56,8 +56,6 @@ namespace module::planning::modelled_walk_mpc {
         Eigen::Vector3d max_velocity = Eigen::Vector3d(1.0, 0.5, 1.5);
         /// @brief Maximum backward (negative x) velocity command magnitude (m/s)
         double max_backward_velocity = 0.15;
-        /// @brief Maximum change of the command per second [m/s², m/s², rad/s²]
-        Eigen::Vector3d max_acceleration = Eigen::Vector3d(1.0, 1.0, 2.0);
 
         /// @brief Weight of the pseudo-Huber distance to the target
         double w_position = 1.0;
@@ -96,7 +94,7 @@ namespace module::planning::modelled_walk_mpc {
 
     /// @brief What one solve produced
     struct Solution {
-        /// @brief Command to send now [vx, vy, vtheta], within the velocity and acceleration limits
+        /// @brief Command to send now [vx, vy, vtheta], within the velocity limits
         Eigen::Vector3d command = Eigen::Vector3d::Zero();
         /// @brief Whether the command is usable: the solve converged or stopped at its iteration cap
         bool success = false;
@@ -168,7 +166,7 @@ namespace module::planning::modelled_walk_mpc {
         /// limits, and drops the warm start
         void set_previous_command(const Eigen::Vector3d& command);
 
-        /// @brief The command sent last, which the next solve's acceleration limits are measured from
+        /// @brief The command sent last, which the next solve's rate cost and the model's estimate start from
         [[nodiscard]] const Eigen::Vector3d& previous_command() const {
             return u_prev;
         }

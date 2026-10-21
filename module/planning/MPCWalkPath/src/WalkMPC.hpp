@@ -45,8 +45,6 @@ namespace module::planning::walk_mpc {
         Eigen::Vector3d max_velocity = Eigen::Vector3d(1.0, 0.5, 1.5);
         /// @brief Maximum backward (negative x) velocity magnitude (m/s)
         double max_backward_velocity = 0.15;
-        /// @brief Maximum change of the command per second [m/s², m/s², rad/s²]
-        Eigen::Vector3d max_acceleration = Eigen::Vector3d(1.0, 1.0, 2.0);
 
         /// @brief Weight of the pseudo-Huber distance to the target
         double w_position = 1.0;
@@ -74,7 +72,7 @@ namespace module::planning::walk_mpc {
 
     /// @brief What one solve produced
     struct Solution {
-        /// @brief Command to send now [vx, vy, vtheta], within the velocity and acceleration limits
+        /// @brief Command to send now [vx, vy, vtheta], within the velocity limits
         Eigen::Vector3d command = Eigen::Vector3d::Zero();
         /// @brief Whether the command is usable: the solve converged or stopped at its iteration cap
         bool success = false;
@@ -118,8 +116,8 @@ namespace module::planning::walk_mpc {
         void reset();
 
         /// @brief Plans from the robot's current pose and returns the command to send now.
-        /// On success, the command becomes the previous command the next solve's rate and acceleration limits are
-        /// measured from. On failure, nothing changes: call set_previous_command with whatever was sent instead.
+        /// On success, the command becomes the previous command the next solve's rate cost is measured from. On
+        /// failure, nothing changes: call set_previous_command with whatever was sent instead.
         /// @param target Goal pose (x, y, theta) in the robot frame
         /// @param obstacles Obstacle centres (x, y) in the robot frame
         Solution solve(const Eigen::Vector3d& target, const std::vector<Eigen::Vector2d>& obstacles);
@@ -128,7 +126,7 @@ namespace module::planning::walk_mpc {
         /// limits, and drops the warm start
         void set_previous_command(const Eigen::Vector3d& command);
 
-        /// @brief The command the next solve's acceleration limits are measured from
+        /// @brief The command the next solve's rate cost is measured from
         [[nodiscard]] const Eigen::Vector3d& previous_command() const {
             return u_prev;
         }

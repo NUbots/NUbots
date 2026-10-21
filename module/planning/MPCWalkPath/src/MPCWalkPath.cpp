@@ -65,7 +65,6 @@ namespace module::planning {
             // Limits
             cfg.mpc.max_velocity          = config["max_velocity"].as<Expression>();
             cfg.mpc.max_backward_velocity = config["max_backward_velocity"].as<double>();
-            cfg.mpc.max_acceleration      = config["max_acceleration"].as<Expression>();
 
             // Cost
             cfg.mpc.w_position     = config["w_position"].as<double>();
@@ -135,8 +134,8 @@ namespace module::planning {
                 const auto now     = NUClear::clock::now();
                 const double since = std::chrono::duration<double>(now - last_plan_time).count();
 
-                // The MPC steps in walk_mpc::WalkMPC::DT, and its acceleration limits assume one solve per step. A
-                // request well before the next step resends the last command.
+                // The MPC steps in walk_mpc::WalkMPC::DT, and its rate cost assumes one solve per step. A request
+                // well before the next step resends the last command.
                 if (since < 0.5 * walk_mpc::WalkMPC::DT) {
                     emit<Task>(std::make_unique<Walk>(last_walk_command));
                     return;
@@ -161,21 +160,16 @@ namespace module::planning {
                     }
                 }
 
-                // A solve that runs over the budget has already moved the MPC's previous command on, so keep the
-                // one actually sent for the fallback's acceleration limits
-                const Eigen::Vector3d u_sent      = mpc->previous_command();
                 const walk_mpc::Solution solution = mpc->solve(target, obstacles);
 
                 Eigen::Vector3d command = solution.command;
                 const bool use_fallback = !solution.success || solution.solve_time > cfg.time_budget;
                 if (use_fallback) {
-                    // PlanWalkPath's control law, held to the MPC's acceleration limits so the switch is smooth
-                    const auto result   = walk_path::walk_to_velocity(rDRr, angle_to_final_heading, cfg.fallback);
-                    const auto velocity = walk_path::constrain_velocity(result.velocity,
-                                                                        cfg.fallback.max_velocity,
-                                                                        cfg.fallback.max_backward_velocity);
-                    const Eigen::Vector3d a_max = cfg.mpc.max_acceleration * walk_mpc::WalkMPC::DT;
-                    command = mpc->clip_to_limits(velocity.cwiseMax(u_sent - a_max).cwiseMin(u_sent + a_max));
+                    // PlanWalkPath's control law
+                    const auto result = walk_path::walk_to_velocity(rDRr, angle_to_final_heading, cfg.fallback);
+                    command = mpc->clip_to_limits(walk_path::constrain_velocity(result.velocity,
+                                                                                cfg.fallback.max_velocity,
+                                                                                cfg.fallback.max_backward_velocity));
                     if (!command.allFinite()) {
                         command.setZero();
                     }

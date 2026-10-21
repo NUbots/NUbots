@@ -8,9 +8,6 @@ log_level: INFO
 max_velocity: [1.75, 1.4, 1.5]
 # Maximum backward speed (m/s)
 max_backward_velocity: 1.5
-# Maximum change of the command per second [m/s², m/s², rad/s²]. Replaces PlanWalkPath's exponential smoothing. A
-# first guess, from the walk-mpc prototype.
-max_acceleration: [1.0, 1.0, 2.0]
 
 # Cost weights, from the walk-mpc prototype (MPC-1). See the README for the cost function.
 # Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
@@ -21,7 +18,10 @@ w_heading: 1.0
 heading_radius: 0.6
 # Facing the direction of travel far from the target. 0 leaves the heading free there.
 w_face: 0.0
-# Command magnitude and change of command between steps, per axis [vx, vy, vtheta]
+# Command magnitude and change of command between steps, per axis [vx, vy, vtheta]. w_rate replaces PlanWalkPath's
+# exponential smoothing; the change of command is otherwise unbounded, as the walk policy keeps the robot stable for
+# any command. It's needed: without it the MPC, which doesn't model the robot's response, plans to stop instantly and
+# reaches the target too fast to settle on it (NUSim, 2026-10-21: 0.23 m steady-state RMSE against 0.15 m with it).
 w_effort: [0.01, 0.01, 0.01]
 w_rate: [1.0, 1.0, 0.5]
 

@@ -70,7 +70,6 @@ namespace {
     struct Run {
         double arrival_time           = -1.0;  // -1 if it never arrived
         double min_clearance          = std::numeric_limits<double>::infinity();
-        Eigen::Vector3d peak_rate     = Eigen::Vector3d::Zero();
         Eigen::Vector3d peak_command  = Eigen::Vector3d::Zero();
         double min_vx                 = 0.0;
         double max_estimate_error     = 0.0;
@@ -88,7 +87,6 @@ namespace {
         Run run{};
         Eigen::Vector3d pose     = Eigen::Vector3d::Zero();
         HammersteinModel::Lags z = HammersteinModel::Lags::Zero();
-        Eigen::Vector3d sent     = Eigen::Vector3d::Zero();
         double inside_since      = -1.0;  // when the robot last entered the target, -1 while outside
         const int substeps       = int(std::round(ModelledWalkMPC::DT / robot.sample_time));
 
@@ -123,11 +121,9 @@ namespace {
                 command.setZero();
                 mpc.set_previous_command(command);
             }
-            run.peak_rate              = run.peak_rate.cwiseMax((command - sent).cwiseAbs() / ModelledWalkMPC::DT);
             run.peak_command           = run.peak_command.cwiseMax(command.cwiseAbs());
             run.min_vx                 = std::min(run.min_vx, command.x());
             run.max_envelope_violation = std::max(run.max_envelope_violation, mpc.envelope_violation(command));
-            sent                       = command;
 
             for (int k = 0; k < substeps; ++k) {
                 const Eigen::Vector3d v = HammersteinModel::delivered(z);
@@ -176,17 +172,17 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("The first command matches the prototype's", "[ModelledWalkMPC]") {
+TEST_CASE("The first command matches acados's Python interface's", "[ModelledWalkMPC]") {
     // The same problem solved through acados's Python interface (acados_template, from codegen/generate_solver.py's
-    // build_ocp) from standing, with the same configuration and initial guess: [0.0999999993, 0.0999999986,
-    // -0.1670205471], at the iteration cap. Also checks that the configured limits, envelope and model survive the
-    // solver's reset.
+    // build_ocp) from standing, with the same configuration and initial guess: [0.5251103960, 0.1677867207,
+    // -0.0558424645], at the iteration cap (it converges in 33 iterations, to within 4e-3 of this). Also checks that
+    // the configured limits, envelope and model survive the solver's reset.
     ModelledWalkMPC mpc{k1_config()};
     const auto solution = mpc.solve(Eigen::Vector3d(2.0, 0.5, 0.3), {});
     REQUIRE(solution.success);
-    CHECK(solution.command.x() == Approx(0.1).margin(1e-4));
-    CHECK(solution.command.y() == Approx(0.0999999986).margin(1e-4));
-    CHECK(solution.command.z() == Approx(-0.1670205471).margin(1e-4));
+    CHECK(solution.command.x() == Approx(0.5251103960).margin(1e-4));
+    CHECK(solution.command.y() == Approx(0.1677867207).margin(1e-4));
+    CHECK(solution.command.z() == Approx(-0.0558424645).margin(1e-4));
 }
 
 TEST_CASE("From cold, a goal straight ahead is walked to without turning", "[ModelledWalkMPC]") {
@@ -217,9 +213,6 @@ TEST_CASE("Arrives at every goal against the model, within the limits", "[Modell
         CHECK(run.min_vx >= -cfg.max_backward_velocity - 1e-9);
         // The envelope is soft, but its penalty keeps the commands inside it
         CHECK(run.max_envelope_violation <= 1e-3);
-        CHECK(run.peak_rate.x() <= cfg.max_acceleration.x() + 1e-6);
-        CHECK(run.peak_rate.y() <= cfg.max_acceleration.y() + 1e-6);
-        CHECK(run.peak_rate.z() <= cfg.max_acceleration.z() + 1e-6);
         // The estimate runs the same model on the same commands, so it is the robot's state
         CHECK(run.max_estimate_error < 1e-9);
         if (!scenario.obstacles.empty()) {

@@ -34,12 +34,12 @@ minimise  Σₖ w_position·ρ(‖pₖ − p*‖)                          pseud
 
 subject to  −max_backward_velocity ≤ ux ≤ max_velocity.x,  |uy| ≤ max_velocity.y,  |uω| ≤ max_velocity.z
             nᵢ·u ≤ dᵢ + σₖᵢ,  σₖᵢ ≥ 0                         the capability envelope, soft
-            |a| ≤ max_acceleration
             ‖pₖ − oⱼ‖² ≥ obstacle_radius² − sₖⱼ,  sₖⱼ ≥ 0
 ```
 
 The costs are MPCWalkPath's (see its README for ρ, gₖ and βₖ), except that effort is on the delivered velocity rather
-than the command. The limits are on the command: the policy's capability envelope (below).
+than the command. The limits are on the command: the policy's capability envelope (below). As in MPCWalkPath, the
+change of command is unbounded, and only `w_rate` shapes it.
 
 ## The model
 
@@ -85,8 +85,9 @@ Things to know about this fit:
   non-monotonic notch in a map is a local minimum the solver gets stuck in. 0.05 on ω (also the product path's map) and
   0.01 on vx keep the maps within a few hundredths of the fit and the dead-zone edges sharp. The product's |vx| is
   smoothed with vx's width. The estimate below uses the unsmoothed model.
-- The vy map has a notch between −0.326 and −0.243 m/s (−0.3 m/s delivers less than −0.15), wider than the 0.03 of vy
-  smoothing was set for on the previous fit, so a sidestep near −0.3 m/s can stall there.
+- The vy map has a notch between −0.326 and −0.243 m/s (−0.3 m/s delivers less than −0.15). 0.06 is the narrowest vy
+  smoothing that removes it: at 0.03 a walk could stall 13 cm off its target with a −0.31 m/s sidestep. The cost is a
+  softer vy dead zone in the solver's model (0.3 m/s delivers 0.085 m/s, against the fit's 0.066).
 - The product path's map falls beyond |ω·vx| ≈ 0.84, so at a 1.5 rad/s turn the model turns slower walking at 1 m/s
   (1.34 rad/s) than at 0.5 m/s (1.59 rad/s).
 - With no gate, the model drifts at zero command (−0.006 m/s forward, 0.008 m/s sideways and −0.016 rad/s), so at the
@@ -120,8 +121,8 @@ writes both (`--tolerance` and `--edges` change the fit). Things to know:
   the problem unsolvable. It is off at the first stage, which is pinned to the command already sent.
 - Each grid holds the third axis fixed (the vy × ω grid at vx = 0.2), so commands on all three axes at once weren't
   measured: the envelope is the intersection of the three planes' octagons.
-- The evaluation is the policy in mjlab with no randomisation, and only the commands, not how fast they change, so
-  `max_acceleration` is still MPCWalkPath's.
+- The evaluation is the policy in mjlab with no randomisation, and only the commands, not how fast they change. The
+  change of command is unbounded, as in MPCWalkPath.
 - Against the evaluation's steady-state sweeps, the model is within about 0.05 m/s on vx from −1.75 to 1.75 m/s and
   within 0.05 m/s on vy outside its dead zone up to ±1.25 m/s (0.1 m/s at ±1.5), and its
   lateral dead zone (±0.33 m/s) doesn't appear in the sweep (0.25 m/s gives 0.2 m/s after a minute), so it probably
@@ -152,8 +153,8 @@ It needs casadi and the `acados_template` of the acados release the Docker image
 The first command from standing matches the problem solved through acados's Python interface, and against the model
 as the robot it reaches every test goal, including 0.3 m sidesteps and 0.15 m steps forward that sit inside the dead
 zones. Solves take 3–22 ms on a desktop with the envelope (2–10 ms without). If a solve fails, or runs over
-`time_budget`, PlanWalkPath's `WalkTo` control law is sent instead, held to the acceleration limits and then through
-PlanWalkPath's dead zone, as PlanWalkPath would.
+`time_budget`, PlanWalkPath's `WalkTo` control law is sent instead, through PlanWalkPath's dead zone, as PlanWalkPath
+would.
 
 ## In NUSim
 

@@ -43,7 +43,7 @@
 #define MPC_WALK_PATH_NP_GLOBAL     0
 #define MPC_WALK_PATH_NBX    3
 #define MPC_WALK_PATH_NBX0   6
-#define MPC_WALK_PATH_NBU    3
+#define MPC_WALK_PATH_NBU    0
 #define MPC_WALK_PATH_NSBX   0
 #define MPC_WALK_PATH_NSBU   0
 #define MPC_WALK_PATH_NSH    4
