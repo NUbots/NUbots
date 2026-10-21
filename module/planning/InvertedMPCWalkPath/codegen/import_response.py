@@ -55,7 +55,7 @@ import numpy as np
 
 AXES = ("vx", "vy", "wz")
 PLANES = (("vx", "vy"), ("vx", "wz"), ("vy", "wz"))
-ROWS = 24  # the generated solver's envelope rows (generate_solver.py's ENVELOPE_ROWS)
+ROWS = 24  # the solver's envelope rows (Problem::ENVELOPE_ROWS in src/Problem.hpp)
 MARKER = "# ---- The capability envelope. Written by codegen/import_response.py: edit by re-importing. ----"
 CONFIG = Path(__file__).resolve().parents[1] / "data" / "config"
 
@@ -139,7 +139,7 @@ def main():
             row[i], row[j], row[3] = n[0], n[1], d
             rows.append(row)
     if len(rows) > ROWS:
-        raise SystemExit(f"{len(rows)} envelope rows, but the solver is generated for {ROWS}: use fewer --edges")
+        raise SystemExit(f"{len(rows)} envelope rows, but the solver has {ROWS}: use fewer --edges")
 
     note = (
         f"Fitted to {args.evaluation.name}: the velocities the policy delivered in steady state for the commands "

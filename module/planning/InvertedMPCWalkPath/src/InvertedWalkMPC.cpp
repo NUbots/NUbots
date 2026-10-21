@@ -32,21 +32,20 @@
 #include <limits>
 #include <stdexcept>
 
-#include "acados_c/ocp_nlp_interface.h"
-#include "acados_solver_inverted_mpc_walk_path.h"
-#include "inverted_mpc_walk_path_layout.h"
+#include "Problem.hpp"
+#include "ocp/AcadosOcp.hpp"
+#include "ocp/OcpFunctions.hpp"
 
 namespace module::planning::inverted_walk_mpc {
 
-    const int InvertedWalkMPC::N             = INVERTED_MPC_WALK_PATH_N;
-    const double InvertedWalkMPC::DT         = INVERTED_MPC_WALK_PATH_DT;
-    const int InvertedWalkMPC::MAX_OBSTACLES = INVERTED_MPC_WALK_PATH_MAX_OBSTACLES;
-    const int InvertedWalkMPC::ENVELOPE_ROWS = INVERTED_MPC_WALK_PATH_ENVELOPE_ROWS;
-
-    static_assert(INVERTED_MPC_WALK_PATH_NX == 6 && INVERTED_MPC_WALK_PATH_NU == 3,
-                  "InvertedWalkMPC expects the state (pose, velocity)");
+    const int InvertedWalkMPC::N             = Problem::N;
+    const double InvertedWalkMPC::DT         = Problem::DT;
+    const int InvertedWalkMPC::MAX_OBSTACLES = Problem::MAX_OBSTACLES;
+    const int InvertedWalkMPC::ENVELOPE_ROWS = Problem::ENVELOPE_ROWS;
 
     namespace {
+
+        using P = Problem;
 
         using Vector6d = Eigen::Matrix<double, 6, 1>;
 
@@ -55,20 +54,19 @@ namespace module::planning::inverted_walk_mpc {
             return std::remainder(angle, 2.0 * M_PI);
         }
 
-        /// @brief Omnidirectional kinematics: the body twist u rotated into the solve frame
-        Eigen::Vector3d f(const Eigen::Vector3d& pose, const Eigen::Vector3d& u) {
-            const double c = std::cos(pose.z());
-            const double s = std::sin(pose.z());
-            return {c * u.x() - s * u.y(), s * u.x() + c * u.y(), u.z()};
-        }
-
-        /// @brief One RK4 step of the kinematics, as in the generated model
-        Eigen::Vector3d rk4(const Eigen::Vector3d& pose, const Eigen::Vector3d& u, const double dt) {
-            const Eigen::Vector3d k1 = f(pose, u);
-            const Eigen::Vector3d k2 = f(pose + dt / 2 * k1, u);
-            const Eigen::Vector3d k3 = f(pose + dt / 2 * k2, u);
-            const Eigen::Vector3d k4 = f(pose + dt * k3, u);
-            return pose + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4);
+        /// @brief The problem's structure: velocity limits on the velocity part of the state, the envelope's rows on
+        /// it, and the obstacle clearances
+        ocp::Layout layout() {
+            ocp::Layout layout{};
+            layout.N              = P::N;
+            layout.dt             = P::DT;
+            layout.nx             = P::NX;
+            layout.nu             = P::NU;
+            layout.np             = P::NP;
+            layout.bounded_states = {3, 4, 5};
+            layout.ng             = P::ENVELOPE_ROWS;
+            layout.nh             = P::NH;
+            return layout;
         }
 
     }  // namespace
@@ -100,31 +98,25 @@ namespace module::planning::inverted_walk_mpc {
         }
     }
 
-    InvertedWalkMPC::InvertedWalkMPC(const Config& config) {
-        capsule = inverted_mpc_walk_path_acados_create_capsule();
-        if (capsule == nullptr || inverted_mpc_walk_path_acados_create(capsule) != 0) {
-            throw std::runtime_error("InvertedMPCWalkPath: creating the acados solver failed");
-        }
-        params.assign(N + 1, std::vector<double>(INVERTED_MPC_WALK_PATH_NP, 0.0));
+    InvertedWalkMPC::InvertedWalkMPC(const Config& config)
+        : ocp(std::make_unique<ocp::AcadosOcp>(layout(), ocp::ProblemFunctions<Problem>::functions())) {
+        params.assign(N + 1, std::vector<double>(P::NP, 0.0));
         configure(config);
         reset();
     }
 
-    InvertedWalkMPC::~InvertedWalkMPC() {
-        inverted_mpc_walk_path_acados_free(capsule);
-        inverted_mpc_walk_path_acados_free_capsule(capsule);
-    }
+    InvertedWalkMPC::~InvertedWalkMPC() = default;
 
     void InvertedWalkMPC::configure(const Config& config) {
         if (int(config.envelope.size()) > ENVELOPE_ROWS) {
             throw std::runtime_error("InvertedMPCWalkPath: the envelope has " + std::to_string(config.envelope.size())
-                                     + " rows, but the solver was generated for " + std::to_string(ENVELOPE_ROWS));
+                                     + " rows, but the problem has " + std::to_string(ENVELOPE_ROWS));
         }
         cfg                        = config;
-        ocp_nlp_config* nlp_config = inverted_mpc_walk_path_acados_get_nlp_config(capsule);
-        ocp_nlp_dims* nlp_dims     = inverted_mpc_walk_path_acados_get_nlp_dims(capsule);
-        ocp_nlp_in* nlp_in         = inverted_mpc_walk_path_acados_get_nlp_in(capsule);
-        ocp_nlp_out* nlp_out       = inverted_mpc_walk_path_acados_get_nlp_out(capsule);
+        ocp_nlp_config* nlp_config = ocp->config;
+        ocp_nlp_dims* nlp_dims     = ocp->dims;
+        ocp_nlp_in* nlp_in         = ocp->in;
+        ocp_nlp_out* nlp_out       = ocp->out;
 
         // Velocity limits on the velocity part of the state, at stages 1..N (stage 0 is pinned to the current state)
         Eigen::Vector3d lbx = cfg.lower_velocity;
@@ -137,7 +129,7 @@ namespace module::planning::inverted_walk_mpc {
         // The capability envelope on the velocity part of the state, at stages 1..N; unused rows, and every row at
         // stage 0 (pinned to the current state, which may be outside after a fallback), are switched off
         constexpr double big = 1e9;
-        constexpr int nx     = INVERTED_MPC_WALK_PATH_NX;
+        constexpr int nx     = P::NX;
         std::vector<double> C(ENVELOPE_ROWS * nx, 0.0);  // column major
         std::vector<double> lg(ENVELOPE_ROWS, -big);
         std::vector<double> ug(ENVELOPE_ROWS, big);
@@ -168,8 +160,7 @@ namespace module::planning::inverted_walk_mpc {
             ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, k, "zu", zu.data());
         }
 
-        int max_iter = std::max(1, cfg.max_iterations);
-        ocp_nlp_solver_opts_set(nlp_config, inverted_mpc_walk_path_acados_get_nlp_opts(capsule), "max_iter", &max_iter);
+        ocp->set_max_iterations(std::max(1, cfg.max_iterations));
 
         // A new configuration can make the old warm start infeasible
         a_guess.clear();
@@ -179,9 +170,8 @@ namespace module::planning::inverted_walk_mpc {
     void InvertedWalkMPC::reset() {
         v_prev = Eigen::Vector3d::Zero();
         a_guess.clear();
-        // Zero the iterates and the QP solver's memory, but not the numerical values: that would put back the
-        // generated code's placeholder limits and parameters
-        inverted_mpc_walk_path_acados_reset(capsule, 1, 0, 0, 0);
+        // Zero the iterates and the QP solver's memory, keeping the limits and parameters
+        ocp->reset();
     }
 
     Eigen::Vector3d InvertedWalkMPC::clip_to_limits(const Eigen::Vector3d& velocity) const {
@@ -203,20 +193,20 @@ namespace module::planning::inverted_walk_mpc {
 
     void InvertedWalkMPC::fill_shared_parameters(const std::vector<Eigen::Vector2d>& obstacles) {
         for (auto& p : params) {
-            p[INVERTED_MPC_WALK_PATH_P_W_POSITION]      = cfg.w_position;
-            p[INVERTED_MPC_WALK_PATH_P_W_HEADING]       = cfg.w_heading;
-            p[INVERTED_MPC_WALK_PATH_P_W_FACE]          = cfg.w_face;
-            p[INVERTED_MPC_WALK_PATH_P_HUBER_DELTA]     = cfg.huber_delta;
-            p[INVERTED_MPC_WALK_PATH_P_OBSTACLE_RADIUS] = cfg.obstacle_radius;
+            p[P::P_W_POSITION]      = cfg.w_position;
+            p[P::P_W_HEADING]       = cfg.w_heading;
+            p[P::P_W_FACE]          = cfg.w_face;
+            p[P::P_HUBER_DELTA]     = cfg.huber_delta;
+            p[P::P_OBSTACLE_RADIUS] = cfg.obstacle_radius;
             for (int i = 0; i < 3; ++i) {
-                p[INVERTED_MPC_WALK_PATH_P_W_EFFORT + i] = cfg.w_effort[i];
-                p[INVERTED_MPC_WALK_PATH_P_W_RATE + i]   = cfg.w_rate[i];
+                p[P::P_W_EFFORT + i] = cfg.w_effort[i];
+                p[P::P_W_RATE + i]   = cfg.w_rate[i];
             }
             for (int j = 0; j < MAX_OBSTACLES; ++j) {
-                const bool used                                   = j < int(obstacles.size());
-                p[INVERTED_MPC_WALK_PATH_P_OBSTACLES + 2 * j]     = used ? obstacles[j].x() : 0.0;
-                p[INVERTED_MPC_WALK_PATH_P_OBSTACLES + 2 * j + 1] = used ? obstacles[j].y() : 0.0;
-                p[INVERTED_MPC_WALK_PATH_P_ACTIVE + j]            = used ? 1.0 : 0.0;
+                const bool used               = j < int(obstacles.size());
+                p[P::P_OBSTACLES + 2 * j]     = used ? obstacles[j].x() : 0.0;
+                p[P::P_OBSTACLES + 2 * j + 1] = used ? obstacles[j].y() : 0.0;
+                p[P::P_ACTIVE + j]            = used ? 1.0 : 0.0;
             }
         }
     }
@@ -259,8 +249,7 @@ namespace module::planning::inverted_walk_mpc {
         std::vector<Vector6d> s_guess(N + 1);
         s_guess[0] << 0.0, 0.0, 0.0, v_prev;
         for (int k = 0; k < N; ++k) {
-            const Eigen::Vector3d u = s_guess[k].tail<3>() + a_guess[k] * DT;
-            s_guess[k + 1] << rk4(s_guess[k].head<3>(), u, DT), u;
+            s_guess[k + 1] = P::dynamics<double>(s_guess[k], a_guess[k], nullptr);
         }
 
         // Per-stage parameters: the heading fade-in and the travel bearing come from the guess, not the decision
@@ -268,21 +257,20 @@ namespace module::planning::inverted_walk_mpc {
         // heading errors cheaper, and the robot would swing out and back to turn on the spot.
         fill_shared_parameters(obstacles);
         for (int k = 0; k <= N; ++k) {
-            const Eigen::Vector2d d                = target.head<2>() - s_guess[k].head<2>();
-            auto& p                                = params[k];
-            p[INVERTED_MPC_WALK_PATH_P_TARGET]     = target.x();
-            p[INVERTED_MPC_WALK_PATH_P_TARGET + 1] = target.y();
-            p[INVERTED_MPC_WALK_PATH_P_TARGET + 2] = target.z();
-            p[INVERTED_MPC_WALK_PATH_P_GATE] = std::exp(-d.squaredNorm() / (cfg.heading_radius * cfg.heading_radius));
-            p[INVERTED_MPC_WALK_PATH_P_BEARING] = d.norm() > 1e-3 ? std::atan2(d.y(), d.x()) : target.z();
-            inverted_mpc_walk_path_acados_update_params(capsule, k, p.data(), INVERTED_MPC_WALK_PATH_NP);
+            const Eigen::Vector2d d = target.head<2>() - s_guess[k].head<2>();
+            auto& p                 = params[k];
+            p[P::P_TARGET]          = target.x();
+            p[P::P_TARGET + 1]      = target.y();
+            p[P::P_TARGET + 2]      = target.z();
+            p[P::P_GATE]            = std::exp(-d.squaredNorm() / (cfg.heading_radius * cfg.heading_radius));
+            p[P::P_BEARING]         = d.norm() > 1e-3 ? std::atan2(d.y(), d.x()) : target.z();
+            ocp->set_parameters(k, p.data());
         }
 
-        ocp_nlp_config* nlp_config = inverted_mpc_walk_path_acados_get_nlp_config(capsule);
-        ocp_nlp_dims* nlp_dims     = inverted_mpc_walk_path_acados_get_nlp_dims(capsule);
-        ocp_nlp_in* nlp_in         = inverted_mpc_walk_path_acados_get_nlp_in(capsule);
-        ocp_nlp_out* nlp_out       = inverted_mpc_walk_path_acados_get_nlp_out(capsule);
-        ocp_nlp_solver* nlp_solver = inverted_mpc_walk_path_acados_get_nlp_solver(capsule);
+        ocp_nlp_config* nlp_config = ocp->config;
+        ocp_nlp_dims* nlp_dims     = ocp->dims;
+        ocp_nlp_in* nlp_in         = ocp->in;
+        ocp_nlp_out* nlp_out       = ocp->out;
 
         // Pin the first state to the current one
         Vector6d x0 = s_guess[0];
@@ -296,9 +284,9 @@ namespace module::planning::inverted_walk_mpc {
         }
 
         const auto start    = std::chrono::steady_clock::now();
-        solution.status     = inverted_mpc_walk_path_acados_solve(capsule);
+        solution.status     = ocp->solve();
         solution.solve_time = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
-        ocp_nlp_get(nlp_solver, "sqp_iter", &solution.iterations);
+        solution.iterations = ocp->iterations();
 
         std::vector<Vector6d> s(N + 1);
         std::vector<Eigen::Vector3d> a(N);

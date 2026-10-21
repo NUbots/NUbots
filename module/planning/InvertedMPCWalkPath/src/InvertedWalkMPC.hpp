@@ -29,14 +29,16 @@
 
 #include <Eigen/Core>
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-// Forward declaration of the generated acados solver, so including this header doesn't pull in acados
-struct inverted_mpc_walk_path_solver_capsule;
-
 namespace module::planning::inverted_walk_mpc {
+
+    namespace ocp {
+        class AcadosOcp;
+    }  // namespace ocp
 
     /// @brief One edge of the capability envelope: the constraint normal·velocity ≤ bound
     struct EnvelopeRow {
@@ -49,7 +51,7 @@ namespace module::planning::inverted_walk_mpc {
     std::vector<EnvelopeRow> envelope_from_yaml(const YAML::Node& node);
 
     /// @brief Tuning of the MPC. The horizon, its step, the number of obstacle slots and the number of envelope rows
-    /// are fixed by the generated solver (codegen/generate_solver.py); everything here can change at runtime.
+    /// are fixed by the problem (Problem.hpp); everything here can change at runtime.
     struct Config {
         /// @brief Smallest planned velocity per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
         Eigen::Vector3d lower_velocity = Eigen::Vector3d(-0.15, -0.5, -1.5);
@@ -162,7 +164,7 @@ namespace module::planning::inverted_walk_mpc {
         /// @brief Sets the parameters every stage shares (weights and obstacles) into params, for every stage
         void fill_shared_parameters(const std::vector<Eigen::Vector2d>& obstacles);
 
-        inverted_mpc_walk_path_solver_capsule* capsule = nullptr;
+        std::unique_ptr<ocp::AcadosOcp> ocp;
         Config cfg{};
 
         /// @brief Last velocity planned (or delivered by a fallback)
