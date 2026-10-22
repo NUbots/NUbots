@@ -117,6 +117,7 @@ namespace module::tools {
             for (const auto& v : config["park_ball"]) {
                 cfg.park_ball.push_back(v.as<double>());
             }
+            cfg.stop_at_target         = config["stop_at_target"].as<bool>();
             cfg.trial_timeout          = config["trial_timeout"].as<double>();
             cfg.reach_position_error   = config["reach_position_error"].as<double>();
             cfg.reach_heading_error    = config["reach_heading_error"].as<Expression>();
@@ -143,7 +144,8 @@ namespace module::tools {
         });
 
         // The velocity of the Walk task the walk skill is running, whichever planner or strategy sent it (including the
-        // zero WalkToFieldPosition sends once at the target, which bypasses the planner), and zero once it stops
+        // zero WalkToFieldPosition sends at the target with stop_at_target, bypassing the planner), and zero once the
+        // walk stops
         on<Trigger<WalkState>>().then(
             [this](const WalkState& walk_state) { walk_command = Eigen::Vector3d(walk_state.velocity_target); });
 
@@ -243,7 +245,7 @@ namespace module::tools {
                 }
 
                 const Eigen::Vector3d& target = targets[trial_index];
-                emit<Task>(std::make_unique<WalkToFieldPosition>(flat(target), true), 1);
+                emit<Task>(std::make_unique<WalkToFieldPosition>(flat(target), cfg.stop_at_target), 1);
 
                 const double t       = std::chrono::duration<double>(now - trial.start).count();
                 const double pos_err = position_error(pose, target);

@@ -9,6 +9,9 @@ the walk policy), and scores each trial on the true robot pose rather than the r
 With `ground_truth_field` on, it also emits the `Field` from ground truth (the field frame is then NUSim's world), so
 localisation error does not mask the planner's behaviour. Run NUSim with `--keyframe kickoff`: the robot starts at (-3, 0) and the targets are relative to its start pose.
 
+With `stop_at_target` off (the default), WalkToFieldPosition leaves stopping at the target to the planner, rather than
+sending a zero walk itself within its `stop_threshold`, so the trials measure how the planner arrives and stands still.
+
 Each trial finishes once the robot has stayed within `reach_position_error` and `reach_heading_error` of the target
 for `settle_time`. It fails as `SHORT` if the robot comes to rest outside the target for `settle_time`, and as
 `TIMEOUT` after `trial_timeout`. One `TRIAL` line is logged per trial and a `SUMMARY` line at the

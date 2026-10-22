@@ -29,6 +29,10 @@ targets:
   - [6.25, 4.25, pi/2]
   - [0.0, 0.0, 0.0]
 
+# Whether WalkToFieldPosition stops the robot once it is within its stop_threshold of the target. Off, the planner does
+# the stopping, so the trials measure how the planner itself arrives and stands still.
+stop_at_target: false
+
 # Seconds before a trial is abandoned as a failure
 trial_timeout: 40
 # The robot is at the target within this position (m) and heading (rad) error

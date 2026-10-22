@@ -57,6 +57,8 @@ namespace module::tools {
             double sweep_duration = 0.0;
             /// @brief Seconds at the end of each hold the delivered velocity is averaged over
             double sweep_measure = 0.0;
+            /// @brief Whether WalkToFieldPosition stops the robot at the target, rather than the planner
+            bool stop_at_target = false;
             /// @brief Seconds before a trial is abandoned as a failure
             double trial_timeout = 0.0;
             /// @brief Position error (m) within which the robot counts as at the target
