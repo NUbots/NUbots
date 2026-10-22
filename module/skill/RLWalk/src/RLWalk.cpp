@@ -253,7 +253,8 @@ namespace module::skill {
 
                     // Hold the default pose at ~zero command, where the policy steps in place.
                     // TODO: train the policy for zero command instead
-                    if (walk_task.velocity_target.norm() < cfg.command_velocity_threshold) {
+                    const bool holding = walk_task.velocity_target.norm() < cfg.command_velocity_threshold;
+                    if (holding) {
                         joint_offsets_scaled_nubots = JointVector::Zero();
                     }
 
@@ -277,10 +278,14 @@ namespace module::skill {
                     }
                     emit<Task>(limbs);
 
-                    auto walk_state = std::make_unique<WalkState>(WalkState::State::WALKING,
-                                                                  walk_task.velocity_target,
-                                                                  0.0);  // Phase not used
+                    auto walk_state =
+                        std::make_unique<WalkState>(holding ? WalkState::State::STOPPED : WalkState::State::WALKING,
+                                                    walk_task.velocity_target,
+                                                    0.0);  // Phase not used
                     emit(walk_state);
+
+                    // SensorFilter picks its odometry gains from this, as it does for skill::Walk
+                    emit(std::make_unique<Stability>(holding ? Stability::STANDING : Stability::DYNAMIC));
 
                     if (log_level <= DEBUG) {
                         emit(graph("Walk velocity target",
