@@ -84,7 +84,8 @@ namespace module::skill {
 
     RLWalk::RLWalk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("RLWalk.yaml").then([this](const Configuration& config) {
+        // Sync<RLWalk> stops a config reload replacing the model and parameters mid-inference
+        on<Configuration, Sync<RLWalk>>("RLWalk.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Load model configuration
@@ -140,7 +141,7 @@ namespace module::skill {
         });
 
         // Each walk starts the gait phase, and the timing diagnostics, from zero
-        on<Start<WalkTask>>().then([this]() {
+        on<Start<WalkTask>, Sync<RLWalk>>().then([this]() {
             control_step = 0;
             if (log_level <= DEBUG) {
                 reset_loop_timing();
@@ -157,6 +158,7 @@ namespace module::skill {
            With<Stability>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single,
+           Sync<RLWalk>,
            Priority::HIGH>()
             .then([this](const WalkTask& walk_task,
                          const RunReason& run_reason,
