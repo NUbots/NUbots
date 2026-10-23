@@ -47,6 +47,7 @@ dependencies = [
     "fabric==3.2.3",
     "casadi>=3.8.1",
     "matplotlib>=3.10.9",
+    "scipy>=1.15",
 ]
 
 [tool.uv.workspace]
