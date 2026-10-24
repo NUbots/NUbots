@@ -61,7 +61,7 @@ namespace utility::input {
 
     std::set<ServoID> LimbID::servos_for_limb(const LimbID& limb) {
         switch (limb.value) {
-            case LimbID::HEAD: return {ServoID::HEAD_PITCH, ServoID::HEAD_YAW};
+            case LimbID::HEAD: return {ServoID::HEAD_PITCH, ServoID::NECK_YAW};
 
             case LimbID::LEFT_LEG:
                 return {ServoID::L_ANKLE_PITCH,
@@ -93,7 +93,7 @@ namespace utility::input {
     LimbID LimbID::limb_for_servo(const ServoID& servo) {
         switch (servo.value) {
             case ServoID::HEAD_PITCH:
-            case ServoID::HEAD_YAW: return LimbID::HEAD;
+            case ServoID::NECK_YAW: return LimbID::HEAD;
 
             case ServoID::L_ANKLE_PITCH:
             case ServoID::L_ANKLE_ROLL:

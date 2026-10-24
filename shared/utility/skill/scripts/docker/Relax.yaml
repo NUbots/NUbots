@@ -64,7 +64,7 @@
       position: 0
       gain: .NaN
       torque: 0
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0
       gain: .NaN
       torque: 0

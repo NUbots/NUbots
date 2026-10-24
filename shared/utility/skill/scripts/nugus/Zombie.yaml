@@ -75,7 +75,7 @@
       gain: 6.64
       position: 0
       torque: 100
-    - id: HEAD_YAW
+    - id: NECK_YAW
       position: 0
       gain: 6.64
       torque: 100

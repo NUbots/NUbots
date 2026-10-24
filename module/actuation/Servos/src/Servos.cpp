@@ -45,7 +45,6 @@ namespace module::actuation {
     using message::actuation::Head;
     using message::actuation::HeadPitch;
     using message::actuation::HeadSequence;
-    using message::actuation::HeadYaw;
     using message::actuation::LeftAnklePitch;
     using message::actuation::LeftAnkleRoll;
     using message::actuation::LeftArm;
@@ -63,6 +62,7 @@ namespace module::actuation {
     using message::actuation::LegsSequence;
     using message::actuation::Limbs;
     using message::actuation::LimbsSequence;
+    using message::actuation::NeckYaw;
     using message::actuation::RightAnklePitch;
     using message::actuation::RightAnkleRoll;
     using message::actuation::RightArm;
@@ -106,7 +106,7 @@ namespace module::actuation {
         add_servo_provider<LeftAnklePitch, ServoID::L_ANKLE_PITCH>();
         add_servo_provider<RightAnkleRoll, ServoID::R_ANKLE_ROLL>();
         add_servo_provider<LeftAnkleRoll, ServoID::L_ANKLE_ROLL>();
-        add_servo_provider<HeadYaw, ServoID::HEAD_YAW>();
+        add_servo_provider<NeckYaw, ServoID::NECK_YAW>();
         add_servo_provider<HeadPitch, ServoID::HEAD_PITCH>();
 
         // Create providers for each limb and the head
@@ -120,7 +120,7 @@ namespace module::actuation {
         add_group_provider<LeftLeg, LeftHipYaw, LeftHipRoll, LeftHipPitch, LeftKnee, LeftAnklePitch, LeftAnkleRoll>();
         add_group_provider<RightArm, RightShoulderPitch, RightShoulderRoll, RightElbow>();
         add_group_provider<LeftArm, LeftShoulderPitch, LeftShoulderRoll, LeftElbow>();
-        add_group_provider<Head, HeadYaw, HeadPitch>();
+        add_group_provider<Head, NeckYaw, HeadPitch>();
 
         // Create providers for each limb/head grouping
         add_group_provider<Body,
@@ -142,7 +142,7 @@ namespace module::actuation {
                            LeftShoulderPitch,
                            LeftShoulderRoll,
                            LeftElbow,
-                           HeadYaw,
+                           NeckYaw,
                            HeadPitch>();
         add_group_provider<UpperBody,
                            RightShoulderPitch,
@@ -151,7 +151,7 @@ namespace module::actuation {
                            LeftShoulderPitch,
                            LeftShoulderRoll,
                            LeftElbow,
-                           HeadYaw,
+                           NeckYaw,
                            HeadPitch>();
         add_group_provider<Limbs,
                            LeftHipYaw,

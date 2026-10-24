@@ -891,8 +891,8 @@ namespace module::purpose {
             for (auto& target : f.targets) {
 
                 switch (target.id.value) {
-                    case ServoID::HEAD_YAW:
-                        new_frame.targets.emplace_back(ServoID::HEAD_YAW, target.position, target.gain, target.torque);
+                    case ServoID::NECK_YAW:
+                        new_frame.targets.emplace_back(ServoID::NECK_YAW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::HEAD_PITCH:
                         new_frame.targets.emplace_back(ServoID::HEAD_PITCH,
@@ -1277,7 +1277,7 @@ namespace module::purpose {
             for (auto& f : script.frames) {
                 for (auto& target : f.targets) {
                     switch (target.id.value) {
-                        case ServoID::HEAD_YAW:
+                        case ServoID::NECK_YAW:
                         case ServoID::HEAD_PITCH:
                         case ServoID::R_SHOULDER_PITCH:
                         case ServoID::L_SHOULDER_PITCH:
@@ -1316,7 +1316,7 @@ namespace module::purpose {
         if (editFrame) {
             for (auto& target : script.frames[frame].targets) {
                 switch (target.id.value) {
-                    case ServoID::HEAD_YAW:
+                    case ServoID::NECK_YAW:
                     case ServoID::HEAD_PITCH:
                     case ServoID::R_SHOULDER_PITCH:
                     case ServoID::L_SHOULDER_PITCH:

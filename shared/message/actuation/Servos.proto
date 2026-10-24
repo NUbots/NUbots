@@ -103,7 +103,7 @@ message LeftAnkleRoll {
     ServoCommand command = 1;
 }
 
-message HeadYaw {
+message NeckYaw {
     ServoCommand command = 1;
 }
 

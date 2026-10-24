@@ -52,7 +52,7 @@ namespace utility::actuation::kinematics {
 
     [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateHeadJointPosition(const KinematicsModel& model,
                                                                                          const float& HEAD_PITCH,
-                                                                                         const float& HEAD_YAW,
+                                                                                         const float& NECK_YAW,
                                                                                          const ServoID& servoID) {
         std::map<ServoID, Eigen::Isometry3d> positions{};
 
@@ -67,14 +67,14 @@ namespace utility::actuation::kinematics {
         // Rotate to face out of base of neck
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitY()));
         // Rotate head in yaw axis
-        runningTransform = runningTransform.rotate(Eigen::AngleAxisd(HEAD_YAW, Eigen::Vector3d::UnitX()));
+        runningTransform = runningTransform.rotate(Eigen::AngleAxisd(NECK_YAW, Eigen::Vector3d::UnitX()));
         // Translate to top of neck (i.e. next motor axle)
         runningTransform = runningTransform.translate(Eigen::Vector3d(NECK_LENGTH, 0.0, 0.0));
         // YAW
         // Return the basis pointing out of the top of the torso with z pointing out the back of the neck. Pos
         // is top of neck (at hip pitch motor)
-        positions[ServoID::HEAD_YAW] = runningTransform;
-        if (servoID == ServoID::HEAD_YAW) {
+        positions[ServoID::NECK_YAW] = runningTransform;
+        if (servoID == ServoID::NECK_YAW) {
             return positions;
         }
 
@@ -94,7 +94,7 @@ namespace utility::actuation::kinematics {
                                                                                          const ServoID& servoID) {
         return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position,
-                                          sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
+                                          sensors.servo[static_cast<int>(ServoID::NECK_YAW)].present_position,
                                           servoID);
     }
     /*! @brief
@@ -291,7 +291,7 @@ namespace utility::actuation::kinematics {
                                                                                 const Sensors& sensors,
                                                                                 const ServoID& servoID) {
         switch (servoID.value) {
-            case ServoID::HEAD_YAW:
+            case ServoID::NECK_YAW:
             case ServoID::HEAD_PITCH: return calculateHeadJointPosition(model, sensors, servoID);
             case ServoID::R_SHOULDER_PITCH:
             case ServoID::R_SHOULDER_ROLL:

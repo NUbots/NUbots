@@ -36,7 +36,6 @@
 namespace utility::actuation {
 
     using message::actuation::HeadPitch;
-    using message::actuation::HeadYaw;
     using message::actuation::LeftAnklePitch;
     using message::actuation::LeftAnkleRoll;
     using message::actuation::LeftElbow;
@@ -46,6 +45,7 @@ namespace utility::actuation {
     using message::actuation::LeftKnee;
     using message::actuation::LeftShoulderPitch;
     using message::actuation::LeftShoulderRoll;
+    using message::actuation::NeckYaw;
     using message::actuation::RightAnklePitch;
     using message::actuation::RightAnkleRoll;
     using message::actuation::RightElbow;
@@ -78,7 +78,7 @@ namespace utility::actuation {
         template <> struct ServoMap<LeftAnklePitch> { static constexpr ServoID::Value value = ServoID::L_ANKLE_PITCH; };
         template <> struct ServoMap<RightAnkleRoll> { static constexpr ServoID::Value value = ServoID::R_ANKLE_ROLL; };
         template <> struct ServoMap<LeftAnkleRoll> { static constexpr ServoID::Value value = ServoID::L_ANKLE_ROLL; };
-        template <> struct ServoMap<HeadYaw> { static constexpr ServoID::Value value = ServoID::HEAD_YAW; };
+        template <> struct ServoMap<NeckYaw> { static constexpr ServoID::Value value = ServoID::NECK_YAW; };
         template <> struct ServoMap<HeadPitch> { static constexpr ServoID::Value value = ServoID::HEAD_PITCH; };
     // clang-format on
 
