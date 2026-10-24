@@ -32,7 +32,7 @@ import subprocess
 from termcolor import cprint
 
 import b
-from utility.dockerise import defaults, platform
+from utility.dockerise import defaults, health_check, platform
 
 
 def register(command):
@@ -49,6 +49,8 @@ def register(command):
 
 
 def run(target, username, uid, reset, **kwargs):
+    health_check.ensure_docker()
+
     if target is None:
         target = platform.selected(defaults.image, username)
         print(f"Currently selected platform is {target}")

@@ -38,7 +38,7 @@ from termcolor import cprint
 import b
 from utility.shell import WrapPty
 
-from . import defaults, platform
+from . import defaults, health_check, platform
 
 
 def _is_docker():
@@ -213,6 +213,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # Pass through devices if requested
         for d in kwargs["device"]:
             docker_args.extend(["--device", d])
+
+        health_check.ensure_docker()
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = kwargs["rebuild"]
