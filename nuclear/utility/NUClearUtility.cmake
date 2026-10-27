@@ -21,6 +21,9 @@ find_package(NUClear REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC NUClear::nuclear nuclear::message)
 target_include_directories(nuclear_utility PUBLIC ${utility_parent_dir})
 
+# Parent directory of the build directory as an include path too to match the source layout
+target_include_directories(nuclear_utility PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/..")
+
 # If we have a libraries.cmake file then include it here
 if(EXISTS "${PROJECT_SOURCE_DIR}/${NUCLEAR_UTILITY_DIR}/libraries.cmake")
   include("${PROJECT_SOURCE_DIR}/${NUCLEAR_UTILITY_DIR}/libraries.cmake")
