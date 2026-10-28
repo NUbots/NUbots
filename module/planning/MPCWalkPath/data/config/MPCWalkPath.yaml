@@ -13,11 +13,17 @@ max_backward_velocity: 1.5
 # Pseudo-Huber distance to the target: quadratic within huber_delta (m), linear beyond, which approximates minimum time
 w_position: 1.0
 huber_delta: 0.2
-# Final-heading error, faded in within about heading_radius (m) of the target
+# Final-heading error, faded in within about heading_radius (m) of the target. 0.8 rather than 0.6 lets short
+# repositioning moves strafe instead of turning to face the target and back.
 w_heading: 1.0
-heading_radius: 0.6
-# Facing the direction of travel far from the target. 0 leaves the heading free there.
-w_face: 0.0
+heading_radius: 0.8
+# Facing the target (the direction of travel) far from it, so the camera can keep it in view. With it at 0 the heading
+# is free there, and as the velocity limits are a per-axis box, the MPC crabs at atan(vy/vx) (about 40 degrees) for the
+# extra diagonal speed, and walks 5-8 m backwards rather than turn around. NUSim, 2026-10-27, walking beyond 1 m of the
+# target: at 0 the heading was within 45 degrees of the bearing to the target 26% of the time (mean 95 degrees off).
+# At 3, after the initial turn, it is always within 45 (mean 8), with no loss of time or accuracy. 1 still let it crab
+# (up to 60 degrees off), 5 was 12% slower.
+w_face: 3.0
 # Command magnitude and change of command between steps, per axis [vx, vy, vtheta]. w_rate replaces PlanWalkPath's
 # exponential smoothing; the change of command is otherwise unbounded, as the walk policy keeps the robot stable for
 # any command. It's needed: without it the MPC, which doesn't model the robot's response, plans to stop instantly and
