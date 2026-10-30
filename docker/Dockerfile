@@ -59,6 +59,7 @@ RUN install-package \
     python3-requests \
     build-essential \
     clang \
+    clang-format \
     ccache \
     ninja-build \
     unzip \
