@@ -27,7 +27,7 @@ jobs:
     # Run once for each of the platforms
     strategy:
       matrix:
-        platform: ["generic_k1", "orinnx"]
+        platform: ["generic", "orinnx"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -74,7 +74,7 @@ jobs:
           file: docker/Dockerfile
           context: docker
           build-args: |
-            platform=${{ matrix.platform == 'generic_k1' && 'generic' || matrix.platform }}
+            platform=${{ matrix.platform }}
           cache-from: type=registry,ref=nubots/nubots:${{ matrix.platform }}
           cache-to: type=inline
           push: true

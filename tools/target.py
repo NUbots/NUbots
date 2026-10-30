@@ -58,11 +58,6 @@ def run(target, username, uid, reset, **kwargs):
         # Ensure the platform image is built
         platform.build(defaults.image, target, username, uid, reset)
 
-        # platform.build() tags generic as generic_k1 (see the image-name conflict note there),
-        # so the tag source must match or docker errors with "No such image".
-        if target == "generic":
-            target += "_k1"
-
         # Tag the built platform image as the selected image
         err = subprocess.call(
             [
@@ -70,7 +65,7 @@ def run(target, username, uid, reset, **kwargs):
                 "image",
                 "tag",
                 defaults.image_name(target, username=username),
-                defaults.image_name("selected_k1", username=username),
+                defaults.image_name("selected", username=username),
             ]
         )
         if err != 0:

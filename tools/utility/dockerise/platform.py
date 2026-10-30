@@ -43,7 +43,7 @@ from . import defaults
 def selected(image, username):
     # Get information about the selected image
     try:
-        selected_img = defaults.image_name("selected_k1", image, username)
+        selected_img = defaults.image_name("selected", image, username)
         prefix = "{}:".format(selected_img.split(":")[0])
         img_info = json.loads(
             subprocess.Popen(["docker", "image", "inspect", selected_img], stdout=subprocess.PIPE).communicate()[0]
@@ -85,12 +85,8 @@ def build(image, platform, username, uid, reset):
     pty = WrapPty()
 
     # If we are building the selected platform we need to work out what that refers to
-    _selected = platform == "selected_k1"
+    _selected = platform == "selected"
     platform = selected(image, username) if _selected else platform
-
-    # Temporary workaround to prevent an image name conflict
-    if platform == "generic":
-        platform += "_k1"
 
     local_tag = defaults.image_name(platform, image, username)
     dockerdir = os.path.join(b.project_dir, "docker")
@@ -141,9 +137,6 @@ def build(image, platform, username, uid, reset):
     # Make sure buildx will use the correct buildx instance
     subprocess.run(["docker", "buildx", "use", builder_name])
 
-    platform_arg = platform
-    if platform.endswith("_k1"):
-        platform_arg = platform[:-3]
     # Build the image!
     err = pty.spawn(
         [
@@ -156,13 +149,13 @@ def build(image, platform, username, uid, reset):
             "--platform",
             "linux/amd64",
             "--build-arg",
-            f"platform={platform_arg}",
+            f"platform={platform}",
             "--platform",
             "linux/amd64",
             "--build-arg",
             f"user_uid={uid}",
             "--output=type=docker",
-            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform_arg}",
+            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
             f"--cache-to=type=inline",
             dockerdir,
         ]
@@ -179,7 +172,7 @@ def build(image, platform, username, uid, reset):
                 "image",
                 "tag",
                 defaults.image_name(platform, image, username),
-                defaults.image_name("selected_k1", image, username),
+                defaults.image_name("selected", image, username),
             ],
             stdout=subprocess.DEVNULL,
         )
