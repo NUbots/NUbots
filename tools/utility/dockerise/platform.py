@@ -153,6 +153,8 @@ def build(image, platform, username, uid, reset):
             "-t",
             local_tag,
             "--pull",
+            "--platform",
+            "linux/amd64",
             "--build-arg",
             f"platform={platform_arg}",
             "--platform",

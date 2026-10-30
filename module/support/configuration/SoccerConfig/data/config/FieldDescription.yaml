@@ -1,5 +1,5 @@
 log_level: INFO
-field_type: 5v5 # options: small, l1, l3, 5v5
+field_type: lab # options: lab, small, l1, l3, 5v5
 
 # ROBOCUP FIELD SIZES
 Units: m
@@ -65,3 +65,15 @@ presets:
     CenterCircleDiameter: 4
     PenaltyAreaLength: 5.0
     PenaltyAreaWidth: 8.0
+  lab:
+    FieldLength: 6.8
+    FieldWidth: 5.0
+    GoalWidth: 1.95 # Distance between inner edges of goal posts.
+    GoalDepth: 0.4
+    GoalCrossbarHeight: 0.55 # from top of wood to ground
+    GoalAreaLength: 1.05
+    GoalAreaWidth: 2.62
+    PenaltyMarkDistance: 1.27
+    CenterCircleDiameter: 1.5
+    PenaltyAreaLength: 1.55
+    PenaltyAreaWidth: 4.05
