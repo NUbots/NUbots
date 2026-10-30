@@ -4,8 +4,7 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
-  # Configuration
-  # Network
+  # Configuration Network
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler

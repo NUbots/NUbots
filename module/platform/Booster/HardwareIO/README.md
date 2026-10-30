@@ -9,7 +9,6 @@ This module is responsible for communicating with the Booster K1 via the Booster
 This module acts as an abstraction layer between the NUbots codebase and the Booster Robotics SDK. It translates SDK
 messages to NUClear Neutrons and vice-versa.
 
-
 This module is built when the subcontroller CMake flag is set to `Booster`. Using `platform::${SUBCONTROLLER}::HardwareIO` will use this module if the subcontroller CMake flag is set to `Booster`.
 
 ## Consumes

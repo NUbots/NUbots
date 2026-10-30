@@ -40,8 +40,8 @@ extern "C" {
 
 #include "utility/platform/aliases.hpp"
 #include "utility/support/network.hpp"
-#include "utility/support/yaml_expression.hpp"
 #include "utility/support/run_cmd.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::tools {
 
@@ -302,8 +302,9 @@ namespace module::tools {
             // In the lab, the IP addresses of the robots are set and may not match in this way,
             // but at RoboCup, it is important that this format is followed
             if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
-                display.log_message += "Warning: At RoboCup, the third position of the IP address should be the "
-                                        "team ID and the fourth should be the player number. ";
+                display.log_message +=
+                    "Warning: At RoboCup, the third position of the IP address should be the "
+                    "team ID and the fourth should be the player number. ";
             }
 
             ipv4_config = fmt::format("method=manual\naddress1={}/16,{}.{}.3.1\ndns=8.8.8.8;\n",
@@ -583,7 +584,8 @@ namespace module::tools {
             attron(A_STANDOUT);
             mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1,
                      display.C1_PAD + (display.COMMAND_GAP * (i / 2)),
-                     "%s", COMMANDS[i]);
+                     "%s",
+                     COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
             int gap = i == 0 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
@@ -596,11 +598,15 @@ namespace module::tools {
             attron(A_STANDOUT);
             mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2,
                      display.C1_PAD + (display.COMMAND_GAP * ((i - 1) / 2)),
-                     "%s", COMMANDS[i]);
+                     "%s",
+                     COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
             int gap = i == 1 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
-            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2, gap + (display.COMMAND_GAP * ((i - 1) / 2)), "%s", MEANINGS[i]);
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2,
+                     gap + (display.COMMAND_GAP * ((i - 1) / 2)),
+                     "%s",
+                     MEANINGS[i]);
         }
 
         // Print any log_messages

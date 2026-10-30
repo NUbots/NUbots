@@ -1,8 +1,7 @@
-# NUSim counterpart of test/behaviour. NUSim ignores the firmware Move/VisualKick RPCs, so walk
-# and kick run as ONNX policies (SimK1Walk, SimK1Kick) instead of Walk/KickWalk, and the
-# camera comes from NUSim's shared-memory writer (input::NUSimCamera). Sim-only config overrides
-# (NUClearNet multicast, walk-policy velocity caps, Tester priorities) live in each module's
-# config/bin/nusim/behaviour/.
+# NUSim counterpart of test/behaviour. NUSim ignores the firmware Move/VisualKick RPCs, so walk and kick run as ONNX
+# policies (SimK1Walk, SimK1Kick) instead of Walk/KickWalk, and the camera comes from NUSim's shared-memory writer
+# (input::NUSimCamera). Sim-only config overrides (NUClearNet multicast, walk-policy velocity caps, Tester priorities)
+# live in each module's config/bin/nusim/behaviour/.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
@@ -16,8 +15,8 @@ nuclear_role(
   network::PlotJuggler
   output::Overview
   output::ImageCompressor
-  # Sensors — NUSimCamera (sim seqlock reader) instead of Camera (NUbridge/on-robot).
-  # Sensors is shared: NUSim's pose writer still uses the v1 layout it reads.
+  # Sensors — NUSimCamera (sim seqlock reader) instead of Camera (NUbridge/on-robot). Sensors is shared: NUSim's pose
+  # writer still uses the v1 layout it reads.
   input::NUSimCamera
   input::Sensors
   # Vision — Yolo-only, matching the robocup.role hardware pipeline

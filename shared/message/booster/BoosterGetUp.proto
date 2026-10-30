@@ -3,5 +3,4 @@ syntax = "proto3";
 package message.booster;
 
 
-message BoosterGetUp {
-}
+message BoosterGetUp {}

@@ -110,8 +110,7 @@ namespace module::planning::walk_path {
             }
         }
 
-        result.velocity.z() =
-            std::clamp(p.k_theta * result.desired_heading, -p.max_velocity.z(), p.max_velocity.z());
+        result.velocity.z() = std::clamp(p.k_theta * result.desired_heading, -p.max_velocity.z(), p.max_velocity.z());
 
         return result;
     }

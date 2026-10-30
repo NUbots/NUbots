@@ -29,10 +29,10 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <atomic>
 #include <booster/idl/sensor_msgs/CameraInfo.h>
 #include <booster/idl/sensor_msgs/Image.h>
 #include <booster/robot/channel/channel_factory.hpp>
-#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <deque>
@@ -50,11 +50,11 @@ namespace module::input {
     private:
         struct CameraContext {
             /// @brief DDS topic carrying sensor_msgs/Image.
-            std::string image_topic {};
+            std::string image_topic{};
             /// @brief DDS topic carrying sensor_msgs/CameraInfo, always image_topic + "/camera_info".
-            std::string info_topic {};
+            std::string info_topic{};
             /// @brief Name of the camera being used.
-            std::string camera_name {};
+            std::string camera_name{};
             /// @brief ID of the camera being used.
             uint32_t id{0};
 

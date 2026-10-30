@@ -76,8 +76,8 @@ namespace module::skill {
                 }
                 log<DEBUG>("Saying: ", sanitized_text);
                 run_cmd(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
-                                   + cfg.device_name)
-                           .c_str());
+                                    + cfg.device_name)
+                            .c_str());
 
                 // Nod head to indicate that the robot is "talking"
                 if (say.nod) {

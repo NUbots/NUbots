@@ -101,7 +101,8 @@ namespace utility::onnx {
             std::unique_ptr<OrtTensorRTProviderOptionsV2, decltype(api.ReleaseTensorRTProviderOptions)> trt_guard(
                 trt,
                 api.ReleaseTensorRTProviderOptions);
-            Ort::ThrowOnError(api.UpdateTensorRTProviderOptions(trt, option_keys.data(), option_values.data(), option_keys.size()));
+            Ort::ThrowOnError(
+                api.UpdateTensorRTProviderOptions(trt, option_keys.data(), option_values.data(), option_keys.size()));
             session_options.AppendExecutionProvider_TensorRT_V2(*trt);
         }
         else if (device_type != "cpu") {
@@ -118,10 +119,8 @@ namespace utility::onnx {
         impl->input_name  = impl->session.GetInputNameAllocated(0, allocator).get();
         impl->output_name = impl->session.GetOutputNameAllocated(0, allocator).get();
 
-        impl->input_shape =
-            resolve_shape(impl->session.GetInputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape());
-        impl->output_shape =
-            resolve_shape(impl->session.GetOutputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape());
+        impl->input_shape  = resolve_shape(impl->session.GetInputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape());
+        impl->output_shape = resolve_shape(impl->session.GetOutputTypeInfo(0).GetTensorTypeAndShapeInfo().GetShape());
         impl->input_count  = element_count(impl->input_shape);
         impl->output_count = element_count(impl->output_shape);
     }
@@ -143,10 +142,10 @@ namespace utility::onnx {
         }
 
         Ort::Value input_tensor = Ort::Value::CreateTensor<float>(impl->memory_info,
-                                                                   const_cast<float*>(input.data()),
-                                                                   input.size(),
-                                                                   impl->input_shape.data(),
-                                                                   impl->input_shape.size());
+                                                                  const_cast<float*>(input.data()),
+                                                                  input.size(),
+                                                                  impl->input_shape.data(),
+                                                                  impl->input_shape.size());
 
         const char* input_names[]  = {impl->input_name.c_str()};
         const char* output_names[] = {impl->output_name.c_str()};

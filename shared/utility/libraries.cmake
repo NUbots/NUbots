@@ -38,7 +38,6 @@ target_link_libraries(nuclear_utility PUBLIC ${LAME_LIBRARIES})
 find_package(onnxruntime REQUIRED)
 target_link_libraries(nuclear_utility PRIVATE onnxruntime::onnxruntime)
 
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})

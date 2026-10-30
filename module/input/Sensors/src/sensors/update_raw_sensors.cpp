@@ -57,20 +57,19 @@ namespace module::input {
                 log<WARN>(make_servo_hardware_error_string(raw_servo, id));
             }
 
-            sensors->servo.emplace_back(
-                hardware_status,
-                id,
-                raw_servo.torque_enabled,
-                raw_servo.position_p_gain,
-                raw_servo.position_i_gain,
-                raw_servo.position_d_gain,
-                raw_servo.goal_position,
-                raw_servo.profile_velocity,
-                raw_servo.present_position,
-                raw_servo.present_velocity,
-                raw_servo.present_current,
-                raw_servo.voltage,
-                static_cast<float>(raw_servo.temperature));
+            sensors->servo.emplace_back(hardware_status,
+                                        id,
+                                        raw_servo.torque_enabled,
+                                        raw_servo.position_p_gain,
+                                        raw_servo.position_i_gain,
+                                        raw_servo.position_d_gain,
+                                        raw_servo.goal_position,
+                                        raw_servo.profile_velocity,
+                                        raw_servo.present_position,
+                                        raw_servo.present_velocity,
+                                        raw_servo.present_current,
+                                        raw_servo.voltage,
+                                        static_cast<float>(raw_servo.temperature));
         }
 
         // **************** Accelerometer and Gyroscope ****************

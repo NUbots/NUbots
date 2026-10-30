@@ -114,9 +114,9 @@ namespace module::network {
                                     == ignored_ip_addresses.end()) {
                                     ignored_ip_addresses.insert(remote_addr);
                                     log<DEBUG>("Ignoring UDP packet from",
-                                              remote_addr,
-                                              "as it doesn't match configured filter address",
-                                              cfg.udp_filter_address);
+                                               remote_addr,
+                                               "as it doesn't match configured filter address",
+                                               cfg.udp_filter_address);
                                 }
 
                                 return;
@@ -133,13 +133,13 @@ namespace module::network {
                             // Filter out messages from ourselves only
                             if (!own_player_message) {
                                 log<DEBUG>("Message received from teammate ID",
-                                          incoming_msg.current_pose.player_id,
-                                          "position:",
-                                          incoming_msg.current_pose.position.x(),
-                                          incoming_msg.current_pose.position.y(),
-                                          incoming_msg.current_pose.position.z(),
-                                          "going for ball:",
-                                          incoming_msg.going_for_ball);
+                                           incoming_msg.current_pose.player_id,
+                                           "position:",
+                                           incoming_msg.current_pose.position.x(),
+                                           incoming_msg.current_pose.position.y(),
+                                           incoming_msg.current_pose.position.z(),
+                                           "going for ball:",
+                                           incoming_msg.going_for_ball);
                                 emit(std::make_unique<Message>(std::move(incoming_msg)));
                             }
                         });
@@ -223,7 +223,7 @@ namespace module::network {
                         // x and y and rotate the yaw by pi before sending.
                         msg->current_pose.position.x() *= -1.0F;
                         msg->current_pose.position.y() *= -1.0F;
-                        const double current_yaw = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                        const double current_yaw       = mat_to_rpy_intrinsic(Hft.rotation()).z();
                         msg->current_pose.position.z() = static_cast<float>(normalise_angle(current_yaw + M_PI));
 
                         msg->current_pose.covariance = field->covariance.cast<float>();
@@ -250,7 +250,7 @@ namespace module::network {
                     msg->target_pose.position.x() *= -1.0F;
                     msg->target_pose.position.y() *= -1.0F;
                     // Extract yaw from rotation matrix
-                    const double target_yaw = mat_to_rpy_intrinsic(Hfd.rotation()).z();
+                    const double target_yaw       = mat_to_rpy_intrinsic(Hfd.rotation()).z();
                     msg->target_pose.position.z() = static_cast<float>(normalise_angle(target_yaw + M_PI));
                     // Copy team and player ID to target pose
                     msg->target_pose.team      = msg->current_pose.team;

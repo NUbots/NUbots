@@ -62,8 +62,8 @@ namespace module::support::configuration {
         desc.ball_radius = config["BallRadius"].as<double>();
 
         FieldDescription::FieldDimensions& d = desc.dimensions;
-        const std::string field_type = config["field_type"].as<std::string>("small");
-        const Configuration preset   = config["presets"][field_type];
+        const std::string field_type         = config["field_type"].as<std::string>("small");
+        const Configuration preset           = config["presets"][field_type];
         d.line_width                         = config["LineWidth"].as<double>();
         d.field_length                       = preset["FieldLength"].as<double>();
         d.field_width                        = preset["FieldWidth"].as<double>();

@@ -1,10 +1,10 @@
 #include "SimK1Walk.hpp"
 
+#include <Eigen/Geometry>
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <vector>
-#include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
 
@@ -60,9 +60,8 @@ namespace module::skill {
         std::array<double, N> load_joint_array(const Configuration& config, const char* key) {
             const auto values = config[key].as<std::vector<double>>();
             if (values.size() != N) {
-                throw std::runtime_error(std::string("SimK1Walk.yaml: ") + key + " must have "
-                                         + std::to_string(N) + " entries (JointIndexK1 order), got "
-                                         + std::to_string(values.size()));
+                throw std::runtime_error(std::string("SimK1Walk.yaml: ") + key + " must have " + std::to_string(N)
+                                         + " entries (JointIndexK1 order), got " + std::to_string(values.size()));
             }
             std::array<double, N> out{};
             std::copy(values.begin(), values.end(), out.begin());
@@ -77,8 +76,7 @@ namespace module::skill {
         have_last_tick = false;
     }
 
-    SimK1Walk::SimK1Walk(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+    SimK1Walk::SimK1Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("SimK1Walk.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -93,12 +91,12 @@ namespace module::skill {
             cfg.kick_duration   = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["kick"]["duration"].as<double>()));
 
-            cfg.kp                 = load_joint_array<JOINT_COUNT>(config, "kp");
-            cfg.kd                 = load_joint_array<JOINT_COUNT>(config, "kd");
-            cfg.action_scale_joint = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
-            cfg.default_pose       = load_joint_array<JOINT_COUNT>(config, "default_pose");
-            cfg.joint_lower        = load_joint_array<JOINT_COUNT>(config, "joint_lower");
-            cfg.joint_upper        = load_joint_array<JOINT_COUNT>(config, "joint_upper");
+            cfg.kp                    = load_joint_array<JOINT_COUNT>(config, "kp");
+            cfg.kd                    = load_joint_array<JOINT_COUNT>(config, "kd");
+            cfg.action_scale_joint    = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
+            cfg.default_pose          = load_joint_array<JOINT_COUNT>(config, "default_pose");
+            cfg.joint_lower           = load_joint_array<JOINT_COUNT>(config, "joint_lower");
+            cfg.joint_upper           = load_joint_array<JOINT_COUNT>(config, "joint_upper");
             const double action_scale = config["action_scale"].as<double>();
             for (double& s : cfg.action_scale_joint) {
                 s *= action_scale;
@@ -166,9 +164,11 @@ namespace module::skill {
 
         // 50 Hz inference loop, matching the training control rate (ctrl_dt = 0.02 s). The
         // simulator/robot PD-tracks the latest LowCmd between ticks.
-        on<Provide<WalkTask>, Every<50, Per<std::chrono::seconds>>, With<RawSensors>, With<Stability>, Single>()
-            .then([this](const WalkTask& walk, const RunReason& run_reason, const RawSensors& raw,
-                         const Stability& stability) {
+        on<Provide<WalkTask>, Every<50, Per<std::chrono::seconds>>, With<RawSensors>, With<Stability>, Single>().then(
+            [this](const WalkTask& walk,
+                   const RunReason& run_reason,
+                   const RawSensors& raw,
+                   const Stability& stability) {
                 if (!model_loaded) {
                     return;
                 }
@@ -229,9 +229,9 @@ namespace module::skill {
                 const Eigen::Matrix3d Rwt =
                     rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
                 const Eigen::Vector3d grav = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
-                obs[idx++] = static_cast<float>(grav.x());
-                obs[idx++] = static_cast<float>(grav.y());
-                obs[idx++] = static_cast<float>(grav.z());
+                obs[idx++]                 = static_cast<float>(grav.x());
+                obs[idx++]                 = static_cast<float>(grav.y());
+                obs[idx++]                 = static_cast<float>(grav.z());
 
                 // [6:9] command [vx, vy, vyaw]
                 obs[idx++] = static_cast<float>(cmd.x());
@@ -241,26 +241,23 @@ namespace module::skill {
                 // Servo feedback in JointIndexK1 order (ankles come pre-converted to serial
                 // pitch/roll by the platform)
                 const RawSensors::Servo* servos[JOINT_COUNT] = {
-                    &raw.servo.head_pan,         &raw.servo.head_tilt,
-                    &raw.servo.l_shoulder_pitch, &raw.servo.l_shoulder_roll,
-                    &raw.servo.l_elbow,          &raw.servo.l_elbow_yaw,
-                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll,
-                    &raw.servo.r_elbow,          &raw.servo.r_elbow_yaw,
-                    &raw.servo.l_hip_pitch,      &raw.servo.l_hip_roll,
-                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,
-                    &raw.servo.l_ankle_pitch,    &raw.servo.l_ankle_roll,
-                    &raw.servo.r_hip_pitch,      &raw.servo.r_hip_roll,
-                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,
-                    &raw.servo.r_ankle_pitch,    &raw.servo.r_ankle_roll,
+                    &raw.servo.head_pan,         &raw.servo.head_tilt,       &raw.servo.l_shoulder_pitch,
+                    &raw.servo.l_shoulder_roll,  &raw.servo.l_elbow,         &raw.servo.l_elbow_yaw,
+                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll, &raw.servo.r_elbow,
+                    &raw.servo.r_elbow_yaw,      &raw.servo.l_hip_pitch,     &raw.servo.l_hip_roll,
+                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,          &raw.servo.l_ankle_pitch,
+                    &raw.servo.l_ankle_roll,     &raw.servo.r_hip_pitch,     &raw.servo.r_hip_roll,
+                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,          &raw.servo.r_ankle_pitch,
+                    &raw.servo.r_ankle_roll,
                 };
 
                 // [9:31] q - default_pose, [31:53] dq. Head entries are masked to the default
                 // pose / zero velocity: the policy was trained with the head near default, and
                 // real head deflections push the observation out of distribution.
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
-                    const bool head = (j == HEAD_YAW || j == HEAD_PITCH);
+                    const bool head      = (j == HEAD_YAW || j == HEAD_PITCH);
                     const double rel_pos = servos[j]->present_position - cfg.default_pose[j];
-                    obs[idx++]        = head ? 0.0f : static_cast<float>(rel_pos);
+                    obs[idx++]           = head ? 0.0f : static_cast<float>(rel_pos);
                 }
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
                     const bool head = (j == HEAD_YAW || j == HEAD_PITCH);
@@ -274,13 +271,12 @@ namespace module::skill {
 
                 // [75:79] gait phase [cos p0, cos p1, sin p0, sin p1], pinned to [pi, pi] while
                 // the commanded speed is below the stand threshold
-                const double speed = cmd.norm();
-                const std::array<double, 2> ph =
-                    speed >= cfg.stand_threshold ? phase : std::array<double, 2>{PI, PI};
-                obs[idx++] = static_cast<float>(std::cos(ph[0]));
-                obs[idx++] = static_cast<float>(std::cos(ph[1]));
-                obs[idx++] = static_cast<float>(std::sin(ph[0]));
-                obs[idx++] = static_cast<float>(std::sin(ph[1]));
+                const double speed             = cmd.norm();
+                const std::array<double, 2> ph = speed >= cfg.stand_threshold ? phase : std::array<double, 2>{PI, PI};
+                obs[idx++]                     = static_cast<float>(std::cos(ph[0]));
+                obs[idx++]                     = static_cast<float>(std::cos(ph[1]));
+                obs[idx++]                     = static_cast<float>(std::sin(ph[0]));
+                obs[idx++]                     = static_cast<float>(std::sin(ph[1]));
 
                 // Full observation trace. Statistics over a log that mixes CUSTOM-mode walking
                 // with frozen non-CUSTOM ticks are meaningless, so every record carries the tick
@@ -288,8 +284,8 @@ namespace module::skill {
                 // segment_walk_log.py splits a capture on those before reporting anything.
                 if (log_level <= NUClear::LogLevel::TRACE) {
                     std::ostringstream line;
-                    line << "WALKOBS " << tick << " mode=" << last_mode << " t="
-                         << std::chrono::duration<double>(now.time_since_epoch()).count() << " dt=" << tick_dt;
+                    line << "WALKOBS " << tick << " mode=" << last_mode
+                         << " t=" << std::chrono::duration<double>(now.time_since_epoch()).count() << " dt=" << tick_dt;
                     for (const float v : obs) {
                         line << ' ' << v;
                     }
@@ -326,8 +322,7 @@ namespace module::skill {
                     // position target is silently absorbed by the joint constraint, so training
                     // never charged the policy for one; on the robot it is a leg driving into a
                     // mechanical stop, so count them rather than pass them through.
-                    const double q_raw =
-                        cfg.default_pose[j] + cfg.action_scale_joint[j] * last_action[j];
+                    const double q_raw = cfg.default_pose[j] + cfg.action_scale_joint[j] * last_action[j];
                     const double q_cmd = utility::math::clamp(cfg.joint_lower[j], q_raw, cfg.joint_upper[j]);
                     clamped += std::size_t(q_cmd != q_raw);
                     motor.q      = static_cast<float>(q_cmd);
@@ -364,8 +359,7 @@ namespace module::skill {
                         // The command the planner actually asked for. Training samples
                         // vx [-1.5, 1.5], vy [-0.8, 0.8], wz [-1.0, 1.0]; PlanWalkPath's
                         // ball-adjust mode can ask for wz 1.5, which is outside that.
-                        << " cmd=[" << cmd.x() << ',' << cmd.y() << ',' << cmd.z() << ']'
-                        << " clamped=" << clamped;
+                        << " cmd=[" << cmd.x() << ',' << cmd.y() << ',' << cmd.z() << ']' << " clamped=" << clamped;
                     std::ostringstream action_stream;
                     std::ostringstream joint_pos_stream;
                     std::ostringstream joint_pos_rel_stream;
@@ -385,11 +379,9 @@ namespace module::skill {
                         joint_vel_stream << servos[j]->present_velocity;
                         cmd_q_stream << cmd_q[j];
                     }
-                    out << " action=[" << action_stream.str() << ']'
-                        << " joint_pos=[" << joint_pos_stream.str() << ']'
-                        << " joint_pos_rel=[" << joint_pos_rel_stream.str() << ']'
-                        << " joint_vel=[" << joint_vel_stream.str() << ']'
-                        << " cmd_q=[" << cmd_q_stream.str() << ']';
+                    out << " action=[" << action_stream.str() << ']' << " joint_pos=[" << joint_pos_stream.str() << ']'
+                        << " joint_pos_rel=[" << joint_pos_rel_stream.str() << ']' << " joint_vel=["
+                        << joint_vel_stream.str() << ']' << " cmd_q=[" << cmd_q_stream.str() << ']';
                     log<DEBUG>(out.str());
                 }
                 if (int(state) != last_walk_state) {

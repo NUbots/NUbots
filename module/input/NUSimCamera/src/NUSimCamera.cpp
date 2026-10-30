@@ -27,8 +27,8 @@
 #include "NUSimCamera.hpp"
 
 #include <algorithm>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <atomic>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -145,8 +145,7 @@ namespace module::input {
                 // doesn't jump across a non-trivial initialization.
                 auto last_frame_time = std::chrono::steady_clock::now();
 
-                if (header->magic != SharedImageHeader::MAGIC
-                    || header->version != SharedImageHeader::VERSION) {
+                if (header->magic != SharedImageHeader::MAGIC || header->version != SharedImageHeader::VERSION) {
                     log<WARN>(fmt::format(
                         "NUSimCamera: segment '{}' layout mismatch (magic {:#x}, version {}) — expected version {}; "
                         "this reader is for NUSim only. Retrying in 500 ms.",
@@ -181,8 +180,7 @@ namespace module::input {
                     const uint32_t data_size = header->data_size;
                     const uint32_t width     = header->width;
                     const uint32_t height    = header->height;
-                    const std::string encoding(header->encoding,
-                                               strnlen(header->encoding, sizeof(header->encoding)));
+                    const std::string encoding(header->encoding, strnlen(header->encoding, sizeof(header->encoding)));
                     uint32_t format          = ros_encoding_to_fourcc(encoding);
                     const float focal_length = header->focal_length;
                     const float fov          = header->fov;

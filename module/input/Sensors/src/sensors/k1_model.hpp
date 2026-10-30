@@ -36,7 +36,7 @@ namespace module::input {
         // Combined rotation: Rz(yaw) * Ry(pitch)
         Eigen::Isometry3d Htp = Eigen::Isometry3d::Identity();
         Htp.linear() << cy * cp, -sy, cy * sp,  //
-            sy * cp, cy, sy * sp,                //
+            sy * cp, cy, sy * sp,               //
             -sp, 0.0, cp;
 
         // Translation: t1 + Rz(yaw) * t2

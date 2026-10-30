@@ -72,59 +72,58 @@ namespace module::skill {
 
         on<Stop<WalkTask>>().then([this] {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
-            auto msg     = std::make_unique<BoosterWalk>();
+            auto msg      = std::make_unique<BoosterWalk>();
             msg->velocity = Eigen::Vector3d::Zero();
             emit(std::move(msg));
         });
 
         // Every lets the kick branch re-run to check whether kick_duration has elapsed
-        on<Provide<WalkTask>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const WalkTask& walk, const RunReason& run_reason) {
-                // The Booster SDK has no in-walk kick primitive, so a kick is emulated as a forward velocity
-                // burst held for kick_duration. The gait runs inside the SDK, so walk.leg cannot be honoured.
-                if (walk.kick) {
-                    if (run_reason == RunReason::NEW_TASK) {
-                        kick_start_time = NUClear::clock::now();
-                        log<INFO>("Walk starting in-walk kick");
-                    }
-
-                    auto msg      = std::make_unique<BoosterWalk>();
-                    msg->velocity = cfg.kick_velocity;
-                    emit(std::move(msg));
-                    emit(std::make_unique<WalkState>(WalkState::State::WALKING, cfg.kick_velocity));
-
-                    // Finish the kick once the burst duration has elapsed, otherwise keep it running
-                    if (NUClear::clock::now() - kick_start_time > cfg.kick_duration) {
-                        log<INFO>("Walk in-walk kick complete");
-                        emit<Task>(std::make_unique<Done>());
-                    }
-                    else {
-                        emit<Task>(std::make_unique<Continue>());
-                    }
-                    return;
-                }
-
-                // Normal walking: only act on a new task to avoid resending unchanged velocity commands
-                if (run_reason != RunReason::NEW_TASK) {
-                    return;
+        on<Provide<WalkTask>, Every<30, Per<std::chrono::seconds>>>().then([this](const WalkTask& walk,
+                                                                                  const RunReason& run_reason) {
+            // The Booster SDK has no in-walk kick primitive, so a kick is emulated as a forward velocity
+            // burst held for kick_duration. The gait runs inside the SDK, so walk.leg cannot be honoured.
+            if (walk.kick) {
+                if (run_reason == RunReason::NEW_TASK) {
+                    kick_start_time = NUClear::clock::now();
+                    log<INFO>("Walk starting in-walk kick");
                 }
 
                 auto msg      = std::make_unique<BoosterWalk>();
-                msg->velocity = walk.velocity_target;
+                msg->velocity = cfg.kick_velocity;
                 emit(std::move(msg));
+                emit(std::make_unique<WalkState>(WalkState::State::WALKING, cfg.kick_velocity));
 
-                const auto state =
-                    walk.velocity_target.isZero() ? WalkState::State::STOPPED : WalkState::State::WALKING;
-                emit(std::make_unique<WalkState>(state, walk.velocity_target));
-
-                if (log_level <= NUClear::LogLevel::DEBUG) {
-                    emit(graph("Walk velocity target",
-                               walk.velocity_target.x(),
-                               walk.velocity_target.y(),
-                               walk.velocity_target.z()));
-                    emit(graph("Walk state", int(state)));
+                // Finish the kick once the burst duration has elapsed, otherwise keep it running
+                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration) {
+                    log<INFO>("Walk in-walk kick complete");
+                    emit<Task>(std::make_unique<Done>());
                 }
-            });
+                else {
+                    emit<Task>(std::make_unique<Continue>());
+                }
+                return;
+            }
+
+            // Normal walking: only act on a new task to avoid resending unchanged velocity commands
+            if (run_reason != RunReason::NEW_TASK) {
+                return;
+            }
+
+            auto msg      = std::make_unique<BoosterWalk>();
+            msg->velocity = walk.velocity_target;
+            emit(std::move(msg));
+
+            const auto state = walk.velocity_target.isZero() ? WalkState::State::STOPPED : WalkState::State::WALKING;
+            emit(std::make_unique<WalkState>(state, walk.velocity_target));
+
+            if (log_level <= NUClear::LogLevel::DEBUG) {
+                emit(graph("Walk velocity target",
+                           walk.velocity_target.x(),
+                           walk.velocity_target.y(),
+                           walk.velocity_target.z()));
+                emit(graph("Walk state", int(state)));
+            }
+        });
     }
 
 }  // namespace module::skill

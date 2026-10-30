@@ -11,10 +11,10 @@
 #include <nuclear>
 #include <string>
 
+#include "sensors/k1_model.hpp"
+
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
-
-#include "sensors/k1_model.hpp"
 
 namespace module::input {
 

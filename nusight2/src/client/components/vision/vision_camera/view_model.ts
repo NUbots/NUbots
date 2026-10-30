@@ -71,5 +71,4 @@ export class VisionCameraViewModel extends CameraViewModel {
       )
     );
   }
-
 }

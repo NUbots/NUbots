@@ -48,7 +48,6 @@ namespace module::support::logging {
         explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-
         struct Config {
             bool display_timestamp = true;
         } cfg;

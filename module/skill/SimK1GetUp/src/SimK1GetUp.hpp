@@ -1,13 +1,14 @@
 #ifndef MODULE_SKILL_SIMK1GETUP_HPP
 #define MODULE_SKILL_SIMK1GETUP_HPP
 
+#include <Eigen/Core>
 #include <array>
 #include <memory>
-#include <Eigen/Core>
 #include <nuclear>
 #include <string>
 
 #include "extension/Behaviour.hpp"
+
 #include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::skill {

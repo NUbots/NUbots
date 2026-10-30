@@ -45,7 +45,7 @@ except:
 
 
 def _detect_gpus():
-    """"all" when the nvidia container stack is usable, otherwise None.
+    """ "all" when the nvidia container stack is usable, otherwise None.
 
     ONNX Runtime's TensorRT EP (Yolo, and the K1 policy skills when set to gpu) needs the GPU
     passed through, but `docker run --gpus all` fails outright ("could not select device

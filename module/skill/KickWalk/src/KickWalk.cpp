@@ -48,41 +48,40 @@ namespace module::skill {
             cfg.new_kick_wait_time       = config["new_kick_wait_time"].as<double>();
         });
 
-        on<Provide<Kick>, Uses<Walk>>().then(
-            [this](const RunReason& run_reason, const Uses<Walk>& walk) {
-                if (run_reason == RunReason::NEW_TASK) {
-                    if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(cfg.new_kick_wait_time)) {
-                        log<DEBUG>("KickWalk is waiting for cooldown after last kick.");
-                        NUClear::clock::time_point wait_until =
-                            last_kick_end + std::chrono::seconds(cfg.new_kick_wait_time);
-                        emit<Task>(std::make_unique<Wait>(wait_until));
-                        return;
-                    }
-
-                    log<DEBUG>("KickWalk module received a kick request.");
-
-                    // Slow approach
-                    Eigen::Vector3d walk_velocity =
-                        Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
-                    emit<Task>(std::make_unique<Walk>(walk_velocity, true));
-                }
-                // The wait triggered the provider
-                else if (run_reason == RunReason::SUBTASK_DONE && !walk.done) {
-                    // Slow approach
-                    log<DEBUG>("KickWalk module received a kick request.");
-                    Eigen::Vector3d walk_velocity =
-                        Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
-                    emit<Task>(std::make_unique<Walk>(walk_velocity, true));
-                }
-
-                // If the walk says the kick is done, emit a Done task
-                if (run_reason == RunReason::SUBTASK_DONE) {
-                    log<DEBUG>("KickWalk step completed.");
-                    last_kick_end = NUClear::clock::now();
-                    emit<Task>(std::make_unique<Done>());
+        on<Provide<Kick>, Uses<Walk>>().then([this](const RunReason& run_reason, const Uses<Walk>& walk) {
+            if (run_reason == RunReason::NEW_TASK) {
+                if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(cfg.new_kick_wait_time)) {
+                    log<DEBUG>("KickWalk is waiting for cooldown after last kick.");
+                    NUClear::clock::time_point wait_until =
+                        last_kick_end + std::chrono::seconds(cfg.new_kick_wait_time);
+                    emit<Task>(std::make_unique<Wait>(wait_until));
                     return;
                 }
-            });
+
+                log<DEBUG>("KickWalk module received a kick request.");
+
+                // Slow approach
+                Eigen::Vector3d walk_velocity =
+                    Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
+                emit<Task>(std::make_unique<Walk>(walk_velocity, true));
+            }
+            // The wait triggered the provider
+            else if (run_reason == RunReason::SUBTASK_DONE && !walk.done) {
+                // Slow approach
+                log<DEBUG>("KickWalk module received a kick request.");
+                Eigen::Vector3d walk_velocity =
+                    Eigen::Vector3d(cfg.kick_approach_velocity_x, cfg.kick_approach_velocity_y, 0.0);
+                emit<Task>(std::make_unique<Walk>(walk_velocity, true));
+            }
+
+            // If the walk says the kick is done, emit a Done task
+            if (run_reason == RunReason::SUBTASK_DONE) {
+                log<DEBUG>("KickWalk step completed.");
+                last_kick_end = NUClear::clock::now();
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
+        });
     }
 
 }  // namespace module::skill

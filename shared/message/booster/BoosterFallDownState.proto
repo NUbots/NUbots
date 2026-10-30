@@ -10,6 +10,6 @@ enum FallDownStateType {
 }
 
 message BoosterFallDownState {
-    FallDownStateType fall_down_state    = 1;
+    FallDownStateType fall_down_state       = 1;
     bool              is_recovery_available = 2;
 }

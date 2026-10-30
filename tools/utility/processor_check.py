@@ -26,6 +26,7 @@
 import subprocess
 from platform import machine
 
+
 def check_architecture(filepath: str) -> dict:
     file_output = subprocess.run(["file", filepath], capture_output=True, text=True).stdout
     bin_arch: str = ""
@@ -37,7 +38,4 @@ def check_architecture(filepath: str) -> dict:
         bin_arch = "unknown"
     cpu_arch = machine()
 
-    return {
-        "binary": bin_arch,
-        "host": cpu_arch
-    }
+    return {"binary": bin_arch, "host": cpu_arch}

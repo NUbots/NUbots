@@ -20,8 +20,8 @@ namespace module::platform::Booster {
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
-    using message::booster::BoosterLowCmd;
     using message::booster::BoosterKick;
+    using message::booster::BoosterLowCmd;
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
@@ -48,10 +48,9 @@ namespace module::platform::Booster {
         : NUClear::Reactor(std::move(environment)) {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.prep_settle_time =
-                std::chrono::duration_cast<NUClear::clock::duration>(
-                    std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
+            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.prep_settle_time = std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
         });
 
         on<Startup>().then([this]() {
@@ -437,8 +436,8 @@ namespace module::platform::Booster {
     void HardwareIO::button_event_handler(const void* msg) {
         const auto* btn_msg = static_cast<const booster_interface::msg::ButtonEventMsg*>(msg);
         const bool pressed  = (btn_msg->event() == booster_interface::msg::PRESS_DOWN
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
 
         std::lock_guard<std::mutex> lock(buttons_mutex);
         switch (btn_msg->button()) {

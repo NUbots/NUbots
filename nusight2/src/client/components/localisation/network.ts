@@ -151,7 +151,9 @@ export class LocalisationNetwork {
     // This robot's own opinion of how long it - and each teammate it can see - would take to reach
     // the ball, keyed by player id (self included). Kept on the observing robot's own model rather
     // than the teammates' synthetic models since it's this robot's estimate, not the teammate's.
-    robot.timeToBallEstimates = new Map(timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]));
+    robot.timeToBallEstimates = new Map(
+      timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]),
+    );
   }
 
   @action.bound

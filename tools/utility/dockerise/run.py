@@ -312,10 +312,12 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # (participant profile "booster_dds"); default to the repo's copy so `./b run
         # <role>` works against NUSim/the robot without remembering the flag.
         if "FASTRTPS_DEFAULT_PROFILES_FILE" not in user_env:
-            docker_args.extend([
-                "--env",
-                f"FASTRTPS_DEFAULT_PROFILES_FILE=/home/{defaults.image_user}/{defaults.directory}/tools/fastdds_default_profiles.xml",
-            ])
+            docker_args.extend(
+                [
+                    "--env",
+                    f"FASTRTPS_DEFAULT_PROFILES_FILE=/home/{defaults.image_user}/{defaults.directory}/tools/fastdds_default_profiles.xml",
+                ]
+            )
 
         # Add the ports
         for port in ports:

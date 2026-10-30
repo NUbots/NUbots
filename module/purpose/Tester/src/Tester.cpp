@@ -35,10 +35,10 @@
 #include "message/skill/GPT.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Say.hpp"
+#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
-#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 

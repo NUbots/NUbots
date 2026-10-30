@@ -1,8 +1,7 @@
-# NUSim counterpart of test/localisation: drive the robot around with the keyboard while
-# vision and localisation run, so field/ball/robot localisation can be checked against
-# NUSim's ground truth. Reads the camera from NUSim's shared-memory writer
-# (input::NUSimCamera, lock-free seqlock) instead of the on-robot NUbridge writer
-# (input::Camera), and drops NatNet/Mocap since sim has no motion capture rig.
+# NUSim counterpart of test/localisation: drive the robot around with the keyboard while vision and localisation run, so
+# field/ball/robot localisation can be checked against NUSim's ground truth. Reads the camera from NUSim's shared-memory
+# writer (input::NUSimCamera, lock-free seqlock) instead of the on-robot NUbridge writer (input::Camera), and drops
+# NatNet/Mocap since sim has no motion capture rig.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
@@ -18,8 +17,8 @@ nuclear_role(
   # Output
   output::Overview
   output::ImageCompressor
-  # Sensors — NUSimCamera (sim seqlock reader) instead of Camera (NUbridge/on-robot).
-  # Sensors is shared: NUSim's pose writer still uses the v1 layout it reads.
+  # Sensors — NUSimCamera (sim seqlock reader) instead of Camera (NUbridge/on-robot). Sensors is shared: NUSim's pose
+  # writer still uses the v1 layout it reads.
   input::NUSimCamera
   input::Sensors
   # Vision — Yolo-only, matching the robocup.role hardware pipeline

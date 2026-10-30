@@ -100,16 +100,16 @@ namespace module::planning {
             cfg.pivot_forward_velocity = config["pivot_forward_velocity"].as<double>();
 
             // Adjust tuning
-            cfg.adjust_range                  = config["adjust_range"].as<double>();
-            cfg.adjust_vx_limit                = config["adjust_vx_limit"].as<double>();
-            cfg.adjust_vy_limit                = config["adjust_vy_limit"].as<double>();
-            cfg.adjust_vtheta_limit            = config["adjust_vtheta_limit"].as<double>();
-            cfg.adjust_vtheta_factor           = config["adjust_vtheta_factor"].as<double>();
-            cfg.adjust_tangential_speed_far    = config["adjust_tangential_speed_far"].as<double>();
-            cfg.adjust_tangential_speed_near   = config["adjust_tangential_speed_near"].as<double>();
-            cfg.adjust_near_threshold          = config["adjust_near_threshold"].as<double>();
-            cfg.adjust_no_turn_threshold       = config["adjust_no_turn_threshold"].as<double>();
-            cfg.adjust_turn_first_threshold    = config["adjust_turn_first_threshold"].as<double>();
+            cfg.adjust_range                 = config["adjust_range"].as<double>();
+            cfg.adjust_vx_limit              = config["adjust_vx_limit"].as<double>();
+            cfg.adjust_vy_limit              = config["adjust_vy_limit"].as<double>();
+            cfg.adjust_vtheta_limit          = config["adjust_vtheta_limit"].as<double>();
+            cfg.adjust_vtheta_factor         = config["adjust_vtheta_factor"].as<double>();
+            cfg.adjust_tangential_speed_far  = config["adjust_tangential_speed_far"].as<double>();
+            cfg.adjust_tangential_speed_near = config["adjust_tangential_speed_near"].as<double>();
+            cfg.adjust_near_threshold        = config["adjust_near_threshold"].as<double>();
+            cfg.adjust_no_turn_threshold     = config["adjust_no_turn_threshold"].as<double>();
+            cfg.adjust_turn_first_threshold  = config["adjust_turn_first_threshold"].as<double>();
 
             cfg.obstacle_radius = config["obstacle_radius"].as<double>();
 
@@ -207,14 +207,14 @@ namespace module::planning {
                 debug_information->Hrd.translation().head(2) = rDRr;
                 debug_information->Hrd.linear() =
                     rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, result.desired_heading));
-                debug_information->min_align_radius        = cfg.walk_to.min_align_radius;
-                debug_information->max_align_radius        = cfg.walk_to.max_align_radius;
-                debug_information->min_angle_error         = cfg.walk_to.min_angle_error;
-                debug_information->max_angle_error         = cfg.walk_to.max_angle_error;
-                debug_information->angle_to_target         = angle_to_target;
-                debug_information->angle_to_final_heading  = angle_to_final_heading;
-                debug_information->translational_error     = rDRr.norm();
-                debug_information->velocity_target         = velocity_target;
+                debug_information->min_align_radius       = cfg.walk_to.min_align_radius;
+                debug_information->max_align_radius       = cfg.walk_to.max_align_radius;
+                debug_information->min_angle_error        = cfg.walk_to.min_angle_error;
+                debug_information->max_angle_error        = cfg.walk_to.max_angle_error;
+                debug_information->angle_to_target        = angle_to_target;
+                debug_information->angle_to_final_heading = angle_to_final_heading;
+                debug_information->translational_error    = rDRr.norm();
+                debug_information->velocity_target        = velocity_target;
                 emit(debug_information);
             });
 
@@ -261,8 +261,8 @@ namespace module::planning {
                 // Tangential orbit speed: switch to the near speed once the arc-length to the correct kick angle
                 // (angle error * ball range) is small
                 const double st = std::abs(delta_dir) * ball_range < cfg.adjust_near_threshold
-                                       ? cfg.adjust_tangential_speed_near
-                                       : cfg.adjust_tangential_speed_far;
+                                      ? cfg.adjust_tangential_speed_near
+                                      : cfg.adjust_tangential_speed_far;
                 // Radial speed to close in on the target orbit range, capped at 0.5 m/s (fixed in the source)
                 const double sr = std::clamp(ball_range - cfg.adjust_range, 0.0, 0.5);
 

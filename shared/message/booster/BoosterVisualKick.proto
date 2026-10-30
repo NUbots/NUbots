@@ -8,6 +8,6 @@ enum VisualKickVer {
 }
 
 message BoosterVisualKick {
-    bool start = 1;
+    bool          start   = 1;
     VisualKickVer version = 2;
 }

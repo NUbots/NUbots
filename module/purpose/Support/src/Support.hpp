@@ -27,9 +27,9 @@
 #ifndef MODULE_PURPOSE_SUPPORT_HPP
 #define MODULE_PURPOSE_SUPPORT_HPP
 
-#include <nuclear>
 #include <Eigen/Core>
 #include <map>
+#include <nuclear>
 #include <optional>
 #include <string>
 

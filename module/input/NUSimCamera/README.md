@@ -11,6 +11,7 @@ Use this module in `roles/nusim/*`; use `input::Camera` in the on-robot roles.
 ## Usage
 
 `data/config/NUSimCamera.yaml` lists, under `cameras`:
+
 - `segment`: name of the [Boost](https://www.boost.org/) shared-memory segment NUSim writes
 - `id`: camera ID to differentiate between images
 - `name`: name of the camera, used to differentiate between outputs

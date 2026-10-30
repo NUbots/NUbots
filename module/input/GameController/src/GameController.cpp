@@ -27,8 +27,8 @@
 
 #include "GameController.hpp"
 
-#include <atomic>
 #include <Eigen/Geometry>
+#include <atomic>
 
 #include "extension/Configuration.hpp"
 
@@ -45,9 +45,9 @@ namespace module::input {
 
     using extension::Configuration;
     using gamecontroller::GameControllerPacket;
-    using message::behaviour::state::Stability;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::Team;
+    using message::behaviour::state::Stability;
     using message::input::GameEvents;
     using message::input::GameState;
     using message::input::Sensors;
@@ -199,9 +199,9 @@ namespace module::input {
         if (have_ball && have_sensors) {
             // Ball position relative to the robot in millimetres: +x forward, +y to the robot's left
             const Eigen::Vector3d rBTt = latest_Htw * latest_rBWw;
-            packet->ball_age = std::chrono::duration<float>(NUClear::clock::now() - latest_ball_time).count();
-            packet->ball[0]  = static_cast<float>(rBTt.x() * 1000.0);
-            packet->ball[1]  = static_cast<float>(rBTt.y() * 1000.0);
+            packet->ball_age           = std::chrono::duration<float>(NUClear::clock::now() - latest_ball_time).count();
+            packet->ball[0]            = static_cast<float>(rBTt.x() * 1000.0);
+            packet->ball[1]            = static_cast<float>(rBTt.y() * 1000.0);
         }
         else {
             packet->ball_age = -1.f;

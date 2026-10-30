@@ -75,85 +75,84 @@ namespace module::planning {
 
         on<Startup, Trigger<FieldDescription>>().then("Update Goal Position", [this](const FieldDescription& fd) {
             // Update the goal position
-            rGFf        = Eigen::Vector3d(-fd.dimensions.field_length / 2 - cfg.goal_target_offset, 0, 0);
+            rGFf         = Eigen::Vector3d(-fd.dimensions.field_length / 2 - cfg.goal_target_offset, 0, 0);
             field_length = fd.dimensions.field_length;
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>, With<Field>>().then(
-            [this](const KickTo& kick_to,
-                   const Uses<Kick>& kick,
-                   const Ball& ball,
-                   const Sensors& sensors,
-                   const Field& field) {
-                log<DEBUG>(fmt::format("PlanKick tick: run_state={} done={}",
-                                       kick.run_state == RunState::RUNNING   ? "RUNNING"
-                                       : kick.run_state == RunState::QUEUED  ? "QUEUED"
-                                                                              : "NO_TASK",
-                                       kick.done));
-                // If the kick is running, don't interrupt or the robot may fall
-                if (kick.run_state == RunState::RUNNING && !kick.done) {
-                    emit<Task>(std::make_unique<Continue>());
-                    return;
-                }
+        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>, With<Field>>().then([this](const KickTo& kick_to,
+                                                                                                 const Uses<Kick>& kick,
+                                                                                                 const Ball& ball,
+                                                                                                 const Sensors& sensors,
+                                                                                                 const Field& field) {
+            log<DEBUG>(fmt::format("PlanKick tick: run_state={} done={}",
+                                   kick.run_state == RunState::RUNNING  ? "RUNNING"
+                                   : kick.run_state == RunState::QUEUED ? "QUEUED"
+                                                                        : "NO_TASK",
+                                   kick.done));
+            // If the kick is running, don't interrupt or the robot may fall
+            if (kick.run_state == RunState::RUNNING && !kick.done) {
+                emit<Task>(std::make_unique<Continue>());
+                return;
+            }
 
-                // CHECK IF BALL IS BALL MEASUREMENT IS RECENT ENOUGH
-                // If the ball measurement is old, then don't do anything
-                auto time_difference = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    NUClear::clock::now() - ball.time_of_measurement);
-                if (time_difference.count() >= cfg.ball_timeout_threshold) {
-                    return;
-                }
+            // CHECK IF BALL IS BALL MEASUREMENT IS RECENT ENOUGH
+            // If the ball measurement is old, then don't do anything
+            auto time_difference =
+                std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - ball.time_of_measurement);
+            if (time_difference.count() >= cfg.ball_timeout_threshold) {
+                return;
+            }
 
-                // CHECK IF CLOSE TO BALL
-                // Get the angle and distance to the ball
-                const Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
-                double ball_angle          = std::abs(std::atan2(rBRr.y(), rBRr.x()));
-                double ball_distance       = rBRr.head(2).norm();
+            // CHECK IF CLOSE TO BALL
+            // Get the angle and distance to the ball
+            const Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+            double ball_angle          = std::abs(std::atan2(rBRr.y(), rBRr.x()));
+            double ball_distance       = rBRr.head(2).norm();
 
-                // Need to be near the ball to consider kicking it
-                if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
-                    log<DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
-                                           ball_distance,
-                                           ball_angle));
-                    return;
-                }
+            // Need to be near the ball to consider kicking it
+            if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
+                log<DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
+                                       ball_distance,
+                                       ball_angle));
+                return;
+            }
 
-                // CHECK IF FACING POINT TO KICK TO
-                double align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
+            // CHECK IF FACING POINT TO KICK TO
+            double align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
 
-                // Don't kick if we should align but we're not aligned to the target
-                if (align_angle > cfg.target_angle_threshold) {
-                    log<DEBUG>("Robot is not aligned to the kick target.");
-                    return;
-                }
+            // Don't kick if we should align but we're not aligned to the target
+            if (align_angle > cfg.target_angle_threshold) {
+                log<DEBUG>("Robot is not aligned to the kick target.");
+                return;
+            }
 
-                // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
-                // Otherwise, the kick conditions are met and we need to check if we are already kicking
-                // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
-                if (kick.run_state == RunState::QUEUED) {
-                    emit<Task>(std::make_unique<Continue>());
-                    return;
-                }
+            // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
+            // Otherwise, the kick conditions are met and we need to check if we are already kicking
+            // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
+            if (kick.run_state == RunState::QUEUED) {
+                emit<Task>(std::make_unique<Continue>());
+                return;
+            }
 
-                // COMPUTE KICK TARGET (field space) AND DIRECTION (robot-relative vector toward it)
-                const Eigen::Isometry3d Hrf = sensors.Hrw * field.Hfw.inverse();
-                // Transform the goal into robot space, then difference against the already robot-relative
-                // ball position so the translation cancels correctly (both points are in the same frame)
-                const Eigen::Vector3d rGRr           = Hrf * rGFf;
-                const Eigen::Vector3d direction_unit = (rGRr - rBRr).normalized();
+            // COMPUTE KICK TARGET (field space) AND DIRECTION (robot-relative vector toward it)
+            const Eigen::Isometry3d Hrf = sensors.Hrw * field.Hfw.inverse();
+            // Transform the goal into robot space, then difference against the already robot-relative
+            // ball position so the translation cancels correctly (both points are in the same frame)
+            const Eigen::Vector3d rGRr           = Hrf * rGFf;
+            const Eigen::Vector3d direction_unit = (rGRr - rBRr).normalized();
 
-                // Determine power based on distance to target
-                const double distance_to_target = rGRr.norm();
-                const double power = distance_to_target > 2.0 * field_length / 3.0 ? cfg.kick_power_far
-                                     : distance_to_target > field_length / 3.0     ? cfg.kick_power_mid
-                                                                                    : cfg.kick_power_near;
+            // Determine power based on distance to target
+            const double distance_to_target = rGRr.norm();
+            const double power              = distance_to_target > 2.0 * field_length / 3.0 ? cfg.kick_power_far
+                                              : distance_to_target > field_length / 3.0     ? cfg.kick_power_mid
+                                                                                            : cfg.kick_power_near;
 
-                log<INFO>("KICK!");
-                auto kick_task        = std::make_unique<Kick>();
-                kick_task->target     = rGFf;
-                kick_task->direction  = direction_unit * power;
-                emit<Task>(std::move(kick_task));
-            });
+            log<INFO>("KICK!");
+            auto kick_task       = std::make_unique<Kick>();
+            kick_task->target    = rGFf;
+            kick_task->direction = direction_unit * power;
+            emit<Task>(std::move(kick_task));
+        });
     }
 
 

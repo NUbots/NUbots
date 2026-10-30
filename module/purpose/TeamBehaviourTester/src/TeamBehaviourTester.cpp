@@ -60,12 +60,12 @@ namespace module::purpose {
             // Synthesise a sensible "we are playing a normal game" state so FieldPlayer's PLAYING
             // reaction fires. Without a GameController on the network the fields default to safe values
             // (not stopped, unpenalised, our kick off so we are allowed to attack).
-            auto game_state              = std::make_unique<GameState>();
-            game_state->phase            = GameState::Phase::PLAYING;
-            game_state->mode             = GameState::Mode::NORMAL;
-            game_state->our_kick_off     = true;
-            game_state->stopped          = false;
-            game_state->team.team_colour = GameState::TeamColour::BLUE;
+            auto game_state                 = std::make_unique<GameState>();
+            game_state->phase               = GameState::Phase::PLAYING;
+            game_state->mode                = GameState::Mode::NORMAL;
+            game_state->our_kick_off        = true;
+            game_state->stopped             = false;
+            game_state->team.team_colour    = GameState::TeamColour::BLUE;
             game_state->self.penalty_reason = GameState::PenaltyReason::UNPENALISED;
             emit(game_state);
 

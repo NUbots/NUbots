@@ -1,13 +1,14 @@
 #ifndef MODULE_SKILL_SIMK1WALK_HPP
 #define MODULE_SKILL_SIMK1WALK_HPP
 
+#include <Eigen/Core>
 #include <array>
 #include <memory>
-#include <Eigen/Core>
 #include <nuclear>
 #include <string>
 
 #include "extension/Behaviour.hpp"
+
 #include "utility/onnx/ONNXRuntime.hpp"
 
 namespace module::skill {
@@ -79,7 +80,7 @@ namespace module::skill {
         /// every observation: statistics over a log that mixes CUSTOM-mode walking with
         /// frozen non-CUSTOM ticks describe a policy shouting at a robot that isn't listening.
         std::uint64_t tick = 0;
-        int last_mode = -1;
+        int last_mode      = -1;
 
         /// Latest clamped head target (yaw, pitch) from BoosterHeadRot
         Eigen::Vector2d head_target = Eigen::Vector2d::Zero();

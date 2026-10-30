@@ -39,9 +39,8 @@ namespace module::skill {
         std::array<double, N> load_joint_array(const Configuration& config, const char* key) {
             const auto values = config[key].as<std::vector<double>>();
             if (values.size() != N) {
-                throw std::runtime_error(std::string("SimK1Kick.yaml: ") + key + " must have "
-                                         + std::to_string(N) + " entries (JointIndexK1 order), got "
-                                         + std::to_string(values.size()));
+                throw std::runtime_error(std::string("SimK1Kick.yaml: ") + key + " must have " + std::to_string(N)
+                                         + " entries (JointIndexK1 order), got " + std::to_string(values.size()));
             }
             std::array<double, N> out{};
             std::copy(values.begin(), values.end(), out.begin());
@@ -50,8 +49,7 @@ namespace module::skill {
 
     }  // namespace
 
-    SimK1Kick::SimK1Kick(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+    SimK1Kick::SimK1Kick(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("SimK1Kick.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -69,10 +67,10 @@ namespace module::skill {
             }
             cfg.kick_direction = {dir[0], dir[1]};
 
-            cfg.kp                 = load_joint_array<JOINT_COUNT>(config, "kp");
-            cfg.kd                 = load_joint_array<JOINT_COUNT>(config, "kd");
-            cfg.action_scale_joint = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
-            cfg.default_pose       = load_joint_array<JOINT_COUNT>(config, "default_pose");
+            cfg.kp                    = load_joint_array<JOINT_COUNT>(config, "kp");
+            cfg.kd                    = load_joint_array<JOINT_COUNT>(config, "kd");
+            cfg.action_scale_joint    = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
+            cfg.default_pose          = load_joint_array<JOINT_COUNT>(config, "default_pose");
             const double action_scale = config["action_scale"].as<double>();
             for (double& s : cfg.action_scale_joint) {
                 s *= action_scale;
@@ -144,17 +142,14 @@ namespace module::skill {
 
                 // Servo feedback in JointIndexK1 order (ankles pre-converted to serial)
                 const RawSensors::Servo* servos[JOINT_COUNT] = {
-                    &raw.servo.head_pan,         &raw.servo.head_tilt,
-                    &raw.servo.l_shoulder_pitch, &raw.servo.l_shoulder_roll,
-                    &raw.servo.l_elbow,          &raw.servo.l_elbow_yaw,
-                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll,
-                    &raw.servo.r_elbow,          &raw.servo.r_elbow_yaw,
-                    &raw.servo.l_hip_pitch,      &raw.servo.l_hip_roll,
-                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,
-                    &raw.servo.l_ankle_pitch,    &raw.servo.l_ankle_roll,
-                    &raw.servo.r_hip_pitch,      &raw.servo.r_hip_roll,
-                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,
-                    &raw.servo.r_ankle_pitch,    &raw.servo.r_ankle_roll,
+                    &raw.servo.head_pan,         &raw.servo.head_tilt,       &raw.servo.l_shoulder_pitch,
+                    &raw.servo.l_shoulder_roll,  &raw.servo.l_elbow,         &raw.servo.l_elbow_yaw,
+                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll, &raw.servo.r_elbow,
+                    &raw.servo.r_elbow_yaw,      &raw.servo.l_hip_pitch,     &raw.servo.l_hip_roll,
+                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,          &raw.servo.l_ankle_pitch,
+                    &raw.servo.l_ankle_roll,     &raw.servo.r_hip_pitch,     &raw.servo.r_hip_roll,
+                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,          &raw.servo.r_ankle_pitch,
+                    &raw.servo.r_ankle_roll,
                 };
 
                 // --- observation (v5, 80): gyro(3), gravity(3), kick_dir(2), ball_xy(2),
@@ -169,9 +164,9 @@ namespace module::skill {
                 const Eigen::Matrix3d Rwt =
                     rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
                 const Eigen::Vector3d grav = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
-                obs[idx++] = static_cast<float>(grav.x());
-                obs[idx++] = static_cast<float>(grav.y());
-                obs[idx++] = static_cast<float>(grav.z());
+                obs[idx++]                 = static_cast<float>(grav.x());
+                obs[idx++]                 = static_cast<float>(grav.y());
+                obs[idx++]                 = static_cast<float>(grav.z());
 
                 // Ball position in the torso frame (xy), matching training's relative_ball_pos.
                 // Htw maps a world point into the torso frame; the world ball estimate is
@@ -180,7 +175,7 @@ namespace module::skill {
                 const double ball_age =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - ball_time)
                         .count();
-                const bool ball_fresh = ball_seen && ball_age < cfg.ball_stale_timeout;
+                const bool ball_fresh   = ball_seen && ball_age < cfg.ball_stale_timeout;
                 Eigen::Vector2d ball_xy = Eigen::Vector2d::Zero();
                 if (ball_fresh) {
                     ball_xy = (sensors.Htw * ball_rBWw).head<2>();
@@ -247,17 +242,15 @@ namespace module::skill {
                 const double blend_age =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - kick_since)
                         .count();
-                const double alpha = cfg.handoff_blend > 0.0
-                                         ? std::min(1.0, blend_age / cfg.handoff_blend)
-                                         : 1.0;
-                auto low      = std::make_unique<BoosterLowCmd>();
-                low->cmd_type = BoosterLowCmd::CmdType::SERIAL;
+                const double alpha = cfg.handoff_blend > 0.0 ? std::min(1.0, blend_age / cfg.handoff_blend) : 1.0;
+                auto low           = std::make_unique<BoosterLowCmd>();
+                low->cmd_type      = BoosterLowCmd::CmdType::SERIAL;
                 low->motor_cmd.resize(JOINT_COUNT);
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
                     auto& motor         = low->motor_cmd[j];
                     motor.mode          = 1;
                     const double target = cfg.default_pose[j] + cfg.action_scale_joint[j] * last_action[j];
-                    motor.q = static_cast<float>((1.0 - alpha) * servos[j]->present_position + alpha * target);
+                    motor.q      = static_cast<float>((1.0 - alpha) * servos[j]->present_position + alpha * target);
                     motor.dq     = 0.0f;
                     motor.tau    = 0.0f;
                     motor.kp     = static_cast<float>(cfg.kp[j]);

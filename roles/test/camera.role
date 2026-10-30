@@ -4,8 +4,7 @@ nuclear_role(
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
-  # Configuration
-  # Network
+  # Configuration Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview

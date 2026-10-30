@@ -47,9 +47,7 @@ namespace utility::platform::Booster {
      */
     inline void ensure_channel_factory(const int32_t domain_id = 0, const std::string& network_interface = "") {
         static std::once_flag flag;
-        std::call_once(flag, [&] {
-            ::booster::robot::ChannelFactory::Instance()->Init(domain_id, network_interface);
-        });
+        std::call_once(flag, [&] { ::booster::robot::ChannelFactory::Instance()->Init(domain_id, network_interface); });
     }
 
 }  // namespace utility::platform::Booster

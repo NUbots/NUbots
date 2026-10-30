@@ -27,10 +27,10 @@
 
 #include "ConsoleLogHandler.hpp"
 
-#include "extension/Configuration.hpp"
-
 #include <iostream>
 #include <regex>
+
+#include "extension/Configuration.hpp"
 
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
@@ -51,7 +51,7 @@ namespace module::support::logging {
                                       const std::vector<utility::support::evil::StackFrame>& stack_trace) {
         std::lock_guard<std::mutex> lock(mutex);
 
-        if (cfg.display_timestamp){
+        if (cfg.display_timestamp) {
             // Output the time
             std::time_t t = NUClear::clock::to_time_t(time);
             std::tm tm    = *std::localtime(&t);

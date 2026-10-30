@@ -87,8 +87,7 @@ namespace utility::strategy {
 
         std::vector<Candidate> candidates{{self_id, self_distance_to_ball}};
         for (const auto& robot : robots.robots) {
-            bool ignored =
-                std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
+            bool ignored = std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
             if (ignored || (!robot.teammate && !include_opponents)) {
                 continue;
             }
@@ -96,12 +95,10 @@ namespace utility::strategy {
             candidates.push_back({robot.teammate ? robot.purpose.player_id : 0u, distance_to_ball});
         }
 
-        double closest_distance = std::min_element(candidates.begin(),
-                                                    candidates.end(),
-                                                    [](const Candidate& a, const Candidate& b) {
-                                                        return a.distance_to_ball < b.distance_to_ball;
-                                                    })
-                                      ->distance_to_ball;
+        double closest_distance =
+            std::min_element(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) {
+                return a.distance_to_ball < b.distance_to_ball;
+            })->distance_to_ball;
 
         // Equidistance is judged against the true closest distance rather than a running comparison, so it
         // can't chain through a sequence of near-equal robots into a false tie
@@ -221,9 +218,9 @@ namespace utility::strategy {
                         double walk_speed,
                         double turn_speed) {
         Eigen::Vector2d to_target = rTFf - rRFf;
-        double distance          = to_target.norm();
-        double angle_to_target   = std::atan2(to_target.y(), to_target.x());
-        double turn_angle        = std::abs(utility::math::angle::normalise_angle(angle_to_target - heading));
+        double distance           = to_target.norm();
+        double angle_to_target    = std::atan2(to_target.y(), to_target.x());
+        double turn_angle         = std::abs(utility::math::angle::normalise_angle(angle_to_target - heading));
         return turn_angle / turn_speed + distance / walk_speed;
     }
 
@@ -279,8 +276,7 @@ namespace utility::strategy {
         std::vector<Candidate> candidates{{self_id, time_to_ball(rTFf, rRFf, self_heading, walk_speed, turn_speed)}};
 
         for (const auto& robot : robots.robots) {
-            bool ignored =
-                std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
+            bool ignored = std::find(ignore_ids.begin(), ignore_ids.end(), robot.purpose.player_id) != ignore_ids.end();
             if (!robot.teammate || ignored) {
                 continue;
             }
@@ -291,20 +287,17 @@ namespace utility::strategy {
             // already facing the target
             Eigen::Vector2d teammate_vFf = (Hfw.linear() * robot.vRw).head<2>();
             Eigen::Vector2d to_target    = rTFf - teammate_rFf;
-            double teammate_heading      = teammate_vFf.norm() > 0.2
-                                              ? std::atan2(teammate_vFf.y(), teammate_vFf.x())
-                                              : std::atan2(to_target.y(), to_target.x());
+            double teammate_heading      = teammate_vFf.norm() > 0.2 ? std::atan2(teammate_vFf.y(), teammate_vFf.x())
+                                                                     : std::atan2(to_target.y(), to_target.x());
 
             double time = time_to_ball(rTFf, teammate_rFf, teammate_heading, walk_speed, turn_speed);
             candidates.push_back({robot.purpose.player_id, time});
         }
 
-        double fastest_time = std::min_element(candidates.begin(),
-                                               candidates.end(),
-                                               [](const Candidate& a, const Candidate& b) {
-                                                   return a.time < b.time;
-                                               })
-                                  ->time;
+        double fastest_time =
+            std::min_element(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) {
+                return a.time < b.time;
+            })->time;
 
         // Judge equidistance against the true fastest time, not a running comparison, so it can't chain
         // through near-equal robots into a false tie (see get_closest_bot)

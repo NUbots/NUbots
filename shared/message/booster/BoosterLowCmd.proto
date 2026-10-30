@@ -22,6 +22,6 @@ message BoosterLowCmd {
         float  weight = 7;
     }
 
-    CmdType cmd_type            = 1;
+    CmdType           cmd_type  = 1;
     repeated MotorCmd motor_cmd = 2;
 }

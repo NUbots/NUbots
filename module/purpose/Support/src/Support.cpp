@@ -71,7 +71,8 @@ namespace module::purpose {
             .then([this](const Configuration& config, const FieldDescription& fd) {
                 // Resolves a YAML coord node: scalar, { field, scale }, or { position[, offset] }
                 auto resolve = [&fd](const YAML::Node& n) -> double {
-                    if (n.IsScalar()) return n.as<double>();
+                    if (n.IsScalar())
+                        return n.as<double>();
                     if (n["field"]) {
                         std::string dim = n["field"].as<std::string>();
                         return (dim == "length" ? fd.dimensions.field_length : fd.dimensions.field_width)
@@ -79,14 +80,20 @@ namespace module::purpose {
                     }
                     std::string pos = n["position"].as<std::string>();
                     double off      = n["offset"] ? n["offset"].as<double>() : 0.0;
-                    if (pos == "field_min_x") return -fd.dimensions.field_length / 2.0 + off;
-                    if (pos == "field_max_x") return fd.dimensions.field_length / 2.0 + off;
-                    if (pos == "field_min_y") return -fd.dimensions.field_width / 2.0 + off;
-                    if (pos == "field_max_y") return fd.dimensions.field_width / 2.0 + off;
+                    if (pos == "field_min_x")
+                        return -fd.dimensions.field_length / 2.0 + off;
+                    if (pos == "field_max_x")
+                        return fd.dimensions.field_length / 2.0 + off;
+                    if (pos == "field_min_y")
+                        return -fd.dimensions.field_width / 2.0 + off;
+                    if (pos == "field_max_y")
+                        return fd.dimensions.field_width / 2.0 + off;
                     if (pos == "left_goal_area_max_x")
                         return -fd.dimensions.field_length / 2.0 + fd.dimensions.goal_area_length + off;
-                    if (pos == "goal_area_min_y") return -fd.dimensions.goal_area_width / 2.0 + off;
-                    if (pos == "goal_area_max_y") return fd.dimensions.goal_area_width / 2.0 + off;
+                    if (pos == "goal_area_min_y")
+                        return -fd.dimensions.goal_area_width / 2.0 + off;
+                    if (pos == "goal_area_max_y")
+                        return fd.dimensions.goal_area_width / 2.0 + off;
                     return off;
                 };
 
@@ -109,18 +116,14 @@ namespace module::purpose {
                             ? Eigen::Vector2d{mode.second["defaults"]["attraction"]["x"].as<double>(),
                                               mode.second["defaults"]["attraction"]["y"].as<double>()}
                             : default_attraction;
-                    double mode_min_x = mode.second["defaults"]["minX"]
-                                            ? resolve(mode.second["defaults"]["minX"])
-                                            : default_min_x;
-                    double mode_max_x = mode.second["defaults"]["maxX"]
-                                            ? resolve(mode.second["defaults"]["maxX"])
-                                            : default_max_x;
-                    double mode_min_y = mode.second["defaults"]["minY"]
-                                            ? resolve(mode.second["defaults"]["minY"])
-                                            : default_min_y;
-                    double mode_max_y = mode.second["defaults"]["maxY"]
-                                            ? resolve(mode.second["defaults"]["maxY"])
-                                            : default_max_y;
+                    double mode_min_x =
+                        mode.second["defaults"]["minX"] ? resolve(mode.second["defaults"]["minX"]) : default_min_x;
+                    double mode_max_x =
+                        mode.second["defaults"]["maxX"] ? resolve(mode.second["defaults"]["maxX"]) : default_max_x;
+                    double mode_min_y =
+                        mode.second["defaults"]["minY"] ? resolve(mode.second["defaults"]["minY"]) : default_min_y;
+                    double mode_max_y =
+                        mode.second["defaults"]["maxY"] ? resolve(mode.second["defaults"]["maxY"]) : default_max_y;
 
                     for (auto robot : mode.second["robots"]) {
                         int id  = std::stoi(robot.first.as<std::string>());
@@ -164,11 +167,11 @@ namespace module::purpose {
                     yaw                  = std::atan2(rBFf.y() - position->y(), rBFf.x() - position->x());
                 }
 
-                emit<Task>(std::make_unique<WalkToFieldPosition>(
-                    pos_rpy_to_transform(*position, Eigen::Vector3d(0, 0, yaw)),
-                    true,
-                    cfg.stop_threshold,
-                    cfg.stopped_threshold));
+                emit<Task>(
+                    std::make_unique<WalkToFieldPosition>(pos_rpy_to_transform(*position, Eigen::Vector3d(0, 0, yaw)),
+                                                          true,
+                                                          cfg.stop_threshold,
+                                                          cfg.stopped_threshold));
 
                 // Always track the ball with the head, regardless of game phase.
                 emit<Task>(std::make_unique<LookAtBall>());
@@ -200,10 +203,10 @@ namespace module::purpose {
     }
 
     std::optional<Eigen::Vector3d> Support::calculate_support_position(const std::shared_ptr<const Ball>& ball,
-                                                                        const Field& field,
-                                                                        const GameState& game_state,
-                                                                        const GlobalConfig& global_config,
-                                                                        const FieldDescription& fd) const {
+                                                                       const Field& field,
+                                                                       const GameState& game_state,
+                                                                       const GlobalConfig& global_config,
+                                                                       const FieldDescription& fd) const {
         // Select the formation mode matching the current set play, with the kicking team
         // (our_kick_off tracks the GameController's kicking_team) picking the us/them variant
         const std::string suffix = game_state.our_kick_off ? "_us" : "_them";
@@ -234,10 +237,8 @@ namespace module::purpose {
             // Formation.yaml uses a mirrored x-axis, so flip the ball's x to match before combining it
             // with the formation coefficients
             double ball_x = -rBFf.x();
-            position.x() =
-                std::clamp(slot.offset.x() + slot.attraction.x() * ball_x, slot.min_x, slot.max_x);
-            position.y() =
-                std::clamp(slot.offset.y() + slot.attraction.y() * rBFf.y(), slot.min_y, slot.max_y);
+            position.x()  = std::clamp(slot.offset.x() + slot.attraction.x() * ball_x, slot.min_x, slot.max_x);
+            position.y()  = std::clamp(slot.offset.y() + slot.attraction.y() * rBFf.y(), slot.min_y, slot.max_y);
         }
 
         // Clamp to field

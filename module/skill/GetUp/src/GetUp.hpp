@@ -35,7 +35,6 @@ namespace module::skill {
 
     class GetUp : public ::extension::behaviour::BehaviourReactor {
     private:
-
     public:
         /// @brief Called by the powerplant to build and setup the GetUp reactor.
         explicit GetUp(std::unique_ptr<NUClear::Environment> environment);

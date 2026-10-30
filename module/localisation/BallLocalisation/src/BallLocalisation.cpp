@@ -136,7 +136,7 @@ namespace module::localisation {
                 }
 
                 Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
-                Eigen::Vector3d rBFf = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
+                Eigen::Vector3d rBFf         = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
 
                 if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
                     || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
@@ -144,7 +144,7 @@ namespace module::localisation {
                     || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
                     continue;
                 }
-                double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                 if (current_distance < lowest_distance) {
                     lowest_distance = current_distance;
                     rBWw            = current_rBWw;

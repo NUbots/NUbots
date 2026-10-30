@@ -117,32 +117,33 @@ namespace module::input {
         }
 
         if (!ctx.have_camera_info.exchange(true)) {
-            log<INFO>(fmt::format("Got CameraInfo for '{}': focal_length {:.4f}, fov {:.3f} rad, centre ({:.4f},"
-                                  " {:.4f})",
-                                  ctx.camera_name,
-                                  lens.focal_length,
-                                  lens.fov,
-                                  lens.centre.x(),
-                                  lens.centre.y()));
+            log<INFO>(
+                fmt::format("Got CameraInfo for '{}': focal_length {:.4f}, fov {:.3f} rad, centre ({:.4f},"
+                            " {:.4f})",
+                            ctx.camera_name,
+                            lens.focal_length,
+                            lens.fov,
+                            lens.centre.x(),
+                            lens.centre.y()));
         }
     }
 
     NUClear::clock::time_point Camera::capture_time(CameraContext& ctx, const sensor_msgs::msg::Image& image) {
         // Prefer the capture timestamp from the camera over our receive time, so the image is
         // matched against the kinematics from when it was actually taken
-        const auto& stamp = image.header().stamp();
-        const auto now    = NUClear::clock::now();
-        const auto stamped =
-            NUClear::clock::time_point(std::chrono::duration_cast<NUClear::clock::duration>(
-                std::chrono::seconds(stamp.sec()) + std::chrono::nanoseconds(stamp.nanosec())));
+        const auto& stamp  = image.header().stamp();
+        const auto now     = NUClear::clock::now();
+        const auto stamped = NUClear::clock::time_point(std::chrono::duration_cast<NUClear::clock::duration>(
+            std::chrono::seconds(stamp.sec()) + std::chrono::nanoseconds(stamp.nanosec())));
 
         const auto skew = std::chrono::abs(stamped - now);
         if (stamp.sec() == 0 || skew > max_clock_skew.load()) {
             if (!ctx.warned_about_timestamp.exchange(true)) {
-                log<WARN>(fmt::format("Capture timestamps on '{}' are {} s from our clock, using receive time"
-                                      " instead. Check that BoosterOS and NUbots share a clock.",
-                                      ctx.image_topic,
-                                      std::chrono::duration_cast<std::chrono::duration<double>>(skew).count()));
+                log<WARN>(
+                    fmt::format("Capture timestamps on '{}' are {} s from our clock, using receive time"
+                                " instead. Check that BoosterOS and NUbots share a clock.",
+                                ctx.image_topic,
+                                std::chrono::duration_cast<std::chrono::duration<double>>(skew).count()));
             }
             return now;
         }
@@ -215,7 +216,7 @@ namespace module::input {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             hcw_buffer_duration = std::chrono::milliseconds(cfg["hcw_buffer_duration"].as<int>());
-            max_clock_skew      =std::chrono::milliseconds(cfg["max_clock_skew"].as<int>());
+            max_clock_skew      = std::chrono::milliseconds(cfg["max_clock_skew"].as<int>());
 
             // Can't reconfigure the readers once the topics have been subscribed to
             if (channels_created) {

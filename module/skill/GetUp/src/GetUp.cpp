@@ -31,8 +31,8 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/booster/BoosterFallDownState.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/booster/BoosterGetUp.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/skill/GetUp.hpp"
 
 namespace module::skill {
@@ -40,8 +40,8 @@ namespace module::skill {
     using extension::Configuration;
     using message::behaviour::state::Stability;
     using message::booster::BoosterFallDownState;
-    using message::booster::FallDownStateType;
     using message::booster::BoosterGetUp;
+    using message::booster::FallDownStateType;
     using message::localisation::ResetFieldLocalisation;
     using GetUpTask = message::skill::GetUp;
 
@@ -53,8 +53,7 @@ namespace module::skill {
 
         on<Provide<GetUpTask>, With<BoosterFallDownState>>().then(
             [this](const RunReason& run_reason, const BoosterFallDownState& fall_state) {
-                if (run_reason == RunReason::NEW_TASK
-                    && fall_state.fall_down_state == FallDownStateType::HAS_FALLEN
+                if (run_reason == RunReason::NEW_TASK && fall_state.fall_down_state == FallDownStateType::HAS_FALLEN
                     && fall_state.is_recovery_available) {
                     log<INFO>("Getting up...");
                     emit(std::make_unique<BoosterGetUp>());

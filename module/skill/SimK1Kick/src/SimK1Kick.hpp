@@ -1,11 +1,11 @@
 #ifndef MODULE_SKILL_SIMK1KICK_HPP
 #define MODULE_SKILL_SIMK1KICK_HPP
 
-#include <array>
-#include <memory>
-#include <cmath>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <array>
+#include <cmath>
+#include <memory>
 #include <nuclear>
 #include <string>
 
@@ -31,7 +31,7 @@ namespace module::skill {
     class SimK1Kick : public ::extension::behaviour::BehaviourReactor {
     public:
         static constexpr std::size_t JOINT_COUNT = 22;  // SDK JointIndexK1 serial order
-        static constexpr std::size_t OBS_DIM = 80;  // gyro+grav+kick_dir+ball+phase+q+dq+last_action
+        static constexpr std::size_t OBS_DIM     = 80;  // gyro+grav+kick_dir+ball+phase+q+dq+last_action
 
         explicit SimK1Kick(std::unique_ptr<NUClear::Environment> environment);
 
@@ -81,9 +81,9 @@ namespace module::skill {
         bool kick_dir_set = false;
 
         /// Latest ball estimate in world space {W}, refreshed from localisation::Ball
-        Eigen::Vector3d ball_rBWw           = Eigen::Vector3d::Zero();
-        bool ball_seen                      = false;
-        double ball_confidence              = 0.0;
+        Eigen::Vector3d ball_rBWw = Eigen::Vector3d::Zero();
+        bool ball_seen            = false;
+        double ball_confidence    = 0.0;
         NUClear::clock::time_point ball_time{};
 
         /// When the current Kick Task started (used to end after cfg.kick_duration)

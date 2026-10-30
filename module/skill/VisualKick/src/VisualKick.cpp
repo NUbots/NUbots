@@ -51,18 +51,18 @@ namespace module::skill {
     using message::localisation::Field;
     using message::skill::Kick;
     using VisualKickMsg = message::booster::BoosterVisualKick;
-    using KickVer    = message::booster::VisualKickVer;
+    using KickVer       = message::booster::VisualKickVer;
 
     VisualKick::VisualKick(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("VisualKick.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.version     = config["version"].as<int>() == 1 ? KickVer::V1 : KickVer::V2;
+            this->log_level   = config["log_level"].as<NUClear::LogLevel>();
+            cfg.version       = config["version"].as<int>() == 1 ? KickVer::V1 : KickVer::V2;
             cfg.kick_duration = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["kick_duration"].as<double>()));
-            cfg.power_scale = config["power_scale"].as<double>();
-            cfg.min_ball_move_distance = config["min_ball_move_distance"].as<double>();
+            cfg.power_scale             = config["power_scale"].as<double>();
+            cfg.min_ball_move_distance  = config["min_ball_move_distance"].as<double>();
             cfg.ball_reference_fraction = config["ball_reference_fraction"].as<double>();
         });
 
@@ -86,7 +86,7 @@ namespace module::skill {
                     vk->version = cfg.version;
                     emit(std::move(vk));
 
-                    initial_ball_position = ball.rBWw;
+                    initial_ball_position       = ball.rBWw;
                     const Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
                     const Eigen::Isometry3d Hrf = Hfr.inverse();
                     const Eigen::Vector3d rBRr  = sensors.Hrw * ball.rBWw;
@@ -115,11 +115,12 @@ namespace module::skill {
                 double current_ball_distance = (ball.rBWw - initial_ball_position).norm();
 
                 // Stop kick after set duration or ball moving past threshold distance
-                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration || current_ball_distance > cfg.min_ball_move_distance) {
+                if (NUClear::clock::now() - kick_start_time > cfg.kick_duration
+                    || current_ball_distance > cfg.min_ball_move_distance) {
                     log<INFO>(fmt::format(
                         "VisualKick done: elapsed={}s configured_duration={}s",
                         std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
-                                                                                    - kick_start_time)
+                                                                                  - kick_start_time)
                             .count(),
                         std::chrono::duration_cast<std::chrono::duration<double>>(cfg.kick_duration).count()));
                     emit<Task>(std::make_unique<Done>());

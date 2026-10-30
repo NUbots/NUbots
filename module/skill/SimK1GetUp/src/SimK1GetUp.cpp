@@ -33,9 +33,8 @@ namespace module::skill {
         std::array<double, N> load_joint_array(const Configuration& config, const char* key) {
             const auto values = config[key].as<std::vector<double>>();
             if (values.size() != N) {
-                throw std::runtime_error(std::string("SimK1GetUp.yaml: ") + key + " must have "
-                                         + std::to_string(N) + " entries (JointIndexK1 order), got "
-                                         + std::to_string(values.size()));
+                throw std::runtime_error(std::string("SimK1GetUp.yaml: ") + key + " must have " + std::to_string(N)
+                                         + " entries (JointIndexK1 order), got " + std::to_string(values.size()));
             }
             std::array<double, N> out{};
             std::copy(values.begin(), values.end(), out.begin());
@@ -57,10 +56,10 @@ namespace module::skill {
             cfg.knee_extended_angle = config["knee_extended_angle"].as<double>();
             cfg.settled_gyro        = config["settled_gyro"].as<double>();
 
-            cfg.kp                 = load_joint_array<JOINT_COUNT>(config, "kp");
-            cfg.kd                 = load_joint_array<JOINT_COUNT>(config, "kd");
-            cfg.action_scale_joint = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
-            cfg.default_pose       = load_joint_array<JOINT_COUNT>(config, "default_pose");
+            cfg.kp                    = load_joint_array<JOINT_COUNT>(config, "kp");
+            cfg.kd                    = load_joint_array<JOINT_COUNT>(config, "kd");
+            cfg.action_scale_joint    = load_joint_array<JOINT_COUNT>(config, "action_scale_joint");
+            cfg.default_pose          = load_joint_array<JOINT_COUNT>(config, "default_pose");
             const double action_scale = config["action_scale"].as<double>();
             for (double& s : cfg.action_scale_joint) {
                 s *= action_scale;
@@ -118,17 +117,14 @@ namespace module::skill {
 
                 // Servo feedback in JointIndexK1 order (ankles pre-converted to serial)
                 const RawSensors::Servo* servos[JOINT_COUNT] = {
-                    &raw.servo.head_pan,         &raw.servo.head_tilt,
-                    &raw.servo.l_shoulder_pitch, &raw.servo.l_shoulder_roll,
-                    &raw.servo.l_elbow,          &raw.servo.l_elbow_yaw,
-                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll,
-                    &raw.servo.r_elbow,          &raw.servo.r_elbow_yaw,
-                    &raw.servo.l_hip_pitch,      &raw.servo.l_hip_roll,
-                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,
-                    &raw.servo.l_ankle_pitch,    &raw.servo.l_ankle_roll,
-                    &raw.servo.r_hip_pitch,      &raw.servo.r_hip_roll,
-                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,
-                    &raw.servo.r_ankle_pitch,    &raw.servo.r_ankle_roll,
+                    &raw.servo.head_pan,         &raw.servo.head_tilt,       &raw.servo.l_shoulder_pitch,
+                    &raw.servo.l_shoulder_roll,  &raw.servo.l_elbow,         &raw.servo.l_elbow_yaw,
+                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll, &raw.servo.r_elbow,
+                    &raw.servo.r_elbow_yaw,      &raw.servo.l_hip_pitch,     &raw.servo.l_hip_roll,
+                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,          &raw.servo.l_ankle_pitch,
+                    &raw.servo.l_ankle_roll,     &raw.servo.r_hip_pitch,     &raw.servo.r_hip_roll,
+                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,          &raw.servo.r_ankle_pitch,
+                    &raw.servo.r_ankle_roll,
                 };
 
                 // --- observation: gyro(3), gravity(3), q-default(22), dq(22), last_action(22) ---
@@ -142,9 +138,9 @@ namespace module::skill {
                 const Eigen::Matrix3d Rwt =
                     rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
                 const Eigen::Vector3d grav = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
-                obs[idx++] = static_cast<float>(grav.x());
-                obs[idx++] = static_cast<float>(grav.y());
-                obs[idx++] = static_cast<float>(grav.z());
+                obs[idx++]                 = static_cast<float>(grav.x());
+                obs[idx++]                 = static_cast<float>(grav.y());
+                obs[idx++]                 = static_cast<float>(grav.z());
 
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
                     obs[idx++] = static_cast<float>(servos[j]->present_position - cfg.default_pose[j]);
@@ -168,10 +164,10 @@ namespace module::skill {
                 low->cmd_type = BoosterLowCmd::CmdType::SERIAL;
                 low->motor_cmd.resize(JOINT_COUNT);
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
-                    auto& motor  = low->motor_cmd[j];
-                    motor.mode   = 1;
-                    motor.q      = static_cast<float>(servos[j]->present_position
-                                                 + cfg.action_scale_joint[j] * last_action[j]);
+                    auto& motor = low->motor_cmd[j];
+                    motor.mode  = 1;
+                    motor.q =
+                        static_cast<float>(servos[j]->present_position + cfg.action_scale_joint[j] * last_action[j]);
                     motor.dq     = 0.0f;
                     motor.tau    = 0.0f;
                     motor.kp     = static_cast<float>(cfg.kp[j]);
@@ -183,15 +179,13 @@ namespace module::skill {
                 // crouch) and hands the robot to the walk policy before it can balance;
                 // there is no torso-height sensor on this side, so knee angle is the
                 // "actually standing" proxy (stand ~0.4 rad, mid-rise > 1 rad).
-                const bool knees_extended =
-                    raw.servo.l_knee.present_position < cfg.knee_extended_angle
-                    && raw.servo.r_knee.present_position < cfg.knee_extended_angle;
+                const bool knees_extended = raw.servo.l_knee.present_position < cfg.knee_extended_angle
+                                            && raw.servo.r_knee.present_position < cfg.knee_extended_angle;
                 // Posture alone also fires while the robot is still oscillating from a
                 // dynamic rise; require the gyro to be quiet too so the walk policy takes
                 // over a settled robot, not a moving one.
                 const bool settled = raw.gyroscope.norm() < cfg.settled_gyro;
-                const bool upright = knees_extended && settled
-                                     && std::abs(raw.imu_rpy.x()) < cfg.upright_angle
+                const bool upright = knees_extended && settled && std::abs(raw.imu_rpy.x()) < cfg.upright_angle
                                      && std::abs(raw.imu_rpy.y()) < cfg.upright_angle;
                 const auto now = NUClear::clock::now();
                 if (upright && !was_upright) {

@@ -163,9 +163,7 @@ def register(parser):
     """
     Register command-line arguments for the optimization tool.
     """
-    parser.description = (
-        "Optimises Mahony filter gains (Kp, Ki) in Sensors.yaml using Optuna and OdometryBenchmark."
-    )
+    parser.description = "Optimises Mahony filter gains (Kp, Ki) in Sensors.yaml using Optuna and OdometryBenchmark."
     parser.add_argument("--nbs_file", type=str, required=True, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--n_trials", type=int, default=100, help="Number of optimisation trials to run.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")

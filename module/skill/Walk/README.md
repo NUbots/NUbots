@@ -3,6 +3,7 @@
 ## Description
 
 Routes walk calls to the Booster Robotics SDK to use the K1's built-in locomotion.
+
 ## Usage
 
 Include this module to allow the robot to walk.
