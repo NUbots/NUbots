@@ -72,5 +72,4 @@ export class VisionCameraViewModel extends CameraViewModel {
     );
   }
 
-  @computed
 }
