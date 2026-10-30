@@ -146,7 +146,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
   const baseModel = await fakeCameraModel();
 
   const Hcw = baseModel.params.Hcw;
-  const Hwc = Matrix4.fromThree(new THREE.Matrix4().copy(Hcw.toThree()).invert());
 
   const viewSize = Vector2.of(baseModel.image.width, baseModel.image.height);
   const focalLength = 193 / viewSize.x;
@@ -189,12 +188,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
       },
     ],
   });
-}
-
-function screenToWorldRay(screenPoint: Vector2, viewSize: Vector2, focalLength: number, Hwc: Matrix4) {
-  const rFCc = unprojectEquidistant(screenPoint, viewSize, focalLength);
-  const Rwc = new THREE.Matrix4().extractRotation(Hwc.toThree());
-  return Vector3.fromThree(rFCc.toThree().applyMatrix4(Rwc)); // rFCw
 }
 
 function unprojectEquidistant(point: Vector2, viewSize: Vector2, focalLength: number): Vector3 {
