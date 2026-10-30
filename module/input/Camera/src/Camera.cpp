@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -26,515 +26,262 @@
  */
 #include "Camera.hpp"
 
-extern "C" {
-#include <aravis-0.8/arv.h>
-}
-
+#include <algorithm>
+#include <booster/common/dds/dds_entity.hpp>
+#include <chrono>
 #include <cmath>
 #include <fmt/format.h>
-#include <tinyrobotics/kinematics.hpp>
-#include <tinyrobotics/parser.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 
-#include "aravis_wrap.hpp"
-#include "description_to_fourcc.hpp"
-#include "settings.hpp"
-#include "time_sync.hpp"
+#include "extension/Configuration.hpp"
 
-#include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 
-#include "utility/input/FrameID.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/platform/aliases.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/Booster/channel_factory.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
-#include "utility/vision/projection.hpp"
 
 namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
     using message::input::Sensors;
-    using utility::input::FrameID;
-    using utility::input::ServoID;
+    using utility::nusight::graph;
+    using utility::platform::Booster::ensure_channel_factory;
     using utility::support::Expression;
+    using utility::vision::fourcc;
+    using utility::vision::ros_encoding_to_fourcc;
 
-    /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
-    constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
-    /// The amount of time on top of the transfer time that would be considered a drifting clock (nanoseconds)
-    constexpr int64_t MAX_CLOCK_DRIFT = 5e6;
-    /// The over under count of recent messages that that were over the expected value
-    constexpr int64_t MAX_COUNT_OVER_TIME_FRAMES = 100;
+    using booster::common::DdsExecutorDispatchMode;
+    using booster::common::DdsExecutorOverflowPolicy;
+    using booster::common::DdsReaderExecutorOptions;
+    using booster::robot::ChannelFactory;
 
-    Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    Eigen::Isometry3d Camera::nearest_Hcw(const NUClear::clock::time_point& timestamp) {
+        std::lock_guard<std::mutex> lock(sensors_mutex);
 
-        on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
-            auto serial_number = config["serial_number"].as<std::string>();
+        if (Hcws.empty()) {
+            return Eigen::Isometry3d::Identity();
+        }
 
-            // Find the camera if it has already been loaded
-            auto it = cameras.find(serial_number);
-
-            /************************************************************************
-             *   ____                _          ____                                *
-             *  / ___|_ __ ___  __ _| |_ ___   / ___|__ _ _ __ ___   ___ _ __ __ _  *
-             * | |   | '__/ _ \/ _` | __/ _ \ | |   / _` | '_ ` _ \ / _ \ '__/ _` | *
-             * | |___| | |  __/ (_| | ||  __/ | |__| (_| | | | | | |  __/ | | (_| | *
-             *  \____|_|  \___|\__,_|\__\___|  \____\__,_|_| |_| |_|\___|_|  \__,_| *
-             *                                                                      *
-             ************************************************************************/
-            if (it == cameras.end()) {
-                // The camera's name is the filename of the config, with the .yaml stripped of
-                const std::string name = config.file_name.stem();
-
-                // Find the camera with the correct serial number
-                auto find_camera = [](const std::string& serial_number) {
-                    int devices = arv_get_n_devices();
-                    for (int i = 0; i < devices; ++i) {
-                        if (serial_number == arv_get_device_serial_nbr(i)) {
-                            return i;
-                        }
-                    }
-                    return -1;
-                };
-
-                // Find the device, and if we can't check for new devices
-                int device_no = find_camera(serial_number);
-                if (device_no == -1) {
-                    arv_update_device_list();
-                    device_no = find_camera(serial_number);
-                }
-
-                // If device_no is still -1 throw an error
-                if (device_no == -1) {
-                    throw std::runtime_error(
-                        fmt::format("{} camera with serial number {} not found", name, serial_number));
-                }
-
-                // Open the camera: Store as shared pointer
-                std::string device_description = arv_get_device_id(device_no);
-                auto camera =
-                    std::shared_ptr<ArvCamera>(arv::camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                        if (ptr) {
-                            g_object_unref(ptr);
-                        }
-                    });
-
-                if (!ARV_IS_CAMERA(camera.get())) {
-                    throw std::runtime_error(fmt::format("Failed to create {} camera ({})", name, device_description));
-                }
-                else {
-                    // Create a new stream object: Store as shared pointer
-                    auto stream = std::shared_ptr<ArvStream>(arv::camera_create_stream(camera.get(), nullptr, nullptr),
-                                                             [](ArvStream* ptr) {
-                                                                 if (ptr) {
-                                                                     g_object_unref(ptr);
-                                                                 }
-                                                             });
-
-                    if (!ARV_IS_STREAM(stream.get())) {
-                        throw std::runtime_error(
-                            fmt::format("Failed to create stream for {} camera ({})", name, device_description));
-                    }
-
-                    // Add camera to list.
-                    it = cameras
-                             .insert(std::make_pair(serial_number,
-                                                    CameraContext{
-                                                        *this,
-                                                        name,
-                                                        0,  // fourcc is set later
-                                                        num_cameras++,
-                                                        Image::Lens(),        // Lens is constructed in settings
-                                                        Eigen::Isometry3d(),  // Hpc is set in settings
-                                                        camera,
-                                                        stream,
-                                                        CameraContext::TimeCorrection(),
-                                                    }))
-                             .first;
-
-                    log<INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
-                }
-            }
-
-            /*****************************************************************************
-             *   _   _           _       _         ____       _   _   _                  *
-             *  | | | |_ __   __| | __ _| |_ ___  / ___|  ___| |_| |_(_)_ __   __ _ ___  *
-             *  | | | | '_ \ / _` |/ _` | __/ _ \ \___ \ / _ \ __| __| | '_ \ / _` / __| *
-             *  | |_| | |_) | (_| | (_| | ||  __/  ___) |  __/ |_| |_| | | | | (_| \__ \ *
-             *   \___/| .__/ \__,_|\__,_|\__\___| |____/ \___|\__|\__|_|_| |_|\__, |___/ *
-             *        |_|                                                     |___/      *
-             *****************************************************************************/
-
-            // Update settings on the camera
-            auto& context    = it->second;
-            const auto& name = context.name;
-            auto& cam        = context.camera;
-            auto& stream     = context.stream;
-            auto* device     = arv_camera_get_device(cam.get());
-
-            // Stop the video stream so we can apply the settings
-            arv::camera_stop_acquisition(cam.get());
-            arv::stream_set_emit_signals(stream.get(), 0);
-
-            // Synchronise the clocks
-            context.time = sync_clocks(device);
-
-            // Get the fourcc code from the pixel format
-            context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
-
-            // Compute Hpc, the transform from the camera to the head pitch space
-            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
-
-            auto camera_frame =
-                config["is_left_camera"].as<bool>() ? std::string("left_camera") : std::string("right_camera");
-
-            auto Hpc = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
-                                                                    nugus_model.home_configuration(),
-                                                                    camera_frame,
-                                                                    std::string("head"));
-
-            // Open the config directory for the robot running this module
-            std::string hostname   = utility::support::get_hostname();
-            std::string robot_name = utility::platform::get_robot_alias(hostname);
-
-            auto camera_in_use = config["is_left_camera"].as<bool>() ? "Left" : "Right";
-            auto robot_config  = YAML::LoadFile(fmt::format("config/{}/Cameras/{}.yaml", robot_name, camera_in_use));
-
-            log<INFO>(fmt::format("Applying camera offsets for {}", robot_name));
-
-            // Apply roll, pitch, and yaw offsets using the name of the robot that's running this code
-            double roll_offset  = robot_config["roll_offset"].as<Expression>();
-            double pitch_offset = robot_config["pitch_offset"].as<Expression>();
-            double yaw_offset   = robot_config["yaw_offset"].as<Expression>();
-
-            // Log all the offsets for debugging to compare against the config files
-            log<DEBUG>(
-                fmt::format("Applying camera offsets for {}: roll offset = {:.2f} deg, pitch offset = {:.2f} deg, yaw "
-                            "offset = {:.2f} deg",
-                            robot_name,
-                            roll_offset * 180.0 / M_PI,
-                            pitch_offset * 180.0 / M_PI,
-                            yaw_offset * 180.0 / M_PI));
-
-
-            context.Hpc = Eigen::AngleAxisd(yaw_offset, Eigen::Vector3d::UnitX()).toRotationMatrix()
-                          * Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
-
-            // Apply image offsets to lens_centre, optical axis:
-            int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
-            int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
-
-            int offset_x = config["settings"]["OffsetX"].as<Expression>();
-            int offset_y = config["settings"]["OffsetY"].as<Expression>();
-            int width    = config["settings"]["Width"].as<Expression>();
-            int height   = config["settings"]["Height"].as<Expression>();
-
-            // Renormalise the focal length
-            float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
-            float fov          = config["lens"]["fov"].as<Expression>();
-
-            // Recentre/renormalise the centre
-            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
-            centre += Eigen::Vector2f(offset_x - (full_width - width - offset_x),
-                                      offset_y - (full_height - height - offset_y))
-                      * 0.5;
-            centre /= width;
-
-            // Adjust the distortion parameters for the new width units
-            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
-            k[0]              = k[0] * std::pow(width / full_height, 2);
-            k[1]              = k[1] * std::pow(width / full_height, 4);
-
-            // Set the lens parameters from configuration
-            context.lens = Image::Lens{
-                config["lens"]["projection"].as<std::string>(),
-                focal_length,
-                fov,
-                centre,
-                k,
-            };
-
-            // If the lens fov was auto we need to correct it
-            if (!std::isfinite(context.lens.fov)) {
-                double a = height / width;
-                std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
-                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
-            }
-
-            // Apply the region to the camera
-            arv::camera_set_region(cam.get(), offset_x, offset_y, width, height);
-
-            // Go through our settings and apply them to the camera
-            for (const auto& cfg : config["settings"].config) {
-                auto key = cfg.first.as<std::string>();
-
-                // Skip the region keys as we handle them above
-                if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
-                    continue;
-                }
-
-                // Get the feature node
-                auto* feature = arv_device_get_feature(device, key.c_str());
-                try {
-                    std::string message;
-                    if (feature == nullptr) {
-                        // Doesn't have this feature
-                        NUClear::log<NUClear::LogLevel::ERROR>(
-                            fmt::format("The {} camera does not have a setting named {}", name, key));
-                    }
-
-                    // Integer setting
-                    else if (ARV_IS_GC_INTEGER_NODE(feature) != 0) {
-                        auto* setting = reinterpret_cast<ArvGcInteger*>(feature);
-                        int64_t value = std::llround(double(cfg.second.as<Expression>()));
-                        message       = set_setting(setting, value);
-                    }
-
-                    // Floating point setting
-                    else if (ARV_IS_GC_FLOAT_NODE(feature) != 0) {
-                        auto* setting = reinterpret_cast<ArvGcFloat*>(feature);
-                        double value  = cfg.second.as<Expression>();
-                        message       = set_setting(setting, value);
-                    }
-
-                    // Boolean setting
-                    else if (ARV_IS_GC_BOOLEAN(feature) != 0) {
-                        auto* setting = reinterpret_cast<ArvGcBoolean*>(feature);
-                        bool value    = bool(cfg.second.as<Expression>());
-                        message       = set_setting(setting, value);
-                    }
-
-                    // Enumeration setting
-                    else if (ARV_IS_GC_ENUMERATION(feature) != 0) {
-                        auto* setting = reinterpret_cast<ArvGcEnumeration*>(feature);
-                        auto value    = cfg.second.as<std::string>();
-                        message       = set_setting(setting, value);
-                    }
-                    else {
-                        log<ERROR>(fmt::format("The type of setting {} is not currently handled", key));
-                    }
-
-                    // If we had a message pass it onto the user
-                    if (!message.empty()) {
-                        log<INFO>(fmt::format("Updated {} on {} camera: {}", key, name, message));
-                    }
-                }
-                catch (const std::runtime_error& e) {
-                    log<ERROR>(fmt::format("Error setting {} on {} camera: {}", key, name, e.what()));
-                }
-            }
-
-            // Check for gigevision device and set packet size to jumbo packets
-            if (arv_camera_is_gv_device(cam.get()) != 0) {
-                arv::camera_gv_set_packet_size(cam.get(), 8192);
-                g_object_set(stream.get(), "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
-            }
-
-            // Add buffers to the queue
-            int payload_size = arv::camera_get_payload(cam.get());
-            for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
-                // to the GPU.
-                // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
-                arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
-            }
-
-            // Connect signal events
-            g_signal_connect(stream.get(), "new-buffer", G_CALLBACK(&Camera::emit_image), &it->second);
-            g_signal_connect(arv_camera_get_device(cam.get()),
-                             "control-lost",
-                             G_CALLBACK(&Camera::control_lost),
-                             &it->second);
-            // Start aquisition
-            arv::camera_start_acquisition(cam.get());
-            arv::stream_set_emit_signals(stream.get(), 1);
+        auto it = std::lower_bound(Hcws.begin(), Hcws.end(), timestamp, [](const auto& a, const auto& t) {
+            return a.first < t;
         });
 
-        on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
-            std::lock_guard<std::mutex> lock(sensors_mutex);
-            auto now = NUClear::clock::now();
-            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
-                                          return v.first < (now - std::chrono::milliseconds(500));
-                                      })));
-
-            // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
-            Eigen::Isometry3d Htw(sensors.Htw);
-            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
-
-            Hwps.emplace_back(sensors.timestamp, Hwp);
-        });
-
-        on<Shutdown>().then([this] {
-            for (auto& camera : cameras) {
-                // Stop the video stream.
-                arv::camera_stop_acquisition(camera.second.camera.get());
-                arv::stream_set_emit_signals(camera.second.stream.get(), 0);
-            }
-            arv_shutdown();
-            cameras.clear();
-        });
+        if (it == Hcws.end()) {
+            return std::prev(it)->second;
+        }
+        if (it == Hcws.begin()) {
+            return it->second;
+        }
+        // Pick whichever of the two straddling samples is closer in time
+        return std::abs((it->first - timestamp).count()) < std::abs((std::prev(it)->first - timestamp).count())
+                   ? it->second
+                   : std::prev(it)->second;
     }
 
-    void Camera::emit_image(ArvStream* stream, CameraContext* context) {
-        using namespace std::chrono;
-        // Get now here, as close as possible to when we pop the buffer
-        int64_t now       = duration_cast<nanoseconds>(NUClear::clock::now().time_since_epoch()).count();
-        ArvBuffer* buffer = arv_stream_try_pop_buffer(stream);
-        Camera& reactor   = context->reactor;
+    void Camera::camera_info_handler(CameraContext& ctx, const void* msg) {
+        const auto* info = static_cast<const sensor_msgs::msg::CameraInfo*>(msg);
 
-        if (buffer != nullptr) {
-            if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
-                int width       = 0;
-                int height      = 0;
-                size_t buffSize = 0;
-                arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
-                const auto* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+        const auto& k = info->k();
+        if (k.size() < 6 || k[0] == 0.0) {
+            log<WARN>(fmt::format("Ignoring CameraInfo on '{}' with an unusable intrinsic matrix", ctx.info_topic));
+            return;
+        }
 
-                auto& timesync = context->time;
+        const float fx = static_cast<float>(k[0]);
+        const float cx = static_cast<float>(k[2]);
+        const float cy = static_cast<float>(k[5]);
+        const float w  = static_cast<float>(info->width());
+        const float h  = static_cast<float>(info->height());
 
-                // Get the timestamp from the buffer
-                int64_t ts = arv_buffer_get_timestamp(buffer);
+        if (w == 0.0f || h == 0.0f) {
+            log<WARN>(fmt::format("Ignoring CameraInfo on '{}' with zero dimensions", ctx.info_topic));
+            return;
+        }
 
-                // If we couldn't calculate the timestamp offset using the cameras API, we have to do it on the fly
-                // and hope that our answer isn't too far off the truth
-                if (timesync.live) {
-                    // Offset in nanoseconds and seconds
-                    int64_t o_ns = (now - ts);
+        // message::input::Image::Lens stores focal_length and centre normalised by image width
+        Image::Lens lens;
+        lens.projection   = Image::Lens::Projection::RECTILINEAR;
+        lens.focal_length = fx / w;
+        lens.fov          = 2.0f * std::atan(w / (2.0f * fx));
+        lens.centre       = Eigen::Vector2f((cx - w / 2.0f) / w, (cy - h / 2.0f) / w);
+        lens.k            = Eigen::Vector2f(info->d().size() > 0 ? static_cast<float>(info->d()[0]) : 0.0f,
+                                 info->d().size() > 1 ? static_cast<float>(info->d()[1]) : 0.0f);
 
-                    // Initialise the filter if this is the first time
-                    timesync.offset = timesync.offset == 0 ? o_ns : timesync.offset;
+        {
+            std::lock_guard<std::mutex> lock(ctx.lens_mutex);
+            ctx.lens = lens;
+        }
 
-                    // Add process noise
-                    timesync.kf.p += timesync.kf.q;
-
-                    // Measurement update
-                    double k        = timesync.kf.p / (timesync.kf.p + timesync.kf.r);
-                    timesync.offset = std::llround(timesync.offset + k * (o_ns - timesync.offset));
-                    timesync.kf.p   = (1.0 - k) * timesync.kf.p;
-                }
-                else {
-                    // Work out the total amount of time since calibration for both local and remote clocks
-                    int64_t total_cam   = ts - timesync.drift.cam_at_calibration;
-                    int64_t total_local = now - timesync.drift.local_at_calibration;
-
-                    // Until an appropriate amount of time has passed use the offset to work out what a bad clock
-                    // drift would be using exponential smoothing
-                    if (total_local < TRANSFER_OFFSET_OBSERVE_TIME) {
-                        timesync.drift.max_clock_drift = timesync.drift.max_clock_drift == 0
-                                                             ? std::abs(total_cam - total_local) + MAX_CLOCK_DRIFT
-                                                             : (timesync.drift.max_clock_drift * 9
-                                                                + std::abs(total_cam - total_local) + MAX_CLOCK_DRIFT)
-                                                                   / 10;
-                    }
-                    else {
-                        // If our camera has drifted out by too large a margin, we recalibrate our clock
-                        timesync.drift.over_time_count +=
-                            std::abs(total_cam - total_local) > timesync.drift.max_clock_drift
-                                ? 1
-                                : (timesync.drift.over_time_count == 0 ? 0 : -1);
-
-                        // 100 frames have been over time recently
-                        if (timesync.drift.over_time_count > MAX_COUNT_OVER_TIME_FRAMES) {
-                            reactor.log<INFO>(fmt::format(
-                                "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
-                                context->name,
-                                std::abs(total_cam - total_local) / 1e6,
-                                timesync.drift.max_clock_drift / 1e6));
-
-                            arv::camera_stop_acquisition(context->camera.get());
-                            arv::stream_set_emit_signals(context->stream.get(), 0);
-                            context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
-                            arv::stream_set_emit_signals(context->stream.get(), 1);
-                            arv::camera_start_acquisition(context->camera.get());
-                        }
-                    }
-                }
-
-                // Apply our timestamp offset
-                ts = ts + context->time.offset;
-
-                auto msg        = std::make_unique<Image>();
-                msg->format     = context->fourcc;
-                msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
-                // TODO(trent) use an std::vector here to avoid the copy
-                msg->data.insert(msg->data.end(), buff, buff + buffSize);
-                msg->id        = context->id;
-                msg->name      = context->name;
-                msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
-
-                Eigen::Isometry3d Hcw;
-
-                /* Mutex Scope */ {
-                    std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
-
-                    Eigen::Isometry3d Hpc = context->Hpc;
-                    Eigen::Isometry3d Hwp;
-                    if (reactor.Hwps.empty()) {
-                        Hwp = Eigen::Isometry3d::Identity();
-                    }
-                    else {
-                        // Find the first time that is not less than the target time
-                        auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
-                                                       reactor.Hwps.end(),
-                                                       std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
-                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
-
-                        if (Hwp_it == reactor.Hwps.end()) {
-                            // Image is newer than most recent sensors
-                            Hwp = std::prev(Hwp_it)->second;
-                        }
-                        else if (Hwp_it == reactor.Hwps.begin()) {
-                            // Image is older than oldest sensors
-                            Hwp = Hwp_it->second;
-                        }
-                        else {
-                            // Check Hwp_it and std::prev(Hwp) for closest match
-                            Hwp = std::abs((Hwp_it->first - msg->timestamp).count())
-                                          < std::abs((std::prev(Hwp_it)->first - msg->timestamp).count())
-                                      ? Hwp_it->second
-                                      : std::prev(Hwp_it)->second;
-                        }
-                    }
-
-                    Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
-                }
-
-                msg->lens = context->lens;
-                msg->Hcw  = Hcw;
-
-                reactor.emit(msg);
-
-                // Put the buffer back on the queue
-                arv_stream_push_buffer(stream, buffer);
-            }
-            else {
-                std::string msg;
-                switch (arv_buffer_get_status(buffer)) {
-                    case ARV_BUFFER_STATUS_UNKNOWN: msg = "UNKNOWN"; break;
-                    case ARV_BUFFER_STATUS_SUCCESS: msg = "SUCCESS"; break;
-                    case ARV_BUFFER_STATUS_CLEARED: msg = "CLEARED"; break;
-                    case ARV_BUFFER_STATUS_TIMEOUT: msg = "TIMEOUT"; break;
-                    case ARV_BUFFER_STATUS_MISSING_PACKETS: msg = "MISSING PACKETS"; break;
-                    case ARV_BUFFER_STATUS_WRONG_PACKET_ID: msg = "WRONG PACKET ID"; break;
-                    case ARV_BUFFER_STATUS_SIZE_MISMATCH: msg = "SIZE MISMATCH"; break;
-                    case ARV_BUFFER_STATUS_FILLING: msg = "FILLING"; break;
-                    case ARV_BUFFER_STATUS_ABORTED: msg = "ABORTED"; break;
-                }
-
-                // Put the buffer back on the queue and show an error message
-                arv_stream_push_buffer(stream, buffer);
-                NUClear::log<NUClear::LogLevel::WARN>("Failed getting buffer from", context->name, "with error", msg);
-            }
+        if (!ctx.have_camera_info.exchange(true)) {
+            log<INFO>(fmt::format("Got CameraInfo for '{}': focal_length {:.4f}, fov {:.3f} rad, centre ({:.4f},"
+                                  " {:.4f})",
+                                  ctx.camera_name,
+                                  lens.focal_length,
+                                  lens.fov,
+                                  lens.centre.x(),
+                                  lens.centre.y()));
         }
     }
 
-    void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
-        NUClear::log<NUClear::LogLevel::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
+    NUClear::clock::time_point Camera::capture_time(CameraContext& ctx, const sensor_msgs::msg::Image& image) {
+        // Prefer the capture timestamp from the camera over our receive time, so the image is
+        // matched against the kinematics from when it was actually taken
+        const auto& stamp = image.header().stamp();
+        const auto now    = NUClear::clock::now();
+        const auto stamped =
+            NUClear::clock::time_point(std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::seconds(stamp.sec()) + std::chrono::nanoseconds(stamp.nanosec())));
+
+        const auto skew = std::chrono::abs(stamped - now);
+        if (stamp.sec() == 0 || skew > max_clock_skew.load()) {
+            if (!ctx.warned_about_timestamp.exchange(true)) {
+                log<WARN>(fmt::format("Capture timestamps on '{}' are {} s from our clock, using receive time"
+                                      " instead. Check that BoosterOS and NUbots share a clock.",
+                                      ctx.image_topic,
+                                      std::chrono::duration_cast<std::chrono::duration<double>>(skew).count()));
+            }
+            return now;
+        }
+        return stamped;
     }
+
+    void Camera::image_handler(CameraContext& ctx, const void* msg) {
+        const auto* image = static_cast<const sensor_msgs::msg::Image*>(msg);
+
+        const uint32_t width  = image->width();
+        const uint32_t height = image->height();
+        const auto& bytes     = image->data();
+
+        if (width == 0 || height == 0 || bytes.empty()) {
+            log<WARN>(fmt::format("Dropping empty frame from '{}'", ctx.camera_name));
+            return;
+        }
+
+        uint32_t format = ros_encoding_to_fourcc(image->encoding());
+        if (format == 0) {
+            log<WARN>(fmt::format("Unknown encoding '{}' on '{}'", image->encoding(), ctx.image_topic));
+            return;
+        }
+
+        auto out = std::make_unique<Image>();
+
+        // Convert NV12 to RGB3
+        if (format == fourcc("NV12")) {
+            const std::size_t expected = std::size_t(width) * height * 3 / 2;
+            if (bytes.size() < expected) {
+                log<WARN>(fmt::format("Dropping truncated NV12 frame from '{}': {} bytes, expected {}",
+                                      ctx.camera_name,
+                                      bytes.size(),
+                                      expected));
+                return;
+            }
+            // Size the destination first and point a Mat at it, so cvtColor writes the converted
+            // pixels straight into the message
+            out->data.resize(std::size_t(width) * height * 3);
+            const cv::Mat nv12(int(height * 3 / 2), int(width), CV_8UC1, const_cast<uint8_t*>(bytes.data()));
+            cv::Mat rgb(int(height), int(width), CV_8UC3, out->data.data());
+            cv::cvtColor(nv12, rgb, cv::COLOR_YUV2RGB_NV12);
+            format = fourcc("RGB3");
+        }
+        else {
+            out->data.assign(bytes.begin(), bytes.end());
+        }
+
+        const auto timestamp = capture_time(ctx, *image);
+
+        out->format         = format;
+        out->dimensions.x() = width;
+        out->dimensions.y() = height;
+        out->id             = ctx.id;
+        out->name           = ctx.camera_name;
+        out->timestamp      = timestamp;
+        {
+            std::lock_guard<std::mutex> lock(ctx.lens_mutex);
+            out->lens = ctx.lens;
+        }
+        out->Hcw = nearest_Hcw(timestamp);
+
+        emit(graph("Camera Pose", out->Hcw.translation().x(), out->Hcw.translation().y(), out->Hcw.translation().z()));
+        emit(out);
+    }
+
+    Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+        on<Configuration>("Camera.yaml").then([this](const Configuration& cfg) {
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
+            hcw_buffer_duration = std::chrono::milliseconds(cfg["hcw_buffer_duration"].as<int>());
+            max_clock_skew      =std::chrono::milliseconds(cfg["max_clock_skew"].as<int>());
+
+            // Can't reconfigure the readers once the topics have been subscribed to
+            if (channels_created) {
+                log<WARN>("Camera topics changed but readers already exist, restart to apply");
+                return;
+            }
+
+            cameras.clear();
+            for (const auto& entry : cfg["cameras"]) {
+                auto ctx         = std::make_unique<CameraContext>();
+                ctx->image_topic = entry["topic"].as<std::string>();
+                ctx->info_topic  = ctx->image_topic + "/camera_info";
+                ctx->camera_name = entry["name"].as<std::string>();
+                ctx->id          = entry["id"].as<uint32_t>();
+
+                cameras.push_back(std::move(ctx));
+            }
+        });
+
+        on<Startup>().then("Subscribe to cameras", [this] {
+            ensure_channel_factory();
+
+            // Setup DDS reader options
+            DdsReaderExecutorOptions image_options;
+            image_options.queue_capacity  = 1;
+            image_options.overflow_policy = DdsExecutorOverflowPolicy::kLatestOnly;
+            image_options.dispatch_mode   = DdsExecutorDispatchMode::kDedicated;
+
+            for (auto& ctx : cameras) {
+                log<INFO>(fmt::format("Subscribing to '{}' for camera '{}'", ctx->image_topic, ctx->camera_name));
+                ctx->image_channel = ChannelFactory::Instance()->CreateRecvChannel<sensor_msgs::msg::Image>(
+                    ctx->image_topic,
+                    [this, raw = ctx.get()](const void* msg) { image_handler(*raw, msg); },
+                    /* reliable = */ false,
+                    image_options);
+
+                // CameraInfo is low rate and we need every update, so take it reliably
+                ctx->info_channel = ChannelFactory::Instance()->CreateRecvChannel<sensor_msgs::msg::CameraInfo>(
+                    ctx->info_topic,
+                    [this, raw = ctx.get()](const void* msg) { camera_info_handler(*raw, msg); },
+                    /* reliable = */ true);
+            }
+
+            channels_created = true;
+        });
+
+        on<Trigger<Sensors>>().then("Buffer Hcw", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            const auto cutoff = NUClear::clock::now() - hcw_buffer_duration.load();
+            while (!Hcws.empty() && Hcws.front().first < cutoff) {
+                Hcws.pop_front();
+            }
+            Hcws.emplace_back(sensors.timestamp, Eigen::Isometry3d(sensors.Hcw));
+        });
+
+        on<Shutdown>().then([this] {
+            log<INFO>("Closing camera channels");
+            for (auto& ctx : cameras) {
+                if (ctx->image_channel != nullptr) {
+                    ChannelFactory::Instance()->CloseReader(ctx->image_topic);
+                }
+                if (ctx->info_channel != nullptr) {
+                    ChannelFactory::Instance()->CloseReader(ctx->info_topic);
+                }
+            }
+        });
+    }
+
 }  // namespace module::input

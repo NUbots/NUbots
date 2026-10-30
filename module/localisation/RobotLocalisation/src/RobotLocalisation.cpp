@@ -39,7 +39,6 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/projection.hpp"
-#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::localisation {
 

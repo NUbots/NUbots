@@ -13,7 +13,6 @@ import useInterval from "../../../../hooks/use-interval";
 import { fakeCameraModel } from "../../../camera/stories/fake_camera_model";
 import { RobotModel } from "../../../robot/model";
 import { VisionRobotModel } from "../../model";
-import { GreenHorizonModel } from "../green_horizon";
 import { VisionCameraModel } from "../model";
 import { VisionCameraView, VisionCameraViewProps } from "../view";
 import { VisionCameraViewModel } from "../view_model";
@@ -155,19 +154,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
   return VisionCameraModel.of({
     ...baseModel,
     id: 0,
-    greenHorizon: new GreenHorizonModel({
-      horizon: [
-        new Vector2(38, 258),
-        new Vector2(248, 136),
-        new Vector2(422, 164),
-        new Vector2(539, 234),
-        new Vector2(567, 333),
-        new Vector2(445, 473),
-        new Vector2(117, 422),
-        new Vector2(38, 258),
-      ].map((p) => screenToWorldRay(p, viewSize, focalLength, Hwc)),
-      Hcw,
-    }),
     balls: [
       {
         timestamp: 0,

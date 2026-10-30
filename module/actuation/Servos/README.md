@@ -2,27 +2,29 @@
 
 ## Description
 
-Takes specific servo requests and emits a ServoTarget for them. Uses Director DSL such that each servo can only be accessed by one Provider at a time.
-Individual Servo Providers are Done when their finish time is reached.
-Limb Providers are Done when all of the Servos in the Limb are Done.
-Sequence Providers run a sequence of Limbs one after the other. They are done when the final Limb is Done.
+Forwards servo commands from the Director to the Booster K1 via the Booster Robotics SDK. It provides the
+`message::actuation::Servos` task and converts it into a `message::booster::BoosterLowCmd`.
 
 ## Usage
 
-Emit a servo, limb or sequence task, with priority to run according to the Director algorithm.
+Install `module::actuation::Servos` in the powerplant, and have a module that talks to the robot's low-level
+controller (e.g. the Booster IO module) consume `BoosterLowCmd`.
+
+Other modules request servo movement by emitting a `message::actuation::Servos` task. The command it carries is
+passed through unchanged, so any joint limiting or smoothing needs to happen before the task is emitted. The
+`Provide` runs at `Priority::HIGH` so commands reach the robot with minimal delay.
+
+This module has no configuration file.
 
 ## Consumes
 
-- Servo messages from `message/actuation/Servos.proto`.
-- Limb messages from `message/actuation/Limbs.proto`, which will then emit Servo Tasks from `message/actuation/Servos.proto` to be consumed as above.
-- Sequence messages from `message/actuation/Limbs.proto`, which will then emit Limb Tasks from `message/actuation/Limbs.proto` to be consumed as above.
+- `message::actuation::Servos` as a Director task (via `Provide`)
 
 ## Emits
 
-- `message::actuation::ServoTarget` the servo control information for the platform module.
-- Servo messages from `message/actuation/Servos.proto` when a `message/actuation/Limbs.proto` is received.
-- Limb messages from `message/actuation/Limbs.proto` when a Sequence message from `message/actuation/Limbs.proto` is received.
+- `message::booster::BoosterLowCmd`
 
 ## Dependencies
 
-- Director
+- The Director (`module/extension/Director`)
+- A module that sends `BoosterLowCmd` to the robot

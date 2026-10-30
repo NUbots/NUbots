@@ -3,7 +3,7 @@
 ## Description
 
 Plans walk velocity commands for the Booster K1, whose gait is the SDK's built-in closed-loop RL
-locomotion policy (commands flow PlanWalkPath → `skill::Walk` → K1Walk → HardwareIO `Move(vx, vy, vtheta)`).
+locomotion policy (commands flow PlanWalkPath → `skill::Walk` → Walk → HardwareIO `Move(vx, vy, vtheta)`).
 The structure follows the planners other K1 teams run (Booster robocup_demo, HTWK Firmware-Salvador).
 
 Three types of walk path planning are in this module:
@@ -53,5 +53,5 @@ run at the same time, since they all Need the Walk.
 ## Dependencies
 
 - Director
-- The K1Walk skill (or another consumer of `skill::Walk`)
+- The Walk skill (or another consumer of `skill::Walk`)
 - Mathematics intersection utility

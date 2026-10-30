@@ -36,8 +36,11 @@
 #include "message/skill/Say.hpp"
 
 #include "utility/skill/Script.hpp"
+#include "utility/support/run_cmd.hpp"
 
 namespace module::skill {
+
+    using utility::support::run_cmd;
 
     using extension::Configuration;
     using message::actuation::HeadSequence;
@@ -72,7 +75,7 @@ namespace module::skill {
                                          sanitized_text.end());
                 }
                 log<DEBUG>("Saying: ", sanitized_text);
-                system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
+                run_cmd(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
                                    + cfg.device_name)
                            .c_str());
 

@@ -65,7 +65,7 @@ namespace module::input {
     // SharedImageWriter.hpp in NUSim. This is the SIM-ONLY reader: VERSION 2 is a
     // lock-free seqlock (`seqlock` even = a complete frame is published, odd = writer
     // mid-write; frame number = seqlock/2). The real robot's NUbridge writer + the
-    // shared input::K1Camera reader stay on the old VERSION 1 mutex layout, so this
+    // shared input::Camera reader stay on the old VERSION 1 mutex layout, so this
     // decoupling never touches the on-robot path.
     struct SharedImageHeader {
         static constexpr uint32_t MAGIC   = 0x4E42494D;  // "NBIM"

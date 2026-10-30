@@ -14,7 +14,7 @@ namespace module::skill {
 
     /// Runs the mujoco_playground K1Getup fall-recovery policy (72-obs / 22-action ONNX)
     /// at 50 Hz and streams joint targets to the platform as BoosterLowCmd, the same
-    /// low-level path skill::SimK1Walk uses. NUSim's counterpart to skill::K1GetUp, whose
+    /// low-level path skill::SimK1Walk uses. NUSim's counterpart to skill::GetUp, whose
     /// GetUpWithMode() RPC NUSim ignores. Unlike the walk policy, actions are offsets on the
     /// *current* joint configuration (the Go1Getup convention the task was trained with), and
     /// the policy owns the head.

@@ -38,7 +38,6 @@
 #include "message/vision/BoundingBoxes.hpp"
 #include "message/vision/FieldIntersections.hpp"
 #include "message/vision/Goal.hpp"
-#include "message/vision/GreenHorizon.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/math/coordinates.hpp"
@@ -46,7 +45,6 @@
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
-#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::vision {
 
@@ -61,13 +59,11 @@ namespace module::vision {
     using message::vision::FieldIntersections;
     using message::vision::Goal;
     using message::vision::Goals;
-    using message::vision::GreenHorizon;
     using message::vision::Robot;
     using message::vision::Robots;
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
-    using utility::math::geometry::point_in_convex_hull;
     using utility::support::Expression;
     using utility::vision::unproject;
 
@@ -103,9 +99,9 @@ namespace module::vision {
             }
         });
 
-        on<Trigger<Image>, Optional<With<GreenHorizon>>, Single>().then(
+        on<Trigger<Image>, Single>().then(
             "Yolo Main Loop",
-            [this](const Image& img, const std::shared_ptr<const GreenHorizon>& horizon) {
+            [this](const Image& img) {
                 if (!model_loaded) {
                     return;
                 }
@@ -277,13 +273,6 @@ namespace module::vision {
                     bbox->corners.push_back(bottom_left_ray);
 
                     if (objects[class_id].name == "Ball") {
-                        // Get the vector in world space to check if it is in the field
-                        Eigen::Vector3d rBWw = img.Hcw.inverse() * ray_to_camera_space(centre_ray);
-                        // Only consider vision measurements within the green horizon, if it exists
-                        if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rBWw)) {
-                            continue;  // skip this run of the loop and continue the for loop
-                        }
-
                         Ball b{};
                         b.uBCc = ray_to_camera_space(centre_ray).normalized();
                         b.measurements.emplace_back();
@@ -311,13 +300,6 @@ namespace module::vision {
                     }
 
                     if (objects[class_id].name == "K1") {
-                        // Get the vector in world space to check if it is in the field
-                        Eigen::Vector3d rRWw = img.Hcw.inverse() * ray_to_camera_space(bottom_centre_ray);
-                        // Only consider vision measurements within the green horizon, if it exists
-                        if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rRWw)) {
-                            continue;  // skip this run of the loop and continue the for loop
-                        }
-
                         Robot r;
                         r.rRCc   = ray_to_camera_space(bottom_centre_ray);
                         r.radius = bottom_centre_ray.dot(bottom_left_ray);
@@ -331,11 +313,6 @@ namespace module::vision {
                         // Project the centre ray onto the ground plane in world {w} space
                         Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
                         Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
-
-                        // Only consider vision measurements within the green horizon, if it exists
-                        if (horizon != nullptr && !point_in_convex_hull(horizon->horizon, rIWw)) {
-                            continue;  // skip this run of the loop and continue the for loop
-                        }
 
                         i.rIWw = rIWw;
                         if (objects[class_id].name == "LCross") {

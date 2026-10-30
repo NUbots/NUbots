@@ -41,8 +41,11 @@ extern "C" {
 #include "utility/platform/aliases.hpp"
 #include "utility/support/network.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/support/run_cmd.hpp"
 
 namespace module::tools {
+
+    using utility::support::run_cmd;
 
     using extension::Configuration;
 
@@ -132,20 +135,20 @@ namespace module::tools {
                     configure_network();
                     break;
                 case 'S':  // starts the robocup service
-                    system("systemctl enable robocup.service");
-                    system("systemctl start robocup.service");
+                    run_cmd("systemctl enable robocup.service");
+                    run_cmd("systemctl start robocup.service");
                     display.log_message = "RoboCup service started!";
                     break;
                 case 'D':  // stops the robocup service
-                    system("systemctl stop robocup.service");
-                    system("systemctl disable robocup.service");
+                    run_cmd("systemctl stop robocup.service");
+                    run_cmd("systemctl disable robocup.service");
                     display.log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
-                    system("nmcli radio all on");
+                    run_cmd("nmcli radio all on");
                     break;
                 case 'W':  // disables wifi services
-                    system("nmcli radio all off");
+                    run_cmd("nmcli radio all off");
                     break;
                 case 'X':  // shutdown powerplant
                     powerplant.shutdown();
@@ -153,7 +156,7 @@ namespace module::tools {
                 case 'B':  // restarts the booster daemon
                     if (confirm_prompt("Warning: robot will briefly go limp! Restart booster-daemon? (y/n)")) {
                         draw_popup("Restarting...");
-                        system("systemctl restart booster-daemon.service");
+                        run_cmd("systemctl restart booster-daemon.service");
                         display.log_message = "booster-daemon.service has been restarted.";
                     }
                     break;
@@ -226,8 +229,8 @@ namespace module::tools {
         draw_popup("Connecting...");
 
         // Reload connections and bring up the new profile
-        system("nmcli connection reload > /dev/null 2>&1");
-        system(("nmcli connection up wifi-robocup ifname " + wifi_interface + " > /dev/null 2>&1").c_str());
+        run_cmd("nmcli connection reload > /dev/null 2>&1");
+        run_cmd(("nmcli connection up wifi-robocup ifname " + wifi_interface + " > /dev/null 2>&1").c_str());
 
         display.log_message = "Network configured!";
     }
@@ -311,7 +314,7 @@ namespace module::tools {
 
         // Write the nmconnection file for the RoboCup WiFi network
         const std::string nm_dir = fmt::format("system/{}/etc/NetworkManager/system-connections", hostname);
-        system(("mkdir -p " + nm_dir).c_str());
+        run_cmd(("mkdir -p " + nm_dir).c_str());
 
         std::ofstream(fmt::format("{}/wifi-robocup.nmconnection", nm_dir)) << fmt::format(
             "[connection]\n"
@@ -531,23 +534,24 @@ namespace module::tools {
         attron(A_ITALIC);
         mvprintw(2, display.C1_PAD, "Networking");
         attroff(A_ITALIC);
-        mvprintw(4, display.C1_PAD, ("Hostname        : " + hostname).c_str());
-        mvprintw(5, display.C1_PAD, ("Robot Name      : " + robot_name).c_str());
-        mvprintw(6, display.C1_PAD, ("Wifi Interface  : " + wifi_interface).c_str());
-        mvprintw(7, display.C1_PAD, ("Use DHCP        : " + std::string(use_dhcp ? "True" : "False")).c_str());
+        mvprintw(4, display.C1_PAD, "%s", ("Hostname        : " + hostname).c_str());
+        mvprintw(5, display.C1_PAD, "%s", ("Robot Name      : " + robot_name).c_str());
+        mvprintw(6, display.C1_PAD, "%s", ("Wifi Interface  : " + wifi_interface).c_str());
+        mvprintw(7, display.C1_PAD, "%s", ("Use DHCP        : " + std::string(use_dhcp ? "True" : "False")).c_str());
         mvprintw(8,
                  display.C1_PAD,
+                 "%s",
                  ("IP Address      : " + (use_dhcp ? std::string("(automatic)") : ip_address)).c_str());
-        mvprintw(9, display.C1_PAD, ("SSID            : " + ssid).c_str());
-        mvprintw(10, display.C1_PAD, ("Password        : " + password).c_str());
+        mvprintw(9, display.C1_PAD, "%s", ("SSID            : " + ssid).c_str());
+        mvprintw(10, display.C1_PAD, "%s", ("Password        : " + password).c_str());
 
         attron(A_ITALIC);
         mvprintw(2, display.C2_PAD, "Game Configuration");
         attroff(A_ITALIC);
-        mvprintw(5, display.C2_PAD, ("Player ID: " + std::to_string(player_id)).c_str());
-        mvprintw(6, display.C2_PAD, ("Team ID  : " + std::to_string(team_id)).c_str());
-        mvprintw(7, display.C2_PAD, ("Goalie? : " + std::string(is_goalie ? "True" : "False")).c_str());
-        mvprintw(8, display.C2_PAD, ("Field Type: " + field_type).c_str());
+        mvprintw(5, display.C2_PAD, "%s", ("Player ID: " + std::to_string(player_id)).c_str());
+        mvprintw(6, display.C2_PAD, "%s", ("Team ID  : " + std::to_string(team_id)).c_str());
+        mvprintw(7, display.C2_PAD, "%s", ("Goalie? : " + std::string(is_goalie ? "True" : "False")).c_str());
+        mvprintw(8, display.C2_PAD, "%s", ("Field Type: " + field_type).c_str());
 
         // Print commands
         // Heading Commands
@@ -579,11 +583,11 @@ namespace module::tools {
             attron(A_STANDOUT);
             mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1,
                      display.C1_PAD + (display.COMMAND_GAP * (i / 2)),
-                     COMMANDS[i]);
+                     "%s", COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
             int gap = i == 0 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
-            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1, gap + (display.COMMAND_GAP * (i / 2)), MEANINGS[i]);
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 1, gap + (display.COMMAND_GAP * (i / 2)), "%s", MEANINGS[i]);
         }
 
         // Print the second row
@@ -592,16 +596,16 @@ namespace module::tools {
             attron(A_STANDOUT);
             mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2,
                      display.C1_PAD + (display.COMMAND_GAP * ((i - 1) / 2)),
-                     COMMANDS[i]);
+                     "%s", COMMANDS[i]);
             attroff(A_BOLD);
             attroff(A_STANDOUT);
             int gap = i == 1 ? 8 : 4;  // ENTER and SPACE are longer than the single-letter commands
-            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2, gap + (display.COMMAND_GAP * ((i - 1) / 2)), MEANINGS[i]);
+            mvprintw(LINES - display.COMMAND_BOTTOM_PAD + 2, gap + (display.COMMAND_GAP * ((i - 1) / 2)), "%s", MEANINGS[i]);
         }
 
         // Print any log_messages
         attron(A_BOLD);
-        mvprintw(LINES - display.LOG_BOTTOM_PAD, display.C1_PAD, display.log_message.c_str());
+        mvprintw(LINES - display.LOG_BOTTOM_PAD, display.C1_PAD, "%s", display.log_message.c_str());
         attroff(A_BOLD);
 
         // Highlight our selected point

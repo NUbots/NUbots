@@ -40,8 +40,11 @@
 #include "extension/Configuration.hpp"
 
 #include "utility/platform/aliases.hpp"
+#include "utility/support/run_cmd.hpp"
 
 namespace module::tools {
+
+    using utility::support::run_cmd;
 
     using extension::Configuration;
     namespace fs = std::filesystem;
@@ -202,13 +205,13 @@ namespace module::tools {
                         }
                     }
                 }
-                std::system("nmcli connection reload");
+                run_cmd("nmcli connection reload");
 
                 const std::string connection   = config["connection"].as<std::string>();
                 const fs::path connection_file = nm_connections / (connection + ".nmconnection");
                 if (fs::is_regular_file(connection_file)) {
                     log<INFO>(fmt::format("Activating connection {}", connection));
-                    std::system(fmt::format("nmcli connection up {}", connection).c_str());
+                    run_cmd(fmt::format("nmcli connection up {}", connection).c_str());
                 }
                 else {
                     log<WARN>(fmt::format("Connection profile {} not found, skipping activation", connection));
@@ -256,13 +259,13 @@ namespace module::tools {
                  **********/
                 log<INFO>("Ensuring relevant APT packages are installed");
                 log<DEBUG>("Updating existing packages and upgrading");
-                std::system("apt-get update && apt-get upgrade -y");
+                run_cmd("apt-get update && apt-get upgrade -y");
                 for (const auto& c : config["apt"].config) {
                     std::string package = c.as<std::string>();
                     log<TRACE>(fmt::format("Checking package {}", package));
-                    if (std::system(fmt::format("dpkg -s {} &>/dev/null", package).c_str()) != 0) {
+                    if (run_cmd(fmt::format("dpkg -s {} &>/dev/null", package).c_str()) != 0) {
                         log<DEBUG>(fmt::format("Installing APT package {}", package));
-                        std::system(fmt::format("apt-get install --yes {}", package).c_str());
+                        run_cmd(fmt::format("apt-get install --yes {}", package).c_str());
                     }
                 }
 
@@ -273,9 +276,9 @@ namespace module::tools {
                 for (const auto& c : config["systemd"].config) {
                     std::string unit = c.as<std::string>();
                     log<TRACE>(fmt::format("Checking systemd unit {}", unit));
-                    if (std::system(fmt::format("systemctl is-enabled --quiet {}", unit).c_str()) != 0) {
+                    if (run_cmd(fmt::format("systemctl is-enabled --quiet {}", unit).c_str()) != 0) {
                         log<DEBUG>(fmt::format("Enabling systemd unit {}", unit));
-                        std::system(fmt::format("systemctl enable {}", unit).c_str());
+                        run_cmd(fmt::format("systemctl enable {}", unit).c_str());
                     }
                 }
 
@@ -284,7 +287,7 @@ namespace module::tools {
                  **********/
                 if (config["generate_locale"].as<bool>()) {
                     log<INFO>("Ensuring locales are generated");
-                    std::system("locale-gen");
+                    run_cmd("locale-gen");
                 }
 
                 /********
@@ -358,14 +361,14 @@ namespace module::tools {
                     auto pos = groups.find(group);
                     if (pos == std::string::npos) {
                         log<INFO>(fmt::format("Group {} doesn't exist. Creating it and adding user {}", group, user));
-                        std::system(fmt::format("groupadd {}", group).c_str());
-                        std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                        run_cmd(fmt::format("groupadd {}", group).c_str());
+                        run_cmd(fmt::format("useradd -m -G {} {}", group, user).c_str());
                     }
                     else {
                         auto eol = groups.find("\n", pos);
                         if (groups.substr(pos, eol - pos).find(user) == std::string::npos) {
                             log<INFO>(fmt::format("Adding user {} to group {}", user, group));
-                            std::system(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                            run_cmd(fmt::format("useradd -m -G {} {}", group, user).c_str());
                         }
                     }
                 }
@@ -399,7 +402,7 @@ namespace module::tools {
                  * PYTHON *
                  **********/
                 // Make sure python checks /usr/local for packages
-                std::system(
+                run_cmd(
                     R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
             > $(python -c "import site; print(site.getsitepackages()[0],'/local.pth',sep='')"))X");
 
@@ -408,9 +411,9 @@ namespace module::tools {
                  ***********/
                 log<INFO>("Ensuring correct ownership is maintained");
                 log<INFO>(fmt::format("Forcing ownership to {0}:{0} in {1}", user, home.string()));
-                std::system(fmt::format("chown -R {0}:{0} {1}", user, home.string()).c_str());
+                run_cmd(fmt::format("chown -R {0}:{0} {1}", user, home.string()).c_str());
                 log<INFO>(fmt::format("Forcing ownership to {0}:{0} in /usr/local", user));
-                std::system(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
+                run_cmd(fmt::format("chown -R {0}:{0} /usr/local", user).c_str());
 
                 if (cli && std::find(cli->begin(), cli->end(), "--hostname") != cli->end()) {
                     log<WARN>("Hostname change will be reflected next time you SSH into this robot.");

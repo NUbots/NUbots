@@ -6,7 +6,7 @@ Reads the camera image out of the shared-memory segment written by **NUSim** (th
 MuJoCo simulator's `Camera` module / `SharedImageWriter`) and emits it as
 `message::input::Image`. NUSimCamera reads NUSim's VERSION 2 **lock-free seqlock** layout.
 
-Use this module in `roles/nusim/*`; use `input::K1Camera` in the on-robot roles.
+Use this module in `roles/nusim/*`; use `input::Camera` in the on-robot roles.
 
 ## Usage
 

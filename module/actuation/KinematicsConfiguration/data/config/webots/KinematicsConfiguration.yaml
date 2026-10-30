@@ -1,4 +1,0 @@
-head:
-  limits: # pitch limit is a function of yaw ... need to calculate this properly
-    yaw: [-pi/2, pi/2] # [min_yaw, max_yaw]
-    pitch: [-pi/2, pi/2] # [min_pitch, max_pitch]

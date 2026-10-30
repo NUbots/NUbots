@@ -7,7 +7,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/K1Servos.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/booster/BoosterLowCmd.hpp"
 #include "message/booster/BoosterMode.hpp"
@@ -273,11 +273,11 @@ namespace module::skill {
                     return;
                 }
 
-                // Emit the command as a Director-arbitrated K1Servos subtask (not a raw
+                // Emit the command as a Director-arbitrated Servos subtask (not a raw
                 // BoosterLowCmd), so the Director owns the low-level channel: kick subsumes
                 // walk, get-up subsumes kick, by task priority. The subtask keeps the Kick
                 // task alive, so no Continue is needed.
-                auto k1_servos     = std::make_unique<message::actuation::K1Servos>();
+                auto k1_servos     = std::make_unique<message::actuation::Servos>();
                 k1_servos->command = *low;
                 emit<Task>(std::move(k1_servos));
             });

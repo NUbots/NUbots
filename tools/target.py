@@ -56,7 +56,7 @@ def run(target, username, uid, reset, **kwargs):
         # Ensure the platform image is built
         platform.build(defaults.image, target, username, uid, reset)
 
-        # platform.build() tags generic as generic_k1 (see the NUgus-conflict note there),
+        # platform.build() tags generic as generic_k1 (see the image-name conflict note there),
         # so the tag source must match or docker errors with "No such image".
         if target == "generic":
             target += "_k1"

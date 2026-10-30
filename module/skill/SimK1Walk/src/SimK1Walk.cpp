@@ -8,7 +8,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/K1Servos.hpp"
+#include "message/actuation/Servos.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
@@ -180,7 +180,7 @@ namespace module::skill {
                 }
 
                 // In-walk kick: no kick primitive in the policy, so emulate it as a forward
-                // velocity burst held for kick_duration (same emulation as skill::K1Walk).
+                // velocity burst held for kick_duration (same emulation as skill::Walk).
                 Eigen::Vector3d cmd = walk.velocity_target;
                 if (walk.kick) {
                     if (run_reason == RunReason::NEW_TASK) {
@@ -346,10 +346,10 @@ namespace module::skill {
                 low->motor_cmd[HEAD_PITCH].kp = static_cast<float>(cfg.head_kp);
                 low->motor_cmd[HEAD_PITCH].kd = static_cast<float>(cfg.head_kd);
 
-                // Emit the command as a Director-arbitrated K1Servos subtask (not a raw
+                // Emit the command as a Director-arbitrated Servos subtask (not a raw
                 // BoosterLowCmd), so the Director owns the low-level channel and subsumes
                 // walk when a higher-priority kick or get-up is active.
-                auto k1_servos     = std::make_unique<message::actuation::K1Servos>();
+                auto k1_servos     = std::make_unique<message::actuation::Servos>();
                 k1_servos->command = *low;
                 emit<Task>(std::move(k1_servos));
 

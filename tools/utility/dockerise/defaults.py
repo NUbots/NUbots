@@ -33,7 +33,7 @@ from . import platform
 
 cache_registry = "nubots"
 image = "nubots"
-image_user = "nubots"
+image_user = "booster"
 directory = "NUbots"
 
 # This can fail if the local user id doesn't exist (e.g. you're in docker and set a uid)

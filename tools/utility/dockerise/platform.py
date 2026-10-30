@@ -88,7 +88,7 @@ def build(image, platform, username, uid, reset):
     _selected = platform == "selected_k1"
     platform = selected(image, username) if _selected else platform
 
-    # Temporary workaround to prevent conflict with NUgus
+    # Temporary workaround to prevent an image name conflict
     if platform == "generic":
         platform += "_k1"
 

@@ -37,7 +37,7 @@ namespace utility::platform::Booster {
      * @brief Idempotently initialise the process-wide Booster DDS ChannelFactory.
      *
      * ChannelFactory is a singleton shared by every module that talks to the robot over DDS
-     * (K1Camera, platform::Booster::HardwareIO, ...) and must only be initialised once per process.
+     * (Camera, platform::Booster::HardwareIO, ...) and must only be initialised once per process.
      * NUClear does not order on<Startup> reactions between modules, so no module can assume another
      * has already initialised it. Every module that needs DDS should call this instead of calling
      * ChannelFactory::Instance()->Init() directly; the first caller wins and the rest are no-ops.

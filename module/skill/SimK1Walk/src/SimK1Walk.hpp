@@ -15,7 +15,7 @@ namespace module::skill {
     /// Runs the mujoco_playground K1 joystick walk policy (79-obs / 22-action ONNX, see
     /// NUSim docs/OBS_ACTION_CONTRACT.md) on the robot side and streams the resulting
     /// joint targets to the platform as BoosterLowCmd (rt/joint_ctrl, CUSTOM mode). This
-    /// replaces skill::K1Walk's Move() RPC path: locomotion inference lives here, and the
+    /// replaces skill::Walk's Move() RPC path: locomotion inference lives here, and the
     /// robot/simulator only has to track servo joint commands.
     ///
     /// The observation carries no base linear velocity. It used to (82 obs), sourced from a

@@ -67,8 +67,6 @@ packer/build.pwi
 *TSWLatexianTemp*
 
 # Webots container building stuff
-/docker/nugus_sim/binaries/
-/docker/nugus_sim/toolchain/
 /robocup-logs/
 
 # Tests
@@ -78,11 +76,7 @@ packer/build.pwi
 /home/nubots/NUbots/log/*
 log
 log/*
-nsga2-output/*
 log.txt
-
-# ScriptTuner autosaves
-/.scripttuner/
 
 # Generated documentation
 /doc/Generated/*

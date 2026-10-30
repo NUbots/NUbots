@@ -70,7 +70,7 @@ def run(target, local, user, config, toolchain, **kwargs):
         target = {
             "{}{}".format(k, num): "10.1.1.{}".format(num)
             for num in range(1, num_robots + 1)
-            for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
+            for k, v in zip(("n", "i", "igus"), [num] * num_robots)
         }.get(target, target)
 
     # If no user, use our user

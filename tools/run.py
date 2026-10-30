@@ -82,7 +82,7 @@ def run(args, use_gdb, trace, trace_output, webots_port, player_id, team_id, **k
 
     # Make sure default log path exists
     if use_asan:
-        log_path = os.path.join(os.sep, "home", "nubots", "NUbots", "log")
+        log_path = os.path.join(os.sep, "home", "booster", "NUbots", "log")
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Add necessary ASAN environment variables

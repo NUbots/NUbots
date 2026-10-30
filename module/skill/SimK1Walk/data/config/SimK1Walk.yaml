@@ -23,7 +23,7 @@ head:
   kp: 10.0
   kd: 0.5
 
-# In-walk kick emulation: forward velocity burst (same emulation as skill::K1Walk)
+# In-walk kick emulation: forward velocity burst (same emulation as skill::Walk)
 kick:
   velocity: [0.5, 0, 0]
   duration: 0.5

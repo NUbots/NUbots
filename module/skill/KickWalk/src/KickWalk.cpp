@@ -49,7 +49,7 @@ namespace module::skill {
         });
 
         on<Provide<Kick>, Uses<Walk>>().then(
-            [this](const Kick& kick, const RunReason& run_reason, const Uses<Walk>& walk) {
+            [this](const RunReason& run_reason, const Uses<Walk>& walk) {
                 if (run_reason == RunReason::NEW_TASK) {
                     if (NUClear::clock::now() - last_kick_end < std::chrono::seconds(cfg.new_kick_wait_time)) {
                         log<DEBUG>("KickWalk is waiting for cooldown after last kick.");
