@@ -15,7 +15,7 @@ jobs:
     name: "Remove extra DockerHub container"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
 
     # We need `jq` for the script, so we run in a container with it installed
     container:
