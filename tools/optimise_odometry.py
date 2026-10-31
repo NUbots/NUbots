@@ -40,19 +40,19 @@ from utility.dockerise import run_on_docker
 
 BUILD_DIR = "/home/nubots/build"
 EXECUTABLE_PATH = os.path.join(BUILD_DIR, "bin/webots/odometry_benchmark")
-SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/SensorFilter.yaml")
+SENSOR_FILTER_YAML_PATH = os.path.join(BUILD_DIR, "config/webots/Sensors.yaml")
 DESTINATION_DIR = os.path.join(BUILD_DIR, "recordings/optimisation_results")
 
 
 def modify_yaml(params, sensor_filter_yaml_path):
     """
-    Modifies the SensorFilter YAML configuration file with the provided parameters
+    Modifies the Sensors YAML configuration file with the provided parameters
     while preserving comments and formatting.
     """
     yaml_parser = YAML()
     yaml_parser.indent(mapping=2, sequence=4, offset=2)
 
-    # Update SensorFilter.yaml
+    # Update Sensors.yaml
     with open(sensor_filter_yaml_path, "r") as file:
         sensor_filter_config = yaml_parser.load(file)
 
@@ -139,7 +139,7 @@ def objective(trial):
     """
     The objective function for Optuna that defines the optimisation problem for odometry.
     """
-    # Define search space for Kp and Ki based on SensorFilter.yaml defaults/expectations
+    # Define search space for Kp and Ki based on Sensors.yaml defaults/expectations
     kp = trial.suggest_float("Kp", 1e-2, 1e1, log=True)
     ki = trial.suggest_float("Ki", 1e-2, 1e1, log=True)
 
@@ -163,9 +163,7 @@ def register(parser):
     """
     Register command-line arguments for the optimization tool.
     """
-    parser.description = (
-        "Optimises Mahony filter gains (Kp, Ki) in SensorFilter.yaml using Optuna and OdometryBenchmark."
-    )
+    parser.description = "Optimises Mahony filter gains (Kp, Ki) in Sensors.yaml using Optuna and OdometryBenchmark."
     parser.add_argument("--nbs_file", type=str, required=True, help="Path to the .nbs file with ground truth data.")
     parser.add_argument("--n_trials", type=int, default=100, help="Number of optimisation trials to run.")
     parser.add_argument("--hostname", type=str, default="webots", help="Specify the Docker hostname (default: webots).")
@@ -191,8 +189,8 @@ def run(n_trials, nbs_file, **kwargs):
     # Save best config
     modify_yaml(study.best_params, SENSOR_FILTER_YAML_PATH)
     os.makedirs(DESTINATION_DIR, exist_ok=True)
-    shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, "BestSensorFilter.yaml"))
-    cprint(f"\n✅ Best SensorFilter YAML saved to {DESTINATION_DIR}/BestSensorFilter.yaml", "green")
+    shutil.copy(SENSOR_FILTER_YAML_PATH, os.path.join(DESTINATION_DIR, "BestSensors.yaml"))
+    cprint(f"\n✅ Best Sensors YAML saved to {DESTINATION_DIR}/BestSensors.yaml", "green")
 
     # Visualisations
     try:

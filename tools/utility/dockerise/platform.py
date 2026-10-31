@@ -60,7 +60,8 @@ def selected(image, username):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
+            # sorted() alone: the list() platform helper below shadows the builtin
+            platform = sorted(names)[0]
             print(f"        The platform chosen will be {platform}")
             return platform
 
@@ -85,7 +86,7 @@ def build(image, platform, username, uid, reset):
 
     # If we are building the selected platform we need to work out what that refers to
     _selected = platform == "selected"
-    platform = selected(image) if _selected else platform
+    platform = selected(image, username) if _selected else platform
 
     local_tag = defaults.image_name(platform, image, username)
     dockerdir = os.path.join(b.project_dir, "docker")
@@ -149,6 +150,8 @@ def build(image, platform, username, uid, reset):
             "linux/amd64",
             "--build-arg",
             f"platform={platform}",
+            "--platform",
+            "linux/amd64",
             "--build-arg",
             f"user_uid={uid}",
             "--output=type=docker",

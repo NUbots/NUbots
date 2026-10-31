@@ -20,7 +20,14 @@ define_property(
 include(CMakeParseArguments)
 function(GenerateNeutron)
   # We need protobuf and python to generate the neutron messages
-  find_package(Protobuf REQUIRED)
+  find_package(Protobuf CONFIG)
+  if(Protobuf_FOUND)
+    set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc")
+    set(PROTOBUF_PROTOC_EXECUTABLE "/usr/bin/protoc")
+  else()
+    message(WARNING "Falling back to cmake FindProtobuf as Protobuf was not found via CONFIG")
+    find_package(Protobuf REQUIRED)
+  endif()
   find_package(Python3 REQUIRED)
 
   # Set the path to our generating scripts
@@ -72,7 +79,7 @@ function(GenerateNeutron)
     COMMAND
       ${PROTOBUF_PROTOC_EXECUTABLE} --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt
       --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/descriptor.pb -I${NEUTRON_PARENT_DIR} -I${NEUTRON_BUILTIN_DIR}
-      ${NEUTRON_PROTO}
+      ${NEUTRON_PROTO} COMMAND_ERROR_IS_FATAL ANY
   )
   file(READ "${CMAKE_CURRENT_BINARY_DIR}/dependencies.txt" dependencies)
   string(REGEX REPLACE "\\\\\n" ";" dependencies ${dependencies})

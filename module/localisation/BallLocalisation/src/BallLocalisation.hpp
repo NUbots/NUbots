@@ -90,6 +90,8 @@ namespace module::localisation {
             double team_guess_error = 0.0;
             /// @brief Timeout for switching from own balls to teammate balls
             double team_guess_default_timer = 0.0;
+            /// @brief Maximum distance from the field that a ball can be before it is ignored
+            double max_distance_from_field = 0.0;
 
         } cfg;
 

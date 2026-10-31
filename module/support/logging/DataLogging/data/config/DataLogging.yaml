@@ -10,14 +10,15 @@ output:
 messages:
   # Input
   message.platform.RawSensors: true
-  message.input.Image: true
+  message.input.Image: false
   message.output.CompressedImage: true
+  message.input.Message: true
+  message.input.GameState: true
   # Vision
   message.vision.Balls: true
   message.vision.Goals: true
-  message.vision.GreenHorizon: true
-  message.vision.FieldLines: true
-  message.vision.VisualMesh: true
+  message.vision.FieldLines: false
+  message.vision.FieldIntersections: true
   message.vision.BoundingBoxes: true
   # Odometry and Localisation
   message.localisation.Ball: true
@@ -25,9 +26,11 @@ messages:
   message.localisation.Robot: true
   message.input.Sensors: true
   message.support.FieldDescription: true
+  message.booster.BoosterOdometry: true
   # Behaviour state
   message.behaviour.state.WalkState: true
-  message.behaviour.state.Stability: true
+  message.purpose.Purpose: true
+  message.strategy.TimeToBall: true
   # Logging and Support
   message.support.nusight.Overview: true
   message.eye.DataPoint: true

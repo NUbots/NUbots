@@ -129,7 +129,8 @@ jobs:
             type=registry,ref=nubots/nubots:${{ env.DOCKER_TAG }}
             type=registry,ref=nubots/nubots:generic
           cache-to: type=inline
-          build-args: platform=generic
+          build-args: |
+            platform=generic
           push: true
 
       - id: image_output

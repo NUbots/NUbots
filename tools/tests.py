@@ -38,7 +38,7 @@ from utility.dockerise import run_on_docker
 TESTS_OUTPUT_DIR = "tests_output"
 
 
-@run_on_docker(image="nubots:generic")
+@run_on_docker
 def register(command):
 
     command.help = "Run and list tests"
@@ -96,7 +96,7 @@ def register(command):
     )
 
 
-@run_on_docker(image="nubots:generic")
+@run_on_docker
 def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
 
     # Change into the build directory

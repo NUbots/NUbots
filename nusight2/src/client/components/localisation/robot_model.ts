@@ -5,6 +5,7 @@ import { action } from "mobx";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
@@ -28,6 +29,8 @@ export class ServoMotorSet {
   @observable leftShoulderRoll: ServoMotor;
   @observable rightElbow: ServoMotor;
   @observable leftElbow: ServoMotor;
+  @observable rightElbowYaw: ServoMotor;
+  @observable leftElbowYaw: ServoMotor;
   @observable rightHipYaw: ServoMotor;
   @observable leftHipYaw: ServoMotor;
   @observable rightHipRoll: ServoMotor;
@@ -50,6 +53,8 @@ export class ServoMotorSet {
     leftShoulderRoll,
     rightElbow,
     leftElbow,
+    rightElbowYaw,
+    leftElbowYaw,
     rightHipYaw,
     leftHipYaw,
     rightHipRoll,
@@ -71,6 +76,8 @@ export class ServoMotorSet {
     this.leftShoulderRoll = leftShoulderRoll;
     this.rightElbow = rightElbow;
     this.leftElbow = leftElbow;
+    this.rightElbowYaw = rightElbowYaw;
+    this.leftElbowYaw = leftElbowYaw;
     this.rightHipYaw = rightHipYaw;
     this.leftHipYaw = leftHipYaw;
     this.rightHipRoll = rightHipRoll;
@@ -95,6 +102,8 @@ export class ServoMotorSet {
       leftShoulderRoll: ServoMotor.of(),
       rightElbow: ServoMotor.of(),
       leftElbow: ServoMotor.of(),
+      rightElbowYaw: ServoMotor.of(),
+      leftElbowYaw: ServoMotor.of(),
       rightHipYaw: ServoMotor.of(),
       leftHipYaw: ServoMotor.of(),
       rightHipRoll: ServoMotor.of(),
@@ -152,6 +161,7 @@ export class LocalisationRobotModel {
   @observable Htw: Matrix4; // World to torso
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
+  @observable Hcw: Matrix4; // World to camera
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
   @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
@@ -164,6 +174,16 @@ export class LocalisationRobotModel {
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
   @observable robots: { id: number; rRWw: Vector3; color: string }[];
   @observable purpose: string;
+  // This robot's own estimate of how long it - and each teammate it can see - would take to reach
+  // the ball, keyed by player id (self included) - see network.ts#onTimeToBall.
+  @observable timeToBallEstimates: Map<number, number> = new Map();
+  // Teammates seen via the UDP team-communication broadcast (message.input.Message), keyed by
+  // player id. Each is a full LocalisationRobotModel so it can be rendered with the exact same
+  // components used for our own robot (K1, PurposeLabel) - see network.ts#onTeamCommunication.
+  @observable teammates: Map<number, LocalisationRobotModel> = new Map();
+  // Desired position when performing the Support purpose. Already in field space (unlike most
+  // fields on this model, which store world-space data and expose field-space via a computed).
+  @observable desiredSupportPosition?: Vector2;
   @observable associationLines?: Line[];
   @observable maxAlignRadius: number;
   @observable minAlignRadius: number;
@@ -194,6 +214,7 @@ export class LocalisationRobotModel {
     Htw,
     Hrw,
     Hfw,
+    Hcw,
     Hrd,
     Hwp,
     Rwt,
@@ -205,6 +226,7 @@ export class LocalisationRobotModel {
     goals,
     robots,
     purpose,
+    desiredSupportPosition,
     associationLines,
     maxAlignRadius,
     minAlignRadius,
@@ -228,6 +250,7 @@ export class LocalisationRobotModel {
     Htw: Matrix4;
     Hrw: Matrix4;
     Hfw: Matrix4;
+    Hcw: Matrix4;
     Hrd?: Matrix4;
     Hwp: Matrix4;
     Rwt: Quaternion;
@@ -239,6 +262,7 @@ export class LocalisationRobotModel {
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
     robots: { id: number; rRWw: Vector3; color: string }[];
     purpose: string;
+    desiredSupportPosition?: Vector2;
     associationLines?: Line[];
     maxAlignRadius: number;
     minAlignRadius: number;
@@ -268,6 +292,7 @@ export class LocalisationRobotModel {
     this.Htw = Htw;
     this.Hrw = Hrw;
     this.Hfw = Hfw;
+    this.Hcw = Hcw;
     this.Hrd = Hrd;
     this.Hwp = Hwp;
     this.Rwt = Rwt;
@@ -279,6 +304,7 @@ export class LocalisationRobotModel {
     this.goals = goals;
     this.robots = robots;
     this.purpose = purpose;
+    this.desiredSupportPosition = desiredSupportPosition;
     this.teamColour = teamColour || "blue";
     this.associationLines = associationLines;
     this.maxAlignRadius = maxAlignRadius;
@@ -305,6 +331,7 @@ export class LocalisationRobotModel {
       Htw: Matrix4.of(),
       Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hcw: Matrix4.of(),
       Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
@@ -343,6 +370,12 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  /** Camera to field transformation */
+  @computed
+  get Hfc(): Matrix4 {
+    return this.Hfw.multiply(this.Hcw.invert());
   }
 
   /** Field line points in field space */

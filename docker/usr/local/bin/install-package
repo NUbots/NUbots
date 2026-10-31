@@ -1,12 +1,98 @@
 #!/bin/sh
 set -e
 
-# If we are not root, rerun using sudo
+# If we are not root, rerun using sudo before the arguments are consumed by the parser below
 if ! [ $(id -u) = 0 ]; then
-    sudo "$0" "$@"
+    exec sudo "$0" "$@"
+fi
+
+# Parse arguments
+platform=""
+packages=""
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -p)
+            shift
+            platform="$1"
+            shift
+            ;;
+        *)
+            packages="$packages $1"
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$packages" ]; then
+    echo "Error: No packages given to install" >&2
+    exit 1
+fi
+
+if [ "$platform" = "orinnx" ]; then
+    # Install amd64 packages on host AND extract arm64 to sysroot
+    apt-get update
+
+    # Install amd64 versions on host
+    apt-get install -y --no-install-recommends $packages
+
+    # Download arm64 packages and their dependencies to sysroot
+    mkdir -p /tmp/debs
+    chmod 777 /tmp/debs
+    cd /tmp/debs
+
+    # Track installed packages to avoid redownloading dependencies
+    ledger=/l4t/targetfs/var/lib/install-package.list
+    touch "$ledger"
+    (sed -n 's/^Package: //p' /l4t/targetfs/var/lib/dpkg/status; cat "$ledger") | sort -u > have.txt
+
+    # Collect the requested packages and their
+    # recursive arm64 dependencies
+    for pkg in $packages; do
+        deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w")
+        if [ -z "$deps" ]; then
+            echo "Error: No arm64 package found for $pkg" >&2
+            exit 1
+        fi
+        echo "$pkg"
+        echo "$deps" | sed 's/:arm64$//'
+    done > deps.txt
+    sort -u deps.txt > want.txt
+
+    todo=$(comm -23 want.txt have.txt)
+    if [ -n "$todo" ]; then
+        # Architecture: all packages have no :arm64 candidate, so download those by bare name
+        dl=""
+        for p in $todo; do
+            if apt-cache show --no-all-versions "$p" 2>/dev/null | grep -q '^Architecture: all'; then
+                dl="$dl $p"
+            else
+                dl="$dl $p:arm64"
+            fi
+        done
+        # shellcheck disable=SC2086
+        apt-get download $dl || { echo "Error: Failed to download arm64 packages" >&2; exit 1; }
+    fi
+
+    # Extract all downloaded debs to sysroot
+    for deb in /tmp/debs/*.deb; do
+        [ -f "$deb" ] && dpkg-deb --fsys-tarfile "$deb" | tar -x --keep-directory-symlink -C /l4t/targetfs
+    done
+    [ -n "$todo" ] && printf '%s\n' $todo >> "$ledger"
+
+    # dpkg -x extracts absolute symlinks verbatim (e.g. libm.so -> /lib/aarch64-linux-gnu/libm.so.6),
+    # which resolve against the container root instead of the sysroot. Broken .so symlinks make the
+    # cross linker silently fall back to non-PIC static archives, so rewrite them as relative links.
+    find /l4t/targetfs -lname '/*' | while read -r link; do
+        target=$(readlink "$link")
+        ln -sfn "$(realpath -m --relative-to="$(dirname "$link")" "/l4t/targetfs$target")" "$link"
+    done
+
+    cd /
+    rm -rf /tmp/debs
+    rm -rf /var/cache/apt /var/lib/apt/lists/*
 else
-    # Update pacman, install the packages and cleanup the cache to make the layer smaller
-    pacman -Syu --noconfirm --needed
-    pacman -S --noconfirm --needed "$@"
-    rm -rf /var/cache
+    apt-get update
+    apt-get install -y --no-install-recommends $packages
+    rm -rf /var/cache/apt /var/lib/apt/lists/*
 fi

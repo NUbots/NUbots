@@ -8,13 +8,15 @@ The classes for the model are from COCO (https://docs.ultralytics.com/datasets/d
 
 Confidence thresholds for each class can be specified in the config.
 
-Inference can be ran on either the CPU or GPU using OpenVino (https://github.com/openvinotoolkit/openvino).
+Inference is run using ONNX Runtime (https://onnxruntime.ai/), either using the default CPU execution provider, or by using the TensorRT execution provider for NVIDIA GPUs.
+
+Note that inference using non-NVIDIA GPUs is currently unsupported.
 
 ## Usage
 
 Include this module to detect balls, goals, robots and field line intersections in images.
 
-To run with GPU device in docker you need to include the following flags `./b run {binary} --gpus all`
+NOTE: If you are running a model for the first time on a robot using the TensorRT execution provider, it may take a few minutes for the model to load, as the EP parses the ONNX file into a format that TensorRT can run. This does not happen on subsequent runs.
 
 ## Consumes
 
@@ -26,6 +28,6 @@ To run with GPU device in docker you need to include the following flags `./b ru
 
 ## Dependencies
 
-- [OpenVino](https://github.com/openvinotoolkit/openvino)
+- [ONNX Runtime](https://onnxruntime.ai/)
 - [Eigen Linear Algebra Library](https://eigen.tuxfamily.org/index.php)
 - [OpenCV](https://opencv.org/)

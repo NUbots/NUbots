@@ -1,0 +1,8 @@
+# NUSim runs the approach-then-kick chain on startup. FallRecovery must outrank every
+# behaviour or the walk keeps the motors while fallen and the get-up never runs.
+tasks:
+  align_ball_to_goal_priority: 1
+  find_ball_priority: 2
+  fall_recovery_priority: 3
+  look_at_ball_priority: 2
+  walk_to_kick_ball_priority: 1

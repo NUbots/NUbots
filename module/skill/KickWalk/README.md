@@ -11,11 +11,11 @@ Include this module to allow the robot to kick while walking. This is useful for
 ## Consumes
 
 - `message::skill::Kick` Task requesting the robot to kick
-- `message::skill::Walk` A Task requesting to walk, containing a vector with the desired velocity target, a boolean indicating whether to kick, and the leg to use when kicking.
+- `message::skill::Walk` A Task requesting to walk, containing a vector with the desired velocity target and a boolean indicating whether to kick.
 
 ## Emits
 
-- `message::skill::Walk` A Task requesting to walk, containing a vector with the desired velocity target, a boolean indicating whether to kick, and the leg to use when kicking.
+- `message::skill::Walk` A Task requesting to walk, containing a vector with the desired velocity target and a boolean indicating whether to kick.
 
 ## Dependencies
 

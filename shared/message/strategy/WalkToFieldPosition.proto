@@ -35,4 +35,10 @@ message WalkToFieldPosition {
     iso3 Hfd = 1;
     /// Whether to stop at the target position
     bool stop_at_target = 2;
+    /// Per-task override for the stop-threshold (metres/radians). 0 (default) = use
+    /// WalkToFieldPosition.yaml's stop_threshold.
+    double stop_threshold_override = 3;
+    /// Per-task override for the stopped (hysteresis) threshold. 0 (default) = use
+    /// WalkToFieldPosition.yaml's stopped_threshold.
+    double stopped_threshold_override = 4;
 }
