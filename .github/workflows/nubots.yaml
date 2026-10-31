@@ -25,7 +25,7 @@ jobs:
   # Detects changes to NUbots related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -57,7 +57,7 @@ jobs:
     name: "Build docker image"
 
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # We output the image tag that we create so the other jobs can use it
     outputs:
@@ -67,6 +67,7 @@ jobs:
     steps:
       # Free up space on the runner
       - name: Free Disk Space
+        if: runner.environment == 'github-hosted'
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
           tool-cache: true
@@ -148,7 +149,7 @@ jobs:
       needs.check_for_changes.outputs.has_cpp_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
     env:
       CTEST_OUTPUT_ON_FAILURE: 1
 
@@ -207,7 +208,7 @@ jobs:
     needs: [check_for_changes, build_docker]
 
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Run on the container we just built
     container:

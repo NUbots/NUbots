@@ -22,7 +22,7 @@ jobs:
     name: "Build and push image"
 
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Run once for each of the platforms
     strategy:
@@ -33,6 +33,7 @@ jobs:
     steps:
       # Free up space on the runner
       - name: Free Disk Space
+        if: runner.environment == 'github-hosted'
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
           android: true
