@@ -29,7 +29,7 @@ jobs:
   # Detects changes to NUsight related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -62,7 +62,7 @@ jobs:
     name: "Build docker image"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # We output the image tag that we create so the other jobs can use it
     outputs:
@@ -72,6 +72,7 @@ jobs:
     steps:
       # Free up space on the runner
       - name: Free Disk Space
+        if: runner.environment == 'github-hosted'
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
           android: true
@@ -151,7 +152,7 @@ jobs:
       needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Run on the container we just built
     container:
@@ -202,7 +203,7 @@ jobs:
       needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Run on the container we just built
     container:
@@ -249,7 +250,7 @@ jobs:
       needs.check_for_changes.outputs.has_docker_changes == 'true' ||
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
 
     # Run on the container we just built
     container:
