@@ -2,10 +2,8 @@ import * as React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { observable } from "mobx";
 import { Observer, observer } from "mobx-react";
-import * as THREE from "three";
 
 import { SeededRandom } from "../../../../../shared/base/random/seeded_random";
-import { Matrix4 } from "../../../../../shared/math/matrix4";
 import { Vector2 } from "../../../../../shared/math/vector2";
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { Vector4 } from "../../../../../shared/math/vector4";
