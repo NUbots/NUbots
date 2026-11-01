@@ -153,9 +153,6 @@ def build(image, platform, username, uid, reset):
             "--build-arg",
             f"user_uid={uid}",
             "--output=type=docker",
-            # Attestations turn the result into a manifest list, which the docker exporter can't load
-            "--provenance=false",
-            "--sbom=false",
             f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
             f"--cache-to=type=inline",
             dockerdir,
