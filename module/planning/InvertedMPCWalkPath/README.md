@@ -8,13 +8,14 @@ delivers, held inside the walk policy's capability envelope, with the command th
 afterwards in the policy's measured response. Nothing about the policy's transients is modelled: the plan assumes the
 robot delivers what it plans at once, and replanning every 0.1 s corrects for the difference. It only provides
 `WalkTo`; PlanWalkPath still provides `TurnOnSpot`, `PivotAroundPoint` and `Adjust`, and it can't share a role with
-PlanWalkPath, MPCWalkPath or ModelledMPCWalkPath, as they all provide `WalkTo`.
+PlanWalkPath, MPCWalkPath, ModelledMPCWalkPath or DynamicInvertedMPCWalkPath, as they all provide `WalkTo`.
 
-| Planner             | Plans                          | The policy's response                                        | Capability envelope |
-| ------------------- | ------------------------------ | ------------------------------------------------------------ | ------------------- |
-| MPCWalkPath         | the command, assumed delivered | PlanWalkPath's hand-tuned dead zone, after the solve         | no                  |
-| ModelledMPCWalkPath | the command                    | an identified Hammerstein model, inside the solver           | on the command      |
-| InvertedMPCWalkPath | the delivered velocity         | its measured steady-state response, inverted after the solve | on the velocity     |
+| Planner                    | Plans                          | The policy's response                                                                                              | Capability envelope |
+| -------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| MPCWalkPath                | the command, assumed delivered | PlanWalkPath's hand-tuned dead zone, after the solve                                                               | no                  |
+| ModelledMPCWalkPath        | the command                    | an identified Hammerstein model, inside the solver                                                                 | on the command      |
+| InvertedMPCWalkPath        | the delivered velocity         | its measured steady-state response (or the Hammerstein model's steady state, `inverse: model`), inverted after the solve | on the velocity     |
+| DynamicInvertedMPCWalkPath | the delivered velocity         | the Hammerstein model and its estimate of the robot, inverted one step ahead after the solve                        | on the velocity     |
 
 Every time `WalkTo` is run (10 Hz under the Director), it solves, in the robot frame, over 25 steps of 0.1 s:
 
@@ -49,6 +50,9 @@ If a solve fails, or runs over `time_budget`, PlanWalkPath's `WalkTo` control la
 PlanWalkPath's dead zone and its limits on the command, and the next solve's rate cost starts from what that command
 delivers.
 
+`inverse` picks the response the command is found from: `table`, the measured response below, or `model`, the steady
+state of the Hammerstein model ModelledMPCWalkPath plans with (see [The model's steady state](#the-models-steady-state)).
+
 ## The measured response
 
 `InvertedMPCWalkPathResponse.yaml` holds the velocity each command delivered in mjlab's evaluation of the policy
@@ -65,6 +69,32 @@ policy stands still for small commands on every axis together. With vx at 0 it d
 0.35 m/s, but with vx at 0.2 m/s it does, nearly linearly. Turning on the spot it barely turns below about 1 rad/s
 (0.5 rad/s gives 0.06 rad/s, 1.0 gives 0.43), but walking forward its turn rate follows the command. The inverse finds
 these jumps from the data: a small planned velocity from standing gets the command at the edge of the standing region.
+
+## The model's steady state
+
+With `inverse: model`, the response is the steady state of ModelledMPCWalkPath's Hammerstein model
+(`InvertedMPCWalkPathModel.yaml`, a copy of `ModelledMPCWalkPathModel.yaml`; the model's code is
+`utility::planning::HammersteinModel`). Each path is a first-order lag, z⁺ = p·z + b·f(u), so held at a command it
+settles to b·f(u)/(1 − p): the steady state is the piecewise-linear maps scaled by their paths' gains, with nothing to
+simulate. It is sampled on the same two grids as the measured response, every `model_grid_step` (0.01) out to the
+model's `identified_range` (vx and vy ±1.75, ω ±1.5), so the inverse is the same search, over the grid's own commands.
+
+The model's dead zones end in edges far steeper than the measured response's: vy rises 15 times as fast as its command
+between 0.42 and 0.45 m/s of command, so a step of 0.01 moves it 0.15 m/s and the velocities between can't be landed
+on. Around the closest grid command, the inverse searches a twentieth of a step apart with the model itself (not
+interpolating across a breakpoint), and the tie rule then chooses from both. With the measured table nothing changes.
+
+Things to know, against the measured response:
+
+- The velocity limits are what the model settles to within its identified range: 1.61 m/s forward rather than 1.75.
+  Turning at speed delivers less than the limit: 1.33 rad/s at most walking at 1 m/s, as the product path's map falls
+  beyond |ω·vx| ≈ 0.84, and a planned turn beyond that gets the command that comes closest.
+- The model drifts at the zero command, so at the target the inverse holds the robot with small commands inside the
+  dead zones (as ModelledMPCWalkPath does), where the measured response's zero command is standing still.
+- The model has no cross paths, so it doesn't know that walking in two directions at once delivers less of each. The
+  envelope, on the velocity, still cuts the worst of those.
+- One run of WalkPathBenchmark in NUSim (2026-11-04, a fresh NUSim, with `w_face` 3 and `heading_radius` 0.8): 13 of
+  13, no falls, 51.3 s, mean errors 0.035 m and 0.020 rad.
 
 ## The capability envelope
 

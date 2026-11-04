@@ -40,6 +40,14 @@ envelope_scale: 1.0
 # region to correct a few millimetres
 zero_tolerance: [0.02, 0.02, 0.02]
 
+# Where the command that delivers the planned velocity is found:
+#   table  the measured steady-state response (InvertedMPCWalkPathResponse.yaml, from mjlab's evaluation)
+#   model  the steady state of the Hammerstein model ModelledMPCWalkPath plans with (InvertedMPCWalkPathModel.yaml),
+#          sampled every model_grid_step out to the model's identified_range
+# Either way the inverse is the same search, and the fallback's command is turned into a velocity the same way.
+inverse: table
+model_grid_step: 0.01
+
 # SQP iterations per solve. With a warm start a few are enough; reaching the cap is not a failure.
 max_iterations: 10
 # Seconds. A solve that takes longer, or fails, sends PlanWalkPath's control law's command instead.

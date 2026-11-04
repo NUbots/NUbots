@@ -1,0 +1,206 @@
+# The Hammerstein model of how the walk policy's gait-averaged velocity responds to its command: a copy of
+# ModelledMPCWalkPath's ModelledMPCWalkPathModel.yaml, so the two planners use the same model. With `inverse: model`
+# (InvertedMPCWalkPath.yaml), the command is found from its steady state. Written by walkmodel-identification's
+# exportHammersteinYaml.m: re-export rather than edit, and copy over both.
+# Source: hammerstein_siso_model_k1v2_27combinedRuns_wzProduct.mat
+# One path per (output, command), and wz_abs_vx to wz from the product wz·|vx| of the commands; each output
+# is the sum of its paths' lag states z:
+#   z⁺ = pole·z + gain·f(command) every sample_time
+#   f(u) = linear·u + offset + Σₙ coef[n]·|u + translation[n]|
+sample_time: 0.02
+# The command amplitude per axis [vx, vy, wz] the identification spanned: the maps extrapolate beyond
+identified_range: [1.75, 1.75, 1.5]
+paths:
+  vx:
+    vx:
+      gain: 1
+      pole: 0.9460690076501503
+      linear: 0.040377975864788515
+      offset: 0.0008293736209447025
+      coef:
+        - 0.007856582026948267
+        - 0.04015069597624858
+        - -0.05956372363980352
+        - 0.025172599619111353
+        - -0.003612664160620574
+        - -0.008799162471945668
+      translation:
+        - 1.1346438279539879
+        - 0.21422795445993864
+        - 0.19253193823520873
+        - -0.14599171026577928
+        - -0.29947749567142234
+        - -1.1107603060490503
+    vy:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    wz:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+  vy:
+    vx:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    vy:
+      gain: 1
+      pole: 0.9336179610980075
+      linear: 0.04827083548999005
+      offset: 0.00044339428838853837
+      coef:
+        - 0.039531629384761055
+        - -0.08263219907386055
+        - 0.02550964291165854
+        - 0.49490765900480904
+        - -0.47681513254788777
+        - -0.0001693435077161874
+      translation:
+        - 0.658779138699221
+        - 0.3261628897285477
+        - 0.2428713409850521
+        - -0.4208927340115847
+        - -0.4463547182297906
+        - -3.904039654461713
+    wz:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+  wz:
+    vx:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    vy:
+      gain: 0
+      pole: 0
+      linear: 0
+      offset: 0
+      coef:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+      translation:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+    wz:
+      gain: 1
+      pole: 0.3451933261054676
+      linear: 0.8874287868142439
+      offset: -0.018938108495603727
+      coef:
+        - -3.149941701794277
+        - 2.806807823811171
+        - 3.164472178265522
+        - 0.026930197725234552
+        - -3.1672163707204732
+        - 0.3180710608480568
+      translation:
+        - 0.8498183293479995
+        - 0.8598882563090732
+        - 0.4807141257578339
+        - -0.054377663823277717
+        - 0.47581087812701384
+        - -0.8890380855404387
+    wz_abs_vx:
+      gain: 1
+      pole: 0.8849184167432107
+      linear: -0.05756638965642891
+      offset: -0.010625685562117638
+      coef:
+        - 0.0673733177530267
+        - 0.009218059882943056
+        - 0.054007774196907034
+        - -0.08344107227371134
+        - -0.005413716090033928
+        - -0.03016625134924855
+      translation:
+        - 0.6850828979647011
+        - 0.3277837451882418
+        - 0.03862781823817926
+        - -0.19166274933989003
+        - -0.723992755093475
+        - -0.8419940111646892

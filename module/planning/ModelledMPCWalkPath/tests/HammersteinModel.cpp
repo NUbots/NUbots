@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "HammersteinModel.hpp"
+#include "utility/planning/HammersteinModel.hpp"
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -32,7 +32,7 @@
 #include <yaml-cpp/yaml.h>
 
 using Catch::Approx;
-using module::planning::modelled_walk_mpc::HammersteinModel;
+using utility::planning::HammersteinModel;
 
 namespace {
 

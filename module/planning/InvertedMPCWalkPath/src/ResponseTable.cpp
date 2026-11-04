@@ -78,15 +78,25 @@ namespace module::planning::inverted_walk_mpc {
             }
         }
 
-        /// @brief The grid's commands, with SUBDIVISIONS steps in each grid step
-        std::vector<double> subdivide(const std::vector<double>& axis) {
+        /// @brief The grid's commands, with subdivisions steps in each grid step
+        std::vector<double> subdivide(const std::vector<double>& axis, const int subdivisions) {
             std::vector<double> out{};
             for (std::size_t i = 0; i + 1 < axis.size(); ++i) {
-                for (int k = 0; k < ResponseTable::SUBDIVISIONS; ++k) {
-                    out.push_back(axis[i] + (axis[i + 1] - axis[i]) * k / ResponseTable::SUBDIVISIONS);
+                for (int k = 0; k < subdivisions; ++k) {
+                    out.push_back(axis[i] + (axis[i + 1] - axis[i]) * k / subdivisions);
                 }
             }
             out.push_back(axis.back());
+            return out;
+        }
+
+        /// @brief Commands from -range to range, step apart
+        std::vector<double> symmetric_axis(const double range, const double step) {
+            const int n = int(std::lround(range / step));
+            std::vector<double> out{};
+            for (int i = -n; i <= n; ++i) {
+                out.push_back(i * step);
+            }
             return out;
         }
 
@@ -98,25 +108,57 @@ namespace module::planning::inverted_walk_mpc {
             return {i, (clamped - axis[i]) / (axis[i + 1] - axis[i])};
         }
 
-        /// @brief Of the candidates, the one closest to the target, or, within TIE_TOLERANCE of that, the one nearest
-        /// zero
-        template <typename Command, typename Delivered, typename Target>
-        Command smallest_closest(const std::vector<Command>& commands,
-                                 const std::vector<Delivered>& delivered,
-                                 const Target& target) {
-            double best = std::numeric_limits<double>::infinity();
-            for (const auto& d : delivered) {
-                best = std::min(best, (d - target).norm());
+        /// @brief How close the closest candidate comes to the target, and which it is
+        template <typename Delivered, typename Target>
+        std::pair<double, std::size_t> closest(const std::vector<Delivered>& delivered, const Target& target) {
+            double best        = std::numeric_limits<double>::infinity();
+            std::size_t chosen = 0;
+            for (std::size_t i = 0; i < delivered.size(); ++i) {
+                const double error = (delivered[i] - target).norm();
+                if (error < best) {
+                    best   = error;
+                    chosen = i;
+                }
             }
-            Command chosen    = commands.front();
-            double chosen_sqr = std::numeric_limits<double>::infinity();
+            return {best, chosen};
+        }
+
+        /// @brief Of the candidates within threshold of the target, the one nearest zero, if it is nearer than chosen
+        template <typename Command, typename Delivered, typename Target>
+        void smallest_within(const std::vector<Command>& commands,
+                             const std::vector<Delivered>& delivered,
+                             const Target& target,
+                             const double threshold,
+                             Command& chosen,
+                             double& chosen_sqr) {
             for (std::size_t i = 0; i < commands.size(); ++i) {
-                if ((delivered[i] - target).norm() <= best + ResponseTable::TIE_TOLERANCE
-                    && commands[i].squaredNorm() < chosen_sqr) {
+                if ((delivered[i] - target).norm() <= threshold && commands[i].squaredNorm() < chosen_sqr) {
                     chosen     = commands[i];
                     chosen_sqr = commands[i].squaredNorm();
                 }
             }
+        }
+
+        /// @brief Of the candidates, the one closest to the target, or, within TIE_TOLERANCE of that, the one nearest
+        /// zero. With refine, the closest candidate's neighbourhood is searched more finely too (refine gives the
+        /// candidates around a command), and both sets are chosen from.
+        template <typename Command, typename Delivered, typename Target, typename Refine>
+        Command smallest_closest(const std::vector<Command>& commands,
+                                 const std::vector<Delivered>& delivered,
+                                 const Target& target,
+                                 const Refine& refine) {
+            auto [best, index] = closest(delivered, target);
+            std::vector<Command> fine_commands{};
+            std::vector<Delivered> fine_delivered{};
+            refine(commands[index], fine_commands, fine_delivered);
+            if (!fine_commands.empty()) {
+                best = std::min(best, closest(fine_delivered, target).first);
+            }
+            Command chosen    = commands.front();
+            double chosen_sqr = std::numeric_limits<double>::infinity();
+            const double threshold = best + ResponseTable::TIE_TOLERANCE;
+            smallest_within(commands, delivered, target, threshold, chosen, chosen_sqr);
+            smallest_within(fine_commands, fine_delivered, target, threshold, chosen, chosen_sqr);
             return chosen;
         }
 
@@ -145,14 +187,59 @@ namespace module::planning::inverted_walk_mpc {
                   table.translation.values);
         read_grid(node["turn"], 1, "turn", table.turn.a, table.turn.b, table.turn.values);
 
-        // The translation commands the inverse searches, and what they deliver
-        for (const double x : subdivide(table.translation.a)) {
-            for (const double y : subdivide(table.translation.b)) {
-                table.translation_commands.emplace_back(x, y);
-                table.translation_delivered.emplace_back(table.translation.at(x, y));
+        table.index_translation();
+        return table;
+    }
+
+    ResponseTable ResponseTable::from_model(const utility::planning::HammersteinModel& model,
+                                            const Eigen::Vector3d& range,
+                                            const double step) {
+        if (!(step > 0.0) || !(range.minCoeff() >= step)) {
+            throw std::runtime_error("InvertedMPCWalkPath: the model's grid needs a positive step within its range");
+        }
+        ResponseTable table{};
+        table.subdivisions = 1;
+        table.refinement   = step;
+        table.model        = model;
+
+        const std::vector<double> vx = symmetric_axis(range.x(), step);
+        const std::vector<double> vy = symmetric_axis(range.y(), step);
+        const std::vector<double> wz = symmetric_axis(range.z(), step);
+
+        table.translation.a = vx;
+        table.translation.b = vy;
+        table.translation.values.assign(2, Eigen::MatrixXd(vx.size(), vy.size()));
+        for (std::size_t i = 0; i < vx.size(); ++i) {
+            for (std::size_t j = 0; j < vy.size(); ++j) {
+                const Eigen::Vector3d v           = model.steady_state({vx[i], vy[j], 0.0});
+                table.translation.values[0](i, j) = v.x();
+                table.translation.values[1](i, j) = v.y();
             }
         }
+
+        table.turn.a = vx;
+        table.turn.b = wz;
+        table.turn.values.assign(1, Eigen::MatrixXd(vx.size(), wz.size()));
+        for (std::size_t i = 0; i < vx.size(); ++i) {
+            for (std::size_t j = 0; j < wz.size(); ++j) {
+                table.turn.values[0](i, j) = model.steady_state({vx[i], 0.0, wz[j]}).z();
+            }
+        }
+
+        table.index_translation();
         return table;
+    }
+
+    void ResponseTable::index_translation() {
+        // The translation commands the inverse searches, and what they deliver
+        translation_commands.clear();
+        translation_delivered.clear();
+        for (const double x : subdivide(translation.a, subdivisions)) {
+            for (const double y : subdivide(translation.b, subdivisions)) {
+                translation_commands.emplace_back(x, y);
+                translation_delivered.emplace_back(translation.at(x, y));
+            }
+        }
     }
 
     Eigen::Vector3d ResponseTable::forward(const Eigen::Vector3d& command) const {
@@ -161,17 +248,43 @@ namespace module::planning::inverted_walk_mpc {
     }
 
     Eigen::Vector3d ResponseTable::inverse(const Eigen::Vector3d& velocity) const {
-        const Eigen::Vector2d u_xy =
-            smallest_closest(translation_commands, translation_delivered, Eigen::Vector2d(velocity.head<2>()));
+        // On the model's table, the closest grid command's neighbourhood, more finely, from the model itself
+        const int fine = refinement > 0.0 ? REFINEMENT : 0;
+        const auto refine_translation = [&](const Eigen::Vector2d& u,
+                                            std::vector<Eigen::Vector2d>& commands,
+                                            std::vector<Eigen::Vector2d>& delivered) {
+            for (int i = -fine; i <= fine && fine > 0; ++i) {
+                for (int j = -fine; j <= fine; ++j) {
+                    const double x =
+                        std::clamp(u.x() + refinement * i / fine, translation.a.front(), translation.a.back());
+                    const double y =
+                        std::clamp(u.y() + refinement * j / fine, translation.b.front(), translation.b.back());
+                    commands.emplace_back(x, y);
+                    delivered.emplace_back(model->steady_state({x, y, 0.0}).head<2>());
+                }
+            }
+        };
+        const Eigen::Vector2d u_xy = smallest_closest(translation_commands,
+                                                      translation_delivered,
+                                                      Eigen::Vector2d(velocity.head<2>()),
+                                                      refine_translation);
 
         // The turn rate the turn commands deliver at this forward command
         std::vector<Eigen::Matrix<double, 1, 1>> u_z{};
         std::vector<Eigen::Matrix<double, 1, 1>> delivered{};
-        for (const double z : subdivide(turn.b)) {
+        for (const double z : subdivide(turn.b, subdivisions)) {
             u_z.emplace_back(z);
             delivered.emplace_back(turn.at(u_xy.x(), z)[0]);
         }
-        const double command_z = smallest_closest(u_z, delivered, Eigen::Matrix<double, 1, 1>(velocity.z()))[0];
+        using Scalar          = Eigen::Matrix<double, 1, 1>;
+        const auto refine_turn = [&](const Scalar& u, std::vector<Scalar>& commands, std::vector<Scalar>& out) {
+            for (int k = -fine; k <= fine && fine > 0; ++k) {
+                const double z = std::clamp(u[0] + refinement * k / fine, turn.b.front(), turn.b.back());
+                commands.emplace_back(z);
+                out.emplace_back(model->steady_state({u_xy.x(), 0.0, z}).z());
+            }
+        };
+        const double command_z = smallest_closest(u_z, delivered, Scalar(velocity.z()), refine_turn)[0];
         return {u_xy.x(), u_xy.y(), command_z};
     }
 

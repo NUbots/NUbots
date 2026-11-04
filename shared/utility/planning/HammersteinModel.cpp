@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-namespace module::planning::modelled_walk_mpc {
+namespace utility::planning {
 
     namespace {
         const std::array<std::string, 3> AXES = {"vx", "vy", "wz"};
@@ -143,4 +143,4 @@ namespace module::planning::modelled_walk_mpc {
         return delivered(z);
     }
 
-}  // namespace module::planning::modelled_walk_mpc
+}  // namespace utility::planning

@@ -39,7 +39,7 @@ using Catch::Approx;
 using module::planning::modelled_walk_mpc::Config;
 using module::planning::modelled_walk_mpc::envelope_from_yaml;
 using module::planning::modelled_walk_mpc::EnvelopeRow;
-using module::planning::modelled_walk_mpc::HammersteinModel;
+using utility::planning::HammersteinModel;
 using module::planning::modelled_walk_mpc::ModelledWalkMPC;
 
 namespace {

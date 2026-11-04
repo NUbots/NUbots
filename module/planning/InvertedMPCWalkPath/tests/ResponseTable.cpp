@@ -34,6 +34,7 @@
 
 using Catch::Approx;
 using module::planning::inverted_walk_mpc::ResponseTable;
+using utility::planning::HammersteinModel;
 
 namespace {
 
@@ -44,6 +45,20 @@ namespace {
 
     /// @brief How close the inverse's command delivers what was asked: the search's step and its tie tolerance
     constexpr double MATCH = 0.02;
+
+    /// @brief The Hammerstein model in the module's configuration, and its table as the module builds it: out to the
+    /// identified range, every 0.01
+    HammersteinModel k1_model() {
+        return HammersteinModel::from_yaml(YAML::LoadFile("config/InvertedMPCWalkPathModel.yaml"));
+    }
+    const Eigen::Vector3d MODEL_RANGE(1.75, 1.75, 1.5);
+    ResponseTable k1_model_table() {
+        return ResponseTable::from_model(k1_model(), MODEL_RANGE, 0.01);
+    }
+
+    /// @brief How close the model's inverse delivers what was asked, by the model: the tie tolerance, and the
+    /// refinement's step on the steepest edge
+    constexpr double MODEL_MATCH = 0.01;
 
 }  // namespace
 
@@ -141,4 +156,75 @@ TEST_CASE("A table that isn't every command on a grid is refused", "[ResponseTab
     YAML::Node short_row        = k1_yaml();
     short_row["translation"][0] = std::vector<double>{0.0, 0.0, 0.0};
     CHECK_THROWS_AS(ResponseTable::from_yaml(short_row), std::runtime_error);
+}
+
+
+TEST_CASE("The model's table is the model's steady state", "[ResponseTable][model]") {
+    const HammersteinModel model = k1_model();
+    const ResponseTable table    = k1_model_table();
+    for (const Eigen::Vector2d u :
+         {Eigen::Vector2d(0.5, 0.0), Eigen::Vector2d(0.6, -0.3), Eigen::Vector2d(-1.2, 0.43)}) {
+        const Eigen::Vector3d expected = model.steady_state({u.x(), u.y(), 0.0});
+        CHECK((table.forward({u.x(), u.y(), 0.0}).head<2>() - expected.head<2>()).norm() < 1e-12);
+    }
+    for (const Eigen::Vector2d u : {Eigen::Vector2d(0.0, 1.0), Eigen::Vector2d(0.6, 0.8), Eigen::Vector2d(1.0, -1.5)}) {
+        const double expected = model.steady_state({u.x(), 0.0, u.y()}).z();
+        CHECK(table.forward({u.x(), 0.0, u.y()}).z() == Approx(expected).margin(1e-12));
+    }
+    // The planner's limits are what the model delivers within the identified range
+    CHECK(table.upper().x() == Approx(model.steady_state({1.75, 0.0, 0.0}).x()));
+    CHECK(table.command_upper().isApprox(MODEL_RANGE));
+    CHECK(table.command_lower().isApprox(-MODEL_RANGE));
+}
+
+TEST_CASE("The model's inverse delivers the velocity asked for, by the model", "[ResponseTable][model]") {
+    const HammersteinModel model = k1_model();
+    const ResponseTable table    = k1_model_table();
+    // Including commands on the steep edges of the dead zones (vy 0.43 and -0.45 m/s, vx 0.15 m/s), where a grid step
+    // alone can't land on the velocity
+    for (const double ux : {-1.2, -0.5, 0.15, 0.8, 1.5}) {
+        for (const double uy : {-1.0, -0.45, 0.0, 0.43, 0.9}) {
+            for (const double uz : {-1.2, 0.0, 0.6}) {
+                const Eigen::Vector3d wanted    = model.steady_state({ux, uy, uz});
+                const Eigen::Vector3d command   = table.inverse(wanted);
+                const Eigen::Vector3d delivered = model.steady_state(command);
+                INFO("command " << ux << ", " << uy << ", " << uz << " delivers " << wanted.transpose() << "; inverse "
+                                << command.transpose() << " delivers " << delivered.transpose());
+                CHECK((delivered.head<2>() - wanted.head<2>()).norm() <= MODEL_MATCH);
+                CHECK(std::abs(delivered.z() - wanted.z()) <= 2 * MODEL_MATCH);
+            }
+        }
+    }
+}
+
+TEST_CASE("The model's inverse finds the command along the edge of a dead zone", "[ResponseTable][model]") {
+    // The model's vy dead zone ends between 0.40 and 0.45 m/s of command, where vy jumps from about 0.09 to 0.48 m/s
+    const HammersteinModel model = k1_model();
+    const ResponseTable table    = k1_model_table();
+    for (const double vy : {0.15, 0.2, 0.3, 0.4}) {
+        const Eigen::Vector3d command = table.inverse({0.0, vy, 0.0});
+        INFO("vy " << vy << " gets " << command.transpose());
+        CHECK(command.y() > 0.4);
+        CHECK(command.y() < 0.45);
+        CHECK(model.steady_state(command).y() == Approx(vy).margin(MODEL_MATCH));
+    }
+}
+
+TEST_CASE("At standing still the model holds the robot with commands inside its dead zones", "[ResponseTable][model]") {
+    // The model drifts at the zero command (about -0.006 m/s, 0.008 m/s and -0.016 rad/s), which the inverse cancels
+    const HammersteinModel model  = k1_model();
+    const Eigen::Vector3d command = k1_model_table().inverse(Eigen::Vector3d::Zero());
+    CHECK(command.cwiseAbs().maxCoeff() < 0.1);
+    CHECK(model.steady_state(command).cwiseAbs().maxCoeff() < MODEL_MATCH);
+}
+
+TEST_CASE("The model's commands stay within its identified range", "[ResponseTable][model]") {
+    // A velocity beyond what the model delivers gets the command that comes closest, or, as the response flattens
+    // towards the range's edge, the smallest within the tie tolerance of it
+    const ResponseTable table     = k1_model_table();
+    const Eigen::Vector3d command = table.inverse({5.0, -5.0, 5.0});
+    CHECK((command.cwiseAbs() - MODEL_RANGE).maxCoeff() <= 1e-12);
+    CHECK(table.forward(command).x() == Approx(table.upper().x()).margin(MODEL_MATCH));
+    CHECK(table.forward(command).y() == Approx(table.lower().y()).margin(MODEL_MATCH));
+    CHECK_THROWS_AS(ResponseTable::from_model(k1_model(), MODEL_RANGE, 0.0), std::runtime_error);
 }

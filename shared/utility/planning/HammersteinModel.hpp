@@ -24,14 +24,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_PLANNING_MODELLEDMPCWALKPATH_HAMMERSTEINMODEL_HPP
-#define MODULE_PLANNING_MODELLEDMPCWALKPATH_HAMMERSTEINMODEL_HPP
+#ifndef UTILITY_PLANNING_HAMMERSTEINMODEL_HPP
+#define UTILITY_PLANNING_HAMMERSTEINMODEL_HPP
 
 #include <Eigen/Core>
 #include <array>
 #include <yaml-cpp/yaml.h>
 
-namespace module::planning::modelled_walk_mpc {
+namespace utility::planning {
 
     /// @brief One path of the Hammerstein model: a command axis through a piecewise-linear map, then a first-order
     /// lag with a one-step delay, z⁺ = pole·z + gain·f(u)
@@ -74,8 +74,8 @@ namespace module::planning::modelled_walk_mpc {
         /// @brief paths[3·output + command], then paths[PRODUCT]
         std::array<HammersteinPath, PATHS> paths{};
 
-        /// @brief Reads the model from its configuration (ModelledMPCWalkPathModel.yaml). A model without the
-        /// product path (paths.wz.wz_abs_vx) has it zero.
+        /// @brief Reads the model from its configuration (ModelledMPCWalkPathModel.yaml, which walkmodel-identification
+        /// exports, or a planner's copy of it). A model without the product path (paths.wz.wz_abs_vx) has it zero.
         static HammersteinModel from_yaml(const YAML::Node& node);
 
         /// @brief The delivered velocity [vx, vy, ω] the lag states give
@@ -92,6 +92,6 @@ namespace module::planning::modelled_walk_mpc {
         [[nodiscard]] Eigen::Vector3d steady_state(const Eigen::Vector3d& u) const;
     };
 
-}  // namespace module::planning::modelled_walk_mpc
+}  // namespace utility::planning
 
-#endif  // MODULE_PLANNING_MODELLEDMPCWALKPATH_HAMMERSTEINMODEL_HPP
+#endif  // UTILITY_PLANNING_HAMMERSTEINMODEL_HPP

@@ -51,7 +51,7 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
 
-    using modelled_walk_mpc::HammersteinModel;
+    using utility::planning::HammersteinModel;
     using modelled_walk_mpc::ModelledWalkMPC;
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;

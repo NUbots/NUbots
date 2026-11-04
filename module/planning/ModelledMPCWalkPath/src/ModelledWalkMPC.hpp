@@ -32,12 +32,15 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-#include "HammersteinModel.hpp"
+#include "utility/planning/HammersteinModel.hpp"
 
 // Forward declaration of the generated acados solver, so including this header doesn't pull in acados
 struct modelled_mpc_walk_path_solver_capsule;
 
 namespace module::planning::modelled_walk_mpc {
+
+    using utility::planning::HammersteinModel;
+    using utility::planning::HammersteinPath;
 
     /// @brief One edge of the capability envelope: the constraint normal·command ≤ bound
     struct EnvelopeRow {

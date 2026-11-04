@@ -26,6 +26,9 @@
  */
 #include "InvertedMPCWalkPath.hpp"
 
+#include <stdexcept>
+#include <string>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -53,6 +56,7 @@ namespace module::planning {
 
     using inverted_walk_mpc::InvertedWalkMPC;
     using inverted_walk_mpc::ResponseTable;
+    using utility::planning::HammersteinModel;
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
@@ -91,6 +95,15 @@ namespace module::planning {
 
                 // Finding the command
                 cfg.zero_tolerance = config["zero_tolerance"].as<Expression>();
+                const auto inverse = config["inverse"].as<std::string>();
+                if (inverse != "table" && inverse != "model") {
+                    throw std::runtime_error("InvertedMPCWalkPath: inverse is table or model, not " + inverse);
+                }
+                cfg.model_inverse = inverse == "model";
+                if (config["model_grid_step"].as<double>() != cfg.model_grid_step) {
+                    cfg.model_grid_step = config["model_grid_step"].as<double>();
+                    drop_modelled();
+                }
 
                 // Solver
                 cfg.mpc.max_iterations = config["max_iterations"].as<int>();
@@ -117,7 +130,16 @@ namespace module::planning {
         // The walk policy's measured response, imported from its evaluation by codegen/import_response.py
         on<Configuration, Sync<InvertedMPCWalkPath>>("InvertedMPCWalkPathResponse.yaml")
             .then([this](const Configuration& config) {
-                response = ResponseTable::from_yaml(config.config);
+                measured = ResponseTable::from_yaml(config.config);
+                configure_mpc();
+            });
+
+        // The Hammerstein model, ModelledMPCWalkPath's, for inverse: model
+        on<Configuration, Sync<InvertedMPCWalkPath>>("InvertedMPCWalkPathModel.yaml")
+            .then([this](const Configuration& config) {
+                model       = HammersteinModel::from_yaml(config.config);
+                model_range = config["identified_range"].as<Expression>();
+                drop_modelled();
                 configure_mpc();
             });
 
@@ -140,7 +162,7 @@ namespace module::planning {
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>, Sync<InvertedMPCWalkPath>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
-                if (mpc == nullptr) {
+                if (mpc == nullptr || response == nullptr) {
                     return;
                 }
 
@@ -246,10 +268,35 @@ namespace module::planning {
         });
     }
 
+    void InvertedMPCWalkPath::drop_modelled() {
+        if (modelled.has_value() && response == &*modelled) {
+            response = nullptr;
+        }
+        modelled.reset();
+    }
+
     void InvertedMPCWalkPath::configure_mpc() {
-        if (!have_config || !response.has_value()) {
+        if (!have_config) {
             return;
         }
+        if (cfg.model_inverse) {
+            if (!model.has_value()) {
+                return;
+            }
+            if (!modelled.has_value()) {
+                modelled = ResponseTable::from_model(*model, model_range, cfg.model_grid_step);
+            }
+        }
+        else if (!measured.has_value()) {
+            return;
+        }
+        const ResponseTable* const next = cfg.model_inverse ? &*modelled : &*measured;
+        if (next != response) {
+            log<INFO>("Finding the command from the",
+                      cfg.model_inverse ? "Hammerstein model's steady state" : "measured response");
+        }
+        response = next;
+
         // The MPC plans within the velocity limits, and only the velocities the measured commands delivered
         const Eigen::Vector3d lower(-cfg.max_backward_velocity, -cfg.max_velocity.y(), -cfg.max_velocity.z());
         cfg.mpc.lower_velocity = lower.cwiseMax(response->lower());

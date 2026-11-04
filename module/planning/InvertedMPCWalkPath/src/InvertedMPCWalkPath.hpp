@@ -37,6 +37,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "utility/planning/HammersteinModel.hpp"
+
 #include "message/behaviour/state/Stability.hpp"
 
 // PlanWalkPath's control law and dead zone are the fallback. Included from PlanWalkPath rather than copied, so the
@@ -59,6 +61,11 @@ namespace module::planning {
             double max_backward_velocity = 0.0;
             /// @brief Planned velocities below this per-axis magnitude are taken as zero before finding the command
             Eigen::Vector3d zero_tolerance = Eigen::Vector3d::Zero();
+            /// @brief Whether the command is found from the Hammerstein model's steady state rather than the measured
+            /// response
+            bool model_inverse = false;
+            /// @brief The step (command units) of the grids the model's steady state is sampled on
+            double model_grid_step = 0.01;
             /// @brief Seconds. A solve that takes longer, or fails, sends the fallback's command instead
             double time_budget = 0.05;
             /// @brief Seconds without a WalkTo after which the next solve starts from standing still
@@ -74,7 +81,15 @@ namespace module::planning {
         } cfg;
 
         /// @brief The walk policy's measured response, once InvertedMPCWalkPathResponse.yaml has been read
-        std::optional<inverted_walk_mpc::ResponseTable> response{};
+        std::optional<inverted_walk_mpc::ResponseTable> measured{};
+        /// @brief The Hammerstein model, and the command range per axis it was identified on, once
+        /// InvertedMPCWalkPathModel.yaml has been read
+        std::optional<utility::planning::HammersteinModel> model{};
+        Eigen::Vector3d model_range = Eigen::Vector3d::Zero();
+        /// @brief The model's steady state as a response, built when it is first needed after a configuration change
+        std::optional<inverted_walk_mpc::ResponseTable> modelled{};
+        /// @brief The response the command is found from (measured or modelled, by cfg.model_inverse)
+        const inverted_walk_mpc::ResponseTable* response = nullptr;
         /// @brief Whether InvertedMPCWalkPath.yaml has been read
         bool have_config = false;
         /// @brief The MPC, created once both configuration files have been read
@@ -88,7 +103,10 @@ namespace module::planning {
         /// @brief Current stability of the robot
         message::behaviour::state::Stability stability{};
 
-        /// @brief Creates or reconfigures the MPC, once both configuration files have been read
+        /// @brief Forgets the model's steady-state response, to be rebuilt from a new model or grid step
+        void drop_modelled();
+
+        /// @brief Creates or reconfigures the MPC, once the configuration and the response it uses have been read
         void configure_mpc();
 
     public:
