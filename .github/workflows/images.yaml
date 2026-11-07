@@ -73,8 +73,7 @@ jobs:
           tags: "nubots/nubots:${{ matrix.platform }}"
           file: docker/Dockerfile
           context: docker
-          build-args: |
-            platform=${{ matrix.platform }}
+          build-args: platform=${{ matrix.platform }}
           cache-from: type=registry,ref=nubots/nubots:${{ matrix.platform }}
           cache-to: type=inline
           push: true
