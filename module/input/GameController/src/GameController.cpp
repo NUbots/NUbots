@@ -536,7 +536,6 @@ namespace module::input {
 
                     // technically, the game phase being set to PLAYING is done by the whistle detector, but this is a
                     // backup for when it doesn't detect properly.
-
                     // if the game state is already PLAYING, don't emit a new PLAYING event.
 
                     if (state->phase == GameState::Phase::Value::PLAYING) {

@@ -34,7 +34,7 @@ targets:
     message.localisation.Field: false
     message.localisation.Robots: true
 
-    # Team communication (UDP broadcast) - used to debug what's actually on the wire between robots
+    # Team communication (UDP broadcast)
     message.input.Message: true
 
     # Log messages

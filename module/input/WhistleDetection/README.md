@@ -27,7 +27,7 @@ on microphone gain and background noise level).
 
 ## Consumes
 
-Nothing — audio is read directly from the ALSA device.
+N/A
 
 ## Emits
 
@@ -36,4 +36,4 @@ Nothing — audio is read directly from the ALSA device.
 
 ## Dependencies
 
-- ALSA (`libasound`) — already a project-wide utility dependency.
+- ALSA (`libasound`)

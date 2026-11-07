@@ -159,7 +159,7 @@ namespace module::input {
             }
 
             log<DEBUG>("Received odometry: x=" + std::to_string(odo.x) + ", y=" + std::to_string(odo.y) + ", theta="
-                       + std::to_string(odo.theta) + " normalized x=" + std::to_string(normalized_odometry[0]) + ", y="
+                       + std::to_string(odo.theta) + " normalised x=" + std::to_string(normalized_odometry[0]) + ", y="
                        + std::to_string(normalized_odometry[1]) + ", theta=" + std::to_string(normalized_odometry[2]));
 
 

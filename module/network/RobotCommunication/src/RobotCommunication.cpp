@@ -287,10 +287,10 @@ namespace module::network {
 
                         // Same mixed-team-protocol 180 degree rotation as current_pose above: negate x and y
                         // (the ball has no orientation, so there's no yaw to rotate).
-                        msg->ball.position.x() *= -1.0F;
-                        msg->ball.position.y() *= -1.0F;
-                        msg->ball.velocity.x() *= -1.0F;
-                        msg->ball.velocity.y() *= -1.0F;
+                        msg->ball.position.x() *= -1.0f;
+                        msg->ball.position.y() *= -1.0f;
+                        msg->ball.velocity.x() *= -1.0f;
+                        msg->ball.velocity.y() *= -1.0f;
                     }
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
                     // Age of the ball observation in seconds (-1 indicates invalid / do not rebroadcast teammate
@@ -301,7 +301,7 @@ namespace module::network {
                     }
                 }
 
-                // Purpose information, simple a bool in the new proto
+                // Determined by whether we're in an attack-adjacent state or not.
                 msg->going_for_ball = (purpose
                                        && (purpose->purpose.value == SoccerPosition::ATTACK
                                            || purpose->purpose.value == SoccerPosition::READY_ATTACK));
@@ -356,7 +356,6 @@ namespace module::network {
                         log<DEBUG>("Messages sent this game:", messages_sent, "/ ", cfg.max_messages_per_game);
                     }
                 }
-
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

@@ -58,11 +58,7 @@ namespace module::input {
 
         int err = snd_pcm_open(&pcm_handle, cfg.device.c_str(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK);
         if (err < 0) {
-
-            // figured this out the hard way - we need to be in the 'audio' group to access the microphone, otherwise we
-            // get a permission denied error. 'sudo usermod -aG audio $USER' worked for me. also make sure we have all
-            // the ALSA packages or it won't work.
-
+            // usually only happens if the K1's user account isn't in audio user group or doesn't have all the ALSA deps installed.
             log<WARN>("Cannot open audio device '",
                       cfg.device,
                       "':",
