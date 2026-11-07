@@ -32,7 +32,6 @@
 #include <complex>
 #include <cstdlib>
 
-
 #include "extension/Configuration.hpp"
 
 #include "message/input/Whistle.hpp"
@@ -58,7 +57,8 @@ namespace module::input {
 
         int err = snd_pcm_open(&pcm_handle, cfg.device.c_str(), SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK);
         if (err < 0) {
-            // usually only happens if the K1's user account isn't in audio user group or doesn't have all the ALSA deps installed.
+            // usually only happens if the K1's user account isn't in audio user group or doesn't have all the ALSA deps
+            // installed.
             log<WARN>("Cannot open audio device '",
                       cfg.device,
                       "':",
