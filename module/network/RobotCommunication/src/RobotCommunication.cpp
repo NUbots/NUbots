@@ -34,7 +34,7 @@
 
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
-#include "message/input/Robocup.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
@@ -50,7 +50,7 @@ namespace module::network {
     using extension::Configuration;
     using message::behaviour::state::WalkState;
     using message::input::GameState;
-    using message::input::Message;
+    using message::input::RoboCup;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -124,7 +124,7 @@ namespace module::network {
 
                             // Deserialise the incoming RoboCup message
                             const std::vector<unsigned char>& payload = p.payload;
-                            Message incoming_msg = NUClear::util::serialise::Serialise<Message>::deserialise(payload);
+                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
                             // Check if the incoming message is from the same player
                             bool own_player_message = global_config.player_id == incoming_msg.current_pose.player_id;
@@ -140,7 +140,7 @@ namespace module::network {
                                            incoming_msg.current_pose.position.z(),
                                            "going for ball:",
                                            incoming_msg.going_for_ball);
-                                emit(std::make_unique<Message>(std::move(incoming_msg)));
+                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                             }
                         });
                 }
@@ -181,7 +181,7 @@ namespace module::network {
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkToDebug>& walk_to,
                          const GlobalConfig& config) {
-                auto msg = std::make_unique<Message>();
+                auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
@@ -330,7 +330,7 @@ namespace module::network {
                     msg->going_for_ball));
 
                 // Check serialised size before sending
-                auto payload = NUClear::util::serialise::Serialise<Message>::serialise(*msg);
+                auto payload = NUClear::util::serialise::Serialise<RoboCup>::serialise(*msg);
                 if (payload.size() > cfg.max_message_size) {
                     log<WARN>("RoboCup message size",
                               payload.size(),

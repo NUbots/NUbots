@@ -103,7 +103,7 @@ enum State {
 }
 
 /// 280 - 300
-message Message {
+message RoboCup {
     /// Timestamp of message creation
     /// tag = 1 Byte
     /// length = 1 Byte

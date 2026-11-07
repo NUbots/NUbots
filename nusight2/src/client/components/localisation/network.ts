@@ -1,6 +1,6 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
-import { Message as RobocupMessage } from "@proto/message/input/Robocup";
+import { RoboCup } from "@proto/message/input/RoboCup";
 import { Sensors } from "@proto/message/input/Sensors";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
@@ -53,7 +53,7 @@ export class LocalisationNetwork {
     this.network.on(Purpose, this.onPurpose);
     this.network.on(SupportPosition, this.onSupportPosition);
     this.network.on(TimeToBall, this.onTimeToBall);
-    this.network.on(RobocupMessage, this.onTeamCommunication);
+    this.network.on(RoboCup, this.onTeamCommunication);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
   }
@@ -157,7 +157,7 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onTeamCommunication(robotModel: RobotModel, message: RobocupMessage) {
+  private onTeamCommunication(robotModel: RobotModel, message: RoboCup) {
     const robot = LocalisationRobotModel.of(robotModel);
     const pose = message.currentPose;
     if (!pose || pose.playerId === 0) {

@@ -12,7 +12,7 @@ messages:
   message.platform.RawSensors: true
   message.input.Image: false
   message.output.CompressedImage: true
-  message.input.Message: true
+  message.input.RoboCup: true
   message.input.GameState: true
   # Vision
   message.vision.Balls: true

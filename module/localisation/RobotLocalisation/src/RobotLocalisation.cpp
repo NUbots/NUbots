@@ -32,7 +32,7 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
-#include "message/input/Robocup.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -53,7 +53,7 @@ namespace module::localisation {
     using message::eye::DataPoint;
     using message::input::GameState;
     using message::input::Image;
-    using message::input::Message;
+    using message::input::RoboCup;
     using message::localisation::Field;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
@@ -116,8 +116,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<Message>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const Message& robocup, const Field& field) {
+        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field) {
                 // **Run prediction step**
                 prediction();
 

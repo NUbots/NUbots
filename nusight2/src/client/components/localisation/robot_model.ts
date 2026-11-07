@@ -177,7 +177,7 @@ export class LocalisationRobotModel {
   // This robot's own estimate of how long it - and each teammate it can see - would take to reach
   // the ball, keyed by player id (self included) - see network.ts#onTimeToBall.
   @observable timeToBallEstimates: Map<number, number> = new Map();
-  // Teammates seen via the UDP team-communication broadcast (message.input.Message), keyed by
+  // Teammates seen via the UDP team-communication broadcast (message.input.RoboCup), keyed by
   // player id. Each is a full LocalisationRobotModel so it can be rendered with the exact same
   // components used for our own robot (K1, PurposeLabel) - see network.ts#onTeamCommunication.
   @observable teammates: Map<number, LocalisationRobotModel> = new Map();

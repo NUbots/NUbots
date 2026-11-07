@@ -34,7 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/eye/DataPoint.hpp"
-#include "message/input/Robocup.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -52,7 +52,7 @@ namespace module::localisation {
     using VisionBall  = message::vision::Ball;
 
     using message::eye::DataPoint;
-    using message::input::Message;
+    using message::input::RoboCup;
     using message::localisation::Field;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
@@ -230,7 +230,7 @@ namespace module::localisation {
         });
 
         // Stores ball positions received from teammates
-        on<Trigger<Message>, With<Field>>().then([this](const Message& robocup, const Field& field) {
+        on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
             if (!cfg.use_r2r_balls) {
                 return;
             }

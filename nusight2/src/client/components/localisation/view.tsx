@@ -45,9 +45,9 @@ type LocalisationViewProps = {
 
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
-  { label: "Robocup (Small)", value: "robocup_small" },
-  { label: "Robocup (Large)", value: "robocup_large" },
-  { label: "Robocup (5v5)", value: "robocup_5v5" },
+  { label: "RoboCup (Small)", value: "robocup_small" },
+  { label: "RoboCup (Large)", value: "robocup_large" },
+  { label: "RoboCup (5v5)", value: "robocup_5v5" },
 ];
 
 // Apply the interfaces to the component's props

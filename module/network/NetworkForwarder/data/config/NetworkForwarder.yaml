@@ -35,7 +35,7 @@ targets:
     message.localisation.Robots: true
 
     # Team communication (UDP broadcast)
-    message.input.Message: true
+    message.input.RoboCup: true
 
     # Log messages
     message.nuclear.LogMessage: false
