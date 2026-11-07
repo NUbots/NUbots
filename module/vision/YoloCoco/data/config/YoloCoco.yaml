@@ -4,11 +4,11 @@ log_level: INFO
 # Path to the model weights
 model_path: "coco.onnx"
 
+# Inference device: cpu, or gpu (TensorRT)
+device: gpu
+
 # NMS threshold for filtering out overlapping bounding boxes
 nms_threshold: 0.5
 
 # NMS confidence (score) threshold for filtering out low confidence detections
 nms_score_threshold: 0.1
-
-# OpenVino device (CPU, GPU)
-device: GPU

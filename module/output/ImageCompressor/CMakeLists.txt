@@ -25,10 +25,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 find_package(TurboJPEG REQUIRED)
-find_package(va REQUIRED)
 find_package(OpenCL REQUIRED)
 
 add_compile_definitions(CL_TARGET_OPENCL_VERSION=120)
 
 # Build our NUClear module
-nuclear_module(LIBRARIES TurboJPEG::TurboJPEG OpenCL::OpenCL va::va)
+nuclear_module(LIBRARIES TurboJPEG::TurboJPEG OpenCL::OpenCL)

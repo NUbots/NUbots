@@ -100,9 +100,13 @@ std::pair<std::thread, int> create_tcp_server(const sa_family_t& family) {
         utility::file::FileDescriptor client_fd(::accept(server_fd.get(), nullptr, nullptr),
                                                 [](int fd) { ::shutdown(fd, SHUT_RDWR); });
 
-        ::read(client_fd.get(), buffer.data(), buffer.size());
+        if (::read(client_fd.get(), buffer.data(), buffer.size()) < 0) {
+            return;
+        }
         std::reverse(buffer.begin(), buffer.end());
-        ::write(client_fd.get(), buffer.data(), buffer.size());
+        if (::write(client_fd.get(), buffer.data(), buffer.size()) < 0) {
+            return;
+        }
     });
 
     // Wait for the server to start up

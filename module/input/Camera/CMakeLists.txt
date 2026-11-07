@@ -1,7 +1,7 @@
 #[[
 MIT License
 
-Copyright (c) 2013 NUbots
+Copyright (c) 2026 NUbots
 
 This file is part of the NUbots codebase.
 See https://github.com/NUbots/NUbots for further info.
@@ -25,8 +25,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
-# Find Aravis
-find_package(Aravis REQUIRED)
-
+find_package(OpenCV REQUIRED)
+find_package(booster_robotics_sdk REQUIRED)
 # Build our NUClear module
-nuclear_module(LIBRARIES Aravis::Aravis)
+nuclear_module(LIBRARIES ${OpenCV_LIBS} booster_robotics_sdk::booster_robotics_sdk)

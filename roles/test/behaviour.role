@@ -6,7 +6,6 @@ nuclear_role(
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Configuration
-  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::SoccerConfig # Field description
   # Network
   network::NUClearNet
@@ -15,13 +14,9 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Sensors
-  input::SensorFilter
   input::Camera
+  input::Sensors
   # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::FieldLineDetector
-  vision::BallDetector
   vision::Yolo
   # Localisation
   localisation::FieldLocalisationNLopt
@@ -30,9 +25,7 @@ nuclear_role(
   # Director
   extension::Director
   # Servos
-  actuation::Kinematics
   actuation::Servos
-  actuation::FootController
   # Skills
   skill::Walk
   skill::KickWalk
@@ -45,7 +38,6 @@ nuclear_role(
   planning::PlanLook
   planning::PlanKick
   planning::GetUpPlanner
-  planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
   strategy::StandStill

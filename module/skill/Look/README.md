@@ -2,22 +2,29 @@
 
 ## Description
 
-Moves the head so that the robot is looking in a given direction, with the option for smoothing.
+Converts head look-at commands into head rotation commands for the Booster Robotics SDK, to move the K1's
+head using its built-in head control.
+
+Takes the look direction from a `message::skill::Look` task, optionally smooths it with an exponential
+filter, converts it into head yaw/pitch angles, and emits a `message::booster::BoosterHeadRot` for the
+Booster HardwareIO to forward to the SDK.
 
 ## Usage
 
-Include this module to make the robot look in the given direction.
+Include this module to allow the robot to look in a given direction on the K1. Use in place of
+`skill::Look`, which instead drives the head via the NUbots servo/kinematics stack.
 
 ## Consumes
 
-- `message::skill::Look` a Task requesting to look in a direction
-- `message::input::Sensors` to get the current head angles for smoothing
+- `message::skill::Look` A Task requesting to look in a direction, containing the vector `rPCt` (camera to
+  target, in torso space) and a `smooth` flag.
 
 ## Emits
 
-- `message::actuation::HeadIK` to calculate and request head joint angles
+- `message::booster::BoosterHeadRot` containing the desired head yaw/pitch rotation, consumed by the
+  Booster HardwareIO.
 
 ## Dependencies
 
 - Director
-- The coordinates utility
+- Eigen

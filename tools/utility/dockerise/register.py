@@ -55,7 +55,11 @@ def register(func, image=None, **kwargs):
         command.add_argument("--network", dest="network", help="Run the container on the specified docker network")
         command.add_argument("--mount", default=[], action="append", help="--mount commands to pass to docker run")
         command.add_argument("--volume", default=[], action="append", help="--volume commands to pass to docker run")
-        command.add_argument("--gpus", help="--gpus commands to pass to docker run")
+        command.add_argument(
+            "--gpus",
+            default=defaults.gpus,
+            help="--gpus commands to pass to docker run (defaults to all when the nvidia container runtime is available)",
+        )
         command.add_argument("--device", default=[], action="append", help="--device commands to pass to docker run")
 
         func(command)

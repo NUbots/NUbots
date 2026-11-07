@@ -20,7 +20,7 @@ const args = minimist(process.argv.slice(2));
 
 const withVirtualRobots = args["virtual-robots"] || false;
 const nuclearnetAddress = args.address || "239.226.152.162";
-const nuclearnetPort = args.port || "7447";
+const nuclearnetPort = Number(args.port ?? 7467);
 
 async function main() {
   const app = express();

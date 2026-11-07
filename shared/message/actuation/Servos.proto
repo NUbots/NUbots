@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2022 NUbots
+// Copyright (c) 2026 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -27,86 +27,16 @@ syntax = "proto3";
 
 package message.actuation;
 
-import "message/actuation/ServoCommand.proto";
+import "message/booster/BoosterLowCmd.proto";
 
-// Message for each servo with command information
-
-message RightShoulderPitch {
-    ServoCommand command = 1;
-}
-
-message LeftShoulderPitch {
-    ServoCommand command = 1;
-}
-
-message RightShoulderRoll {
-    ServoCommand command = 1;
-}
-
-message LeftShoulderRoll {
-    ServoCommand command = 1;
-}
-
-message RightElbow {
-    ServoCommand command = 1;
-}
-
-message LeftElbow {
-    ServoCommand command = 1;
-}
-
-message RightHipYaw {
-    ServoCommand command = 1;
-}
-
-message LeftHipYaw {
-    ServoCommand command = 1;
-}
-
-message RightHipRoll {
-    ServoCommand command = 1;
-}
-
-message LeftHipRoll {
-    ServoCommand command = 1;
-}
-
-message RightHipPitch {
-    ServoCommand command = 1;
-}
-
-message LeftHipPitch {
-    ServoCommand command = 1;
-}
-
-message RightKnee {
-    ServoCommand command = 1;
-}
-
-message LeftKnee {
-    ServoCommand command = 1;
-}
-
-message RightAnklePitch {
-    ServoCommand command = 1;
-}
-
-message LeftAnklePitch {
-    ServoCommand command = 1;
-}
-
-message RightAnkleRoll {
-    ServoCommand command = 1;
-}
-
-message LeftAnkleRoll {
-    ServoCommand command = 1;
-}
-
-message HeadYaw {
-    ServoCommand command = 1;
-}
-
-message HeadPitch {
-    ServoCommand command = 1;
+/**
+ * Whole-body K1 low-level actuation Task. Wraps a BoosterLowCmd so the Director
+ * can arbitrate ownership of the K1's single low-level channel between the walk,
+ * kick and get-up policies by priority (subsumption: get-up > kick > walk). The
+ * module::actuation::Servos provider forwards the winning requester's command
+ * to the platform as a raw BoosterLowCmd (nubridge / Booster HardwareIO).
+ */
+message Servos {
+    /// The low-level joint command (per-motor q/dq/tau/kp/kd/weight) to actuate.
+    booster.BoosterLowCmd command = 1;
 }

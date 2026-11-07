@@ -44,6 +44,21 @@ namespace utility::vision {
                 static_cast<char>((v >> 24) & 0xFF)};
     }
 
+    /// @brief Map a ROS sensor_msgs/Image encoding string to a FOURCC code, or 0 if unsupported.
+    inline uint32_t ros_encoding_to_fourcc(const std::string& enc) {
+        // clang-format off
+        if (enc == "rgb8")         return fourcc("RGB3");
+        if (enc == "bgr8")         return fourcc("BGR3");
+        if (enc == "mono8")        return fourcc("GREY");
+        if (enc == "bayer_bggr8")  return fourcc("BGGR");
+        if (enc == "bayer_grbg8")  return fourcc("GRBG");
+        if (enc == "bayer_rggb8")  return fourcc("RGGB");
+        if (enc == "bayer_gbrg8")  return fourcc("GBRG");
+        if (enc == "nv12")         return fourcc("NV12");
+        // clang-format on
+        return 0;
+    }
+
 }  // namespace utility::vision
 
 #endif  // UTILITY_VISION_FOURCC
