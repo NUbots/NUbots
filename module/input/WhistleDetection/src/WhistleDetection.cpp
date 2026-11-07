@@ -32,12 +32,12 @@
 #include <complex>
 #include <cstdlib>
 
-#include "utils/fft.hpp"
 
 #include "extension/Configuration.hpp"
 
 #include "message/input/Whistle.hpp"
 
+#include "utility/audio/fft.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::input {
