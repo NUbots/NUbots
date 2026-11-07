@@ -104,7 +104,7 @@ a module's README before modifying it, and keep it up to date when you change wh
 
 A **role** (`roles/*.role`) is a CMake-ish file listing which modules to compile into one executable, in
 dependency/startup order (e.g. `roles/robocup.role` is the full on-robot game binary; `roles/test/*.role` are
-narrow single-purpose roles for exercising one subsystem; `roles/webots/` builds sim variants). Order matters:
+narrow single-purpose roles for exercising one subsystem; `roles/nusim/` are NUSim simulator counterparts of test roles). Order matters:
 foundational modules (FileWatcher, SignalCatcher, log handlers, config) go first, hardware/platform IO modules go
 last.
 
@@ -119,7 +119,25 @@ Modules using this pattern derive from `extension::behaviour::BehaviourReactor` 
 directly. Scaffold new ones with `./b module generate <path> --director`. This is the mechanism behind the
 purpose/strategy/skill layers deciding, e.g., "walk to ball" vs "fall recovery" vs "get up" at any given moment.
 
+### Messages
+
+Messages passed between reactors are protobuf definitions in `shared/message/<layer>/*.proto`; C++ types are
+generated at build time (`./b build -m` regenerates them). Add or change a message there, not in a module.
+
+### Configuration layering
+
+Module YAML configs (`data/config/Foo.yaml`) are loaded via `shared/extension/Configuration.hpp` and merged in order:
+default `config/Foo.yaml` → per-platform `config/<platform>/` → per-hostname `config/<hostname>/` → per-robot-name →
+per-binary `config/bin/<role>/` (e.g. `data/config/bin/nusim/behaviour/`). Override files only need the keys they
+change. Configs hot-reload via `extension::FileWatcher`.
+
 ### Shared code
 
 Prefer reusing something from `shared/utility` (cross-module C++ helpers, tests mirrored under
 `shared/tests/utility/...`) or `shared/extension` (NUClear DSL extensions) over duplicating logic in a module.
+
+## Spelling
+
+Use Australian/British English, not American English, in comments, docs, READMEs, log messages, commit messages and
+new identifiers (e.g. "colour", "behaviour", "optimise", "localisation", "licence", "metre"). Don't rename existing
+identifiers or external API names (e.g. `color` in third-party libraries) just to change spelling.
