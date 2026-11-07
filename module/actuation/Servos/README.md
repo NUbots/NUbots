@@ -14,8 +14,6 @@ Other modules request servo movement by emitting a `message::actuation::Servos` 
 passed through unchanged, so any joint limiting or smoothing needs to happen before the task is emitted. The
 `Provide` runs at `Priority::HIGH` so commands reach the robot with minimal delay.
 
-This module has no configuration file.
-
 ## Consumes
 
 - `message::actuation::Servos` as a Director task (via `Provide`)

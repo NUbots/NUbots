@@ -27,15 +27,22 @@
 
 #include "Servos.hpp"
 
+#include "extension/Configuration.hpp"
+
 #include "message/actuation/Servos.hpp"
 #include "message/booster/BoosterLowCmd.hpp"
 
 namespace module::actuation {
 
+    using extension::Configuration;
     using message::booster::BoosterLowCmd;
     using ServosTask = message::actuation::Servos;
 
     Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+
+        on<Configuration>("Servos.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+        });
 
         on<Provide<ServosTask>, Priority::HIGH>().then(
             [this](const ServosTask& servos) { emit(std::make_unique<BoosterLowCmd>(servos.command)); });
