@@ -29,6 +29,9 @@ band_ratio_threshold: 0.80
 # Tune this for the robot's microphone gain.
 min_band_energy: 1.0e-6
 
+# Minimum total energy threshold.
+min_total_energy_threshold: 1.0e-10
+
 # Number of consecutive FFT frames that must exceed the threshold before a Whistle event
 # is emitted.  At 50% overlap each frame represents 32 ms of new audio, so 3 frames ≈
 # 96 ms of sustained whistle-like signal.

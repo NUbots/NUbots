@@ -121,17 +121,18 @@ namespace module::input {
         on<Configuration, Sync<WhistleDetection>>("WhistleDetection.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.device                = config["device"].as<std::string>();
-            cfg.sample_rate           = config["sample_rate"].as<unsigned int>();
-            cfg.fft_size              = config["fft_size"].as<int>();
-            cfg.freq_min              = config["freq_min"].as<float>();
-            cfg.freq_max              = config["freq_max"].as<float>();
-            cfg.band_ratio_threshold  = config["band_ratio_threshold"].as<float>();
-            cfg.min_band_energy       = config["min_band_energy"].as<float>();
-            cfg.confirm_frames        = config["confirm_frames"].as<int>();
-            cfg.cooldown_ms           = config["cooldown_ms"].as<int>();
-            cfg.startup_delay         = config["startup_delay"].as<int>();
-            cfg.use_whistle_detection = config["use_whistle_detection"].as<bool>();
+            cfg.device                     = config["device"].as<std::string>();
+            cfg.sample_rate                = config["sample_rate"].as<unsigned int>();
+            cfg.fft_size                   = config["fft_size"].as<int>();
+            cfg.freq_min                   = config["freq_min"].as<float>();
+            cfg.freq_max                   = config["freq_max"].as<float>();
+            cfg.band_ratio_threshold       = config["band_ratio_threshold"].as<float>();
+            cfg.min_band_energy            = config["min_band_energy"].as<float>();
+            cfg.min_total_energy_threshold = config["min_total_energy_threshold"].as<float>();
+            cfg.confirm_frames             = config["confirm_frames"].as<int>();
+            cfg.cooldown_ms                = config["cooldown_ms"].as<int>();
+            cfg.startup_delay              = config["startup_delay"].as<int>();
+            cfg.use_whistle_detection      = config["use_whistle_detection"].as<bool>();
 
             setup_audio();
 
@@ -213,7 +214,7 @@ namespace module::input {
         }
 
         // Skip frames that are essentially silence
-        if (total_energy < 1e-10f) {
+        if (total_energy < cfg.min_total_energy_threshold) {
             consecutive_detections = 0;
             return;
         }
