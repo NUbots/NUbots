@@ -48,7 +48,7 @@ repo = pygit2.Repository(b.project_dir)
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
-# TODO: Fix this
+# TODO: fix this
 # formatters["licence"] = {
 #     "format": [
 #         [
@@ -78,10 +78,6 @@ formatters = OrderedDict()
 #         "**/Dockerfile",
 #     ],
 #     "exclude": [
-#         "shared/utility/skill/splines/*",
-#         "shared/utility/platform/models/nugus/nugus.proto",
-#         "module/support/optimisation/NSGA2Optimiser/src/nsga2",
-#         "nusight2/src/assets/robot-models/nugus/nugus.proto",
 #         "nusight2/src/shared/messages/proto/google/*",
 #     ],
 # }

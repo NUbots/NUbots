@@ -169,23 +169,63 @@ export class LocalisationController {
           borderStripMinWidth: 0.38,
         });
         break;
-      case "robocup":
+      case "robocup_small":
         model.field.dimensions = new FieldDimensions({
           lineWidth: 0.06,
           markWidth: 0.1,
-          fieldLength: 9,
-          fieldWidth: 6,
+          fieldLength: 9.0,
+          fieldWidth: 6.0,
+          goalDepth: 0.58,
+          goalWidth: 2.575,
+          goalAreaLength: 0.9,
+          goalAreaWidth: 2.9,
+          penaltyAreaLength: 1.9,
+          penaltyAreaWidth: 3.9,
+          goalCrossbarHeight: 1.2,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 1.47,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+        break;
+      case "robocup_large":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 9.0,
+          fieldWidth: 6.0,
+          goalDepth: 0.5,
+          goalWidth: 1.8,
+          goalAreaLength: 0.9,
+          goalAreaWidth: 2.9,
+          penaltyAreaLength: 1.9,
+          penaltyAreaWidth: 3.9,
+          goalCrossbarHeight: 1.2,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 1.47,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+        break;
+      case "robocup_5v5":
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 22.0,
+          fieldWidth: 14.0,
           goalDepth: 0.6,
           goalWidth: 2.6,
-          goalAreaLength: 1,
-          goalAreaWidth: 3,
-          penaltyAreaLength: 2,
-          penaltyAreaWidth: 5,
+          goalAreaLength: 2.0,
+          goalAreaWidth: 5.0,
+          penaltyAreaLength: 5.0,
+          penaltyAreaWidth: 8.0,
           goalCrossbarHeight: 1.25,
           goalPostDiameter: 0.1,
-          goalNetHeight: 1,
-          penaltyMarkDistance: 1.5,
-          centerCircleDiameter: 1.5,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 3.5,
+          centerCircleDiameter: 4,
           borderStripMinWidth: 1.0,
         });
         break;
@@ -374,6 +414,31 @@ export class LocalisationController {
   @action
   toggleBoundedBoxVisibility = (model: LocalisationModel) => {
     model.boundedBoxVisible = !model.boundedBoxVisible;
+  };
+
+  @action
+  togglePurposeLabelVisibility = (model: LocalisationModel) => {
+    model.purposeLabelVisible = !model.purposeLabelVisible;
+  };
+
+  @action
+  toggleTimeToBallVisibility = (model: LocalisationModel) => {
+    model.timeToBallVisible = !model.timeToBallVisible;
+  };
+
+  @action
+  toggleSupportPositionVisibility = (model: LocalisationModel) => {
+    model.supportPositionVisible = !model.supportPositionVisible;
+  };
+
+  @action
+  toggleTeammatesVisibility = (model: LocalisationModel) => {
+    model.teammatesVisible = !model.teammatesVisible;
+  };
+
+  @action
+  toggleTeammateBallVisibility = (model: LocalisationModel) => {
+    model.teammateBallVisible = !model.teammateBallVisible;
   };
 
   @action

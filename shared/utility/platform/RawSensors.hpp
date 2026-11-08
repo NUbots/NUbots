@@ -120,6 +120,8 @@ namespace utility::platform {
             case ServoID::L_ANKLE_ROLL: return sensors.servo.l_ankle_roll;
             case ServoID::HEAD_YAW: return sensors.servo.head_pan;
             case ServoID::HEAD_PITCH: return sensors.servo.head_tilt;
+            case ServoID::R_ELBOW_YAW: return sensors.servo.r_elbow_yaw;
+            case ServoID::L_ELBOW_YAW: return sensors.servo.l_elbow_yaw;
 
             default: throw std::runtime_error("Out of bounds");
         }
@@ -148,6 +150,8 @@ namespace utility::platform {
             case ServoID::L_ANKLE_ROLL: return sensors.servo.l_ankle_roll;
             case ServoID::HEAD_YAW: return sensors.servo.head_pan;
             case ServoID::HEAD_PITCH: return sensors.servo.head_tilt;
+            case ServoID::R_ELBOW_YAW: return sensors.servo.r_elbow_yaw;
+            case ServoID::L_ELBOW_YAW: return sensors.servo.l_elbow_yaw;
 
             default: throw std::runtime_error("Out of bounds");
         }

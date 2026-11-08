@@ -1,0 +1,4 @@
+# NUSim runs the stack on the same machine as NUsight, where the robot-subnet broadcast
+# address in the base config reaches nothing. Use the NUClearNet multicast group instead
+# (the port stays the base config's 7467, NUsight's default).
+address: 239.226.152.162

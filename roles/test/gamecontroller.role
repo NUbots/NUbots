@@ -4,16 +4,14 @@ nuclear_role(
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
-  # Configuration
-  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
-  # GlobalConfig is used by GameController
+  # Configuration GlobalConfig is used by GameController
   support::configuration::GlobalConfig
   # Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
   # Sensors for button testing
-  input::SensorFilter
+  input::Sensors
   # GameController communications
   input::GameController
   # Platform

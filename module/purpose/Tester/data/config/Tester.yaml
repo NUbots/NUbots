@@ -6,6 +6,7 @@ tasks:
   # Strategies
   align_ball_to_goal_priority: 0
   find_ball_priority: 0
+  fall_recovery_priority: 0
   look_at_ball_priority: 0
   walk_to_ball_priority: 0
   walk_to_kick_ball_priority: 0
@@ -17,6 +18,8 @@ tasks:
   # Planners
   kick_to_priority: 0
   look_around_priority: 0
+  # Run skill::Kick (SimK1Kick) directly, bypassing the FindBall -> WalkToKickBall -> PlanKick chain
+  kick_policy_priority: 0
 
   # Skills
   say_priority: 0

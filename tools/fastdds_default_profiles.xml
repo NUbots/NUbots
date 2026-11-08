@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Fast-DDS profiles for the Booster SDK (ChannelFactory::Init refuses to create its
+     participant without a profile named "booster_dds"). Pass via
+     FASTRTPS_DEFAULT_PROFILES_FILE — see NUSim docs/K1_MUJOCO_SETUP.md. -->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <participant profile_name="booster_dds" is_default_profile="true">
+        <rtps>
+            <name>booster_dds</name>
+        </rtps>
+    </participant>
+</profiles>

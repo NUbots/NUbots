@@ -36,6 +36,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -50,6 +51,8 @@ namespace module::output {
     using message::input::Image;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::purpose::Purpose;
+    using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::skill::Walk;
     using message::support::GlobalConfig;
@@ -86,6 +89,7 @@ namespace module::output {
            Optional<With<Kick>>,
            Optional<With<GameState>>,
            Optional<With<Walk>>,
+           Optional<With<Purpose>>,
            Single,
            Priority::LOW>()
             .then([this](const std::shared_ptr<const GlobalConfig>& global,
@@ -95,7 +99,8 @@ namespace module::output {
                          const std::shared_ptr<const LocalisationBall>& loc_ball,
                          const std::shared_ptr<const Kick>& kick,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const Walk>& walk) {
+                         const std::shared_ptr<const Walk>& walk,
+                         const std::shared_ptr<const Purpose>& purpose) {
                 auto msg = std::make_unique<OverviewMsg>();
 
                 // Set properties
@@ -156,6 +161,9 @@ namespace module::output {
                 else {
                     msg->walk_command = Eigen::Vector3f::Zero();
                 }
+
+                // Set the role (soccer position) the robot has decided to take
+                msg->role = purpose ? purpose->purpose : SoccerPosition(SoccerPosition::UNKNOWN);
 
                 emit(msg);
             });

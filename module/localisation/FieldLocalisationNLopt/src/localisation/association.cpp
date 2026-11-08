@@ -36,7 +36,7 @@ namespace module::localisation {
     using message::vision::FieldIntersections;
 
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::hungarian_association(
-        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const FieldIntersections& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
@@ -46,10 +46,10 @@ namespace module::localisation {
 
         // Create cost matrix for the Hungarian algorithm
         // Note that the assignment is intersection index to landmark index
-        Eigen::MatrixXd cost_matrix(field_intersections->intersections.size(), landmarks.size());
+        Eigen::MatrixXd cost_matrix(field_intersections.intersections.size(), landmarks.size());
 
         int intersection_idx = 0;
-        for (const auto& intersection : field_intersections->intersections) {
+        for (const auto& intersection : field_intersections.intersections) {
             // Transform the detected intersection from world to field coordinates
             Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
 
@@ -73,7 +73,7 @@ namespace module::localisation {
             if (cost < cfg.max_association_distance) {
                 // Access the intersection and landmark using their indices because the result of determine_assignment()
                 // is index based
-                const auto& intersection = field_intersections->intersections.at(intersection_index);
+                const auto& intersection = field_intersections.intersections.at(intersection_index);
                 const auto& landmark     = landmarks.at(landmark_index);
 
                 Eigen::Vector3d rIFf = Hfw * intersection.rIWw;
@@ -97,14 +97,14 @@ namespace module::localisation {
 
 
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::greedy_association(
-        const std::shared_ptr<const FieldIntersections>& field_intersections,
+        const FieldIntersections& field_intersections,
         const Eigen::Isometry3d& Hfw) {
 
         std::vector<Eigen::Vector3d> occupied_landmarks{};
         std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> associations;
 
         // Greedily associate each intersection with the closest landmark
-        for (const auto& intersection : field_intersections->intersections) {
+        for (const auto& intersection : field_intersections.intersections) {
             double min_distance = std::numeric_limits<double>::max();
             Eigen::Vector3d closest_landmark;
             bool found_association = false;

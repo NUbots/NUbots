@@ -46,16 +46,6 @@ export class VisionCameraView extends Component<VisionCameraViewProps> {
     const drawOptions = this.props.viewModel.drawOptions;
     return [
       {
-        label: "Visual Mesh",
-        enabled: drawOptions.drawVisualMesh,
-        toggle: action(() => (drawOptions.drawVisualMesh = !drawOptions.drawVisualMesh)),
-      },
-      {
-        label: "Green Horizon",
-        enabled: drawOptions.drawGreenHorizon,
-        toggle: action(() => (drawOptions.drawGreenHorizon = !drawOptions.drawGreenHorizon)),
-      },
-      {
         label: "Balls",
         enabled: drawOptions.drawBalls,
         toggle: action(() => (drawOptions.drawBalls = !drawOptions.drawBalls)),

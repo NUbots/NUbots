@@ -27,12 +27,13 @@
 #
 import getpass
 import os
+import shutil
 
 from . import platform
 
 cache_registry = "nubots"
 image = "nubots"
-image_user = "nubots"
+image_user = "booster"
 directory = "NUbots"
 
 # This can fail if the local user id doesn't exist (e.g. you're in docker and set a uid)
@@ -41,6 +42,23 @@ try:
     local_user = getpass.getuser()
 except:
     local_user = f"{os.getuid()}"
+
+
+def _detect_gpus():
+    """ "all" when the nvidia container stack is usable, otherwise None.
+
+    ONNX Runtime's TensorRT EP (Yolo, and the K1 policy skills when set to gpu) needs the GPU
+    passed through, but `docker run --gpus all` fails outright ("could not select device
+    driver") on a host without the nvidia container runtime, which would break every `./b run`
+    on a CPU-only machine. So only default it on when both the device nodes and the runtime
+    hook are present; the policy skills fall back to CPU when the GPU isn't there.
+    """
+    has_devices = os.path.exists("/dev/nvidiactl")
+    has_runtime = shutil.which("nvidia-container-runtime") or shutil.which("nvidia-container-runtime-hook")
+    return "all" if has_devices and has_runtime else None
+
+
+gpus = _detect_gpus()
 
 
 def image_name(label, image=image, username=local_user):

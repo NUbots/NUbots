@@ -27,11 +27,10 @@
 #ifndef MODULE_PLANNING_PLANKICK_HPP
 #define MODULE_PLANNING_PLANKICK_HPP
 
+#include <Eigen/Core>
 #include <extension/Behaviour.hpp>
 #include <nuclear>
 #include <string>
-
-#include "utility/input/LimbID.hpp"
 
 namespace module::planning {
 
@@ -43,8 +42,21 @@ namespace module::planning {
             double ball_distance_threshold = 0.0;
             double ball_angle_threshold    = 0.0;
             double target_angle_threshold  = 0.0;
-            utility::input::LimbID kick_leg{};
+            /// @brief The offset on goal target, shared with WalkToBall's config
+            double goal_target_offset = 0.0;
+            /// @brief Kick power used when the target is far away (> 2/3 field length)
+            double kick_power_far = 0.0;
+            /// @brief Kick power used when the target is a medium distance away (1/3 to 2/3 field length)
+            double kick_power_mid = 0.0;
+            /// @brief Kick power used when the target is close (< 1/3 field length)
+            double kick_power_near = 0.0;
         } cfg;
+
+        /// @brief The position of the goal in field space, the Kick task's target
+        Eigen::Vector3d rGFf = Eigen::Vector3d::Zero();
+
+        /// @brief The length of the field, used to band kick power by distance to target
+        double field_length = 0.0;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanKick reactor.
