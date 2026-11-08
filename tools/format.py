@@ -48,38 +48,39 @@ repo = pygit2.Repository(b.project_dir)
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
-formatters["licence"] = {
-    "format": [
-        [
-            "licenseheaders",
-            "-t",
-            os.path.join(b.project_dir, ".licence.tmpl"),
-            "--years={added}",
-            "--owner=NUbots",
-            f"--projname=NUbots",
-            "--projurl=https://github.com/NUbots/NUbots",
-            "-f",
-            "{path}",
-        ]
-    ],
-    "include": [
-        "*.cpp",
-        "*.hpp",
-        "*.h",
-        "*.c",
-        "*.py",
-        "*.sh",
-        "*.cmake",
-        "*.proto",
-        "CMakeLists.txt",
-        "**/CMakeLists.txt",
-        "Dockerfile",
-        "**/Dockerfile",
-    ],
-    "exclude": [
-        "nusight2/src/shared/messages/proto/google/*",
-    ],
-}
+# TODO: fix this
+# formatters["licence"] = {
+#     "format": [
+#         [
+#             "licenseheaders",
+#             "-t",
+#             os.path.join(b.project_dir, ".licence.tmpl"),
+#             "--years={added}",
+#             "--owner=NUbots",
+#             f"--projname=NUbots",
+#             "--projurl=https://github.com/NUbots/NUbots",
+#             "-f",
+#             "{path}",
+#         ]
+#     ],
+#     "include": [
+#         "*.cpp",
+#         "*.hpp",
+#         "*.h",
+#         "*.c",
+#         "*.py",
+#         "*.sh",
+#         "*.cmake",
+#         "*.proto",
+#         "CMakeLists.txt",
+#         "**/CMakeLists.txt",
+#         "Dockerfile",
+#         "**/Dockerfile",
+#     ],
+#     "exclude": [
+#         "nusight2/src/shared/messages/proto/google/*",
+#     ],
+# }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],
