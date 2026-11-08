@@ -468,12 +468,12 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160; </div>
 <div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;            <span class="comment">// Default values if we can&#39;t find the group info</span></div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;            <a class="code" href="structextension_1_1behaviour_1_1Uses.html">Uses&lt;T&gt;</a> data;</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;            data.run_state = RunState::NO_TASK;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            data.done      = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;            data.<a class="code" href="structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707">run_state</a> = RunState::NO_TASK;</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            data.<a class="code" href="structextension_1_1behaviour_1_1Uses.html#aaf8a4311472c0e4a3fbf6d0849621307">done</a>      = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160; </div>
 <div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            <span class="keyword">auto</span> group_info    = <a class="code" href="structextension_1_1behaviour_1_1information_1_1GroupInfoStore.html">information::GroupInfoStore&lt;T&gt;::get</a>();</div>
 <div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            <span class="keywordtype">bool</span> root_provider = t.id != state::current_task_id;</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            data.done          = group_info-&gt;done;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            data.<a class="code" href="structextension_1_1behaviour_1_1Uses.html#aaf8a4311472c0e4a3fbf6d0849621307">done</a>          = group_info-&gt;done;</div>
 <div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
 <div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            <span class="comment">// If we can&#39;t find the group info then cannot fill the data</span></div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;            <span class="keywordflow">if</span> (group_info == <span class="keyword">nullptr</span>) {</div>
@@ -484,7 +484,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            <span class="comment">// Then if the active task is run from root, then it is running</span></div>
 <div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;            <span class="comment">// If a watcher is root, then it is queued</span></div>
 <div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;            <span class="keywordflow">if</span> (root_provider) {</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;                data.run_state = group_info-&gt;active_task.root</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;                data.<a class="code" href="structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707">run_state</a> = group_info-&gt;active_task.root</div>
 <div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;                                     ? RunState::RUNNING</div>
 <div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;                                     : (std::any_of(group_info-&gt;watchers.begin(),</div>
 <div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;                                                    group_info-&gt;watchers.end(),</div>
@@ -499,7 +499,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;            <span class="keyword">auto</span> is_target_task = [&amp;t](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; task) {</div>
 <div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;                <span class="keywordflow">return</span> task.requester_id == t.parent-&gt;id &amp;&amp; task.type == <span class="keyword">typeid</span>(T);</div>
 <div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            };</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            data.run_state = group_info-&gt;active_task.requester_id == t.parent-&gt;id ? RunState::RUNNING</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            data.<a class="code" href="structextension_1_1behaviour_1_1Uses.html#a665a7abe83011c6ef29f4dcbb30a1707">run_state</a> = group_info-&gt;active_task.requester_id == t.parent-&gt;id ? RunState::RUNNING</div>
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                             : std::any_of(group_info-&gt;watchers.begin(), group_info-&gt;watchers.end(), is_target_task)</div>
 <div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                                 ? RunState::QUEUED</div>
 <div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                                 : RunState::NO_TASK;</div>
@@ -657,7 +657,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_c23e0f9c1b229783d92a813e01cca46a.html">extension</a></li><li class="navelem"><b>Behaviour.hpp</b></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

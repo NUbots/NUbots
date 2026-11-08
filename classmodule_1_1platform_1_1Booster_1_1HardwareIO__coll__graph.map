@@ -1,0 +1,7 @@
+<map id="module::platform::Booster::HardwareIO" name="module::platform::Booster::HardwareIO">
+<area shape="rect" id="node1" title=" " alt="" coords="341,78,535,119"/>
+<area shape="rect" id="node2" title=" " alt="" coords="35,5,169,32"/>
+<area shape="rect" id="node3" title=" " alt="" coords="54,56,150,83"/>
+<area shape="rect" id="node4" href="$structmodule_1_1platform_1_1Booster_1_1HardwareIO_1_1Config.html" title=" " alt="" coords="5,107,199,149"/>
+<area shape="rect" id="node5" href="$structmodule_1_1platform_1_1Booster_1_1HardwareIO_1_1Buttons.html" title=" " alt="" coords="5,173,199,214"/>
+</map>

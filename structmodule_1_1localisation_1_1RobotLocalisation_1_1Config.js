@@ -5,5 +5,6 @@ var structmodule_1_1localisation_1_1RobotLocalisation_1_1Config =
     [ "max_distance_from_field", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a8e27c1a88edcc6668340a28144988504", null ],
     [ "max_localisation_cost", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a3a2bf8ae574938c23d2b735c66b11018", null ],
     [ "max_missed_count", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9", null ],
+    [ "teammate_timeout", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aad5b8cbf771c3fbe62910b592b806b6d", null ],
     [ "ukf", "structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a7ac033f3108980bbfed9bfb7ae26cc71", null ]
 ];

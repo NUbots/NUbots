@@ -1,7 +1,7 @@
 var classmodule_1_1tools_1_1LocalisationBenchmark =
 [
     [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html#a67d824966f0817d8bc52f234f14f605d", null ],
-    [ "config", "classmodule_1_1tools_1_1LocalisationBenchmark.html#ae8cfc1d67b90f90bdbcbcb43cb5984be", null ],
+    [ "config", "classmodule_1_1tools_1_1LocalisationBenchmark.html#aef67a9cb0c8bdd5d5d268fb410e03878", null ],
     [ "count", "classmodule_1_1tools_1_1LocalisationBenchmark.html#a26dcde290ee0d92c536cc043fd6e2b34", null ],
     [ "messages", "classmodule_1_1tools_1_1LocalisationBenchmark.html#a2a64254b4ad8cd07982f0e248c85d0b3", null ],
     [ "mode", "classmodule_1_1tools_1_1LocalisationBenchmark.html#a38fd66656c5cf24525bb1dda4f61de64", null ],

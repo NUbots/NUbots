@@ -219,6 +219,12 @@ Private Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a2fba8682aa62f6793714a47a9f2520f7">configure_network</a> ()</td></tr>
 <tr class="memdesc:a2fba8682aa62f6793714a47a9f2520f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using the current configuration, sets the network settings. This needs sudo to run, as it edits the network configuration files. set_values() is called first in this function. <br /></td></tr>
 <tr class="separator:a2fba8682aa62f6793714a47a9f2520f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af666fdede9a69ec1bff2f28e6eaac488"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#af666fdede9a69ec1bff2f28e6eaac488">confirm_prompt</a> (const std::string &amp;message)</td></tr>
+<tr class="memdesc:af666fdede9a69ec1bff2f28e6eaac488"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a popup with the given message and blocks until the user presses y/n.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#af666fdede9a69ec1bff2f28e6eaac488">More...</a><br /></td></tr>
+<tr class="separator:af666fdede9a69ec1bff2f28e6eaac488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf260dae1d7a9ce0dfd12cd06ee5c684"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aaf260dae1d7a9ce0dfd12cd06ee5c684">draw_popup</a> (const std::string &amp;message)</td></tr>
+<tr class="memdesc:aaf260dae1d7a9ce0dfd12cd06ee5c684"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a centred popup box with a message (eg "Connecting...") over the current view. The popup remains on screen until the next <a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1cbd999435abca4067e96b37fbfc08f6" title="Displays the screen with any updated values to the user.">refresh_view()</a> call.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aaf260dae1d7a9ce0dfd12cd06ee5c684">More...</a><br /></td></tr>
+<tr class="separator:aaf260dae1d7a9ce0dfd12cd06ee5c684"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4b37ae9123408e3088ced66790621ca"><td class="memItemLeft" align="right" valign="top"><a id="aa4b37ae9123408e3088ced66790621ca"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aa4b37ae9123408e3088ced66790621ca">edit_selection</a> ()</td></tr>
 <tr class="memdesc:aa4b37ae9123408e3088ced66790621ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functionality for the user to edit a field in the display. <br /></td></tr>
@@ -231,7 +237,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:a07b69b04c725c425740ea64adcb12665"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current configurable values to display to the user. <br /></td></tr>
 <tr class="separator:a07b69b04c725c425740ea64adcb12665"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68910190e5eac9fc7db3dce984eadad6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6">get_platform</a> ()</td></tr>
-<tr class="memdesc:a68910190e5eac9fc7db3dce984eadad6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6">More...</a><br /></td></tr>
+<tr class="memdesc:a68910190e5eac9fc7db3dce984eadad6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the platform we are currently running on, eg booster, docker, webots, from the hostname.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6">More...</a><br /></td></tr>
 <tr class="separator:a68910190e5eac9fc7db3dce984eadad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cbd999435abca4067e96b37fbfc08f6"><td class="memItemLeft" align="right" valign="top"><a id="a1cbd999435abca4067e96b37fbfc08f6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1cbd999435abca4067e96b37fbfc08f6">refresh_view</a> ()</td></tr>
@@ -257,6 +263,10 @@ struct <a class="el" href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Conf
 <tr class="memitem:af0fbcb70e9a4a5c955cefcfad7eb8289"><td class="memItemLeft" align="right" valign="top"><a id="af0fbcb70e9a4a5c955cefcfad7eb8289"></a>
 struct <a class="el" href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html">module::tools::RoboCupConfiguration::Display</a>&#160;</td><td class="memItemRight" valign="bottom"><b>display</b></td></tr>
 <tr class="separator:af0fbcb70e9a4a5c955cefcfad7eb8289"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91c323f0ee643c8e901cc5d43ad99bc8"><td class="memItemLeft" align="right" valign="top"><a id="a91c323f0ee643c8e901cc5d43ad99bc8"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a91c323f0ee643c8e901cc5d43ad99bc8">field_type</a> = &quot;small&quot;</td></tr>
+<tr class="memdesc:a91c323f0ee643c8e901cc5d43ad99bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The selected field type preset. <br /></td></tr>
+<tr class="separator:a91c323f0ee643c8e901cc5d43ad99bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1eae40a927bc7cf7010c933c3fb7b499"><td class="memItemLeft" align="right" valign="top"><a id="a1eae40a927bc7cf7010c933c3fb7b499"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1eae40a927bc7cf7010c933c3fb7b499">hostname</a> = &quot;&quot;</td></tr>
 <tr class="memdesc:a1eae40a927bc7cf7010c933c3fb7b499"><td class="mdescLeft">&#160;</td><td class="mdescRight">The hostname of the robot. <br /></td></tr>
@@ -289,6 +299,10 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a6754361cf74cdfbe85f3afbbcd3a1a90">team_id</a> = 0</td></tr>
 <tr class="memdesc:a6754361cf74cdfbe85f3afbbcd3a1a90"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ID that the robot is player for. <br /></td></tr>
 <tr class="separator:a6754361cf74cdfbe85f3afbbcd3a1a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0776e22c5408208bd135333c1c1f06b0"><td class="memItemLeft" align="right" valign="top"><a id="a0776e22c5408208bd135333c1c1f06b0"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a0776e22c5408208bd135333c1c1f06b0">use_dhcp</a> = false</td></tr>
+<tr class="memdesc:a0776e22c5408208bd135333c1c1f06b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to use DHCP (automatic IP assignment) instead of a static IP. <br /></td></tr>
+<tr class="separator:a0776e22c5408208bd135333c1c1f06b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae2cf546846460b7b6a8eeb0e943b252"><td class="memItemLeft" align="right" valign="top"><a id="aae2cf546846460b7b6a8eeb0e943b252"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aae2cf546846460b7b6a8eeb0e943b252">wifi_interface</a> = &quot;&quot;</td></tr>
 <tr class="memdesc:aae2cf546846460b7b6a8eeb0e943b252"><td class="mdescLeft">&#160;</td><td class="mdescRight">The wifi interface that the robot is connected to. <br /></td></tr>
@@ -306,6 +320,75 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 <tr class="separator:a2e01604cbb34686a3bcdc49123eb2ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="af666fdede9a69ec1bff2f28e6eaac488"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af666fdede9a69ec1bff2f28e6eaac488">&#9670;&nbsp;</a></span>confirm_prompt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool module::tools::RoboCupConfiguration::confirm_prompt </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draws a popup with the given message and blocks until the user presses y/n. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>The confirmation message to display </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the user confirmed with y, false if they declined with n </dd></dl>
+
+</div>
+</div>
+<a id="aaf260dae1d7a9ce0dfd12cd06ee5c684"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf260dae1d7a9ce0dfd12cd06ee5c684">&#9670;&nbsp;</a></span>draw_popup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::tools::RoboCupConfiguration::draw_popup </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Draws a centred popup box with a message (eg "Connecting...") over the current view. The popup remains on screen until the next <a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1cbd999435abca4067e96b37fbfc08f6" title="Displays the screen with any updated values to the user.">refresh_view()</a> call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">message</td><td>The message to display in the popup </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a068110e852d5a900c79bc0906c3e23ad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a068110e852d5a900c79bc0906c3e23ad">&#9670;&nbsp;</a></span>get_config_file()</h2>
 
@@ -364,7 +447,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 </table>
 </div><div class="memdoc">
 
-<p>Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname. </p>
+<p>Gets the platform we are currently running on, eg booster, docker, webots, from the hostname. </p>
 <dl class="section return"><dt>Returns</dt><dd>The platform we are currently running on </dd></dl>
 
 </div>
@@ -407,7 +490,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>tools</b></li><li class="navelem"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html">RoboCupConfiguration</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

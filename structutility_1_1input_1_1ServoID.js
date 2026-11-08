@@ -21,6 +21,8 @@ var structutility_1_1input_1_1ServoID =
       [ "L_ANKLE_ROLL", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0e167a9cfd6032f8a88e0d177cd47a74", null ],
       [ "HEAD_YAW", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daaf0c2e9714e33aa60d589d3b703aa8b8b", null ],
       [ "HEAD_PITCH", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2bfe46de35a071363788406659e29dee", null ],
+      [ "R_ELBOW_YAW", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa6be443f7b7286a79eb760e9b623ab366", null ],
+      [ "L_ELBOW_YAW", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daae6135df5e5f010706a5a6591fd54d0e2", null ],
       [ "NUMBER_OF_SERVOS", "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa83992d6862f3b0f78421ed96840c83e6", null ]
     ] ],
     [ "ServoID", "structutility_1_1input_1_1ServoID.html#a0dccc3c86509d39bc8451a53270806c8", null ],

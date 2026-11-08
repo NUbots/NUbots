@@ -176,15 +176,6 @@ $(document).ready(function(){initNavTree('structmodule_1_1planning_1_1PlanKick_1
 
 <p>Stores configuration values.  
  <a href="structmodule_1_1planning_1_1PlanKick_1_1Config.html#details">More...</a></p>
-<div class="dynheader">
-Collaboration diagram for module::planning::PlanKick::Config:</div>
-<div class="dyncontent">
-<div class="center"><img src="structmodule_1_1planning_1_1PlanKick_1_1Config__coll__graph.png" border="0" usemap="#amodule_1_1planning_1_1PlanKick_1_1Config_coll__map" alt="Collaboration graph"/></div>
-<map name="amodule_1_1planning_1_1PlanKick_1_1Config_coll__map" id="amodule_1_1planning_1_1PlanKick_1_1Config_coll__map">
-<area shape="rect" title="Stores configuration values." alt="" coords="5,95,204,136"/>
-<area shape="rect" href="structutility_1_1input_1_1LimbID.html" title=" " alt="" coords="27,5,182,32"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -197,9 +188,22 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>ball_distance_thres
 <tr class="memitem:ad32c23d72ca5598bb994812d9aa2c74a"><td class="memItemLeft" align="right" valign="top"><a id="ad32c23d72ca5598bb994812d9aa2c74a"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>ball_timeout_threshold</b> = 0.0</td></tr>
 <tr class="separator:ad32c23d72ca5598bb994812d9aa2c74a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a3731e480d14a48a19bf80e1368948d"><td class="memItemLeft" align="right" valign="top"><a id="a2a3731e480d14a48a19bf80e1368948d"></a>
-<a class="el" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>kick_leg</b> {}</td></tr>
-<tr class="separator:a2a3731e480d14a48a19bf80e1368948d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8d1be67376cb00e0de0c7fdfa184f3a"><td class="memItemLeft" align="right" valign="top"><a id="aa8d1be67376cb00e0de0c7fdfa184f3a"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanKick_1_1Config.html#aa8d1be67376cb00e0de0c7fdfa184f3a">goal_target_offset</a> = 0.0</td></tr>
+<tr class="memdesc:aa8d1be67376cb00e0de0c7fdfa184f3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The offset on goal target, shared with WalkToBall's config. <br /></td></tr>
+<tr class="separator:aa8d1be67376cb00e0de0c7fdfa184f3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fe3961a28ccde79b2de10d7b43dd25a"><td class="memItemLeft" align="right" valign="top"><a id="a4fe3961a28ccde79b2de10d7b43dd25a"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanKick_1_1Config.html#a4fe3961a28ccde79b2de10d7b43dd25a">kick_power_far</a> = 0.0</td></tr>
+<tr class="memdesc:a4fe3961a28ccde79b2de10d7b43dd25a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kick power used when the target is far away (&gt; 2/3 field length) <br /></td></tr>
+<tr class="separator:a4fe3961a28ccde79b2de10d7b43dd25a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a192babdb74c0c610b6bd19f6e5693b43"><td class="memItemLeft" align="right" valign="top"><a id="a192babdb74c0c610b6bd19f6e5693b43"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanKick_1_1Config.html#a192babdb74c0c610b6bd19f6e5693b43">kick_power_mid</a> = 0.0</td></tr>
+<tr class="memdesc:a192babdb74c0c610b6bd19f6e5693b43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kick power used when the target is a medium distance away (1/3 to 2/3 field length) <br /></td></tr>
+<tr class="separator:a192babdb74c0c610b6bd19f6e5693b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98d8d6299c8adbe96ee0866e8ee434ed"><td class="memItemLeft" align="right" valign="top"><a id="a98d8d6299c8adbe96ee0866e8ee434ed"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanKick_1_1Config.html#a98d8d6299c8adbe96ee0866e8ee434ed">kick_power_near</a> = 0.0</td></tr>
+<tr class="memdesc:a98d8d6299c8adbe96ee0866e8ee434ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kick power used when the target is close (&lt; 1/3 field length) <br /></td></tr>
+<tr class="separator:a98d8d6299c8adbe96ee0866e8ee434ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a072dc6729a8ba24468186f6309558b73"><td class="memItemLeft" align="right" valign="top"><a id="a072dc6729a8ba24468186f6309558b73"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>target_angle_threshold</b> = 0.0</td></tr>
 <tr class="separator:a072dc6729a8ba24468186f6309558b73"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -215,7 +219,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>target_angle_thresh
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanKick.html">PlanKick</a></li><li class="navelem"><a class="el" href="structmodule_1_1planning_1_1PlanKick_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

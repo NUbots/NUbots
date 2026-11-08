@@ -225,9 +225,9 @@ Private Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a071bc744ede53369f339230f8b68130e">debug_info</a> () const</td></tr>
 <tr class="memdesc:a071bc744ede53369f339230f8b68130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print out the current state of the tracked robots. <br /></td></tr>
 <tr class="separator:a071bc744ede53369f339230f8b68130e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bd170b4b4ef9c02219fdf4719527ab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a9bd170b4b4ef9c02219fdf4719527ab6">maintenance</a> (const message::vision::GreenHorizon &amp;horizon, const message::localisation::Field &amp;field, const message::support::FieldDescription &amp;field_desc)</td></tr>
-<tr class="memdesc:a9bd170b4b4ef9c02219fdf4719527ab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run maintenance on the tracked robots This will remove any viewable robots that have been missed too many times or are too close to another robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a9bd170b4b4ef9c02219fdf4719527ab6">More...</a><br /></td></tr>
-<tr class="separator:a9bd170b4b4ef9c02219fdf4719527ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3c4823f068bbad045dbfd03a645ea29"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#ac3c4823f068bbad045dbfd03a645ea29">maintenance</a> (const message::input::Image &amp;image, const message::localisation::Field &amp;field, const message::support::FieldDescription &amp;field_desc)</td></tr>
+<tr class="memdesc:ac3c4823f068bbad045dbfd03a645ea29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run maintenance on the tracked robots This will remove any viewable robots that have been missed too many times or are too close to another robot.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#ac3c4823f068bbad045dbfd03a645ea29">More...</a><br /></td></tr>
+<tr class="separator:ac3c4823f068bbad045dbfd03a645ea29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a767cb02d9117e7d7c2c1080ba489a3a1"><td class="memItemLeft" align="right" valign="top"><a id="a767cb02d9117e7d7c2c1080ba489a3a1"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a767cb02d9117e7d7c2c1080ba489a3a1">prediction</a> ()</td></tr>
 <tr class="memdesc:a767cb02d9117e7d7c2c1080ba489a3a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run Kalman filter prediction step for all tracked robots. <br /></td></tr>
@@ -300,8 +300,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a9bd170b4b4ef9c02219fdf4719527ab6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bd170b4b4ef9c02219fdf4719527ab6">&#9670;&nbsp;</a></span>maintenance()</h2>
+<a id="ac3c4823f068bbad045dbfd03a645ea29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3c4823f068bbad045dbfd03a645ea29">&#9670;&nbsp;</a></span>maintenance()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -312,8 +312,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="memname">void module::localisation::RobotLocalisation::maintenance </td>
           <td>(</td>
-          <td class="paramtype">const message::vision::GreenHorizon &amp;&#160;</td>
-          <td class="paramname"><em>horizon</em>, </td>
+          <td class="paramtype">const message::input::Image &amp;&#160;</td>
+          <td class="paramname"><em>image</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -343,7 +343,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <p>Run maintenance on the tracked robots This will remove any viewable robots that have been missed too many times or are too close to another robot. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">horizon</td><td>The green horizon from the vision system, to determine if a robot is in view </td></tr>
+    <tr><td class="paramname">image</td><td>The most recent camera image, used to determine if a robot is within the camera's view </td></tr>
     <tr><td class="paramname">field</td><td>The field localisation, used to determine location of the tracked robot on field </td></tr>
     <tr><td class="paramname">field_desc</td><td>Field description, used to get the length and width of the field </td></tr>
   </table>
@@ -362,7 +362,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

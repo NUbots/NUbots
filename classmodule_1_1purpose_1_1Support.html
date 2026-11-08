@@ -167,7 +167,10 @@ $(document).ready(function(){initNavTree('classmodule_1_1purpose_1_1Support.html
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1purpose_1_1Support-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::purpose::Support Class Reference</div>  </div>
@@ -188,18 +191,43 @@ Collaboration diagram for module::purpose::Support:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1purpose_1_1Support__coll__graph.png" border="0" usemap="#amodule_1_1purpose_1_1Support_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1purpose_1_1Support_coll__map" id="amodule_1_1purpose_1_1Support_coll__map">
-<area shape="rect" title=" " alt="" coords="5,169,195,196"/>
-<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="21,80,179,121"/>
-<area shape="rect" title=" " alt="" coords="33,5,167,32"/>
+<area shape="rect" title=" " alt="" coords="89,185,278,212"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,81,164,123"/>
+<area shape="rect" title=" " alt="" coords="17,5,152,32"/>
+<area shape="rect" href="structmodule_1_1purpose_1_1Support_1_1Config.html" title="Stores configuration values." alt="" coords="189,81,378,123"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1Support_1_1Config.html">Config</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores configuration values.  <a href="structmodule_1_1purpose_1_1Support_1_1Config.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1Support_1_1RobotSlot.html">RobotSlot</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the offset, attraction, and minimum x for a robot's formation slot.  <a href="structmodule_1_1purpose_1_1Support_1_1RobotSlot.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af55fc85ed08a86c475d081d24e12b401"><td class="memItemLeft" align="right" valign="top"><a id="af55fc85ed08a86c475d081d24e12b401"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Support.html#af55fc85ed08a86c475d081d24e12b401">Support</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:af55fc85ed08a86c475d081d24e12b401"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> reactor. <br /></td></tr>
 <tr class="separator:af55fc85ed08a86c475d081d24e12b401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a30a19c523787f3f5d549d4aa561539dd"><td class="memItemLeft" align="right" valign="top">std::optional&lt; Eigen::Vector3d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Support.html#a30a19c523787f3f5d549d4aa561539dd">calculate_support_position</a> (const std::shared_ptr&lt; const message::localisation::Ball &gt; &amp;ball, const message::localisation::Field &amp;field, const message::input::GameState &amp;game_state, const message::support::GlobalConfig &amp;global_config, const message::support::FieldDescription &amp;fd) const</td></tr>
+<tr class="memdesc:a30a19c523787f3f5d549d4aa561539dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute what this robot's support position would be right now, given the current ball, field, game state and formation config - regardless of whether this robot is actually assigned the <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> purpose. Used both by the active <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> behaviour (to know where to walk) and by an always-on reactor that lets NUsight show a live preview of this position even when some other robot is currently the one supporting.  <a href="classmodule_1_1purpose_1_1Support.html#a30a19c523787f3f5d549d4aa561539dd">More...</a><br /></td></tr>
+<tr class="separator:a30a19c523787f3f5d549d4aa561539dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77f558fcfc6d15ee73dc2d551d6533a6"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structmodule_1_1purpose_1_1Support_1_1RobotSlot.html">RobotSlot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Support.html#a77f558fcfc6d15ee73dc2d551d6533a6">find_slot</a> (const std::string &amp;mode_name, int player_id) const</td></tr>
+<tr class="memdesc:a77f558fcfc6d15ee73dc2d551d6533a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve this robot's formation slot for the given mode, falling back to the normal_play formation when the mode is not defined. Returns nullptr when neither the mode nor the fallback defines a slot for this robot (e.g. Formation.yaml has not been loaded yet), so callers never dereference a past-the-end iterator.  <a href="classmodule_1_1purpose_1_1Support.html#a77f558fcfc6d15ee73dc2d551d6533a6">More...</a><br /></td></tr>
+<tr class="separator:a77f558fcfc6d15ee73dc2d551d6533a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:af1dc2104c862fe484d9f82ba63fe7508"><td class="memItemLeft" align="right" valign="top"><a id="af1dc2104c862fe484d9f82ba63fe7508"></a>
+struct <a class="el" href="structmodule_1_1purpose_1_1Support_1_1Config.html">module::purpose::Support::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:af1dc2104c862fe484d9f82ba63fe7508"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -252,6 +280,110 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <tr class="memitem:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>When</b> = ::<a class="el" href="structextension_1_1behaviour_1_1When.html">extension::behaviour::When</a>&lt; State, expr, value &gt;</td></tr>
 <tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a30a19c523787f3f5d549d4aa561539dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30a19c523787f3f5d549d4aa561539dd">&#9670;&nbsp;</a></span>calculate_support_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; Eigen::Vector3d &gt; module::purpose::Support::calculate_support_position </td>
+          <td>(</td>
+          <td class="paramtype">const std::shared_ptr&lt; const message::localisation::Ball &gt; &amp;&#160;</td>
+          <td class="paramname"><em>ball</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const message::localisation::Field &amp;&#160;</td>
+          <td class="paramname"><em>field</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const message::input::GameState &amp;&#160;</td>
+          <td class="paramname"><em>game_state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const message::support::GlobalConfig &amp;&#160;</td>
+          <td class="paramname"><em>global_config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const message::support::FieldDescription &amp;&#160;</td>
+          <td class="paramname"><em>fd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute what this robot's support position would be right now, given the current ball, field, game state and formation config - regardless of whether this robot is actually assigned the <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> purpose. Used both by the active <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> behaviour (to know where to walk) and by an always-on reactor that lets NUsight show a live preview of this position even when some other robot is currently the one supporting. </p>
+<dl class="section return"><dt>Returns</dt><dd>the computed field-space position (x, y, 0), or std::nullopt if no formation slot applies (e.g. Formation.yaml has not been loaded yet) </dd></dl>
+
+</div>
+</div>
+<a id="a77f558fcfc6d15ee73dc2d551d6533a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77f558fcfc6d15ee73dc2d551d6533a6">&#9670;&nbsp;</a></span>find_slot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto module::purpose::Support::find_slot </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>mode_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>player_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resolve this robot's formation slot for the given mode, falling back to the normal_play formation when the mode is not defined. Returns nullptr when neither the mode nor the fallback defines a slot for this robot (e.g. Formation.yaml has not been loaded yet), so callers never dereference a past-the-end iterator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mode_name</td><td>the formation mode to look up </td></tr>
+    <tr><td class="paramname">player_id</td><td>the robot's player ID </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>pointer to the matching slot, or nullptr if none applies </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/purpose/Support/src/<a class="el" href="Support_8hpp_source.html">Support.hpp</a></li>
 <li>module/purpose/Support/src/Support.cpp</li>
@@ -262,7 +394,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

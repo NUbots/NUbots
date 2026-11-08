@@ -176,45 +176,66 @@ $(document).ready(function(){initNavTree('structmodule_1_1planning_1_1PlanWalkPa
 
 <p>Stores configuration values.  
  <a href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#details">More...</a></p>
+<div class="dynheader">
+Collaboration diagram for module::planning::PlanWalkPath::Config:</div>
+<div class="dyncontent">
+<div class="center"><img src="structmodule_1_1planning_1_1PlanWalkPath_1_1Config__coll__graph.png" border="0" usemap="#amodule_1_1planning_1_1PlanWalkPath_1_1Config_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1planning_1_1PlanWalkPath_1_1Config_coll__map" id="amodule_1_1planning_1_1PlanWalkPath_1_1Config_coll__map">
+<area shape="rect" title="Stores configuration values." alt="" coords="5,109,208,151"/>
+<area shape="rect" href="structmodule_1_1planning_1_1walk__path_1_1WalkToParams.html" title=" " alt="" coords="19,5,194,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a3cadd474fc5462ac44a470a52c14967d"><td class="memItemLeft" align="right" valign="top"><a id="a3cadd474fc5462ac44a470a52c14967d"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d">acceleration</a> = 0.0</td></tr>
-<tr class="memdesc:a3cadd474fc5462ac44a470a52c14967d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Crude acceleration, the maximum increment/decrease in walk command velocity per update. <br /></td></tr>
-<tr class="separator:a3cadd474fc5462ac44a470a52c14967d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a517c75cddccfec6cbdb73033f56d7ff5"><td class="memItemLeft" align="right" valign="top"><a id="a517c75cddccfec6cbdb73033f56d7ff5"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a517c75cddccfec6cbdb73033f56d7ff5">adjust_near_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a517c75cddccfec6cbdb73033f56d7ff5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arc-length threshold (angle error * ball range) below which the near speed is used. <br /></td></tr>
+<tr class="separator:a517c75cddccfec6cbdb73033f56d7ff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1dbd983a195b241f9d36f3e2e265868"><td class="memItemLeft" align="right" valign="top"><a id="ab1dbd983a195b241f9d36f3e2e265868"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab1dbd983a195b241f9d36f3e2e265868">adjust_no_turn_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:ab1dbd983a195b241f9d36f3e2e265868"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ball yaw error below which no turning is applied. <br /></td></tr>
+<tr class="separator:ab1dbd983a195b241f9d36f3e2e265868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa344bca3ec467b7727cd7e6cbb7039b"><td class="memItemLeft" align="right" valign="top"><a id="afa344bca3ec467b7727cd7e6cbb7039b"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afa344bca3ec467b7727cd7e6cbb7039b">adjust_range</a> = 0.0</td></tr>
+<tr class="memdesc:afa344bca3ec467b7727cd7e6cbb7039b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance to maintain from the ball while orbiting during Adjust. <br /></td></tr>
+<tr class="separator:afa344bca3ec467b7727cd7e6cbb7039b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae929e8132fffc0dbdeac27a5dc5a51a4"><td class="memItemLeft" align="right" valign="top"><a id="ae929e8132fffc0dbdeac27a5dc5a51a4"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ae929e8132fffc0dbdeac27a5dc5a51a4">adjust_tangential_speed_far</a> = 0.0</td></tr>
+<tr class="memdesc:ae929e8132fffc0dbdeac27a5dc5a51a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tangential orbit speed while far from the correct kick angle. <br /></td></tr>
+<tr class="separator:ae929e8132fffc0dbdeac27a5dc5a51a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5be03d07b1a838c880aadb1e9e226048"><td class="memItemLeft" align="right" valign="top"><a id="a5be03d07b1a838c880aadb1e9e226048"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a5be03d07b1a838c880aadb1e9e226048">adjust_tangential_speed_near</a> = 0.0</td></tr>
+<tr class="memdesc:a5be03d07b1a838c880aadb1e9e226048"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tangential orbit speed while close to the correct kick angle. <br /></td></tr>
+<tr class="separator:a5be03d07b1a838c880aadb1e9e226048"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a107a09d488bafe43d9a9a83b6cb3920a"><td class="memItemLeft" align="right" valign="top"><a id="a107a09d488bafe43d9a9a83b6cb3920a"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a107a09d488bafe43d9a9a83b6cb3920a">adjust_turn_first_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a107a09d488bafe43d9a9a83b6cb3920a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ball yaw error above which the robot turns in place rather than translating. <br /></td></tr>
+<tr class="separator:a107a09d488bafe43d9a9a83b6cb3920a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab53a73828eadf00809c639a66cf19e34"><td class="memItemLeft" align="right" valign="top"><a id="ab53a73828eadf00809c639a66cf19e34"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab53a73828eadf00809c639a66cf19e34">adjust_vtheta_factor</a> = 0.0</td></tr>
+<tr class="memdesc:ab53a73828eadf00809c639a66cf19e34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gain turning to face the ball during Adjust. <br /></td></tr>
+<tr class="separator:ab53a73828eadf00809c639a66cf19e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2684f174fee54e086ad3c1499ce0dac"><td class="memItemLeft" align="right" valign="top"><a id="ab2684f174fee54e086ad3c1499ce0dac"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab2684f174fee54e086ad3c1499ce0dac">adjust_vtheta_limit</a> = 0.0</td></tr>
+<tr class="memdesc:ab2684f174fee54e086ad3c1499ce0dac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum angular speed during Adjust. <br /></td></tr>
+<tr class="separator:ab2684f174fee54e086ad3c1499ce0dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb7d360768aa5b589460b0301f303dca"><td class="memItemLeft" align="right" valign="top"><a id="afb7d360768aa5b589460b0301f303dca"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afb7d360768aa5b589460b0301f303dca">adjust_vx_limit</a> = 0.0</td></tr>
+<tr class="memdesc:afb7d360768aa5b589460b0301f303dca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum forward/backward speed during Adjust. <br /></td></tr>
+<tr class="separator:afb7d360768aa5b589460b0301f303dca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fc4cfa13886d93503fd5f01240ad3fc"><td class="memItemLeft" align="right" valign="top"><a id="a5fc4cfa13886d93503fd5f01240ad3fc"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a5fc4cfa13886d93503fd5f01240ad3fc">adjust_vy_limit</a> = 0.0</td></tr>
+<tr class="memdesc:a5fc4cfa13886d93503fd5f01240ad3fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum sideways speed during Adjust. <br /></td></tr>
+<tr class="separator:a5fc4cfa13886d93503fd5f01240ad3fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4b38ca04de52e09926f3a5122e50bf6"><td class="memItemLeft" align="right" valign="top"><a id="ab4b38ca04de52e09926f3a5122e50bf6"></a>
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab4b38ca04de52e09926f3a5122e50bf6">alpha</a> = Eigen::Vector3d(1, 1, 1)</td></tr>
 <tr class="memdesc:ab4b38ca04de52e09926f3a5122e50bf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponential smoothing factor for the velocity command [x, y, theta]. <br /></td></tr>
 <tr class="separator:ab4b38ca04de52e09926f3a5122e50bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d0b4b4523f6c6d095da6fe841102f44"><td class="memItemLeft" align="right" valign="top"><a id="a6d0b4b4523f6c6d095da6fe841102f44"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>max_align_radius</b> = 0.0</td></tr>
-<tr class="separator:a6d0b4b4523f6c6d095da6fe841102f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c279870073767f89d33b44c619875ff"><td class="memItemLeft" align="right" valign="top"><a id="a3c279870073767f89d33b44c619875ff"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>max_angle_error</b> = 0.0</td></tr>
-<tr class="separator:a3c279870073767f89d33b44c619875ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51187d1ec848c03ee92ea0f6c0182cf0"><td class="memItemLeft" align="right" valign="top"><a id="a51187d1ec848c03ee92ea0f6c0182cf0"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a51187d1ec848c03ee92ea0f6c0182cf0">max_angular_velocity</a> = 0.0</td></tr>
-<tr class="memdesc:a51187d1ec848c03ee92ea0f6c0182cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum angular velocity command for walking. <br /></td></tr>
-<tr class="separator:a51187d1ec848c03ee92ea0f6c0182cf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35071ba9dd0dec74397c30e78a21a966"><td class="memItemLeft" align="right" valign="top"><a id="a35071ba9dd0dec74397c30e78a21a966"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a35071ba9dd0dec74397c30e78a21a966">max_velocity_magnitude</a> = 0.0</td></tr>
-<tr class="memdesc:a35071ba9dd0dec74397c30e78a21a966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum velocity magnitude of the walk command to clamp "acceleration". <br /></td></tr>
-<tr class="separator:a35071ba9dd0dec74397c30e78a21a966"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc782e1c2ffd4e1632ab90e2811a18da"><td class="memItemLeft" align="right" valign="top"><a id="afc782e1c2ffd4e1632ab90e2811a18da"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afc782e1c2ffd4e1632ab90e2811a18da">max_x_velocity</a> = 0.0</td></tr>
-<tr class="memdesc:afc782e1c2ffd4e1632ab90e2811a18da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum walk command velocity x for walking. <br /></td></tr>
-<tr class="separator:afc782e1c2ffd4e1632ab90e2811a18da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a545013ad795262ef34f741f4d6cea38b"><td class="memItemLeft" align="right" valign="top"><a id="a545013ad795262ef34f741f4d6cea38b"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a545013ad795262ef34f741f4d6cea38b">max_y_velocity</a> = 0.0</td></tr>
-<tr class="memdesc:a545013ad795262ef34f741f4d6cea38b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum walk command velocity y for walking. <br /></td></tr>
-<tr class="separator:a545013ad795262ef34f741f4d6cea38b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca3c9598a22fcc497820ea13e25b8177"><td class="memItemLeft" align="right" valign="top"><a id="aca3c9598a22fcc497820ea13e25b8177"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>min_align_radius</b> = 0.0</td></tr>
-<tr class="separator:aca3c9598a22fcc497820ea13e25b8177"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30a1f835ac340e1d88cae1b7bfbefa5b"><td class="memItemLeft" align="right" valign="top"><a id="a30a1f835ac340e1d88cae1b7bfbefa5b"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>min_angle_error</b> = 0.0</td></tr>
-<tr class="separator:a30a1f835ac340e1d88cae1b7bfbefa5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97775376114fb80074f584d975087075"><td class="memItemLeft" align="right" valign="top"><a id="a97775376114fb80074f584d975087075"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a97775376114fb80074f584d975087075">min_velocity</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a97775376114fb80074f584d975087075"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum effective velocity command per axis, smaller nonzero commands are bumped up to these. <br /></td></tr>
+<tr class="separator:a97775376114fb80074f584d975087075"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e0454b6afafd3a4e27fdd78c6800cb3"><td class="memItemLeft" align="right" valign="top"><a id="a9e0454b6afafd3a4e27fdd78c6800cb3"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a9e0454b6afafd3a4e27fdd78c6800cb3">obstacle_radius</a> = 0.0</td></tr>
 <tr class="memdesc:a9e0454b6afafd3a4e27fdd78c6800cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radius to avoid obstacles. <br /></td></tr>
@@ -223,18 +244,18 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a79235b99b43b3a6f443e3c4108b4ecaf">one_minus_alpha</a> = Eigen::Vector3d::Ones() - <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab4b38ca04de52e09926f3a5122e50bf6">alpha</a></td></tr>
 <tr class="memdesc:a79235b99b43b3a6f443e3c4108b4ecaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Complementary exponential smoothing factor for the velocity command [x, y, theta]. <br /></td></tr>
 <tr class="separator:a79235b99b43b3a6f443e3c4108b4ecaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc786a549bae88e7f61fbcd5371a2d15"><td class="memItemLeft" align="right" valign="top"><a id="adc786a549bae88e7f61fbcd5371a2d15"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#adc786a549bae88e7f61fbcd5371a2d15">pivot_ball_velocity</a> = 0.0</td></tr>
-<tr class="memdesc:adc786a549bae88e7f61fbcd5371a2d15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pivot ball command angular velocity. <br /></td></tr>
-<tr class="separator:adc786a549bae88e7f61fbcd5371a2d15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10d2fbe7bdd1a17586a47311f6e9319a"><td class="memItemLeft" align="right" valign="top"><a id="a10d2fbe7bdd1a17586a47311f6e9319a"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a10d2fbe7bdd1a17586a47311f6e9319a">pivot_ball_velocity_x</a> = 0.0</td></tr>
-<tr class="memdesc:a10d2fbe7bdd1a17586a47311f6e9319a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pivot ball forward velocity. <br /></td></tr>
-<tr class="separator:a10d2fbe7bdd1a17586a47311f6e9319a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e2995002c2ed98893488009579fa1b7"><td class="memItemLeft" align="right" valign="top"><a id="a4e2995002c2ed98893488009579fa1b7"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a4e2995002c2ed98893488009579fa1b7">pivot_ball_velocity_y</a> = 0.0</td></tr>
-<tr class="memdesc:a4e2995002c2ed98893488009579fa1b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pivot ball side velocity. <br /></td></tr>
-<tr class="separator:a4e2995002c2ed98893488009579fa1b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9f9b7fbb2204f36515f08ef9ad34ba3"><td class="memItemLeft" align="right" valign="top"><a id="af9f9b7fbb2204f36515f08ef9ad34ba3"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#af9f9b7fbb2204f36515f08ef9ad34ba3">pivot_angular_velocity</a> = 0.0</td></tr>
+<tr class="memdesc:af9f9b7fbb2204f36515f08ef9ad34ba3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pivot around point angular velocity (rad/s) <br /></td></tr>
+<tr class="separator:af9f9b7fbb2204f36515f08ef9ad34ba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1ba9403c81c58a4f850792c0e2d7a5f"><td class="memItemLeft" align="right" valign="top"><a id="ab1ba9403c81c58a4f850792c0e2d7a5f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab1ba9403c81c58a4f850792c0e2d7a5f">pivot_forward_velocity</a> = 0.0</td></tr>
+<tr class="memdesc:ab1ba9403c81c58a4f850792c0e2d7a5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward velocity bias while pivoting (m/s) <br /></td></tr>
+<tr class="separator:ab1ba9403c81c58a4f850792c0e2d7a5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a858771cb6c5ad5d966d97561f5b5edaf"><td class="memItemLeft" align="right" valign="top"><a id="a858771cb6c5ad5d966d97561f5b5edaf"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a858771cb6c5ad5d966d97561f5b5edaf">pivot_radius</a> = 0.0</td></tr>
+<tr class="memdesc:a858771cb6c5ad5d966d97561f5b5edaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radius of the orbit around the pivot point (m) <br /></td></tr>
+<tr class="separator:a858771cb6c5ad5d966d97561f5b5edaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c8d63dcf9944707c66dbc827c6b842d"><td class="memItemLeft" align="right" valign="top"><a id="a6c8d63dcf9944707c66dbc827c6b842d"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a6c8d63dcf9944707c66dbc827c6b842d">rotate_velocity</a> = 0.0</td></tr>
 <tr class="memdesc:a6c8d63dcf9944707c66dbc827c6b842d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotate on spot walk command angular velocity. <br /></td></tr>
@@ -247,16 +268,17 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a043d3ea874ed212ef1b3bdd1f71ecc0d">rotate_velocity_y</a> = 0.0</td></tr>
 <tr class="memdesc:a043d3ea874ed212ef1b3bdd1f71ecc0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rotate on spot walk command side velocity. <br /></td></tr>
 <tr class="separator:a043d3ea874ed212ef1b3bdd1f71ecc0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad88ea73307971d93ed2b4e09122137dd"><td class="memItemLeft" align="right" valign="top"><a id="ad88ea73307971d93ed2b4e09122137dd"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ad88ea73307971d93ed2b4e09122137dd">starting_velocity</a> = Eigen::Vector3d(0, 0, 0)</td></tr>
-<tr class="memdesc:ad88ea73307971d93ed2b4e09122137dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starting velocity for the walk command. <br /></td></tr>
-<tr class="separator:ad88ea73307971d93ed2b4e09122137dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5610fae322ed4cf15b56dd5821e0e86c"><td class="memItemLeft" align="right" valign="top"><a id="a5610fae322ed4cf15b56dd5821e0e86c"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>strafe_gain</b> = 0.0</td></tr>
-<tr class="separator:a5610fae322ed4cf15b56dd5821e0e86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2b6cb3d2307aecf6c3c4d82d6b5a176"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aa2b6cb3d2307aecf6c3c4d82d6b5a176">tau</a> = Eigen::Vector3d(0, 0, 0)</td></tr>
 <tr class="memdesc:aa2b6cb3d2307aecf6c3c4d82d6b5a176"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponential smoothing time constant for the [x,y,theta]-velocity.  <a href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aa2b6cb3d2307aecf6c3c4d82d6b5a176">More...</a><br /></td></tr>
 <tr class="separator:aa2b6cb3d2307aecf6c3c4d82d6b5a176"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef2bc9817d11c38bbc7a6192fb6ee71d"><td class="memItemLeft" align="right" valign="top"><a id="aef2bc9817d11c38bbc7a6192fb6ee71d"></a>
+<a class="el" href="structmodule_1_1planning_1_1walk__path_1_1WalkToParams.html">walk_path::WalkToParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aef2bc9817d11c38bbc7a6192fb6ee71d">walk_to</a> {}</td></tr>
+<tr class="memdesc:aef2bc9817d11c38bbc7a6192fb6ee71d"><td class="mdescLeft">&#160;</td><td class="mdescRight">WalkTo controller parameters (velocity limits, gains, alignment regions) <br /></td></tr>
+<tr class="separator:aef2bc9817d11c38bbc7a6192fb6ee71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c84270fe73cf5dd12ce58a6ba553f5a"><td class="memItemLeft" align="right" valign="top"><a id="a4c84270fe73cf5dd12ce58a6ba553f5a"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a4c84270fe73cf5dd12ce58a6ba553f5a">zero_tolerance</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a4c84270fe73cf5dd12ce58a6ba553f5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smoothed commands below this per-axis magnitude are snapped to zero. <br /></td></tr>
+<tr class="separator:a4c84270fe73cf5dd12ce58a6ba553f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
@@ -287,7 +309,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>strafe_gain</b> = 0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html">PlanWalkPath</a></li><li class="navelem"><a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

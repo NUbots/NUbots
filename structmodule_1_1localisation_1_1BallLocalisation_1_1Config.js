@@ -5,6 +5,7 @@ var structmodule_1_1localisation_1_1BallLocalisation_1_1Config =
     [ "acceptance_radius", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#a8fdc4b5d7597ef5e4940a5e761868e0e", null ],
     [ "initial_covariance", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#af780830bae6285862aace35b54898a07", null ],
     [ "initial_mean", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#aeeb19a30a0ecb5fa54d8105a8f4902bb", null ],
+    [ "max_distance_from_field", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#a24133bc3a2da28f228ebfb5e0cf1fac0", null ],
     [ "max_rejections", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#ad6616097d3c3947b2ce6728ac9ee4803", null ],
     [ "team_ball_recency", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#a7afcb667cbd171e5d8de203f88ec7213", null ],
     [ "team_guess_default_timer", "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#acbc2cbf3a71a5771ee01e6bab46d319c", null ],

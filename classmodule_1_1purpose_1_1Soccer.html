@@ -220,6 +220,14 @@ struct <a class="el" href="structmodule_1_1purpose_1_1Soccer_1_1Config.html">mod
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a255d4902af8f922e32aa6c5453d6286b">idle</a> = false</td></tr>
 <tr class="memdesc:a255d4902af8f922e32aa6c5453d6286b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idle state of the robot. <br /></td></tr>
 <tr class="separator:a255d4902af8f922e32aa6c5453d6286b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7b307b2563e90bfc1c86d1a337c325b"><td class="memItemLeft" align="right" valign="top"><a id="ac7b307b2563e90bfc1c86d1a337c325b"></a>
+message::input::GameState::Phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#ac7b307b2563e90bfc1c86d1a337c325b">previous_phase</a> = message::input::GameState::Phase::UNKNOWN_PHASE</td></tr>
+<tr class="memdesc:ac7b307b2563e90bfc1c86d1a337c325b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last observed game phase, used to detect transitions (e.g. leaving READY so the robot can switch the Booster into soccer/movement mode) <br /></td></tr>
+<tr class="separator:ac7b307b2563e90bfc1c86d1a337c325b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a513f368c07c86c66a0258d3f045219ba"><td class="memItemLeft" align="right" valign="top"><a id="a513f368c07c86c66a0258d3f045219ba"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html#a513f368c07c86c66a0258d3f045219ba">stopped</a> = false</td></tr>
+<tr class="memdesc:a513f368c07c86c66a0258d3f045219ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a brief stop ("Stop Play") is currently in effect. Used to detect transitions so the robot ceases all motion when a stop is called and resumes when it is cleared. <br /></td></tr>
+<tr class="separator:a513f368c07c86c66a0258d3f045219ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
@@ -289,7 +297,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1Soccer.html">Soccer</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

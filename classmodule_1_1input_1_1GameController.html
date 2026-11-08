@@ -253,10 +253,42 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 gamecontroller::GamePhase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a2c96e07aff3ede805ce9c57b78a7cab6">game_phase</a> {}</td></tr>
 <tr class="memdesc:a2c96e07aff3ede805ce9c57b78a7cab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current game phase from the <a class="el" href="classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller.">GameController</a> packet. <br /></td></tr>
 <tr class="separator:a2c96e07aff3ede805ce9c57b78a7cab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2d88af0a89a66509b9a0413441c3c4a"><td class="memItemLeft" align="right" valign="top"><a id="ac2d88af0a89a66509b9a0413441c3c4a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#ac2d88af0a89a66509b9a0413441c3c4a">have_ball</a> {false}</td></tr>
+<tr class="memdesc:ac2d88af0a89a66509b9a0413441c3c4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether latest_rBWw has been populated by a Ball message yet. <br /></td></tr>
+<tr class="separator:ac2d88af0a89a66509b9a0413441c3c4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bfbc6fd9fc3e241faa7defcdd2db814"><td class="memItemLeft" align="right" valign="top"><a id="a3bfbc6fd9fc3e241faa7defcdd2db814"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a3bfbc6fd9fc3e241faa7defcdd2db814">have_field</a> {false}</td></tr>
+<tr class="memdesc:a3bfbc6fd9fc3e241faa7defcdd2db814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether latest_Hfw has been populated by a Field message yet. <br /></td></tr>
+<tr class="separator:a3bfbc6fd9fc3e241faa7defcdd2db814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a07c936793dc2dbaeab04e4227fafb6"><td class="memItemLeft" align="right" valign="top"><a id="a9a07c936793dc2dbaeab04e4227fafb6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a9a07c936793dc2dbaeab04e4227fafb6">have_sensors</a> {false}</td></tr>
+<tr class="memdesc:a9a07c936793dc2dbaeab04e4227fafb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether latest_Htw has been populated by a <a class="el" href="classmodule_1_1input_1_1Sensors.html">Sensors</a> message yet. <br /></td></tr>
+<tr class="separator:a9a07c936793dc2dbaeab04e4227fafb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a238ff12d77c3f42e3d8f6cbd98749701"><td class="memItemLeft" align="right" valign="top"><a id="a238ff12d77c3f42e3d8f6cbd98749701"></a>
 std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a238ff12d77c3f42e3d8f6cbd98749701">ignored_ip_addresses</a> {}</td></tr>
 <tr class="memdesc:a238ff12d77c3f42e3d8f6cbd98749701"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set of IP addresses that have been ignored due to not matching the udp_filter_address. <br /></td></tr>
 <tr class="separator:a238ff12d77c3f42e3d8f6cbd98749701"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaabbab6b4d78ec2616cf13dcfcee595d"><td class="memItemLeft" align="right" valign="top"><a id="aaabbab6b4d78ec2616cf13dcfcee595d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aaabbab6b4d78ec2616cf13dcfcee595d">is_fallen</a> {false}</td></tr>
+<tr class="memdesc:aaabbab6b4d78ec2616cf13dcfcee595d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the robot is currently fallen or falling, for the reply packet's fallen field. <br /></td></tr>
+<tr class="separator:aaabbab6b4d78ec2616cf13dcfcee595d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2efd2f8e0845a8020f40b4e0e2198d1d"><td class="memItemLeft" align="right" valign="top"><a id="a2efd2f8e0845a8020f40b4e0e2198d1d"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a2efd2f8e0845a8020f40b4e0e2198d1d">latest_ball_time</a> {}</td></tr>
+<tr class="memdesc:a2efd2f8e0845a8020f40b4e0e2198d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time the cached ball estimate was measured. <br /></td></tr>
+<tr class="separator:a2efd2f8e0845a8020f40b4e0e2198d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7e3be969d70186174b0051c08a6a695"><td class="memItemLeft" align="right" valign="top"><a id="aa7e3be969d70186174b0051c08a6a695"></a>
+Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aa7e3be969d70186174b0051c08a6a695">latest_Hfw</a> {Eigen::Isometry3d::Identity()}</td></tr>
+<tr class="memdesc:aa7e3be969d70186174b0051c08a6a695"><td class="mdescLeft">&#160;</td><td class="mdescRight">Latest world-to-field transform, cached for the reply packet's pose field. <br /></td></tr>
+<tr class="separator:aa7e3be969d70186174b0051c08a6a695"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef9a9fbb3a46f54f178b3c495c5a7c37"><td class="memItemLeft" align="right" valign="top"><a id="aef9a9fbb3a46f54f178b3c495c5a7c37"></a>
+Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aef9a9fbb3a46f54f178b3c495c5a7c37">latest_Htw</a> {Eigen::Isometry3d::Identity()}</td></tr>
+<tr class="memdesc:aef9a9fbb3a46f54f178b3c495c5a7c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Latest torso-to-world transform, cached for the reply packet's pose field. <br /></td></tr>
+<tr class="separator:aef9a9fbb3a46f54f178b3c495c5a7c37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadff40effd19a9a0dfca5c4e9f9b73b0"><td class="memItemLeft" align="right" valign="top"><a id="aadff40effd19a9a0dfca5c4e9f9b73b0"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#aadff40effd19a9a0dfca5c4e9f9b73b0">latest_rBWw</a> {Eigen::Vector3d::Zero()}</td></tr>
+<tr class="memdesc:aadff40effd19a9a0dfca5c4e9f9b73b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Latest ball position in world space, cached for the reply packet's ball fields. <br /></td></tr>
+<tr class="separator:aadff40effd19a9a0dfca5c4e9f9b73b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51971ab114f2472f71e8febacc716978"><td class="memItemLeft" align="right" valign="top"><a id="a51971ab114f2472f71e8febacc716978"></a>
 ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1GameController.html#a51971ab114f2472f71e8febacc716978">listen_handle</a></td></tr>
 <tr class="memdesc:a51971ab114f2472f71e8febacc716978"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle for our registered UDP receive callback. <br /></td></tr>
@@ -326,7 +358,7 @@ Trent Houliston </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1GameController.html">GameController</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

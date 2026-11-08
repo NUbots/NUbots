@@ -3,6 +3,7 @@ var structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display =
     [ "Column1", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1e", [
       [ "ROBOT_NAME", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1ea3ece7f1d48dcaf5f3820de6bba521dea", null ],
       [ "WIFI_INTERFACE", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1eaf4ba15a13c3052563bbd06c34a746757", null ],
+      [ "USE_DHCP", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1ead46493d7e62da492c8dfa77757d23540", null ],
       [ "IP_ADDRESS", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1eab3e03bb42ca194c075e80b94ec97b484", null ],
       [ "SSID", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1ea0d09d7b23e604623465e83b0dc113f4d", null ],
       [ "PASSWORD", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1ea319f4d26e3c536b5dd871bb2c52e3178", null ],
@@ -12,6 +13,7 @@ var structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display =
       [ "PLAYER_ID", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a3eb694104fa7862ff2669e6e33a4863d", null ],
       [ "TEAM_ID", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a71c415389b72dc4cfad55dfd85a21204", null ],
       [ "GOALIE", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01a1d34da79d1e23d75fb53a74890332e10", null ],
+      [ "FIELD_TYPE", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01ab6c9705673a2c6be2568960ae1c19a74", null ],
       [ "END", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01ab1a326c06d88bf042f73d70f50197905", null ]
     ] ],
     [ "C1_PAD", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a320045bd1b89f970cd5a3f8f77be0a7d", null ],

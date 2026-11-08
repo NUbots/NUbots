@@ -25,7 +25,6 @@
 var NAVTREE =
 [
   [ "NUbots", "index.html", [
-    [ "Todo List", "todo.html", null ],
     [ "Modules", "modules.html", "modules" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -54,27 +53,19 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"",
-"GameController_8cpp.html#a7590774cc2ec9916750561eadd281821",
-"classes.html",
-"classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#a3d929cfe1f495eeceb7d24a098ce1c6b",
-"classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8dd9766a7dbc52d06a062a07692dc90e",
-"classmodule_1_1purpose_1_1ScriptTuner.html#a5f93eb9452bd3a9178d6b85942d5e162",
-"classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html#a9e8240d97e5f6ea905b9f24cc633b3dc",
-"classmodule_1_1vision_1_1GoalDetector.html#a865047de4b3ed731d93a5e5cc54acd97",
-"classutility_1_1math_1_1filter_1_1MahonyFilter.html#a21f9a92f67dd88ea850e5c5341f3970c",
-"classutility_1_1openai_1_1__detail_1_1OpenAI.html#ac7364060ede646a5fe85220954529b24",
-"functions_vars_x.html",
-"pages.html",
-"structextension_1_1behaviour_1_1ProviderBase.html",
-"structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#a3fc2684a829d0292e9d3b9dab31f663a",
-"structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aa4bda853359927e637d4ad54a50344f1",
-"structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a4e2995002c2ed98893488009579fa1b7",
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa598e05fd34cc1c40b4ea48b7efe4298",
-"structmodule_1_1purpose_1_1Soccer_1_1Config.html",
-"structmodule_1_1vision_1_1Yolo_1_1Object.html#a02564a7df93497b212bee8f13c8e6ab9",
-"structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#aaf2b70491f73ad58d39949e0acfce0d2",
-"structutility_1_1strutil_1_1Colour.html#a8e8be1231aaf9d183050b3443fe01091"
+"Attack_8cpp.html#afc3f8ac01cb31889ffac1d49431a319d",
+"Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152",
+"classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Factory.html",
+"classmodule_1_1purpose_1_1ReadyAttack.html#a8f12263960378c9767da42eb804f261c",
+"classutility_1_1file_1_1FileDescriptor.html#a8295d32395709f94605e646ad15ad7f0",
+"classutility_1_1nbs_1_1IndexStorage.html#a387d4636b8ac5e86337841e1332eee10",
+"group__ErrorAccumulations.html#ga6b260afdbb7413fc9d76bbb97d223b78",
+"structextension_1_1behaviour_1_1Continue.html",
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html",
+"structmodule_1_1localisation_1_1GoalPost.html#a3cb979e5a5d34e7004c477de2f33cb40",
+"structmodule_1_1skill_1_1SimK1Walk_1_1Config.html",
+"structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a21d0aefbb5e5fb4e12a1e5d169b17b28",
+"structutility_1_1type__traits_1_1has__id.html#a4df0e04b0321594d53bf7a11650d140e"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

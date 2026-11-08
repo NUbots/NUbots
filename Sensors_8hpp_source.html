@@ -1,0 +1,303 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module/input/Sensors/src/Sensors.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('Sensors_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">Sensors.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2026 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_INPUT_K1SENSORS_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_INPUT_K1SENSORS_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;Eigen/Geometry&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;atomic&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;booster/idl/geometry_msgs/Pose.h&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;booster/robot/channel/channel_factory.hpp&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#include &quot;sensors/k1_model.hpp&quot;</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#include &quot;message/platform/RawSensors.hpp&quot;</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keyword">namespace </span>module::input {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">using</span> SensorsMsg = message::input::Sensors;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">using</span> message::platform::RawSensors;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html">   50</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1input_1_1Sensors.html">Sensors</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">        /// @brief Stores configuration values</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1Sensors_1_1Config.html">   53</a></span>&#160;<span class="comment"></span>        <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1Sensors_1_1Config.html">Config</a> {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            std::string pose_topic;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            Eigen::Isometry3d Hhp = Eigen::Isometry3d::Identity();</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            Eigen::Isometry3d Hpc = Eigen::Isometry3d::Identity();<span class="comment"></span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment">            /// @brief Deadband below which normalized odometry components are snapped to zero, to</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">            /// avoid tiny floating-point residuals (e.g. ~1e-10) being treated as real motion</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1Sensors_1_1Config.html#ac7e006c80030cffefcdeb221002462b6">   59</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">double</span> <a class="code" href="structmodule_1_1input_1_1Sensors_1_1Config.html#ac7e006c80030cffefcdeb221002462b6">odometry_deadband</a> = 0.0;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        } cfg;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">        /// @brief DDS reader for the head pose topic, created once at startup</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a56fa41b6c37cfd72be2af5becb356195">   63</a></span>&#160;<span class="comment"></span>        booster::robot::ChannelPtr&lt;geometry_msgs::msg::Pose&gt; <a class="code" href="classmodule_1_1input_1_1Sensors.html#a56fa41b6c37cfd72be2af5becb356195">pose_channel</a>;<span class="comment"></span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">        /// @brief True once the reader exists, so a config reload can&#39;t create a second one</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a2e21463f6e08162aa49baba48bca0361">   65</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a2e21463f6e08162aa49baba48bca0361">channel_created</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">        /// @brief Guards Hrh and have_pose, which are written from the DDS callback thread</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a8da8e6fcf0d7ffb84f70a6ff0c781449">   68</a></span>&#160;<span class="comment"></span>        std::mutex <a class="code" href="classmodule_1_1input_1_1Sensors.html#a8da8e6fcf0d7ffb84f70a6ff0c781449">pose_mutex</a>;<span class="comment"></span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">        /// @brief Head frame in the robot base frame, from the most recent head pose message</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a6c84c221f563b505718c35f21d21f1ca">   70</a></span>&#160;<span class="comment"></span>        Eigen::Isometry3d <a class="code" href="classmodule_1_1input_1_1Sensors.html#a6c84c221f563b505718c35f21d21f1ca">Hrh</a> = Eigen::Isometry3d::Identity();<span class="comment"></span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment">        /// @brief False until the first head pose message arrives, while Hrh is still identity</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a008cbeaeb238ae67c7cbd2189a5546cb">   72</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a008cbeaeb238ae67c7cbd2189a5546cb">have_pose</a> = <span class="keyword">false</span>;<span class="comment"></span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">        /// @brief Set once the missing head pose warning has been logged</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a0e2f45764d37307eecb73bab265f5c62">   74</a></span>&#160;<span class="comment"></span>        std::atomic&lt;bool&gt; <a class="code" href="classmodule_1_1input_1_1Sensors.html#a0e2f45764d37307eecb73bab265f5c62">pose_warned</a>{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        std::mutex odometry_mutex;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="keywordtype">bool</span> booster_odometry_has_offset = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        std::array&lt;double, 3&gt; booster_odometry_offset{};<span class="comment"></span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">        /// @brief Last Booster motion mode seen, used to clear the odometry offset whenever the mode</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">        /// changes (-1 = no mode seen yet)</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a0c8898ac85ce8db04f04bdf8e00fcaf0">   81</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">int</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a0c8898ac85ce8db04f04bdf8e00fcaf0">last_booster_mode</a> = -1;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keywordtype">bool</span> left_down   = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keywordtype">bool</span> middle_down = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">        /// @brief Number of actuatable joints in the K1 robot</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classmodule_1_1input_1_1Sensors.html#a68aa17e84bd1049f0cf5d47aad3a7762">   87</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> constexpr <span class="keywordtype">int</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a68aa17e84bd1049f0cf5d47aad3a7762">n_servos</a> = 22;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">        /// @brief DDS callback for the head pose topic, caches the pose as Hrh</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment">        /// @param msg The received geometry_msgs::msg::Pose</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a2ef6bd3412042cd952ad902b5e5272a9">pose_handler</a>(<span class="keyword">const</span> <span class="keywordtype">void</span>* msg);</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">        /// @brief Updates the sensors message with raw sensor data, including servo joint information</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">        /// @param sensors The sensors message to update</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">        /// @param raw_sensors The raw sensor data</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#a43c4dc586b1718f6ab2d5eb9e947015f">update_raw_sensors</a>(std::unique_ptr&lt;SensorsMsg&gt;&amp; sensors, <span class="keyword">const</span> RawSensors&amp; raw_sensors);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the Sensors reactor.</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1input_1_1Sensors.html#af0119f7b10f522157931cce713541c9d">Sensors</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        ~<a class="code" href="classmodule_1_1input_1_1Sensors.html">Sensors</a>();</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    };</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;}  <span class="comment">// namespace module::input</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_INPUT_K1SENSORS_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html">module::input::Sensors</a></div><div class="ttdef"><b>Definition:</b> Sensors.hpp:50</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a008cbeaeb238ae67c7cbd2189a5546cb"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a008cbeaeb238ae67c7cbd2189a5546cb">module::input::Sensors::have_pose</a></div><div class="ttdeci">bool have_pose</div><div class="ttdoc">False until the first head pose message arrives, while Hrh is still identity.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:72</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a0c8898ac85ce8db04f04bdf8e00fcaf0"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a0c8898ac85ce8db04f04bdf8e00fcaf0">module::input::Sensors::last_booster_mode</a></div><div class="ttdeci">int last_booster_mode</div><div class="ttdoc">Last Booster motion mode seen, used to clear the odometry offset whenever the mode changes (-1 = no m...</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:81</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a0e2f45764d37307eecb73bab265f5c62"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a0e2f45764d37307eecb73bab265f5c62">module::input::Sensors::pose_warned</a></div><div class="ttdeci">std::atomic&lt; bool &gt; pose_warned</div><div class="ttdoc">Set once the missing head pose warning has been logged.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:74</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a2e21463f6e08162aa49baba48bca0361"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a2e21463f6e08162aa49baba48bca0361">module::input::Sensors::channel_created</a></div><div class="ttdeci">bool channel_created</div><div class="ttdoc">True once the reader exists, so a config reload can't create a second one.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:65</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a2ef6bd3412042cd952ad902b5e5272a9"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a2ef6bd3412042cd952ad902b5e5272a9">module::input::Sensors::pose_handler</a></div><div class="ttdeci">void pose_handler(const void *msg)</div><div class="ttdoc">DDS callback for the head pose topic, caches the pose as Hrh.</div><div class="ttdef"><b>Definition:</b> Sensors.cpp:63</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a43c4dc586b1718f6ab2d5eb9e947015f"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a43c4dc586b1718f6ab2d5eb9e947015f">module::input::Sensors::update_raw_sensors</a></div><div class="ttdeci">void update_raw_sensors(std::unique_ptr&lt; SensorsMsg &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</div><div class="ttdoc">Updates the sensors message with raw sensor data, including servo joint information.</div><div class="ttdef"><b>Definition:</b> update_raw_sensors.cpp:39</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a56fa41b6c37cfd72be2af5becb356195"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a56fa41b6c37cfd72be2af5becb356195">module::input::Sensors::pose_channel</a></div><div class="ttdeci">booster::robot::ChannelPtr&lt; geometry_msgs::msg::Pose &gt; pose_channel</div><div class="ttdoc">DDS reader for the head pose topic, created once at startup.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:63</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a68aa17e84bd1049f0cf5d47aad3a7762"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a68aa17e84bd1049f0cf5d47aad3a7762">module::input::Sensors::n_servos</a></div><div class="ttdeci">static constexpr int n_servos</div><div class="ttdoc">Number of actuatable joints in the K1 robot.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:87</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a6c84c221f563b505718c35f21d21f1ca"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a6c84c221f563b505718c35f21d21f1ca">module::input::Sensors::Hrh</a></div><div class="ttdeci">Eigen::Isometry3d Hrh</div><div class="ttdoc">Head frame in the robot base frame, from the most recent head pose message.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:70</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_a8da8e6fcf0d7ffb84f70a6ff0c781449"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#a8da8e6fcf0d7ffb84f70a6ff0c781449">module::input::Sensors::pose_mutex</a></div><div class="ttdeci">std::mutex pose_mutex</div><div class="ttdoc">Guards Hrh and have_pose, which are written from the DDS callback thread.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:68</div></div>
+<div class="ttc" id="aclassmodule_1_1input_1_1Sensors_html_af0119f7b10f522157931cce713541c9d"><div class="ttname"><a href="classmodule_1_1input_1_1Sensors.html#af0119f7b10f522157931cce713541c9d">module::input::Sensors::Sensors</a></div><div class="ttdeci">Sensors(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the Sensors reactor.</div><div class="ttdef"><b>Definition:</b> Sensors.cpp:79</div></div>
+<div class="ttc" id="astructmodule_1_1input_1_1Sensors_1_1Config_html"><div class="ttname"><a href="structmodule_1_1input_1_1Sensors_1_1Config.html">module::input::Sensors::Config</a></div><div class="ttdoc">Stores configuration values.</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:53</div></div>
+<div class="ttc" id="astructmodule_1_1input_1_1Sensors_1_1Config_html_ac7e006c80030cffefcdeb221002462b6"><div class="ttname"><a href="structmodule_1_1input_1_1Sensors_1_1Config.html#ac7e006c80030cffefcdeb221002462b6">module::input::Sensors::Config::odometry_deadband</a></div><div class="ttdeci">double odometry_deadband</div><div class="ttdoc">Deadband below which normalized odometry components are snapped to zero, to avoid tiny floating-point...</div><div class="ttdef"><b>Definition:</b> Sensors.hpp:59</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_4d10c6a6480147e17a39ec31ce05eab6.html">input</a></li><li class="navelem"><a class="el" href="dir_20ee518951defc3d3a92c33a8a066f1c.html">Sensors</a></li><li class="navelem"><a class="el" href="dir_e3acffbd8fe5b6b7796e0107a2a0ab62.html">src</a></li><li class="navelem"><b>Sensors.hpp</b></li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

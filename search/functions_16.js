@@ -1,14 +1,6 @@
 var searchData=
 [
-  ['wait_2426',['Wait',['../structextension_1_1behaviour_1_1Wait.html#aba0a4f69391f5757a477edc00e2db9b0',1,'extension::behaviour::Wait']]],
-  ['waiting_5ffor_5frequest_2427',['waiting_for_request',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#a7c0bda860a98e914c0fbe80298f94b33',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['walk_2428',['Walk',['../classmodule_1_1skill_1_1Walk.html#a2f75c359956f6571b161c56a7943fe57',1,'module::skill::Walk']]],
-  ['walk_2429',['walk',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#aa9f0a54f3a74d078bcc14b9ec6aa2194',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['walk_5ftoggle_2430',['walk_toggle',['../classmodule_1_1purpose_1_1KeyboardWalk.html#a59890bcf3c94a08498020a3ef22e57c6',1,'module::purpose::KeyboardWalk']]],
-  ['walktoball_2431',['WalkToBall',['../classmodule_1_1strategy_1_1WalkToBall.html#aab2b0923992f7dd90b649d1552945ef9',1,'module::strategy::WalkToBall']]],
-  ['walktofieldposition_2432',['WalkToFieldPosition',['../classmodule_1_1strategy_1_1WalkToFieldPosition.html#a333c4470a037c16e70e4f2f4020966ff',1,'module::strategy::WalkToFieldPosition']]],
-  ['webots_2433',['Webots',['../classmodule_1_1platform_1_1Webots.html#ae102e11a296e7571c94527833ca5151c',1,'module::platform::Webots']]],
-  ['whenexpression_2434',['WhenExpression',['../structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a932f0f2dd65f003c03f313d92657d107',1,'extension::behaviour::commands::WhenExpression']]],
-  ['write_2435',['write',['../classutility_1_1nbs_1_1Encoder.html#afa47332567825131f4f5661520ba235c',1,'utility::nbs::Encoder::write(const T &amp;value, const NUClear::clock::time_point &amp;timestamp)'],['../classutility_1_1nbs_1_1Encoder.html#ab8e1bc8e837ced5fcdfd8ef14bb769fe',1,'utility::nbs::Encoder::write(const NUClear::clock::time_point &amp;timestamp, const uint64_t &amp;message_timestamp, const uint64_t &amp;hash, const uint32_t &amp;id, const std::vector&lt; uint8_t &gt; &amp;data)']]],
-  ['write_5foffsets_2436',['write_offsets',['../classmodule_1_1tools_1_1ExtrinsicsCalibration.html#a82f05ff8b705d593922fc1ca15140101',1,'module::tools::ExtrinsicsCalibration']]]
+  ['yawfilter_1746',['YawFilter',['../classutility_1_1math_1_1filter_1_1YawFilter.html#a6d53eb2d456baf0beb2b854ff7350de8',1,'utility::math::filter::YawFilter']]],
+  ['yolo_1747',['Yolo',['../classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7',1,'module::vision::Yolo']]],
+  ['yolococo_1748',['YoloCoco',['../classmodule_1_1vision_1_1YoloCoco.html#aaacd052d864f8fd9cdab78b4a419765d',1,'module::vision::YoloCoco']]]
 ];

@@ -212,6 +212,10 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9">max_missed_count</a> = 0</td></tr>
 <tr class="memdesc:af27c4782b650b9c0f48bf214a447a1b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of times a robot can be missed consecutively before it is removed. <br /></td></tr>
 <tr class="separator:af27c4782b650b9c0f48bf214a447a1b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad5b8cbf771c3fbe62910b592b806b6d"><td class="memItemLeft" align="right" valign="top"><a id="aad5b8cbf771c3fbe62910b592b806b6d"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aad5b8cbf771c3fbe62910b592b806b6d">teammate_timeout</a> = 0.0</td></tr>
+<tr class="memdesc:aad5b8cbf771c3fbe62910b592b806b6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long (seconds) without a comms message before a teammate is removed. Teammates are pruned on comms staleness rather than the vision-driven missed_count, since they are frequently outside camera view but still broadcasting - see <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a767cb02d9117e7d7c2c1080ba489a3a1" title="Run Kalman filter prediction step for all tracked robots.">prediction()</a> and <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#ac3c4823f068bbad045dbfd03a645ea29" title="Run maintenance on the tracked robots This will remove any viewable robots that have been missed too ...">maintenance()</a>. <br /></td></tr>
+<tr class="separator:aad5b8cbf771c3fbe62910b592b806b6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ac033f3108980bbfed9bfb7ae26cc71"><td class="memItemLeft" align="right" valign="top"><a id="a7ac033f3108980bbfed9bfb7ae26cc71"></a>
 struct <a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html">module::localisation::RobotLocalisation::Config::UKF</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ukf</b></td></tr>
 <tr class="separator:a7ac033f3108980bbfed9bfb7ae26cc71"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -225,7 +229,7 @@ struct <a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

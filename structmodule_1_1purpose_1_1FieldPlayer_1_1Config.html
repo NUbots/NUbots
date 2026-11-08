@@ -179,6 +179,14 @@ $(document).ready(function(){initNavTree('structmodule_1_1purpose_1_1FieldPlayer
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a05b60ed6291fb3a820914af946b4cc1b"><td class="memItemLeft" align="right" valign="top"><a id="a05b60ed6291fb3a820914af946b4cc1b"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a05b60ed6291fb3a820914af946b4cc1b">approach_distance_behind_ball</a> = 0.0</td></tr>
+<tr class="memdesc:a05b60ed6291fb3a820914af946b4cc1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">How far behind the ball (m) the attack approach point sits, for a straight kick run-up. <br /></td></tr>
+<tr class="separator:a05b60ed6291fb3a820914af946b4cc1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a945fab16598e4a57f06f232c33ed64f1"><td class="memItemLeft" align="right" valign="top"><a id="a945fab16598e4a57f06f232c33ed64f1"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a945fab16598e4a57f06f232c33ed64f1">attack_equidistant_time_threshold</a> = 0.0</td></tr>
+<tr class="memdesc:a945fab16598e4a57f06f232c33ed64f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time difference (s) below which two robots are considered equally fast to attack. <br /></td></tr>
+<tr class="separator:a945fab16598e4a57f06f232c33ed64f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cd9a65008ae374a3691c46dd62cc3fa"><td class="memItemLeft" align="right" valign="top"><a id="a8cd9a65008ae374a3691c46dd62cc3fa"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a8cd9a65008ae374a3691c46dd62cc3fa">ball_off_center_threshold</a> = 0.0</td></tr>
 <tr class="memdesc:a8cd9a65008ae374a3691c46dd62cc3fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">The distance from the ball to consider it moved from the center position and in play for kickoff. <br /></td></tr>
@@ -195,6 +203,22 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a90b3e4c59c9ce6270bfffd88e752275e">equidistant_threshold</a> = 0.0</td></tr>
 <tr class="memdesc:a90b3e4c59c9ce6270bfffd88e752275e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The distance from a robot to consider it equidistant, to consider error. <br /></td></tr>
 <tr class="separator:a90b3e4c59c9ce6270bfffd88e752275e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84cb32c31e44e0a8afcdece3eccb2ac4"><td class="memItemLeft" align="right" valign="top"><a id="a84cb32c31e44e0a8afcdece3eccb2ac4"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a84cb32c31e44e0a8afcdece3eccb2ac4">estimated_turn_speed</a> = 0.0</td></tr>
+<tr class="memdesc:a84cb32c31e44e0a8afcdece3eccb2ac4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumed turning speed (rad/s), used alongside estimated_walk_speed. <br /></td></tr>
+<tr class="separator:a84cb32c31e44e0a8afcdece3eccb2ac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d24f864344b86dcf30b3f37c43266ac"><td class="memItemLeft" align="right" valign="top"><a id="a7d24f864344b86dcf30b3f37c43266ac"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a7d24f864344b86dcf30b3f37c43266ac">estimated_walk_speed</a> = 0.0</td></tr>
+<tr class="memdesc:a7d24f864344b86dcf30b3f37c43266ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumed walking speed (m/s), used to rank who should attack - see fastest_to_ball_on_team. <br /></td></tr>
+<tr class="separator:a7d24f864344b86dcf30b3f37c43266ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a413fb1bb92931e8726adc62a2ed8ab"><td class="memItemLeft" align="right" valign="top"><a id="a3a413fb1bb92931e8726adc62a2ed8ab"></a>
+std::map&lt; std::string, std::set&lt; int &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a3a413fb1bb92931e8726adc62a2ed8ab">formation_player_ids</a> {}</td></tr>
+<tr class="memdesc:a3a413fb1bb92931e8726adc62a2ed8ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Player IDs that have a formation slot per mode, used to check if <a class="el" href="classmodule_1_1purpose_1_1Support.html">Support</a> can handle READY. <br /></td></tr>
+<tr class="separator:a3a413fb1bb92931e8726adc62a2ed8ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25c70768763a80e35b8622a959fadda6"><td class="memItemLeft" align="right" valign="top"><a id="a25c70768763a80e35b8622a959fadda6"></a>
+std::chrono::seconds&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a25c70768763a80e35b8622a959fadda6">localise_timeout</a> {0}</td></tr>
+<tr class="memdesc:a25c70768763a80e35b8622a959fadda6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum time to stand still and look around waiting for localisation to converge. <br /></td></tr>
+<tr class="separator:a25c70768763a80e35b8622a959fadda6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a38aff93504373b82edecce4b51eaf9"><td class="memItemLeft" align="right" valign="top"><a id="a0a38aff93504373b82edecce4b51eaf9"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html#a0a38aff93504373b82edecce4b51eaf9">max_localisation_cost</a> = 0.0</td></tr>
 <tr class="memdesc:a0a38aff93504373b82edecce4b51eaf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum cost for a localisation to be considered valid. <br /></td></tr>
@@ -215,7 +239,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1FieldPlayer.html">FieldPlayer</a></li><li class="navelem"><a class="el" href="structmodule_1_1purpose_1_1FieldPlayer_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

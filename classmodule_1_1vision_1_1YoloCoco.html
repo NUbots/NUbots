@@ -216,18 +216,14 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a318ff2c28353f99794d78d11ae7477ae"><td class="memItemLeft" align="right" valign="top"><a id="a318ff2c28353f99794d78d11ae7477ae"></a>
 struct <a class="el" href="structmodule_1_1vision_1_1YoloCoco_1_1Config.html">module::vision::YoloCoco::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a318ff2c28353f99794d78d11ae7477ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8284476a8495f9a661b1a6c27c4386b5"><td class="memItemLeft" align="right" valign="top"><a id="a8284476a8495f9a661b1a6c27c4386b5"></a>
-ov::CompiledModel&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1YoloCoco.html#a8284476a8495f9a661b1a6c27c4386b5">compiled_model</a> {}</td></tr>
-<tr class="memdesc:a8284476a8495f9a661b1a6c27c4386b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenVINO compiled model, used to create inference request object. <br /></td></tr>
-<tr class="separator:a8284476a8495f9a661b1a6c27c4386b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a979e2b29050fd6be4c563faf6eaad044"><td class="memItemLeft" align="right" valign="top"><a id="a979e2b29050fd6be4c563faf6eaad044"></a>
-ov::InferRequest&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1YoloCoco.html#a979e2b29050fd6be4c563faf6eaad044">infer_request</a> {}</td></tr>
-<tr class="memdesc:a979e2b29050fd6be4c563faf6eaad044"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inference request, used to run the model (inference) <br /></td></tr>
-<tr class="separator:a979e2b29050fd6be4c563faf6eaad044"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe9611c3f59724a47f5c2cdcfbae88b3"><td class="memItemLeft" align="right" valign="top"><a id="afe9611c3f59724a47f5c2cdcfbae88b3"></a>
 std::vector&lt; <a class="el" href="structmodule_1_1vision_1_1YoloCoco_1_1Object.html">Object</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1YoloCoco.html#afe9611c3f59724a47f5c2cdcfbae88b3">objects</a></td></tr>
 <tr class="memdesc:afe9611c3f59724a47f5c2cdcfbae88b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The objects that the <a class="el" href="classmodule_1_1vision_1_1Yolo.html">Yolo</a> model can detect. <br /></td></tr>
 <tr class="separator:afe9611c3f59724a47f5c2cdcfbae88b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5b7bb4ee5feb9bd3550b1ec20e13210"><td class="memItemLeft" align="right" valign="top"><a id="ad5b7bb4ee5feb9bd3550b1ec20e13210"></a>
+std::unique_ptr&lt; <a class="el" href="classutility_1_1onnx_1_1ONNXRuntime.html">utility::onnx::ONNXRuntime</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1YoloCoco.html#ad5b7bb4ee5feb9bd3550b1ec20e13210">onnx_rt</a> {}</td></tr>
+<tr class="memdesc:ad5b7bb4ee5feb9bd3550b1ec20e13210"><td class="mdescLeft">&#160;</td><td class="mdescRight">ONNX Runtime session used to run the YOLO model. <br /></td></tr>
+<tr class="separator:ad5b7bb4ee5feb9bd3550b1ec20e13210"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/vision/YoloCoco/src/<a class="el" href="YoloCoco_8hpp_source.html">YoloCoco.hpp</a></li>
@@ -239,7 +235,7 @@ std::vector&lt; <a class="el" href="structmodule_1_1vision_1_1YoloCoco_1_1Object
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>vision</b></li><li class="navelem"><a class="el" href="classmodule_1_1vision_1_1YoloCoco.html">YoloCoco</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

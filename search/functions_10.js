@@ -1,7 +1,29 @@
 var searchData=
 [
-  ['queue_5fclear_5fall_2310',['queue_clear_all',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad3a0b428c419d29017e479c12217676e',1,'module::platform::OpenCR::HardwareIO']]],
-  ['queue_5fitem_5fwaiting_2311',['queue_item_waiting',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8dd9766a7dbc52d06a062a07692dc90e',1,'module::platform::OpenCR::HardwareIO']]],
-  ['quinticspline_2312',['QuinticSpline',['../classutility_1_1skill_1_1splines_1_1QuinticSpline.html#af971acc607b0f432004a5d35b7ecf75c',1,'utility::skill::splines::QuinticSpline']]],
-  ['quit_2313',['quit',['../classmodule_1_1purpose_1_1KeyboardWalk.html#a33f084842b41c692a5f7f38e4a93d5ac',1,'module::purpose::KeyboardWalk']]]
+  ['reactiontimer_1661',['ReactionTimer',['../classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1',1,'module::support::ReactionTimer']]],
+  ['read_1662',['read',['../classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb',1,'utility::io::uart']]],
+  ['readyattack_1663',['ReadyAttack',['../classmodule_1_1purpose_1_1ReadyAttack.html#a8f12263960378c9767da42eb804f261c',1,'module::purpose::ReadyAttack']]],
+  ['reconnect_1664',['Reconnect',['../structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#a1a2db8dee59f75168f2ee6bacf006686',1,'utility::reactor::StreamReactor::Reconnect']]],
+  ['reevaluate_5fchildren_1665',['reevaluate_children',['../classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e',1,'module::extension::Director']]],
+  ['reevaluate_5fgroup_1666',['reevaluate_group',['../classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668',1,'module::extension::Director']]],
+  ['refresh_5fview_1667',['refresh_view',['../classmodule_1_1tools_1_1RoboCupConfiguration.html#a1cbd999435abca4067e96b37fbfc08f6',1,'module::tools::RoboCupConfiguration']]],
+  ['register_5femitter_1668',['register_emitter',['../classmodule_1_1nbs_1_1Player.html#a5cf0774dfdd7920f535c341ef0f699a2',1,'module::nbs::Player']]],
+  ['register_5femitters_1669',['register_emitters',['../classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896',1,'module::nbs::Player']]],
+  ['register_5fplayers_1670',['register_players',['../classmodule_1_1support_1_1logging_1_1DataPlayback.html#a3b42599b5ebada4a64c3d1b4ecfbf2e1',1,'module::support::logging::DataPlayback']]],
+  ['remove_5fprovider_1671',['remove_provider',['../classmodule_1_1extension_1_1Director.html#ab5cb1189cc1ccd5680fdc36dcbf47178',1,'module::extension::Director']]],
+  ['remove_5ftask_1672',['remove_task',['../classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73',1,'module::extension::Director']]],
+  ['resample_1673',['resample',['../classutility_1_1math_1_1filter_1_1ParticleFilter.html#a1bcc9c9d69f0102c6c2e6a28a1e0ad23',1,'utility::math::filter::ParticleFilter']]],
+  ['resample_5fparticles_1674',['resample_particles',['../classutility_1_1math_1_1filter_1_1ParticleFilter.html#a200179128c2836d233d373dfef3c71f2',1,'utility::math::filter::ParticleFilter']]],
+  ['reset_1675',['reset',['../classmodule_1_1purpose_1_1KeyboardWalk.html#a0fb72688886d8030ddeaa63d68e128be',1,'module::purpose::KeyboardWalk::reset()'],['../classutility_1_1math_1_1filter_1_1YawFilter.html#a1ed783c3c0343769cabb7ebc03e8a0f3',1,'utility::math::filter::YawFilter::reset()'],['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6e5e89688e2473c48e20e892af20f157',1,'utility::math::filter::KalmanFilter::reset()']]],
+  ['reset_5fstate_1676',['reset_state',['../classmodule_1_1input_1_1GameController.html#a0d18714780a73407222b6992175d0455',1,'module::input::GameController']]],
+  ['resize_1677',['resize',['../classutility_1_1localisation_1_1OccupancyMap.html#ac25080da4be5c7cca126e7bd1cbc5b75',1,'utility::localisation::OccupancyMap']]],
+  ['right_1678',['right',['../classmodule_1_1purpose_1_1KeyboardWalk.html#ad9970c386b529f62d6f9f0bff4632a1b',1,'module::purpose::KeyboardWalk']]],
+  ['robocupconfiguration_1679',['RoboCupConfiguration',['../classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d',1,'module::tools::RoboCupConfiguration']]],
+  ['robotcommunication_1680',['RobotCommunication',['../classmodule_1_1network_1_1RobotCommunication.html#aa955f5692c176e6192174bb33a2f1370',1,'module::network::RobotCommunication']]],
+  ['robotlocalisation_1681',['RobotLocalisation',['../classmodule_1_1localisation_1_1RobotLocalisation.html#af046bea223f24f0d09055cc54bfd6d77',1,'module::localisation::RobotLocalisation']]],
+  ['run_5fcallbacks_1682',['run_callbacks',['../classutility_1_1nbs_1_1Decoder.html#a40606ced077f7052ffff6f05c5bec92e',1,'utility::nbs::Decoder']]],
+  ['run_5ffield_5fline_5foptimisation_1683',['run_field_line_optimisation',['../classmodule_1_1localisation_1_1FieldLocalisationNLopt.html#ad43135313ca63826ab258c1e19c10100',1,'module::localisation::FieldLocalisationNLopt']]],
+  ['run_5ftask_5fon_5fprovider_1684',['run_task_on_provider',['../classmodule_1_1extension_1_1Director.html#afaa3e4a164097d1ca11e840072c261f9',1,'module::extension::Director']]],
+  ['run_5ftask_5fpack_1685',['run_task_pack',['../classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5',1,'module::extension::Director']]],
+  ['run_5ftasks_1686',['run_tasks',['../classmodule_1_1extension_1_1Director.html#af83cc11c92a845bfcd7810873b731dda',1,'module::extension::Director']]]
 ];

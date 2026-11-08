@@ -1,0 +1,6 @@
+<map id="module::skill::SimK1Kick" name="module::skill::SimK1Kick">
+<area shape="rect" id="node1" title="Runs the mujoco_playground K1Kick policy (v5 side&#45;sweep, 80&#45;obs / 22&#45;action ONNX) at 50 Hz and stream..." alt="" coords="90,185,274,212"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,81,164,123"/>
+<area shape="rect" id="node3" title=" " alt="" coords="17,5,152,32"/>
+<area shape="rect" id="node4" href="$structmodule_1_1skill_1_1SimK1Kick_1_1Config.html" title=" " alt="" coords="189,81,373,123"/>
+</map>

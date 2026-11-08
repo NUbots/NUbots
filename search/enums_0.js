@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['address_3182',['Address',['../structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d',1,'module::platform::OpenCR::DynamixelServo::Address()'],['../structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dc',1,'module::platform::OpenCR::FSR::Address()'],['../classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7',1,'module::platform::OpenCR::OpenCR::Address()']]]
+  ['classification_2337',['Classification',['../structmodule_1_1extension_1_1component_1_1Provider.html#a8457b72e0f98da5dbfdb20632cbdbd96',1,'module::extension::component::Provider']]],
+  ['column1_2338',['Column1',['../structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a03d380cfdad28853325db7e87d253e1e',1,'module::tools::RoboCupConfiguration::Display']]],
+  ['column2_2339',['Column2',['../structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html#a6beee0a2680f3e4e7891d5fb29603f01',1,'module::tools::RoboCupConfiguration::Display']]]
 ];

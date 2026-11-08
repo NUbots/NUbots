@@ -167,8 +167,9 @@ $(document).ready(function(){initNavTree('classmodule_1_1input_1_1Camera.html','
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1input_1_1Camera-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -194,6 +195,11 @@ Collaboration diagram for module::input::Camera:</div>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a81af0369c1dfff43949f94131bbbce7c"><td class="memItemLeft" align="right" valign="top"><a id="a81af0369c1dfff43949f94131bbbce7c"></a>
@@ -201,30 +207,220 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a81af0369c1dfff43949f94131bbbce7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1input_1_1Camera.html">Camera</a> reactor. <br /></td></tr>
 <tr class="separator:a81af0369c1dfff43949f94131bbbce7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
-Static Private Member Functions</h2></td></tr>
-<tr class="memitem:a52b9ea9c9ec416efc7bb8bc982b02841"><td class="memItemLeft" align="right" valign="top"><a id="a52b9ea9c9ec416efc7bb8bc982b02841"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>control_lost</b> (ArvGvDevice *device, <a class="el" href="structmodule_1_1input_1_1CameraContext.html">CameraContext</a> *context)</td></tr>
-<tr class="separator:a52b9ea9c9ec416efc7bb8bc982b02841"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe17fd4379fe7adeef32bb26e307e401"><td class="memItemLeft" align="right" valign="top"><a id="afe17fd4379fe7adeef32bb26e307e401"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>emit_image</b> (ArvStream *stream, <a class="el" href="structmodule_1_1input_1_1CameraContext.html">CameraContext</a> *context)</td></tr>
-<tr class="separator:afe17fd4379fe7adeef32bb26e307e401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:acfa19d37e75277a095dbcc275e5a6ed7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#acfa19d37e75277a095dbcc275e5a6ed7">camera_info_handler</a> (<a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;ctx, const void *msg)</td></tr>
+<tr class="memdesc:acfa19d37e75277a095dbcc275e5a6ed7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a sensor_msgs/CameraInfo sample.  <a href="classmodule_1_1input_1_1Camera.html#acfa19d37e75277a095dbcc275e5a6ed7">More...</a><br /></td></tr>
+<tr class="separator:acfa19d37e75277a095dbcc275e5a6ed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a617f3730aea1c087714f003272186eb4"><td class="memItemLeft" align="right" valign="top">NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a617f3730aea1c087714f003272186eb4">capture_time</a> (<a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;ctx, const sensor_msgs::msg::Image &amp;image)</td></tr>
+<tr class="memdesc:a617f3730aea1c087714f003272186eb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The capture time from the message header, or our receive time if the clocks disagree.  <a href="classmodule_1_1input_1_1Camera.html#a617f3730aea1c087714f003272186eb4">More...</a><br /></td></tr>
+<tr class="separator:a617f3730aea1c087714f003272186eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e1ecc756c39de71329a79464c34e184"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a8e1ecc756c39de71329a79464c34e184">image_handler</a> (<a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;ctx, const void *msg)</td></tr>
+<tr class="memdesc:a8e1ecc756c39de71329a79464c34e184"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a sensor_msgs/Image sample, converting and emitting it as an Image.  <a href="classmodule_1_1input_1_1Camera.html#a8e1ecc756c39de71329a79464c34e184">More...</a><br /></td></tr>
+<tr class="separator:a8e1ecc756c39de71329a79464c34e184"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c0d1cb06b6b2bfa835ea28d1cd579b"><td class="memItemLeft" align="right" valign="top">Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a24c0d1cb06b6b2bfa835ea28d1cd579b">nearest_Hcw</a> (const NUClear::clock::time_point &amp;timestamp)</td></tr>
+<tr class="memdesc:a24c0d1cb06b6b2bfa835ea28d1cd579b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the buffered Hcw closest in time to the given timestamp.  <a href="classmodule_1_1input_1_1Camera.html#a24c0d1cb06b6b2bfa835ea28d1cd579b">More...</a><br /></td></tr>
+<tr class="separator:a24c0d1cb06b6b2bfa835ea28d1cd579b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a51671e73fc96d7bd36c5dc849b7a051d"><td class="memItemLeft" align="right" valign="top"><a id="a51671e73fc96d7bd36c5dc849b7a051d"></a>
-std::map&lt; std::string, <a class="el" href="structmodule_1_1input_1_1CameraContext.html">CameraContext</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>cameras</b></td></tr>
-<tr class="separator:a51671e73fc96d7bd36c5dc849b7a051d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a095ce864be73632cea786c76c22d1155"><td class="memItemLeft" align="right" valign="top"><a id="a095ce864be73632cea786c76c22d1155"></a>
-std::vector&lt; std::pair&lt; NUClear::clock::time_point, Eigen::Isometry3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Hwps</b></td></tr>
-<tr class="separator:a095ce864be73632cea786c76c22d1155"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5117ab64e86e561bd07fc221a403ad66"><td class="memItemLeft" align="right" valign="top"><a id="a5117ab64e86e561bd07fc221a403ad66"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>num_cameras</b> = 0</td></tr>
-<tr class="separator:a5117ab64e86e561bd07fc221a403ad66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3711c4277ea92dbda14ade8773f9fbf5"><td class="memItemLeft" align="right" valign="top"><a id="a3711c4277ea92dbda14ade8773f9fbf5"></a>
+std::vector&lt; std::unique_ptr&lt; <a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a3711c4277ea92dbda14ade8773f9fbf5">cameras</a></td></tr>
+<tr class="memdesc:a3711c4277ea92dbda14ade8773f9fbf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of camera contexts. <br /></td></tr>
+<tr class="separator:a3711c4277ea92dbda14ade8773f9fbf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17fe54d04f8ef6d0b4a9a4d3308d29f7"><td class="memItemLeft" align="right" valign="top"><a id="a17fe54d04f8ef6d0b4a9a4d3308d29f7"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a17fe54d04f8ef6d0b4a9a4d3308d29f7">channels_created</a> = false</td></tr>
+<tr class="memdesc:a17fe54d04f8ef6d0b4a9a4d3308d29f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the DDS channels have been created. <br /></td></tr>
+<tr class="separator:a17fe54d04f8ef6d0b4a9a4d3308d29f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba8e3414b8fa22cdad8cc0e47e5b1801"><td class="memItemLeft" align="right" valign="top"><a id="aba8e3414b8fa22cdad8cc0e47e5b1801"></a>
+std::atomic&lt; std::chrono::milliseconds &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#aba8e3414b8fa22cdad8cc0e47e5b1801">hcw_buffer_duration</a> {std::chrono::milliseconds(500)}</td></tr>
+<tr class="memdesc:aba8e3414b8fa22cdad8cc0e47e5b1801"><td class="mdescLeft">&#160;</td><td class="mdescRight">How stale a Hcw may be before it is dropped from the buffer. <br /></td></tr>
+<tr class="separator:aba8e3414b8fa22cdad8cc0e47e5b1801"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53dbf2b1ed1437827766c37499f39311"><td class="memItemLeft" align="right" valign="top"><a id="a53dbf2b1ed1437827766c37499f39311"></a>
+std::deque&lt; std::pair&lt; NUClear::clock::time_point, Eigen::Isometry3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a53dbf2b1ed1437827766c37499f39311">Hcws</a></td></tr>
+<tr class="memdesc:a53dbf2b1ed1437827766c37499f39311"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recent world to camera transforms. <br /></td></tr>
+<tr class="separator:a53dbf2b1ed1437827766c37499f39311"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73d0088d3c924298effeab43163cbb01"><td class="memItemLeft" align="right" valign="top"><a id="a73d0088d3c924298effeab43163cbb01"></a>
+std::atomic&lt; std::chrono::milliseconds &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a73d0088d3c924298effeab43163cbb01">max_clock_skew</a> {std::chrono::milliseconds(1000)}</td></tr>
+<tr class="memdesc:a73d0088d3c924298effeab43163cbb01"><td class="mdescLeft">&#160;</td><td class="mdescRight">How far a capture timestamp may be from our own clock before we distrust it. <br /></td></tr>
+<tr class="separator:a73d0088d3c924298effeab43163cbb01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38dbe990d0cb8bb0bcbbbafefe8780bf"><td class="memItemLeft" align="right" valign="top"><a id="a38dbe990d0cb8bb0bcbbbafefe8780bf"></a>
-std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>sensors_mutex</b></td></tr>
+std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1Camera.html#a38dbe990d0cb8bb0bcbbbafefe8780bf">sensors_mutex</a></td></tr>
+<tr class="memdesc:a38dbe990d0cb8bb0bcbbbafefe8780bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">A mutex for sensor info. <br /></td></tr>
 <tr class="separator:a38dbe990d0cb8bb0bcbbbafefe8780bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="acfa19d37e75277a095dbcc275e5a6ed7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfa19d37e75277a095dbcc275e5a6ed7">&#9670;&nbsp;</a></span>camera_info_handler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::input::Camera::camera_info_handler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a sensor_msgs/CameraInfo sample. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>The context of the camera the sample came from, its lens is updated </td></tr>
+    <tr><td class="paramname">msg</td><td>Pointer to the received sensor_msgs::msg::CameraInfo </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a617f3730aea1c087714f003272186eb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a617f3730aea1c087714f003272186eb4">&#9670;&nbsp;</a></span>capture_time()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">NUClear::clock::time_point module::input::Camera::capture_time </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const sensor_msgs::msg::Image &amp;&#160;</td>
+          <td class="paramname"><em>image</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The capture time from the message header, or our receive time if the clocks disagree. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>The context of the camera the image came from </td></tr>
+    <tr><td class="paramname">image</td><td>The image whose header stamp is used </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The capture time, or the current time if the stamp is unset or too far from our clock </dd></dl>
+
+</div>
+</div>
+<a id="a8e1ecc756c39de71329a79464c34e184"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e1ecc756c39de71329a79464c34e184">&#9670;&nbsp;</a></span>image_handler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::input::Camera::image_handler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1input_1_1Camera_1_1CameraContext.html">CameraContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>msg</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a sensor_msgs/Image sample, converting and emitting it as an Image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>The context of the camera the sample came from </td></tr>
+    <tr><td class="paramname">msg</td><td>Pointer to the received sensor_msgs::msg::Image </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a24c0d1cb06b6b2bfa835ea28d1cd579b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24c0d1cb06b6b2bfa835ea28d1cd579b">&#9670;&nbsp;</a></span>nearest_Hcw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Isometry3d module::input::Camera::nearest_Hcw </td>
+          <td>(</td>
+          <td class="paramtype">const NUClear::clock::time_point &amp;&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find the buffered Hcw closest in time to the given timestamp. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">timestamp</td><td>The time to find a transform for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The nearest buffered Hcw, or identity if none are buffered </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/input/Camera/src/<a class="el" href="Camera_8hpp_source.html">Camera.hpp</a></li>
 <li>module/input/Camera/src/Camera.cpp</li>
@@ -235,7 +431,7 @@ std::mutex&#160;</td><td class="memItemRight" valign="bottom"><b>sensors_mutex</
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1Camera.html">Camera</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ordering_3186',['Ordering',['../classutility_1_1nbs_1_1Index.html#a8b558c9cd5df0b2ba76202b22ed8d053',1,'utility::nbs::Index']]]
+  ['providerclassification_2341',['ProviderClassification',['../namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4',1,'extension::behaviour::commands']]]
 ];

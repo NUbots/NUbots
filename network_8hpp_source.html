@@ -303,9 +303,9 @@ $(document).ready(function(){initNavTree('network_8hpp_source.html',''); initRes
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;        <span class="keywordflow">return</span> std::string(ssid);</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    }</div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keyword">inline</span> std::string get_wifi_password(<span class="keyword">const</span> std::string&amp; ssid, <span class="keyword">const</span> std::string&amp; wifi_interface) {</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        std::string wpa_supplicant_file = fmt::format(<span class="stringliteral">&quot;/etc/wpa_supplicant/wpa_supplicant-{}.conf&quot;</span>, wifi_interface);</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        std::ifstream file(wpa_supplicant_file);</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keyword">inline</span> std::string get_wifi_password(<span class="keyword">const</span> std::string&amp; ssid) {</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        std::string nmconfig = fmt::format(<span class="stringliteral">&quot;/etc/NetworkManager/system-connections/wifi-{}.conf&quot;</span>, ssid);</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        std::ifstream file(nmconfig);</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        std::string line;</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="keywordtype">bool</span> ssid_found = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        <span class="keywordtype">char</span> c;</div>
@@ -323,50 +323,45 @@ $(document).ready(function(){initNavTree('network_8hpp_source.html',''); initRes
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                <span class="comment">// Skip whitespace and the opening quote</span></div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                <span class="keywordflow">while</span> (file.get(c) &amp;&amp; isspace(c))</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;                    ;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                <span class="keywordflow">if</span> (c != <span class="charliteral">&#39;\&quot;&#39;</span>)</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                    <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;  <span class="comment">// Expected a quote</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160; </div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                <span class="comment">// Read the psk value inside the quotes</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;                <span class="keywordflow">while</span> (file.get(c) &amp;&amp; c != <span class="charliteral">&#39;\&quot;&#39;</span>) {</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                    psk.push_back(c);</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;                }</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                <span class="comment">// Read the psk value</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                <span class="keywordflow">while</span> (file.get(c)) {</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                    psk.push_back(c);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                }</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                <span class="keywordflow">return</span> psk;</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;            }</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                <span class="keywordflow">return</span> psk;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;            }</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;            <span class="keywordflow">if</span> (!ssid_found &amp;&amp; buffer == <span class="stringliteral">&quot;ssid&quot;</span>) {</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                std::string current_ssid;</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                <span class="comment">// Skip whitespace and the equals sign</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                <span class="keywordflow">while</span> (file.get(c) &amp;&amp; (isspace(c) || c == <span class="charliteral">&#39;=&#39;</span>))</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                    ;</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                <span class="keywordflow">if</span> (c != <span class="charliteral">&#39;\&quot;&#39;</span>)</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                    <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;  <span class="comment">// Expected a quote</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;            <span class="keywordflow">if</span> (!ssid_found &amp;&amp; buffer == <span class="stringliteral">&quot;ssid&quot;</span>) {</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                std::string current_ssid;</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                <span class="comment">// Skip whitespace and the equals sign</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                <span class="keywordflow">while</span> (file.get(c) &amp;&amp; (isspace(c) || c == <span class="charliteral">&#39;=&#39;</span>))</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                    ;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                <span class="comment">// Read the ssid value</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                <span class="keywordflow">while</span> (file.get(c)) {</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                    current_ssid.push_back(c);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                }</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                <span class="comment">// Read the ssid value inside the quotes</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                <span class="keywordflow">while</span> (file.get(c) &amp;&amp; c != <span class="charliteral">&#39;\&quot;&#39;</span>) {</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;                    current_ssid.push_back(c);</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;                }</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                <span class="keywordflow">if</span> (current_ssid == ssid) {</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;                    ssid_found = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                }</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;            }</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        }</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        <span class="comment">// If we reach here, we didn&#39;t find the ssid or the psk</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    }</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;}  <span class="comment">// namespace utility::support</span></div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_SUPPORT_NETWORK_HPP</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                <span class="keywordflow">if</span> (current_ssid == ssid) {</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                    ssid_found = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;                }</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;            }</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        }</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;        <span class="comment">// If we reach here, we didn&#39;t find the ssid or the psk</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    }</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160; </div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;}  <span class="comment">// namespace utility::support</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_SUPPORT_NETWORK_HPP</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_7a14655160e996e834c58137480ad3d2.html">support</a></li><li class="navelem"><b>network.hpp</b></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

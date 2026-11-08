@@ -192,11 +192,12 @@ Collaboration diagram for module::planning::PlanWalkPath:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1planning_1_1PlanWalkPath__coll__graph.png" border="0" usemap="#amodule_1_1planning_1_1PlanWalkPath_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1planning_1_1PlanWalkPath_coll__map" id="amodule_1_1planning_1_1PlanWalkPath_coll__map">
-<area shape="rect" title=" " alt="" coords="497,78,728,105"/>
-<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="211,5,370,47"/>
-<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html" title="Stores configuration values." alt="" coords="189,71,392,112"/>
-<area shape="rect" title=" " alt="" coords="253,137,329,163"/>
+<area shape="rect" title=" " alt="" coords="592,78,823,105"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="306,5,465,47"/>
+<area shape="rect" title=" " alt="" coords="25,13,160,39"/>
+<area shape="rect" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html" title="Stores configuration values." alt="" coords="284,71,487,112"/>
+<area shape="rect" href="structmodule_1_1planning_1_1walk__path_1_1WalkToParams.html" title=" " alt="" coords="5,71,180,112"/>
+<area shape="rect" title=" " alt="" coords="347,137,423,163"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -215,9 +216,6 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a9b6595e47f523bc2454793cc02d86345"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">constrain_velocity</a> (const Eigen::Vector3d &amp;v)</td></tr>
-<tr class="memdesc:a9b6595e47f523bc2454793cc02d86345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrain a velocity vector to ensure it is within the limits.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#a9b6595e47f523bc2454793cc02d86345">More...</a><br /></td></tr>
-<tr class="separator:a9b6595e47f523bc2454793cc02d86345"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; Eigen::Vector2d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">get_obstacles</a> (const std::vector&lt; Eigen::Vector2d &gt; &amp;all_obstacles, const Eigen::Vector2d &amp;rDRr)</td></tr>
 <tr class="memdesc:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the closest obstacle in the path to the target, including obstacles close to that obstacle.  <a href="classmodule_1_1planning_1_1PlanWalkPath.html#afc0aa37ffad11d1c6b0820b1012bcf47">More...</a><br /></td></tr>
 <tr class="separator:afc0aa37ffad11d1c6b0820b1012bcf47"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -229,16 +227,12 @@ struct <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.ht
 <tr class="separator:a6e84da1d1dc1c917d65ec5e6fda7aa5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6bc099e356780d818f764564f3311a7"><td class="memItemLeft" align="right" valign="top"><a id="af6bc099e356780d818f764564f3311a7"></a>
 Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#af6bc099e356780d818f764564f3311a7">previous_walk_command</a> = Eigen::Vector3d::Zero()</td></tr>
-<tr class="memdesc:af6bc099e356780d818f764564f3311a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous walk command. <br /></td></tr>
+<tr class="memdesc:af6bc099e356780d818f764564f3311a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous (smoothed, pre-dead-zone) walk command. <br /></td></tr>
 <tr class="separator:af6bc099e356780d818f764564f3311a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b185aa078aa34e06a442d6b7cb98233"><td class="memItemLeft" align="right" valign="top"><a id="a1b185aa078aa34e06a442d6b7cb98233"></a>
 message::behaviour::state::Stability&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a1b185aa078aa34e06a442d6b7cb98233">stability</a> {}</td></tr>
 <tr class="memdesc:a1b185aa078aa34e06a442d6b7cb98233"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current stability of the robot. <br /></td></tr>
 <tr class="separator:a1b185aa078aa34e06a442d6b7cb98233"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2642739bb0ad2e7220a8261e4d04009f"><td class="memItemLeft" align="right" valign="top"><a id="a2642739bb0ad2e7220a8261e4d04009f"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html#a2642739bb0ad2e7220a8261e4d04009f">velocity_magnitude</a> = 0.0</td></tr>
-<tr class="memdesc:a2642739bb0ad2e7220a8261e4d04009f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current magnitude of the translational velocity of the walk command. <br /></td></tr>
-<tr class="separator:a2642739bb0ad2e7220a8261e4d04009f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
@@ -299,41 +293,6 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a9b6595e47f523bc2454793cc02d86345"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b6595e47f523bc2454793cc02d86345">&#9670;&nbsp;</a></span>constrain_velocity()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Eigen::Vector3d module::planning::PlanWalkPath::constrain_velocity </td>
-          <td>(</td>
-          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
-          <td class="paramname"><em>v</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Constrain a velocity vector to ensure it is within the limits. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">v</td><td>velocity vector to constrain </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Constrained velocity vector </dd></dl>
-
-</div>
-</div>
 <a id="afc0aa37ffad11d1c6b0820b1012bcf47"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afc0aa37ffad11d1c6b0820b1012bcf47">&#9670;&nbsp;</a></span>get_obstacles()</h2>
 
@@ -390,7 +349,7 @@ template&lt;typename State , template&lt; typename &gt; class expr, State::Value
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1PlanWalkPath.html">PlanWalkPath</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

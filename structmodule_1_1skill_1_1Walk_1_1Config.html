@@ -173,52 +173,17 @@ $(document).ready(function(){initNavTree('structmodule_1_1skill_1_1Walk_1_1Confi
 <div class="title">module::skill::Walk::Config Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Collaboration diagram for module::skill::Walk::Config:</div>
-<div class="dyncontent">
-<div class="center"><img src="structmodule_1_1skill_1_1Walk_1_1Config__coll__graph.png" border="0" usemap="#amodule_1_1skill_1_1Walk_1_1Config_coll__map" alt="Collaboration graph"/></div>
-<map name="amodule_1_1skill_1_1Walk_1_1Config_coll__map" id="amodule_1_1skill_1_1Walk_1_1Config_coll__map">
-<area shape="rect" title=" " alt="" coords="840,39,987,80"/>
-<area shape="rect" href="classutility_1_1skill_1_1WalkGenerator.html" title=" " alt="" coords="405,39,604,80"/>
-<area shape="rect" href="classutility_1_1skill_1_1splines_1_1Trajectory.html" title=" " alt="" coords="25,5,193,47"/>
-<area shape="rect" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html" title=" " alt="" coords="5,71,212,112"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a0202923248a55cb11872381e6ddad2ea"><td class="memItemLeft" align="right" valign="top"><a id="a0202923248a55cb11872381e6ddad2ea"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a0202923248a55cb11872381e6ddad2ea">acceleration</a> = Eigen::Vector3d(0.0, 0.0, 0.0)</td></tr>
-<tr class="memdesc:a0202923248a55cb11872381e6ddad2ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max acceleration for smoothing walk commands. <br /></td></tr>
-<tr class="separator:a0202923248a55cb11872381e6ddad2ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03092583f297113b9af9752fb4f9f087"><td class="memItemLeft" align="right" valign="top"><a id="a03092583f297113b9af9752fb4f9f087"></a>
-std::vector&lt; std::pair&lt; <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087">arm_positions</a> {}</td></tr>
-<tr class="memdesc:a03092583f297113b9af9752fb4f9f087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired arm positions while walking. <br /></td></tr>
-<tr class="separator:a03092583f297113b9af9752fb4f9f087"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf7537a03b0d7a348c76a1e204848ea0"><td class="memItemLeft" align="right" valign="top"><a id="adf7537a03b0d7a348c76a1e204848ea0"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#adf7537a03b0d7a348c76a1e204848ea0">kick_timing_offset</a> = 0.0</td></tr>
-<tr class="memdesc:adf7537a03b0d7a348c76a1e204848ea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer time before the kick starts. <br /></td></tr>
-<tr class="separator:adf7537a03b0d7a348c76a1e204848ea0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67621436be7b7c23adb87ca0e1d7f929"><td class="memItemLeft" align="right" valign="top"><a id="a67621436be7b7c23adb87ca0e1d7f929"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a67621436be7b7c23adb87ca0e1d7f929">kick_velocity_x</a> = 0.0</td></tr>
-<tr class="memdesc:a67621436be7b7c23adb87ca0e1d7f929"><td class="mdescLeft">&#160;</td><td class="mdescRight">The velocity to kick the ball with (x direction) <br /></td></tr>
-<tr class="separator:a67621436be7b7c23adb87ca0e1d7f929"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a463649cbc6b8b490a079cff68a39550b"><td class="memItemLeft" align="right" valign="top"><a id="a463649cbc6b8b490a079cff68a39550b"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a463649cbc6b8b490a079cff68a39550b">kick_velocity_y</a> = 0.0</td></tr>
-<tr class="memdesc:a463649cbc6b8b490a079cff68a39550b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The velocity to kick the ball with (y direction) <br /></td></tr>
-<tr class="separator:a463649cbc6b8b490a079cff68a39550b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7ba1c4e2415aa67e85d22c4fc1c6252"><td class="memItemLeft" align="right" valign="top"><a id="ae7ba1c4e2415aa67e85d22c4fc1c6252"></a>
-std::map&lt; <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, message::actuation::ServoState &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252">servo_states</a> {}</td></tr>
-<tr class="memdesc:ae7ba1c4e2415aa67e85d22c4fc1c6252"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the gains for each servo. <br /></td></tr>
-<tr class="separator:ae7ba1c4e2415aa67e85d22c4fc1c6252"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aebe00ce8173e39e457ef934cebf53530"><td class="memItemLeft" align="right" valign="top"><a id="aebe00ce8173e39e457ef934cebf53530"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#aebe00ce8173e39e457ef934cebf53530">use_balance_control</a> = false</td></tr>
-<tr class="memdesc:aebe00ce8173e39e457ef934cebf53530"><td class="mdescLeft">&#160;</td><td class="mdescRight">Option to use balance control when walking. <br /></td></tr>
-<tr class="separator:aebe00ce8173e39e457ef934cebf53530"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3e157e8398d2fab854ef92459d9e6d1"><td class="memItemLeft" align="right" valign="top"><a id="ac3e157e8398d2fab854ef92459d9e6d1"></a>
-<a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; double &gt;::WalkParameters&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#ac3e157e8398d2fab854ef92459d9e6d1">walk_generator_parameters</a> {}</td></tr>
-<tr class="memdesc:ac3e157e8398d2fab854ef92459d9e6d1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classmodule_1_1skill_1_1Walk.html">Walk</a> engine parameters. <br /></td></tr>
-<tr class="separator:ac3e157e8398d2fab854ef92459d9e6d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d9cf4b815435901daf246f2c4eb5750"><td class="memItemLeft" align="right" valign="top"><a id="a1d9cf4b815435901daf246f2c4eb5750"></a>
+NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a1d9cf4b815435901daf246f2c4eb5750">kick_duration</a> {}</td></tr>
+<tr class="memdesc:a1d9cf4b815435901daf246f2c4eb5750"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long to drive the kick velocity before reporting the kick as done. <br /></td></tr>
+<tr class="separator:a1d9cf4b815435901daf246f2c4eb5750"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29466fb7856e24f0ae4391c299ef519b"><td class="memItemLeft" align="right" valign="top"><a id="a29466fb7856e24f0ae4391c299ef519b"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a29466fb7856e24f0ae4391c299ef519b">kick_velocity</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a29466fb7856e24f0ae4391c299ef519b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Velocity command applied while performing an in-walk kick (x forward, y lateral, theta) <br /></td></tr>
+<tr class="separator:a29466fb7856e24f0ae4391c299ef519b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/skill/Walk/src/<a class="el" href="Walk_8hpp_source.html">Walk.hpp</a></li>
@@ -229,7 +194,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>skill</b></li><li class="navelem"><a class="el" href="classmodule_1_1skill_1_1Walk.html">Walk</a></li><li class="navelem"><a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -199,10 +199,6 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ab53b609b24616aeb15b5191120a51f44">cost_threshold</a> = 0.0</td></tr>
 <tr class="memdesc:ab53b609b24616aeb15b5191120a51f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cost threshold for resetting the filter. <br /></td></tr>
 <tr class="separator:ab53b609b24616aeb15b5191120a51f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83ad66418e7e75a60da171186d77d46c"><td class="memItemLeft" align="right" valign="top"><a id="a83ad66418e7e75a60da171186d77d46c"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a83ad66418e7e75a60da171186d77d46c">field_line_distance_weight</a> = 0.0</td></tr>
-<tr class="memdesc:a83ad66418e7e75a60da171186d77d46c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with distance to field lines. <br /></td></tr>
-<tr class="separator:a83ad66418e7e75a60da171186d77d46c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e4ba2c9310cc9d312337c4cbf4ac8a5"><td class="memItemLeft" align="right" valign="top"><a id="a8e4ba2c9310cc9d312337c4cbf4ac8a5"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8e4ba2c9310cc9d312337c4cbf4ac8a5">field_line_intersection_weight</a> = 0.0</td></tr>
 <tr class="memdesc:a8e4ba2c9310cc9d312337c4cbf4ac8a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scalar weighting of cost associated with distance to field intersections. <br /></td></tr>
@@ -239,10 +235,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struc
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae33dccc610078b9c69675a27e5b02c51">min_field_line_intersections</a> = 0</td></tr>
 <tr class="memdesc:ae33dccc610078b9c69675a27e5b02c51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line intersections for an update to run. <br /></td></tr>
 <tr class="separator:ae33dccc610078b9c69675a27e5b02c51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39f2469ba1fdb2a7dd474f9517b19115"><td class="memItemLeft" align="right" valign="top"><a id="a39f2469ba1fdb2a7dd474f9517b19115"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a39f2469ba1fdb2a7dd474f9517b19115">min_field_line_points</a> = 0</td></tr>
-<tr class="memdesc:a39f2469ba1fdb2a7dd474f9517b19115"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line points for an update to run. <br /></td></tr>
-<tr class="separator:a39f2469ba1fdb2a7dd474f9517b19115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6778a2d8b06ab1d0bd19578efb1d6d55"><td class="memItemLeft" align="right" valign="top"><a id="a6778a2d8b06ab1d0bd19578efb1d6d55"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a6778a2d8b06ab1d0bd19578efb1d6d55">min_localised_measurements</a> = 0</td></tr>
+<tr class="memdesc:a6778a2d8b06ab1d0bd19578efb1d6d55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of accepted measurements since the last reset before the pose is trusted. <br /></td></tr>
+<tr class="separator:a6778a2d8b06ab1d0bd19578efb1d6d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9656a9d22e776f89f3f12ad4297d5525"><td class="memItemLeft" align="right" valign="top"><a id="a9656a9d22e776f89f3f12ad4297d5525"></a>
 nlopt::algorithm&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9656a9d22e776f89f3f12ad4297d5525">normal_algorithm</a> = nlopt::LN_COBYLA</td></tr>
 <tr class="memdesc:a9656a9d22e776f89f3f12ad4297d5525"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal optimisation - Algorithm to use. <br /></td></tr>
@@ -353,7 +349,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisationNLopt.html">FieldLocalisationNLopt</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Oct 17 2026 05:39:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Nov 8 2026 04:12:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

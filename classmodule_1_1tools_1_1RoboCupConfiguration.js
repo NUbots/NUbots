@@ -4,6 +4,8 @@ var classmodule_1_1tools_1_1RoboCupConfiguration =
     [ "Display", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display.html", "structmodule_1_1tools_1_1RoboCupConfiguration_1_1Display" ],
     [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d", null ],
     [ "configure_network", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a2fba8682aa62f6793714a47a9f2520f7", null ],
+    [ "confirm_prompt", "classmodule_1_1tools_1_1RoboCupConfiguration.html#af666fdede9a69ec1bff2f28e6eaac488", null ],
+    [ "draw_popup", "classmodule_1_1tools_1_1RoboCupConfiguration.html#aaf260dae1d7a9ce0dfd12cd06ee5c684", null ],
     [ "edit_selection", "classmodule_1_1tools_1_1RoboCupConfiguration.html#aa4b37ae9123408e3088ced66790621ca", null ],
     [ "get_config_file", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a068110e852d5a900c79bc0906c3e23ad", null ],
     [ "get_config_values", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a07b69b04c725c425740ea64adcb12665", null ],
@@ -14,6 +16,7 @@ var classmodule_1_1tools_1_1RoboCupConfiguration =
     [ "user_input", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a53c034144dfee6e2ca4357cef51d9888", null ],
     [ "cfg", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a858336b38e53e960c44d3aa115875c31", null ],
     [ "display", "classmodule_1_1tools_1_1RoboCupConfiguration.html#af0fbcb70e9a4a5c955cefcfad7eb8289", null ],
+    [ "field_type", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a91c323f0ee643c8e901cc5d43ad99bc8", null ],
     [ "hostname", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a1eae40a927bc7cf7010c933c3fb7b499", null ],
     [ "ip_address", "classmodule_1_1tools_1_1RoboCupConfiguration.html#abb7f978fcc43688b3bba938a3ab571e2", null ],
     [ "is_goalie", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a68019c0085239577427d43bcdc106754", null ],
@@ -24,5 +27,6 @@ var classmodule_1_1tools_1_1RoboCupConfiguration =
     [ "robot_name", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a202fb766361cfb7232f922a2e677c526", null ],
     [ "ssid", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a2f6b8494f9360baffa684ba960adcad0", null ],
     [ "team_id", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a6754361cf74cdfbe85f3afbbcd3a1a90", null ],
+    [ "use_dhcp", "classmodule_1_1tools_1_1RoboCupConfiguration.html#a0776e22c5408208bd135333c1c1f06b0", null ],
     [ "wifi_interface", "classmodule_1_1tools_1_1RoboCupConfiguration.html#aae2cf546846460b7b6a8eeb0e943b252", null ]
 ];

@@ -1,52 +1,5 @@
 var namespaces_dup =
 [
-    [ "dynamixel", null, [
-      [ "v2", null, [
-        [ "ActionCommand", "structdynamixel_1_1v2_1_1ActionCommand.html", "structdynamixel_1_1v2_1_1ActionCommand" ],
-        [ "BulkReadCommand", "structdynamixel_1_1v2_1_1BulkReadCommand.html", "structdynamixel_1_1v2_1_1BulkReadCommand" ],
-        [ "BulkReadData", "structdynamixel_1_1v2_1_1BulkReadData.html", "structdynamixel_1_1v2_1_1BulkReadData" ],
-        [ "BulkWriteCommand", "structdynamixel_1_1v2_1_1BulkWriteCommand.html", "structdynamixel_1_1v2_1_1BulkWriteCommand" ],
-        [ "BulkWriteData", "structdynamixel_1_1v2_1_1BulkWriteData.html", "structdynamixel_1_1v2_1_1BulkWriteData" ],
-        [ "FactoryResetCommand", "structdynamixel_1_1v2_1_1FactoryResetCommand.html", "structdynamixel_1_1v2_1_1FactoryResetCommand" ],
-        [ "PingCommand", "structdynamixel_1_1v2_1_1PingCommand.html", "structdynamixel_1_1v2_1_1PingCommand" ],
-        [ "ReadCommand", "structdynamixel_1_1v2_1_1ReadCommand.html", "structdynamixel_1_1v2_1_1ReadCommand" ],
-        [ "RebootCommand", "structdynamixel_1_1v2_1_1RebootCommand.html", "structdynamixel_1_1v2_1_1RebootCommand" ],
-        [ "RegWriteCommand", "structdynamixel_1_1v2_1_1RegWriteCommand.html", "structdynamixel_1_1v2_1_1RegWriteCommand" ],
-        [ "StatusReturnCommand", "structdynamixel_1_1v2_1_1StatusReturnCommand.html", "structdynamixel_1_1v2_1_1StatusReturnCommand" ],
-        [ "SyncReadCommand", "structdynamixel_1_1v2_1_1SyncReadCommand.html", "structdynamixel_1_1v2_1_1SyncReadCommand" ],
-        [ "SyncWriteCommand", "structdynamixel_1_1v2_1_1SyncWriteCommand.html", "structdynamixel_1_1v2_1_1SyncWriteCommand" ],
-        [ "SyncWriteData", "structdynamixel_1_1v2_1_1SyncWriteData.html", "structdynamixel_1_1v2_1_1SyncWriteData" ],
-        [ "WriteCommand", "structdynamixel_1_1v2_1_1WriteCommand.html", "structdynamixel_1_1v2_1_1WriteCommand" ],
-        [ "CommandError", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893", [
-          [ "NO_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893ad306b6fdee05fe87455110ddf6501e6c", null ],
-          [ "RESULT_FAIL", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a557e440b4bd99850a7eaea8de32d21fc", null ],
-          [ "INSTRUCTION_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a3c039cc33b5d22749325e1689752097c", null ],
-          [ "CRC_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893afde7dcbac92720d696e3ef02bf6435db", null ],
-          [ "RANGE_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a20b3033861fb9032b6a6f96c5ad3ef66", null ],
-          [ "LENGTH_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a379cb55f9bbd4535ffbd3bd50f0d661c", null ],
-          [ "LIMIT_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a057a8ec38581528cfe6621a26e97f8cd", null ],
-          [ "ACCESS_ERROR", "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893ae1435d7f366c537097b73e89e39a3b59", null ]
-        ] ],
-        [ "Instruction", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6e", [
-          [ "PING", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6eabf1106fbdf959eae5c6d3c18df7be9f0", null ],
-          [ "READ", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6eae56bdd579e971db3ff98507d3be8627e", null ],
-          [ "WRITE", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea0b722005898db329b18ae083b96f015f", null ],
-          [ "REG_WRITE", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea32d6a874b07b4980a01b45a1e7f3d696", null ],
-          [ "ACTION", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ead4090892fa41052bfac9b0afdec09310", null ],
-          [ "FACTORY_RESET", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea4b61669308b1ff2fa9b96af730134cce", null ],
-          [ "REBOOT", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6eaa3ab6a04a74bb548e81d547b381c2ca7", null ],
-          [ "STATUS_RETURN", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6eabb87ca5e61fcb99169ca6b3c7e26c0f8", null ],
-          [ "SYNC_READ", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea59a9e436eb7a9cb24d480948f89f5b95", null ],
-          [ "SYNC_WRITE", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea9db7e0bf605068f87d7d24f261d8c497", null ],
-          [ "BULK_READ", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea3308f69d6704569138f46a23d2de21fa", null ],
-          [ "BULK_WRITE", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea5b92ca22c3ff8b084e79d6f3c9e48a16", null ]
-        ] ],
-        [ "__attribute__", "Action_8hpp.html#a9db884af178deddd2b44de7ab12d738b", null ],
-        [ "calculate_checksum", "Dynamixel_8hpp.html#a99e3fa93953f0ecb734e831ccb18f0f3", null ],
-        [ "calculate_checksum", "Dynamixel_8hpp.html#adc31a80bc5bc9881bae3297d3d18b0f8", null ],
-        [ "update_crc", "Dynamixel_8hpp.html#a2eb76856c5616c30a08660e9d5640238", null ]
-      ] ]
-    ] ],
     [ "extension", null, [
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
@@ -93,16 +46,10 @@ var namespaces_dup =
       [ "FileWatcherReady", "structextension_1_1FileWatcherReady.html", null ],
       [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ]
     ] ],
-    [ "fmt", null, [
-      [ "formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
-    ] ],
     [ "module", null, [
       [ "actuation", null, [
-        [ "FootController", "classmodule_1_1actuation_1_1FootController.html", "classmodule_1_1actuation_1_1FootController" ],
-        [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
-        [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ],
-        [ "SetGains", "structmodule_1_1actuation_1_1SetGains.html", null ]
+        [ "ServosTask", "Servos_8cpp.html#adfd313272abe70fce9837ce47a4ce7a3", null ]
       ] ],
       [ "extension", null, [
         [ "component", null, [
@@ -119,21 +66,6 @@ var namespaces_dup =
         [ "translate", "translate_8cpp.html#a7dbd955435d8334340cf13ef8cff9c9c", null ]
       ] ],
       [ "input", null, [
-        [ "arv", null, [
-          [ "camera_create_stream", "aravis__wrap_8hpp.html#a8a36797581b15174818f230a4bf2ceea", null ],
-          [ "camera_get_payload", "aravis__wrap_8hpp.html#aecdb4e7ab0c7bbd1416b3913ccbeff43", null ],
-          [ "camera_gv_set_packet_size", "aravis__wrap_8hpp.html#a52c51ae266287b805d6228099973b442", null ],
-          [ "camera_new", "aravis__wrap_8hpp.html#a175c5d0592934f5c03f311a010aa355f", null ],
-          [ "camera_set_region", "aravis__wrap_8hpp.html#aa56824a375e1f884278f36d28aaf7fb3", null ],
-          [ "camera_start_acquisition", "aravis__wrap_8hpp.html#a6494355a5e2e24d8c0a0ad94b821e448", null ],
-          [ "camera_stop_acquisition", "aravis__wrap_8hpp.html#a41e040ba0acdfc91885358cce1c389a5", null ],
-          [ "device_execute_command", "aravis__wrap_8hpp.html#a6d6482e68b918be05df61f075f53a8e0", null ],
-          [ "device_get_boolean_feature_value", "aravis__wrap_8hpp.html#a524fdabf8819bb3acee846db4c9bc55c", null ],
-          [ "device_get_integer_feature_value", "aravis__wrap_8hpp.html#ab00bf069ccb135cd348ece76228daeac", null ],
-          [ "stream_set_emit_signals", "aravis__wrap_8hpp.html#a9485b5e748a036dddd778481f7051b49", null ],
-          [ "wrap", "aravis__wrap_8hpp.html#aa9f04b5489f2a37ff2b3fc1159801fb8", null ],
-          [ "wrap_return", "aravis__wrap_8hpp.html#adb011fe415c8799b0551910da7322b76", null ]
-        ] ],
         [ "decompressor", null, [
           [ "turbojpeg", null, [
             [ "Decompressor", "classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor.html", "classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor" ],
@@ -207,11 +139,11 @@ var namespaces_dup =
           [ "RETURN_VERSION", "GameControllerData_8hpp.html#ac739fd672d5d657249250d153cf30761", null ]
         ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
-        [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
         [ "FakeCamera", "classmodule_1_1input_1_1FakeCamera.html", "classmodule_1_1input_1_1FakeCamera" ],
         [ "GameController", "classmodule_1_1input_1_1GameController.html", "classmodule_1_1input_1_1GameController" ],
         [ "ImageDecompressor", "classmodule_1_1input_1_1ImageDecompressor.html", "classmodule_1_1input_1_1ImageDecompressor" ],
         [ "NatNet", "classmodule_1_1input_1_1NatNet.html", "classmodule_1_1input_1_1NatNet" ],
+        [ "NUSimCamera", "classmodule_1_1input_1_1NUSimCamera.html", "classmodule_1_1input_1_1NUSimCamera" ],
         [ "ReadData", "structmodule_1_1input_1_1ReadData.html", "structmodule_1_1input_1_1ReadData" ],
         [ "ReadData< Device >", "structmodule_1_1input_1_1ReadData_3_01Device_01_4.html", "structmodule_1_1input_1_1ReadData_3_01Device_01_4" ],
         [ "ReadData< Eigen::Matrix< Scalar, rows, cols > >", "structmodule_1_1input_1_1ReadData_3_01Eigen_1_1Matrix_3_01Scalar_00_01rows_00_01cols_01_4_01_4.html", "structmodule_1_1input_1_1ReadData_3_01Eigen_1_1Matrix_3_01Scalar_00_01rows_00_01cols_01_4_01_4" ],
@@ -229,12 +161,9 @@ var namespaces_dup =
         [ "ReadData< std::string >", "structmodule_1_1input_1_1ReadData_3_01std_1_1string_01_4.html", "structmodule_1_1input_1_1ReadData_3_01std_1_1string_01_4" ],
         [ "ReadData< std::vector< Marker > >", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4.html", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4" ],
         [ "ReadData< std::vector< T > >", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4.html", "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4" ],
-        [ "SensorFilter", "classmodule_1_1input_1_1SensorFilter.html", "classmodule_1_1input_1_1SensorFilter" ],
-        [ "SettingsFunctions", "structmodule_1_1input_1_1SettingsFunctions.html", null ],
-        [ "SettingsFunctions< ArvGcBoolean >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4" ],
-        [ "SettingsFunctions< ArvGcEnumeration >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4" ],
-        [ "SettingsFunctions< ArvGcFloat >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4" ],
-        [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ],
+        [ "Sensors", "classmodule_1_1input_1_1Sensors.html", "classmodule_1_1input_1_1Sensors" ],
+        [ "SharedImageHeader", "structmodule_1_1input_1_1SharedImageHeader.html", "structmodule_1_1input_1_1SharedImageHeader" ],
+        [ "WhistleDetection", "classmodule_1_1input_1_1WhistleDetection.html", "classmodule_1_1input_1_1WhistleDetection" ],
         [ "Device", "Parse_8hpp.html#aa65603961328a2fabede3c79195ea028", null ],
         [ "ForcePlate", "Parse_8hpp.html#ac1f71f1a76fde732ec47a6deadb6e70d", null ],
         [ "GameEventPhase", "GameController_8cpp.html#a114fd7bb98acddbdd3795d0122bccaae", null ],
@@ -249,15 +178,14 @@ var namespaces_dup =
         [ "PenaltyReason", "GameController_8cpp.html#afa17cf795b68030f271778e640f399b2", null ],
         [ "RigidBody", "Parse_8hpp.html#ab1825c6a6c0db5d0045b47ecc2d6d987", null ],
         [ "Score", "GameController_8cpp.html#a12020adafa5bcc667b4564d5e6f1c46c", null ],
+        [ "SensorsMsg", "Sensors_8hpp.html#ade6631982bc4c39d7afebac5a438f9a7", null ],
         [ "Skeleton", "Parse_8hpp.html#a4064373edcb402eac06cbfda50c171bd", null ],
         [ "TeamColour", "GameController_8cpp.html#ae39848e521ad82bb2dbaba1ee21c93db", null ],
         [ "Unpenalisation", "GameController_8cpp.html#a7590774cc2ec9916750561eadd281821", null ],
-        [ "description_to_fourcc", "description__to__fourcc_8hpp.html#a9eafba3f12c745ee669e27de1a8887d7", null ],
-        [ "set_setting", "settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe", null ],
-        [ "sync_clocks", "time__sync_8cpp.html#a235ccd7baf919af6cc690c4b193bf879", null ],
-        [ "MAX_CLOCK_DRIFT", "Camera_8cpp.html#a18ed7bb4fb26212f5032b5bf837d81aa", null ],
-        [ "MAX_COUNT_OVER_TIME_FRAMES", "Camera_8cpp.html#ae37c426f9faf2b72db97920370eac673", null ],
-        [ "TRANSFER_OFFSET_OBSERVE_TIME", "Camera_8cpp.html#ac248d5d3941892924ca670ecfdfe26a5", null ]
+        [ "compute_Htp", "k1__model_8hpp.html#ae9385f3c53db259a836e55eb349fa756", null ],
+        [ "fft", "fft_8cpp.html#a56fe2c1f2f0e4ba264bcf556b399d9e2", null ],
+        [ "ros_encoding_to_fourcc", "NUSimCamera_8cpp.html#a55029826798f93ee72ea4dfc772b8e23", null ],
+        [ "MAX_IMAGE_BYTES", "NUSimCamera_8cpp.html#a16794ec7ae15ba877658117edc7e4c8d", null ]
       ] ],
       [ "localisation", null, [
         [ "MeasurementType", null, [
@@ -306,161 +234,6 @@ var namespaces_dup =
             [ "Compressor", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor" ],
             [ "Factory", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory" ]
           ] ],
-          [ "vaapi", null, [
-            [ "cl", null, [
-              [ "opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t" ],
-              [ "opencl_wrapper", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper" ],
-              [ "command_queue", "wrapper_8hpp.html#a7cc6f82eab4d36490c4bdfcef69abcde", null ],
-              [ "context", "wrapper_8hpp.html#abb9d61c848a29e64198b781b0192d7b1", null ],
-              [ "event", "wrapper_8hpp.html#a4dbf160a06d4cf91df267cacbf317500", null ],
-              [ "kernel", "wrapper_8hpp.html#a862b5d9d1bdba45d952186b5e6ef8e46", null ],
-              [ "mem", "wrapper_8hpp.html#aaa85a824c50807d9057b828de18b4f6f", null ],
-              [ "program", "wrapper_8hpp.html#ab963f169c64e422505cd72878ccacd4f", null ],
-              [ "opencl_error_code", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9e", [
-                [ "SUCCESS", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead0749aaba8b833466dfcbb0428e4f89c", null ],
-                [ "DEVICE_NOT_FOUND", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eab75d8a2c3c647346973220ce1237fe18", null ],
-                [ "DEVICE_NOT_AVAILABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaf4724a191551c1036f76fdb39f4af9ee", null ],
-                [ "COMPILER_NOT_AVAILABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea0e505adf566fc26197f5e39aa1e7ddd8", null ],
-                [ "MEM_OBJECT_ALLOCATION_FAILURE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea29fe175fb7860bde7ae6ec3add13d87e", null ],
-                [ "OUT_OF_RESOURCES", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea99815af430adc0a31881951dfe7ecdcf", null ],
-                [ "OUT_OF_HOST_MEMORY", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac536d1fb0edde61bccd53cab09d5deb2", null ],
-                [ "PROFILING_INFO_NOT_AVAILABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea48a2e0014fe70344953c26877d956d7a", null ],
-                [ "MEM_COPY_OVERLAP", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea951eb2bd2bc2b6b27ef808beb85bbb2f", null ],
-                [ "IMAGE_FORMAT_MISMATCH", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea198d80ccd57ee9d7becfc55d858f3a42", null ],
-                [ "IMAGE_FORMAT_NOT_SUPPORTED", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea056b6ec79924efdf6ad872ccb90650db", null ],
-                [ "BUILD_PROGRAM_FAILURE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea01fe3e557f587a15332501b52cd35ef3", null ],
-                [ "MAP_FAILURE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabf6aa1e7e70a98990e84b6ec12115c15", null ],
-                [ "MISALIGNED_SUB_BUFFER_OFFSET", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaecb1e715d940a5a4ace98c5d81e1f201", null ],
-                [ "EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead4ff77c82bc35064f04056c3eddec83b", null ],
-                [ "COMPILE_PROGRAM_FAILURE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea43e3391b3b56bcfa516664589ac81dbc", null ],
-                [ "LINKER_NOT_AVAILABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea75550bcab6aea5e09835dbbc3bfc3fe1", null ],
-                [ "LINK_PROGRAM_FAILURE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead762cda705f19a36fb2e0f42e6b0a966", null ],
-                [ "DEVICE_PARTITION_FAILED", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea5e46fb4e6ebf48a13b2e3f39d182dc0b", null ],
-                [ "KERNEL_ARG_INFO_NOT_AVAILABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea15f4d482ea57fa64228457b5bed86472", null ],
-                [ "INVALID_VALUE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead8f24f388e990b9ccf8905b7993b99ae", null ],
-                [ "INVALID_DEVICE_TYPE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac9c2f7c1558d5a31a19ba2458aa61bd1", null ],
-                [ "INVALID_PLATFORM", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea1cf8b122493c903ffb30abc5abff1c40", null ],
-                [ "INVALID_DEVICE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea148e069c03dea724f9401060aee30ca3", null ],
-                [ "INVALID_CONTEXT", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eae42f3f80cfccd06c789af461816c902a", null ],
-                [ "INVALID_QUEUE_PROPERTIES", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabc01f96512167a7069c257557eeca9f0", null ],
-                [ "INVALID_COMMAND_QUEUE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea5054c6532d610c79e6bbc612badb3f9e", null ],
-                [ "INVALID_HOST_PTR", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eacb3db8889b12b977faaae95bd71a6a76", null ],
-                [ "INVALID_MEM_OBJECT", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eafb9cdcbf54b74da47c8eab195ede93a2", null ],
-                [ "INVALID_IMAGE_FORMAT_DESCRIPTOR", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea6b0ccaca7bfa7951b76b97fbc77935f3", null ],
-                [ "INVALID_IMAGE_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea76b0d23e07898b79116d4e0cfeaea871", null ],
-                [ "INVALID_SAMPLER", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eafcbd52600a208760a180c3bd86211617", null ],
-                [ "INVALID_BINARY", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea0b010d84b45dcb367a81c7c029d3f5bb", null ],
-                [ "INVALID_BUILD_OPTIONS", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead534d07f81409b52aa8c88331d62ed8a", null ],
-                [ "INVALID_PROGRAM", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea74ef508c0ae769b250a291c958aafe4b", null ],
-                [ "INVALID_PROGRAM_EXECUTABLE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea49f28ee31d7ed87a90c88cea4d62bae6", null ],
-                [ "INVALID_KERNEL_NAME", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa77d671b4a13a27b9e79c5a99c19a513", null ],
-                [ "INVALID_KERNEL_DEFINITION", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa54fc66909d01803e1ed39f3689aa7da", null ],
-                [ "INVALID_KERNEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea1141f3b4e0dc723031c0cf8a3eb90359", null ],
-                [ "INVALID_ARG_INDEX", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea7f2c3ad3c86f9557ede3f8647d6bf143", null ],
-                [ "INVALID_ARG_VALUE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea1d43dae94b4f3828df91f5663672f54a", null ],
-                [ "INVALID_ARG_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabaf8efdf2c51511a057826a834276c96", null ],
-                [ "INVALID_KERNEL_ARGS", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea272448d9b2d97789770c9581439e9018", null ],
-                [ "INVALID_WORK_DIMENSION", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaa10427b75509aa6dafdd67e6b69240e5", null ],
-                [ "INVALID_WORK_GROUP_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea59b3b9d46572b1445f05b7f3ca1fab4e", null ],
-                [ "INVALID_WORK_ITEM_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eae20a90824334dcd2ee33ff515b5cce64", null ],
-                [ "INVALID_GLOBAL_OFFSET", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea29915cc524d446bb0e55ed0d0dad8b65", null ],
-                [ "INVALID_EVENT_WAIT_LIST", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea8ec480313335ed1cc238909a5c46f4e3", null ],
-                [ "INVALID_EVENT", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac79a53612e60468871f9432691620caf", null ],
-                [ "INVALID_OPERATION", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eade918d7abaea4c856c3c64720f3cbb7c", null ],
-                [ "INVALID_GL_OBJECT", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea508bf25f21e9d3566803a59d7f075f97", null ],
-                [ "INVALID_BUFFER_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea7098218d4f8427ece1f1f6746ea18341", null ],
-                [ "INVALID_MIP_LEVEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea287449c4ab25f80c37b144ba224c12e1", null ],
-                [ "INVALID_GLOBAL_WORK_SIZE", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea0dcedd91f47ab8ee1c14345124f55b8d", null ],
-                [ "INVALID_PROPERTY", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eae495af356a6a8807b18ccab127285042", null ],
-                [ "INVALID_IMAGE_DESCRIPTOR", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ead620c5d52281c02a609ae523a3860895", null ],
-                [ "INVALID_COMPILER_OPTIONS", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea1326f8b11e0b872a1fee88854460e9f5", null ],
-                [ "INVALID_LINKER_OPTIONS", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea771e1bdfe1ff8b047d8fc1eb705b80d8", null ],
-                [ "INVALID_DEVICE_PARTITION_COUNT", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea38357866c70c47a06b367baa765fda92", null ],
-                [ "INVALID_VA_API_MEDIA_ADAPTER_INTEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eaf012ba1a536a1722eb5726c6308b0847", null ],
-                [ "INVALID_VA_API_MEDIA_SURFACE_INTEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eac82ec29b727444c92731adaf724ed6fc", null ],
-                [ "VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eadfbde527f4e77a18778f9af4523cd436", null ],
-                [ "VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea08e4474b08f2868b0d044133abb96960", null ],
-                [ "UNKNOWN", "opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea696b031073e74bf2cb98e5ef201d4aa3", null ]
-              ] ],
-              [ "make_error_condition", "opencl__error__category_8cpp.html#a9534d7027b2548c84ae872164fc5d6a7", null ],
-              [ "make_mosaic_kernel", "make__mosaic__kernel_8cpp.html#a26f92677ffad3678f721c664123c410d", null ],
-              [ "mosaic_to_surface", "mosaic__to__surface_8cpp.html#ac75c38e0cbce65db0bfdc44f173a186e", null ],
-              [ "opencl_context_for_display", "opencl__context__for__display_8cpp.html#a910ae5f5473dcb1c5b8b223430425799", null ],
-              [ "opencl_error_category", "opencl__error__category_8cpp.html#ad016e94aa1971c854d2a8a15d07a8fb5", null ]
-            ] ],
-            [ "operation", null, [
-              [ "markers", null, [
-                [ "AppData", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData" ],
-                [ "DHT", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1DHT.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1DHT" ],
-                [ "DQT", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1DQT.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1DQT" ],
-                [ "SOF0_Colour", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour" ],
-                [ "SOF0_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome" ],
-                [ "SOI", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI" ],
-                [ "SOS_Colour", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour" ],
-                [ "SOS_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome" ],
-                [ "__attribute__", "jpeg__header_8cpp.html#ae9e11a86bb80238187d9c7dbd5eab91d", null ]
-              ] ],
-              [ "create_surface", "create__surface_8cpp.html#a00feee931436ee31114ee37a251899f0", null ],
-              [ "emplace_bytes", "jpeg__header_8cpp.html#a9322a2b0379d88a649d39d63bfac2315", null ],
-              [ "huffman_table", "huffman__table_8cpp.html#abafa3480b14b3d6de416c6169ab79d01", null ],
-              [ "image_to_buffer", "upload__to__surface_8cpp.html#a371eabefaeff09ad00e1cf7aa1ace5e4", null ],
-              [ "jpeg_header", "jpeg__header_8cpp.html#ace1d451768102c107a89b4d3ef59ec05", null ],
-              [ "picture_parameter", "picture__parameter_8cpp.html#afc2700d2eec8e70ce738fdb76d6cf6bf", null ],
-              [ "quantization_matrix", "quantization__matrix_8cpp.html#aaa85ed4fef1efdc929e3ddde853719e0", null ],
-              [ "slice_parameter", "slice__parameter_8cpp.html#a13548fcaa95135e5f5e7d3d720cc6c19", null ],
-              [ "unpack_copy", "upload__to__surface_8cpp.html#aaec5d97faeaf58ba4ce02ab50421281f", null ],
-              [ "upload_to_surface", "upload__to__surface_8cpp.html#a9f3fcd2a44bd53887df91c7ddc4ceba9", null ],
-              [ "va_fourcc_from_format", "create__surface_8cpp.html#ad8d5ddd4fdd881d5322b255e73049a9f", null ],
-              [ "va_render_target_type_from_format", "create__surface_8cpp.html#a9b2faccc541dfefc11b2fd91627e4fb1", null ],
-              [ "jpeg_chroma_quant", "jpeg__constants_8hpp.html#aa9b4b3f9bd09f712a2eec10ce6dc314a", null ],
-              [ "jpeg_hufftable_chroma_ac", "jpeg__constants_8hpp.html#a353f18baf8f2d5ea640664b2ba6777ab", null ],
-              [ "jpeg_hufftable_chroma_dc", "jpeg__constants_8hpp.html#a69e9150e29bfc6e0acdfb260c63d89b5", null ],
-              [ "jpeg_hufftable_luma_ac", "jpeg__constants_8hpp.html#a4cb99ace7bd755ffbd669eef8abe0d88", null ],
-              [ "jpeg_hufftable_luma_dc", "jpeg__constants_8hpp.html#ae201815ff4e089afba04c43816233900", null ],
-              [ "jpeg_luma_quant", "jpeg__constants_8hpp.html#af80f72f764336a03eaf4612eb16338fe", null ],
-              [ "jpeg_zigzag", "jpeg__constants_8hpp.html#a87fa99a49ede22903771cd30f885141e", null ]
-            ] ],
-            [ "CompressionContext", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext" ],
-            [ "Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor" ],
-            [ "Factory", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory" ],
-            [ "vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t" ],
-            [ "vaapi_error_code", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeb", [
-              [ "SUCCESS", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebad0749aaba8b833466dfcbb0428e4f89c", null ],
-              [ "OPERATION_FAILED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8f8d49d3d0842358e0fe8f43601d8537", null ],
-              [ "ALLOCATION_FAILED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebadcda066639ec16527e09a645c4db4bce", null ],
-              [ "INVALID_DISPLAY", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebaa4c4e9b1e76dcfa91f5331fedbbcbe05", null ],
-              [ "INVALID_CONFIG", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba2188ade13df339354cd8c383dda3f8bb", null ],
-              [ "INVALID_CONTEXT", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebae42f3f80cfccd06c789af461816c902a", null ],
-              [ "INVALID_SURFACE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8daf504f26451420b7aac3cb87b06652", null ],
-              [ "INVALID_BUFFER", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba54aa17e7e049522544708f5721f42397", null ],
-              [ "INVALID_IMAGE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba2d0123834a4c1d1a6b499a140821e7ea", null ],
-              [ "INVALID_SUBPICTURE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebaeec6a626d6ea1eff8e3364d8c02322c1", null ],
-              [ "ATTR_NOT_SUPPORTED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba3827d56be9a43232a06d66735390f662", null ],
-              [ "MAX_NUM_EXCEEDED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebac545cd384142eefba2919f7003d7b7c0", null ],
-              [ "UNSUPPORTED_PROFILE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba707ca6cc10b67e02d113a0653b051900", null ],
-              [ "UNSUPPORTED_ENTRYPOINT", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebac15ac225045ba4ece01d9cce1af42ba3", null ],
-              [ "UNSUPPORTED_RT_FORMAT", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba703171bd0f3a9c3a5ca09fe350514991", null ],
-              [ "UNSUPPORTED_BUFFERTYPE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebad7f6837beb8fe65d5af24c60b954425b", null ],
-              [ "SURFACE_BUSY", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba182c9889256c37fc47b5a1baf3eef5f2", null ],
-              [ "FLAG_NOT_SUPPORTED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba6731a66e6d987a6700bf8937b4685390", null ],
-              [ "INVALID_PARAMETER", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebafeb1a30cb74c35aaf4ea067736109e30", null ],
-              [ "RESOLUTION_NOT_SUPPORTED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba787e7b7efa7f385b717a6a53a0a5c409", null ],
-              [ "UNIMPLEMENTED", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebaaa528108d473f663f8947b4d16e7c13c", null ],
-              [ "SURFACE_IN_DISPLAYING", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebad9eaa70db913341d05e4ac74a22c9ef1", null ],
-              [ "INVALID_IMAGE_FORMAT", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebaead0fa5e5c1ac748a3ccfb970d58f817", null ],
-              [ "DECODING_ERROR", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebad6e0eddd38b32360943b23e38b239b0e", null ],
-              [ "ENCODING_ERROR", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba143316308927631a545acc6e16b4c4c2", null ],
-              [ "INVALID_VALUE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebad8f24f388e990b9ccf8905b7993b99ae", null ],
-              [ "UNSUPPORTED_FILTER", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeebace503aa76b204e462dcf8e795371b020", null ],
-              [ "INVALID_FILTER_CHAIN", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba001c48e86694acc1a3b5143fd0c54f68", null ],
-              [ "HW_BUSY", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba3a94c497f4d9aa94d65e12e4f8262e6d", null ],
-              [ "UNSUPPORTED_MEMORY_TYPE", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8eca9cea5610e4a4cb96ae6677b8f3a6", null ],
-              [ "NOT_ENOUGH_BUFFER", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba99e1e29f22ce0ae9736d69cc616133fc", null ],
-              [ "UNKNOWN", "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba696b031073e74bf2cb98e5ef201d4aa3", null ]
-            ] ],
-            [ "make_error_condition", "vaapi__error__category_8hpp.html#ad00cf5da14a210d65b2b75e9528e38ac", null ],
-            [ "vaapi_error_category", "vaapi__error__category_8hpp.html#ae2a0616759cfb0f23b67545832bf9533", null ]
-          ] ],
           [ "Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", "classmodule_1_1output_1_1compressor_1_1Compressor" ],
           [ "CompressorFactory", "classmodule_1_1output_1_1compressor_1_1CompressorFactory.html", "classmodule_1_1output_1_1compressor_1_1CompressorFactory" ]
         ] ],
@@ -473,92 +246,27 @@ var namespaces_dup =
         [ "compressed_fourcc", "ImageCompressor_8cpp.html#afa7b1154bdb52d97496fec4212007474", null ]
       ] ],
       [ "planning", null, [
-        [ "FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", "classmodule_1_1planning_1_1FallingRelaxPlanner" ],
+        [ "walk_path", null, [
+          [ "WalkToParams", "structmodule_1_1planning_1_1walk__path_1_1WalkToParams.html", "structmodule_1_1planning_1_1walk__path_1_1WalkToParams" ],
+          [ "WalkToResult", "structmodule_1_1planning_1_1walk__path_1_1WalkToResult.html", "structmodule_1_1planning_1_1walk__path_1_1WalkToResult" ],
+          [ "apply_dead_zone", "walk__path__control_8hpp.html#a110f1382e04503c5e18a613635384231", null ],
+          [ "constrain_velocity", "walk__path__control_8hpp.html#a626f94ef1c9d744259660face831d01b", null ],
+          [ "lerp", "walk__path__control_8hpp.html#af25750c86c705a3989ce4c989966ffb6", null ],
+          [ "lerp_angle", "walk__path__control_8hpp.html#a724faac54ef116e5cf49d645b98518a0", null ],
+          [ "prog", "walk__path__control_8hpp.html#a665b6ba72b1c938d30d57cb0ac54c786", null ],
+          [ "walk_to_velocity", "walk__path__control_8hpp.html#ac7bbbf1becfd8b0558bd201a8f398f49", null ]
+        ] ],
         [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ],
         [ "PlanKick", "classmodule_1_1planning_1_1PlanKick.html", "classmodule_1_1planning_1_1PlanKick" ],
         [ "PlanLook", "classmodule_1_1planning_1_1PlanLook.html", "classmodule_1_1planning_1_1PlanLook" ],
         [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ]
       ] ],
       [ "platform", null, [
-        [ "NUSense", null, [
-          [ "EmitReflector", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector" ],
-          [ "EmitReflector< void >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4" ],
-          [ "HardwareIO", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO" ],
-          [ "NUgus", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html", "classmodule_1_1platform_1_1NUSense_1_1NUgus" ],
-          [ "NUSenseFrame", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame" ],
-          [ "NUSenseParser", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser" ],
-          [ "read_le_32", "NUSenseParser_8cpp.html#a06d9c47dc10ee3032b15a114a1bc69bc", null ],
-          [ "read_le_64", "NUSenseParser_8cpp.html#af4a89575be25fcd332dec4146ebf1e5f", null ]
-        ] ],
-        [ "OpenCR", null, [
-          [ "convert", null, [
-            [ "acc", "Convert_8cpp.html#af1f2486f3da6dd44e291db3e305b8d49", null ],
-            [ "acc", "Convert_8cpp.html#a9aacef8de84208ee24b641cbdc74b8fd", null ],
-            [ "current", "Convert_8cpp.html#a84708b45bbfccb2e865fee093cc85eb9", null ],
-            [ "current", "Convert_8cpp.html#a8b36ea35d38b70cb77fc415587febd12", null ],
-            [ "d_gain", "Convert_8cpp.html#ad339f686f999c1f5f9ce5b0d2701ec53", null ],
-            [ "d_gain", "Convert_8cpp.html#a059350cf9bbf73ee78f375e5f5bb88a0", null ],
-            [ "ff_gain", "Convert_8cpp.html#a4bda00f24f37354215fd5b8e478850b2", null ],
-            [ "ff_gain", "Convert_8cpp.html#a2c9362fa08bfb9eb100f3b8727385870", null ],
-            [ "gyro", "Convert_8cpp.html#a71fcae94012cd821b7a19fdd97e96e51", null ],
-            [ "gyro", "Convert_8cpp.html#a3e755bd4e1b1752c4ff3acfdd83092b1", null ],
-            [ "i_gain", "Convert_8cpp.html#a6a1cff31fbe9da7dafd52549ca49c94d", null ],
-            [ "i_gain", "Convert_8cpp.html#a776367b1bf01c5bc3fdf79aa9974cd6a", null ],
-            [ "p_gain", "Convert_8cpp.html#a987bf2406856cff58710fb0484af2152", null ],
-            [ "p_gain", "Convert_8cpp.html#ad64e075a2d608b04877d3876c9d3f653", null ],
-            [ "position", "Convert_8cpp.html#a331b52b30254067c1c84ca82e749ec91", null ],
-            [ "position", "Convert_8cpp.html#a0fd7f0f4d115e94e2745564e448a8d30", null ],
-            [ "profile_velocity", "Convert_8cpp.html#a2c259c120f23fcedb4fe385ba98c4370", null ],
-            [ "PWM", "Convert_8cpp.html#a0df1198182ac8a145b01ffc6137ef38f", null ],
-            [ "temperature", "Convert_8cpp.html#a07395c0ca1da53593af92347d292c1d3", null ],
-            [ "temperature", "Convert_8cpp.html#a928f5adad1d849326afe9047e2d5d9d6", null ],
-            [ "velocity", "Convert_8cpp.html#a1f675769f291641a705a3cfa492989dd", null ],
-            [ "velocity", "Convert_8cpp.html#a4f6ed000aeda09aaee11f6d01b83d564", null ],
-            [ "voltage", "Convert_8cpp.html#a0e7a9ea085a0ae649665ea5b036a4f34", null ],
-            [ "voltage", "Convert_8cpp.html#a74ca9dd073087942e2c2b417587dd6ed", null ],
-            [ "voltage", "Convert_8cpp.html#ad77bbb436b1925610a42cd3406c66f0b", null ]
-          ] ],
-          [ "DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", null ],
-          [ "DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo" ],
-          [ "DynamixelServoReadData", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData" ],
-          [ "DynamixelServoWriteDataPart1", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1" ],
-          [ "DynamixelServoWriteDataPart2", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2" ],
-          [ "FSR", "structmodule_1_1platform_1_1OpenCR_1_1FSR.html", "structmodule_1_1platform_1_1OpenCR_1_1FSR" ],
-          [ "HardwareIO", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO" ],
-          [ "MX106", "structmodule_1_1platform_1_1OpenCR_1_1MX106.html", "structmodule_1_1platform_1_1OpenCR_1_1MX106" ],
-          [ "MX64", "structmodule_1_1platform_1_1OpenCR_1_1MX64.html", "structmodule_1_1platform_1_1OpenCR_1_1MX64" ],
-          [ "NUgus", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html", "classmodule_1_1platform_1_1OpenCR_1_1NUgus" ],
-          [ "OpenCR", "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html", "classmodule_1_1platform_1_1OpenCR_1_1OpenCR" ],
-          [ "OpenCRReadData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData" ],
-          [ "OpenCRWriteData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData" ],
-          [ "XH540_W270", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270" ],
-          [ "AddressBook", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736", [
-            [ "SERVO_READ_ADDRESS", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4f1c21646db56041cb549e99046ccb9a", null ],
-            [ "SERVO_READ", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4d98c649812ed9956885d4f3223177ec", null ],
-            [ "SERVO_WRITE_ADDRESS_1", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736ac4e206acd0a6024e5223e23e53e11685", null ],
-            [ "SERVO_WRITE_ADDRESS_2", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a71768c08b572e094af54591f2d6075d5", null ],
-            [ "SERVO_WRITE_1", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a8ec06c78b19a71ce2cfc9f9d86defd6a", null ],
-            [ "SERVO_WRITE_2", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736aee68ae72012d61ff2a16d17b7397e88f", null ],
-            [ "FSR_READ", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a1f83a18570b8b74293b9970d2dbed954", null ]
-          ] ],
-          [ "Phases", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5d", [
-            [ "IDLE", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da75815bad26a6db6f30b95e1fe252fe35", null ],
-            [ "HEADER_SYNC", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5dae7f66be9ec3ebd3c838cee9554ad037e", null ],
-            [ "PREAMBLE", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da029bcf6a5b5cb28d33634f4e4549f215", null ],
-            [ "DATA", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da442f0b6625bbdda7f8ec5ce2fd27126e", null ],
-            [ "FINISH", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5daf0f15806f9693e6917234c4bdef14780", null ],
-            [ "TIMEOUT", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da567bb7d42622ad0d2d636aea2b8152db", null ]
-          ] ],
-          [ "__attribute__", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#ae7c66eb22e53a1985a8f1c0980ee41ce", null ],
-          [ "__attribute__", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#af1e3b905f110d64f603a22e62320282f", null ]
-        ] ],
-        [ "HardwareSimulator", "classmodule_1_1platform_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1HardwareSimulator" ],
-        [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ],
-        [ "centered_noise", "HardwareSimulator_8cpp.html#a2a90ad87152ba961b598132ed6dcf323", null ],
-        [ "create_sensor_time_steps", "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4", null ],
-        [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ],
-        [ "id_to_joint_name", "Webots_8cpp.html#a490d8e2eafeea870cb0d5fcbd180b0fb", null ],
-        [ "sensor_name_to_id", "Webots_8cpp.html#a0c7cfa92ede99edac377afc0de7e5c68", null ]
+        [ "Booster", null, [
+          [ "EnterPrep", "structmodule_1_1platform_1_1Booster_1_1EnterPrep.html", null ],
+          [ "HardwareIO", "classmodule_1_1platform_1_1Booster_1_1HardwareIO.html", "classmodule_1_1platform_1_1Booster_1_1HardwareIO" ],
+          [ "fill_servo", "HardwareIO_8cpp.html#a9b757c69db714680cbafac993c0fa5a7", null ]
+        ] ]
       ] ],
       [ "purpose", null, [
         [ "Attack", "classmodule_1_1purpose_1_1Attack.html", "classmodule_1_1purpose_1_1Attack" ],
@@ -568,28 +276,20 @@ var namespaces_dup =
         [ "FieldPlayer", "classmodule_1_1purpose_1_1FieldPlayer.html", "classmodule_1_1purpose_1_1FieldPlayer" ],
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
-        [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
-        [ "PenaltyShootout", "classmodule_1_1purpose_1_1PenaltyShootout.html", "classmodule_1_1purpose_1_1PenaltyShootout" ],
-        [ "Play", "structmodule_1_1purpose_1_1Play.html", null ],
-        [ "PS3Walk", "classmodule_1_1purpose_1_1PS3Walk.html", "classmodule_1_1purpose_1_1PS3Walk" ],
         [ "ReadyAttack", "classmodule_1_1purpose_1_1ReadyAttack.html", "classmodule_1_1purpose_1_1ReadyAttack" ],
-        [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
-        [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
-        [ "StartPenalty", "structmodule_1_1purpose_1_1StartPenalty.html", null ],
         [ "StartSoccer", "structmodule_1_1purpose_1_1StartSoccer.html", null ],
         [ "StartTester", "structmodule_1_1purpose_1_1StartTester.html", null ],
         [ "Support", "classmodule_1_1purpose_1_1Support.html", "classmodule_1_1purpose_1_1Support" ],
+        [ "TeamBehaviourTester", "classmodule_1_1purpose_1_1TeamBehaviourTester.html", "classmodule_1_1purpose_1_1TeamBehaviourTester" ],
         [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ],
         [ "AttackMsg", "Attack_8cpp.html#afc3f8ac01cb31889ffac1d49431a319d", null ],
         [ "DefendMsg", "Defend_8cpp.html#a3737df6866c94c24252fb8b3d4402c8f", null ],
         [ "FieldPlayerMsg", "FieldPlayer_8cpp.html#a211bea12b54a10d2aa549d137f24d783", null ],
         [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
-        [ "LimbID", "ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "FieldPlayer_8cpp.html#ae0412f9163805a4502651d331d8c43ce", null ],
         [ "ReadyAttackTask", "ReadyAttack_8cpp.html#a8c7ae1cfbd84b1e03ab40fa4f3c86d4c", null ],
-        [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "SupportMsg", "Support_8cpp.html#ae74c7b77dd20c445cf5c3e01d36e54c7", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
         [ "LogColours", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
@@ -602,52 +302,35 @@ var namespaces_dup =
         ] ]
       ] ],
       [ "skill", null, [
-        [ "Animator", "classmodule_1_1skill_1_1Animator.html", "classmodule_1_1skill_1_1Animator" ],
-        [ "CurrentWalkTask", "structmodule_1_1skill_1_1CurrentWalkTask.html", null ],
-        [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
-        [ "IKKick", "classmodule_1_1skill_1_1IKKick.html", "classmodule_1_1skill_1_1IKKick" ],
-        [ "KickBalancer", "classmodule_1_1skill_1_1KickBalancer.html", "classmodule_1_1skill_1_1KickBalancer" ],
-        [ "Kicker", "classmodule_1_1skill_1_1Kicker.html", "classmodule_1_1skill_1_1Kicker" ],
         [ "KickWalk", "classmodule_1_1skill_1_1KickWalk.html", "classmodule_1_1skill_1_1KickWalk" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
-        [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
-        [ "SixDOFFootController", "classmodule_1_1skill_1_1SixDOFFootController.html", "classmodule_1_1skill_1_1SixDOFFootController" ],
-        [ "SixDOFFrame", "classmodule_1_1skill_1_1SixDOFFrame.html", "classmodule_1_1skill_1_1SixDOFFrame" ],
-        [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
+        [ "SimK1GetUp", "classmodule_1_1skill_1_1SimK1GetUp.html", "classmodule_1_1skill_1_1SimK1GetUp" ],
+        [ "SimK1Kick", "classmodule_1_1skill_1_1SimK1Kick.html", "classmodule_1_1skill_1_1SimK1Kick" ],
+        [ "SimK1Walk", "classmodule_1_1skill_1_1SimK1Walk.html", "classmodule_1_1skill_1_1SimK1Walk" ],
+        [ "VisualKick", "classmodule_1_1skill_1_1VisualKick.html", "classmodule_1_1skill_1_1VisualKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ],
-        [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
-        [ "FrameID", "IKKick_8cpp.html#acd73c12a8ca34742c8d746f1be769bbb", null ],
-        [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
-        [ "LimbID", "IKKick_8cpp.html#a305fa4d07c67fb64eb585549d41a240a", null ],
+        [ "GetUpTask", "GetUp_8cpp.html#ad5f57b12fcb297a8c4e9223641b104f6", null ],
+        [ "KickTask", "SimK1Kick_8cpp.html#ace9179209dbc5a018a689c170f2e7a08", null ],
+        [ "KickVer", "VisualKick_8cpp.html#a08666573ea578037ce283dc0ec2aacc1", null ],
+        [ "LocalisationBall", "SimK1Kick_8cpp.html#a4f61d61e60f6b1a822f9672d015546e1", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ],
         [ "SayTask", "Say_8cpp.html#a52cce32b085db46104fee4406a26e9ac", null ],
-        [ "ServoID", "IKKick_8cpp.html#a247a3e44a191995ffbdd04cfd2538f08", null ],
-        [ "WalkState", "Walk_8cpp.html#afebde5e5778924a828c4aa8da384d27d", null ],
-        [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ],
-        [ "MotionStage", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8", [
-          [ "READY", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8ae1e93a358007501ba2e1c2d03fa1d488", null ],
-          [ "RUNNING", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8a106ced5325e746ee63d26368b7e5ffde", null ],
-          [ "STOPPING", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8a8802aa8def92b5af65fe221af9107a69", null ],
-          [ "FINISHED", "IKKickControllers_8hpp.html#a8a0b664a4f9e29315defb9a2d3e142f8aa9a161fb6bcb743944967bf4d5885ace", null ]
-        ] ]
+        [ "VisualKickMsg", "VisualKick_8cpp.html#a278f4989a4c91b9a4ca4f39e15ba15ce", null ],
+        [ "WalkTask", "SimK1Walk_8cpp.html#ac88a083538bb3a0de107f217ee6ef417", null ]
       ] ],
       [ "strategy", null, [
-        [ "DiveToBall", "classmodule_1_1strategy_1_1DiveToBall.html", "classmodule_1_1strategy_1_1DiveToBall" ],
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
-        [ "StartSafely", "classmodule_1_1strategy_1_1StartSafely.html", "classmodule_1_1strategy_1_1StartSafely" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
         [ "WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", "classmodule_1_1strategy_1_1WalkToFieldPosition" ],
-        [ "DiveToBallTask", "DiveToBall_8cpp.html#a13d9363b2f126b9b014996b9c6938906", null ],
         [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ],
         [ "FieldDescription", "WalkToBall_8cpp.html#a90a5a47fca75d83de632f1e24543dbc4", null ],
         [ "StandStillTask", "StandStill_8cpp.html#a34f0cf0c4ada0c7e001c5f278b773f79", null ],
-        [ "StartSafelyTask", "StartSafely_8cpp.html#ada395fc35f6d7855041b195b96c40e6c", null ],
         [ "WalkToBallTask", "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b", null ],
         [ "WalkToFieldPositionTask", "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8", null ]
       ] ],
@@ -685,22 +368,6 @@ var namespaces_dup =
           [ "formatted_time", "DataLogging_8cpp.html#a31101356c34dad13c8d4985675f0dcb9", null ],
           [ "read_packet", "read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e", null ]
         ] ],
-        [ "optimisation", null, [
-          [ "EvaluatorTask", "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html", "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask" ],
-          [ "MultiPathOptimiser", "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser" ],
-          [ "NSGA2Evaluator", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator" ],
-          [ "NSGA2Optimiser", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser" ],
-          [ "OnboardWalkOptimisation", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation" ],
-          [ "OptimiserTask", "classmodule_1_1support_1_1optimisation_1_1OptimiserTask.html", "classmodule_1_1support_1_1optimisation_1_1OptimiserTask" ],
-          [ "RotationEvaluator", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator" ],
-          [ "RotationOptimiser", "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser" ],
-          [ "StandEvaluator", "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1StandEvaluator" ],
-          [ "StandOptimiser", "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1StandOptimiser" ],
-          [ "StrafeEvaluator", "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator" ],
-          [ "StrafeOptimiser", "classmodule_1_1support_1_1optimisation_1_1StrafeOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1StrafeOptimiser" ],
-          [ "WalkEvaluator", "classmodule_1_1support_1_1optimisation_1_1WalkEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1WalkEvaluator" ],
-          [ "WalkOptimiser", "classmodule_1_1support_1_1optimisation_1_1WalkOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1WalkOptimiser" ]
-        ] ],
         [ "LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", "classmodule_1_1support_1_1LocalisationSimulator" ],
         [ "NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", "classmodule_1_1support_1_1NUsightHarness" ],
         [ "Profiler", "classmodule_1_1support_1_1Profiler.html", "classmodule_1_1support_1_1Profiler" ],
@@ -713,7 +380,6 @@ var namespaces_dup =
         [ "userRequestedShutdown", "SignalCatcher_8cpp.html#a6fb2c65ed6e2ef01c78a40ff06798673", null ]
       ] ],
       [ "tools", null, [
-        [ "ExtrinsicsCalibration", "classmodule_1_1tools_1_1ExtrinsicsCalibration.html", "classmodule_1_1tools_1_1ExtrinsicsCalibration" ],
         [ "LocalisationBenchmark", "classmodule_1_1tools_1_1LocalisationBenchmark.html", "classmodule_1_1tools_1_1LocalisationBenchmark" ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
         [ "OdometryBenchmark", "classmodule_1_1tools_1_1OdometryBenchmark.html", "classmodule_1_1tools_1_1OdometryBenchmark" ],
@@ -726,40 +392,9 @@ var namespaces_dup =
         [ "glyphs", "glyphs_8hpp.html#af3b204f9c4dd1e5c4b36cc57e9bdc13e", null ]
       ] ],
       [ "vision", null, [
-        [ "visualmesh", null, [
-          [ "generate_runner", null, [
-            [ "BuildEngine", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html", null ],
-            [ "BuildEngine<::visualmesh::engine::cpu::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a" ],
-            [ "BuildEngine<::visualmesh::engine::opencl::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf" ],
-            [ "engine", "VisualMeshRunner_8cpp.html#a8439cd14b8801bafeb3165af8d20c5c3", null ],
-            [ "geometry", "VisualMeshRunner_8cpp.html#a7aab69bd8034eb2c0ec9079af53bee61", null ],
-            [ "model", "VisualMeshRunner_8cpp.html#aba896e714c3b008bd15a63c709a60a7a", null ],
-            [ "runner", "VisualMeshRunner_8cpp.html#a10d5fc24186b0b4eeb2752783730eea2", null ]
-          ] ],
-          [ "LoadedModel", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel" ],
-          [ "VisualMeshModelConfig", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig" ],
-          [ "VisualMeshResults", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults" ],
-          [ "VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner" ],
-          [ "activation_function", "load__model_8cpp.html#a49170557c49e873d708c37767d7f1c16", null ],
-          [ "load_model", "load__model_8cpp.html#aa6e66bf87e7962954feeadc5cd23ea8f", null ]
-        ] ],
-        [ "BallDetector", "classmodule_1_1vision_1_1BallDetector.html", "classmodule_1_1vision_1_1BallDetector" ],
-        [ "FieldLineDetector", "classmodule_1_1vision_1_1FieldLineDetector.html", "classmodule_1_1vision_1_1FieldLineDetector" ],
-        [ "GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", "classmodule_1_1vision_1_1GoalDetector" ],
-        [ "GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", "classmodule_1_1vision_1_1GreenHorizonDetector" ],
-        [ "RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", "classmodule_1_1vision_1_1RobotDetector" ],
-        [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ],
         [ "Yolo", "classmodule_1_1vision_1_1Yolo.html", "classmodule_1_1vision_1_1Yolo" ],
         [ "YoloCoco", "classmodule_1_1vision_1_1YoloCoco.html", "classmodule_1_1vision_1_1YoloCoco" ]
       ] ]
-    ] ],
-    [ "nsga2", null, [
-      [ "Individual", "classnsga2_1_1Individual.html", "classnsga2_1_1Individual" ],
-      [ "IndividualConfigurator", "structnsga2_1_1IndividualConfigurator.html", "structnsga2_1_1IndividualConfigurator" ],
-      [ "NSGA2", "classnsga2_1_1NSGA2.html", "classnsga2_1_1NSGA2" ],
-      [ "Population", "classnsga2_1_1Population.html", "classnsga2_1_1Population" ],
-      [ "RandomGenerator", "classnsga2_1_1RandomGenerator.html", "classnsga2_1_1RandomGenerator" ],
-      [ "sort_n", "structnsga2_1_1sort__n.html", "structnsga2_1_1sort__n" ]
     ] ],
     [ "NUClear", null, [
       [ "dsl", null, [
@@ -776,67 +411,15 @@ var namespaces_dup =
         ] ]
       ] ]
     ] ],
-    [ "std", null, [
-      [ "is_error_condition_enum< module::output::compressor::vaapi::cl::opencl_error_code >", "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html", null ],
-      [ "is_error_condition_enum< module::output::compressor::vaapi::vaapi_error_code >", "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html", null ]
-    ] ],
     [ "utility", null, [
-      [ "actuation", null, [
-        [ "kinematics", null, [
-          [ "calculate_head_joints", "InverseKinematics_8hpp.html#ac81c070cbf00280291564afd33a2779d", null ],
-          [ "calculate_leg_joints", "InverseKinematics_8hpp.html#aa27e3b07c1ca35e8f7c3a57d12305689", null ],
-          [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a84e2c61ae7d6b3651408b04e1a1e9e51", null ],
-          [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#acaa0c37a4b94cc4ee1adda38d59a7ef4", null ],
-          [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a7fb2148a3a02cc01cb2e045e5bbd386d", null ],
-          [ "calculateGroundSpace", "ForwardKinematics_8hpp.html#a6f1629195e306fb51055d3f6dfcd3f60", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#acafb13dd600b679a2a8b134382d9e809", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#aeacfb8e0ab7120fe8e077e5fec1defe8", null ],
-          [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#a8f700e315a0133e6e775249064467147", null ],
-          [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#aab331e0e4b1dbea659cc77d4e7e6d4b6", null ],
-          [ "calculatePosition", "ForwardKinematics_8hpp.html#adb9bea25d11c7f7e0eded49ac6cecfdd", null ],
-          [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a68be5789fb33da4e7d44df7f9b79cfb3", null ]
-        ] ],
-        [ "tinyrobotics", null, [
-          [ "configuration_to_servos", "tinyrobotics_8hpp.html#a7cfbd0a3d7019dc4759bbf134b24da2c", null ],
-          [ "forward_kinematics_to_servo_map", "tinyrobotics_8hpp.html#a1c507ba419daed35009b8311425d8d1d", null ],
-          [ "sensors_to_configuration", "tinyrobotics_8hpp.html#a3973886db37538466f4d52cb9b297ccf", null ],
-          [ "servo_exists", "tinyrobotics_8hpp.html#a415e8b6891a975e4f62223526b5ab748", null ],
-          [ "servos_to_configuration", "tinyrobotics_8hpp.html#a2264553f0a06ca8267d8b0f05c9667d3", null ],
-          [ "joint_map", "tinyrobotics_8hpp.html#a34780ac595cbe79a51992652fbebb504", null ],
-          [ "link_map", "tinyrobotics_8hpp.html#a0867a02e8d463829bc789af482c99f74", null ]
-        ] ],
-        [ "ServoMap", "structutility_1_1actuation_1_1ServoMap.html", null ],
-        [ "ServoMap< HeadPitch >", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4" ],
-        [ "ServoMap< HeadYaw >", "structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4" ],
-        [ "ServoMap< LeftAnklePitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4" ],
-        [ "ServoMap< LeftAnkleRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4" ],
-        [ "ServoMap< LeftElbow >", "structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4" ],
-        [ "ServoMap< LeftHipPitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4" ],
-        [ "ServoMap< LeftHipRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4" ],
-        [ "ServoMap< LeftHipYaw >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4" ],
-        [ "ServoMap< LeftKnee >", "structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4" ],
-        [ "ServoMap< LeftShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4" ],
-        [ "ServoMap< LeftShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4" ],
-        [ "ServoMap< RightAnklePitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4" ],
-        [ "ServoMap< RightAnkleRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4" ],
-        [ "ServoMap< RightElbow >", "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4" ],
-        [ "ServoMap< RightHipPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4" ],
-        [ "ServoMap< RightHipRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4" ],
-        [ "ServoMap< RightHipYaw >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4" ],
-        [ "ServoMap< RightKnee >", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4" ],
-        [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
-        [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
-      ] ],
       [ "algorithm", null, [
         [ "determine_assignment", "assignment_8hpp.html#aa9e1a3a19a13a65053a0b9a886227654", null ]
       ] ],
       [ "file", "namespaceutility_1_1file.html", "namespaceutility_1_1file" ],
       [ "input", null, [
-        [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],
         [ "LimbID", "structutility_1_1input_1_1LimbID.html", "structutility_1_1input_1_1LimbID" ],
         [ "ServoID", "structutility_1_1input_1_1ServoID.html", "structutility_1_1input_1_1ServoID" ],
         [ "ServoID", "LimbID_8cpp.html#aa0c047925696e66fd1f5d098c744e133", null ],
-        [ "operator<<", "FrameID_8cpp.html#a417f668cd797bbff60417949f5ffcf7e", null ],
         [ "operator<<", "LimbID_8cpp.html#accc0ac967dfb1eea992099c6d2ada892", null ],
         [ "operator<<", "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62", null ],
         [ "raw_to_mp3", "microphone_8hpp.html#a2cc78612b4b2765bd30f5311904fe534", null ],
@@ -965,10 +548,6 @@ var namespaces_dup =
         [ "roundUp", "comparison_8hpp.html#a75da193963fbe74dc2a6e535d6c04912", null ],
         [ "sgn", "comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d", null ]
       ] ],
-      [ "motion", null, [
-        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
-        [ "LimbID", "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6", null ]
-      ] ],
       [ "nbs", null, [
         [ "Decoder", "classutility_1_1nbs_1_1Decoder.html", "classutility_1_1nbs_1_1Decoder" ],
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
@@ -996,6 +575,9 @@ var namespaces_dup =
           [ "buildGraph", "NUhelpers_8hpp.html#afb4c6084208e40da11c1f15e5c51858d", null ]
         ] ],
         [ "graph", "NUhelpers_8hpp.html#aac2d4f8c0c2aa3defb6820b2bdef61b0", null ]
+      ] ],
+      [ "onnx", null, [
+        [ "ONNXRuntime", "classutility_1_1onnx_1_1ONNXRuntime.html", "classutility_1_1onnx_1_1ONNXRuntime" ]
       ] ],
       [ "openai", null, [
         [ "_detail", null, [
@@ -1032,6 +614,9 @@ var namespaces_dup =
         ] ]
       ] ],
       [ "platform", null, [
+        [ "Booster", null, [
+          [ "ensure_channel_factory", "channel__factory_8hpp.html#a748200de52bd84e42bd74d83be7ad552", null ]
+        ] ],
         [ "get_raw_servo", "RawSensors_8hpp.html#aa4ab65d6601361d1522bca695f9efa68", null ],
         [ "get_raw_servo", "RawSensors_8hpp.html#af5589a17b45a3543f82530a2d2353bcb", null ],
         [ "get_robot_alias", "aliases_8hpp.html#afa95da58cc267df37e0bbf14595efa86", null ],
@@ -1050,13 +635,16 @@ var namespaces_dup =
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", "namespaceutility_1_1skill" ],
       [ "strategy", null, [
+        [ "approach_point_behind_ball", "soccer__strategy_8hpp.html#a5221857e51448c16592b6c2932c55796", null ],
         [ "ball_possession", "soccer__strategy_8hpp.html#a89f10d8908e8a50c7d081a963220e84f", null ],
         [ "closest_to_ball_on_team", "soccer__strategy_8hpp.html#a25e79f96d5e1343e70f14699f7b2385b", null ],
+        [ "fastest_to_ball_on_team", "soccer__strategy_8hpp.html#a010d1014a8dfa3350897d0b4535f53ec", null ],
         [ "furthest_back", "soccer__strategy_8hpp.html#a77769eb4228e67ce08a1b23e96338bae", null ],
         [ "get_closest_bot", "soccer__strategy_8hpp.html#a1dd5cf76429f7fcbd2486709fef4f5f2", null ],
         [ "index_of", "positioning_8hpp.html#a9134cd33af38dc0fee8acf641ae7a52a", null ],
         [ "ready_position", "positioning_8hpp.html#af732bac7d6eec7b68cb796c8519c54a9", null ],
-        [ "remove_robot", "positioning_8hpp.html#a6970097f650f7cf7670118fe2302d86e", null ]
+        [ "remove_robot", "positioning_8hpp.html#a6970097f650f7cf7670118fe2302d86e", null ],
+        [ "time_to_ball", "soccer__strategy_8hpp.html#afccb60fd0ace0b3508dcaf2cbf302800", null ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],
       [ "support", null, [
@@ -1076,12 +664,13 @@ var namespaces_dup =
         [ "get_hostname", "network_8hpp.html#a9747f835b9bf26fa23c46b137bb775da", null ],
         [ "get_ip_address", "network_8hpp.html#a43f2054af7d1e3b4f58f648e888b989f", null ],
         [ "get_ssid", "network_8hpp.html#a9e56d92ed7b66e319a4bfd9fe25416f5", null ],
-        [ "get_wifi_password", "network_8hpp.html#af062baa868838ebb92725074b3ccc00d", null ],
+        [ "get_wifi_password", "network_8hpp.html#acc3696b914429baf58f8ae3ff474727e", null ],
         [ "get_wireless_interface", "network_8hpp.html#aa91897017bac3831b266391039ff9112", null ],
         [ "parse_math_string", "math__string_8hpp.html#aaf19de1dcdb45570182a2ed76db18c87", null ],
         [ "parse_to_double", "math__string_8cpp.html#a1811b8e9d6f01973a61e1198954dc72e", null ],
         [ "resolve_expression", "yaml__expression_8hpp.html#acacd392c1f93317cba47c512ea523d2d", null ],
         [ "resolve_expression", "yaml__expression_8hpp.html#a5c935ac5626ece49990c4a873d6c8570", null ],
+        [ "run_cmd", "run__cmd_8hpp.html#ad4168c6c88e31e9cfd6a3bf58cc492ec", null ],
         [ "si_time", "si__unit_8hpp.html#ab8e765009f64846cc16953ca01587b67", null ],
         [ "si_unit", "si__unit_8hpp.html#a6b9566482ed5592a474e636478704b32", null ],
         [ "CLEAR_LINE", "ProgressBar_8cpp.html#adbc260d701bd08a5e4fe54edb483b54f", null ],
@@ -1107,16 +696,6 @@ var namespaces_dup =
         [ "rectilinear", null, [
           [ "r", "projection_8hpp.html#a7532ed129dbb327fa0cd39eabae7ccb7", null ],
           [ "theta", "projection_8hpp.html#a6778802b91999c3242fa137456726995", null ]
-        ] ],
-        [ "visualmesh", null, [
-          [ "boundary_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637", null ],
-          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a265dd178f856b688c7769575070863db", null ],
-          [ "cluster_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4", null ],
-          [ "find_cluster_angular_radius", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac413caba2ea41afdf0043b974872d48b", null ],
-          [ "find_cluster_central_axis", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ae8d166444539e1fa34d7d1e073dd8685", null ],
-          [ "find_cluster_fill", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aaec13dffeebee3a154185b11fee28de1", null ],
-          [ "get_green_horizon_side_mask", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#abc415fc1e00742aa6c83004fbb10abbe", null ],
-          [ "partition_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959", null ]
         ] ],
         [ "Colour", "structutility_1_1vision_1_1Colour.html", "structutility_1_1vision_1_1Colour" ],
         [ "Mosaic", "classutility_1_1vision_1_1Mosaic.html", "classutility_1_1vision_1_1Mosaic" ],
@@ -1172,6 +751,7 @@ var namespaces_dup =
         [ "inverse_coefficients", "projection_8hpp.html#a23ed0f263dc15e3b9be4328b063f88b4", null ],
         [ "loadImage", "Vision_8hpp.html#ad012cee1af2ebf1a7fdf67e83c0bf31e", null ],
         [ "project", "projection_8hpp.html#a22b611de984047ae8574396e761da7d6", null ],
+        [ "ros_encoding_to_fourcc", "fourcc_8hpp.html#aae4da969a2f07ef8eceb2d369b35f8cc", null ],
         [ "saveImage", "Vision_8cpp.html#a9a0a422467da93cc6b507c9de190dae8", null ],
         [ "undistort", "projection_8hpp.html#ac1d8abb43c6cff23bebb6fe53df0b284", null ],
         [ "unproject", "projection_8hpp.html#a3395668bc08de38add739f8e9482c3ba", null ],

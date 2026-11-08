@@ -2,7 +2,7 @@ var classmodule_1_1input_1_1ImageDecompressor =
 [
     [ "DecompressorContext", "structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext.html", "structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext" ],
     [ "ImageDecompressor", "classmodule_1_1input_1_1ImageDecompressor.html#a58921185ea60e6e2c9faee5dcb626b80", null ],
-    [ "config", "classmodule_1_1input_1_1ImageDecompressor.html#ac283123854239ea4a3101c3f9cd2575d", null ],
+    [ "config", "classmodule_1_1input_1_1ImageDecompressor.html#afc1f6af3111b807eccb6821a82f7e6f1", null ],
     [ "decompressed", "classmodule_1_1input_1_1ImageDecompressor.html#aeb2dfa8557433591eced36aad526ba1d", null ],
     [ "decompressor_mutex", "classmodule_1_1input_1_1ImageDecompressor.html#afbb5f8370772edca197b0816fda56d98", null ],
     [ "decompressors", "classmodule_1_1input_1_1ImageDecompressor.html#a92b0ef0dde83307a7a87badc557b846d", null ],
