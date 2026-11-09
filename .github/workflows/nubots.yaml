@@ -230,4 +230,9 @@ jobs:
         run: ./b yarn
 
       - name: Check formatting
+        if: ${{ github.event_name != 'merge_group' }}
         run: ./b format --check --verbose
+
+      - name: Check formatting in merge queue
+        if: ${{ github.event_name == 'merge_group' }}
+        run: ./b format --check --verbose --skip-license

@@ -48,39 +48,38 @@ repo = pygit2.Repository(b.project_dir)
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
-# TODO: fix this
-# formatters["licence"] = {
-#     "format": [
-#         [
-#             "licenseheaders",
-#             "-t",
-#             os.path.join(b.project_dir, ".licence.tmpl"),
-#             "--years={added}",
-#             "--owner=NUbots",
-#             f"--projname=NUbots",
-#             "--projurl=https://github.com/NUbots/NUbots",
-#             "-f",
-#             "{path}",
-#         ]
-#     ],
-#     "include": [
-#         "*.cpp",
-#         "*.hpp",
-#         "*.h",
-#         "*.c",
-#         "*.py",
-#         "*.sh",
-#         "*.cmake",
-#         "*.proto",
-#         "CMakeLists.txt",
-#         "**/CMakeLists.txt",
-#         "Dockerfile",
-#         "**/Dockerfile",
-#     ],
-#     "exclude": [
-#         "nusight2/src/shared/messages/proto/google/*",
-#     ],
-# }
+formatters["licence"] = {
+    "format": [
+        [
+            "licenseheaders",
+            "-t",
+            os.path.join(b.project_dir, ".licence.tmpl"),
+            "--years={added}",
+            "--owner=NUbots",
+            f"--projname=NUbots",
+            "--projurl=https://github.com/NUbots/NUbots",
+            "-f",
+            "{path}",
+        ]
+    ],
+    "include": [
+        "*.cpp",
+        "*.hpp",
+        "*.h",
+        "*.c",
+        "*.py",
+        "*.sh",
+        "*.cmake",
+        "*.proto",
+        "CMakeLists.txt",
+        "**/CMakeLists.txt",
+        "Dockerfile",
+        "**/Dockerfile",
+    ],
+    "exclude": [
+        "nusight2/src/shared/messages/proto/google/*",
+    ],
+}
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],
@@ -256,6 +255,14 @@ def register(command):
         help="Check that files conform to formatting requirements",
     )
     command.add_argument(
+        "-s",
+        "--skip-license",
+        dest="skip_license",
+        action="store_true",
+        default=False,
+        help="Skip the MIT license formatter (only intended for use with merge queue checks)",
+    )
+    command.add_argument(
         "globs",
         nargs="*",
         help="Globs with which to limit the files to format",
@@ -263,7 +270,7 @@ def register(command):
 
 
 @run_on_docker
-def run(verbose, check, format_all, globs, **kwargs):
+def run(verbose, check, format_all, skip_license, globs, **kwargs):
     # Change into the project directory
     os.chdir(b.project_dir)
 
@@ -290,6 +297,9 @@ def run(verbose, check, format_all, globs, **kwargs):
             return False
 
         files = filter(matches_glob, files)
+
+    if skip_license:
+        formatters.pop("licence")
 
     success = True
     with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
