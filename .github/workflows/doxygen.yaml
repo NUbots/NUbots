@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-22.04' || 'self-hosted' }}
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
