@@ -157,7 +157,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
-      options: --user 0:0
+      options: --user ${{ github.event.pull_request.head.repo.fork && '0:0' || '1000:1000' }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -208,7 +208,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
-      options: --user 0:0
+      options: --user ${{ github.event.pull_request.head.repo.fork && '0:0' || '1000:1000' }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -255,7 +255,7 @@ jobs:
     # Run on the container we just built
     container:
       image: "${{ needs.build_docker.outputs.image }}"
-      options: --user 0:0
+      options: --user ${{ github.event.pull_request.head.repo.fork && '0:0' || '1000:1000' }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
