@@ -33,7 +33,9 @@
 #include "message/planning/KickTo.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/skill/GPT.hpp"
+#include "message/skill/Kick.hpp"
 #include "message/skill/Say.hpp"
+#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/FindBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -52,7 +54,9 @@ namespace module::purpose {
     using message::planning::LookAround;
     using message::skill::GPTAudioRequest;
     using message::skill::GPTChatRequest;
+    using message::skill::Kick;
     using message::skill::Say;
+    using message::strategy::FallRecovery;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
@@ -69,11 +73,13 @@ namespace module::purpose {
             // Use configuration here from file Tester.yaml
             this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
             cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
+            cfg.fall_recovery_priority          = config["tasks"]["fall_recovery_priority"].as<int>();
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
             cfg.walk_to_kick_ball_priority      = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
             cfg.walk_to_field_position_priority = config["tasks"]["walk_to_field_position_priority"].as<int>();
             cfg.kick_to_priority                = config["tasks"]["kick_to_priority"].as<int>();
+            cfg.kick_policy_priority            = config["tasks"]["kick_policy_priority"].as<int>();
             cfg.look_around_priority            = config["tasks"]["look_around_priority"].as<int>();
             cfg.stand_still_priority            = config["tasks"]["stand_still_priority"].as<int>();
             cfg.say_priority                    = config["tasks"]["say_priority"].as<int>();
@@ -98,6 +104,9 @@ namespace module::purpose {
                 if (cfg.find_ball_priority > 0) {
                     emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
                 }
+                if (cfg.fall_recovery_priority > 0) {
+                    emit<Task>(std::make_unique<FallRecovery>(), cfg.fall_recovery_priority);
+                }
                 if (cfg.look_at_ball_priority > 0) {
                     emit<Task>(std::make_unique<LookAtBall>(), cfg.look_at_ball_priority);
                 }
@@ -118,6 +127,11 @@ namespace module::purpose {
                 }
                 if (cfg.kick_to_priority > 0) {
                     emit<Task>(std::make_unique<KickTo>(), cfg.kick_to_priority);
+                }
+                if (cfg.kick_policy_priority > 0) {
+                    // Trigger the ONNX kick policy directly, bypassing PlanKick's
+                    // approach/alignment gate: the policy does its own approach and kick.
+                    emit<Task>(std::make_unique<Kick>(), cfg.kick_policy_priority);
                 }
                 if (cfg.look_around_priority > 0) {
                     emit<Task>(std::make_unique<LookAround>(), cfg.look_around_priority);

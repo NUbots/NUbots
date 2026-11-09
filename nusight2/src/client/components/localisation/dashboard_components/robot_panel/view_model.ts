@@ -63,6 +63,11 @@ export class DashboardRobotPanelViewModel {
   }
 
   @computed
+  get purpose(): string {
+    return this.model.purpose;
+  }
+
+  @computed
   get title(): string {
     return this.model.name;
   }

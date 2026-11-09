@@ -1,8 +1,0 @@
-#IMU drift in rad/s
-imu_drift_rate: 0.0
-
-noise:
-  accelerometer: [0.01, 0.01, 0.01]
-  gyroscope: [0.01, 0.01, 0.01]
-
-body_tilt: 0 #25 * pi / 180 # set this to be the same as the WalkEngine.yaml:stance:bodyTilt TODO: read this from WalkEngine

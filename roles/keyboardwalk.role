@@ -4,33 +4,28 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
-  # Configuration
-  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
-  # Network
+  # Configuration Network
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler
   # Sensors
-  input::SensorFilter
+  input::Sensors
   # Director
   extension::Director
   # Servos
   actuation::Servos
-  actuation::Kinematics
-  actuation::FootController
   # Skills
   skill::Walk
-  skill::KickWalk
   skill::GetUp
   skill::Look
   # Planners
   planning::GetUpPlanner
-  planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
+  output::Overview
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
 )

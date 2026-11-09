@@ -5,7 +5,7 @@
 This module adds a communication schema that conforms to the official
 robocup spec. It allows the robots to use this schema for internal communication.
 
-The Robocup message is created, and emitted to other robots over UDP. All UDP messages are received by every robot in the network.
+The RoboCup message is created, and emitted to other robots over UDP. All UDP messages are received by every robot in the network.
 
 UDP messages that have been emitted by the receiving robot are filtered out.
 

@@ -27,10 +27,6 @@ SOFTWARE.
 cmake_minimum_required(VERSION 3.20)
 project(NUbots)
 
-# Set the compiler version of the project
-set(CMAKE_C_COMPILER "/usr/bin/gcc-13")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-13")
-
 # The GENERATED source file property is now visible in all directories
 cmake_policy(SET CMP0118 NEW)
 
@@ -76,13 +72,13 @@ endif()
 
 # Allow selection of subcontroller for conditional build
 if(NOT SUBCONTROLLER)
-  message(STATUS "Setting subcontroller to 'NUSense' as none was specified.")
+  message(STATUS "Setting subcontroller to 'Booster' as none was specified.")
   set(SUBCONTROLLER
-      NUSense
+      Booster
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
-  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "NUSense" "OpenCR")
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "Booster")
 endif()
 
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
