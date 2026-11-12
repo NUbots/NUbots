@@ -33,7 +33,6 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include "glyphs.hpp"
