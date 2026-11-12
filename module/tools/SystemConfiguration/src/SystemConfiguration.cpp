@@ -361,14 +361,25 @@ namespace module::tools {
                     auto pos = groups.find(group);
                     if (pos == std::string::npos) {
                         log<INFO>(fmt::format("Group {} doesn't exist. Creating it and adding user {}", group, user));
-                        run_cmd(fmt::format("groupadd {}", group).c_str());
-                        run_cmd(fmt::format("useradd -m -G {} {}", group, user).c_str());
+                        if (run_cmd(fmt::format("groupadd {}", group).c_str()) != 0) {
+                            // command run failed!
+                            log<ERROR>("Failed to create group!");
+                        }
+
+                        if (run_cmd(fmt::format("usermod -aG {} {}", group, user).c_str()) != 0) {
+                            // command run failed!
+                            log<ERROR>(fmt::format("Failed to add user {} to {} group", user, group));
+                        }
                     }
                     else {
                         auto eol = groups.find("\n", pos);
                         if (groups.substr(pos, eol - pos).find(user) == std::string::npos) {
                             log<INFO>(fmt::format("Adding user {} to group {}", user, group));
-                            run_cmd(fmt::format("useradd -m -G {} {}", group, user).c_str());
+
+                            if (run_cmd(fmt::format("usermod -aG {} {}", group, user).c_str()) != 0) {
+                                // command run failed!
+                                log<ERROR>(fmt::format("Failed to add user {} to {} group", user, group));
+                            }
                         }
                     }
                 }
