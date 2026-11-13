@@ -16,7 +16,7 @@ Include this module in a role with `actuation::Servos` and emit a `message::skil
 ## Consumes
 
 - `message::skill::Walk` Task with the target velocity
-- `message::platform::RawSensors` for joint feedback, gyro and the IMU attitude
+- `message::input::Sensors` for joint feedback, gyro and the torso attitude (`Htw`)
 - `message::behaviour::state::Stability`, ticks are skipped while FALLEN, when the get-up skill owns the servos
 - `message::booster::BoosterHeadRot` for the head targets (unless `head.policy_controlled`)
 - `message::booster::BoosterModeState` (optional) to request CUSTOM mode until the robot is in it
@@ -30,6 +30,7 @@ Include this module in a role with `actuation::Servos` and emit a `message::skil
 ## Dependencies
 
 - Director
+- `input::Sensors`
 - ONNX Runtime
 
 ## Policy
@@ -53,20 +54,18 @@ The observation normaliser is part of the graph, so the module applies none. Act
 
 ### Observation (75 floats)
 
-One frame, with no history (`history_window: 1`), no gait clock (`gait_clock: false`), and no scaling or clipping.
+One frame, with no history (`history_window: 1`), and no scaling or clipping.
 
 | Offset | Count | Field                               | Notes                                                    |
 | ------ | ----- | ----------------------------------- | -------------------------------------------------------- |
-| 0      | 3     | Angular velocity (gyro), body frame | rad/s, from `RawSensors::gyroscope`                      |
-| 3      | 3     | Projected gravity, body frame       | world `(0, 0, -1)` rotated by the firmware attitude      |
+| 0      | 3     | Angular velocity (gyro), body frame | rad/s, from `Sensors::gyroscope`                         |
+| 3      | 3     | Projected gravity, body frame       | world `(0, 0, -1)` rotated by `Sensors::Htw`             |
 | 6      | 22    | `q - default_pose`                  | rad                                                      |
 | 28     | 22    | `dq`                                | rad/s                                                    |
 | 50     | 22    | Last action                         | raw network output, before scaling and joint-range clamp |
 | 72     | 3     | Command `[vx, vy, wz]`              | m/s, m/s, rad/s                                          |
 
-With `history_window` above 1 the input is that many frames, oldest first. With `gait_clock` set, each frame ends
-with `[sin, cos]` of a clock of period `gait_period`, which is `(0, 0)` while the command is at or below
-`command_threshold`.
+With `history_window` above 1 the input is that many frames, oldest first.
 
 ### Joint order
 
@@ -114,7 +113,7 @@ Commands are not clipped.
 
 ## Changing the policy
 
-A checkpoint with a different contract needs `history_window`, `gait_clock`, `policy_joints`, the gains, the action
+A checkpoint with a different contract needs `history_window`, `policy_joints`, the gains, the action
 scales, the default pose and the joint ranges in `Walk.yaml` changed to match it. booster_mjlab exports these as
 ONNX metadata props (`joint_names`, `joint_stiffness`, `joint_damping`, `default_joint_pos`, `action_scale`,
 `observation_names`, `observation_terms_history_length`), which `onnx.load(path).metadata_props` reads.

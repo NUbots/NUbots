@@ -1,0 +1,41 @@
+// MIT License
+//
+// Copyright (c) 2026 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+syntax = "proto3";
+
+package message.booster;
+
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+
+// Velocity reported by the Booster controller's ROS odometry (rt/odom, nav_msgs/Odometry).
+// rt/odometer_state (BoosterOdometry) carries only the planar pose; this is the twist half of the
+// full odometry, used to fill Sensors.vTw.
+message BoosterOdometryTwist {
+    google.protobuf.Timestamp timestamp = 1;  // When NUbots received it
+    vec3 linear                         = 2;  // Linear velocity in child_frame_id (m/s)
+    vec3 angular                        = 3;  // Angular velocity in child_frame_id (rad/s)
+    string frame_id                     = 4;  // Frame the odometry pose is in (header.frame_id)
+    string child_frame_id               = 5;  // Frame the twist is in, the body frame by ROS convention
+}

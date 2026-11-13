@@ -48,11 +48,10 @@
 #include "message/booster/BoosterLowCmd.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
-#include "message/platform/RawSensors.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/skill/Walk.hpp"
 
-#include "utility/math/comparison.hpp"
-#include "utility/math/euler.hpp"
+#include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -68,25 +67,19 @@ namespace module::skill {
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::K1Mode;
-    using message::platform::RawSensors;
+    using message::input::Sensors;
     using WalkTask = message::skill::Walk;
 
-    using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::input::ServoID;
     using utility::nusight::graph;
     using utility::support::Expression;
 
     namespace {
 
-        constexpr double TWO_PI = 6.283185307179586;
-
         // Booster SDK RotateHead limits: pitch down-positive [-0.3, 1.0], yaw [-0.785, 0.785]
         constexpr double HEAD_PITCH_MIN = -0.3;
         constexpr double HEAD_PITCH_MAX = 1.0;
         constexpr double HEAD_YAW_LIMIT = 0.785;
-
-        // Bounds on the measured loop period used to advance the gait phase
-        constexpr double MIN_TICK_DT = 0.005;
-        constexpr double MAX_TICK_DT = 0.100;
 
         // The training control period, and the error in it past which a tick counts as off rate
         constexpr double NOMINAL_TICK_DT   = 0.02;
@@ -110,16 +103,22 @@ namespace module::skill {
             return out;
         }
 
-        /// Servo feedback in JointIndexK1 order (ankles pre-converted to serial by the platform)
-        std::array<const RawSensors::Servo*, Walk::JOINT_COUNT> servos_of(const RawSensors& raw) {
-            return {&raw.servo.head_pan,         &raw.servo.head_tilt,       &raw.servo.l_shoulder_pitch,
-                    &raw.servo.l_shoulder_roll,  &raw.servo.l_elbow,         &raw.servo.l_elbow_yaw,
-                    &raw.servo.r_shoulder_pitch, &raw.servo.r_shoulder_roll, &raw.servo.r_elbow,
-                    &raw.servo.r_elbow_yaw,      &raw.servo.l_hip_pitch,     &raw.servo.l_hip_roll,
-                    &raw.servo.l_hip_yaw,        &raw.servo.l_knee,          &raw.servo.l_ankle_pitch,
-                    &raw.servo.l_ankle_roll,     &raw.servo.r_hip_pitch,     &raw.servo.r_hip_roll,
-                    &raw.servo.r_hip_yaw,        &raw.servo.r_knee,          &raw.servo.r_ankle_pitch,
-                    &raw.servo.r_ankle_roll};
+        /// ServoID of each joint, in JointIndexK1 order
+        constexpr std::array<ServoID::Value, Walk::JOINT_COUNT> K1_SERVO_IDS = {
+            ServoID::HEAD_YAW,      ServoID::HEAD_PITCH,  ServoID::L_SHOULDER_PITCH, ServoID::L_SHOULDER_ROLL,
+            ServoID::L_ELBOW,       ServoID::L_ELBOW_YAW, ServoID::R_SHOULDER_PITCH, ServoID::R_SHOULDER_ROLL,
+            ServoID::R_ELBOW,       ServoID::R_ELBOW_YAW, ServoID::L_HIP_PITCH,      ServoID::L_HIP_ROLL,
+            ServoID::L_HIP_YAW,     ServoID::L_KNEE,      ServoID::L_ANKLE_PITCH,    ServoID::L_ANKLE_ROLL,
+            ServoID::R_HIP_PITCH,   ServoID::R_HIP_ROLL,  ServoID::R_HIP_YAW,        ServoID::R_KNEE,
+            ServoID::R_ANKLE_PITCH, ServoID::R_ANKLE_ROLL};
+
+        /// Servo feedback in JointIndexK1 order. Sensors::servo is indexed by ServoID.
+        std::array<const Sensors::Servo*, Walk::JOINT_COUNT> servos_of(const Sensors& sensors) {
+            std::array<const Sensors::Servo*, Walk::JOINT_COUNT> servos{};
+            for (std::size_t j = 0; j < Walk::JOINT_COUNT; ++j) {
+                servos[j] = &sensors.servo[K1_SERVO_IDS[j]];
+            }
+            return servos;
         }
 
         template <typename Shape>
@@ -134,7 +133,6 @@ namespace module::skill {
     void Walk::reset_policy_state() {
         std::fill(last_action.begin(), last_action.end(), 0.0f);
         history.clear();
-        gait_phase     = 0.0;
         have_last_tick = false;
 
         off_rate_ticks     = 0;
@@ -153,9 +151,6 @@ namespace module::skill {
             cfg.model_path             = config["model_path"].as<std::string>();
             cfg.device                 = config["device"].as<std::string>();
             cfg.history_window         = config["history_window"].as<std::size_t>();
-            cfg.gait_clock             = config["gait_clock"].as<bool>();
-            cfg.gait_period            = config["gait_period"].as<double>();
-            cfg.command_threshold      = config["command_threshold"].as<double>();
             cfg.handoff_blend          = config["handoff_blend"].as<double>();
             cfg.head_policy_controlled = config["head"]["policy_controlled"].as<bool>();
             cfg.head_kp                = config["head"]["kp"].as<double>();
@@ -166,9 +161,6 @@ namespace module::skill {
 
             if (cfg.history_window < 1) {
                 throw std::runtime_error("Walk.yaml: history_window must be >= 1");
-            }
-            if (cfg.gait_clock && cfg.gait_period <= 0.0) {
-                throw std::runtime_error("Walk.yaml: gait_period must be > 0 when gait_clock is set");
             }
 
             // The policy joints must be distinct and in range
@@ -246,16 +238,20 @@ namespace module::skill {
         // pool does not run the tick late.
         on<Provide<WalkTask>,
            Every<50, Per<std::chrono::seconds>>,
-           With<RawSensors>,
+           With<Sensors>,
            With<Stability>,
            Single,
            Sync<Walk>,
            Priority::HIGH>()
             .then([this](const WalkTask& walk,
                          const RunReason& run_reason,
-                         const RawSensors& raw,
+                         const Sensors& sensors,
                          const Stability& stability) {
                 if (!model_loaded) {
+                    return;
+                }
+                if (sensors.servo.size() < ServoID::NUMBER_OF_SERVOS) {
+                    log<WARN>("Sensors has", sensors.servo.size(), "servos, expected", int(ServoID::NUMBER_OF_SERVOS));
                     return;
                 }
 
@@ -297,7 +293,7 @@ namespace module::skill {
                     emit<Task>(std::make_unique<Continue>());
                 }
 
-                // Measured control period, which the gait phase advances on
+                // Measured control period
                 const auto now = NUClear::clock::now();
                 double tick_dt = NOMINAL_TICK_DT;
                 if (have_last_tick) {
@@ -305,7 +301,6 @@ namespace module::skill {
                     off_rate_ticks += std::abs(tick_dt - NOMINAL_TICK_DT) > TICK_DT_TOLERANCE ? 1 : 0;
                     min_tick_dt = std::min(min_tick_dt, tick_dt);
                     max_tick_dt = std::max(max_tick_dt, tick_dt);
-                    tick_dt     = utility::math::clamp(MIN_TICK_DT, tick_dt, MAX_TICK_DT);
                 }
                 last_tick_time = now;
                 have_last_tick = true;
@@ -313,7 +308,7 @@ namespace module::skill {
                 // Report ticks that missed the trained period
                 if (now - last_timing_report > TIMING_REPORT_PERIOD) {
                     if (off_rate_ticks > 0) {
-                        log<WARN>(
+                        log<DEBUG>(
                             fmt::format("Walk missed the trained 50 Hz on {} of the last {} ticks "
                                         "(period {:.1f}-{:.1f} ms, {} Director runs skipped); the policy is "
                                         "seeing the wrong dynamics",
@@ -331,53 +326,43 @@ namespace module::skill {
                     last_timing_report = now;
                 }
 
-                if (log_level <= NUClear::LogLevel::DEBUG) {
+                if (log_level <= DEBUG) {
                     emit(graph("Policy command", cmd.x(), cmd.y(), cmd.z()));
                     emit(graph("Policy loop period (s)", tick_dt));
                 }
 
-                const auto servos = servos_of(raw);
+                const auto servos = servos_of(sensors);
 
                 // Observation frame, see README.md
-                std::vector<float> frame{};
-                frame.reserve(frame_dim());
+                const std::size_t n_joints = cfg.policy_joints.size();
+                Eigen::VectorXf obs(frame_dim());
+                std::size_t idx = 0;
 
-                // [0:3] gyro, body frame
-                frame.push_back(raw.gyroscope.x());
-                frame.push_back(raw.gyroscope.y());
-                frame.push_back(raw.gyroscope.z());
+                // Gyro, body frame
+                obs.segment<3>(idx) = sensors.gyroscope.cast<float>();
+                idx += 3;
 
-                // [3:6] projected gravity: world (0, 0, -1) in the body frame
-                const Eigen::Matrix3d Rwt =
-                    rpy_intrinsic_to_mat(Eigen::Vector3d(raw.imu_rpy.x(), raw.imu_rpy.y(), raw.imu_rpy.z()));
-                const Eigen::Vector3d gravity = Rwt.transpose() * Eigen::Vector3d(0.0, 0.0, -1.0);
-                frame.push_back(static_cast<float>(gravity.x()));
-                frame.push_back(static_cast<float>(gravity.y()));
-                frame.push_back(static_cast<float>(gravity.z()));
+                // Projected gravity: world (0, 0, -1) in the torso frame
+                const Eigen::Vector3d g_world(0.0, 0.0, -1.0);
+                obs.segment<3>(idx) = (sensors.Htw.linear() * g_world).cast<float>();
+                idx += 3;
 
                 // q - default_pose, then dq, over the policy joints
-                for (const std::size_t j : cfg.policy_joints) {
-                    frame.push_back(static_cast<float>(servos[j]->present_position - cfg.default_pose[j]));
+                for (std::size_t k = 0; k < n_joints; ++k) {
+                    const std::size_t j     = cfg.policy_joints[k];
+                    obs[idx + k]            = static_cast<float>(servos[j]->present_position - cfg.default_pose[j]);
+                    obs[idx + n_joints + k] = static_cast<float>(servos[j]->present_velocity);
                 }
-                for (const std::size_t j : cfg.policy_joints) {
-                    frame.push_back(servos[j]->present_velocity);
-                }
+                idx += 2 * n_joints;
 
                 // Previous raw network output
-                frame.insert(frame.end(), last_action.begin(), last_action.end());
+                obs.segment(idx, n_joints) = Eigen::Map<const Eigen::VectorXf>(last_action.data(), n_joints);
+                idx += n_joints;
 
                 // Command [vx, vy, wz]
-                frame.push_back(static_cast<float>(cmd.x()));
-                frame.push_back(static_cast<float>(cmd.y()));
-                frame.push_back(static_cast<float>(cmd.z()));
+                obs.segment<3>(idx) = cmd.cast<float>();
 
-                // Gait clock, (0, 0) while the command is below the threshold
-                if (cfg.gait_clock) {
-                    const double command_magnitude = cmd.head<2>().norm() + std::abs(cmd.z());
-                    const bool clock_active        = command_magnitude > cfg.command_threshold;
-                    frame.push_back(clock_active ? static_cast<float>(std::sin(TWO_PI * gait_phase)) : 0.0f);
-                    frame.push_back(clock_active ? static_cast<float>(std::cos(TWO_PI * gait_phase)) : 0.0f);
-                }
+                const std::vector<float> frame(obs.data(), obs.data() + obs.size());
 
                 // Observation window, seeded by repeating the first frame as in training
                 if (history.empty()) {
@@ -399,15 +384,12 @@ namespace module::skill {
                 const std::vector<float> action = onnx_rt->infer(input);
                 std::copy_n(action.begin(), last_action.size(), last_action.begin());
 
-                // The phase advances regardless of the command, only the observed clock is gated
-                if (cfg.gait_clock) {
-                    gait_phase = std::fmod(gait_phase + tick_dt / cfg.gait_period, 1.0);
-                }
-
                 // Observation trace, with the tick, mode and time to segment a capture on
-                if (log_level <= NUClear::LogLevel::TRACE) {
+                if (log_level <= TRACE) {
+                    // K1Mode's string conversion throws on -1 (no mode seen yet)
+                    const std::string mode = last_mode < 0 ? "UNKNOWN" : std::string(K1Mode(last_mode));
                     std::ostringstream line;
-                    line << "WALKOBS " << tick << " mode=" << last_mode
+                    line << "WALKOBS " << tick << " mode=" << mode
                          << " t=" << std::chrono::duration<double>(now.time_since_epoch()).count() << " dt=" << tick_dt;
                     for (const float v : frame) {
                         line << ' ' << v;
@@ -468,37 +450,6 @@ namespace module::skill {
                 emit<Task>(std::move(servos_task));
 
                 const auto state = cmd.isZero() ? WalkState::State::STOPPED : WalkState::State::WALKING;
-                if (state == WalkState::State::WALKING && log_level <= NUClear::LogLevel::DEBUG) {
-                    std::ostringstream out;
-                    out << std::fixed << std::setprecision(4);
-                    out << "Walk sim2real"
-                        << " cmd=[" << cmd.x() << ',' << cmd.y() << ',' << cmd.z() << ']';
-                    if (cfg.gait_clock) {
-                        out << " phase=" << gait_phase;
-                    }
-                    out << " clamped=" << clamped;
-                    std::ostringstream action_stream;
-                    std::ostringstream joint_pos_rel_stream;
-                    std::ostringstream joint_vel_stream;
-                    std::ostringstream cmd_q_stream;
-                    for (std::size_t k = 0; k < cfg.policy_joints.size(); ++k) {
-                        const std::size_t j = cfg.policy_joints[k];
-                        if (k != 0) {
-                            action_stream << ',';
-                            joint_pos_rel_stream << ',';
-                            joint_vel_stream << ',';
-                            cmd_q_stream << ',';
-                        }
-                        action_stream << last_action[k];
-                        joint_pos_rel_stream << (servos[j]->present_position - cfg.default_pose[j]);
-                        joint_vel_stream << servos[j]->present_velocity;
-                        cmd_q_stream << cmd_q[j];
-                    }
-                    out << " action=[" << action_stream.str() << ']' << " joint_pos_rel=[" << joint_pos_rel_stream.str()
-                        << ']' << " joint_vel=[" << joint_vel_stream.str() << ']' << " cmd_q=[" << cmd_q_stream.str()
-                        << ']';
-                    log<DEBUG>(out.str());
-                }
 
                 // Emit on a command change too, as others report WalkState's velocity as the walk command
                 if (int(state) != last_walk_state || cmd != last_walk_command) {

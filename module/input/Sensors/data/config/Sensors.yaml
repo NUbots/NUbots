@@ -8,6 +8,10 @@ head_pose:
 # snapped to zero, avoiding tiny floating-point residuals (~1e-10) being treated as real motion
 odometry_deadband: 1.0e-6
 
+# Oldest odometry twist (rt/odom, published at the controller's rate) used for Sensors.vTw, in
+# seconds. Without one this recent, vTw is left unmeasured (NaN).
+odometry_twist_max_age: 0.1
+
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians

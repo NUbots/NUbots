@@ -25,6 +25,7 @@ This module is built when the subcontroller CMake flag is set to `Booster`. Usin
 
 - `message::platform::RawSensors` with IMU, joint, battery, and button state from the SDK's low state.
 - `message::booster::BoosterOdometry` with the SDK's odometry pose.
+- `message::booster::BoosterOdometryTwist` with the twist from the controller's ROS odometry (`rt/odom`).
 - `message::booster::BoosterFallDownState` with the robot's fall state and whether recovery is available.
 - `message::booster::BoosterModeState` with the robot's current motion mode.
 

@@ -1,26 +1,18 @@
 log_level: INFO
 
-# mjlab AMP K1 velocity-tracking walk policy: booster_mjlab task Mjlab-Velocity-Flat-Booster-K1, W&B run poi732yy,
-# iteration 29999. The ONNX takes one observation frame [1, 75] and gives [1, 22] actions, and normalises the
-# observation itself. The module refuses a graph whose sizes do not match the contract configured here, see README.md.
+# mjlab AMP K1 velocity-tracking walk polic from booster_mjlab. The ONNX takes one observation
+# frame [1, 75] and gives [1, 22] actions, and normalises the observation itself. The module
+# refuses a graph whose sizes do not match the contract configured here, see README.md.
 model_path: "k1_walk_mjlab.onnx"
 
-# Inference device: cpu, or gpu (TensorRT, FP32), which falls back to the cpu if TensorRT cannot be set up
-device: gpu
+# Inference device: cpu to leave the gpu free, walk inference is cheap.
+device: cpu
 
 # Number of observation frames the policy takes (1 = no history)
 history_window: 1
 
 # JointIndexK1 indices the policy observes and acts on, in policy order
 policy_joints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-
-# Whether the observation ends with a [sin, cos] gait clock. This policy has none, so gait_period and
-# command_threshold are unused.
-gait_clock: false
-# Gait cycle duration (s) of the observed clock
-gait_period: 0.6
-# Command magnitude (|v_xy| + |wz|) at or below which the observed clock is (0, 0)
-command_threshold: 0.05
 
 # Time (s) to blend from the measured pose into the policy target after a walk starts
 handoff_blend: 0.3

@@ -25,14 +25,13 @@ Four types of walk path planning are in this module:
 
 Every mode emits a `WalkProposal` Task, which this module re-consumes at a fixed rate to apply per-axis exponential
 smoothing (`tau`) and then the dead zone, and emits the result as the `message::skill::Walk` Task. The RL walk stands
-still for any command too small to start stepping and never turns on the spot, however fast the turn, so the dead
+still for any command too small to start stepping, so the dead
 zone (`walk_path::apply_dead_zone`):
 
 - snaps axes below `zero_tolerance` to zero, and an all-zero command is a stop;
 - scales a small translation onto the ellipse with semi-axes `min_velocity` x and y, keeping its direction (the turn
   passes through, as the walk tracks small turns once stepping);
-- makes a turn with no translation an on-the-spot turn, with `rotate_velocity_x` forward and at least
-  `min_velocity` z;
+- makes a turn with no translation have some small `rotate_velocity_x` forward and at least `min_velocity` z;
 - clamps everything to `max_velocity`.
 
 `min_velocity` and `max_velocity` are measured from the mjlab AMP walk policy (`skill::Walk`) in NUSim.

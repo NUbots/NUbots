@@ -18,6 +18,8 @@ restart to take effect.
 - `message::platform::RawSensors` to build the outgoing `Sensors` message, including servo, IMU, button, and LED
   state.
 - `message::booster::BoosterOdometry`, paired with `RawSensors`, for the robot's odometry-derived world pose.
+- `message::booster::BoosterOdometryTwist` (optional) for `vTw`, the body-frame twist rotated into the world by
+  `Htw`. Without a twist newer than `odometry_twist_max_age`, `vTw` is NaN.
 - `message::booster::BoosterModeState` to detect motion mode changes and reset the odometry zero offset.
 - `message::localisation::ResetFieldLocalisation` to reset the odometry zero offset after a localisation reset.
 

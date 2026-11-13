@@ -49,7 +49,6 @@ namespace module::skill {
     /// The observation contract is configured. One frame is
     ///
     ///     gyro(3) | projected gravity(3) | q - default(N) | dq(N) | last action(N) | command(3)
-    ///     [ | gait clock(2), when gait_clock is set ]
     ///
     /// over the `policy_joints` joints, and the ONNX input is the last `history_window` frames,
     /// oldest first. Observation normalisation is baked into the graph. See README.md.
@@ -62,8 +61,6 @@ namespace module::skill {
         static constexpr std::size_t HEAD_PITCH = 1;
         /// Velocity command length: [vx, vy, wz]
         static constexpr std::size_t COMMAND_DIM = 3;
-        /// Gait clock length: [sin(2*pi*phase), cos(2*pi*phase)]
-        static constexpr std::size_t CLOCK_DIM = 2;
 
         explicit Walk(std::unique_ptr<NUClear::Environment> environment);
 
@@ -76,12 +73,6 @@ namespace module::skill {
             std::size_t history_window = 1;
             /// JointIndexK1 indices the policy observes and acts on, in policy order
             std::vector<std::size_t> policy_joints{};
-            /// Whether the observation frame ends with the [sin, cos] gait clock
-            bool gait_clock = false;
-            /// Gait cycle duration (s) of the observed clock, as in training
-            double gait_period = 0.6;
-            /// Command magnitude (|v_xy| + |wz|) at or below which the observed clock is (0, 0)
-            double command_threshold = 0.05;
             /// Time (s) to blend from the measured pose into the policy target after a walk starts
             double handoff_blend = 0.3;
             /// Whether the policy drives the head. Otherwise the head tracks BoosterHeadRot.
@@ -105,13 +96,13 @@ namespace module::skill {
 
         /// Length of one observation frame
         [[nodiscard]] std::size_t frame_dim() const {
-            return 6 + 3 * cfg.policy_joints.size() + COMMAND_DIM + (cfg.gait_clock ? CLOCK_DIM : 0);
+            return 6 + 3 * cfg.policy_joints.size() + COMMAND_DIM;
         }
 
         /// Loads the ONNX and checks its input and output sizes against the configured contract
         void load_model();
 
-        /// Clears the observation history, the last action and the gait phase, for when the next
+        /// Clears the observation history and the last action, for when the next
         /// tick does not continue the previous one
         void reset_policy_state();
 
@@ -123,9 +114,6 @@ namespace module::skill {
         std::vector<float> last_action{};
         /// Observation window, oldest frame first
         std::deque<std::vector<float>> history{};
-
-        /// Gait clock phase in [0, 1), advanced on the measured loop period
-        double gait_phase = 0.0;
 
         /// Time of the previous policy tick
         bool have_last_tick = false;
