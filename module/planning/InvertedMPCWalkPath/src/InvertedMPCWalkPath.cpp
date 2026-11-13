@@ -26,6 +26,7 @@
  */
 #include "InvertedMPCWalkPath.hpp"
 
+#include <chrono>
 #include <stdexcept>
 #include <string>
 
@@ -166,6 +167,9 @@ namespace module::planning {
                     return;
                 }
 
+                // From receiving the WalkTo to emitting the walk command, for the debug message
+                const auto tick_start = std::chrono::steady_clock::now();
+
                 const auto now     = NUClear::clock::now();
                 const double since = std::chrono::duration<double>(now - last_plan_time).count();
 
@@ -236,6 +240,8 @@ namespace module::planning {
 
                 last_walk_command = command;
                 emit<Task>(std::make_unique<Walk>(command));
+                const double tick_time =
+                    std::chrono::duration<double>(std::chrono::steady_clock::now() - tick_start).count();
 
                 // Visualise the plan in NUsight / PlotJuggler
                 emit(graph("MPC Planned Velocity", velocity.x(), velocity.y(), velocity.z()));
@@ -257,6 +263,10 @@ namespace module::planning {
                 debug->angle_to_final_heading = angle_to_final_heading;
                 debug->translational_error    = rDRr.norm();
                 debug->velocity_target        = command;
+                debug->tick_time              = tick_time;
+                debug->solve_time             = solution.solve_time;
+                debug->iterations             = solution.iterations;
+                debug->fallback               = use_fallback;
                 emit(debug);
             });
 

@@ -41,11 +41,17 @@ Configure the targets and thresholds in `WalkPathBenchmark.yaml`. The per-tick t
 `target_yaw` is written on the branch nearest it. `err_x`, `err_y` and `err_yaw` are the signed target − robot errors in
 the field frame, with `err_yaw` wrapped to [-π, π].
 
+Beside it, `YYYYMMDDTHH_MM_SS_timing.csv` has a row for each `WalkTo` the planner handles during the trials, from its
+`WalkToDebug`: `tick_ms`, the time from receiving the `WalkTo` to emitting the walk command; `solve_ms`, the optimiser's
+alone (zero for PlanWalkPath); its `iterations`; and `fallback`, 1 where the planner fell back to PlanWalkPath's control
+law. The MPC planners resend their last command for a `WalkTo` well before their next step, without a row.
+
 ## Consumes
 
 - `message::booster::NUSimRobotGroundTruth` the robot's true pose
 - `message::input::Sensors` for Hrw, to build the ground-truth Field
 - `message::behaviour::state::WalkState` the velocity of the Walk task the walk skill is running, for the CSV
+- `message::planning::WalkToDebug` the planner's timing, for the timing CSV
 
 ## Emits
 

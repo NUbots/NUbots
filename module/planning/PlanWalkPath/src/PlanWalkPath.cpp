@@ -26,6 +26,7 @@
  */
 #include "PlanWalkPath.hpp"
 
+#include <chrono>
 #include <ranges>
 
 #include "extension/Behaviour.hpp"
@@ -135,6 +136,9 @@ namespace module::planning {
 
         on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+                // From receiving the WalkTo to emitting the walk command, for the debug message
+                const auto tick_start = std::chrono::steady_clock::now();
+
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;
                 const auto& Hrw = sensors.Hrw;
@@ -202,6 +206,8 @@ namespace module::planning {
                 // Emit the walk task with the calculated velocities (smoothing inlined --
                 // an Every-driven WalkProposal provider never fires under the Director)
                 emit_smoothed_walk(velocity_target);
+                const double tick_time =
+                    std::chrono::duration<double>(std::chrono::steady_clock::now() - tick_start).count();
 
                 // Emit debugging information for visualisation and monitoring. Hrd is the pose being walked to, with
                 // its final heading (not the heading the control law is turning to now), as the MPC planners send
@@ -217,6 +223,7 @@ namespace module::planning {
                 debug_information->angle_to_final_heading  = angle_to_final_heading;
                 debug_information->translational_error     = rDRr.norm();
                 debug_information->velocity_target         = velocity_target;
+                debug_information->tick_time               = tick_time;
                 emit(debug_information);
             });
 

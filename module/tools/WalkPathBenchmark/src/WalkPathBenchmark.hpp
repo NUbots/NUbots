@@ -141,6 +141,8 @@ namespace module::tools {
         std::ofstream csv{};
         /// @brief Yaw last written to the CSV, unwrapped so it stays continuous through ±pi. NaN before the first row
         double csv_yaw = std::numeric_limits<double>::quiet_NaN();
+        /// @brief Planner timing output, a row per WalkToDebug the planner sends during the trials
+        std::ofstream timing_csv{};
 
         /// @brief Begins holding the sweep command at sweep_index
         void start_sweep();

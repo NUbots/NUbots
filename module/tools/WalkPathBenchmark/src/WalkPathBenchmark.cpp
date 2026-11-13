@@ -41,6 +41,7 @@
 #include "message/booster/NUSimGroundTruth.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
@@ -57,6 +58,7 @@ namespace module::tools {
     using message::booster::NUSimRobotGroundTruth;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::planning::WalkToDebug;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::WalkToFieldPosition;
@@ -136,11 +138,29 @@ namespace module::tools {
             if (!cfg.csv_directory.empty()) {
                 // One CSV per run, named by its start time
                 std::filesystem::create_directories(cfg.csv_directory);
-                const std::filesystem::path path = cfg.csv_directory / fmt::format("{}.csv", formatted_time());
+                const std::string name           = formatted_time();
+                const std::filesystem::path path = cfg.csv_directory / fmt::format("{}.csv", name);
                 csv.open(path);
                 log<INFO>("Writing the trajectory to", path.string());
                 csv << "t,trial,x,y,yaw,z,target_x,target_y,target_yaw,err_x,err_y,err_yaw,cmd_vx,cmd_vy,cmd_wz\n";
+                // And the planner's timing, a row per WalkTo it handles
+                timing_csv.open(cfg.csv_directory / fmt::format("{}_timing.csv", name));
+                timing_csv << "t,trial,tick_ms,solve_ms,iterations,fallback\n";
             }
+        });
+
+        // The planner's timing for each WalkTo it handles during the trials
+        on<Trigger<WalkToDebug>, Sync<WalkPathBenchmark>>().then([this](const WalkToDebug& debug) {
+            if (state != State::RUNNING || !timing_csv.is_open()) {
+                return;
+            }
+            timing_csv << fmt::format("{:.3f},{},{:.4f},{:.4f},{},{}\n",
+                                      std::chrono::duration<double>(NUClear::clock::now() - trial.start).count(),
+                                      trial_index,
+                                      debug.tick_time * 1e3,
+                                      debug.solve_time * 1e3,
+                                      debug.iterations,
+                                      debug.fallback ? 1 : 0);
         });
 
         // The velocity of the Walk task the walk skill is running, whichever planner or strategy sent it (including the
@@ -398,6 +418,9 @@ namespace module::tools {
                         total_head_error / n));
         if (csv.is_open()) {
             csv.close();
+        }
+        if (timing_csv.is_open()) {
+            timing_csv.close();
         }
         if (cfg.shutdown_when_done) {
             powerplant.shutdown();
