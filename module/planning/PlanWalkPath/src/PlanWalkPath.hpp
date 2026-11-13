@@ -52,7 +52,8 @@ namespace module::planning {
 
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0.0;
-            /// @brief Rotate on spot walk command forward velocity
+            /// @brief Rotate on spot walk command forward velocity, also given to any turn with no translation, as the
+            /// walk does not step for a pure rotation
             double rotate_velocity_x = 0.0;
             /// @brief Rotate on spot walk command side velocity
             double rotate_velocity_y = 0.0;
