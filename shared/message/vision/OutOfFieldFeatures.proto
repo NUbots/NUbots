@@ -1,0 +1,116 @@
+// MIT License
+//
+// Copyright (c) 2026 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+
+syntax = "proto3";
+
+package message.vision;
+
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "Transform.proto";
+
+/// Out-of-field corner features and the map landmarks they were matched against, for one camera
+/// frame. The RoboCup field is symmetric under a 180 degree rotation, so on-field landmarks fit a
+/// pose and its mirror equally well; the asymmetric scenery beyond the field boundary is what breaks
+/// the tie. This is the per-frame working state of that comparison, published for display only --
+/// nothing in the estimator consumes it.
+message OutOfFieldFeature {
+    /// What happened to one detected corner this frame. Ordered by precedence: a corner that
+    /// qualifies for several is reported as the highest one.
+    enum Status {
+        /// Masked out by the carpet classification, so not background scenery. Shown to verify the mask.
+        ON_CARPET = 0;
+        /// Out-of-field, but nothing in the map or the candidate pool claimed it
+        UNMATCHED = 1;
+        /// Grew an existing candidate track (not a landmark yet)
+        CANDIDATE = 2;
+        /// Gated to a landmark but rejected: clutter explains it better, or it lost the
+        /// one-to-one assignment to a closer corner
+        OUTLIER = 3;
+        /// Associated only under the mirrored pose, i.e. evidence we are on the wrong side
+        MIRROR = 4;
+        /// Associated to a map landmark at the current pose
+        ASSOCIATED = 5;
+    }
+    /// Unit ray in camera space {c} towards the detected corner
+    vec3 uPCc = 1;
+    /// What became of this corner
+    Status status = 2;
+}
+
+/// One mapped out-of-field landmark predicted into this camera frame.
+message OutOfFieldLandmark {
+    /// What happened to one map landmark predicted into the current camera
+    enum Status {
+        /// Does not project into the image at the current pose
+        NOT_IN_VIEW = 0;
+        /// Projects into the image but too close to the border to count as predicted-visible
+        EDGE = 1;
+        /// Predicted bearing too smeared to discriminate the mirror, so excluded from matching
+        AMBIGUOUS = 2;
+        /// Predicted well inside the image, but no corner associated with it
+        MISSED = 3;
+        /// Associated to a corner this frame
+        ASSOCIATED = 4;
+        /// Culled this frame: too many predicted-visible frames without a hit
+        CULLED_MISSING = 5;
+        /// Culled this frame: its observation window stopped fitting one static point (a mover)
+        CULLED_OUTLIER = 6;
+    }
+    /// Unit ray in {c} towards where this landmark is predicted to appear
+    vec3 uPCc = 1;
+    /// What became of this landmark
+    Status status = 2;
+    /// Unit ray in {c} towards the corner that claimed it. Only set when status is ASSOCIATED.
+    vec3 uMatchCc = 3;
+    /// Bearing-only landmark: mapped at an assumed range because it never accrued usable parallax
+    bool bearing_only = 4;
+}
+
+message OutOfFieldFeatures {
+    /// ID of the camera that took the image these were detected in
+    uint32 id = 1;
+    /// When the image was taken that this measurement is derived from
+    google.protobuf.Timestamp timestamp = 2;
+    /// Isometry3d transform from world space to camera space at the time the image was taken
+    iso3 Hcw = 3;
+    /// Every corner the detector found, on-carpet ones included
+    repeated OutOfFieldFeature features = 4;
+    /// Every map landmark that projects into this image at the current pose estimate
+    repeated OutOfFieldLandmark landmarks = 5;
+    /// Accumulated own-vs-mirror log-likelihood ratio [nats]. Positive backs the current pose.
+    double llr = 6;
+    /// This frame's clamped own-minus-mirror evidence increment [nats]; 0 on an unscored frame
+    double side_delta = 7;
+    /// Live landmarks in the map
+    uint32 landmark_count = 8;
+    /// Live bearing candidates waiting for enough parallax to triangulate
+    uint32 candidate_count = 9;
+    /// Map building was frozen this frame (the pose is too uncertain, or the side is in doubt)
+    bool map_frozen = 10;
+    /// The evidence says the filter is on the wrong side of the field
+    bool flip_requested = 11;
+}
