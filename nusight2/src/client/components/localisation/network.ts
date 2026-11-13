@@ -79,6 +79,7 @@ export class LocalisationNetwork {
     // Keep field-frame orientation fixed across team colours.
     robot.Hfw = Matrix4.from(field.Hfw);
 
+    robot.covariance = Matrix3.from(field.covariance);
     robot.particles = field.particles.map((particle) => Vector3.from(particle));
     robot.associationLines = field.associationLines.map((line) => ({
       start: Vector3.from(line.start),

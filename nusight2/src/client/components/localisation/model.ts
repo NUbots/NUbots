@@ -123,6 +123,7 @@ export class LocalisationModel {
   @observable robotVisible = true;
   @observable ballVisible = true;
   @observable particlesVisible = true;
+  @observable uncertaintyVisible = true;
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
   @observable fieldIntersectionsVisible = true;

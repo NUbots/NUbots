@@ -387,6 +387,11 @@ export class LocalisationController {
   };
 
   @action
+  toggleUncertaintyVisibility = (model: LocalisationModel) => {
+    model.uncertaintyVisible = !model.uncertaintyVisible;
+  };
+
+  @action
   toggleGoalVisibility = (model: LocalisationModel) => {
     model.goalsVisible = !model.goalsVisible;
   };
