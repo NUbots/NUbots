@@ -6,8 +6,8 @@ robot side at 50 Hz and streams the resulting joint position targets to
 them to the Booster SDK `rt/joint_ctrl` topic (honoured in CUSTOM mode).
 
 It is the walk used by the `nusim/*` roles: NUSim ignores the firmware `Move()` RPC that
-`skill::Walk` drives, so in sim locomotion inference lives in the NUbots stack and the
-simulator only tracks servo joint commands. The robot roles use `skill::Walk`.
+`skill::BoosterWalk` drives, so in sim locomotion inference lives in the NUbots stack and the
+simulator only tracks servo joint commands. The robot roles use `skill::BoosterWalk`.
 
 ## Consumes
 

@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MODULE_SKILL_WALK_HPP
-#define MODULE_SKILL_WALK_HPP
+#ifndef MODULE_SKILL_BOOSTERWALK_HPP
+#define MODULE_SKILL_BOOSTERWALK_HPP
 
 #include <Eigen/Core>
 #include <nuclear>
@@ -34,11 +34,11 @@
 
 namespace module::skill {
 
-    class Walk : public ::extension::behaviour::BehaviourReactor {
+    class BoosterWalk : public ::extension::behaviour::BehaviourReactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the Walk reactor
-        explicit Walk(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the BoosterWalk reactor
+        explicit BoosterWalk(std::unique_ptr<NUClear::Environment> environment);
 
     private:
         struct Config {
@@ -54,4 +54,4 @@ namespace module::skill {
 
 }  // namespace module::skill
 
-#endif  // MODULE_SKILL_WALK_HPP
+#endif  // MODULE_SKILL_BOOSTERWALK_HPP

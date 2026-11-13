@@ -1,8 +1,9 @@
-# Walk
+# BoosterWalk
 
 ## Description
 
-Routes walk calls to the Booster Robotics SDK to use the K1's built-in locomotion.
+Routes walk calls to the Booster Robotics SDK to use the K1's built-in locomotion. This is the legacy firmware walk;
+`skill::Walk` runs the mjlab AMP walk policy instead. Only one walk skill should be in a role.
 
 ## Usage
 

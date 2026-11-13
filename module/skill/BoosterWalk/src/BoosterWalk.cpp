@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Walk.hpp"
+#include "BoosterWalk.hpp"
 
 #include "extension/Configuration.hpp"
 
@@ -45,16 +45,17 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::booster::BoosterMode;
-    using message::booster::BoosterWalk;
+    using BoosterWalkCommand = message::booster::BoosterWalk;
     using message::booster::K1Mode;
     using WalkTask = message::skill::Walk;
 
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    Walk::Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+    BoosterWalk::BoosterWalk(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("Walk.yaml").then([this](const Configuration& config) {
+        on<Configuration>("BoosterWalk.yaml").then([this](const Configuration& config) {
             log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.kick_velocity = Eigen::Vector3d(config["kick"]["velocity"].as<Expression>());
             cfg.kick_duration = std::chrono::duration_cast<NUClear::clock::duration>(
@@ -72,7 +73,7 @@ namespace module::skill {
 
         on<Stop<WalkTask>>().then([this] {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
-            auto msg      = std::make_unique<BoosterWalk>();
+            auto msg      = std::make_unique<BoosterWalkCommand>();
             msg->velocity = Eigen::Vector3d::Zero();
             emit(std::move(msg));
         });
@@ -88,7 +89,7 @@ namespace module::skill {
                     log<INFO>("Walk starting in-walk kick");
                 }
 
-                auto msg      = std::make_unique<BoosterWalk>();
+                auto msg      = std::make_unique<BoosterWalkCommand>();
                 msg->velocity = cfg.kick_velocity;
                 emit(std::move(msg));
                 emit(std::make_unique<WalkState>(WalkState::State::WALKING, cfg.kick_velocity));
@@ -109,7 +110,7 @@ namespace module::skill {
                 return;
             }
 
-            auto msg      = std::make_unique<BoosterWalk>();
+            auto msg      = std::make_unique<BoosterWalkCommand>();
             msg->velocity = walk.velocity_target;
             emit(std::move(msg));
 

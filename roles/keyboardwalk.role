@@ -15,7 +15,7 @@ nuclear_role(
   # Servos
   actuation::Servos
   # Skills
-  skill::Walk
+  skill::BoosterWalk
   skill::GetUp
   skill::Look
   # Planners
