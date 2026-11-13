@@ -14,9 +14,9 @@ w_position: 1.0
 huber_delta: 0.2
 # Final-heading error, faded in within about heading_radius (m) of the target
 w_heading: 1.0
-heading_radius: 0.6
+heading_radius: 0.8
 # Facing the direction of travel far from the target. 0 leaves the heading free there.
-w_face: 0.0
+w_face: 3.0
 # Delivered velocity magnitude (predicted by the model) and change of command between steps, per axis [vx, vy, vtheta]
 w_effort: [0.01, 0.01, 0.01]
 w_rate: [1.0, 1.0, 0.5]

@@ -15,9 +15,9 @@ w_position: 1.0
 huber_delta: 0.2
 # Final-heading error, faded in within about heading_radius (m) of the target
 w_heading: 1.0
-heading_radius: 0.6
+heading_radius: 0.8
 # Facing the direction of travel far from the target. 0 leaves the heading free there.
-w_face: 0.0
+w_face: 3.0
 # Planned velocity and its change between steps, per axis [vx, vy, vtheta]. As in MPCWalkPath, w_rate is what makes
 # the plan slow down before the target, as the MPC assumes the robot delivers what it plans at once.
 w_effort: [0.01, 0.01, 0.01]
