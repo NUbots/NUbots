@@ -125,6 +125,7 @@ export class LocalisationModel {
   @observable particlesVisible = true;
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
+  @observable cameraProjectionVisible = false;
   @observable fieldIntersectionsVisible = true;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
