@@ -40,8 +40,9 @@ namespace utility::onnx {
         /// Load an ONNX model for inference
         /// @param onnx_path Path to the ONNX model file
         /// @param device_type "cpu", or "gpu" to use the TensorRT execution provider
+        /// @param fp16 Let the TensorRT execution provider run in FP16 precision (ignored on "cpu")
         /// @throws std::runtime_error if the model cannot be loaded or device_type is unknown
-        explicit ONNXRuntime(const std::string& onnx_path, const std::string& device_type);
+        explicit ONNXRuntime(const std::string& onnx_path, const std::string& device_type, bool fp16 = true);
         ~ONNXRuntime();
 
         ONNXRuntime(const ONNXRuntime&)            = delete;

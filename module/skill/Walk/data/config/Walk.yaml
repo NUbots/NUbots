@@ -1,0 +1,151 @@
+log_level: INFO
+
+# mjlab AMP K1 velocity-tracking walk policy: booster_mjlab task Mjlab-Velocity-Flat-Booster-K1, W&B run poi732yy,
+# iteration 29999. The ONNX takes one observation frame [1, 75] and gives [1, 22] actions, and normalises the
+# observation itself. The module refuses a graph whose sizes do not match the contract configured here, see README.md.
+model_path: "k1_walk_mjlab.onnx"
+
+# Inference device: cpu, or gpu (TensorRT, FP32), which falls back to the cpu if TensorRT cannot be set up
+device: gpu
+
+# Number of observation frames the policy takes (1 = no history)
+history_window: 1
+
+# JointIndexK1 indices the policy observes and acts on, in policy order
+policy_joints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+
+# Whether the observation ends with a [sin, cos] gait clock. This policy has none, so gait_period and
+# command_threshold are unused.
+gait_clock: false
+# Gait cycle duration (s) of the observed clock
+gait_period: 0.6
+# Command magnitude (|v_xy| + |wz|) at or below which the observed clock is (0, 0)
+command_threshold: 0.05
+
+# Time (s) to blend from the measured pose into the policy target after a walk starts
+handoff_blend: 0.3
+
+# Global multiplier on action_scale_joint
+action_scale: 1.0
+
+head:
+  # Whether the policy drives the head. Otherwise the head tracks the latest BoosterHeadRot with the gains below.
+  policy_controlled: false
+  kp: 10.0
+  kd: 0.5
+
+# In-walk kick emulation: a velocity burst [vx, vy, wz] held for duration (s)
+kick:
+  velocity: [0.5, 0, 0]
+  duration: 0.5
+
+# All joint arrays are in JointIndexK1 order: head (2), left arm (4), right arm (4), left leg (6), right leg (6)
+
+# Training-time gains, from the booster_mjlab K1 actuators
+kp:
+  [
+    4.0,
+    4.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    80.0,
+    80.0,
+    80.0,
+    80.0,
+    50.0,
+    50.0,
+    80.0,
+    80.0,
+    80.0,
+    80.0,
+    50.0,
+    50.0,
+  ]
+kd: [0.25, 0.25, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0, 2.0, 2.0, 4.0, 4.0, 4.0, 4.0, 2.0, 2.0]
+# 0.25 * effort_limit / kp
+action_scale_joint:
+  [
+    0.375,
+    0.375,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.35,
+    0.2125,
+    0.2375,
+    0.11968750,
+    0.35,
+    0.1915,
+    0.1915,
+    0.2125,
+    0.2375,
+    0.11968750,
+    0.35,
+    0.1915,
+    0.1915,
+  ]
+
+# Training keyframe (booster_mjlab HOME_KEYFRAME)
+default_pose: [0, 0, 0, -1.4, 0, -0.4, 0, 1.4, 0, 0.4, -0.4, 0, 0, 0.8, -0.4, 0, -0.4, 0, 0, 0.8, -0.4, 0]
+
+# Joint ranges the commanded position is clamped to: the booster_mjlab k1.xml ranges, with a tighter hip pitch
+joint_lower:
+  [
+    -1.000,
+    -0.349,
+    -3.316,
+    -1.740,
+    -2.270,
+    -2.440,
+    -3.316,
+    -1.570,
+    -2.270,
+    0.000,
+    -1.800,
+    -0.400,
+    -1.000,
+    0.000,
+    -0.870,
+    -0.345,
+    -1.800,
+    -1.570,
+    -1.000,
+    0.000,
+    -0.870,
+    -0.345,
+  ]
+joint_upper:
+  [
+    1.000,
+    0.855,
+    1.220,
+    1.570,
+    2.270,
+    0.000,
+    1.220,
+    1.740,
+    2.270,
+    2.440,
+    1.570,
+    1.570,
+    1.000,
+    2.230,
+    0.345,
+    0.345,
+    1.570,
+    0.400,
+    1.000,
+    2.230,
+    0.345,
+    0.345,
+  ]
