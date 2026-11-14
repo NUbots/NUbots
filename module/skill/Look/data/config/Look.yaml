@@ -3,3 +3,7 @@ log_level: INFO
 
 # Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
 smoothing_factor: 0.1
+
+# Largest head yaw (rad) a look with hold_yaw is turned to as the robot turns under it (the Booster SDK's head yaw
+# limit). Past it the gaze turns with the robot.
+max_hold_yaw: 0.785

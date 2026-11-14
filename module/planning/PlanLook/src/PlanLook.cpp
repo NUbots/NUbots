@@ -47,6 +47,7 @@ namespace module::planning {
             // Use configuration here from file PlanLook.yaml
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
             cfg.search_fixation_time = config["search_fixation_time"].as<float>();
+            cfg.hold_yaw             = config["hold_yaw"].as<bool>();
 
             // Create vector of search positions
             for (const auto& search_position : config["search_positions"].config) {
@@ -73,7 +74,7 @@ namespace module::planning {
                                         * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()))
                                            .toRotationMatrix()
                                        * Eigen::Vector3d::UnitX();
-                emit<Task>(std::make_unique<Look>(uPCt, false));
+                emit<Task>(std::make_unique<Look>(uPCt, false, cfg.hold_yaw));
 
                 // Move to next search position in list
                 search_last_moved = NUClear::clock::now();

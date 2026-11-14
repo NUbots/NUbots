@@ -4,6 +4,9 @@ log_level: INFO
 # Time lingering at each position in search (seconds)
 search_fixation_time: 1.1
 
+# Hold each search position's yaw in the world while lingering at it, so the gaze stays put while the robot turns
+hold_yaw: true
+
 # List of positions for search
 min_yaw: &min_yaw -0.9
 max_yaw: &max_yaw 0.9

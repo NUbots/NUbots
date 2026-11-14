@@ -39,6 +39,8 @@ namespace module::skill {
         /// @brief Stores configuration values
         struct Config {
             float smoothing_factor = 0.0;
+            /// @brief Largest head yaw (rad) a look with hold_yaw is turned to
+            double max_hold_yaw = 0.0;
         } cfg;
 
         /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
@@ -47,6 +49,13 @@ namespace module::skill {
 
         /// @brief Last goal vector, used for smoothing
         Eigen::Vector3d uPCt = Eigen::Vector3d::Zero();
+
+        /// @brief The direction of the last Look given, to tell a new Look from a rerun of the same one
+        Eigen::Vector3d last_rPCt = Eigen::Vector3d::Zero();
+        /// @brief The robot's yaw in the world when the last Look was given, for hold_yaw
+        double hold_reference_yaw = 0.0;
+        /// @brief Whether a Look has been run since the task started
+        bool have_look = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the Look reactor.

@@ -34,4 +34,7 @@ message Look {
     vec3 rPCt = 1;
     /// If true, smooth the goal angle using exponential smoothing
     bool smooth = 2;
+    /// If true, the yaw of the direction is held in the world from when the task is given, rather than in torso
+    /// space, so the gaze stays put while the robot turns
+    bool hold_yaw = 3;
 }

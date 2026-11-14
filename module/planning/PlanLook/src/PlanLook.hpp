@@ -40,6 +40,8 @@ namespace module::planning {
         struct Config {
             /// @brief How long to look at each search position
             float search_fixation_time = 0.0f;
+            /// @brief Whether each search position's yaw is held in the world while lingering at it
+            bool hold_yaw = false;
             /// @brief List of search positions for the search pattern
             std::vector<Eigen::Vector2d> search_positions{};
         } cfg;

@@ -17,7 +17,9 @@ Include this module to allow the robot to look in a given direction on the K1. U
 ## Consumes
 
 - `message::skill::Look` A Task requesting to look in a direction, containing the vector `rPCt` (camera to
-  target, in torso space) and a `smooth` flag.
+  target, in torso space), a `smooth` flag and a `hold_yaw` flag. With `hold_yaw`, the direction's yaw is held in the
+  world from when the Look is given: the head turns against the robot's turning, up to `max_hold_yaw`.
+- `message::input::Sensors` for the robot's yaw, when a Look has `hold_yaw`.
 
 ## Emits
 
