@@ -78,4 +78,12 @@ message WalkToDebug {
     double max_angle_error = 9;
     /// Minimum angle error to start walking at full speed
     double min_angle_error = 8;
+    /// Time taken handling the WalkTo, from receiving it to emitting the walk command (s)
+    double tick_time = 10;
+    /// Time taken by the optimiser alone (s), zero for planners without one
+    double solve_time = 11;
+    /// Optimiser iterations, zero for planners without one
+    int32 iterations = 12;
+    /// Whether the planner fell back to PlanWalkPath's control law
+    bool fallback = 13;
 }
