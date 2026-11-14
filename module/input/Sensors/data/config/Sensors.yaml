@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 head_pose:
   topic: rt/head_pose
@@ -7,6 +7,10 @@ head_pose:
 # Deadband (metres for x/y, radians for theta) below which normalized odometry components are
 # snapped to zero, avoiding tiny floating-point residuals (~1e-10) being treated as real motion
 odometry_deadband: 1.0e-6
+
+# Oldest odometry twist (rt/odom, published at the controller's rate) used for Sensors.vTw, in
+# seconds. Without one this recent, vTw is left unmeasured (NaN).
+odometry_twist_max_age: 0.1
 
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
