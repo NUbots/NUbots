@@ -1,0 +1,3 @@
+# The robot's field pose from NUSim, so behaviour can be tested without field localisation. The ball stays on vision.
+ground_truth: true
+ground_truth_ball: false

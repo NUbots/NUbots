@@ -1,2 +1,5 @@
+# MPCWalkPath provides WalkTo in this role
+provide_walk_to: false
+
 max_velocity: [0.8, 0.5, 1.0]
 adjust_vtheta_limit: 1.0

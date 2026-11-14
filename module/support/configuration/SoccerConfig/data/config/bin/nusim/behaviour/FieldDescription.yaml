@@ -1,0 +1,19 @@
+# NUSim's default field (`./b run sim/soccer`): the 2026 HSL M-Field. field_type must match NUSim's --field.
+field_type: middle
+
+BallRadius: 0.0785
+LineWidth: 0.05
+
+presets:
+  middle:
+    FieldLength: 14.0
+    FieldWidth: 9.0
+    GoalWidth: 2.5
+    GoalDepth: 0.7
+    GoalCrossbarHeight: 1.75
+    GoalAreaLength: 1.0
+    GoalAreaWidth: 4.0
+    PenaltyMarkDistance: 2.0
+    CenterCircleDiameter: 3.0
+    PenaltyAreaLength: 3.0
+    PenaltyAreaWidth: 6.0
