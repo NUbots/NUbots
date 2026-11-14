@@ -44,6 +44,8 @@ stale command cannot produce a velocity spike on resume.
 Include this module in the role and emit the provide Task for either reaction. The reactions cannot
 run at the same time, since they all Need the Walk.
 
+With `provide_walk_to: false` it doesn't provide `WalkTo`, so MPCWalkPath can provide it in the same role.
+
 ## Consumes
 
 - `message::planning::WalkTo` Task requesting to walk towards a given pose in robot space.

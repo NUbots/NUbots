@@ -99,6 +99,9 @@ namespace module::planning {
 
         } cfg;
 
+        /// @brief The WalkTo provider, disabled when another planner provides WalkTo (provide_walk_to)
+        ReactionHandle walk_to_provider{};
+
         /// @brief Previous (smoothed, pre-dead-zone) walk command
         Eigen::Vector3d previous_walk_command = Eigen::Vector3d::Zero();
 

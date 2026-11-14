@@ -75,6 +75,9 @@ namespace module::planning {
         on<Configuration>("PlanWalkPath.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
+            // Another planner (MPCWalkPath) can provide WalkTo instead
+            walk_to_provider.enable(config["provide_walk_to"].as<bool>());
+
             // WalkTo controller tuning
             cfg.walk_to.max_velocity          = config["max_velocity"].as<Expression>();
             cfg.walk_to.max_backward_velocity = config["max_backward_velocity"].as<double>();
@@ -133,7 +136,7 @@ namespace module::planning {
             stability = new_stability;
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
+        walk_to_provider = on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>>().then(
             [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
                 // Get all the parameters we need to calculate the walk path
                 const auto& Hrd = walk_to.Hrd;

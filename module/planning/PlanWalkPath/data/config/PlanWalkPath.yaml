@@ -1,6 +1,10 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
+# Whether to provide WalkTo. Turn off when MPCWalkPath is in the role to provide it instead: this module then only
+# provides TurnOnSpot, PivotAroundPoint and Adjust.
+provide_walk_to: true # TODO: come up with a cleaner integration between the different planners
+
 # Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
 # The mjlab AMP walk policy tracks these in NUSim, they are not yet checked on the robot
 max_velocity: [1.0, 0.5, 1.5]
