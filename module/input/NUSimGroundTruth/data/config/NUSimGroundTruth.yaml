@@ -1,0 +1,16 @@
+log_level: INFO
+
+# Use NUSim's ground truth for the robot's field pose and the ball, instead of vision + localisation.
+# NUSim's match launcher writes this file per robot when "Perception: Ground truth" is chosen.
+ground_truth: false
+
+# NUSim's ground truth topics (nav_msgs/Odometry, simulator world frame). See NUSim's SdkBridge/PROTOCOL.md.
+robot_topic: rt/nusim/gt/robot
+ball_topic: rt/nusim/gt/ball
+
+# Yaw from NUSim's world frame to this robot's field frame {f}. {f} has our own goal on +x. NUSim's first
+# team defends the -x goal, so its robots need half a turn and the second team's need none.
+world_to_field_yaw: 3.14159265358979
+
+# Ground truth older than this (seconds) is treated as missing, and vision + localisation take over again
+timeout: 0.5

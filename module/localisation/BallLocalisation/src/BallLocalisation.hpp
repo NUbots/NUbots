@@ -28,6 +28,7 @@
 #ifndef MODULE_LOCALISATION_BALLLOCALISATION_HPP
 #define MODULE_LOCALISATION_BALLLOCALISATION_HPP
 
+#include <atomic>
 #include <nuclear>
 
 #include "BallModel.hpp"
@@ -103,6 +104,9 @@ namespace module::localisation {
 
         /// @brief The time of the last time update
         NUClear::clock::time_point last_time_update;
+
+        /// @brief Set while input::NUSimGroundTruth is providing Ball, so this module must not emit its own
+        std::atomic<bool> ground_truth_mode{false};
 
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};

@@ -1,0 +1,5 @@
+# NUSim: walk and kick are ONNX policies streaming low-level commands, which need custom mode
+firmware_soccer_mode: false
+
+# Nobody presses the simulated robot's button, so fall recovery has to run from startup
+fall_recovery_from_startup: true

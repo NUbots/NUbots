@@ -35,6 +35,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/algorithm/assignment.hpp"
+#include "utility/localisation/GroundTruthMode.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -50,6 +51,7 @@ namespace module::localisation {
     using message::localisation::PenaltyReset;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::RobotPoseGroundTruth;
+    using utility::localisation::GroundTruthMode;
     using message::localisation::UncertaintyResetFieldLocalisation;
     using utility::localisation::OccupancyMap;
     using utility::math::euler::mat_to_rpy_intrinsic;
@@ -216,6 +218,8 @@ namespace module::localisation {
             num_accepted = cfg.min_localised_measurements;
         });
 
+        on<Trigger<GroundTruthMode>>().then([this](const GroundTruthMode& mode) { ground_truth_mode = mode.enabled; });
+
         on<Trigger<FieldIntersections>,
            Optional<With<Goals>>,
            With<Stability>,
@@ -230,6 +234,11 @@ namespace module::localisation {
                          const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
                          const FieldDescription& fd,
                          const Sensors& sensors) {
+                      // Ground truth perception is switched on: Field comes from the simulator instead
+                      if (ground_truth_mode) {
+                          return;
+                      }
+
                       // Emit field message using ground truth if available
                       if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
                           auto field(std::make_unique<Field>());

@@ -40,6 +40,7 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/localisation/GroundTruthMode.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -64,6 +65,7 @@ namespace module::localisation {
         : Reactor(std::move(environment)) {
 
         using message::localisation::Ball;
+        using utility::localisation::GroundTruthMode;
 
         on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -114,10 +116,17 @@ namespace module::localisation {
             last_time_update = NUClear::clock::now();
         });
 
+        on<Trigger<GroundTruthMode>>().then([this](const GroundTruthMode& mode) { ground_truth_mode = mode.enabled; });
+
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then([this](const VisionBalls& balls,
                                                                                             const FieldDescription& fd,
                                                                                             const Field& field) {
+            // Ground truth perception is switched on: Ball comes from the simulator instead
+            if (ground_truth_mode) {
+                return;
+            }
+
             // If there are no balls or there are no valid balls, return
             if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
                 return;
@@ -231,7 +240,7 @@ namespace module::localisation {
 
         // Stores ball positions received from teammates
         on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
-            if (!cfg.use_r2r_balls) {
+            if (!cfg.use_r2r_balls || ground_truth_mode) {
                 return;
             }
 

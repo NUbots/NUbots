@@ -1,0 +1,65 @@
+# NUSim counterpart of robocup.role: the competition role, which obeys the GameController, with the swaps
+# nusim/behaviour makes for the simulator. NUSim ignores the firmware Move/VisualKick RPCs, so walk, kick and get-up
+# run as ONNX policies (SimK1Walk, SimK1Kick, SimK1GetUp), and the camera comes from NUSim's shared-memory writer
+# (input::NUSimCamera). input::NUSimGroundTruth is idle unless NUSim's launcher switches ground truth on.
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # support::logging::MessageLogHandler Configuration
+  support::configuration::SoccerConfig # Field description
+  support::configuration::GlobalConfig
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  output::ImageCompressor
+  # Sensors and network (input)
+  input::Sensors
+  input::NUSimCamera
+  input::NUSimGroundTruth
+  input::GameController
+  # input::WhistleDetection
+  network::RobotCommunication
+  # Vision
+  vision::Yolo
+  # Localisation
+  localisation::FieldLocalisationNLopt
+  localisation::BallLocalisation
+  localisation::RobotLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Servos
+  # Skills
+  skill::SimK1Walk
+  # skill::KickWalk
+  skill::SimK1Kick
+  skill::SimK1GetUp
+  skill::Look
+  # Planners
+  planning::PlanWalkPath
+  planning::PlanLook
+  planning::PlanKick
+  planning::GetUpPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  strategy::WalkToFieldPosition
+  strategy::StrategiseLook
+  strategy::WalkToBall
+  strategy::FindObject
+  # Purposes
+  purpose::Soccer
+  purpose::FieldPlayer
+  purpose::Goalie
+  purpose::Attack
+  purpose::ReadyAttack
+  purpose::Defend
+  purpose::Support
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+  # support::logging::DataLogging
+)
