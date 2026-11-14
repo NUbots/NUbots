@@ -27,7 +27,6 @@
 #ifndef MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
 #define MODULE_LOCALISATION_FIELDLOCALSATIONNLOPT_HPP
 
-#include <atomic>
 #include <Eigen/Core>
 #include <nlopt.hpp>
 #include <nuclear>
@@ -315,8 +314,9 @@ namespace module::localisation {
         /// @brief Bool indicating ground truth localisation (Hfw) computed
         bool ground_truth_initialised = false;
 
-        /// @brief Set while input::NUSimGroundTruth is providing Field, so this module must not emit its own
-        std::atomic<bool> ground_truth_mode{false};
+        /// @brief The main localisation reaction. Disabled while input::NUSimGroundTruth is providing Field, so this
+        /// module does not emit its own
+        ReactionHandle localisation_reaction{};
 
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();

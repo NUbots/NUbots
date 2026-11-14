@@ -1,6 +1,6 @@
 # NUSim counterpart of robocup.role: the competition role, which obeys the GameController, with the swaps
-# nusim/behaviour makes for the simulator. NUSim ignores the firmware Move/VisualKick RPCs, so walk, kick and get-up
-# run as ONNX policies (SimK1Walk, SimK1Kick, SimK1GetUp), and the camera comes from NUSim's shared-memory writer
+# nusim/behaviour makes for the simulator. NUSim ignores the firmware Move/VisualKick RPCs, so walk, kick and get-up run
+# as ONNX policies (SimK1Walk, SimK1Kick, SimK1GetUp), and the camera comes from NUSim's shared-memory writer
 # (input::NUSimCamera). input::NUSimGroundTruth is idle unless NUSim's launcher switches ground truth on.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First

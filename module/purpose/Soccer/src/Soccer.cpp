@@ -89,10 +89,10 @@ namespace module::purpose {
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Soccer.yaml").then([this](const Configuration& config) {
-            this->log_level        = config["log_level"].as<NUClear::LogLevel>();
-            cfg.force_playing      = config["force_playing"].as<bool>();
-            cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
-            cfg.firmware_soccer_mode = config["firmware_soccer_mode"].as<bool>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
+            cfg.force_playing              = config["force_playing"].as<bool>();
+            cfg.disable_idle_delay         = config["disable_idle_delay"].as<int>();
+            cfg.firmware_soccer_mode       = config["firmware_soccer_mode"].as<bool>();
             cfg.fall_recovery_from_startup = config["fall_recovery_from_startup"].as<bool>();
 
             if (cfg.force_playing) {
@@ -120,7 +120,8 @@ namespace module::purpose {
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
             // In NUSim there is no button press to start fall recovery, so start it ourselves. Not straight away: until
-            // the first sensor readings arrive the torso looks fallen, and getting up from standing knocks the robot over
+            // the first sensor readings arrive the torso looks fallen, and getting up from standing knocks the robot
+            // over
             if (cfg.fall_recovery_from_startup) {
                 emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(10));
             }

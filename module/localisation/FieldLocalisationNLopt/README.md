@@ -94,6 +94,7 @@ Include this module to allow the robot to estimate where the field is in world s
 - `message::vision::FieldLineIntersections` field line intersections are used in the field localisation cost function
 - `message::vision::Goals` goal positions are used in the field localisation cost function
 - `message::support::FieldDescription` to determine the field map and bounds of the field
+- `message::localisation::GroundTruthMode` stops field localisation while the simulator is providing ground truth
 
 ## Emits
 

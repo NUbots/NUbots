@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -34,8 +34,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/GroundTruthMode.hpp"
 
-#include "utility/localisation/GroundTruthMode.hpp"
 #include "utility/platform/Booster/channel_factory.hpp"
 
 namespace module::input {
@@ -45,8 +45,8 @@ namespace module::input {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::localisation::GroundTruthMode;
     using message::localisation::RobotPoseGroundTruth;
-    using utility::localisation::GroundTruthMode;
 
     NUSimGroundTruth::NUSimGroundTruth(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -157,10 +157,18 @@ namespace module::input {
                 ball->time_of_measurement   = NUClear::clock::now();
                 ball->Hcw                   = sensors.Hcw;
                 ball->average_rBWw          = ball->rBWw;
-                log<DEBUG>("robot in field (x, y, yaw):", Hft.translation().x(), Hft.translation().y(),
-                           std::atan2(Hft(1, 0), Hft(0, 0)), "ball in field:", (Hfs * ball_position).x(),
-                           (Hfs * ball_position).y(), "ball in world:", ball->rBWw.x(), ball->rBWw.y(),
-                           "torso in world:", sensors.Htw.inverse().translation().x(),
+                log<DEBUG>("robot in field (x, y, yaw):",
+                           Hft.translation().x(),
+                           Hft.translation().y(),
+                           std::atan2(Hft(1, 0), Hft(0, 0)),
+                           "ball in field:",
+                           (Hfs * ball_position).x(),
+                           (Hfs * ball_position).y(),
+                           "ball in world:",
+                           ball->rBWw.x(),
+                           ball->rBWw.y(),
+                           "torso in world:",
+                           sensors.Htw.inverse().translation().x(),
                            sensors.Htw.inverse().translation().y());
                 emit(ball);
             }
@@ -174,7 +182,9 @@ namespace module::input {
         active = now_active;
         log<INFO>(active ? "Ground truth ON: Field and Ball now come from NUSim"
                          : "Ground truth OFF: back to vision and localisation");
-        emit(std::make_unique<GroundTruthMode>(GroundTruthMode{active}));
+        auto mode     = std::make_unique<GroundTruthMode>();
+        mode->enabled = active;
+        emit(mode);
     }
 
 }  // namespace module::input
