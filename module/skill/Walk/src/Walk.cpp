@@ -475,11 +475,11 @@ namespace module::skill {
             }
         };
 
-        // Only a failure to set up the GPU falls back to the CPU. FP16 is off, see Walk.yaml.
+        // Only a failure to set up the GPU falls back to the CPU.
         try {
             std::string device = cfg.device;
             try {
-                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
+                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device);
             }
             catch (const std::exception& e) {
                 if (device != "gpu") {
@@ -487,7 +487,7 @@ namespace module::skill {
                 }
                 log<INFO>("TensorRT unavailable, falling back to the CPU:", e.what());
                 device  = "cpu";
-                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device, false);
+                onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(cfg.model_path, device);
             }
             check(numel(onnx_rt->input_shape()), numel(onnx_rt->output_shape()));
             model_loaded = true;
