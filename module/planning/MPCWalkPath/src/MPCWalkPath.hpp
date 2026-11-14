@@ -28,6 +28,7 @@
 #define MODULE_PLANNING_MPCWALKPATH_HPP
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <memory>
 #include <nuclear>
 #include <optional>
@@ -89,6 +90,12 @@ namespace module::planning {
         std::unique_ptr<walk_mpc::WalkMPC> mpc{};
         /// @brief When the last WalkTo was planned, to tell a fresh request from a continuing one
         NUClear::clock::time_point last_plan_time{};
+        /// @brief The target of the last WalkTo, as it was given (to tell a new WalkTo from a rerun of the same one)
+        Eigen::Isometry3d last_Hrd = Eigen::Isometry3d::Identity();
+        /// @brief The target of the last WalkTo in world space, fixed when the WalkTo was first run
+        Eigen::Isometry3d Hwd = Eigen::Isometry3d::Identity();
+        /// @brief Whether a WalkTo has been run since the task started
+        bool have_target = false;
         /// @brief The last command sent to the walk
         Eigen::Vector3d last_walk_command = Eigen::Vector3d::Zero();
         /// @brief Solves that fell back to PlanWalkPath's control law since the last log

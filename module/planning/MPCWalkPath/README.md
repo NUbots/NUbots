@@ -7,9 +7,11 @@ Plans walk velocity commands to a target pose with model predictive control, as 
 command that delivers it is found afterwards from a Hammerstein model of the walk policy's response and the model's
 estimate of what the robot is delivering now: the command that, held from the estimate, delivers the planned velocity
 one planner step (0.1 s) later. It only provides `WalkTo`; PlanWalkPath still provides `TurnOnSpot`,
-`PivotAroundPoint` and `Adjust`, and the two can't be in the same role, as both provide `WalkTo`.
+`PivotAroundPoint` and `Adjust`, and can be in the same role with its own `WalkTo` turned off (`provide_walk_to: false`
+in `PlanWalkPath.yaml`).
 
-Every time `WalkTo` is run (10 Hz under the Director):
+`WalkTo` is run at 10 Hz while the task is active, however often it is emitted. Between new `WalkTo`s the target stays
+where it was in the world. Every time it is run:
 
 1. The model's estimate of the robot is advanced by the time since the last solve, with the command sent then held.
 2. The MPC plans the delivered velocity (below).
@@ -112,7 +114,8 @@ Things to know:
 
 ## Usage
 
-Include this module in a role in place of PlanWalkPath, and emit a `WalkTo` Task.
+Include this module in a role in place of PlanWalkPath, or alongside it with PlanWalkPath's `provide_walk_to` off (as
+in `roles/nusim/behaviour.role`), and emit a `WalkTo` Task.
 
 ## Consumes
 

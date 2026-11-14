@@ -53,71 +53,69 @@ namespace module::planning {
     using message::planning::WalkToDebug;
     using message::skill::Walk;
 
-    using walk_mpc::DynamicInverse;
-    using walk_mpc::WalkMPC;
     using utility::math::angle::vector_to_bearing;
     using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
     using utility::planning::HammersteinModel;
     using utility::support::Expression;
+    using walk_mpc::DynamicInverse;
+    using walk_mpc::WalkMPC;
 
     MPCWalkPath::MPCWalkPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration, Sync<MPCWalkPath>>("MPCWalkPath.yaml")
-            .then([this](const Configuration& config) {
-                this->log_level = config["log_level"].as<NUClear::LogLevel>();
+        on<Configuration, Sync<MPCWalkPath>>("MPCWalkPath.yaml").then([this](const Configuration& config) {
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-                // Velocity limits, on the planned velocity
-                cfg.max_velocity          = config["max_velocity"].as<Expression>();
-                cfg.max_backward_velocity = config["max_backward_velocity"].as<double>();
+            // Velocity limits, on the planned velocity
+            cfg.max_velocity          = config["max_velocity"].as<Expression>();
+            cfg.max_backward_velocity = config["max_backward_velocity"].as<double>();
 
-                // Cost
-                cfg.mpc.w_position     = config["w_position"].as<double>();
-                cfg.mpc.huber_delta    = config["huber_delta"].as<double>();
-                cfg.mpc.w_heading      = config["w_heading"].as<double>();
-                cfg.mpc.heading_radius = config["heading_radius"].as<double>();
-                cfg.mpc.w_face         = config["w_face"].as<double>();
-                cfg.mpc.w_effort       = config["w_effort"].as<Expression>();
-                cfg.mpc.w_rate         = config["w_rate"].as<Expression>();
+            // Cost
+            cfg.mpc.w_position     = config["w_position"].as<double>();
+            cfg.mpc.huber_delta    = config["huber_delta"].as<double>();
+            cfg.mpc.w_heading      = config["w_heading"].as<double>();
+            cfg.mpc.heading_radius = config["heading_radius"].as<double>();
+            cfg.mpc.w_face         = config["w_face"].as<double>();
+            cfg.mpc.w_effort       = config["w_effort"].as<Expression>();
+            cfg.mpc.w_rate         = config["w_rate"].as<Expression>();
 
-                // Obstacles
-                cfg.mpc.obstacle_radius = config["obstacle_radius"].as<double>();
-                cfg.mpc.w_slack         = config["w_slack"].as<double>();
+            // Obstacles
+            cfg.mpc.obstacle_radius = config["obstacle_radius"].as<double>();
+            cfg.mpc.w_slack         = config["w_slack"].as<double>();
 
-                // Finding the command
-                cfg.zero_tolerance    = config["zero_tolerance"].as<Expression>();
-                cfg.command_grid_step = config["command_grid_step"].as<double>();
+            // Finding the command
+            cfg.zero_tolerance    = config["zero_tolerance"].as<Expression>();
+            cfg.command_grid_step = config["command_grid_step"].as<double>();
 
-                // Solver
-                cfg.mpc.max_iterations = config["max_iterations"].as<int>();
-                cfg.time_budget        = config["time_budget"].as<double>();
-                cfg.stale_time         = config["stale_time"].as<double>();
+            // Solver
+            cfg.mpc.max_iterations = config["max_iterations"].as<int>();
+            cfg.time_budget        = config["time_budget"].as<double>();
+            cfg.stale_time         = config["stale_time"].as<double>();
 
-                // Fallback (PlanWalkPath's WalkTo control law and dead zone), with the velocity limits
-                cfg.fallback.max_velocity          = cfg.max_velocity;
-                cfg.fallback.max_backward_velocity = cfg.max_backward_velocity;
-                cfg.fallback.k_translation         = config["fallback"]["k_translation"].as<double>();
-                cfg.fallback.k_theta               = config["fallback"]["k_theta"].as<double>();
-                cfg.fallback.max_align_radius      = config["fallback"]["max_align_radius"].as<double>();
-                cfg.fallback.min_align_radius      = config["fallback"]["min_align_radius"].as<double>();
-                cfg.fallback.max_angle_error       = config["fallback"]["max_angle_error"].as<Expression>();
-                cfg.fallback.min_angle_error       = config["fallback"]["min_angle_error"].as<Expression>();
-                cfg.fallback_min_velocity          = config["fallback"]["min_velocity"].as<Expression>();
-                cfg.fallback_zero_tolerance        = config["fallback"]["zero_tolerance"].as<Expression>();
-                cfg.fallback_rotate_velocity_x     = config["fallback"]["rotate_velocity_x"].as<double>();
+            // Fallback (PlanWalkPath's WalkTo control law and dead zone), with the velocity limits
+            cfg.fallback.max_velocity          = cfg.max_velocity;
+            cfg.fallback.max_backward_velocity = cfg.max_backward_velocity;
+            cfg.fallback.k_translation         = config["fallback"]["k_translation"].as<double>();
+            cfg.fallback.k_theta               = config["fallback"]["k_theta"].as<double>();
+            cfg.fallback.max_align_radius      = config["fallback"]["max_align_radius"].as<double>();
+            cfg.fallback.min_align_radius      = config["fallback"]["min_align_radius"].as<double>();
+            cfg.fallback.max_angle_error       = config["fallback"]["max_angle_error"].as<Expression>();
+            cfg.fallback.min_angle_error       = config["fallback"]["min_angle_error"].as<Expression>();
+            cfg.fallback_min_velocity          = config["fallback"]["min_velocity"].as<Expression>();
+            cfg.fallback_zero_tolerance        = config["fallback"]["zero_tolerance"].as<Expression>();
+            cfg.fallback_rotate_velocity_x     = config["fallback"]["rotate_velocity_x"].as<double>();
 
-                have_config = true;
-                configure_mpc();
-            });
+            have_config = true;
+            configure_mpc();
+        });
 
         // The Hammerstein model
-        on<Configuration, Sync<MPCWalkPath>>("MPCWalkPathModel.yaml")
-            .then([this](const Configuration& config) {
-                model       = HammersteinModel::from_yaml(config.config);
-                model_range = config["identified_range"].as<Expression>();
-                configure_mpc();
-            });
+        on<Configuration, Sync<MPCWalkPath>>("MPCWalkPathModel.yaml").then([this](const Configuration& config) {
+            model       = HammersteinModel::from_yaml(config.config);
+            model_range = config["identified_range"].as<Expression>();
+            configure_mpc();
+        });
 
         on<Trigger<Stability>, Sync<MPCWalkPath>>().then([this](const Stability& new_stability) {
             // Starting to walk after a fall or from standing: the previous velocity and the estimate no longer describe
@@ -132,13 +130,19 @@ namespace module::planning {
 
         on<Start<WalkTo>, Sync<MPCWalkPath>>().then([this] {
             // A new WalkTo: whatever was walking before, the MPC's warm start and the estimate are from another request
+            have_target = false;
             if (mpc != nullptr) {
                 reset();
             }
         });
 
-        on<Provide<WalkTo>, Optional<With<Robots>>, With<Sensors>, Sync<MPCWalkPath>>().then(
-            [this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
+        // Runs at the MPC's rate as well as on every new WalkTo, as the task may be emitted far less often
+        on<Provide<WalkTo>,
+           Every<10, Per<std::chrono::seconds>>,
+           Optional<With<Robots>>,
+           With<Sensors>,
+           Sync<MPCWalkPath>>()
+            .then([this](const WalkTo& walk_to, const std::shared_ptr<const Robots>& robots, const Sensors& sensors) {
                 if (mpc == nullptr) {
                     return;
                 }
@@ -165,8 +169,13 @@ namespace module::planning {
                 }
                 last_plan_time = now;
 
-                // Target pose in the robot frame
-                const auto& Hrd                     = walk_to.Hrd;
+                // Target pose in the robot frame. Between new WalkTos the target stays where it was in the world.
+                if (!have_target || walk_to.Hrd.matrix() != last_Hrd.matrix()) {
+                    have_target = true;
+                    last_Hrd    = walk_to.Hrd;
+                    Hwd         = sensors.Hrw.inverse() * walk_to.Hrd;
+                }
+                const Eigen::Isometry3d Hrd         = sensors.Hrw * Hwd;
                 const Eigen::Vector2d rDRr          = Hrd.translation().head<2>();
                 const double angle_to_final_heading = vector_to_bearing(Hrd.linear().col(0).head<2>());
                 const Eigen::Vector3d target(rDRr.x(), rDRr.y(), angle_to_final_heading);
@@ -193,10 +202,10 @@ namespace module::planning {
                                                                         cfg.fallback.max_velocity,
                                                                         cfg.fallback.max_backward_velocity);
                     command             = walk_path::apply_dead_zone(fallback,
-                                                                     cfg.fallback_min_velocity,
-                                                                     cfg.fallback_zero_tolerance,
-                                                                     cfg.max_velocity,
-                                                                     cfg.fallback_rotate_velocity_x);
+                                                         cfg.fallback_min_velocity,
+                                                         cfg.fallback_zero_tolerance,
+                                                         cfg.max_velocity,
+                                                         cfg.fallback_rotate_velocity_x);
                     if (!command.allFinite()) {
                         command.setZero();
                     }
@@ -273,8 +282,7 @@ namespace module::planning {
             return;
         }
         // A new model or grid starts the estimate from standing, as a reset does
-        inverse =
-            std::make_unique<DynamicInverse>(*model, model_range, cfg.command_grid_step, WalkMPC::DT);
+        inverse = std::make_unique<DynamicInverse>(*model, model_range, cfg.command_grid_step, WalkMPC::DT);
 
         // The MPC plans within the velocity limits, and only the velocities the model settles to
         const Eigen::Vector3d lower(-cfg.max_backward_velocity, -cfg.max_velocity.y(), -cfg.max_velocity.z());
