@@ -314,6 +314,10 @@ namespace module::localisation {
         /// @brief Bool indicating ground truth localisation (Hfw) computed
         bool ground_truth_initialised = false;
 
+        /// @brief The main localisation reaction. Disabled while input::NUSimGroundTruth is providing Field, so this
+        /// module does not emit its own
+        ReactionHandle localisation_reaction{};
+
         /// @brief Ground truth Hfw
         Eigen::Isometry3d ground_truth_Hfw = Eigen::Isometry3d::Identity();
 

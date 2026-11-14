@@ -33,6 +33,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/GroundTruthMode.hpp"
 
 #include "utility/algorithm/assignment.hpp"
 #include "utility/math/euler.hpp"
@@ -46,6 +47,7 @@ namespace module::localisation {
     using message::input::Sensors;
     using message::localisation::Field;
     using message::localisation::FinishReset;
+    using message::localisation::GroundTruthMode;
     using message::localisation::Line;
     using message::localisation::PenaltyReset;
     using message::localisation::ResetFieldLocalisation;
@@ -196,6 +198,10 @@ namespace module::localisation {
             last_reset        = NUClear::clock::now();
             localised         = false;
             num_accepted      = 0;
+            // While ground truth perception is on, Field comes from the simulator instead
+            if (!localisation_reaction.enabled()) {
+                return;
+            }
             // Emit an unlocalised Field immediately so consumers don't act on the stale pre-reset pose
             auto field       = std::make_unique<Field>();
             field->Hfw       = compute_Hfw(filtered_state);
@@ -216,168 +222,173 @@ namespace module::localisation {
             num_accepted = cfg.min_localised_measurements;
         });
 
-        on<Trigger<FieldIntersections>,
-           Optional<With<Goals>>,
-           With<Stability>,
-           Optional<With<RobotPoseGroundTruth>>,
-           With<FieldDescription>,
-           With<Sensors>,
-           Single>()
-            .then("NLopt field localisation",
-                  [this](const FieldIntersections& field_intersections,
-                         const std::shared_ptr<const Goals>& goals,
-                         const Stability& stability,
-                         const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
-                         const FieldDescription& fd,
-                         const Sensors& sensors) {
-                      // Emit field message using ground truth if available
-                      if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
-                          auto field(std::make_unique<Field>());
-                          // Odometry ground truth should be field {f} to torso {t} space, so we can assume the identity
-                          // transform
+        // While ground truth perception is on, Field comes from the simulator instead, so stop our own reaction
+        on<Trigger<GroundTruthMode>>().then(
+            [this](const GroundTruthMode& mode) { localisation_reaction.enable(!mode.enabled); });
 
-                          if (!ground_truth_initialised) {
-                              Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
-                              ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
-                              ground_truth_Hfw.translation()[2]        = 0;
-                              double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
-                              ground_truth_Hfw.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
-                              ground_truth_initialised  = true;
-                          }
-                          field->Hfw       = ground_truth_Hfw;
-                          field->localised = true;
-                          emit(field);
-                          return;
-                      }
+        localisation_reaction =
+            on<Trigger<FieldIntersections>,
+               Optional<With<Goals>>,
+               With<Stability>,
+               Optional<With<RobotPoseGroundTruth>>,
+               With<FieldDescription>,
+               With<Sensors>,
+               Single>()
+                .then("NLopt field localisation",
+                      [this](const FieldIntersections& field_intersections,
+                             const std::shared_ptr<const Goals>& goals,
+                             const Stability& stability,
+                             const std::shared_ptr<const RobotPoseGroundTruth>& robot_pose_ground_truth,
+                             const FieldDescription& fd,
+                             const Sensors& sensors) {
+                          // Emit field message using ground truth if available
+                          if (cfg.use_ground_truth_localisation && robot_pose_ground_truth) {
+                              auto field(std::make_unique<Field>());
+                              // Odometry ground truth should be field {f} to torso {t} space, so we can assume the
+                              // identity transform
 
-                      // Don't run an update if the robot is unstable. If there are not enough field line
-                      // intersections, we can still run an initial startup update when two goals are visible.
-                      bool unstable = stability <= Stability::FALLING;
-                      bool enough_field_line_intersections =
-                          field_intersections.intersections.size() >= cfg.min_field_line_intersections;
-                      bool enough_goals = goals && goals->goals.size() == 2;
-
-                      if (unstable || !(enough_field_line_intersections || enough_goals)) {
-                          log<DEBUG>("Not enough localisation information or robot is unstable");
-                          return;
-                      }
-
-                      double chosen_state_cost = 0.0;
-                      Eigen::Vector3d proposed_state;
-
-                      if (startup && cfg.starting_side == StartingSide::EITHER) {
-                          // Find the best initial state to use based on the visible field features.
-                          std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                          for (auto& hypothesis : cfg.initial_hypotheses) {
-                              if (enough_field_line_intersections) {
-                                  opt_results.push_back(
-                                      run_field_line_optimisation(hypothesis, field_intersections, goals));
+                              if (!ground_truth_initialised) {
+                                  Eigen::Isometry3d Hft = Eigen::Isometry3d(robot_pose_ground_truth->Hft);
+                                  ground_truth_Hfw.translation().head<2>() = Hft.translation().head<2>();
+                                  ground_truth_Hfw.translation()[2]        = 0;
+                                  double yaw                               = mat_to_rpy_intrinsic(Hft.rotation()).z();
+                                  ground_truth_Hfw.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, yaw));
+                                  ground_truth_initialised  = true;
                               }
-                              else {
-                                  opt_results.emplace_back(hypothesis, goal_post_alignment_cost(hypothesis, goals));
-                              }
+                              field->Hfw       = ground_truth_Hfw;
+                              field->localised = true;
+                              emit(field);
+                              return;
                           }
-                          auto best_hypothesis =
-                              std::min_element(opt_results.begin(),
-                                               opt_results.end(),
-                                               [](const auto& a, const auto& b) { return a.second < b.second; });
-                          proposed_state    = best_hypothesis->first;
-                          chosen_state_cost = best_hypothesis->second;
-                          // For startup, always accept the best hypothesis.
-                          state              = proposed_state;
-                          last_certain_state = state;
-                          filtered_state     = state;
-                          first_measurement  = true;
-                          startup            = false;
-                          num_accepted++;
-                      }
-                      else {
-                          // Run the optimisation routine
-                          std::pair<Eigen::Vector3d, double> opt_results =
-                              run_field_line_optimisation(filtered_state, field_intersections, goals);
-                          proposed_state    = opt_results.first;
-                          chosen_state_cost = opt_results.second;
 
-                          // Only accept the optimisation result if the cost is below the threshold
-                          if (chosen_state_cost < cfg.cost_threshold) {
-                              state = proposed_state;
+                          // Don't run an update if the robot is unstable. If there are not enough field line
+                          // intersections, we can still run an initial startup update when two goals are visible.
+                          bool unstable = stability <= Stability::FALLING;
+                          bool enough_field_line_intersections =
+                              field_intersections.intersections.size() >= cfg.min_field_line_intersections;
+                          bool enough_goals = goals && goals->goals.size() == 2;
 
-                              // Apply exponential filter to smooth the state estimate unless it is the first
-                              // measurement.
-                              filtered_state =
-                                  first_measurement
-                                      ? state
-                                      : cfg.alpha.cwiseProduct(state)
-                                            + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+                          if (unstable || !(enough_field_line_intersections || enough_goals)) {
+                              log<DEBUG>("Not enough localisation information or robot is unstable");
+                              return;
+                          }
 
-                              // Reset the flag.
-                              first_measurement = false;
+                          double chosen_state_cost = 0.0;
+                          Eigen::Vector3d proposed_state;
 
-                              // Update the last certain state and reset counter
-                              last_certain_state = filtered_state;
-                              num_over_cost      = 0;
+                          if (startup && cfg.starting_side == StartingSide::EITHER) {
+                              // Find the best initial state to use based on the visible field features.
+                              std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
+                              for (auto& hypothesis : cfg.initial_hypotheses) {
+                                  if (enough_field_line_intersections) {
+                                      opt_results.push_back(
+                                          run_field_line_optimisation(hypothesis, field_intersections, goals));
+                                  }
+                                  else {
+                                      opt_results.emplace_back(hypothesis, goal_post_alignment_cost(hypothesis, goals));
+                                  }
+                              }
+                              auto best_hypothesis =
+                                  std::min_element(opt_results.begin(),
+                                                   opt_results.end(),
+                                                   [](const auto& a, const auto& b) { return a.second < b.second; });
+                              proposed_state    = best_hypothesis->first;
+                              chosen_state_cost = best_hypothesis->second;
+                              // For startup, always accept the best hypothesis.
+                              state              = proposed_state;
+                              last_certain_state = state;
+                              filtered_state     = state;
+                              first_measurement  = true;
+                              startup            = false;
                               num_accepted++;
                           }
                           else {
-                              // Reject the update, keep previous filtered state
-                              log<DEBUG>("Rejecting optimisation result: cost ",
-                                         chosen_state_cost,
-                                         " exceeds threshold ",
-                                         cfg.cost_threshold);
-                              // Keep the current filtered_state unchanged
-                              // Increment the over-cost counter for potential reset
-                              num_over_cost++;
+                              // Run the optimisation routine
+                              std::pair<Eigen::Vector3d, double> opt_results =
+                                  run_field_line_optimisation(filtered_state, field_intersections, goals);
+                              proposed_state    = opt_results.first;
+                              chosen_state_cost = opt_results.second;
+
+                              // Only accept the optimisation result if the cost is below the threshold
+                              if (chosen_state_cost < cfg.cost_threshold) {
+                                  state = proposed_state;
+
+                                  // Apply exponential filter to smooth the state estimate unless it is the first
+                                  // measurement.
+                                  filtered_state =
+                                      first_measurement
+                                          ? state
+                                          : cfg.alpha.cwiseProduct(state)
+                                                + (Eigen::Vector3d::Ones() - cfg.alpha).cwiseProduct(filtered_state);
+
+                                  // Reset the flag.
+                                  first_measurement = false;
+
+                                  // Update the last certain state and reset counter
+                                  last_certain_state = filtered_state;
+                                  num_over_cost      = 0;
+                                  num_accepted++;
+                              }
+                              else {
+                                  // Reject the update, keep previous filtered state
+                                  log<DEBUG>("Rejecting optimisation result: cost ",
+                                             chosen_state_cost,
+                                             " exceeds threshold ",
+                                             cfg.cost_threshold);
+                                  // Keep the current filtered_state unchanged
+                                  // Increment the over-cost counter for potential reset
+                                  num_over_cost++;
+                              }
                           }
-                      }
 
-                      // Check if uncertainty is too high and trigger reset if needed
-                      emit(graph("Cost", chosen_state_cost));
-                      if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
-                          && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
-                          // Cost has been high too many times, reset the localisation
-                          log<WARN>("Cost exceeded threshold ",
-                                    cfg.max_over_cost,
-                                    " times, triggering uncertainty reset");
-                          // Emit that we are resetting, eg for behaviour
-                          emit(std::make_unique<UncertaintyResetFieldLocalisation>());
-                          // Reset localisation by finding a new low cost state
-                          const auto reset_start = NUClear::clock::now();
-                          uncertainty_reset(fd, field_intersections, goals, sensors.Hrw);
-                          const auto reset_end = NUClear::clock::now();
-                          const auto reset_duration =
-                              std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
-                          log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
-                          // Reset variables
-                          num_over_cost = 0;
-                          num_accepted  = 0;
-                          last_reset    = NUClear::clock::now();
-                          // Let other modules know that localisation has finished resetting
-                          emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
-                      }
+                          // Check if uncertainty is too high and trigger reset if needed
+                          emit(graph("Cost", chosen_state_cost));
+                          if (cfg.reset_on_cost && (num_over_cost > cfg.max_over_cost)
+                              && ((NUClear::clock::now() - last_reset) > std::chrono::seconds(cfg.reset_delay))) {
+                              // Cost has been high too many times, reset the localisation
+                              log<WARN>("Cost exceeded threshold ",
+                                        cfg.max_over_cost,
+                                        " times, triggering uncertainty reset");
+                              // Emit that we are resetting, eg for behaviour
+                              emit(std::make_unique<UncertaintyResetFieldLocalisation>());
+                              // Reset localisation by finding a new low cost state
+                              const auto reset_start = NUClear::clock::now();
+                              uncertainty_reset(fd, field_intersections, goals, sensors.Hrw);
+                              const auto reset_end = NUClear::clock::now();
+                              const auto reset_duration =
+                                  std::chrono::duration_cast<std::chrono::duration<double>>(reset_end - reset_start);
+                              log<DEBUG>("Uncertainty reset duration (s): ", reset_duration.count());
+                              // Reset variables
+                              num_over_cost = 0;
+                              num_accepted  = 0;
+                              last_reset    = NUClear::clock::now();
+                              // Let other modules know that localisation has finished resetting
+                              emit<Scope::DELAY>(std::make_unique<FinishReset>(), std::chrono::seconds(1));
+                          }
 
-                      // Emit the field message
-                      auto field = std::make_unique<Field>();
-                      field->Hfw = compute_Hfw(filtered_state);
+                          // Emit the field message
+                          auto field = std::make_unique<Field>();
+                          field->Hfw = compute_Hfw(filtered_state);
 
-                      // Debugging
-                      if (log_level <= DEBUG) {
-                          debug_field_localisation(field->Hfw, sensors.Htw);
-                      }
-                      // Association (run once for debugging in NUsight)
-                      auto associations = data_association(field_intersections, field->Hfw);
-                      for (const auto& association : associations) {
-                          field->association_lines.push_back({association.first, association.second});
-                      }
+                          // Debugging
+                          if (log_level <= DEBUG) {
+                              debug_field_localisation(field->Hfw, sensors.Htw);
+                          }
+                          // Association (run once for debugging in NUsight)
+                          auto associations = data_association(field_intersections, field->Hfw);
+                          for (const auto& association : associations) {
+                              field->association_lines.push_back({association.first, association.second});
+                          }
 
-                      // Add cost, covariance, and uncertainty to the field message
-                      field->cost = chosen_state_cost;
+                          // Add cost, covariance, and uncertainty to the field message
+                          field->cost = chosen_state_cost;
 
-                      // The pose is trusted once enough measurements have been accepted since the last reset
-                      localised        = num_accepted >= cfg.min_localised_measurements;
-                      field->localised = localised;
+                          // The pose is trusted once enough measurements have been accepted since the last reset
+                          localised        = num_accepted >= cfg.min_localised_measurements;
+                          field->localised = localised;
 
-                      emit(field);
-                  });
+                          emit(field);
+                      });
     }
 
     void FieldLocalisationNLopt::debug_field_localisation(const Eigen::Isometry3d& Hfw, const Eigen::Isometry3d& Htw) {

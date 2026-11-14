@@ -104,6 +104,11 @@ namespace module::localisation {
         /// @brief The time of the last time update
         NUClear::clock::time_point last_time_update;
 
+        /// @brief The reactions that update the ball estimate. Disabled while input::NUSimGroundTruth is providing
+        /// Ball, so this module does not emit its own
+        ReactionHandle vision_ball_reaction{};
+        ReactionHandle team_ball_reaction{};
+
         /// @brief Unscented Kalman Filter for ball filtering
         utility::math::filter::UKF<double, BallModel> ukf{};
 

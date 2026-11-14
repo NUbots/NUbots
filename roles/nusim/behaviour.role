@@ -18,6 +18,7 @@ nuclear_role(
   # Sensors — NUSimCamera (sim seqlock reader) instead of Camera (NUbridge/on-robot). Sensors is shared: NUSim's pose
   # writer still uses the v1 layout it reads.
   input::NUSimCamera
+  input::NUSimGroundTruth # NUSim's "Perception: Ground truth" switch: Field + Ball straight from the simulator
   input::Sensors
   # Vision — Yolo-only, matching the robocup.role hardware pipeline
   vision::Yolo

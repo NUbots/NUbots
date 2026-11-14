@@ -89,9 +89,11 @@ namespace module::purpose {
     Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Soccer.yaml").then([this](const Configuration& config) {
-            this->log_level        = config["log_level"].as<NUClear::LogLevel>();
-            cfg.force_playing      = config["force_playing"].as<bool>();
-            cfg.disable_idle_delay = config["disable_idle_delay"].as<int>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
+            cfg.force_playing              = config["force_playing"].as<bool>();
+            cfg.disable_idle_delay         = config["disable_idle_delay"].as<int>();
+            cfg.firmware_soccer_mode       = config["firmware_soccer_mode"].as<bool>();
+            cfg.fall_recovery_from_startup = config["fall_recovery_from_startup"].as<bool>();
 
             if (cfg.force_playing) {
                 emit(std::make_unique<GameState::Phase>(GameState::Phase::PLAYING));
@@ -117,6 +119,12 @@ namespace module::purpose {
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 0);
             // Idle look forward if the head isn't doing anything else
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true), 0);
+            // In NUSim there is no button press to start fall recovery, so start it ourselves. Not straight away: until
+            // the first sensor readings arrive the torso looks fallen, and getting up from standing knocks the robot
+            // over
+            if (cfg.fall_recovery_from_startup) {
+                emit<Scope::DELAY>(std::make_unique<StartSoccer>(), std::chrono::seconds(10));
+            }
         });
 
         on<Trigger<StartSoccer>, With<GameState>>().then([this](const GameState& game_state) {
@@ -153,7 +161,7 @@ namespace module::purpose {
         // mode until it leaves the READY phase, at which point it needs to move so we switch to soccer.
         on<Trigger<GameState>>().then([this](const GameState& game_state) {
             if (previous_phase == GameState::Phase::READY && game_state.phase != GameState::Phase::READY) {
-                emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
+                emit(std::make_unique<BoosterMode>(cfg.firmware_soccer_mode ? K1Mode::SOCCER : K1Mode::CUSTOM));
             }
             previous_phase = game_state.phase;
 
@@ -217,7 +225,7 @@ namespace module::purpose {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (!cfg.force_playing && !idle && self_unpenalisation.context == GameEvents::Context::SELF) {
                 // The robot autonomously re-enters the game, so it needs to move again: back to soccer
-                emit(std::make_unique<BoosterMode>(K1Mode::SOCCER));
+                emit(std::make_unique<BoosterMode>(cfg.firmware_soccer_mode ? K1Mode::SOCCER : K1Mode::CUSTOM));
                 // If a brief stop is in effect, stay still - the stop-clear handler resumes play instead
                 if (!stopped) {
                     emit<Task>(std::make_unique<FindPurpose>(), 1);
