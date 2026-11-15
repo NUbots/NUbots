@@ -36,7 +36,6 @@
 #include "message/localisation/GroundTruthMode.hpp"
 
 #include "utility/algorithm/assignment.hpp"
-#include "utility/localisation/GroundTruthMode.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -54,7 +53,6 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::RobotPoseGroundTruth;
     using message::localisation::UncertaintyResetFieldLocalisation;
-    using utility::localisation::GroundTruthMode;
     using utility::localisation::OccupancyMap;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;

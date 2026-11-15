@@ -41,7 +41,6 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-#include "utility/localisation/GroundTruthMode.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
