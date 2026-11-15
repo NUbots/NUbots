@@ -34,13 +34,14 @@ nuclear_role(
   # Servos
   actuation::Servos
   # Skills
-  skill::SimK1Walk
+  skill::Walk
   # skill::KickWalk
   skill::SimK1Kick
   skill::SimK1GetUp
   skill::Look
   # Planners
-  planning::PlanWalkPath
+  planning::MPCWalkPath # Provides WalkTo
+  planning::PlanWalkPath # TurnOnSpot, PivotAroundPoint and Adjust only (provide_walk_to is off for this role)
   planning::PlanLook
   planning::PlanKick
   planning::GetUpPlanner
