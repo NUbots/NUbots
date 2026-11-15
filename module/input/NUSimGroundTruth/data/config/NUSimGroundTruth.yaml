@@ -3,9 +3,6 @@ log_level: INFO
 # Use NUSim's ground truth for the robot's field pose and the ball, instead of vision + localisation.
 # NUSim's match launcher writes this file per robot when "Perception: Ground truth" is chosen.
 ground_truth: false
-# Whether the ball comes from ground truth too. Off leaves the ball to vision + BallLocalisation, with only the
-# robot's field pose from NUSim.
-ground_truth_ball: true
 
 # NUSim's ground truth topics (nav_msgs/Odometry, simulator world frame). See NUSim's SdkBridge/PROTOCOL.md.
 robot_topic: rt/nusim/gt/robot
@@ -17,3 +14,7 @@ world_to_field_yaw: 3.14159265358979
 
 # Ground truth older than this (seconds) is treated as missing, and vision + localisation take over again
 timeout: 0.5
+
+# While ground truth is on but missing, repeat the warning this often (seconds). Ground truth that has never arrived is
+# first reported this long after startup
+warning_period: 5.0

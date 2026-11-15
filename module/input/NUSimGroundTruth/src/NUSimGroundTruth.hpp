@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NUbots
+ * Copyright (c) 2026 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -42,13 +42,29 @@ namespace module::input {
     class NUSimGroundTruth : public NUClear::Reactor {
     private:
         struct Config {
-            bool ground_truth      = false;
-            bool ground_truth_ball = true;
+            bool ground_truth = false;
             std::string robot_topic;
             std::string ball_topic;
             double world_to_field_yaw = 0.0;
             double timeout            = 0.5;
+            double warning_period     = 5.0;
         } cfg;
+
+        /// @brief Tracks whether one of the ground truth topics is arriving, so dropouts are reported once when they
+        /// happen and then every warning_period, rather than on every cycle
+        struct Feed {
+            /// @brief What this feed carries, for the log messages
+            std::string name;
+            /// @brief Whether the feed was arriving the last time it was checked
+            bool fresh = false;
+            /// @brief Whether a warning has been logged since the feed was last arriving
+            bool warned = false;
+            /// @brief When the last warning was logged. Starts at construction so a feed that never arrives gets one
+            /// warning_period to show up before it is reported
+            NUClear::clock::time_point last_warning = NUClear::clock::now();
+        };
+        Feed robot_feed{"robot pose"};
+        Feed ball_feed{"ball"};
 
         /// @brief Latest samples, written by the DDS reader threads
         std::mutex mutex;
@@ -63,10 +79,20 @@ namespace module::input {
 
         /// @brief Whether ground truth is currently replacing vision + localisation
         bool active = false;
-        /// @brief Whether ground truth is currently replacing the vision ball too
-        bool ball_active = false;
 
-        void set_active(bool now_active, bool now_ball_active);
+        void set_active(bool now_active);
+
+        /// @brief Logs a warning when a ground truth feed drops out or never arrives, and when it comes back
+        /// @param feed The feed's state
+        /// @param topic The DDS topic the feed is read from
+        /// @param last_received When the last sample arrived, or the epoch if none ever has
+        /// @param fresh Whether the last sample is within the timeout
+        /// @param consequence What the robot is doing without this feed, for the log message
+        void check_feed(Feed& feed,
+                        const std::string& topic,
+                        const NUClear::clock::time_point& last_received,
+                        bool fresh,
+                        const std::string& consequence);
 
     public:
         /// @brief Called by the powerplant to build and setup the NUSimGroundTruth reactor.

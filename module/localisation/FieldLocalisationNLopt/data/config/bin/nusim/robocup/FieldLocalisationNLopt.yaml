@@ -1,0 +1,2 @@
+# Lower threshold tuned for NUSim, where fewer field line points reach the localiser
+min_field_line_points: 8
