@@ -11,6 +11,9 @@ localisation modules (`localisation::FieldLocalisationNLopt` and `localisation::
 own estimates. If no ground truth arrives for longer than `timeout`, ground truth mode is switched off again and vision
 and localisation take over.
 
+While `ground_truth` is enabled, a warning is logged when the robot pose or ball ground truth drops out, and again every
+`warning_period` for as long as it stays missing, including when it has never arrived since startup.
+
 Use this module in `roles/nusim/*` only.
 
 ## Usage
@@ -25,6 +28,8 @@ Use this module in `roles/nusim/*` only.
   frame). Only read at startup
 - `world_to_field_yaw`: yaw from NUSim's world frame to this robot's field frame {f}, which has our own goal on +x
 - `timeout`: ground truth older than this (in seconds) is treated as missing
+- `warning_period`: how often (in seconds) the missing ground truth warning repeats, and how long after startup ground
+  truth that has never arrived is first reported
 
 ## Consumes
 

@@ -14,3 +14,7 @@ world_to_field_yaw: 3.14159265358979
 
 # Ground truth older than this (seconds) is treated as missing, and vision + localisation take over again
 timeout: 0.5
+
+# While ground truth is on but missing, repeat the warning this often (seconds). Ground truth that has never arrived is
+# first reported this long after startup
+warning_period: 5.0
