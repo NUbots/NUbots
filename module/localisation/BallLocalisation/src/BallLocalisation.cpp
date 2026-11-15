@@ -37,6 +37,7 @@
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/GroundTruthMode.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 
@@ -64,6 +65,7 @@ namespace module::localisation {
         : Reactor(std::move(environment)) {
 
         using message::localisation::Ball;
+        using message::localisation::GroundTruthMode;
 
         on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -114,162 +116,171 @@ namespace module::localisation {
             last_time_update = NUClear::clock::now();
         });
 
+        // While ground truth perception is on, Ball comes from the simulator instead, so stop our own reactions
+        on<Trigger<GroundTruthMode>>().then([this](const GroundTruthMode& mode) {
+            vision_ball_reaction.enable(!mode.enabled);
+            team_ball_reaction.enable(!mode.enabled);
+        });
+
         /* To run whenever a ball has been detected */
-        on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then([this](const VisionBalls& balls,
-                                                                                            const FieldDescription& fd,
-                                                                                            const Field& field) {
-            // If there are no balls or there are no valid balls, return
-            if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
-                return;
-            }
-
-            Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
-            last_Hcw              = balls.Hcw;
-            auto state            = BallModel<double>::StateVec(ukf.get_state());
-
-            // Data association: find the ball closest to our current estimate
-            Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
-            double lowest_distance = std::numeric_limits<double>::max();
-            for (const auto& ball : balls.balls) {
-                if (ball.is_invalid) {
-                    continue;  // Skip ball if it is marked invalid
+        vision_ball_reaction = on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then(
+            [this](const VisionBalls& balls, const FieldDescription& fd, const Field& field) {
+                // If there are no balls or there are no valid balls, return
+                if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
+                    return;
                 }
 
-                Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
-                Eigen::Vector3d rBFf         = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
+                Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
+                last_Hcw              = balls.Hcw;
+                auto state            = BallModel<double>::StateVec(ukf.get_state());
 
-                if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
-                    || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
-                    || rBFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
-                    || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
-                    continue;
+                // Data association: find the ball closest to our current estimate
+                Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
+                double lowest_distance = std::numeric_limits<double>::max();
+                for (const auto& ball : balls.balls) {
+                    if (ball.is_invalid) {
+                        continue;  // Skip ball if it is marked invalid
+                    }
+
+                    Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                    Eigen::Vector3d rBFf         = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
+
+                    if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
+                        || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
+                        || rBFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
+                        || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                        continue;
+                    }
+                    double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                    if (current_distance < lowest_distance) {
+                        lowest_distance = current_distance;
+                        rBWw            = current_rBWw;
+                    }
                 }
-                double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
-                if (current_distance < lowest_distance) {
-                    lowest_distance = current_distance;
-                    rBWw            = current_rBWw;
+
+                // Data association: ensure the ball is within the acceptance radius
+                bool low_confidence = false;
+                bool accept_ball    = true;
+                if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
+                    low_confidence = true;
+                    rejection_count++;
                 }
-            }
+                else {
+                    first_ball_seen = true;
+                    rejection_count = 0;
+                }
+                log<DEBUG>("Rejection count: ", rejection_count);
+                log<DEBUG>("Accept ball: ", accept_ball);
 
-            // Data association: ensure the ball is within the acceptance radius
-            bool low_confidence = false;
-            bool accept_ball    = true;
-            if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
-                low_confidence = true;
-                rejection_count++;
-            }
-            else {
-                first_ball_seen = true;
-                rejection_count = 0;
-            }
-            log<DEBUG>("Rejection count: ", rejection_count);
-            log<DEBUG>("Accept ball: ", accept_ball);
+                // Data association: if we have rejected too many balls, accept the closest one
+                if (rejection_count > cfg.max_rejections) {
+                    accept_ball     = true;
+                    rejection_count = 0;
+                }
 
-            // Data association: if we have rejected too many balls, accept the closest one
-            if (rejection_count > cfg.max_rejections) {
-                accept_ball     = true;
-                rejection_count = 0;
-            }
+                bool accept_team_guess       = false;
+                Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
+                if (cfg.use_r2r_balls) {
+                    auto [valid, avg] = get_average_team_rBFf();
+                    accept_team_guess = valid;
+                    average_rBFf      = avg;
+                }
 
-            bool accept_team_guess       = false;
-            Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
-            if (cfg.use_r2r_balls) {
-                auto [valid, avg] = get_average_team_rBFf();
-                accept_team_guess = valid;
-                average_rBFf      = avg;
-            }
+                // Don't continue if we don't accept the ball or team guess
+                if (!(accept_ball || accept_team_guess)) {
+                    return;
+                }
 
-            // Don't continue if we don't accept the ball or team guess
-            if (!(accept_ball || accept_team_guess)) {
-                return;
-            }
+                // Generate and emit message
+                auto ball = std::make_unique<Ball>();
 
-            // Generate and emit message
-            auto ball = std::make_unique<Ball>();
+                // If not accepting the ball or low confidence, then use the average team guess
+                if (!accept_ball || (low_confidence && accept_team_guess)) {
+                    ball->rBWw       = field.Hfw.inverse() * average_rBFf;
+                    ball->vBw        = Eigen::Vector3d::Zero();
+                    ball->confidence = 0.0;  // No confidence in other teammates' guesses
+                }
+                else {
+                    // Compute the time since the last update (in seconds)
+                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
+                                                                                              - last_time_update)
+                                        .count();
+                    last_time_update = NUClear::clock::now();
 
-            // If not accepting the ball or low confidence, then use the average team guess
-            if (!accept_ball || (low_confidence && accept_team_guess)) {
-                ball->rBWw       = field.Hfw.inverse() * average_rBFf;
-                ball->vBw        = Eigen::Vector3d::Zero();
-                ball->confidence = 0.0;  // No confidence in other teammates' guesses
-            }
-            else {
-                // Compute the time since the last update (in seconds)
+                    // Time update
+                    ukf.time(dt);
+
+                    // Measurement update
+                    ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
+                                cfg.ukf.noise.measurement.position,
+                                MeasurementType::BALL_POSITION());
+
+                    // Get the new state, here we are assuming ball is on the ground
+                    state            = BallModel<double>::StateVec(ukf.get_state());
+                    ball->rBWw       = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
+                    ball->vBw        = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                    ball->confidence = 1.0;  // Full confidence in our own measurements
+                }
+
+                ball->time_of_measurement = last_time_update;
+                ball->Hcw                 = balls.Hcw;
+                ball->average_rBWw        = field.Hfw.inverse() * average_rBFf;
+                if (log_level <= DEBUG) {
+                    log<DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
+                    log<DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
+                    log<DEBUG>("average rBWw: ",
+                               ball->average_rBWw.x(),
+                               ball->average_rBWw.y(),
+                               ball->average_rBWw.z());
+                    emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
+                    emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
+                }
+
+                emit(ball);
+            });
+
+        // Stores ball positions received from teammates
+        team_ball_reaction =
+            on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
+                if (!cfg.use_r2r_balls) {
+                    return;
+                }
+
+                // This occurs when the ball has not been seen
+                if (robocup.ball.age < 0.0f) {
+                    // If the ball has not been seen, then we don't care about it
+                    return;
+                }
+
+                Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+
+                // Resize the vector of guesses if it is not large enough
+                if (team_guesses.capacity() < robocup.current_pose.player_id) {
+                    team_guesses.resize(robocup.current_pose.player_id);
+                }
+
+                // Update this teammates information
+                team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
+                team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
+
+                // Don't use teammates ball info if we have a recent ball measurement
                 const auto dt =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
                         .count();
-                last_time_update = NUClear::clock::now();
+                if (dt < cfg.team_guess_default_timer) {
+                    return;
+                }
 
-                // Time update
-                ukf.time(dt);
-
-                // Measurement update
-                ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
-                            cfg.ukf.noise.measurement.position,
-                            MeasurementType::BALL_POSITION());
-
-                // Get the new state, here we are assuming ball is on the ground
-                state            = BallModel<double>::StateVec(ukf.get_state());
-                ball->rBWw       = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
-                ball->vBw        = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
-                ball->confidence = 1.0;  // Full confidence in our own measurements
-            }
-
-            ball->time_of_measurement = last_time_update;
-            ball->Hcw                 = balls.Hcw;
-            ball->average_rBWw        = field.Hfw.inverse() * average_rBFf;
-            if (log_level <= DEBUG) {
-                log<DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
-                log<DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
-                log<DEBUG>("average rBWw: ", ball->average_rBWw.x(), ball->average_rBWw.y(), ball->average_rBWw.z());
-                emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
-                emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
-            }
-
-            emit(ball);
-        });
-
-        // Stores ball positions received from teammates
-        on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
-            if (!cfg.use_r2r_balls) {
-                return;
-            }
-
-            // This occurs when the ball has not been seen
-            if (robocup.ball.age < 0.0f) {
-                // If the ball has not been seen, then we don't care about it
-                return;
-            }
-
-            Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
-
-            // Resize the vector of guesses if it is not large enough
-            if (team_guesses.capacity() < robocup.current_pose.player_id) {
-                team_guesses.resize(robocup.current_pose.player_id);
-            }
-
-            // Update this teammates information
-            team_guesses[robocup.current_pose.player_id - 1].last_heard = NUClear::clock::now();
-            team_guesses[robocup.current_pose.player_id - 1].rBFf       = rBFf;
-
-            // Don't use teammates ball info if we have a recent ball measurement
-            const auto dt =
-                std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
-                    .count();
-            if (dt < cfg.team_guess_default_timer) {
-                return;
-            }
-
-            // If we have a valid guess, emit a new ball message
-            last_time_update          = NUClear::clock::now();
-            auto ball                 = std::make_unique<Ball>();
-            ball->rBWw                = field.Hfw.inverse() * get_average_team_rBFf().second;
-            ball->vBw                 = Eigen::Vector3d::Zero();
-            ball->confidence          = 0.0;  // No confidence in other teammates' guesses
-            ball->time_of_measurement = last_time_update;
-            ball->Hcw                 = last_Hcw;
-            emit(ball);
-        });
+                // If we have a valid guess, emit a new ball message
+                last_time_update          = NUClear::clock::now();
+                auto ball                 = std::make_unique<Ball>();
+                ball->rBWw                = field.Hfw.inverse() * get_average_team_rBFf().second;
+                ball->vBw                 = Eigen::Vector3d::Zero();
+                ball->confidence          = 0.0;  // No confidence in other teammates' guesses
+                ball->time_of_measurement = last_time_update;
+                ball->Hcw                 = last_Hcw;
+                emit(ball);
+            });
     }
 
     std::pair<bool, Eigen::Vector3d> BallLocalisation::get_average_team_rBFf() {
