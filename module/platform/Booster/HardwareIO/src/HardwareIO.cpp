@@ -490,8 +490,8 @@ namespace module::platform::Booster {
     void HardwareIO::button_event_handler(const void* msg) {
         const auto* btn_msg = static_cast<const booster_interface::msg::ButtonEventMsg*>(msg);
         const bool pressed  = (btn_msg->event() == booster_interface::msg::PRESS_DOWN
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
 
         std::lock_guard<std::mutex> lock(buttons_mutex);
         switch (btn_msg->button()) {
