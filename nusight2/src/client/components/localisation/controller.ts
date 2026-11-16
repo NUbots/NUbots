@@ -407,6 +407,11 @@ export class LocalisationController {
   };
 
   @action
+  toggleCameraLinesVisibility = (model: LocalisationModel) => {
+    model.cameraLinesVisible = !model.cameraLinesVisible;
+  };
+
+  @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };

@@ -175,7 +175,7 @@ export class LocalisationRobotModel {
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
   @observable Hcw: Matrix4; // World to camera
-  /** The latest camera image, only populated while the camera projection is visible */
+  /** The latest camera image, only populated while the camera projection or camera lines are visible */
   @observable.ref cameraImage?: CameraImage;
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
   @observable Hwp: Matrix4; // Planted foot to world

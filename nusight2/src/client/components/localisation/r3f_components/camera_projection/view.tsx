@@ -12,6 +12,12 @@ interface CameraProjectionProps {
   image: CameraImage;
   /** World to field transform */
   Hfw: Matrix4;
+  /** Length of the field along the field x axis, between the goal lines (metres) */
+  fieldLength: number;
+  /** Width of the field along the field y axis, between the touch lines (metres) */
+  fieldWidth: number;
+  /** The image is only drawn on the field and this far beyond its boundary lines (metres) */
+  border?: number;
   /** Points on the field further than this from the camera are not drawn (metres) */
   maxDistance?: number;
   opacity?: number;
@@ -24,10 +30,22 @@ interface CameraProjectionProps {
  * which pixel of the image (if any) sees that point on the field. If the camera intrinsics, extrinsics and the
  * localisation are all correct, the field lines in the image will sit on top of the field lines of the field model.
  */
-export const CameraProjection: React.FC<CameraProjectionProps> = ({ image, Hfw, maxDistance = 12, opacity = 0.85 }) => {
-  // A plane big enough to cover everything within maxDistance of anywhere on the field. Fragments the camera
-  // cannot see are discarded in the shader.
-  const geometry = useMemo(() => new THREE.PlaneGeometry(40, 40), []);
+export const CameraProjection: React.FC<CameraProjectionProps> = ({
+  image,
+  Hfw,
+  fieldLength,
+  fieldWidth,
+  border = 0.5,
+  maxDistance = 12,
+  opacity = 0.85,
+}) => {
+  // A plane covering the field plus the border around it, so nothing is projected beyond that. Fragments the
+  // camera cannot see are discarded in the shader.
+  const geometry = useMemo(
+    () => new THREE.PlaneGeometry(fieldLength + 2 * border, fieldWidth + 2 * border),
+    [fieldLength, fieldWidth, border],
+  );
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   const texture = useMemo(() => {
     const texture = new THREE.Texture(image.bitmap);

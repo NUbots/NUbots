@@ -78,8 +78,8 @@ export class LocalisationNetwork {
   private onCompressedImage = async (robotModel: RobotModel, image: CompressedImage) => {
     const robot = LocalisationRobotModel.of(robotModel);
 
-    // Decoding images is expensive, so only do it while the projection is being shown
-    if (!this.model.cameraProjectionVisible) {
+    // Decoding images is expensive, so only do it while a projection of the image is being shown
+    if (!this.model.cameraProjectionVisible && !this.model.cameraLinesVisible) {
       if (robot.cameraImage) {
         runInAction(() => (robot.cameraImage = undefined));
       }
