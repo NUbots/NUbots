@@ -6,3 +6,11 @@ force_playing: false
 
 # Delay in seconds before the robot starts playing after button press
 disable_idle_delay: 5
+
+# Move in the Booster firmware's soccer mode. False when walking and kicking run as low-level policies (NUSim), which
+# the robot only obeys in custom mode
+firmware_soccer_mode: true
+
+# Run fall recovery from startup, instead of waiting for the first button press, unpenalisation or cleared stop. For
+# NUSim, where nobody presses the robot's button
+fall_recovery_from_startup: false
