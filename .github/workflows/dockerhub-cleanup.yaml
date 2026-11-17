@@ -20,6 +20,7 @@ jobs:
     # We need `jq` for the script, so we run in a container with it installed
     container:
       image: dwdraju/alpine-curl-jq
+      options: --user ${{ github.event.pull_request.head.repo.fork && '0:0' || '1000:1000' }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
