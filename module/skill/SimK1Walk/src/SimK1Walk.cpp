@@ -206,7 +206,7 @@ namespace module::skill {
                 }
 
                 // In-walk kick: no kick primitive in the policy, so emulate it as a forward
-                // velocity burst held for kick_duration (same emulation as skill::Walk).
+                // velocity burst held for kick_duration (same emulation as skill::BoosterWalk).
                 Eigen::Vector3d cmd = walk.velocity_target;
                 if (walk.kick) {
                     if (run_reason == RunReason::NEW_TASK) {

@@ -32,7 +32,7 @@ nuclear_role(
   # Servos
   actuation::Servos
   # Skills
-  skill::Walk
+  skill::BoosterWalk
   skill::KickWalk
   skill::GetUp
   skill::Look

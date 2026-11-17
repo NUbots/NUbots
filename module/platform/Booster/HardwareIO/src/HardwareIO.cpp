@@ -51,6 +51,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
+    using message::booster::BoosterOdometryTwist;
     using message::booster::BoosterVisualKick;
     using message::booster::BoosterWalk;
     using message::booster::FallDownStateType;
@@ -113,6 +114,11 @@ namespace module::platform::Booster {
                 "rt/odometer_state",
                 [this](const void* msg) { odometer_handler(msg); });
 
+            // The controller's full ROS odometry; rt/odometer_state above has only its planar pose
+            ros_odometry_channel = ChannelFactory::Instance()->CreateRecvChannel<nav_msgs::msg::Odometry>(
+                booster::robot::b1::kTopicRosOdometer,
+                [this](const void* msg) { ros_odometry_handler(msg); });
+
             low_cmd_channel =
                 ChannelFactory::Instance()->CreateSendChannel<booster_interface::msg::LowCmd>("rt/joint_ctrl");
 
@@ -138,6 +144,9 @@ namespace module::platform::Booster {
             }
             if (odometer_channel != nullptr) {
                 ChannelFactory::Instance()->CloseReader("rt/odometer_state");
+            }
+            if (ros_odometry_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader(booster::robot::b1::kTopicRosOdometer);
             }
         });
 
@@ -439,6 +448,25 @@ namespace module::platform::Booster {
         emit(out);
     }
 
+    void HardwareIO::ros_odometry_handler(const void* msg) {
+        const auto* odom  = static_cast<const nav_msgs::msg::Odometry*>(msg);
+        const auto& twist = odom->twist().twist();
+
+        // Which frames the controller publishes in is not documented, so leave a record of them
+        if (!ros_odometry_frames_logged.exchange(true)) {
+            log<INFO>("Receiving " + booster::robot::b1::kTopicRosOdometer + " odometry: pose in frame '"
+                      + odom->header().frame_id() + "', twist in frame '" + odom->child_frame_id() + "'");
+        }
+
+        auto out            = std::make_unique<BoosterOdometryTwist>();
+        out->timestamp      = NUClear::clock::now();
+        out->linear         = Eigen::Vector3d(twist.linear().x(), twist.linear().y(), twist.linear().z());
+        out->angular        = Eigen::Vector3d(twist.angular().x(), twist.angular().y(), twist.angular().z());
+        out->frame_id       = odom->header().frame_id();
+        out->child_frame_id = odom->child_frame_id();
+        emit(out);
+    }
+
     void HardwareIO::battery_handler(const void* msg) {
         const auto* bat_msg = static_cast<const booster_interface::msg::BatteryState*>(msg);
         std::lock_guard<std::mutex> lock(battery_mutex);
@@ -462,8 +490,8 @@ namespace module::platform::Booster {
     void HardwareIO::button_event_handler(const void* msg) {
         const auto* btn_msg = static_cast<const booster_interface::msg::ButtonEventMsg*>(msg);
         const bool pressed  = (btn_msg->event() == booster_interface::msg::PRESS_DOWN
-                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
-                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
+                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
+                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
 
         std::lock_guard<std::mutex> lock(buttons_mutex);
         switch (btn_msg->button()) {

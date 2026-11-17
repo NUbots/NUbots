@@ -305,7 +305,8 @@ namespace module::planning {
             const Eigen::Vector3d walk_command = walk_path::apply_dead_zone(smoothed_command,
                                                                             cfg.min_velocity,
                                                                             cfg.zero_tolerance,
-                                                                            cfg.walk_to.max_velocity);
+                                                                            cfg.walk_to.max_velocity,
+                                                                            cfg.rotate_velocity_x);
 
             // Visualise the walk path in NUsight
             emit(graph("Walk Proposal", walk.velocity_target.x(), walk.velocity_target.y(), walk.velocity_target.z()));
