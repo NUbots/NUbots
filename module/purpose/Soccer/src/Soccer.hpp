@@ -48,6 +48,12 @@ namespace module::purpose {
             int disable_idle_delay = 0;
             /// @brief Delay in seconds before the robot can start playing after startup
             int startup_delay = 0;
+            /// @brief Whether the robot moves in the Booster firmware's soccer mode. False when walking and kicking
+            /// run as low-level policies instead (NUSim), which are only obeyed in custom mode
+            bool firmware_soccer_mode = true;
+            /// @brief Whether fall recovery runs from startup, instead of waiting for the first button press,
+            /// unpenalisation or cleared stop. For NUSim, where nobody presses the robot's button
+            bool fall_recovery_from_startup = false;
         } cfg;
 
         /// @brief Idle state of the robot
