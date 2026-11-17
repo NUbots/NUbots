@@ -402,6 +402,16 @@ export class LocalisationController {
   };
 
   @action
+  toggleCameraProjectionVisibility = (model: LocalisationModel) => {
+    model.cameraProjectionVisible = !model.cameraProjectionVisible;
+  };
+
+  @action
+  toggleCameraLinesVisibility = (model: LocalisationModel) => {
+    model.cameraLinesVisible = !model.cameraLinesVisible;
+  };
+
+  @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };

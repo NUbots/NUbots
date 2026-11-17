@@ -31,7 +31,7 @@ targets:
 
     # Localisation Messages
     message.localisation.Ball: true
-    message.localisation.Field: false
+    message.localisation.Field: true
     message.localisation.Robots: true
 
     # Team communication (UDP broadcast)
