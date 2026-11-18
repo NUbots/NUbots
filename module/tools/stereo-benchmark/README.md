@@ -1,138 +1,115 @@
 # K1 Stereo Benchmark
 
-A hardware benchmarking framework for testing ffs on the Orin NX vs the RDK x5.
+A hardware benchmarking framework for testing **Fast-FoundationStereo (FFS)** on the NVIDIA Orin NX and D-Robotics RDK X5.
 
-Goal: investigate the feasibility of running real-time stereo depth estimation on both platforms. Compare inference performance, latency, resource utils.
+**Goal:** Investigate the feasibility of real-time stereo depth estimation on both platforms by comparing inference performance, latency and resource utilisation.
 
-TODO:
+## TODO
 
-- Build containerised perception module
-- Access raw stereo camera data from K1 (in this branch)
-- Retreived synced and rectified L/R camera streams
-- Run ffs on Orin NX
-- Investigate deployment on RDK x5
-- compare inference performance across both computing platforms
-- evaluate hardware acceleration using trt and Horizon BPU runtime
+- [ ] Build containerised perception module
+- [x] Identify K1 raw stereo camera streams
+- [ ] Record synchronised and rectified left/right camera pairs
+- [ ] Run FFS on Orin NX
+- [ ] Investigate deployment on RDK X5
+- [ ] Compare inference performance across both platforms
+- [ ] Evaluate hardware acceleration using TensorRT and Horizon BPU
 
-```
+## Project Structure
+
+```text
 stereo-benchmark/
-│
 ├── docker/
 │   ├── orin/
 │   │   └── Dockerfile
 │   └── rdk/
 │       └── Dockerfile
-│
 ├── src/
 │   ├── camera/       # Stereo camera acquisition
 │   ├── stereo/       # Model integration and preprocessing
-│   ├── backends/     # Hardware-specific inference backends
-│   └── benchmark/    # Performance measurement and reporting
-│
-├── config/           # Platform-specific configurations
-├── scripts/          # Setup and deployment utilities
+│   ├── backends/     # Hardware-specific inference
+│   └── benchmark/    # Performance measurement
+├── config/           # Platform configurations
+├── scripts/          # Setup and deployment
 ├── datasets/         # Recorded stereo image pairs
 ├── models/           # Model weights and converted engines
-├── results/          # Benchmark outputs
-│
+├── results/          # Benchmark results
 ├── docker-compose.yml
 └── README.md
-
 ```
 
-stereo-benchmark/
-│
-├── docker/
-│   ├── orin/
-│   │   └── Dockerfile
-│   └── rdk/
-│       └── Dockerfile
-│
-├── src/
-│   ├── camera/       # Stereo camera acquisition
-│   ├── stereo/       # Model integration and preprocessing
-│   ├── backends/     # Hardware-specific inference backends
-│   └── benchmark/    # Performance measurement and reporting
-│
-├── config/           # Platform-specific configurations
-├── scripts/          # Setup and deployment utilities
-├── datasets/         # Recorded stereo image pairs
-├── models/           # Model weights and converted engines
-├── results/          # Benchmark outputs
-│
-├── docker-compose.yml
-└── README.md
+## K1 Stereo Camera
 
-Software and Deployment
+The Booster K1 uses the RDK X5 camera pipeline, exposing separate stereo streams through ROS 2 using the `mipi_cam` driver.
 
-The application is designed to use Docker to maintain reproducible software environments across both computing platforms.
+| Property | Left Camera | Right Camera |
+|---|---|---|
+| ROS 2 topic | `/boostercamera/head/raw/rgb` | `/boostercamera/head/raw/right/rgb` |
+| Encoding | NV12 | NV12 |
+| Resolution | 544 × 448 | 544 × 448 |
+| Row step | 544 bytes | 544 bytes |
+| Measured FPS | ~29.8 | ~30.0 |
 
-Hardware-specific dependencies are isolated into separate container images.
+Camera calibration is available through the corresponding `camera_info` topics.
 
-NVIDIA Jetson Orin NX
+The existing StereoNet pipeline also publishes rectified images and depth.
 
-Expected software components:
+### ROS 2 Camera Topics
 
-NVIDIA JetPack
+| Topic | Message Type | Description |
+|---|---|---|
+| `/boostercamera/head/raw/rgb` | `sensor_msgs/msg/Image` | Raw left camera image |
+| `/boostercamera/head/raw/right/rgb` | `sensor_msgs/msg/Image` | Raw right camera image |
+| `/boostercamera/head/raw/combine/rgb` | `sensor_msgs/msg/Image` | Combined stereo image |
+| `/boostercamera/head/raw/rgb/camera_info` | `sensor_msgs/msg/CameraInfo` | Raw left camera calibration |
+| `/boostercamera/head/raw/right/rgb/camera_info` | `sensor_msgs/msg/CameraInfo` | Raw right camera calibration |
+| `/boostercamera/head/rgb` | `sensor_msgs/msg/Image` | Rectified left image |
+| `/boostercamera/head/right/rgb` | `sensor_msgs/msg/Image` | Rectified right image |
+| `/boostercamera/head/rgb/camera_info` | `sensor_msgs/msg/CameraInfo` | Rectified left camera calibration |
+| `/boostercamera/head/depth` | `sensor_msgs/msg/Image` | StereoNet depth output |
+| `/boostercamera/head/depth/camera_info` | `sensor_msgs/msg/CameraInfo` | Depth camera information |
 
-CUDA
+Raw image streams are published by `mipi_cam`. Rectified images and depth are published by the existing StereoNet pipeline.
 
-PyTorch
+**Benchmark acquisition sources:**
+- `/boostercamera/head/raw/rgb`
+- `/boostercamera/head/raw/right/rgb`
 
-TensorRT
+The raw streams will be used as the initial recording sources. Stereo synchronisation and rectification still need to be verified before creating the benchmark dataset.
 
-NVIDIA Container Toolkit
+## Software and Deployment
 
-D-Robotics RDK X5
+Docker will provide reproducible software environments, with separate images for hardware-specific dependencies.
 
-Expected software components:
+### NVIDIA Jetson Orin NX
 
-D-Robotics Horizon software stack
+- NVIDIA JetPack and CUDA
+- PyTorch
+- TensorRT
+- NVIDIA Container Toolkit
 
-Horizon BPU runtime
+### D-Robotics RDK X5
 
-Compatible model conversion tools
+- D-Robotics Horizon software stack
+- Horizon BPU runtime
+- Compatible model conversion tools
 
-Required hardware device interfaces
+Actual dependencies and versions will be confirmed against the installed platform environments.
 
-Actual dependencies and versions will be determined from the installed software environments.
+## Benchmarking Methodology
 
-Benchmarking Methodology
+The benchmark will measure the following metrics:
 
-The benchmark will measure:
+| Metric | Description |
+|---|---|
+| Inference FPS | Stereo inference throughput |
+| Average latency | Average inference time per stereo pair |
+| Median latency | Median inference time |
+| P95 latency | 95th percentile inference latency |
+| Peak memory | Maximum memory consumption |
+| CPU utilisation | CPU resource consumption |
+| Accelerator utilisation | GPU/BPU utilisation |
+| Power consumption | Platform power usage |
 
-Metric
+Inference-only performance and end-to-end performance (capture, preprocessing and inference) will be measured separately.
 
-Description
-
-Inference FPS
-
-Stereo inference throughput
-
-Average latency
-
-Average inference time per stereo pair
-
-Median latency
-
-Median inference time
-
-P95 latency
-
-95th percentile inference latency
-
-Peak memory
-
-Maximum memory consumption
-
-CPU utilisation
-
-CPU resource consumption
-
-Accelerator utilisation
-
-GPU/BPU utilisation
-
-Power consumption
-
-Platform power usage
+Both platforms should process identical recorded stereo image pairs wherever possible to ensure a fair comparison.
