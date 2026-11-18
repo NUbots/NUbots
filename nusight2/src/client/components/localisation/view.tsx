@@ -19,6 +19,8 @@ import { LocalisationNetwork } from "./network";
 import { AssociationLines } from "./r3f_components/association_lines";
 import { Ball } from "./r3f_components/ball";
 import { BoundingBox } from "./r3f_components/bounding_box/view";
+import { CameraLines } from "./r3f_components/camera_lines/view";
+import { CameraProjection } from "./r3f_components/camera_projection/view";
 import { FieldView } from "./r3f_components/field/view";
 import { FieldIntersections } from "./r3f_components/field_intersections";
 import { FieldObjects } from "./r3f_components/field_objects";
@@ -138,6 +140,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleParticleVisibility={this.toggleParticleVisibility}
             toggleGoalVisibility={this.toggleGoalVisibility}
             toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+            toggleCameraProjectionVisibility={this.toggleCameraProjectionVisibility}
+            toggleCameraLinesVisibility={this.toggleCameraLinesVisibility}
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
@@ -170,6 +174,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleParticleVisibility={this.toggleParticleVisibility}
             toggleGoalVisibility={this.toggleGoalVisibility}
             toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+            toggleCameraProjectionVisibility={this.toggleCameraProjectionVisibility}
+            toggleCameraLinesVisibility={this.toggleCameraLinesVisibility}
             toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
             toggleWalkToDebugVisibility={this.toggleWalkToDebugVisibility}
             toggleBoundedBoxVisibility={this.toggleBoundedBoxVisibility}
@@ -267,6 +273,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
 
+  private toggleCameraProjectionVisibility = () => {
+    this.props.controller.toggleCameraProjectionVisibility(this.props.model);
+  };
+
+  private toggleCameraLinesVisibility = () => {
+    this.props.controller.toggleCameraLinesVisibility(this.props.model);
+  };
+
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
@@ -319,6 +333,8 @@ interface LocalisationMenuBarProps {
   toggleParticleVisibility(): void;
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
+  toggleCameraProjectionVisibility(): void;
+  toggleCameraLinesVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
   toggleWalkToDebugVisibility(): void;
   toggleBoundedBoxVisibility(): void;
@@ -426,6 +442,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         toggleParticleVisibility={props.toggleParticleVisibility}
         toggleGoalVisibility={props.toggleGoalVisibility}
         toggleFieldLinePointsVisibility={props.toggleFieldLinePointsVisibility}
+        toggleCameraProjectionVisibility={props.toggleCameraProjectionVisibility}
+        toggleCameraLinesVisibility={props.toggleCameraLinesVisibility}
         toggleFieldIntersectionsVisibility={props.toggleFieldIntersectionsVisibility}
         toggleWalkToDebugVisibility={props.toggleWalkToDebugVisibility}
         toggleBoundedBoxVisibility={props.toggleBoundedBoxVisibility}
@@ -488,6 +506,12 @@ const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">)
       title: "Debug",
       buttons: [
         { label: "Particles", isVisible: model.particlesVisible, onClick: props.toggleParticleVisibility },
+        {
+          label: "Camera Projection",
+          isVisible: model.cameraProjectionVisible,
+          onClick: props.toggleCameraProjectionVisibility,
+        },
+        { label: "Camera Lines", isVisible: model.cameraLinesVisible, onClick: props.toggleCameraLinesVisibility },
         { label: "Walk Path", isVisible: model.walkToDebugVisible, onClick: props.toggleWalkToDebugVisibility },
         { label: "Bounding Box", isVisible: model.boundedBoxVisible, onClick: props.toggleBoundedBoxVisibility },
       ],
@@ -565,6 +589,24 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
   return (
     <object3D key={robot.id}>
       <K1 model={robot} />
+
+      {model.cameraProjectionVisible && robot.cameraImage && (
+        <CameraProjection
+          image={robot.cameraImage}
+          Hfw={robot.Hfw}
+          fieldLength={model.field.dimensions.fieldLength}
+          fieldWidth={model.field.dimensions.fieldWidth}
+        />
+      )}
+
+      {model.cameraLinesVisible && robot.cameraImage && (
+        <CameraLines
+          image={robot.cameraImage}
+          Hfw={robot.Hfw}
+          fieldLength={model.field.dimensions.fieldLength}
+          fieldWidth={model.field.dimensions.fieldWidth}
+        />
+      )}
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
