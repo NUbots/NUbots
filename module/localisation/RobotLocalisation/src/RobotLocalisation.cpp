@@ -26,7 +26,10 @@
  */
 #include "RobotLocalisation.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <fmt/format.h>
+#include <limits>
 
 #include "extension/Configuration.hpp"
 
@@ -77,11 +80,20 @@ namespace module::localisation {
             cfg.ukf.noise.process.velocity      = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
             cfg.ukf.initial_covariance.position = config["ukf"]["initial_covariance"]["position"].as<Expression>();
             cfg.ukf.initial_covariance.velocity = config["ukf"]["initial_covariance"]["velocity"].as<Expression>();
-            cfg.association_distance            = config["association_distance"].as<double>();
-            cfg.max_missed_count                = config["max_missed_count"].as<int>();
-            cfg.max_distance_from_field         = config["max_distance_from_field"].as<double>();
-            cfg.max_localisation_cost           = config["max_localisation_cost"].as<double>();
-            cfg.teammate_timeout                = config["teammate_timeout"].as<double>();
+            cfg.ukf.initial_covariance.vision_velocity =
+                config["ukf"]["initial_covariance"]["vision_velocity"].as<Expression>();
+            cfg.measurement.range_base        = config["measurement"]["range_base"].as<double>();
+            cfg.measurement.range_quad        = config["measurement"]["range_quad"].as<double>();
+            cfg.measurement.bearing_per_metre = config["measurement"]["bearing_per_metre"].as<double>();
+            cfg.measurement.pose_std          = config["measurement"]["pose_std"].as<double>();
+            cfg.gate_chi2                     = config["gate_chi2"].as<double>();
+            cfg.max_track_age                 = config["max_track_age"].as<double>();
+            cfg.merge_distance                = config["merge_distance"].as<double>();
+            cfg.max_robot_tracks              = config["max_robot_tracks"].as<int>();
+            cfg.max_missed_count              = config["max_missed_count"].as<int>();
+            cfg.max_distance_from_field       = config["max_distance_from_field"].as<double>();
+            cfg.max_localisation_cost         = config["max_localisation_cost"].as<double>();
+            cfg.teammate_timeout              = config["teammate_timeout"].as<double>();
         });
 
         on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
@@ -143,14 +155,16 @@ namespace module::localisation {
             // **Data association**
             // Transform the robot positions from camera coordinates to world coordinates
             Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw).inverse();
-            // Make a vector with the transformed position
+            // Make vectors with the transformed positions and their measurement covariances
             std::vector<Eigen::Vector3d> robots_rRWw{};
+            std::vector<Eigen::Matrix2d> covariances{};
             for (const auto& vision_robot : vision_robots.robots) {
                 Eigen::Vector3d rRWw = Hwc * vision_robot.rRCc;
                 robots_rRWw.push_back(rRWw);
+                covariances.push_back(vision_covariance(rRWw, Hwc.translation()));
             }
             // Run data association step
-            data_association(robots_rRWw);
+            vision_association(robots_rRWw, covariances);
         });
     }
 
@@ -206,79 +220,152 @@ namespace module::localisation {
 
                 continue;
             }
+        }
+    }
 
-            // Get the closest robot we have to the given vision measurement
-            auto closest_robot_itr =
-                std::min_element(tracked_robots.begin(),
-                                 tracked_robots.end(),
-                                 [&rRWw](const TrackedRobot& a, const TrackedRobot& b) {
-                                     // Get each robot's x-y 2D position in the world
-                                     auto a_rRWw = a.get_rRWw();
-                                     auto b_rRWw = b.get_rRWw();
-                                     // Compare to see which is closer to the robot vision measurement position
-                                     return (rRWw.head<2>() - a_rRWw).norm() < (rRWw.head<2>() - b_rRWw).norm();
-                                 });
-            double closest_distance = (rRWw.head<2>() - closest_robot_itr->get_rRWw()).norm();
+    Eigen::Matrix2d RobotLocalisation::vision_covariance(const Eigen::Vector3d& rRWw,
+                                                         const Eigen::Vector3d& rCWw) const {
+        const Eigen::Vector2d d = rRWw.head<2>() - rCWw.head<2>();
+        const double r          = std::max(d.norm(), 1e-3);
+        const Eigen::Vector2d u = d / r;
+        const Eigen::Vector2d t(-u.y(), u.x());
 
-            // If the closest robot is far enough away, add this as a new robot
-            if (closest_distance > cfg.association_distance) {
-                tracked_robots.emplace_back(TrackedRobot(rRWw, cfg.ukf, next_id++, purpose));
-                continue;
+        const double pose_var  = cfg.measurement.pose_std * cfg.measurement.pose_std;
+        const double range_std = cfg.measurement.range_base + cfg.measurement.range_quad * r * r;
+        const double tang_std  = cfg.measurement.bearing_per_metre * r;
+
+        const double range_var = range_std * range_std + pose_var;
+        const double tang_var  = tang_std * tang_std + pose_var;
+        return range_var * u * u.transpose() + tang_var * t * t.transpose();
+    }
+
+    void RobotLocalisation::vision_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
+                                               const std::vector<Eigen::Matrix2d>& covariances) {
+        const size_t n_tracks = tracked_robots.size();
+        const size_t n_dets   = robots_rRWw.size();
+        const double inf      = std::numeric_limits<double>::infinity();
+
+        // Squared Mahalanobis distance of every detection to every track, infinite if outside the gate
+        std::vector<std::vector<double>> cost(n_tracks, std::vector<double>(n_dets, inf));
+        for (size_t i = 0; i < n_tracks; ++i) {
+            const Eigen::Vector2d mean = tracked_robots[i].get_rRWw();
+            const Eigen::Matrix2d P    = tracked_robots[i].ukf.get_covariance().topLeftCorner<2, 2>();
+            for (size_t j = 0; j < n_dets; ++j) {
+                const Eigen::Vector2d nu = robots_rRWw[j].head<2>() - mean;
+                const double d2          = nu.dot((P + covariances[j]).ldlt().solve(nu));
+                if (d2 <= cfg.gate_chi2) {
+                    cost[i][j] = d2;
+                }
             }
+        }
 
-            // Otherwise update matched robot with the vision measurement
-            closest_robot_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                           cfg.ukf.noise.measurement.position,
-                                           MeasurementType::ROBOT_POSITION());
-            closest_robot_itr->seen = true;
+        // Greedy one-to-one assignment, lowest cost first
+        std::vector<bool> detection_used(n_dets, false);
+        while (true) {
+            double best = inf;
+            size_t bi = 0, bj = 0;
+            for (size_t i = 0; i < n_tracks; ++i) {
+                for (size_t j = 0; j < n_dets; ++j) {
+                    if (cost[i][j] < best) {
+                        best = cost[i][j];
+                        bi   = i;
+                        bj   = j;
+                    }
+                }
+            }
+            if (!std::isfinite(best)) {
+                break;
+            }
+            auto& track = tracked_robots[bi];
+            track.ukf.measure(Eigen::Vector2d(robots_rRWw[bj].head<2>()),
+                              covariances[bj],
+                              MeasurementType::ROBOT_POSITION());
+            track.seen             = true;
+            track.last_vision_time = NUClear::clock::now();
+            track.vision_updates++;
+            detection_used[bj] = true;
+            for (size_t k = 0; k < n_tracks; ++k) {
+                cost[k][bj] = inf;
+            }
+            std::fill(cost[bi].begin(), cost[bi].end(), inf);
+        }
+
+        // Detections that matched no track are new robots
+        for (size_t j = 0; j < n_dets; ++j) {
+            if (!detection_used[j]) {
+                tracked_robots.emplace_back(TrackedRobot(robots_rRWw[j], cfg.ukf, next_id++, nullptr, &covariances[j]));
+            }
         }
     }
 
     void RobotLocalisation::maintenance(const Image& image, const Field& field, const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
+        const auto now = NUClear::clock::now();
 
-        // Sort tracked_robots so that robots that are teammates are at the front to prevent teammates being removed
+        // Sort tracked_robots so that teammates are at the front, then oldest first. A track is dropped as a
+        // duplicate of a track earlier in this order, so teammates and older tracks win.
         std::sort(tracked_robots.begin(), tracked_robots.end(), [](const TrackedRobot& a, const TrackedRobot& b) {
-            return a.purpose.player_id > b.purpose.player_id;
+            if (a.purpose.player_id != b.purpose.player_id) {
+                return a.purpose.player_id > b.purpose.player_id;
+            }
+            return a.id < b.id;
         });
 
         for (auto& tracked_robot : tracked_robots) {
             auto state = RobotModel<double>::StateVec(tracked_robot.ukf.get_state());
 
-            // If a tracked robot has moved outside of the camera's field of view, keep it as seen so we don't
-            // lose it. Project the robot's world position into the camera's pixel space and check whether it
-            // falls outside the image bounds.
-            Eigen::Vector3d rRCc = image.Hcw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+            if (tracked_robot.teammate) {
+                // If a teammate has moved outside of the camera's field of view, keep it as seen so we don't
+                // lose it. Project its world position into the camera's pixel space and check whether it
+                // falls outside the image bounds.
+                Eigen::Vector3d rRCc = image.Hcw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
 
-            bool in_view = false;
-            if (rRCc.x() > 0.0) {  // in front of the camera
-                Eigen::Vector2d dimensions      = Eigen::Vector2d(image.dimensions.x(), image.dimensions.y());
-                Eigen::Vector2d norm_dimensions = dimensions / dimensions.x();
-                Eigen::Vector2d pixel           = project(rRCc.normalized(), image.lens, norm_dimensions);
-                in_view = pixel.x() >= 0.0 && pixel.x() < norm_dimensions.x() && pixel.y() >= 0.0
-                          && pixel.y() < norm_dimensions.y();
+                bool in_view = false;
+                if (rRCc.x() > 0.0) {  // in front of the camera
+                    Eigen::Vector2d dimensions      = Eigen::Vector2d(image.dimensions.x(), image.dimensions.y());
+                    Eigen::Vector2d norm_dimensions = dimensions / dimensions.x();
+                    Eigen::Vector2d pixel           = project(rRCc.normalized(), image.lens, norm_dimensions);
+                    in_view = pixel.x() >= 0.0 && pixel.x() < norm_dimensions.x() && pixel.y() >= 0.0
+                              && pixel.y() < norm_dimensions.y();
+                }
+
+                if (!in_view) {
+                    tracked_robot.seen = true;
+                }
+
+                // If the tracked robot has not been seen, increment the consecutively missed count
+                tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
+
+                // Don't keep this robot if it has been missed too many times
+                if (tracked_robot.missed_count > cfg.max_missed_count) {
+                    log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
+                    continue;
+                }
+            }
+            else {
+                // Opponents (and unidentified robots) are removed when they have not had a vision update recently
+                double age =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(now - tracked_robot.last_vision_time)
+                        .count();
+                if (age > cfg.max_track_age) {
+                    log<DEBUG>(fmt::format("Removing robot {} due to age without vision update", tracked_robot.id));
+                    continue;
+                }
             }
 
-            if (!in_view) {
-                tracked_robot.seen = true;
-            }
-
-            // If the tracked robot has not been seen, increment the consecutively missed count
-            tracked_robot.missed_count = tracked_robot.seen ? 0 : tracked_robot.missed_count + 1;
-
-            // Don't add this robot if it has been missed too many times
-            if (tracked_robot.missed_count > cfg.max_missed_count) {
-                log<DEBUG>(fmt::format("Removing robot {} due to missed count", tracked_robot.id));
-                continue;
-            }
-
+            // Remove duplicates: a robot that is on top of one already kept is the same robot
+            bool duplicate = false;
             for (const auto& other_robot : new_tracked_robots) {
-                if ((tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.association_distance) {
+                if ((tracked_robot.get_rRWw() - other_robot.get_rRWw()).norm() < cfg.merge_distance) {
                     log<DEBUG>(fmt::format("Removing robot {} due to proximity to robot {}",
                                            tracked_robot.id,
                                            other_robot.id));
-                    continue;
+                    duplicate = true;
+                    break;
                 }
+            }
+            if (duplicate) {
+                continue;
             }
 
             Eigen::Vector3d rRFf = field.Hfw * Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
@@ -293,6 +380,32 @@ namespace module::localisation {
 
             // If removal conditions not met, keep the robot
             new_tracked_robots.push_back(tracked_robot);
+        }
+
+        // Keep only the best confirmed non-teammate tracks when the number of robots on the field is limited
+        if (cfg.max_robot_tracks > 0) {
+            std::vector<size_t> candidates{};
+            for (size_t i = 0; i < new_tracked_robots.size(); ++i) {
+                if (!new_tracked_robots[i].teammate) {
+                    candidates.push_back(i);
+                }
+            }
+            if (candidates.size() > static_cast<size_t>(cfg.max_robot_tracks)) {
+                std::stable_sort(candidates.begin(), candidates.end(), [&](size_t a, size_t b) {
+                    return new_tracked_robots[a].vision_updates > new_tracked_robots[b].vision_updates;
+                });
+                std::vector<bool> remove(new_tracked_robots.size(), false);
+                for (size_t k = cfg.max_robot_tracks; k < candidates.size(); ++k) {
+                    remove[candidates[k]] = true;
+                }
+                std::vector<TrackedRobot> limited{};
+                for (size_t i = 0; i < new_tracked_robots.size(); ++i) {
+                    if (!remove[i]) {
+                        limited.push_back(new_tracked_robots[i]);
+                    }
+                }
+                new_tracked_robots = std::move(limited);
+            }
         }
 
         tracked_robots = std::move(new_tracked_robots);
