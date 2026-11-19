@@ -82,6 +82,7 @@ namespace module::strategy {
             cfg.distance_behind_ball   = config["distance_behind_ball"].as<double>();
             cfg.max_error_y            = config["max_error_y"].as<double>();
             cfg.error_gain_perp        = config["error_gain_perp"].as<double>();
+            cfg.in_front_margin        = config["in_front_margin"].as<double>();
             cfg.min_offset_y           = config["min_offset_y"].as<double>();
             cfg.max_offset_y           = config["max_offset_y"].as<double>();
             cfg.infront_of_ball_radius = config["infront_of_ball_radius"].as<double>();
@@ -227,8 +228,9 @@ namespace module::strategy {
 
                 /* Adjustment target point for a better ball approach */
 
-                // Add a sideways offset if we're in front of the ball (so we walk around it)
-                if (err_x > 0) {
+                // Add a sideways offset if we're in front of the ball (so we walk around it). The margin stops a
+                // small overshoot from sending the robot sideways off the ball.
+                if (err_x > cfg.in_front_margin) {
                     log<DEBUG>("In front of the ball, adjusting target sideways for ball approach.");
                     target += uTBf_p * (err_y < 0 ? -1 : 1) * std::clamp(err_x, cfg.min_offset_y, cfg.max_offset_y);
                 }
