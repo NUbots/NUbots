@@ -176,13 +176,22 @@ namespace module::localisation {
             cfg.height_sigma  = config["height_sigma"].as<double>();
 
             // How far vision is trusted
-            cfg.measurement.sigma_angular  = config["measurement"]["sigma_angular"].as<double>();
-            cfg.measurement.gate_angle     = config["measurement"]["gate_angle"].as<double>();
-            cfg.measurement.min_confidence = config["measurement"]["min_confidence"].as<double>();
+            cfg.measurement.sigma_angular          = config["measurement"]["sigma_angular"].as<double>();
+            cfg.measurement.gate_angle             = config["measurement"]["gate_angle"].as<double>();
+            cfg.measurement.min_confidence         = config["measurement"]["min_confidence"].as<double>();
+            cfg.measurement.gate_yaw_scale         = config["measurement"]["gate_yaw_scale"].as<double>();
+            cfg.measurement.gate_angle_max         = config["measurement"]["gate_angle_max"].as<double>();
+            cfg.measurement.inlier_probability     = config["measurement"]["inlier_probability"].as<double>();
+            cfg.measurement.confidence_reference   = config["measurement"]["confidence_reference"].as<double>();
+            cfg.measurement.max_inlier_probability = config["measurement"]["max_inlier_probability"].as<double>();
 
             // How fast the belief may move
-            cfg.process.sigma_vel   = config["process"]["sigma_vel"].as<double>();
-            cfg.process.sigma_omega = config["process"]["sigma_omega"].as<double>();
+            cfg.process.sigma_vel       = config["process"]["sigma_vel"].as<double>();
+            cfg.process.sigma_omega     = config["process"]["sigma_omega"].as<double>();
+            cfg.process.sigma_pos_xy    = config["process"]["sigma_pos_xy"].as<double>();
+            cfg.process.sigma_yaw       = config["process"]["sigma_yaw"].as<double>();
+            cfg.process.sigma_gyro_bias = config["process"]["sigma_gyro_bias"].as<double>();
+            cfg.process.sigma_cam_bias  = config["process"]["sigma_cam_bias"].as<double>();
 
             // How much confidence a fall costs
             cfg.recovery_pos_std = config["fall"]["recovery_pos_std"].as<double>();
@@ -714,8 +723,8 @@ namespace module::localisation {
         field->covariance  = covariance;
         field->uncertainty = covariance.trace();
         // Behaviours (FieldPlayer, Goalie) stand and look around until this is set
-        field->localised = std::sqrt(P(0, 0) + P(1, 1)) < cfg.localised_pos_std
-                           && std::sqrt(var_yaw) < cfg.localised_yaw_std;
+        field->localised =
+            std::sqrt(P(0, 0) + P(1, 1)) < cfg.localised_pos_std && std::sqrt(var_yaw) < cfg.localised_yaw_std;
 
         // Hypotheses as (x, y, yaw) particles; one component in single-hypothesis mode.
         if (system->num_hypotheses() > 1) {

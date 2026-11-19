@@ -166,9 +166,10 @@ Tuning is split by how often you would reach for it. `data/config/FieldLocalisat
 the knobs you change because something about the robot, the venue or the game changed — the tables
 below are all of it. Everything else was tuned once against recorded data and is a constant in the
 code, documented where it is defined: `struct Config` in `FieldLocalisationSRIF.hpp` (initial
-covariance, grid search, ZUPT noise, the odometry buffer, gravity gating, the |q| = 1 prior),
-`SystemLocalisation::Parameters` (the rest of the process PSDs, the `*_disturbed` set and its window)
-and `MeasurementFieldLandmarks::Options` (association gate internals, the robust inlier mixture).
+covariance, grid search, ZUPT noise, the odometry buffer, gravity gating, the |q| = 1 prior) and
+`SystemLocalisation::Parameters` (the remaining process PSDs, the `*_disturbed` set and its window).
+
+The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 
 **What the filter runs**
 
@@ -196,6 +197,11 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 | `sigma_angular`  | Inlier ray angular noise [rad]; total per-frame error, not just px |
 | `gate_angle`     | Nominal association pre-gate [rad]; widened at runtime by yaw std  |
 | `min_confidence` | YOLO confidence below which a detection is discarded outright      |
+| `gate_yaw_scale` | Yaw std devs the pre-gate widens by, so an uncertain belief can re-associate |
+| `gate_angle_max` | Ceiling on the widened pre-gate [rad]                              |
+| `inlier_probability` | Robust mixture inlier weight of a detection at `confidence_reference` |
+| `confidence_reference` | YOLO confidence that maps to `inlier_probability`            |
+| `max_inlier_probability` | Cap on the inlier weight, so no detection is treated as certainly real |
 
 **How fast the belief may move** (`process:`) — the dominant process noise
 
@@ -203,6 +209,10 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 | ------------- | ----------------------------------------------------------------------------- |
 | `sigma_vel`   | Body linear velocity random walk [m/s/√s]; raise if the filter lags the robot |
 | `sigma_omega` | Body angular velocity random walk [rad/s/√s]; lower if the pose is twitchy    |
+| `sigma_pos_xy` | Horizontal position random walk [m/√s], a floor on top of the velocity states |
+| `sigma_yaw` | Yaw random walk [rad/√s], a floor on top of the velocity states                  |
+| `sigma_gyro_bias` | Gyroscope bias random walk [rad/s/√s]                                      |
+| `sigma_cam_bias` | Camera-mount attitude bias random walk [rad/√s]                             |
 
 **How much confidence a fall costs** (`fall:`)
 
@@ -210,6 +220,25 @@ and `MeasurementFieldLandmarks::Options` (association gate internals, the robust
 | ------------------ | ------------------------------------------------------------------------ |
 | `recovery_pos_std` | Horizontal position std restored on standing up [m]                      |
 | `recovery_yaw_std` | Yaw std restored on standing up [rad]; also reopens the association gate |
+
+### Tuning
+
+The yaml can be tuned against recordings with ground truth, offline and deterministically:
+
+```bash
+# In NUSim, for each recording (a fresh sim, so the robot starts beside its own half like at kick-off)
+./b run sim/soccer --game 1
+# In NUbots: walk a random tour of the field on NUSim's ground truth, recording vision, odometry and ground truth
+./b localisation record --duration 300 --seed 1        # --no-look-around keeps the head still
+# Search the yaml over several recordings, then check the result on others
+./b localisation tune recordings/localisation_recording/<a>.nbs <b>.nbs --trials 300 --jobs 8
+./b localisation tune <c>.nbs --validate --yaml recordings/tuning/srif_FieldLocalisationSRIF.yaml
+./b localisation playback <c>.nbs                      # plot against ground truth
+```
+
+The search space is `SPACE` in `tools/localisation/tune.py`. Recordings carry no `Stability` (it is an enum,
+which `DataLogging` cannot record), so playback treats the robot as always upright and the `fall:`
+values are not tuned this way.
 
 ## Consumes
 
