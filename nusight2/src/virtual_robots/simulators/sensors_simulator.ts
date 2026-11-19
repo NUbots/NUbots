@@ -10,7 +10,7 @@ import { Message, Simulator } from "../simulator";
 import { periodic } from "./periodic";
 
 // export const DARWIN_HIP_TO_FOOT = 0.2465
-export const NUGUS_HIP_TO_FOOT = 0.479;
+export const HIP_TO_FOOT = 0.479;
 
 export class SensorsSimulator extends Simulator {
   constructor(
@@ -51,7 +51,7 @@ export class SensorsSimulator extends Simulator {
     const x = distance * Math.cos(angle);
     const y = distance * Math.sin(angle);
     const heading = angle + Math.PI;
-    const Htw = toHtw(x, y, NUGUS_HIP_TO_FOOT, heading);
+    const Htw = toHtw(x, y, HIP_TO_FOOT, heading);
 
     const buffer = new Sensors({
       Htw: toProtoMat44(Htw),

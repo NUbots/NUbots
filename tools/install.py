@@ -26,14 +26,14 @@
 # SOFTWARE.
 #
 
+import getpass
 import glob
 import os
 import subprocess
 import tempfile
-import fabric
-import getpass
-from invoke import Responder
 
+import fabric
+from invoke import Responder
 from termcolor import cprint
 
 import b
@@ -70,7 +70,7 @@ def run(target, local, user, config, toolchain, **kwargs):
         target = {
             "{}{}".format(k, num): "10.1.1.{}".format(num)
             for num in range(1, num_robots + 1)
-            for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
+            for k, v in zip(("n", "i", "igus"), [num] * num_robots)
         }.get(target, target)
 
     # If no user, use our user
@@ -145,8 +145,8 @@ def run(target, local, user, config, toolchain, **kwargs):
         if not os.path.isfile(file):
             continue
         arch = processor_check.check_architecture(file)
-        if arch["binary"] != 'aarch64':
-            cprint(f"File {file} is not compiled for target. Stopping install.","red", attrs=["bold"])
+        if arch["binary"] != "aarch64":
+            cprint(f"File {file} is not compiled for target. Stopping install.", "red", attrs=["bold"])
             exit(1)
 
     # Add a /./ to files so rsync --relative/-R behaves how we want it to
@@ -164,7 +164,13 @@ def run(target, local, user, config, toolchain, **kwargs):
         # Fix permissions on /usr/local to allow the user to write
         if not local:
             cprint("Fixing permissions on /usr/local", "blue", attrs=["bold"])
-            conn.run("sudo setfacl -m u:{}:rwx /usr/local /usr/local/lib /usr/local/sbin /usr/local/share /usr/local/man".format(user), pty=True, watchers=[sudo_responder])
+            conn.run(
+                "sudo setfacl -m u:{}:rwx /usr/local /usr/local/lib /usr/local/sbin /usr/local/share /usr/local/man".format(
+                    user
+                ),
+                pty=True,
+                watchers=[sudo_responder],
+            )
 
         source_dir = os.path.join("/usr", "local")
 
@@ -232,7 +238,9 @@ def run(target, local, user, config, toolchain, **kwargs):
     if config in ["new", "n"]:
         cprint("Adding new configuration files to the target", "blue", attrs=["bold"])
         subprocess.run(
-            ["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e " + ssh_cmd] + config_files + [target_binaries_dir]
+            ["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e " + ssh_cmd]
+            + config_files
+            + [target_binaries_dir]
         )
 
     if config in ["ignore", "i"]:

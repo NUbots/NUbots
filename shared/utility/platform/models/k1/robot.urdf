@@ -1341,7 +1341,7 @@
     name="camera"
     type="fixed">
     <!-- Hpk: transform from camera NUbots frame (k) to Head_2 pitch link (p) -->
-    <!-- Translation and rotation from K1Sensors.yaml Hpk calibration -->
+    <!-- Translation and rotation from Sensors.yaml Hpk calibration -->
     <origin
       xyz="-0.0122268423 0.0440084077 -0.0283811111"
       rpy="-1.5518693404 -0.0017597899 -1.4953884566" />

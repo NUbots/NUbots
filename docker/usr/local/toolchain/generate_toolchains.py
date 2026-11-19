@@ -52,9 +52,7 @@ def generate_cmake_toolchain(target, prefix):
     )
 
     emulator = target.get("emulator", [])
-    emulator_block = (
-        'set(CMAKE_CROSSCOMPILING_EMULATOR "{}")\n'.format(";".join(emulator)) if emulator else "\n"
-    )
+    emulator_block = 'set(CMAKE_CROSSCOMPILING_EMULATOR "{}")\n'.format(";".join(emulator)) if emulator else "\n"
 
     linker_flags = target.get("linker_flags", [])
     linker_flags_block = (

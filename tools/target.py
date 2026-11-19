@@ -32,7 +32,7 @@ import subprocess
 from termcolor import cprint
 
 import b
-from utility.dockerise import defaults, platform
+from utility.dockerise import defaults, health_check, platform
 
 
 def register(command):
@@ -49,17 +49,14 @@ def register(command):
 
 
 def run(target, username, uid, reset, **kwargs):
+    health_check.ensure_docker()
+
     if target is None:
         target = platform.selected(defaults.image, username)
         print(f"Currently selected platform is {target}")
     else:
         # Ensure the platform image is built
         platform.build(defaults.image, target, username, uid, reset)
-
-        # platform.build() tags generic as generic_k1 (see the NUgus-conflict note there),
-        # so the tag source must match or docker errors with "No such image".
-        if target == "generic":
-            target += "_k1"
 
         # Tag the built platform image as the selected image
         err = subprocess.call(
@@ -68,7 +65,7 @@ def run(target, username, uid, reset, **kwargs):
                 "image",
                 "tag",
                 defaults.image_name(target, username=username),
-                defaults.image_name("selected_k1", username=username),
+                defaults.image_name("selected", username=username),
             ]
         )
         if err != 0:

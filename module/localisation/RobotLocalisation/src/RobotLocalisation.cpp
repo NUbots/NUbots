@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -32,14 +32,13 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
-#include "message/input/Robocup.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/Robot.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/projection.hpp"
-#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::localisation {
 
@@ -54,7 +53,7 @@ namespace module::localisation {
     using message::eye::DataPoint;
     using message::input::GameState;
     using message::input::Image;
-    using message::input::Message;
+    using message::input::RoboCup;
     using message::localisation::Field;
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
@@ -117,8 +116,8 @@ namespace module::localisation {
                 emit(std::move(localisation_robots));
             });
 
-        on<Trigger<Message>, With<Field>, Sync<RobotLocalisation>>().then(
-            [this](const Message& robocup, const Field& field) {
+        on<Trigger<RoboCup>, With<Field>, Sync<RobotLocalisation>>().then(
+            [this](const RoboCup& robocup, const Field& field) {
                 // **Run prediction step**
                 prediction();
 
@@ -131,7 +130,7 @@ namespace module::localisation {
                 purpose->player_id = robocup.current_pose.player_id;
                 purpose->purpose   = robocup.going_for_ball ? SoccerPosition::ATTACK : SoccerPosition::SUPPORT;
                 // Teammates only count in strategy decisions if active, so mark them active unless penalised
-                purpose->active    = robocup.state != PenaltyState::PENALISED;
+                purpose->active = robocup.state != PenaltyState::PENALISED;
 
                 // Run data association step
                 data_association(robots_rRWw, purpose);
@@ -201,8 +200,8 @@ namespace module::localisation {
                 teammate_itr->ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
                                           cfg.ukf.noise.measurement.position,
                                           MeasurementType::ROBOT_POSITION());
-                teammate_itr->seen           = true;
-                teammate_itr->purpose        = *purpose;
+                teammate_itr->seen            = true;
+                teammate_itr->purpose         = *purpose;
                 teammate_itr->last_comms_time = NUClear::clock::now();
 
                 continue;
@@ -235,9 +234,7 @@ namespace module::localisation {
         }
     }
 
-    void RobotLocalisation::maintenance(const Image& image,
-                                        const Field& field,
-                                        const FieldDescription& field_desc) {
+    void RobotLocalisation::maintenance(const Image& image, const Field& field, const FieldDescription& field_desc) {
         std::vector<TrackedRobot> new_tracked_robots{};
 
         // Sort tracked_robots so that robots that are teammates are at the front to prevent teammates being removed
@@ -258,8 +255,8 @@ namespace module::localisation {
                 Eigen::Vector2d dimensions      = Eigen::Vector2d(image.dimensions.x(), image.dimensions.y());
                 Eigen::Vector2d norm_dimensions = dimensions / dimensions.x();
                 Eigen::Vector2d pixel           = project(rRCc.normalized(), image.lens, norm_dimensions);
-                in_view                         = pixel.x() >= 0.0 && pixel.x() < norm_dimensions.x()
-                                 && pixel.y() >= 0.0 && pixel.y() < norm_dimensions.y();
+                in_view = pixel.x() >= 0.0 && pixel.x() < norm_dimensions.x() && pixel.y() >= 0.0
+                          && pixel.y() < norm_dimensions.y();
             }
 
             if (!in_view) {

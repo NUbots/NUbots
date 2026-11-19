@@ -52,7 +52,7 @@ def register(command):
 
 # Gets the image and debayers if needed, then saves the image
 def process_save_image(packet, output):
-    image_data = decode_image(packet.msg.data, packet.msg.format)
+    image_data = decode_image(packet.msg.data, packet.msg.format, (packet.msg.dimensions.x, packet.msg.dimensions.y))
 
     img = image_data[0]["image"].numpy()
     fmt = image_data[0]["fourcc"]

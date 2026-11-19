@@ -13,7 +13,7 @@ visualisation.
 
 The robot itself is still driven around manually by `KeyboardWalk`. `FieldPlayer`'s own locomotion tasks
 (Attack, Defend, Support, ...) are deliberately left without providers in the role, so they are inert and the
-robot never moves on its own - this module only reports what role the robot *would* take if it were in a real
+robot never moves on its own - this module only reports what role the robot _would_ take if it were in a real
 game.
 
 ## Usage

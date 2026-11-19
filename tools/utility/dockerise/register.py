@@ -30,7 +30,7 @@ from . import defaults
 
 
 def register(func, image=None, **kwargs):
-    image = defaults.image_name("selected_k1") if image is None else image
+    image = defaults.image_name("selected") if image is None else image
 
     def _register(command):
 
@@ -50,15 +50,6 @@ def register(func, image=None, **kwargs):
         command.add_argument(
             "--environment",
             dest="environment",
-            # The Booster SDK's ChannelFactory::Init(0) (platform::Booster::HardwareIO) refuses to
-            # create its DDS participant unless FASTRTPS_DEFAULT_PROFILES_FILE points at a profiles
-            # XML with a `booster_dds` participant profile — NUbots_K1 ships one at
-            # tools/fastdds_default_profiles.xml (path as seen inside the container, where the repo
-            # mounts at /home/nubots/NUbots). Default it so `./b run <role>` works without every
-            # user having to pass it. See NUSim docs/K1_MUJOCO_SETUP.md. NOTE: passing --environment
-            # replaces this default (it is not merged), so include the FASTRTPS var yourself if you
-            # add your own, e.g. --environment "FASTRTPS_DEFAULT_PROFILES_FILE=...,MY_VAR=1".
-            default="FASTRTPS_DEFAULT_PROFILES_FILE=/home/nubots/NUbots/tools/fastdds_default_profiles.xml",
             help="Run the container with extra environment variables. Set variables as VAR1=VALUE1,VAR2=VALUE2",
         )
         command.add_argument("--network", dest="network", help="Run the container on the specified docker network")

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2026 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "HardwareIO.hpp"
 
 #include <booster/robot/b1/b1_api_const.hpp>
@@ -20,6 +46,7 @@ namespace module::platform::Booster {
     using message::booster::BoosterFallDownState;
     using message::booster::BoosterGetUp;
     using message::booster::BoosterHeadRot;
+    using message::booster::BoosterKick;
     using message::booster::BoosterLowCmd;
     using message::booster::BoosterMode;
     using message::booster::BoosterModeState;
@@ -48,10 +75,9 @@ namespace module::platform::Booster {
         : NUClear::Reactor(std::move(environment)) {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.prep_settle_time =
-                std::chrono::duration_cast<NUClear::clock::duration>(
-                    std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
+            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.prep_settle_time = std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["prep_settle_time"].as<double>()));
         });
 
         on<Startup>().then([this]() {
@@ -95,9 +121,31 @@ namespace module::platform::Booster {
 
             low_cmd_channel =
                 ChannelFactory::Instance()->CreateSendChannel<booster_interface::msg::LowCmd>("rt/joint_ctrl");
+
+            kick_channel = ChannelFactory::Instance()->CreateSendChannel<brain::msg::Kick>(
+                booster::robot::b1::kTopicKickReference);
         });
 
-        on<Shutdown>().then([this]() { booster_client.ChangeMode(RobotMode::kPrepare); });
+        on<Shutdown>().then([this]() {
+            booster_client.ChangeMode(RobotMode::kPrepare);
+
+            log<INFO>("Closing HardwareIO channels");
+            if (low_state_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/low_state");
+            }
+            if (battery_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/battery_state");
+            }
+            if (fall_down_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/fall_down");
+            }
+            if (button_event_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/button_event");
+            }
+            if (odometer_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader("rt/odometer_state");
+            }
+        });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {
             // The robot must not move in prep mode, so drop walk commands while in (or entering) prep.
@@ -187,6 +235,22 @@ namespace module::platform::Booster {
             low.motor_cmd(std::move(motors));
             if (low_cmd_channel == nullptr || !low_cmd_channel->Write(&low)) {
                 log<WARN>("Failed to write LowCmd to rt/joint_ctrl");
+            }
+        });
+
+        on<Trigger<BoosterKick>>().then([this](const BoosterKick& kick) {
+            brain::msg::Kick msg;
+            msg.x(kick.x);
+            msg.y(kick.y);
+            msg.dir(kick.dir);
+            msg.goal_x(kick.goal_x);
+            msg.goal_y(kick.goal_y);
+            msg.robot_theta_to_field(kick.robot_theta_to_field);
+            msg.power(kick.power);
+            log<DEBUG>("Sending kick reference: x=" + std::to_string(kick.x) + ", y=" + std::to_string(kick.y)
+                       + ", dir=" + std::to_string(kick.dir) + ", power=" + std::to_string(kick.power));
+            if (kick_channel == nullptr || !kick_channel->Write(&msg)) {
+                log<ERROR>("Failed to publish kick reference");
             }
         });
 
@@ -423,8 +487,8 @@ namespace module::platform::Booster {
     void HardwareIO::button_event_handler(const void* msg) {
         const auto* btn_msg = static_cast<const booster_interface::msg::ButtonEventMsg*>(msg);
         const bool pressed  = (btn_msg->event() == booster_interface::msg::PRESS_DOWN
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
-                               || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_START
+                              || btn_msg->event() == booster_interface::msg::LONG_PRESS_HOLD);
 
         std::lock_guard<std::mutex> lock(buttons_mutex);
         switch (btn_msg->button()) {

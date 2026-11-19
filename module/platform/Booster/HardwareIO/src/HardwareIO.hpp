@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2026 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
 #define MODULE_PLATFORM_BOOSTER_HARDWAREIO_HPP
 
@@ -5,6 +31,7 @@
 #include <booster/idl/b1/BatteryState.h>
 #include <booster/idl/b1/ButtonEvent.h>
 #include <booster/idl/b1/FallDownState.h>
+#include <booster/idl/b1/Kick.h>
 #include <booster/idl/b1/LowCmd.h>
 #include <booster/idl/b1/LowState.h>
 #include <booster/idl/b1/Odometer.h>
@@ -20,6 +47,7 @@
 #include "message/booster/BoosterFallDownState.hpp"
 #include "message/booster/BoosterGetUp.hpp"
 #include "message/booster/BoosterHeadRot.hpp"
+#include "message/booster/BoosterKick.hpp"
 #include "message/booster/BoosterLowCmd.hpp"
 #include "message/booster/BoosterMode.hpp"
 #include "message/booster/BoosterModeState.hpp"
@@ -69,6 +97,7 @@ namespace module::platform::Booster {
         booster::robot::ChannelPtr<booster_interface::msg::Odometer> odometer_channel;
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ros_odometry_channel;
         booster::robot::ChannelPtr<booster_interface::msg::LowCmd> low_cmd_channel;
+        booster::robot::ChannelPtr<brain::msg::Kick> kick_channel;
 
         /// @brief Set once the frames of the first rt/odom message have been logged
         std::atomic<bool> ros_odometry_frames_logged{false};

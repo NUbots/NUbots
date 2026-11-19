@@ -6,8 +6,8 @@ IMPORTANT: `systemconfiguration` and `robocup` roles should be built to the robo
 
 The purpose of this module is to provide a simple way to set up the robot for RoboCup games. It has an ncurses inferface that shows the current configuration of the network and certain module configuration files. The user can modify these fields to set up the robot appropriately. Note that this is designed to be run directly on the robot. To revert the affects of this module, rebuild configuration files to the robot and remove
 
-- `system/nugus<number>/etc/systemd/network/30-wifi.network`
-- `system/nugus<number>/etc/wpa_supplicant/wpa_supplicant-<wifi_interface>.conf`
+- `system/<hostname>/etc/systemd/network/30-wifi.network`
+- `system/<hostname>/etc/wpa_supplicant/wpa_supplicant-<wifi_interface>.conf`
 
 Then run `./systemconfiguration` and reboot. Alternatively you can run this module again and revert the values manually.
 

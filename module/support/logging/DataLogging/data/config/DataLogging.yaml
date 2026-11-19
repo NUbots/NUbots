@@ -12,16 +12,14 @@ messages:
   message.platform.RawSensors: true
   message.input.Image: false
   message.output.CompressedImage: true
-  message.input.Message: true
+  message.input.RoboCup: true
   message.input.GameState: true
   # Vision
   message.vision.Balls: true
   message.vision.Goals: true
-  message.vision.GreenHorizon: true
-  message.vision.FieldLines: true
+  message.vision.FieldLines: false
   message.vision.FieldIntersections: true
   message.support.FieldDescription: true
-  message.vision.VisualMesh: true
   message.vision.BoundingBoxes: true
   # Odometry and Localisation
   message.localisation.Ball: true

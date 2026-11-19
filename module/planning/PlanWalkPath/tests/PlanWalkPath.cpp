@@ -150,11 +150,11 @@ TEST_CASE("Dead zone snaps, bumps and clamps per axis", "[apply_dead_zone]") {
     auto dz = [&](double x) { return apply_dead_zone(Eigen::Vector3d(x, 0.0, 0.0), min_v, zero_tol, max_v).x(); };
 
     CHECK(dz(0.0) == Approx(0.0));
-    CHECK(dz(0.03) == Approx(0.0));    // below zero tolerance -> stop
-    CHECK(dz(0.1) == Approx(0.3));     // in the dead zone -> bumped to minimum
-    CHECK(dz(-0.1) == Approx(-0.3));   // sign preserved
-    CHECK(dz(0.5) == Approx(0.5));     // normal command passes through
-    CHECK(dz(1.5) == Approx(1.0));     // clamped to maximum
+    CHECK(dz(0.03) == Approx(0.0));   // below zero tolerance -> stop
+    CHECK(dz(0.1) == Approx(0.3));    // in the dead zone -> bumped to minimum
+    CHECK(dz(-0.1) == Approx(-0.3));  // sign preserved
+    CHECK(dz(0.5) == Approx(0.5));    // normal command passes through
+    CHECK(dz(1.5) == Approx(1.0));    // clamped to maximum
 
     // Each axis uses its own thresholds
     const Eigen::Vector3d out = apply_dead_zone(Eigen::Vector3d(0.1, 0.1, 0.1), min_v, zero_tol, max_v);

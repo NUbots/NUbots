@@ -4,6 +4,9 @@ log_level: INFO
 # Path to the model weights
 model_path: "booster.onnx"
 
+# Inference device: cpu, or gpu (TensorRT)
+device: gpu
+
 # Minimum confidence required for a ball detection to be accepted
 ball_confidence_threshold: 0.45
 
@@ -30,9 +33,3 @@ nms_threshold: 0.5
 
 # NMS confidence (score) threshold for filtering out low confidence detections
 nms_score_threshold: 0.1
-
-# Inference device (CPU, GPU). GPU is also what gates TensorRT: the module only tries to
-# build an engine when this is GPU, because probing CUDA with no visible device can crash
-# inside the driver rather than throw. With no GPU passed through it falls back to
-# OpenVINO CPU on its own, so GPU is safe to leave on.
-device: GPU

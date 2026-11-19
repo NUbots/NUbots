@@ -9,6 +9,7 @@ import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector2 } from "../../../shared/math/vector2";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
+import { Lens } from "../camera/lens";
 import { RobotModel } from "../robot/model";
 
 class ServoMotor {
@@ -155,6 +156,18 @@ export class BoundingBox {
   }
 }
 
+/** A camera image along with everything needed to project it out into the world */
+export interface CameraImage {
+  bitmap: ImageBitmap;
+  width: number;
+  height: number;
+  /** Time the image was captured, in seconds */
+  timestamp: number;
+  /** World to camera transform at the time the image was captured */
+  Hcw: Matrix4;
+  lens: Lens;
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -163,6 +176,8 @@ export class LocalisationRobotModel {
   @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
   @observable Hcw: Matrix4; // World to camera
+  /** The latest camera image, only populated while the camera projection or camera lines are visible */
+  @observable.ref cameraImage?: CameraImage;
   @observable Hrd?: Matrix4; // Walk path desired pose in robot space.
   @observable Hwp: Matrix4; // Planted foot to world
   @observable Rwt: Quaternion; // Torso to world rotation.
@@ -178,7 +193,7 @@ export class LocalisationRobotModel {
   // This robot's own estimate of how long it - and each teammate it can see - would take to reach
   // the ball, keyed by player id (self included) - see network.ts#onTimeToBall.
   @observable timeToBallEstimates: Map<number, number> = new Map();
-  // Teammates seen via the UDP team-communication broadcast (message.input.Message), keyed by
+  // Teammates seen via the UDP team-communication broadcast (message.input.RoboCup), keyed by
   // player id. Each is a full LocalisationRobotModel so it can be rendered with the exact same
   // components used for our own robot (K1, PurposeLabel) - see network.ts#onTeamCommunication.
   @observable teammates: Map<number, LocalisationRobotModel> = new Map();

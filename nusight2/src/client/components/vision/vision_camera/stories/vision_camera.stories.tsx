@@ -2,10 +2,8 @@ import * as React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { observable } from "mobx";
 import { Observer, observer } from "mobx-react";
-import * as THREE from "three";
 
 import { SeededRandom } from "../../../../../shared/base/random/seeded_random";
-import { Matrix4 } from "../../../../../shared/math/matrix4";
 import { Vector2 } from "../../../../../shared/math/vector2";
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { Vector4 } from "../../../../../shared/math/vector4";
@@ -13,7 +11,6 @@ import useInterval from "../../../../hooks/use-interval";
 import { fakeCameraModel } from "../../../camera/stories/fake_camera_model";
 import { RobotModel } from "../../../robot/model";
 import { VisionRobotModel } from "../../model";
-import { GreenHorizonModel } from "../green_horizon";
 import { VisionCameraModel } from "../model";
 import { VisionCameraView, VisionCameraViewProps } from "../view";
 import { VisionCameraViewModel } from "../view_model";
@@ -147,7 +144,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
   const baseModel = await fakeCameraModel();
 
   const Hcw = baseModel.params.Hcw;
-  const Hwc = Matrix4.fromThree(new THREE.Matrix4().copy(Hcw.toThree()).invert());
 
   const viewSize = Vector2.of(baseModel.image.width, baseModel.image.height);
   const focalLength = 193 / viewSize.x;
@@ -155,19 +151,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
   return VisionCameraModel.of({
     ...baseModel,
     id: 0,
-    greenHorizon: new GreenHorizonModel({
-      horizon: [
-        new Vector2(38, 258),
-        new Vector2(248, 136),
-        new Vector2(422, 164),
-        new Vector2(539, 234),
-        new Vector2(567, 333),
-        new Vector2(445, 473),
-        new Vector2(117, 422),
-        new Vector2(38, 258),
-      ].map((p) => screenToWorldRay(p, viewSize, focalLength, Hwc)),
-      Hcw,
-    }),
     balls: [
       {
         timestamp: 0,
@@ -203,12 +186,6 @@ async function fakeVisionCameraModel(): Promise<VisionCameraModel> {
       },
     ],
   });
-}
-
-function screenToWorldRay(screenPoint: Vector2, viewSize: Vector2, focalLength: number, Hwc: Matrix4) {
-  const rFCc = unprojectEquidistant(screenPoint, viewSize, focalLength);
-  const Rwc = new THREE.Matrix4().extractRotation(Hwc.toThree());
-  return Vector3.fromThree(rFCc.toThree().applyMatrix4(Rwc)); // rFCw
 }
 
 function unprojectEquidistant(point: Vector2, viewSize: Vector2, focalLength: number): Vector3 {

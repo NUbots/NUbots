@@ -2,7 +2,7 @@
 
 ## Description
 
-This module benchmarks the performance of the robot's odometry system (specifically `Htw` from `SensorFilter`) by comparing its estimates against ground truth data during NBS file playback. It calculates Root Mean Square Error (RMSE) for translation and rotation errors, as well as individual errors for each degree of freedom (x, y, z, roll, pitch, yaw).
+This module benchmarks the performance of the robot's odometry system (specifically `Htw` from `Sensors`) by comparing its estimates against ground truth data during NBS file playback. It calculates Root Mean Square Error (RMSE) for translation and rotation errors, as well as individual errors for each degree of freedom (x, y, z, roll, pitch, yaw).
 
 ## Usage
 

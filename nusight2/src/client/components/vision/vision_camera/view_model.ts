@@ -6,11 +6,9 @@ import { VisionRobotModel } from "../model";
 import { BallsViewModel } from "./balls";
 import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { GoalsViewModel } from "./goals";
-import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
 import { OtherRobotsViewModel } from "./other_robots";
 import { OutOfFieldViewModel } from "./out_of_field";
-import { VisualMeshViewModel } from "./visual_mesh";
 
 export class VisionCameraViewModel extends CameraViewModel {
   constructor(
@@ -27,8 +25,6 @@ export class VisionCameraViewModel extends CameraViewModel {
   readonly getRenderables = () => {
     const { drawOptions } = this.model;
     return [
-      drawOptions.drawVisualMesh && this.visualMesh?.visualMesh(),
-      drawOptions.drawGreenHorizon && this.greenHorizon?.greenHorizon(),
       drawOptions.drawBalls && this.balls?.balls(),
       drawOptions.drawGoals && this.goals?.goals(),
       drawOptions.drawRobots && this.robots?.robots(),
@@ -40,12 +36,6 @@ export class VisionCameraViewModel extends CameraViewModel {
   @computed
   get drawOptions() {
     return this.model.drawOptions;
-  }
-
-  @computed
-  private get greenHorizon(): GreenHorizonViewModel | undefined {
-    const { greenHorizon, params } = this.model;
-    return greenHorizon && GreenHorizonViewModel.of(greenHorizon, params, this.canvas, this.imageAspectRatio);
   }
 
   @computed
@@ -92,9 +82,4 @@ export class VisionCameraViewModel extends CameraViewModel {
     );
   }
 
-  @computed
-  private get visualMesh(): VisualMeshViewModel | undefined {
-    const { visualMesh, params } = this.model;
-    return visualMesh && VisualMeshViewModel.of(visualMesh, params, this.canvas, this.imageAspectRatio);
-  }
 }

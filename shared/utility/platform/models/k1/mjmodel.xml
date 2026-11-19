@@ -23,7 +23,7 @@
         <inertial pos="0.0110088 -0.000864606 0.0805424" quat="0.996554 -0.000898356 -0.0774465 -0.0296718" mass="0.701" diaginertia="0.00604512 0.00578769 0.00170607"/>
         <joint name="Head_pitch" pos="0 0 0" axis="0 1 0" range="-0.349 0.855" actuatorfrcrange="-6 6"/>
         <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="Head_2"/>
-        <!-- Camera NUbots frame (k): Hpk calibration from K1Sensors.yaml -->
+        <!-- Camera NUbots frame (k): Hpk calibration from Sensors.yaml -->
         <site name="camera" pos="0.065  0.035 0.0915 " quat="0.52295637 -0.51398909 0.47576496 -0.48577726" size="0.01" rgba="1 0 0 1"/>
       </body>
     </body>

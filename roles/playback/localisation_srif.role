@@ -8,7 +8,6 @@ nuclear_role(
   support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Configuration
-  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig # Field description, chosen by hostname (config/nusim/ for NUSim)
   # Localisation

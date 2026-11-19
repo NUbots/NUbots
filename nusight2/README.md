@@ -38,4 +38,4 @@
 `yarn start --address 192.168.1.255`
 `yarn prod --address 192.168.1.255`
 
-The port defaults to `7467` to match the robots' `NUClearNet.yaml` (UDP 7447 is taken by BoosterOS on the K1). Override it with `--port`.
+The port defaults to `7467` to match the robots' `NUClearNet.yaml` (UDP 7447 is taken by a Booster process on the K1). Override it with `--port`.

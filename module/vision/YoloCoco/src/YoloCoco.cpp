@@ -61,25 +61,9 @@ namespace module::vision {
             cfg.nms_threshold       = config["nms_threshold"].as<double>();
             cfg.nms_score_threshold = config["nms_score_threshold"].as<double>();
 
-            // Load and compile the model
+            // Load the model
             std::string model_path = config["model_path"].as<std::string>();
-
-            // Try TensorRT first, building the engine from the ONNX model on this device.
-            // The built engine is cached on disk, so this is only slow the first time.
-            try {
-                log<INFO>("Building TensorRT engine from: ", model_path);
-                trt = std::make_unique<utility::vision::TensorRT>(model_path);
-                log<INFO>("TensorRT engine ready");
-            }
-            catch (const std::exception& e) {
-                trt.reset();
-                log<WARN>("TensorRT unavailable: ", e.what());
-                log<INFO>("Falling back to OpenVINO");
-
-                // Compile the model and create inference request object
-                compiled_model = ov::Core().compile_model(model_path, config["device"].as<std::string>());
-                infer_request  = compiled_model.create_infer_request();
-            }
+            onnx_rt = std::make_unique<utility::onnx::ONNXRuntime>(model_path, config["device"].as<std::string>());
         });
 
         on<Trigger<Image>, Single>().then("Yolo Main Loop", [this](const Image& img) {
@@ -110,8 +94,7 @@ namespace module::vision {
             img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
 
             // Use the model's expected input size, assuming NCHW format
-            int model_input_size = trt != nullptr ? static_cast<int>(trt->input_shape()[2])
-                                                  : static_cast<int>(compiled_model.input().get_shape()[2]);
+            int model_input_size = static_cast<int>(onnx_rt->input_shape()[2]);
             cv::Mat blob         = cv::dnn::blobFromImage(letterbox_img,
                                                   1.0 / 255.0,
                                                   cv::Size(model_input_size, model_input_size),
@@ -124,42 +107,16 @@ namespace module::vision {
             int out_channels   = 0;
             int out_detections = 0;
 
-            if (trt != nullptr) {
-                // TensorRT inference
-                try {
-                    float* blob_ptr = blob.ptr<float>();
-                    output_data     = trt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
-                    out_channels    = static_cast<int>(trt->output_shape()[1]);
-                    out_detections  = static_cast<int>(trt->output_shape()[2]);
-                }
-                catch (const std::exception& e) {
-                    log<ERROR>("TensorRT inference failed: ", e.what());
-                    return;
-                }
+            // ONNX Runtime inference
+            try {
+                float* blob_ptr = blob.ptr<float>();
+                output_data     = onnx_rt->infer(std::vector<float>(blob_ptr, blob_ptr + blob.total()));
+                out_channels    = static_cast<int>(onnx_rt->output_shape()[1]);
+                out_detections  = static_cast<int>(onnx_rt->output_shape()[2]);
             }
-            else {
-                // OpenVINO inference
-                try {
-                    // Get input port for model with one input
-                    auto input_port = compiled_model.input();
-                    // Create tensor from external memory
-                    ov::Tensor input_tensor(input_port.get_element_type(), input_port.get_shape(), blob.ptr(0));
-                    // Set input tensor for model with one input
-                    infer_request.set_input_tensor(input_tensor);
-
-                    infer_request.infer();
-                    auto output    = infer_request.get_output_tensor(0);
-                    out_channels   = static_cast<int>(output.get_shape()[1]);
-                    out_detections = static_cast<int>(output.get_shape()[2]);
-
-                    // Copy output data
-                    float* data = output.data<float>();
-                    output_data.assign(data, data + output.get_byte_size() / sizeof(float));
-                }
-                catch (const std::exception& e) {
-                    log<ERROR>("OpenVINO inference failed: ", e.what());
-                    return;
-                }
+            catch (const std::exception& e) {
+                log<ERROR>("ONNX Runtime inference failed: ", e.what());
+                return;
             }
 
             // -------- Postprocess the result --------

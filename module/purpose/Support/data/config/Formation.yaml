@@ -22,7 +22,7 @@ defaults:
 modes:
   normal_play:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -39,7 +39,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -57,7 +57,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -77,7 +77,7 @@ modes:
         minY:
           field: width
           scale: -0.4
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -97,7 +97,7 @@ modes:
         minY:
           field: width
           scale: -0.35
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -123,7 +123,7 @@ modes:
         x: 0.35
         y: 0.25
     robots:
-      '1':
+      "1":
         offset:
           x:
             position: left_goal_area_max_x
@@ -140,7 +140,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -160,7 +160,7 @@ modes:
         minY:
           field: width
           scale: -0.1
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -180,7 +180,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -197,7 +197,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -223,7 +223,7 @@ modes:
         field: length
         scale: -0.45
     robots:
-      '1':
+      "1":
         offset:
           x:
             position: left_goal_area_max_x
@@ -240,7 +240,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -260,7 +260,7 @@ modes:
         minY:
           field: width
           scale: -0.1
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -280,7 +280,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -288,7 +288,7 @@ modes:
           y:
             field: width
             scale: 0.12
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -298,7 +298,7 @@ modes:
             scale: -0.12
   throw_in_us:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -315,7 +315,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -335,7 +335,7 @@ modes:
         minY:
           field: width
           scale: -0.1
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -355,7 +355,7 @@ modes:
         minY:
           field: width
           scale: -0.35
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -372,7 +372,7 @@ modes:
         minY:
           field: width
           scale: -0.2
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -391,7 +391,7 @@ modes:
           scale: -0.35
   throw_in_them:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -408,7 +408,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -422,7 +422,7 @@ modes:
         maxX:
           field: length
           scale: -0.15
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -436,7 +436,7 @@ modes:
         maxX:
           field: length
           scale: -0.15
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -450,7 +450,7 @@ modes:
         minX:
           field: length
           scale: -0.37
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -466,7 +466,7 @@ modes:
           scale: -0.16
   corner_kick_us:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -483,7 +483,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -504,7 +504,7 @@ modes:
         maxY:
           position: field_max_y
           offset: 0.25
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -518,7 +518,7 @@ modes:
         maxX:
           field: length
           scale: -0.15
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -532,7 +532,7 @@ modes:
         minX:
           field: length
           scale: -0.3
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -545,7 +545,7 @@ modes:
           scale: -0.05
   corner_kick_them:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -562,7 +562,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -573,7 +573,7 @@ modes:
         attraction:
           x: 0.6
           y: 0.55
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -587,7 +587,7 @@ modes:
         attraction:
           x: 0.6
           y: 0.55
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -604,7 +604,7 @@ modes:
         maxY:
           field: length
           scale: 0.25
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -620,7 +620,7 @@ modes:
           scale: -0.16
   penalty_kick_us:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -637,7 +637,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -648,7 +648,7 @@ modes:
         maxX:
           field: length
           scale: 0.27
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -659,7 +659,7 @@ modes:
         maxX:
           field: length
           scale: -0.15
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -670,7 +670,7 @@ modes:
         attraction:
           x: 0.7
           y: 0.65
-      '5':
+      "5":
         offset:
           x:
             field: length
@@ -686,7 +686,7 @@ modes:
           scale: -0.16
   penalty_kick_them:
     robots:
-      '1':
+      "1":
         offset:
           x:
             field: length
@@ -703,7 +703,7 @@ modes:
           position: goal_area_min_y
         maxY:
           position: goal_area_max_y
-      '2':
+      "2":
         offset:
           x:
             field: length
@@ -714,7 +714,7 @@ modes:
         minX:
           field: length
           scale: -0.25
-      '3':
+      "3":
         offset:
           x:
             field: length
@@ -725,7 +725,7 @@ modes:
         minX:
           field: length
           scale: -0.25
-      '4':
+      "4":
         offset:
           x:
             field: length
@@ -739,7 +739,7 @@ modes:
         minX:
           field: length
           scale: -0.17
-      '5':
+      "5":
         offset:
           x:
             field: length

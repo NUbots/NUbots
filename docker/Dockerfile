@@ -59,6 +59,7 @@ RUN install-package \
     python3-requests \
     build-essential \
     clang \
+    clang-format \
     ccache \
     ninja-build \
     unzip \
@@ -194,17 +195,15 @@ RUN if [ "${platform}" != "generic" ]; then \
     -DBUILD_SHARED_LIBS=OFF; \
     fi
 
-# OpenVino - Dependencies
-RUN install-package opencl-c-headers \
+# Build dependencies
+RUN install-package \
     shellcheck \
     scons \
     pkgconf \
     patchelf \
     fdupes \
     ca-certificates \
-    file \
-    rapidjson-dev \
-    libsnappy-dev
+    file
 
 
 RUN install-from-source https://github.com/uxlfoundation/oneTBB/archive/refs/tags/v2021.13.0.tar.gz \
@@ -213,42 +212,6 @@ RUN install-from-source https://github.com/uxlfoundation/oneTBB/archive/refs/tag
     -DCMAKE_BUILD_TYPE=Release \
     -DTBB_TEST:BOOL='OFF' \
     -DTBB_BENCH:BOOL='OFF'
-
-# Clone OpenVINO repository
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2024.6.0 && \
-    cd openvino && \
-    git submodule update --init --recursive
-
-# Build OpenVINO
-WORKDIR /openvino
-RUN mkdir build && cd build && \
-    cmake .. -DBUILD_TESTING:BOOL='OFF' \
-    -DCMAKE_BUILD_TYPE:STRING='Release' \
-    -DCMAKE_TOOLCHAIN_FILE=${prefix}/toolchain.cmake \
-    -DENABLE_AVX512F:BOOL='OFF' \
-    -DENABLE_PYTHON:BOOL='OFF' \
-    -DENABLE_CLANG_FORMAT:BOOL='OFF' \
-    -DENABLE_NCC_STYLE:BOOL='OFF' \
-    -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
-    -DENABLE_INTEL_NPU:BOOL='OFF' \
-    -DENABLE_SYSTEM_TBB:BOOL='ON' \
-    -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-    -DENABLE_SYSTEM_PROTOBUF:BOOL='OFF' \
-    -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
-    -DENABLE_INTEL_GPU:BOOL='OFF' \
-    -DENABLE_INTEL_CPU:BOOL='ON' \
-    -DENABLE_ARM_COMPUTE_CMAKE:BOOL='OFF' \
-    -DARM_COMPUTE_SCONS_JOBS="$(nproc)" \
-    -DENABLE_CPPLINT:BOOL='OFF' \
-    -DCMAKE_CXX_STANDARD='17' \
-    -Wno-dev \
-    -GNinja && \
-    ninja -j$(nproc) && ninja -j$(nproc) install
-
-# Move OpenVino libraries to our library path
-RUN ARCH=$([ "${platform}" = "orinnx" ] && echo "aarch64" || echo "intel64") && \
-    LIB_PATH=$([ "${platform}" = "orinnx" ] && echo "/l4t/targetfs/usr/local/lib" || echo "/usr/local/lib") && \
-    cp /openvino/bin/${ARCH}/Release/* ${LIB_PATH}/ -r
 
 # CUDA Toolkit
 COPY usr/local/bin/install-cuda.sh /usr/local/bin/install-cuda.sh
@@ -268,28 +231,59 @@ RUN install-package -p ${platform} \
     cuda-nvrtc-12-5 \
     cuda-nvrtc-dev-12-5
 
+# Pin TensorRT to v10 as ONNXRuntime needs v10 and not v11
+RUN printf 'Package: libnvinfer* libnvonnxparsers*\nPin: version 10.3.0.26-1+cuda12.5\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/tensorrt
+
 # TensorRT - install binary packages from NVIDIA CUDA repository
-# NvInfer.h, NvOnnxParser.h, libnvinfer.so, libnvonnxparsers.so
 RUN install-package -p ${platform} \
     libnvinfer-dev \
-    libnvonnxparsers-dev \
-    libnvinfer-plugin-dev \
-    libnvinfer-lean-dev \
-    libnvinfer-vc-plugin-dev
+    libnvonnxparsers-dev
+
+# Runtime libraries the x64 GPU ONNXRuntime build links its CUDA and TensorRT providers against
+# (the TensorRT provider also loads the CUDA provider). On Jetson these come from JetPack on the device instead
+RUN if [ "${platform}" = "generic" ]; then \
+        install-package \
+            libcudnn9-cuda-12 \
+            libcurand-12-5 \
+            libcufft-12-5 ;\
+    fi
+
+
+# ONNXRuntime (headers + libs); on Jetson the libs are replaced by the GPU wheel's below
+RUN . /root/.dep_env && \
+    if [ "${platform}" = "generic" ]; then \
+        ONNXRUNTIME_ARCHIVE=onnxruntime-linux-x64-gpu-1.24.1.tgz ;\
+    else \
+        ONNXRUNTIME_ARCHIVE=onnxruntime-linux-aarch64-1.24.1.tgz ;\
+    fi && \
+    install-from-source https://github.com/microsoft/onnxruntime/releases/download/v1.24.1/${ONNXRUNTIME_ARCHIVE} \
+        --prefix ${DEP_PREFIX} \
+        --no-toolchain
+
+# ONNXRuntime (Jetson); to update, see:
+# https://pypi.jetson-ai-lab.io/
+RUN . /root/.dep_env && \
+    if [ "${platform}" != "generic" ]; then \
+        wget -nv https://pypi.jetson-ai-lab.io/jp6/cu128/+f/d98/0b934b9a29c1a/onnxruntime_gpu-1.24.0-cp310-cp310-linux_aarch64.whl#sha256=d980b934b9a29c1a9d6f39751edd7662b69fadd75556a10ff363773a58ce0950 -O /tmp/onnxruntime_tensorrt.whl && \
+        unzip /tmp/onnxruntime_tensorrt.whl -d /tmp/onnxruntime_tensorrt && \
+        cd /tmp/onnxruntime_tensorrt/onnxruntime/capi && \
+        mv libonnxruntime* ${DEP_PREFIX}/lib/ && \
+        # Change current symlinks to point to the copied fi;es
+        rm -f ${DEP_PREFIX}/lib/libonnxruntime.so.1.24.1 && \
+        ln -sf libonnxruntime.so.1.24.0 ${DEP_PREFIX}/lib/libonnxruntime.so.1 && \
+        ln -sf libonnxruntime.so.1 ${DEP_PREFIX}/lib/libonnxruntime.so && \
+        # Get TensorRT EP header
+        install-from-source https://raw.githubusercontent.com/microsoft/onnxruntime/refs/tags/v1.24.1/include/onnxruntime/core/providers/tensorrt/tensorrt_provider_options.h \
+            --prefix ${DEP_PREFIX} \
+            --no-toolchain \
+            --header-path include/onnxruntime/core/providers/tensorrt; \
+    fi
+
 
 # Eigen3
 RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz \
     --jobs $(nproc)
-
-# tcmalloc
-RUN . /root/.dep_env && \
-    install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
-    --jobs $(nproc) \
-    --build-system autotools \
-    --prefix ${DEP_PREFIX} \
-    ${DEP_TOOLCHAIN} \
-    --with-tcmalloc-pagesize=64 \
-    --enable-minimal
 
 # Libjpeg
 RUN install-package yasm
@@ -373,13 +367,6 @@ RUN . /root/.dep_env && \
     --prefix ${DEP_PREFIX} --no-toolchain \
     --header-path include/zstr
 
-# Visual Mesh
-RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a17bbee73339eaee556f47a80b93c40.tar.gz \
-    --jobs $(nproc) \
-    -DBUILD_TENSORFLOW_OP=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_OPENCL_ENGINE=ON
-
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN . /root/.dep_env && \
     install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp \
@@ -404,10 +391,6 @@ RUN . /root/.dep_env && \
     --jobs $(nproc) \
     --prefix ${DEP_PREFIX} \
     ${DEP_TOOLCHAIN}
-
-# Nanopb for generating messages for NUSense
-RUN install-from-source https://github.com/nanopb/nanopb/archive/refs/tags/0.4.9.1.tar.gz \
-    --jobs $(nproc)
 
 # autodiff
 RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v1.1.2.tar.gz \
@@ -473,8 +456,8 @@ RUN pip3 install uv==0.7.2
 
 # When in the docker image uv will use a separate volume for the cache and venv
 # Virtual environments are on the same volume as the uv cache to allow hard linking for ~speed~
-ENV UV_CACHE_DIR=/home/nubots/python/uv-cache
-ENV UV_PROJECT_ENVIRONMENT=/home/nubots/python/.venv
+ENV UV_CACHE_DIR=/home/booster/python/uv-cache
+ENV UV_PROJECT_ENVIRONMENT=/home/booster/python/.venv
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_VISIBLE_DEVICES=all
@@ -504,31 +487,31 @@ ARG user_uid=1000
 ARG user_gid=$user_uid
 ARG render_gid=110
 
-# useradd -G is not sufficient to add the nubots user to the dialout
+# useradd -G is not sufficient to add the booster user to the dialout
 # group as docker manages to lose supplementary groups when changing
-# to the nubots user.
+# to the booster user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
 # Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
 RUN groupadd --gid $render_gid render_host \
-    && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp,video,render_host -m nubots
+    && groupadd --gid $user_gid booster \
+    && useradd --uid $user_uid --gid booster -G audio,dialout,uucp,video,render_host -m booster
 
-USER nubots
+USER booster
 
 # Without this git gets very angry and confused about the state of the user
 RUN git config --global --add safe.directory '*'
 
 # Copy over GDB alias'
-COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
+COPY --chown=booster:booster home/booster/.gdbinit /home/booster/.gdbinit
 
 
 # Setup the locations where we will mount our folders
-RUN install -d -m 0755 /home/nubots/NUbots \
-    && install -d -m 0777 /home/nubots/build \
-    && install -d -m 0777 /home/nubots/python \
-    && install -d -m 0777 /home/nubots/NUbots/nusight2/node_modules
+RUN install -d -m 0755 /home/booster/NUbots \
+    && install -d -m 0777 /home/booster/build \
+    && install -d -m 0777 /home/booster/python \
+    && install -d -m 0777 /home/booster/NUbots/nusight2/node_modules
 
 # Configure the cache directories
-ENV CCACHE_DIR=/home/nubots/build/ccache
+ENV CCACHE_DIR=/home/booster/build/ccache
 
-WORKDIR /home/nubots/NUbots
+WORKDIR /home/booster/NUbots

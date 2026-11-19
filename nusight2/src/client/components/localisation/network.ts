@@ -1,10 +1,11 @@
 import { WalkState } from "@proto/message/behaviour/state/WalkState";
 import { GameState_TeamColourEnum } from "@proto/message/input/GameState";
-import { Message as RobocupMessage } from "@proto/message/input/Robocup";
+import { RoboCup } from "@proto/message/input/RoboCup";
 import { Sensors } from "@proto/message/input/Sensors";
 import { Ball as LocalisationBall } from "@proto/message/localisation/Ball";
 import { Field } from "@proto/message/localisation/Field";
 import { Robots as LocalisationRobots } from "@proto/message/localisation/Robot";
+import { CompressedImage } from "@proto/message/output/CompressedImage";
 import { WalkToDebug } from "@proto/message/planning/WalkPath";
 import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose";
 import { SupportPosition } from "@proto/message/purpose/SupportPosition";
@@ -15,7 +16,7 @@ import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
 import { FieldLines } from "@proto/message/vision/FieldLines";
 import { Goals } from "@proto/message/vision/Goal";
 import { Iiso3 } from "@proto/Transform";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import * as THREE from "three";
 
 import { Matrix2 } from "../../../shared/math/matrix2";
@@ -28,6 +29,7 @@ import { Vector4 } from "../../../shared/math/vector4";
 import { Timestamp } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
+import { Lens } from "../camera/lens";
 import { RobotModel } from "../robot/model";
 
 import { DashboardRobotModel } from "./dashboard_components/dashboard_robot/model";
@@ -53,9 +55,10 @@ export class LocalisationNetwork {
     this.network.on(Purpose, this.onPurpose);
     this.network.on(SupportPosition, this.onSupportPosition);
     this.network.on(TimeToBall, this.onTimeToBall);
-    this.network.on(RobocupMessage, this.onTeamCommunication);
+    this.network.on(RoboCup, this.onTeamCommunication);
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
+    this.network.on(CompressedImage, this.onCompressedImage);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -71,6 +74,49 @@ export class LocalisationNetwork {
   getKey(enumType: any, enumValue: number) {
     return Object.keys(enumType).find((key) => enumType[key] === enumValue);
   }
+
+  private onCompressedImage = async (robotModel: RobotModel, image: CompressedImage) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    // Decoding images is expensive, so only do it while a projection of the image is being shown
+    if (!this.model.cameraProjectionVisible && !this.model.cameraLinesVisible) {
+      if (robot.cameraImage) {
+        runInAction(() => (robot.cameraImage = undefined));
+      }
+      return;
+    }
+
+    // Image data or lens will be missing for empty NBS packets (emitted by the nbs scrubber when there's no image
+    // packet at a requested timestamp)
+    if (!image.data || !image.lens || !image.Hcw || !image.dimensions) {
+      return;
+    }
+
+    const { dimensions, data, Hcw, lens } = image;
+    const timestamp = Timestamp.toSeconds(image.timestamp);
+
+    const bitmap = await createImageBitmap(new Blob([data], { type: "image/jpeg" }), {
+      colorSpaceConversion: "none",
+      premultiplyAlpha: "none",
+    });
+
+    runInAction(() => {
+      robot.cameraImage = {
+        bitmap,
+        width: dimensions.x!,
+        height: dimensions.y!,
+        timestamp,
+        Hcw: Matrix4.from(Hcw),
+        lens: new Lens({
+          // The protobuf and NUsight projection enums share the same values
+          projection: lens.projection as number,
+          focalLength: lens.focalLength!,
+          centre: Vector2.from(lens.centre),
+          distortionCoefficients: Vector2.from(lens.k),
+        }),
+      };
+    });
+  };
 
   @action
   private onField = (robotModel: RobotModel, field: Field) => {
@@ -152,11 +198,13 @@ export class LocalisationNetwork {
     // This robot's own opinion of how long it - and each teammate it can see - would take to reach
     // the ball, keyed by player id (self included). Kept on the observing robot's own model rather
     // than the teammates' synthetic models since it's this robot's estimate, not the teammate's.
-    robot.timeToBallEstimates = new Map(timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]));
+    robot.timeToBallEstimates = new Map(
+      timeToBall.estimates.map((estimate) => [estimate.playerId!, estimate.timeToBall!]),
+    );
   }
 
   @action.bound
-  private onTeamCommunication(robotModel: RobotModel, message: RobocupMessage) {
+  private onTeamCommunication(robotModel: RobotModel, message: RoboCup) {
     const robot = LocalisationRobotModel.of(robotModel);
     const pose = message.currentPose;
     if (!pose || pose.playerId === 0) {

@@ -41,26 +41,44 @@ if [ "$platform" = "orinnx" ]; then
     chmod 777 /tmp/debs
     cd /tmp/debs
 
-    # Get recursive dependencies for arm64 and download them
-    for pkg in $packages; do
-        # Download the requested package itself so -dev artifacts (e.g. libudev.so)
-        # are present in the sysroot, not just its runtime dependencies.
-        apt-get download "$pkg:arm64" || { echo "Error: Failed to download $pkg:arm64" >&2; exit 1; }
+    # Track installed packages to avoid redownloading dependencies
+    ledger=/l4t/targetfs/var/lib/install-package.list
+    touch "$ledger"
+    (sed -n 's/^Package: //p' /l4t/targetfs/var/lib/dpkg/status; cat "$ledger") | sort -u > have.txt
 
-        deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w" | sort -u)
+    # Collect the requested packages and their
+    # recursive arm64 dependencies
+    for pkg in $packages; do
+        deps=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg:arm64" 2>/dev/null | grep "^\w")
         if [ -z "$deps" ]; then
             echo "Error: No arm64 package found for $pkg" >&2
             exit 1
         fi
-        for dep in $deps; do
-            apt-get download "$dep" || { echo "Error: Failed to download $dep:arm64" >&2; exit 1; }
+        echo "$pkg"
+        echo "$deps" | sed 's/:arm64$//'
+    done > deps.txt
+    sort -u deps.txt > want.txt
+
+    todo=$(comm -23 want.txt have.txt)
+    if [ -n "$todo" ]; then
+        # Architecture: all packages have no :arm64 candidate, so download those by bare name
+        dl=""
+        for p in $todo; do
+            if apt-cache show --no-all-versions "$p" 2>/dev/null | grep -q '^Architecture: all'; then
+                dl="$dl $p"
+            else
+                dl="$dl $p:arm64"
+            fi
         done
-    done
+        # shellcheck disable=SC2086
+        apt-get download $dl || { echo "Error: Failed to download arm64 packages" >&2; exit 1; }
+    fi
 
     # Extract all downloaded debs to sysroot
     for deb in /tmp/debs/*.deb; do
-        [ -f "$deb" ] && dpkg -x "$deb" /l4t/targetfs
+        [ -f "$deb" ] && dpkg-deb --fsys-tarfile "$deb" | tar -x --keep-directory-symlink -C /l4t/targetfs
     done
+    [ -n "$todo" ] && printf '%s\n' $todo >> "$ledger"
 
     # dpkg -x extracts absolute symlinks verbatim (e.g. libm.so -> /lib/aarch64-linux-gnu/libm.so.6),
     # which resolve against the container root instead of the sysroot. Broken .so symlinks make the

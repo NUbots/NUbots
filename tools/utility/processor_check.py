@@ -1,3 +1,4 @@
+#
 # MIT License
 #
 # Copyright (c) 2026 NUbots
@@ -22,9 +23,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 import subprocess
 from platform import machine
+
 
 def check_architecture(filepath: str) -> dict:
     file_output = subprocess.run(["file", filepath], capture_output=True, text=True).stdout
@@ -32,12 +35,9 @@ def check_architecture(filepath: str) -> dict:
     if "ARM" in file_output:
         bin_arch = "aarch64"
     elif "x86-64" in file_output:
-        bin_arch = "x86_64"
+        bin_arch = "x86_64"  # normalize to platform.machine() spelling
     else:
         bin_arch = "unknown"
     cpu_arch = machine()
 
-    return {
-        "binary": bin_arch,
-        "host": cpu_arch
-    }
+    return {"binary": bin_arch, "host": cpu_arch}

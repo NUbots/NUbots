@@ -49,6 +49,8 @@ namespace module::input {
             float freq_max = 0.0;
             /// Fraction of total spectral power that must lie in the whistle band
             float band_ratio_threshold = 0.0;
+            /// Minimum total energy threshold
+            float min_total_energy_threshold = 1e-10f;
             /// Minimum absolute in-band power (filters near-silence)
             float min_band_energy = 0.0;
             /// Number of consecutive FFT frames above threshold required to confirm a whistle

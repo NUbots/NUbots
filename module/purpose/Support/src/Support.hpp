@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2026 NUbots
+ * Copyright (c) 2025 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -27,9 +27,9 @@
 #ifndef MODULE_PURPOSE_SUPPORT_HPP
 #define MODULE_PURPOSE_SUPPORT_HPP
 
-#include <nuclear>
 #include <Eigen/Core>
 #include <map>
+#include <nuclear>
 #include <optional>
 #include <string>
 

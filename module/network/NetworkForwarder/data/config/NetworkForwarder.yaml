@@ -25,9 +25,7 @@ targets:
     message.vision.Balls: true
     message.vision.Goals: true
     message.vision.Robots: true
-    message.vision.GreenHorizon: true
     message.vision.FieldLines: true
-    message.vision.VisualMesh: false
     message.vision.FieldIntersections: true
     message.vision.BoundingBoxes: true
 
@@ -36,8 +34,8 @@ targets:
     message.localisation.Field: false
     message.localisation.Robots: true
 
-    # Team communication (UDP broadcast) - used to debug what's actually on the wire between robots
-    message.input.Message: true
+    # Team communication (UDP broadcast)
+    message.input.RoboCup: true
 
     # Log messages
     message.nuclear.LogMessage: false

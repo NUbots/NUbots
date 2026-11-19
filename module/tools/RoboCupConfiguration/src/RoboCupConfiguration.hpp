@@ -134,7 +134,7 @@ namespace module::tools {
         /// set_values() is called first in this function.
         void configure_network();
 
-        /// @brief Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname
+        /// @brief Gets the platform we are currently running on, eg booster, docker, webots, from the hostname
         /// @return The platform we are currently running on
         std::string get_platform();
 

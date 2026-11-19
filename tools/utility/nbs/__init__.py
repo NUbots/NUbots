@@ -26,7 +26,21 @@
 # SOFTWARE.
 #
 
+import os
+
 from .encoder import Encoder
 from .grouped_decoder import GroupDecoder
 from .linear_decoder import LinearDecoder
 from .protobuf_types import MessageTypes
+
+
+def resolve_nbs_paths(paths):
+    """Expand directories to .nbs files and drop .nbs.idx index files."""
+    result = []
+    for p in paths:
+        p_abs = os.path.abspath(p)
+        if os.path.isdir(p_abs):
+            result.extend(sorted(os.path.join(p_abs, name) for name in os.listdir(p_abs) if name.endswith(".nbs")))
+        elif p_abs.endswith(".nbs"):
+            result.append(p_abs)
+    return result

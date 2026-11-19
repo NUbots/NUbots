@@ -26,120 +26,222 @@
  */
 #include "NUSimGroundTruth.hpp"
 
-#include <Eigen/Geometry>
 #include <chrono>
+#include <cmath>
 
 #include "extension/Configuration.hpp"
 
-#include "message/booster/NUSimGroundTruth.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/localisation/GroundTruthMode.hpp"
 
 #include "utility/platform/Booster/channel_factory.hpp"
 
 namespace module::input {
 
-    using extension::Configuration;
-
-    using message::booster::NUSimBallCommand;
-    using message::booster::NUSimBallGroundTruth;
-    using message::booster::NUSimRobotGroundTruth;
-
     using booster::robot::ChannelFactory;
-    using utility::platform::Booster::ensure_channel_factory;
-
-    namespace {
-
-        /// NUSim stamps ground truth with the wall clock of the physics snapshot. NUClear's clock is
-        /// built on the system clock, so the stamp maps straight onto its time_point.
-        NUClear::clock::time_point stamp_of(const nav_msgs::msg::Odometry& odom) {
-            const auto& t = odom.header().stamp();
-            return NUClear::clock::time_point(std::chrono::duration_cast<NUClear::clock::duration>(
-                std::chrono::seconds(t.sec()) + std::chrono::nanoseconds(t.nanosec())));
-        }
-
-        Eigen::Vector3d vec(const geometry_msgs::msg::Vector3& v) {
-            return {v.x(), v.y(), v.z()};
-        }
-
-        void set(geometry_msgs::msg::Vector3& out, const Eigen::Vector3d& v) {
-            out.x(v.x());
-            out.y(v.y());
-            out.z(v.z());
-        }
-
-    }  // namespace
+    using extension::Configuration;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::localisation::GroundTruthMode;
+    using message::localisation::RobotPoseGroundTruth;
 
     NUSimGroundTruth::NUSimGroundTruth(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("NUSimGroundTruth.yaml").then([this](const Configuration& config) {
-            log_level         = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_topic    = config["topics"]["ball"].as<std::string>();
-            cfg.robot_topic   = config["topics"]["robot"].as<std::string>();
-            cfg.command_topic = config["topics"]["ball_command"].as<std::string>();
+        // The reactions that touch cfg are synced, so a config reload cannot land halfway through a cycle
+        on<Configuration, Sync<NUSimGroundTruth>>("NUSimGroundTruth.yaml").then([this](const Configuration& config) {
+            log_level              = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ground_truth       = config["ground_truth"].as<bool>();
+            cfg.world_to_field_yaw = config["world_to_field_yaw"].as<double>();
+            cfg.timeout            = config["timeout"].as<double>();
+            cfg.warning_period     = config["warning_period"].as<double>();
+            // The DDS readers are created once at startup, so the topics only apply then
+            if (robot_channel == nullptr) {
+                cfg.robot_topic = config["robot_topic"].as<std::string>();
+                cfg.ball_topic  = config["ball_topic"].as<std::string>();
+            }
         });
 
-        on<Startup>().then("Subscribe to NUSim ground truth", [this] {
-            ensure_channel_factory();
-            // Ground truth is sampled state: drop stale samples rather than queue them
-            ball_channel = ChannelFactory::Instance()->CreateRecvChannel<nav_msgs::msg::Odometry>(
-                cfg.ball_topic,
-                [this](const void* msg) { ball_handler(msg); },
-                /* reliable = */ false);
+        on<Startup, Sync<NUSimGroundTruth>>().then("Subscribe to NUSim ground truth", [this] {
+            utility::platform::Booster::ensure_channel_factory();
+
             robot_channel = ChannelFactory::Instance()->CreateRecvChannel<nav_msgs::msg::Odometry>(
                 cfg.robot_topic,
-                [this](const void* msg) { robot_handler(msg); },
-                /* reliable = */ false);
-            command_channel = ChannelFactory::Instance()->CreateSendChannel<nav_msgs::msg::Odometry>(cfg.command_topic);
-            log<INFO>("Listening for NUSim ground truth on", cfg.ball_topic, "and", cfg.robot_topic);
+                [this](const void* msg) {
+                    const auto& odometry = *static_cast<const nav_msgs::msg::Odometry*>(msg);
+                    const auto& p        = odometry.pose().pose().position();
+                    const auto& q        = odometry.pose().pose().orientation();
+                    std::lock_guard<std::mutex> lock(mutex);
+                    Hst.translation() << p.x(), p.y(), p.z();
+                    Hst.linear() = Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z()).normalized().toRotationMatrix();
+                    robot_time   = NUClear::clock::now();
+                });
+            ball_channel = ChannelFactory::Instance()->CreateRecvChannel<nav_msgs::msg::Odometry>(
+                cfg.ball_topic,
+                [this](const void* msg) {
+                    const auto& odometry = *static_cast<const nav_msgs::msg::Odometry*>(msg);
+                    const auto& p        = odometry.pose().pose().position();
+                    const auto& v        = odometry.twist().twist().linear();
+                    std::lock_guard<std::mutex> lock(mutex);
+                    rBSs << p.x(), p.y(), p.z();
+                    vBs << v.x(), v.y(), v.z();
+                    ball_time = NUClear::clock::now();
+                });
+            log<INFO>("Listening for NUSim ground truth on", cfg.robot_topic, "and", cfg.ball_topic);
         });
 
-        on<Trigger<NUSimBallCommand>>().then([this](const NUSimBallCommand& cmd) {
-            if (command_channel == nullptr) {
-                log<WARN>("Ball command before the NUSim channels were created, dropped");
-                return;
-            }
-            nav_msgs::msg::Odometry odom;
-            odom.header().frame_id(cmd.frame == NUSimBallCommand::Frame::ROBOT ? "robot" : "world");
-            odom.child_frame_id(cmd.rolling ? "rolling" : "");
-            odom.pose().pose().position().x(cmd.position.x());
-            odom.pose().pose().position().y(cmd.position.y());
-            odom.pose().pose().position().z(cmd.position.z());
-            odom.pose().pose().orientation().w(1.0);
-            set(odom.twist().twist().linear(), cmd.velocity);
-            set(odom.twist().twist().angular(), cmd.angular_velocity);
-            if (!command_channel->Write(&odom)) {
-                log<WARN>("Failed to write the ball command to", cfg.command_topic);
+        on<Shutdown>().then([this] {
+            if (robot_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader(cfg.robot_topic);
+                ChannelFactory::Instance()->CloseReader(cfg.ball_topic);
             }
         });
+
+        on<Every<50, Per<std::chrono::seconds>>, With<Sensors>, Sync<NUSimGroundTruth>, Single>().then(
+            [this](const Sensors& sensors) {
+                Eigen::Isometry3d torso;
+                Eigen::Vector3d ball_position;
+                Eigen::Vector3d ball_velocity;
+                NUClear::clock::time_point robot_received;
+                NUClear::clock::time_point ball_received;
+                bool robot_fresh = false;
+                bool ball_fresh  = false;
+                {
+                    const auto now     = NUClear::clock::now();
+                    const auto timeout = std::chrono::duration<double>(cfg.timeout);
+                    std::lock_guard<std::mutex> lock(mutex);
+                    torso          = Hst;
+                    ball_position  = rBSs;
+                    ball_velocity  = vBs;
+                    robot_received = robot_time;
+                    ball_received  = ball_time;
+                    robot_fresh    = now - robot_received < timeout;
+                    ball_fresh     = now - ball_received < timeout;
+                }
+
+                if (cfg.ground_truth) {
+                    check_feed(robot_feed,
+                               cfg.robot_topic,
+                               robot_received,
+                               robot_fresh,
+                               "vision and localisation are being used instead");
+                }
+
+                // Without a simulator to ask, vision + localisation carry on as normal
+                set_active(cfg.ground_truth && robot_fresh);
+                if (!active) {
+                    return;
+                }
+
+                // The localisation modules are standing down, so nothing else will provide a ball
+                check_feed(ball_feed, cfg.ball_topic, ball_received, ball_fresh, "no Ball is being emitted");
+
+                // NUSim world {s} -> field {f}: a yaw about the centre mark
+                Eigen::Isometry3d Hfs = Eigen::Isometry3d::Identity();
+                Hfs.linear() = Eigen::AngleAxisd(cfg.world_to_field_yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                const Eigen::Isometry3d Hft = Hfs * torso;
+
+                auto robot_pose = std::make_unique<RobotPoseGroundTruth>();
+                robot_pose->Hft = Hft;
+                emit(robot_pose);
+
+                // Field: where the odometry world {w} sits on the field. {w} and {f} share the ground plane, so keep
+                // only the planar part (x, y, yaw) of Hft * Htw.
+                const Eigen::Isometry3d Hfw_full = Hft * sensors.Htw;
+                const double yaw                 = std::atan2(Hfw_full(1, 0), Hfw_full(0, 0));
+                Eigen::Isometry3d Hfw            = Eigen::Isometry3d::Identity();
+                Hfw.linear()                     = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                Hfw.translation() = Eigen::Vector3d(Hfw_full.translation().x(), Hfw_full.translation().y(), 0.0);
+
+                auto field         = std::make_unique<Field>();
+                field->Hfw         = Hfw;
+                field->covariance  = Eigen::Matrix3d::Identity() * 1e-6;
+                field->uncertainty = 0.0;
+                field->cost        = 0.0;
+                field->localised   = true;
+                emit(field);
+
+                // Ball, in the odometry world like BallLocalisation's output
+                if (ball_fresh) {
+                    const Eigen::Isometry3d Hwf = Hfw.inverse();
+                    auto ball                   = std::make_unique<Ball>();
+                    ball->rBWw                  = Hwf * (Hfs * ball_position);
+                    ball->vBw                   = Hwf.linear() * (Hfs.linear() * ball_velocity);
+                    ball->covariance            = Eigen::Matrix4d::Identity() * 1e-6;
+                    ball->confidence            = 1.0;
+                    ball->time_of_measurement   = NUClear::clock::now();
+                    ball->Hcw                   = sensors.Hcw;
+                    ball->average_rBWw          = ball->rBWw;
+                    log<DEBUG>("robot in field (x, y, yaw):",
+                               Hft.translation().x(),
+                               Hft.translation().y(),
+                               std::atan2(Hft(1, 0), Hft(0, 0)),
+                               "ball in field:",
+                               (Hfs * ball_position).x(),
+                               (Hfs * ball_position).y(),
+                               "ball in world:",
+                               ball->rBWw.x(),
+                               ball->rBWw.y(),
+                               "torso in world:",
+                               sensors.Htw.inverse().translation().x(),
+                               sensors.Htw.inverse().translation().y());
+                    emit(ball);
+                }
+            });
     }
 
-    void NUSimGroundTruth::ball_handler(const void* msg) {
-        const auto& odom = *static_cast<const nav_msgs::msg::Odometry*>(msg);
-        const auto& p    = odom.pose().pose().position();
-
-        auto gt       = std::make_unique<NUSimBallGroundTruth>();
-        gt->timestamp = stamp_of(odom);
-        gt->rBSs      = Eigen::Vector3d(p.x(), p.y(), p.z());
-        gt->vBs       = vec(odom.twist().twist().linear());
-        gt->omegaBs   = vec(odom.twist().twist().angular());
-        emit(gt);
+    void NUSimGroundTruth::set_active(bool now_active) {
+        if (now_active == active) {
+            return;
+        }
+        active = now_active;
+        log<INFO>(active ? "Ground truth ON: Field and Ball now come from NUSim"
+                         : "Ground truth OFF: back to vision and localisation");
+        auto mode     = std::make_unique<GroundTruthMode>();
+        mode->enabled = active;
+        emit(mode);
     }
 
-    void NUSimGroundTruth::robot_handler(const void* msg) {
-        const auto& odom = *static_cast<const nav_msgs::msg::Odometry*>(msg);
-        const auto& p    = odom.pose().pose().position();
-        const auto& q    = odom.pose().pose().orientation();
+    void NUSimGroundTruth::check_feed(Feed& feed,
+                                      const std::string& topic,
+                                      const NUClear::clock::time_point& last_received,
+                                      bool fresh,
+                                      const std::string& consequence) {
+        if (fresh) {
+            if (feed.warned) {
+                log<INFO>("Ground truth", feed.name, "is arriving again on", topic);
+            }
+            feed.fresh  = true;
+            feed.warned = false;
+            return;
+        }
 
-        Eigen::Isometry3d Hst = Eigen::Isometry3d::Identity();
-        Hst.linear()          = Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z()).normalized().toRotationMatrix();
-        Hst.translation()     = Eigen::Vector3d(p.x(), p.y(), p.z());
+        // Warn as soon as a feed drops out, then keep reminding every warning_period while it is missing
+        const auto now     = NUClear::clock::now();
+        const bool dropped = feed.fresh;
+        feed.fresh         = false;
+        if (!dropped && now - feed.last_warning < std::chrono::duration<double>(cfg.warning_period)) {
+            return;
+        }
+        feed.last_warning = now;
+        feed.warned       = true;
 
-        auto gt       = std::make_unique<NUSimRobotGroundTruth>();
-        gt->timestamp = stamp_of(odom);
-        gt->Hst       = Hst;
-        gt->vTs       = vec(odom.twist().twist().linear());
-        gt->omegaTs   = vec(odom.twist().twist().angular());
-        emit(gt);
+        if (last_received == NUClear::clock::time_point{}) {
+            log<WARN>("Ground truth", feed.name, "has never arrived on", topic, "-", consequence);
+        }
+        else {
+            log<WARN>("Ground truth",
+                      feed.name,
+                      dropped ? "dropped out: nothing on" : "is still missing: nothing on",
+                      topic,
+                      "for",
+                      std::chrono::duration<double>(now - last_received).count(),
+                      "s -",
+                      consequence);
+        }
     }
 
 }  // namespace module::input

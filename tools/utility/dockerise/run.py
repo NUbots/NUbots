@@ -38,7 +38,7 @@ from termcolor import cprint
 import b
 from utility.shell import WrapPty
 
-from . import defaults, platform
+from . import defaults, health_check, platform
 
 
 def _is_docker():
@@ -101,7 +101,7 @@ def _setup_internal_image(image, rebuild, clean_volume, clean_uv_cache):
         platform.build(repository, target, defaults.local_user, os.getuid(), False)
 
     # Find the current target for this platform
-    target = target if target != "selected_k1" else platform.selected(repository, defaults.local_user)
+    target = target if target != "selected" else platform.selected(repository, defaults.local_user)
 
     # Ensure the build volume exists and clean it if necessary
     build_volume_name = f"{repository}_{target}_{defaults.local_user}_build"
@@ -167,6 +167,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "docker",
             "container",
             "run",
+            "--platform",
+            "linux/amd64",
             "--rm",
             "--tty",
             "--attach",
@@ -214,6 +216,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # Pass through devices if requested
         for d in kwargs["device"]:
             docker_args.extend(["--device", d])
+
+        health_check.ensure_docker()
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = kwargs["rebuild"]
@@ -309,10 +313,12 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # (participant profile "booster_dds"); default to the repo's copy so `./b run
         # <role>` works against NUSim/the robot without remembering the flag.
         if "FASTRTPS_DEFAULT_PROFILES_FILE" not in user_env:
-            docker_args.extend([
-                "--env",
-                f"FASTRTPS_DEFAULT_PROFILES_FILE=/home/{defaults.image_user}/{defaults.directory}/tools/fastdds_default_profiles.xml",
-            ])
+            docker_args.extend(
+                [
+                    "--env",
+                    f"FASTRTPS_DEFAULT_PROFILES_FILE=/home/{defaults.image_user}/{defaults.directory}/tools/fastdds_default_profiles.xml",
+                ]
+            )
 
         # Add the ports
         for port in ports:

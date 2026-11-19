@@ -4,7 +4,6 @@ nuclear_role(
   extension::FileWatcher
   support::SignalCatcher
   support::logging::ConsoleLogHandler
-  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::GlobalConfig
   # Network
   network::NUClearNet
@@ -12,7 +11,7 @@ nuclear_role(
   network::PlotJuggler
   output::Overview
   # Sensors for button testing
-  input::K1Sensors
+  input::Sensors
   input::WhistleDetection # this is the module under test
   input::GameController
   # Platform

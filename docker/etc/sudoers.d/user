@@ -1,1 +1,1 @@
-nubots ALL=(ALL) NOPASSWD: ALL
+booster ALL=(ALL) NOPASSWD: ALL

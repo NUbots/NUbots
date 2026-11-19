@@ -10,7 +10,7 @@ The module requires configuration through `Mocap.yaml` with the following parame
 
 - `robot_rigid_body_id`: The ID of the rigid body that represents the robot in the motion capture system
 
-Enable ground truth localisation in `SensorFilter` and `FieldLocalisationNLopt` module to use this data directly for pose estimation (odometry/localisation)
+Enable ground truth localisation in `Sensors` and `FieldLocalisationNLopt` module to use this data directly for pose estimation (odometry/localisation)
 
 ## Consumes
 

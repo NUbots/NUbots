@@ -78,7 +78,7 @@ namespace module::purpose {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level                = config["log_level"].as<NUClear::LogLevel>();
             cfg.equidistant_threshold      = config["equidistant_threshold"].as<double>();
             cfg.ball_threshold             = config["ball_threshold"].as<double>();
             cfg.waiting_distance_from_line = config["waiting_distance_from_line"].as<double>();
@@ -141,11 +141,10 @@ namespace module::purpose {
                 bool set_play = game_state.mode.value >= GameState::Mode::DIRECT_FREEKICK
                                 && game_state.mode.value <= GameState::Mode::THROW_IN;
 
-                bool teammates_exist = robots
-                                       && std::find_if(robots->robots.begin(),
-                                                       robots->robots.end(),
-                                                       [](const auto& robot) { return robot.teammate; })
-                                              != robots->robots.end();
+                bool teammates_exist =
+                    robots && std::find_if(robots->robots.begin(), robots->robots.end(), [](const auto& robot) {
+                                  return robot.teammate;
+                              }) != robots->robots.end();
 
                 // Act like a field player
                 if (!teammates_exist) {
@@ -160,9 +159,7 @@ namespace module::purpose {
 
                 // If there's no ball message, we can't play, just look for the ball
                 if (ball == nullptr) {
-                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line,
-                                         0.0,
-                                         0.0);
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line, 0.0, 0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("No ball message, waiting in middle of goals.");
@@ -184,9 +181,7 @@ namespace module::purpose {
                 Eigen::Vector3d rBFf = field.Hfw * ball->rBWw;
                 if (rBFf.x() < 0.0) {
                     // Not in our half, just stay in spot and keep looking
-                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line,
-                                         0.0,
-                                         0.0);
+                    Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - cfg.waiting_distance_from_line, 0.0, 0.0);
                     Eigen::Isometry3d Hfr = pos_rpy_to_transform(rPFf, Eigen::Vector3d(0.0, 0.0, -M_PI));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Hfr, true));
                     log<DEBUG>("Ball not in our half, waiting in middle of goals.");
@@ -244,7 +239,7 @@ namespace module::purpose {
                 // We are not the closest, but the ball is in our half, so we should defend the goals.
                 // To do this we stay within the goals, following the ball's y position but bowing forward off the
                 // line in a parabola as we approach the posts, and staying cfg.goal_post_clearance away from them
-                double y_max = fd.dimensions.goal_width / 2.0 - cfg.goal_post_clearance;
+                double y_max      = fd.dimensions.goal_width / 2.0 - cfg.goal_post_clearance;
                 double y_position = std::clamp(rBFf.y(), -y_max, y_max);
                 double x_offset   = cfg.strafe_curve_depth * (y_position / y_max) * (y_position / y_max);
                 Eigen::Vector3d rPFf(fd.dimensions.field_length / 2.0 - x_offset, y_position, 0.0);

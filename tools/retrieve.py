@@ -53,7 +53,7 @@ def register(command):
         help="The target to retrieve: config/recordings/scripts/all",
     )
 
-    command.add_argument("--user", "-u", help="The user to retrieve the files with", default="nubots")
+    command.add_argument("--user", "-u", help="The user to retrieve the files with", default="booster")
 
 
 def rsync_from(host, user, remote_folder, local_folder, ssh_cmd="ssh"):
@@ -209,4 +209,4 @@ def run(host, target, user=None, **kwargs):
 
     # STAGE 3: copy all the scripts back, filtered very similar to the configs
     if target in ("scripts", "all"):
-        retrieve_and_merge(host, user, f"{home_folder}/scripts", "nugus", ssh_cmd)
+        retrieve_and_merge(host, user, f"{home_folder}/scripts", "scripts", ssh_cmd)

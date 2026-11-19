@@ -126,6 +126,8 @@ export class LocalisationModel {
   @observable uncertaintyVisible = true;
   @observable goalsVisible = true;
   @observable fieldLinePointsVisible = true;
+  @observable cameraProjectionVisible = false;
+  @observable cameraLinesVisible = true;
   @observable fieldIntersectionsVisible = true;
   @observable walkToDebugVisible = false;
   @observable boundedBoxVisible = true;
