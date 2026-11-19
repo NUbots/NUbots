@@ -66,6 +66,9 @@ namespace module::strategy {
             /// @brief Gain for the perpendicular error when approaching the ball
             double error_gain_perp = 0.0;
 
+            /// @brief Distance past the ball (m) before the robot counts as in front of it and walks around
+            double in_front_margin = 0.0;
+
             /// @brief Minimum sideways offset when approaching from in front of the ball
             double min_offset_y = 0.0;
 
