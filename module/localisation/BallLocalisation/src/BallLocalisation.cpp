@@ -70,8 +70,7 @@ namespace module::localisation {
             return std::chrono::duration_cast<std::chrono::duration<double>>(d).count();
         }
 
-        /// Rolling resistance on the mean state over dt: the ball slows at a constant rate until it stops. The UKF's
-        /// constant-velocity step has already moved the position by v * dt, so only the difference is corrected.
+        /// Applies rolling deceleration to the mean over dt. The UKF step has already moved the position by v * dt.
         BallModel<double>::StateVec decelerate(BallModel<double>::StateVec state,
                                                const double deceleration,
                                                const double dt) {
@@ -134,8 +133,7 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         vision_ball_reaction = on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then(
             [this](const VisionBalls& balls, const FieldDescription& fd, const Field& field) {
-                // The filter runs in image time: the detections describe the ball when the image was taken,
-                // however long vision took to deliver them
+                // The filter runs in image time
                 const NUClear::clock::time_point image_time = balls.timestamp;
                 last_Hcw                                    = balls.Hcw;
                 const Eigen::Isometry3d Hwc                 = Eigen::Isometry3d(balls.Hcw).inverse();
@@ -173,11 +171,10 @@ namespace module::localisation {
                     const BallModel<double>::StateVec state(ukf.get_state());
                     const Eigen::Matrix2d P   = ukf.get_covariance().topLeftCorner<2, 2>();
                     const double since_accept = seconds(image_time - last_accept_time);
-                    // A kick is only believable if the ball could have got there since we last saw it; cap the
-                    // window so a long gap cannot make any far-off false positive "reachable"
+                    // Capped so a long gap cannot make a far-off false positive reachable as a kick
                     const double kick_window = std::min(since_accept, cfg.association.reacquire_after);
-                    // Once lost, the covariance has grown so far that any detection passes the gate, and measuring
-                    // it gives the track a spurious velocity. Only a confirmed reacquisition restarts the track.
+                    // Once lost, the grown covariance would let any detection through the gate, so only a confirmed
+                    // reacquisition restarts the track
                     const bool lost = since_accept > cfg.association.reacquire_after;
 
                     const Candidate* inside = nullptr;
@@ -206,9 +203,7 @@ namespace module::localisation {
                     }
 
                     if (inside != nullptr) {
-                        // A kick that stays inside the gate still shows as innovations that keep pointing the
-                        // same way. Under a steady ball the running average stays near zero (its covariance is
-                        // about a/(2-a) of S), so a large normalised average means the ball is accelerating.
+                        // A kick inside the gate shows as innovations that keep pointing the same way
                         const Eigen::Vector2d innovation = inside->rBWw - state.rBWw;
                         const Eigen::Matrix2d S          = P + Eigen::Matrix2d::Identity() * std::pow(inside->sigma, 2);
                         const double a                   = cfg.association.manoeuvre_smoothing;
@@ -225,8 +220,7 @@ namespace module::localisation {
                         accepted = *inside;
                     }
                     else if (kick != nullptr) {
-                        // Kicked: the constant-velocity prediction no longer holds. Open up the velocity (and the
-                        // position, so the jump is taken) and let the detection pull the track across.
+                        // Kicked: open up the velocity and position covariance so the track follows the detection
                         BallModel<double>::StateMat covariance = ukf.get_covariance();
                         covariance.block<2, 2>(BallModel<double>::StateVec::VX, BallModel<double>::StateVec::VX) +=
                             Eigen::Matrix2d::Identity() * std::pow(cfg.association.kick_velocity_std, 2);

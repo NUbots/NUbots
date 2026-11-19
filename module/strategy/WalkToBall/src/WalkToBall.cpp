@@ -228,8 +228,7 @@ namespace module::strategy {
 
                 /* Adjustment target point for a better ball approach */
 
-                // Add a sideways offset if we're in front of the ball (so we walk around it). The margin stops a
-                // small overshoot from sending the robot sideways off the ball.
+                // Add a sideways offset once we're past the ball by more than the margin (so we walk around it)
                 if (err_x > cfg.in_front_margin) {
                     log<DEBUG>("In front of the ball, adjusting target sideways for ball approach.");
                     target += uTBf_p * (err_y < 0 ? -1 : 1) * std::clamp(err_x, cfg.min_offset_y, cfg.max_offset_y);

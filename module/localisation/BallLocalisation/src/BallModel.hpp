@@ -90,17 +90,14 @@ namespace module::localisation {
 
         using StateMat = Eigen::Matrix<Scalar, size, size>;
 
-        /// White-noise-acceleration spectral density (m^2/s^3): how quickly the ball's velocity may change
-        /// between updates. Kicks are handled by the filter's association logic, not by this noise.
+        /// White-noise-acceleration spectral density (m^2/s^3)
         Scalar acceleration_noise = Scalar(1);
 
         [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar delta_T) const {
             StateVec new_state(state);
 
-            // Constant velocity. Rolling deceleration is applied to the mean by BallLocalisation, not here. The sigma
-            // points sit very close to the mean (alpha 0.1), so pushing them through the deceleration pulls all of a
-            // slow ball's points towards zero speed. That shrinks the velocity variance every step and leaves the
-            // filter too sure a resting ball will stay still.
+            // Constant velocity. BallLocalisation applies rolling deceleration to the mean, as pushing it through the
+            // sigma points collapses a slow ball's velocity variance.
             new_state.rBWw += state.vBw * delta_T;
 
             return new_state;

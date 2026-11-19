@@ -241,9 +241,7 @@ namespace module::vision {
                 return Hwc.inverse() * rPWw;
             };
 
-            // The ball's centre is a ball radius above the field, so its ray is cut at that height. Cutting it at
-            // the field, as for the other objects, puts the ball too far away by radius / (camera height - radius)
-            // of its range: about 11% on the K1 (NUSim, Sep 2026). Without a FieldDescription, cut at the field.
+            // The ball's centre is a ball radius above the field, so cut its ray at that height
             const double radius              = ball_radius;
             auto ball_centre_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
                 Eigen::Vector3d uBCw = Hwc.rotation() * ray;

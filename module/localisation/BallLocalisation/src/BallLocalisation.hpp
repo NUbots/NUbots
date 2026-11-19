@@ -59,21 +59,17 @@ namespace module::localisation {
             struct Association {
                 /// @brief Squared Mahalanobis distance below which a detection updates the track
                 double gate = 9.21;
-                /// @brief Fastest the ball can travel (m/s): a detection outside the gate but reachable since
-                /// the last accepted one, and confirmed by the previous frame, is taken as a kick
+                /// @brief Fastest the ball can travel (m/s), bounds which detections outside the gate can be a kick
                 double max_ball_speed = 8.0;
                 /// @brief Velocity standard deviation (m/s) injected when a kick is detected
                 double kick_velocity_std = 4.0;
-                /// @brief How far (m) a detection may move between consecutive frames and still confirm itself,
-                /// on top of max_ball_speed times the frame interval
+                /// @brief Extra distance (m) a detection may move between consecutive images and still confirm itself
                 double confirm_radius = 0.3;
-                /// @brief Seconds without an accepted detection before the track is lost and only restarts on a
-                /// confirmed detection
+                /// @brief Seconds without an accepted detection before the track is lost
                 double reacquire_after = 0.5;
                 /// @brief Weight of the newest innovation in the running innovation average (0-1]
                 double manoeuvre_smoothing = 0.5;
-                /// @brief Normalised size of the running innovation average above which the ball is taken to be
-                /// accelerating (kicked or deflected) and the velocity covariance is opened up
+                /// @brief Normalised running innovation average above which the velocity covariance is opened up
                 double manoeuvre_threshold = 3.0;
             } association{};
             /// @brief Whether or not to use teammate balls
@@ -101,8 +97,7 @@ namespace module::localisation {
         NUClear::clock::time_point filter_time{};
         /// @brief Image time of the last detection the track accepted
         NUClear::clock::time_point last_accept_time{};
-        /// @brief Running average of the innovations: a kicked ball keeps producing innovations in the same
-        /// direction, which the average picks up long before any single one leaves the gate
+        /// @brief Running average of the innovations, for manoeuvre detection
         Eigen::Vector2d innovation_bias = Eigen::Vector2d::Zero();
         /// @brief Detections from the previous image and its time, used to confirm kicks and re-acquisitions
         std::vector<Candidate> previous_candidates{};

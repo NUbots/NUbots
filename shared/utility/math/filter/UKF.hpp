@@ -91,14 +91,11 @@ namespace utility::math::filter {
             // Our first row is always the mean
             points.col(0) = mean;
 
-            // Cholesky decomposition of the (symmetrised) scaled covariance, sigma_weight * P = L L^T.
-            // Don't take absolute values of the entries here: that flips every negative correlation.
+            // Cholesky of the symmetrised scaled covariance, sigma_weight * P = L L^T (no abs(), it flips correlations)
             Eigen::LLT<StateMat> cholesky(sigma_weight * (covariance + covariance.transpose()) * T(0.5));
 
             if (cholesky.info() == Eigen::Success) {
-                // The sigma points sit either side of the mean along the columns of L, so they reproduce L L^T = P.
-                // The columns of U = L^T would instead reproduce L^T L, which differs from P whenever the state is
-                // correlated (e.g. position and velocity).
+                // Sigma points along the columns of L reproduce L L^T = P (the columns of U would give L^T L)
                 StateMat chol = cholesky.matrixL().toDenseMatrix();
                 for (unsigned int i = 1; i < Model::size + 1; ++i) {
                     points.col(i)               = (mean + chol.col(i - 1));
