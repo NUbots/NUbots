@@ -176,12 +176,18 @@ namespace module::localisation {
                     // A kick is only believable if the ball could have got there since we last saw it; cap the
                     // window so a long gap cannot make any far-off false positive "reachable"
                     const double kick_window = std::min(since_accept, cfg.association.reacquire_after);
+                    // Once lost, the covariance has grown so far that any detection passes the gate, and measuring
+                    // it gives the track a spurious velocity. Only a confirmed reacquisition restarts the track.
+                    const bool lost = since_accept > cfg.association.reacquire_after;
 
                     const Candidate* inside = nullptr;
                     const Candidate* kick   = nullptr;
                     double inside_d2        = std::numeric_limits<double>::infinity();
                     double kick_d2          = std::numeric_limits<double>::infinity();
                     for (const auto& c : candidates) {
+                        if (lost) {
+                            break;
+                        }
                         const Eigen::Vector2d innovation = c.rBWw - state.rBWw;
                         const Eigen::Matrix2d S          = P + Eigen::Matrix2d::Identity() * c.sigma * c.sigma;
                         const double d2                  = innovation.dot(S.ldlt().solve(innovation));
@@ -231,7 +237,7 @@ namespace module::localisation {
                         accepted = *kick;
                         log<DEBUG>("Ball kick detected, innovation", (kick->rBWw - state.rBWw).norm(), "m");
                     }
-                    else if (since_accept > cfg.association.reacquire_after) {
+                    else if (lost) {
                         // Lost the ball: jump to the confirmed detection nearest where it should be
                         const Candidate* best = nullptr;
                         double best_distance  = std::numeric_limits<double>::infinity();

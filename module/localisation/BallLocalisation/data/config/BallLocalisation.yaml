@@ -39,7 +39,7 @@ association:
   kick_velocity_std: 4.0
   # Extra distance (m) a detection may move between consecutive images and still confirm itself
   confirm_radius: 0.3
-  # Seconds without an accepted detection before the track may jump to a different confirmed detection
+  # Seconds without an accepted detection before the track is lost and only restarts on a confirmed detection
   reacquire_after: 0.5
   # Manoeuvre detection: a running average of the innovations (newest weighted by manoeuvre_smoothing). A kick
   # that stays inside the gate still produces innovations that keep pointing the same way; when the average's

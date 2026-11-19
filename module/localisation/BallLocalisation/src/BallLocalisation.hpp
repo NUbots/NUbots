@@ -67,7 +67,8 @@ namespace module::localisation {
                 /// @brief How far (m) a detection may move between consecutive frames and still confirm itself,
                 /// on top of max_ball_speed times the frame interval
                 double confirm_radius = 0.3;
-                /// @brief Seconds without an accepted detection before the track may jump to a new ball
+                /// @brief Seconds without an accepted detection before the track is lost and only restarts on a
+                /// confirmed detection
                 double reacquire_after = 0.5;
                 /// @brief Weight of the newest innovation in the running innovation average (0-1]
                 double manoeuvre_smoothing = 0.5;
