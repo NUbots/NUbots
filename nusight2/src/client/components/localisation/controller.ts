@@ -189,6 +189,27 @@ export class LocalisationController {
           borderStripMinWidth: 1.0,
         });
         break;
+      case "runswift":
+        // rUNSWift lab field. Goal dimensions not supplied, so taken from robocup_small
+        model.field.dimensions = new FieldDimensions({
+          lineWidth: 0.06,
+          markWidth: 0.1,
+          fieldLength: 9.0,
+          fieldWidth: 6.0,
+          goalDepth: 0.58,
+          goalWidth: 2.575,
+          goalAreaLength: 0.6,
+          goalAreaWidth: 2.2,
+          penaltyAreaLength: 1.65,
+          penaltyAreaWidth: 4.0,
+          goalCrossbarHeight: 1.2,
+          goalPostDiameter: 0.1,
+          goalNetHeight: 1.2,
+          penaltyMarkDistance: 1.5,
+          centerCircleDiameter: 1.5,
+          borderStripMinWidth: 1.0,
+        });
+        break;
       case "robocup_large":
         model.field.dimensions = new FieldDimensions({
           lineWidth: 0.06,
