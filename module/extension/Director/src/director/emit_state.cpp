@@ -51,6 +51,7 @@ namespace module::extension {
 
             update(proto_group.active_provider, group.active_provider ? group.active_provider->id : 0);
             update(proto_group.parent_provider, group.active_task ? group.active_task->requester_id : 0);
+            update(proto_group.last_run.failed, group.failed);
 
             // Rebuild subtasks for this group
             std::vector<DirectorState::DirectorTask> subtasks;

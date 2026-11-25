@@ -142,6 +142,9 @@ namespace module::extension::component {
         /// Stores if this group is in the process of being deleted and should be considered dead for challenges
         bool zombie = false;
 
+        /// Stores if the last time this group tried to run, the reaction failed to execute
+        bool failed = false;
+
         /// The current task that is running on this Provider
         std::shared_ptr<DirectorTask> active_task;
         /// The currently active provider that is executing
