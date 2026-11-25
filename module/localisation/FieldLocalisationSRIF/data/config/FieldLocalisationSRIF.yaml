@@ -23,7 +23,7 @@ use_gravity: true
 use_kinematic_height: true
 
 # --- How far each sensor is trusted (noise standard deviations) -----------------------------------
-# The values in this file were tuned in NUSim against ground truth (./b localisation tune, see the README), whose
+# The values in this file were tuned in NUSim against ground truth (see the README's Tuning section), whose
 # odometry error model is fit to the real K1's. NUSim's vision is cleaner than a real camera's, so sigma_angular and
 # the association gate may need loosening on a real robot.
 

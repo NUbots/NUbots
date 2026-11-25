@@ -19,7 +19,6 @@ messages:
   message.vision.Goals: true
   message.vision.FieldLines: false
   message.vision.FieldIntersections: true
-  message.support.FieldDescription: true
   message.vision.BoundingBoxes: true
   # Odometry and Localisation
   message.localisation.Ball: true

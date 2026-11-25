@@ -35,9 +35,8 @@ runs the playback/localisation_nlopt and playback/localisation_srif roles on the
 to a csv), then plots the torso's field pose (x, y, yaw) from both next to the ground truth, with their errors, into
 recordings/<recording>_localisation.png. The csvs are copied to recordings/localisation_playback/.
 
-Ground truth is read from the recording itself:
-  - message.localisation.RobotPoseGroundTruth (Hft): the real robot under motion capture (localisation::Mocap)
-  - message.booster.NUSimRobotGroundTruth (Hst): NUSim (input::NUSimGroundTruth), in NUSim's world
+Ground truth is read from the recording itself, as message.localisation.RobotPoseGroundTruth (Hft): from motion
+capture on a real robot (localisation::Mocap), or from NUSim (input::NUSimGroundTruth with ground_truth: true).
 
 The field is symmetric, so without a team side the localisation can settle on the field turned half way round and be
 equally right. By default (--field-yaw auto) the ground truth is turned by 0 or 180 degrees, whichever the estimates
@@ -114,18 +113,17 @@ def load_ground_truth(nbs):
     from utility.nbs import LinearDecoder
     from utility.nbs.protobuf_types import MessageTypes
 
-    wanted = ["message.localisation.RobotPoseGroundTruth", "message.booster.NUSimRobotGroundTruth"]
-    types = [t for t in wanted if t in MessageTypes]
+    types = [t for t in ["message.localisation.RobotPoseGroundTruth"] if t in MessageTypes]
 
     rows = []
     for packet in LinearDecoder(nbs, types=types, show_progress=True):
         t = packet.index_timestamp * 1e-9
-        m = packet.msg.Hft if packet.type.name == "message.localisation.RobotPoseGroundTruth" else packet.msg.Hst
+        m = packet.msg.Hft
         rows.append((t, m.t.x, m.t.y, math.atan2(m.x.y, m.x.x)))
 
     if not rows:
         cprint(
-            "No ground truth in the recording (RobotPoseGroundTruth or NUSimRobotGroundTruth): plotting the estimates only",
+            "No ground truth in the recording (RobotPoseGroundTruth): plotting the estimates only",
             "yellow",
         )
         return None

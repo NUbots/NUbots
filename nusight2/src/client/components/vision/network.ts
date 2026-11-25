@@ -199,7 +199,6 @@ export class VisionNetwork {
       flipRequested: flipRequested ?? false,
     };
   }
-
 }
 
 async function jpegBufferToBitmap(buffer: Uint8Array): Promise<ImageBitmap> {

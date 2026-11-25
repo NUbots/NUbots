@@ -314,8 +314,8 @@ namespace module::vision {
                     i.rIWw = rIWw;
 
                     // Bounding box centre in pixel coordinates, used by FieldLocalisationSRIF
-                    i.pixel_centre = Eigen::Vector2d(boxes[idx].x + boxes[idx].width / 2.0,
-                                                     boxes[idx].y + boxes[idx].height / 2.0);
+                    i.pixel_centre =
+                        Eigen::Vector2d(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height / 2.0);
 
                     if (objects[class_id].name == "LCross") {
                         i.type = FieldIntersection::IntersectionType::L_INTERSECTION;

@@ -1,6 +1,0 @@
-# Merged over ../NetworkForwarder.yaml for roles run with hostname nusim (see
-# tools/utility/dockerise/run.py). Forward the field localisation estimate so NUsight draws the
-# robot and its uncertainty from it rather than from raw odometry.
-targets:
-  nusight:
-    message.localisation.Field: true

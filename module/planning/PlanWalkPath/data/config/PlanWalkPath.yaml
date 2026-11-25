@@ -2,10 +2,7 @@
 log_level: INFO
 
 # Maximum velocity command per axis [vx (m/s), vy (m/s), vtheta (rad/s)]
-# vx capped at 0.8: the deployed walk policy serves 0.62 m/s at a 0.8 command and stalls
-# outright at 1.0 (measured, NUSim surface sweep 2026-08-12), so commanding past its
-# ceiling asks for a velocity it answers by standing still.
-max_velocity: [0.8, 0.5, 1.0]
+max_velocity: [1.0, 0.5, 1.0]
 # Maximum backward speed (m/s), fast backward walking is unstable
 max_backward_velocity: 0.15
 # Minimum effective command per axis, smaller nonzero commands are bumped up to these
@@ -37,7 +34,7 @@ pivot_forward_velocity: 0.0
 adjust_range: 0.5
 adjust_vx_limit: 0.5
 adjust_vy_limit: 0.6
-adjust_vtheta_limit: 1.0 # training samples ang_vel_yaw [-1, 1]; 1.5 was out of distribution
+adjust_vtheta_limit: 1.5
 adjust_vtheta_factor: 4.5
 adjust_tangential_speed_far: 0.9
 adjust_tangential_speed_near: 0.4

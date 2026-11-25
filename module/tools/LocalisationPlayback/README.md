@@ -30,9 +30,8 @@ message.input.Sensors: true # both
 message.vision.FieldIntersections: true # NLopt
 message.vision.Goals: true # NLopt
 message.vision.BoundingBoxes: true # SRIF
-# Ground truth, one of
-message.localisation.RobotPoseGroundTruth: true # real robot: input::NatNet + localisation::Mocap
-message.booster.NUSimRobotGroundTruth: true # NUSim: input::NUSimGroundTruth
+# Ground truth: input::NatNet + localisation::Mocap on a real robot, input::NUSimGroundTruth (ground_truth: true) in NUSim
+message.localisation.RobotPoseGroundTruth: true
 ```
 
 ## Consumes

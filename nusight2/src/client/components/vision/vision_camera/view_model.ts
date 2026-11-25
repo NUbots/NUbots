@@ -81,5 +81,4 @@ export class VisionCameraViewModel extends CameraViewModel {
       OutOfFieldViewModel.of(this.model.outOfField, this.model.params, this.canvas, this.imageAspectRatio)
     );
   }
-
 }

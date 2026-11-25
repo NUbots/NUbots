@@ -1,7 +1,7 @@
 # Plays a recording's sensors and vision through FieldLocalisationNLopt and writes its field pose estimates to
-# recordings/localisation_playback/ (tools::LocalisationPlayback). Its twin, playback/localisation_srif, runs the
-# same inputs through FieldLocalisationSRIF: both emit message::localisation::Field, so they cannot share a binary.
-# `./b localisation playback <recording.nbs>` runs both and plots them against the recording's ground truth.
+# recordings/localisation_playback/ (tools::LocalisationPlayback). Its twin, playback/localisation_srif, runs the same
+# inputs through FieldLocalisationSRIF: both emit message::localisation::Field, so they cannot share a binary. `./b
+# localisation playback <recording.nbs>` runs both and plots them against the recording's ground truth.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
