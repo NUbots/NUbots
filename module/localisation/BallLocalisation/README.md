@@ -2,8 +2,12 @@
 
 ## Description
 
-This module takes in a list of vision balls, uses the ball measurement closest to our current estimate and applies an
-Unscented Kalman Filter to estimate the balls position and velocity in world space.
+This module estimates the ball's position and velocity in world space with a constant-velocity Unscented Kalman Filter,
+run in image time. Each detection has a range-scaled noise and is gated against the prediction by Mahalanobis distance.
+Detections outside the gate are taken as a kick when the ball could have reached them and the previous image confirms
+them, and a run of same-direction innovations inside the gate opens up the velocity covariance. Tracking starts on, and
+reacquires after a loss to, a detection seen in two consecutive images. The published estimate is predicted forward over
+vision's latency, and teammate balls are used as a fallback when the ball has not been seen recently.
 
 ## Usage
 

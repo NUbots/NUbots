@@ -29,7 +29,10 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <limits>
 #include <numeric>
+#include <optional>
 
 #include "extension/Configuration.hpp"
 
@@ -55,55 +58,58 @@ namespace module::localisation {
     using message::eye::DataPoint;
     using message::input::RoboCup;
     using message::localisation::Field;
+    using message::localisation::GroundTruthMode;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
 
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    namespace {
+        double seconds(const NUClear::clock::duration& d) {
+            return std::chrono::duration_cast<std::chrono::duration<double>>(d).count();
+        }
+
+        /// Applies rolling deceleration to the mean over dt. The UKF step has already moved the position by v * dt.
+        BallModel<double>::StateVec decelerate(BallModel<double>::StateVec state,
+                                               const double deceleration,
+                                               const double dt) {
+            const double speed = state.vBw.norm();
+            if (deceleration <= 0.0 || speed < 1e-6 || dt <= 0.0) {
+                return state;
+            }
+            const Eigen::Vector2d v_end = state.vBw * std::max(0.0, 1.0 - deceleration * dt / speed);
+            state.rBWw += 0.5 * (v_end - state.vBw) * dt;
+            state.vBw = v_end;
+            return state;
+        }
+    }  // namespace
+
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        using message::localisation::Ball;
-        using message::localisation::GroundTruthMode;
-
         on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
-            // Set our measurement noise
-            cfg.ukf.noise.measurement.position =
-                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["ball_position"].as<Expression>()).asDiagonal();
 
-            // Set our process noises
-            cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
-            cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
+            // Measurement noise grows with range: vision error is roughly proportional to distance
+            cfg.ukf.measurement_base      = config["ukf"]["noise"]["measurement"]["base"].as<double>();
+            cfg.ukf.measurement_per_metre = config["ukf"]["noise"]["measurement"]["per_metre"].as<double>();
 
-            // Set our motion model's process noise
-            BallModel<double>::StateVec process_noise;
-            process_noise.rBWw      = cfg.ukf.noise.process.position;
-            process_noise.vBw       = cfg.ukf.noise.process.velocity;
-            ukf.model.process_noise = process_noise;
+            // Motion model
+            cfg.ukf.acceleration_noise      = config["ukf"]["noise"]["process"]["acceleration"].as<double>();
+            cfg.ukf.rolling_deceleration    = config["motion"]["rolling_deceleration"].as<double>();
+            ukf.model.acceleration_noise    = cfg.ukf.acceleration_noise;
+            cfg.ukf.initial_covariance.rBWw = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
+            cfg.ukf.initial_covariance.vBw  = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
 
-            // Set our initial mean
-            cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
-            cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
-
-            // Set out initial covariance
-            cfg.ukf.initial.covariance.position = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
-            cfg.ukf.initial.covariance.velocity = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
-
-            // Set our initial state with the config means and covariances, flagging the filter to reset it
-            cfg.initial_mean.rBWw = cfg.ukf.initial.mean.position;
-            cfg.initial_mean.vBw  = cfg.ukf.initial.mean.velocity;
-
-            cfg.initial_covariance.rBWw = cfg.ukf.initial.covariance.position;
-            cfg.initial_covariance.vBw  = cfg.ukf.initial.covariance.velocity;
-            ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
-
-            // Set our acceptance radius
-            cfg.acceptance_radius = config["acceptance_radius"].as<double>();
-
-            // Set our rejection count
-            cfg.max_rejections = config["max_rejections"].as<int>();
+            // Association
+            cfg.association.gate                = config["association"]["gate"].as<double>();
+            cfg.association.max_ball_speed      = config["association"]["max_ball_speed"].as<double>();
+            cfg.association.kick_velocity_std   = config["association"]["kick_velocity_std"].as<double>();
+            cfg.association.confirm_radius      = config["association"]["confirm_radius"].as<double>();
+            cfg.association.reacquire_after     = config["association"]["reacquire_after"].as<double>();
+            cfg.association.manoeuvre_smoothing = config["association"]["manoeuvre_smoothing"].as<double>();
+            cfg.association.manoeuvre_threshold = config["association"]["manoeuvre_threshold"].as<double>();
 
             // Set configuration for robot to robot communication balls
             cfg.use_r2r_balls            = config["use_r2r_balls"].as<bool>();
@@ -113,6 +119,8 @@ namespace module::localisation {
 
             cfg.max_distance_from_field = config["max_distance_from_field"].as<double>();
 
+            // Start acquiring from scratch with the new settings
+            tracking         = false;
             last_time_update = NUClear::clock::now();
         });
 
@@ -125,117 +133,173 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         vision_ball_reaction = on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then(
             [this](const VisionBalls& balls, const FieldDescription& fd, const Field& field) {
-                // If there are no balls or there are no valid balls, return
-                if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
-                    return;
-                }
+                // The filter runs in image time
+                const NUClear::clock::time_point image_time = balls.timestamp;
+                last_Hcw                                    = balls.Hcw;
+                const Eigen::Isometry3d Hwc                 = Eigen::Isometry3d(balls.Hcw).inverse();
 
-                Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
-                last_Hcw              = balls.Hcw;
-                auto state            = BallModel<double>::StateVec(ukf.get_state());
-
-                // Data association: find the ball closest to our current estimate
-                Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
-                double lowest_distance = std::numeric_limits<double>::max();
+                // Candidate detections on or near the field, in world space, each with its own noise
+                std::vector<Candidate> candidates{};
                 for (const auto& ball : balls.balls) {
-                    if (ball.is_invalid) {
-                        continue;  // Skip ball if it is marked invalid
-                    }
-
-                    Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
-                    Eigen::Vector3d rBFf         = field.Hfw * Eigen::Vector3d(current_rBWw.x(), current_rBWw.y(), 0);
-
-                    if (rBFf.x() < (-fd.dimensions.field_length / 2) - cfg.max_distance_from_field
-                        || rBFf.x() > (fd.dimensions.field_length / 2) + cfg.max_distance_from_field
-                        || rBFf.y() < (-fd.dimensions.field_width / 2) - cfg.max_distance_from_field
-                        || rBFf.y() > (fd.dimensions.field_width / 2) + cfg.max_distance_from_field) {
+                    if (ball.is_invalid || ball.measurements.empty()) {
                         continue;
                     }
-                    double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
-                    if (current_distance < lowest_distance) {
-                        lowest_distance = current_distance;
-                        rBWw            = current_rBWw;
+                    const Eigen::Vector3d rBCc = ball.measurements[0].rBCc.cast<double>();
+                    const Eigen::Vector3d rBWw = Hwc * rBCc;
+                    const Eigen::Vector3d rBFf = field.Hfw * Eigen::Vector3d(rBWw.x(), rBWw.y(), 0);
+                    if (std::abs(rBFf.x()) > fd.dimensions.field_length / 2 + cfg.max_distance_from_field
+                        || std::abs(rBFf.y()) > fd.dimensions.field_width / 2 + cfg.max_distance_from_field) {
+                        continue;
+                    }
+                    candidates.push_back(
+                        {rBWw.head<2>(), cfg.ukf.measurement_base + cfg.ukf.measurement_per_metre * rBCc.norm()});
+                }
+
+                std::optional<Candidate> accepted{};
+                bool restarted = false;
+
+                if (tracking) {
+                    const double dt = seconds(image_time - filter_time);
+                    if (dt > 0.0) {
+                        ukf.time(dt);
+                        ukf.set_state(
+                            decelerate(BallModel<double>::StateVec(ukf.get_state()), cfg.ukf.rolling_deceleration, dt)
+                                .getStateVec(),
+                            ukf.get_covariance());
+                        filter_time = image_time;
+                    }
+                    const BallModel<double>::StateVec state(ukf.get_state());
+                    const Eigen::Matrix2d P   = ukf.get_covariance().topLeftCorner<2, 2>();
+                    const double since_accept = seconds(image_time - last_accept_time);
+                    // Capped so a long gap cannot make a far-off false positive reachable as a kick
+                    const double kick_window = std::min(since_accept, cfg.association.reacquire_after);
+                    // Once lost, the grown covariance would let any detection through the gate, so only a confirmed
+                    // reacquisition restarts the track
+                    const bool lost = since_accept > cfg.association.reacquire_after;
+
+                    const Candidate* inside = nullptr;
+                    const Candidate* kick   = nullptr;
+                    double inside_d2        = std::numeric_limits<double>::infinity();
+                    double kick_d2          = std::numeric_limits<double>::infinity();
+                    for (const auto& c : candidates) {
+                        if (lost) {
+                            break;
+                        }
+                        const Eigen::Vector2d innovation = c.rBWw - state.rBWw;
+                        const Eigen::Matrix2d S          = P + Eigen::Matrix2d::Identity() * c.sigma * c.sigma;
+                        const double d2                  = innovation.dot(S.ldlt().solve(innovation));
+                        if (d2 <= cfg.association.gate) {
+                            if (d2 < inside_d2) {
+                                inside_d2 = d2;
+                                inside    = &c;
+                            }
+                        }
+                        else if (d2 < kick_d2
+                                 && innovation.norm() <= cfg.association.max_ball_speed * kick_window + 3.0 * c.sigma
+                                 && confirmed(c, image_time)) {
+                            kick_d2 = d2;
+                            kick    = &c;
+                        }
+                    }
+
+                    if (inside != nullptr) {
+                        // A kick inside the gate shows as innovations that keep pointing the same way
+                        const Eigen::Vector2d innovation = inside->rBWw - state.rBWw;
+                        const Eigen::Matrix2d S          = P + Eigen::Matrix2d::Identity() * std::pow(inside->sigma, 2);
+                        const double a                   = cfg.association.manoeuvre_smoothing;
+                        innovation_bias                  = (1.0 - a) * innovation_bias + a * innovation;
+                        const double drift               = innovation_bias.dot(S.ldlt().solve(innovation_bias));
+                        if (drift > cfg.association.manoeuvre_threshold) {
+                            BallModel<double>::StateMat covariance = ukf.get_covariance();
+                            covariance.block<2, 2>(BallModel<double>::StateVec::VX, BallModel<double>::StateVec::VX) +=
+                                Eigen::Matrix2d::Identity() * std::pow(cfg.association.kick_velocity_std, 2);
+                            ukf.set_state(state.getStateVec(), covariance);
+                            innovation_bias.setZero();
+                            log<DEBUG>("Ball manoeuvre detected");
+                        }
+                        accepted = *inside;
+                    }
+                    else if (kick != nullptr) {
+                        // Kicked: open up the velocity and position covariance so the track follows the detection
+                        BallModel<double>::StateMat covariance = ukf.get_covariance();
+                        covariance.block<2, 2>(BallModel<double>::StateVec::VX, BallModel<double>::StateVec::VX) +=
+                            Eigen::Matrix2d::Identity() * std::pow(cfg.association.kick_velocity_std, 2);
+                        covariance.topLeftCorner<2, 2>() +=
+                            Eigen::Matrix2d::Identity() * (kick->rBWw - state.rBWw).squaredNorm();
+                        ukf.set_state(state.getStateVec(), covariance);
+                        innovation_bias.setZero();
+                        accepted = *kick;
+                        log<DEBUG>("Ball kick detected, innovation", (kick->rBWw - state.rBWw).norm(), "m");
+                    }
+                    else if (lost) {
+                        // Lost the ball: jump to the confirmed detection nearest where it should be
+                        const Candidate* best = nullptr;
+                        double best_distance  = std::numeric_limits<double>::infinity();
+                        for (const auto& c : candidates) {
+                            const double distance = (c.rBWw - state.rBWw).norm();
+                            if (distance < best_distance && confirmed(c, image_time)) {
+                                best_distance = distance;
+                                best          = &c;
+                            }
+                        }
+                        if (best != nullptr) {
+                            reset_track(*best, image_time);
+                            restarted = true;
+                            log<DEBUG>("Ball reacquired", best_distance, "m from the lost track");
+                        }
+                    }
+                }
+                else {
+                    // Not tracking yet: start on the nearest detection seen in two consecutive images
+                    const Candidate* best = nullptr;
+                    for (const auto& c : candidates) {
+                        if (confirmed(c, image_time) && (best == nullptr || c.sigma < best->sigma)) {
+                            best = &c;
+                        }
+                    }
+                    if (best != nullptr) {
+                        reset_track(*best, image_time);
+                        restarted = true;
                     }
                 }
 
-                // Data association: ensure the ball is within the acceptance radius
-                bool low_confidence = false;
-                bool accept_ball    = true;
-                if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
-                    low_confidence = true;
-                    rejection_count++;
-                }
-                else {
-                    first_ball_seen = true;
-                    rejection_count = 0;
-                }
-                log<DEBUG>("Rejection count: ", rejection_count);
-                log<DEBUG>("Accept ball: ", accept_ball);
-
-                // Data association: if we have rejected too many balls, accept the closest one
-                if (rejection_count > cfg.max_rejections) {
-                    accept_ball     = true;
-                    rejection_count = 0;
+                if (accepted) {
+                    ukf.measure(accepted->rBWw,
+                                Eigen::Matrix2d(Eigen::Matrix2d::Identity() * accepted->sigma * accepted->sigma),
+                                MeasurementType::BALL_POSITION());
+                    last_accept_time = image_time;
                 }
 
-                bool accept_team_guess       = false;
-                Eigen::Vector3d average_rBFf = Eigen::Vector3d::Zero();
-                if (cfg.use_r2r_balls) {
-                    auto [valid, avg] = get_average_team_rBFf();
-                    accept_team_guess = valid;
-                    average_rBFf      = avg;
-                }
-
-                // Don't continue if we don't accept the ball or team guess
-                if (!(accept_ball || accept_team_guess)) {
+                previous_candidates = std::move(candidates);
+                previous_time       = image_time;
+                if (!accepted && !restarted) {
                     return;
                 }
 
-                // Generate and emit message
-                auto ball = std::make_unique<Ball>();
+                // Publish the ball where it is now: predict the image-time estimate over vision's latency
+                const BallModel<double>::StateVec state(ukf.get_state());
+                const double latency = std::clamp(seconds(NUClear::clock::now() - image_time), 0.0, 0.5);
+                const BallModel<double>::StateVec now_state =
+                    decelerate(BallModel<double>::StateVec(ukf.model.time(state, latency)),
+                               cfg.ukf.rolling_deceleration,
+                               latency);
 
-                // If not accepting the ball or low confidence, then use the average team guess
-                if (!accept_ball || (low_confidence && accept_team_guess)) {
-                    ball->rBWw       = field.Hfw.inverse() * average_rBFf;
-                    ball->vBw        = Eigen::Vector3d::Zero();
-                    ball->confidence = 0.0;  // No confidence in other teammates' guesses
-                }
-                else {
-                    // Compute the time since the last update (in seconds)
-                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
-                                                                                              - last_time_update)
-                                        .count();
-                    last_time_update = NUClear::clock::now();
-
-                    // Time update
-                    ukf.time(dt);
-
-                    // Measurement update
-                    ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
-                                cfg.ukf.noise.measurement.position,
-                                MeasurementType::BALL_POSITION());
-
-                    // Get the new state, here we are assuming ball is on the ground
-                    state            = BallModel<double>::StateVec(ukf.get_state());
-                    ball->rBWw       = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
-                    ball->vBw        = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
-                    ball->confidence = 1.0;  // Full confidence in our own measurements
-                }
-
-                ball->time_of_measurement = last_time_update;
+                auto ball                 = std::make_unique<Ball>();
+                ball->rBWw                = Eigen::Vector3d(now_state.rBWw.x(), now_state.rBWw.y(), fd.ball_radius);
+                ball->vBw                 = Eigen::Vector3d(now_state.vBw.x(), now_state.vBw.y(), 0);
+                ball->covariance          = ukf.get_covariance();
+                ball->confidence          = 1.0;  // Full confidence in our own measurements
+                ball->time_of_measurement = image_time;
                 ball->Hcw                 = balls.Hcw;
-                ball->average_rBWw        = field.Hfw.inverse() * average_rBFf;
+                if (cfg.use_r2r_balls) {
+                    ball->average_rBWw = field.Hfw.inverse() * get_average_team_rBFf().second;
+                }
+                last_time_update = NUClear::clock::now();
+
                 if (log_level <= DEBUG) {
-                    log<DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
-                    log<DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
-                    log<DEBUG>("average rBWw: ",
-                               ball->average_rBWw.x(),
-                               ball->average_rBWw.y(),
-                               ball->average_rBWw.z());
                     emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
                     emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
                 }
-
                 emit(ball);
             });
 
@@ -281,6 +345,27 @@ namespace module::localisation {
                 ball->Hcw                 = last_Hcw;
                 emit(ball);
             });
+    }
+
+    void BallLocalisation::reset_track(const Candidate& candidate, const NUClear::clock::time_point& time) {
+        BallModel<double>::StateVec mean{};
+        mean.rBWw = candidate.rBWw;
+        ukf.set_state(mean.getStateVec(), cfg.ukf.initial_covariance.asDiagonal());
+        tracking         = true;
+        filter_time      = time;
+        last_accept_time = time;
+        innovation_bias.setZero();
+    }
+
+    bool BallLocalisation::confirmed(const Candidate& candidate, const NUClear::clock::time_point& time) const {
+        const double dt = seconds(time - previous_time);
+        if (dt <= 0.0 || dt > cfg.association.reacquire_after) {
+            return false;
+        }
+        const double reach = cfg.association.confirm_radius + cfg.association.max_ball_speed * dt;
+        return std::any_of(previous_candidates.begin(), previous_candidates.end(), [&](const Candidate& previous) {
+            return (previous.rBWw - candidate.rBWw).norm() <= reach;
+        });
     }
 
     std::pair<bool, Eigen::Vector3d> BallLocalisation::get_average_team_rBFf() {

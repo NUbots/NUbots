@@ -34,6 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/BoundingBoxes.hpp"
 #include "message/vision/FieldIntersections.hpp"
@@ -51,6 +52,7 @@ namespace module::vision {
     using extension::Configuration;
 
     using message::input::Image;
+    using message::support::FieldDescription;
     using message::vision::Ball;
     using message::vision::Balls;
     using message::vision::BoundingBox;
@@ -98,6 +100,8 @@ namespace module::vision {
                 log<ERROR>("YOLO inference disabled until a valid model is configured");
             }
         });
+
+        on<Trigger<FieldDescription>>().then([this](const FieldDescription& fd) { ball_radius = fd.ball_radius; });
 
         on<Trigger<Image>, Single>().then("Yolo Main Loop", [this](const Image& img) {
             if (!model_loaded) {
@@ -237,6 +241,14 @@ namespace module::vision {
                 return Hwc.inverse() * rPWw;
             };
 
+            // The ball's centre is a ball radius above the field, so cut its ray at that height
+            const double radius              = ball_radius;
+            auto ball_centre_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
+                Eigen::Vector3d uBCw = Hwc.rotation() * ray;
+                Eigen::Vector3d rBWw = uBCw * std::abs((Hwc.translation().z() - radius) / uBCw.z()) + Hwc.translation();
+                return Hwc.inverse() * rBWw;
+            };
+
             for (size_t i = 0; i < indices.size(); i++) {
                 // Get the index of the detected object from list of indices
                 int idx = indices[i];
@@ -271,10 +283,10 @@ namespace module::vision {
 
                 if (objects[class_id].name == "Ball") {
                     Ball b{};
-                    b.uBCc = ray_to_camera_space(centre_ray).normalized();
+                    b.uBCc = ball_centre_to_camera_space(centre_ray).normalized();
                     b.measurements.emplace_back();
                     b.measurements.back().type = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
+                    b.measurements.back().rBCc = ball_centre_to_camera_space(centre_ray);
                     // Calculate the angular radius of the ball in camera space
                     b.radius = bottom_centre_ray.dot(bottom_left_ray);
                     b.colour.fill(1.0);
