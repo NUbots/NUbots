@@ -223,15 +223,11 @@ The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 
 ### Tuning
 
-The values in the yaml were tuned in NUSim against its ground truth, by playing recordings back offline. A recording
-with ground truth (`message::localisation::RobotPoseGroundTruth`, from `input::NUSimGroundTruth` with `ground_truth: true`) can be checked with:
-
-```bash
-./b localisation playback recordings/<recording>.nbs     # plot SRIF and NLopt against ground truth
-```
-
-Recordings carry no `Stability` (it is an enum, which `DataLogging` cannot record), so playback treats the robot as
-always upright and the `fall:` values were not tuned this way.
+The values in the yaml were tuned in NUSim, by playing recordings back offline and scoring the estimate against
+NUSim's ground truth (`message::localisation::RobotPoseGroundTruth`, from `input::NUSimGroundTruth` with
+`ground_truth: true`). NUSim's odometry error model is fit to the real K1's, but its vision is cleaner than a real
+camera's, so `sigma_angular` and the association gate may need loosening on a real robot. Recordings carry no
+`Stability` (it is an enum, which `DataLogging` cannot record), so the `fall:` values were not tuned this way.
 
 ## Consumes
 
