@@ -145,6 +145,9 @@ namespace module::platform::Booster {
             if (odometer_channel != nullptr) {
                 ChannelFactory::Instance()->CloseReader("rt/odometer_state");
             }
+            if (ros_odometry_channel != nullptr) {
+                ChannelFactory::Instance()->CloseReader(booster::robot::b1::kTopicRosOdometer);
+            }
         });
 
         on<Trigger<BoosterWalk>>().then([this](const BoosterWalk& move) {

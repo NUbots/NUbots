@@ -74,7 +74,6 @@ namespace module::input {
         bool have_pose = false;
         /// @brief Set once the missing head pose warning has been logged
         std::atomic<bool> pose_warned{false};
-
         /// @brief Set once the missing odometry twist warning has been logged
         std::atomic<bool> twist_warned{false};
 
