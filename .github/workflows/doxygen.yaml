@@ -1,6 +1,8 @@
 name: "Doxygen GitHub Pages Deploy Action"
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 permissions:
   contents: write
 jobs:
