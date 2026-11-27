@@ -39,6 +39,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "k1_joints.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Servos.hpp"
@@ -101,24 +103,6 @@ namespace module::skill {
             std::array<double, N> out{};
             std::copy(values.begin(), values.end(), out.begin());
             return out;
-        }
-
-        /// ServoID of each joint, in JointIndexK1 order
-        constexpr std::array<ServoID::Value, Walk::JOINT_COUNT> K1_SERVO_IDS = {
-            ServoID::HEAD_YAW,      ServoID::HEAD_PITCH,  ServoID::L_SHOULDER_PITCH, ServoID::L_SHOULDER_ROLL,
-            ServoID::L_ELBOW,       ServoID::L_ELBOW_YAW, ServoID::R_SHOULDER_PITCH, ServoID::R_SHOULDER_ROLL,
-            ServoID::R_ELBOW,       ServoID::R_ELBOW_YAW, ServoID::L_HIP_PITCH,      ServoID::L_HIP_ROLL,
-            ServoID::L_HIP_YAW,     ServoID::L_KNEE,      ServoID::L_ANKLE_PITCH,    ServoID::L_ANKLE_ROLL,
-            ServoID::R_HIP_PITCH,   ServoID::R_HIP_ROLL,  ServoID::R_HIP_YAW,        ServoID::R_KNEE,
-            ServoID::R_ANKLE_PITCH, ServoID::R_ANKLE_ROLL};
-
-        /// Servo feedback in JointIndexK1 order. Sensors::servo is indexed by ServoID.
-        std::array<const Sensors::Servo*, Walk::JOINT_COUNT> servos_of(const Sensors& sensors) {
-            std::array<const Sensors::Servo*, Walk::JOINT_COUNT> servos{};
-            for (std::size_t j = 0; j < Walk::JOINT_COUNT; ++j) {
-                servos[j] = &sensors.servo[K1_SERVO_IDS[j]];
-            }
-            return servos;
         }
 
         template <typename Shape>
@@ -197,6 +181,8 @@ namespace module::skill {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
+        setup_ball_skills();
+
         // Cached rather than a With<>, as BoosterModeState is not emitted in NUSim
         on<Trigger<BoosterModeState>, Sync<Walk>>().then([this](const BoosterModeState& state) {  //
             last_mode = int(state.mode);
@@ -218,10 +204,21 @@ namespace module::skill {
             reset_policy_state();
             walk_since = NUClear::clock::now();
 
+            // Straight on from a ball skill: no blend, and the walk's previous action is the target the ball skill
+            // last sent, in the walk's convention (mjlab CONTROLLER_INTERFACE.md section 4)
+            if (handing_over_from(TargetSource::BALL_SKILL)) {
+                for (std::size_t k = 0; k < cfg.policy_joints.size(); ++k) {
+                    const std::size_t j = cfg.policy_joints[k];
+                    last_action[k] =
+                        ball_skill::to_action(last_target[j], cfg.default_pose[j], cfg.action_scale_joint[j]);
+                }
+                walk_since -= std::chrono::duration_cast<NUClear::clock::duration>(
+                    std::chrono::duration<double>(cfg.handoff_blend + 1.0));
+                log<INFO>("Walk taking over from a ball skill");
+            }
+
             // Low-level joint commands are only honoured in CUSTOM mode
-            auto mode  = std::make_unique<BoosterMode>();
-            mode->mode = K1Mode::CUSTOM;
-            emit(std::move(mode));
+            request_custom_mode();
 
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
             last_walk_state   = int(WalkState::State::STOPPED);
@@ -275,10 +272,7 @@ namespace module::skill {
                 // Re-request CUSTOM until the robot reports it, as the Walk task can start before the
                 // model has loaded, in which case Start<WalkTask> did not request it
                 if (last_mode != int(K1Mode::CUSTOM) && NUClear::clock::now() - last_mode_request > MODE_RETRY_PERIOD) {
-                    last_mode_request = NUClear::clock::now();
-                    auto mode         = std::make_unique<BoosterMode>();
-                    mode->mode        = K1Mode::CUSTOM;
-                    emit(std::move(mode));
+                    request_custom_mode();
                 }
 
                 // The policy has no kick, so emulate one as a velocity burst held for kick_duration
@@ -331,7 +325,7 @@ namespace module::skill {
                     emit(graph("Policy loop period (s)", tick_dt));
                 }
 
-                const auto servos = servos_of(sensors);
+                const auto servos = k1::servos_of(sensors);
 
                 // Observation frame, see README.md
                 const std::size_t n_joints = cfg.policy_joints.size();
@@ -418,36 +412,18 @@ namespace module::skill {
                 const double blend_age = std::chrono::duration<double>(now - walk_since).count();
                 const double alpha     = cfg.handoff_blend > 0.0 ? std::min(1.0, blend_age / cfg.handoff_blend) : 1.0;
 
-                auto low      = std::make_unique<BoosterLowCmd>();
-                low->cmd_type = BoosterLowCmd::CmdType::SERIAL;
-                low->motor_cmd.resize(JOINT_COUNT);
                 std::array<double, JOINT_COUNT> cmd_q{};
                 // Number of targets the joint-range clamp moved this tick
                 int clamped = 0;
                 for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
                     const double blended = (1.0 - alpha) * servos[j]->present_position + alpha * target[j];
-                    const double q       = std::clamp(blended, cfg.joint_lower[j], cfg.joint_upper[j]);
-                    clamped += q != blended ? 1 : 0;
-
-                    auto& motor  = low->motor_cmd[j];
-                    motor.mode   = 1;
-                    motor.q      = static_cast<float>(q);
-                    motor.dq     = 0.0f;
-                    motor.tau    = 0.0f;
-                    motor.kp     = static_cast<float>(kp[j]);
-                    motor.kd     = static_cast<float>(kd[j]);
-                    motor.weight = 0.0f;
-                    cmd_q[j]     = q;
+                    cmd_q[j]             = std::clamp(blended, cfg.joint_lower[j], cfg.joint_upper[j]);
+                    clamped += cmd_q[j] != blended ? 1 : 0;
                 }
                 if (clamped > 0) {
                     log<DEBUG>("Clamped", clamped, "joint targets to the joint limits");
                 }
-
-                // A Servos subtask rather than a raw BoosterLowCmd, so the Director can give the
-                // servos to a higher priority kick or get-up
-                auto servos_task     = std::make_unique<Servos>();
-                servos_task->command = *low;
-                emit<Task>(std::move(servos_task));
+                send_targets(cmd_q, kp, kd, TargetSource::WALK);
 
                 const auto state = cmd.isZero() ? WalkState::State::STOPPED : WalkState::State::WALKING;
 
@@ -458,6 +434,45 @@ namespace module::skill {
                     last_walk_command = cmd;
                 }
             });
+    }
+
+    void Walk::send_targets(const std::array<double, JOINT_COUNT>& q,
+                            const std::array<double, JOINT_COUNT>& kp,
+                            const std::array<double, JOINT_COUNT>& kd,
+                            TargetSource source) {
+        BoosterLowCmd low;
+        low.cmd_type = BoosterLowCmd::CmdType::SERIAL;
+        low.motor_cmd.resize(JOINT_COUNT);
+        for (std::size_t j = 0; j < JOINT_COUNT; ++j) {
+            auto& motor  = low.motor_cmd[j];
+            motor.mode   = 1;
+            motor.q      = static_cast<float>(q[j]);
+            motor.dq     = 0.0f;
+            motor.tau    = 0.0f;
+            motor.kp     = static_cast<float>(kp[j]);
+            motor.kd     = static_cast<float>(kd[j]);
+            motor.weight = 0.0f;
+        }
+        last_target        = q;
+        last_target_source = source;
+        last_target_time   = NUClear::clock::now();
+
+        // A Servos subtask rather than a raw BoosterLowCmd, so the Director can give the
+        // servos to a higher priority kick or get-up
+        auto servos_task     = std::make_unique<Servos>();
+        servos_task->command = low;
+        emit<Task>(std::move(servos_task));
+    }
+
+    bool Walk::handing_over_from(TargetSource source) const {
+        return last_target_source == source && NUClear::clock::now() - last_target_time < ball_cfg.handover_window;
+    }
+
+    void Walk::request_custom_mode() {
+        last_mode_request = NUClear::clock::now();
+        auto mode         = std::make_unique<BoosterMode>();
+        mode->mode        = K1Mode::CUSTOM;
+        emit(std::move(mode));
     }
 
     void Walk::load_model() {

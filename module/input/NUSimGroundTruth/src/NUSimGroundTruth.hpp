@@ -45,6 +45,7 @@ namespace module::input {
             bool ground_truth = false;
             std::string robot_topic;
             std::string ball_topic;
+            std::string ball_command_topic;
             double world_to_field_yaw = 0.0;
             double timeout            = 0.5;
             double warning_period     = 5.0;
@@ -76,6 +77,7 @@ namespace module::input {
 
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> robot_channel;
         booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ball_channel;
+        booster::robot::ChannelPtr<nav_msgs::msg::Odometry> ball_command_channel;
 
         /// @brief Whether ground truth is currently replacing vision + localisation
         bool active = false;

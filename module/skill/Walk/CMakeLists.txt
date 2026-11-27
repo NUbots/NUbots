@@ -1,7 +1,7 @@
 #[[
 MIT License
 
-Copyright (c) 2026 NUbots
+Copyright (c) 2023 NUbots
 
 This file is part of the NUbots codebase.
 See https://github.com/NUbots/NUbots for further info.
@@ -25,4 +25,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 # Build our NUClear module
-nuclear_module(SOURCES src/Walk.cpp)
+nuclear_module(SOURCES src/Walk.cpp src/BallSkills.cpp)

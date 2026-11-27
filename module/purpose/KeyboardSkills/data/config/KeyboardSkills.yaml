@@ -1,0 +1,40 @@
+log_level: INFO
+
+# Walk command step per key press: vx, vy (m/s) and wz (rad/s)
+walk_step: 0.1
+turn_step: 0.2
+
+# Ball velocity command step per key press (m/s), robot yaw frame (x forward, y left)
+ball_step: 0.2
+
+# The ball command each skill starts with when it is selected (m/s, robot yaw frame). skill::Walk clamps commands to
+# the trained ranges (BallSkills.yaml limits).
+start:
+  dribble: [0.0, 0.0] # hold the ball; w to go
+  kick: [4.0, 0.0] # a 4 m/s pass straight ahead
+  first_touch: [0.0, 0.9] # to the left: within 90 degrees of where the pass came from (in front)
+  first_pass: [3.0, 0.0] # straight back to the passer, for a pass from in front
+
+# Head step per arrow key press (degrees), for the look while walking
+head_step_deg: 2.0
+
+# The pass `p` rolls at the robot in NUSim: from this far ahead (m), arriving at this speed (m/s). The rolling
+# deceleration (m/s^2) works out the launch speed.
+pass:
+  distance: 3.0
+  arrival_speed: 2.0
+  rolling_deceleration: 0.9
+
+# Where `b` puts the ball at rest (m ahead of the robot)
+drop_distance: 0.5
+
+# Hold a ball command fixed in the world (its direction when set or stepped) while the robot turns, as NUSim's keyboard
+# does, rather than letting it turn with the robot. The keys step it in the robot's frame as it faces at the time.
+hold_in_world: true
+
+# Read keys from the terminal. Set false to run only the script below, e.g. headless.
+interactive: true
+
+# Key presses at times after startup (s): [time, key], key as typed or "space". For example:
+#   script: [[4.0, "b"], [6.0, "3"], [6.5, "w"], [6.6, "w"], [6.7, "w"], [12.0, "4"], [15.0, "1"]]
+script: []

@@ -135,6 +135,16 @@ namespace utility::onnx {
         return impl->output_shape;
     }
 
+    std::optional<std::string> ONNXRuntime::metadata(const std::string& key) const {
+        Ort::AllocatorWithDefaultOptions allocator;
+        const Ort::ModelMetadata model_metadata = impl->session.GetModelMetadata();
+        const auto value = model_metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator);
+        if (!value) {
+            return std::nullopt;
+        }
+        return std::string(value.get());
+    }
+
     std::vector<float> ONNXRuntime::infer(const std::vector<float>& input) {
         if (input.size() != impl->input_count) {
             throw std::runtime_error("Input size " + std::to_string(input.size()) + " does not match model input "

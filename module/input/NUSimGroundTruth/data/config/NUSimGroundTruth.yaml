@@ -7,6 +7,8 @@ ground_truth: false
 # NUSim's ground truth topics (nav_msgs/Odometry, simulator world frame). See NUSim's SdkBridge/PROTOCOL.md.
 robot_topic: rt/nusim/gt/robot
 ball_topic: rt/nusim/gt/ball
+# Where NUSimBallCommand is published, to place or roll the ball (nav_msgs/Odometry)
+ball_command_topic: rt/nusim/ball_command
 
 # Yaw from NUSim's world frame to this robot's field frame {f}. {f} has our own goal on +x. NUSim's first
 # team defends the -x goal, so its robots need half a turn and the second team's need none.

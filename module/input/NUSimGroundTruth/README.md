@@ -6,6 +6,10 @@ Reads the ground truth pose of the robot and the ball published by **NUSim** ove
 enabled, emits `message::localisation::Field` and `message::localisation::Ball` directly from it. This lets behaviour
 be tested in the simulator without vision or localisation in the loop.
 
+It also forwards `message::platform::NUSimBallCommand` to NUSim, to place or roll the ball for repeatable ball-skill
+tests. A command in the robot frame is converted to NUSim's world frame using this robot's ground truth pose when one is
+arriving, as NUSim's own `robot` frame is that of the first robot in the scene.
+
 While ground truth is active the module emits `message::localisation::GroundTruthMode` so that the vision-based
 localisation modules (`localisation::FieldLocalisationNLopt` and `localisation::BallLocalisation`) stop emitting their
 own estimates. If no ground truth arrives for longer than `timeout`, ground truth mode is switched off again and vision
@@ -26,6 +30,7 @@ Use this module in `roles/nusim/*` only.
   startup
 - `ball_topic`: DDS topic for the ball's ground truth position and velocity (`nav_msgs/Odometry` in NUSim's world
   frame). Only read at startup
+- `ball_command_topic`: DDS topic `NUSimBallCommand` is published on (`nav_msgs/Odometry`). Only read at startup
 - `world_to_field_yaw`: yaw from NUSim's world frame to this robot's field frame {f}, which has our own goal on +x
 - `timeout`: ground truth older than this (in seconds) is treated as missing
 - `warning_period`: how often (in seconds) the missing ground truth warning repeats, and how long after startup ground
@@ -35,6 +40,7 @@ Use this module in `roles/nusim/*` only.
 
 - `message::input::Sensors` uses the odometry transform from world {w} to torso {t} to compute where the field is in
   world space, and the camera transform for the ball message
+- `message::platform::NUSimBallCommand` to place or roll the ball in NUSim
 
 ## Emits
 

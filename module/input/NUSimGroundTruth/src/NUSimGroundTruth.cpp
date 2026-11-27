@@ -35,6 +35,7 @@
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/GroundTruthMode.hpp"
+#include "message/platform/NUSimBallCommand.hpp"
 
 #include "utility/platform/Booster/channel_factory.hpp"
 
@@ -47,6 +48,7 @@ namespace module::input {
     using message::localisation::Field;
     using message::localisation::GroundTruthMode;
     using message::localisation::RobotPoseGroundTruth;
+    using message::platform::NUSimBallCommand;
 
     NUSimGroundTruth::NUSimGroundTruth(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -60,8 +62,9 @@ namespace module::input {
             cfg.warning_period     = config["warning_period"].as<double>();
             // The DDS readers are created once at startup, so the topics only apply then
             if (robot_channel == nullptr) {
-                cfg.robot_topic = config["robot_topic"].as<std::string>();
-                cfg.ball_topic  = config["ball_topic"].as<std::string>();
+                cfg.robot_topic        = config["robot_topic"].as<std::string>();
+                cfg.ball_topic         = config["ball_topic"].as<std::string>();
+                cfg.ball_command_topic = config["ball_command_topic"].as<std::string>();
             }
         });
 
@@ -90,13 +93,68 @@ namespace module::input {
                     vBs << v.x(), v.y(), v.z();
                     ball_time = NUClear::clock::now();
                 });
+            ball_command_channel =
+                ChannelFactory::Instance()->CreateSendChannel<nav_msgs::msg::Odometry>(cfg.ball_command_topic);
             log<INFO>("Listening for NUSim ground truth on", cfg.robot_topic, "and", cfg.ball_topic);
         });
+
+        // Place or roll the ball. A command in the robot frame is turned into the world frame with this robot's
+        // ground truth pose when there is one, as NUSim's own "robot" frame is the first robot's, not this one's.
+        on<Trigger<NUSimBallCommand>, Sync<NUSimGroundTruth>>().then(
+            "Send NUSim ball command",
+            [this](const NUSimBallCommand& command) {
+                if (ball_command_channel == nullptr) {
+                    log<WARN>("Ball command before the DDS writer was created, dropped");
+                    return;
+                }
+                Eigen::Vector3d position = command.position;
+                Eigen::Vector3d velocity = command.velocity;
+                std::string frame        = command.frame == NUSimBallCommand::Frame::WORLD ? "world" : "robot";
+                Eigen::Isometry3d torso;
+                bool robot_fresh = false;
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    torso       = Hst;
+                    robot_fresh = NUClear::clock::now() - robot_time < std::chrono::duration<double>(cfg.timeout);
+                }
+                if (frame == "robot" && robot_fresh) {
+                    const double yaw = std::atan2(torso(1, 0), torso(0, 0));
+                    const Eigen::Matrix3d Rsr(Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
+                    const Eigen::Vector3d rRSs(torso.translation().x(), torso.translation().y(), 0.0);
+                    const double z = position.z();
+                    position       = Rsr * Eigen::Vector3d(position.x(), position.y(), 0.0) + rRSs;
+                    position.z()   = z;  // a negative z still rests it on the floor
+                    velocity       = Rsr * velocity;
+                    frame          = "world";
+                }
+
+                nav_msgs::msg::Odometry msg;
+                msg.header().frame_id(frame);
+                msg.child_frame_id(command.rolling ? "rolling" : "");
+                msg.pose().pose().position().x(position.x());
+                msg.pose().pose().position().y(position.y());
+                msg.pose().pose().position().z(position.z());
+                msg.pose().pose().orientation().w(1.0);
+                msg.twist().twist().linear().x(velocity.x());
+                msg.twist().twist().linear().y(velocity.y());
+                msg.twist().twist().linear().z(velocity.z());
+                if (!ball_command_channel->Write(&msg)) {
+                    log<WARN>("Failed to send the ball command on", cfg.ball_command_topic);
+                    return;
+                }
+                log<INFO>("Ball command (",
+                          frame,
+                          ") position",
+                          position.transpose(),
+                          "velocity",
+                          velocity.transpose());
+            });
 
         on<Shutdown>().then([this] {
             if (robot_channel != nullptr) {
                 ChannelFactory::Instance()->CloseReader(cfg.robot_topic);
                 ChannelFactory::Instance()->CloseReader(cfg.ball_topic);
+                ChannelFactory::Instance()->CloseWriter(cfg.ball_command_topic);
             }
         });
 

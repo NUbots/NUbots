@@ -1,0 +1,58 @@
+# The mjlab K1 ball-skill policies (mjlab brooker/jogaMIT, policies/CONTROLLER_INTERFACE.md), run by skill::Walk for
+# the skill::BallSkill task. Each ONNX takes [1, 234] (seven terms over the last three steps, oldest first) and gives
+# [1, 22] actions. Joint order, default pose, action scale and gains are read from each file's metadata.
+
+# ONNX file per skill, relative to the binary's directory. Leave one empty to not load it.
+models:
+  receive: ball_skills/receive.onnx # k1_receive_walk_v5_stable model_19500
+  dribble: ball_skills/dribble.onnx # k1_dribble_v13b_arms_low model_33700
+  kick: ball_skills/kick.onnx # k1_kick_v10_handover model_40493
+  kick_air: ball_skills/kick_air.onnx # k1_kick_air_v6_handover model_43292
+  first_touch: ball_skills/first_touch.onnx # k1_first_touch_v5_aim model_26999
+  first_pass: ball_skills/first_pass.onnx # k1_first_touch_pass_v6_long_more model_34290
+
+# Inference device: cpu, or gpu for TensorRT with a CPU fallback. The networks are small.
+device: cpu
+
+# Gains used only if a file's metadata gains are placeholders (kp 1, kd 0, from the exporter before its fix):
+# the real robot's gains the 2026-11-20 set was trained with. JointIndexK1 order.
+fallback_kp: [4, 4, 10, 10, 10, 10, 10, 10, 10, 10, 80, 80, 80, 80, 50, 50, 80, 80, 80, 80, 50, 50]
+fallback_kd: [0.25, 0.25, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 2, 2, 4, 4, 4, 4, 2, 2]
+
+ball:
+  # Where the ball observation comes from:
+  #   vision: the nearest vision::Balls detection, its ray put on the ball centre (closest to how the policies
+  #     were trained: per-frame detections, the last one held when the ball is not seen)
+  #   localisation: the filtered localisation::Ball, which is NUSim's ground truth when NUSimGroundTruth is on
+  source: localisation
+  # Ball radius (m), to put a detection's ray on the ball centre
+  radius: 0.0785
+  # An estimate older than this (s) counts as not seen this tick. Vision runs at 30 Hz, the policies at 50 Hz.
+  max_age: 0.1
+  # localisation only: advance the estimate by its velocity over its age
+  predict: true
+
+# The head camera the ball observation models: the head pitch link frame (Head_2) with its origin moved by offset,
+# cut to a symmetric field of view and a range. The camera's mounting (Hpc) comes from Sensors.yaml.
+camera:
+  offset: [0.06, 0.0, 0.07] # m, in the head pitch link frame, as trained
+  hfov_deg: 106.2 # the K1 head camera's calibration, 544 x 448
+  vfov_deg: 95.0
+  range: 9.0 # m: the receive and first-touch policies were trained to 9 m
+
+# Commands are clamped to the trained ranges (CONTROLLER_INTERFACE.md section 2)
+limits:
+  dribble: [0.4, 1.8] # m/s, or (0, 0) to hold: a command under half the minimum is a hold
+  kick: [2.0, 7.0] # m/s
+  kick_angle_deg: 135 # off the heading
+  shot_speed: 4.5 # m/s, above which kicks are kept within shot_angle_deg
+  shot_angle_deg: 45
+  first_touch: [0.5, 1.2] # m/s
+  first_pass: [2.0, 4.0] # m/s
+
+# Head joint speed limit (rad/s). The ground kick exceeds the head motor's 7.85 rad/s rating in about 20% of kicks.
+head_rate_limit: 7.85
+
+# How recent (s) the walk's last joint targets must be for a ball skill to continue from them, and the other way
+# round, rather than blending in from the measured pose
+handover_window: 0.1

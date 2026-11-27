@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,11 @@ namespace utility::onnx {
 
         /// Shape of the model's output tensor, e.g. {1, 10, 8400}
         [[nodiscard]] const std::vector<int64_t>& output_shape() const;
+
+        /// A custom metadata property of the model, e.g. the joint names an exported policy was trained with
+        /// @param key Metadata key
+        /// @return The value, or std::nullopt if the model has no such property
+        [[nodiscard]] std::optional<std::string> metadata(const std::string& key) const;
 
         /// Run inference on the model
         /// @param input Input tensor data, must match the input tensor's element count
