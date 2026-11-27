@@ -29,6 +29,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <nuclear>
@@ -146,6 +147,16 @@ namespace module::localisation {
             OdometryVelocitySource odometry_velocity_source = OdometryVelocitySource::HTW_DIFFERENCE;
             /// @brief Body linear velocity measurement noise std dev per axis [m/s]
             double odometry_velocity_sigma = 0.15;
+            /// @brief Odometry velocities faster than this are discarded [m/s]. The Booster
+            ///        controller reports >100 m/s for a few hundred ms after an odometry reset.
+            double max_odometry_speed = 2.0;
+            /// @brief A step between consecutive Sensors.Htw larger than this is an odometry
+            ///        discontinuity (reset or offset recapture), not motion [m, rad]
+            double odometry_jump_xy    = 0.1;
+            double odometry_jump_angle = 0.3;
+            /// @brief Frames this close to a discontinuity skip Hcw-dependent updates, since Hcw
+            ///        and the paired Htw may straddle it [s]
+            double odometry_jump_holdoff = 0.25;
             /// @brief Zero-velocity update noise while FALLEN (lying still) [m/s]
             double zupt_sigma = 0.02;
             /// @brief Zero-velocity update noise while FALLING or getting up [m/s]
@@ -173,6 +184,8 @@ namespace module::localisation {
         /// @brief Rolling window of recent odometry samples, newest last, each carrying the
         ///        velocity it was measured with (bounded by sensors_window_seconds)
         std::vector<filter::SensorsSample> sensors_window;
+        /// @brief Time of the latest odometry discontinuity [s since t0]
+        double last_odometry_jump_t = -std::numeric_limits<double>::infinity();
         /// @brief The estimator (null until the first successful initial-pose solve)
         std::unique_ptr<filter::SystemLocalisation> system;
         /// @brief Field landmark map (null until the first FieldDescription arrives)
@@ -200,6 +213,12 @@ namespace module::localisation {
          * @return The nearest sample, or nullptr if the window is empty or the nearest is too old.
          */
         [[nodiscard]] const filter::SensorsSample* nearest_sensors(double t) const;
+
+        /// @brief Whether Hcw-dependent updates at time t should be skipped because an odometry
+        ///        discontinuity is too close (see odometry_jump_holdoff)
+        [[nodiscard]] bool near_odometry_jump(double t) const {
+            return std::abs(t - last_odometry_jump_t) < cfg.odometry_jump_holdoff;
+        }
 
         /**
          * @brief Hand confidence back to the belief on standing up again.

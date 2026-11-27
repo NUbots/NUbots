@@ -110,6 +110,9 @@ namespace module::localisation {
             case utility::vision::fourcc("BGR3"):
                 cv::cvtColor(cv::Mat(height, width, CV_8UC3, data), gray, cv::COLOR_BGR2GRAY);
                 return true;
+            case utility::vision::FOURCC::RGB3:
+                cv::cvtColor(cv::Mat(height, width, CV_8UC3, data), gray, cv::COLOR_RGB2GRAY);
+                return true;
             case utility::vision::FOURCC::RGGB:
                 cv::cvtColor(cv::Mat(height, width, CV_8UC1, data), gray, cv::COLOR_BayerRG2GRAY);
                 return true;
@@ -217,6 +220,10 @@ namespace module::localisation {
             log<INFO>("Resetting field localisation");
             system.reset();
             initialised = false;
+            was_upright = true;
+            // Its landmark map is in the old field frame
+            side.reset();
+            last_respawn_t = -std::numeric_limits<double>::infinity();
         });
 
         // Maintain the rolling odometry window. Priority::HIGH and the shared Sync group keep
@@ -244,6 +251,24 @@ namespace module::localisation {
                               : filter::SystemLocalisation::body_velocity_from_odometry(sensors_window.back(),
                                                                                         s,
                                                                                         cfg.max_odometry_gap);
+            if (s.vBb.norm() > cfg.max_odometry_speed) {
+                s.vBb = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
+            }
+
+            // A reset or offset recapture moves Htw without the torso moving
+            if (!sensors_window.empty()) {
+                const filter::Pose<double> step = sensors_window.back().Htw * s.Htw.inverse();
+                const double angle              = Eigen::AngleAxisd(step.rotation_matrix).angle();
+                if (step.translation_vector.head<2>().norm() > cfg.odometry_jump_xy
+                    || angle > cfg.odometry_jump_angle) {
+                    last_odometry_jump_t = s.t;
+                    log<INFO>("Odometry discontinuity of ",
+                              step.translation_vector.head<2>().norm(),
+                              "m, ",
+                              angle * 180.0 / M_PI,
+                              "deg; holding off vision updates");
+                }
+            }
 
             sensors_window.push_back(std::move(s));
 
@@ -330,6 +355,16 @@ namespace module::localisation {
                             MeasurementBodyVelocity::stationary(t, settled ? cfg.zupt_sigma : cfg.zupt_dynamic_sigma);
                         system->process(zupt);
                     }
+                }
+
+                // Tbc is unreliable across an odometry discontinuity. The field-frame belief is
+                // unaffected, so Hfw is re-emitted against the newest Htw.
+                if (near_odometry_jump(t)) {
+                    if (initialised) {
+                        system->predict_all(t);
+                        emit_field(sensors_window.back().Htw, nullptr);
+                    }
+                    return;
                 }
 
                 // Prediction otherwise happens only inside Event::process, so a frame with no
@@ -446,6 +481,9 @@ namespace module::localisation {
         }
 
         const double t = seconds(image.timestamp);
+        if (near_odometry_jump(t)) {
+            return;
+        }
 
         // Same pairing as the landmark path: Hcw is at capture, so the torso pose must be too.
         const filter::SensorsSample* paired = nearest_sensors(t);
