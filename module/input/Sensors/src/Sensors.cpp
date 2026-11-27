@@ -100,6 +100,9 @@ namespace module::input {
             cfg.odometry_deadband      = config["odometry_deadband"].as<double>();
             cfg.odometry_twist_max_age = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["odometry_twist_max_age"].as<double>()));
+            cfg.odometry_twist_max_speed = config["odometry_twist_max_speed"].as<double>();
+            cfg.odometry_jump_xy         = config["odometry_jump"]["xy"].as<double>();
+            cfg.odometry_jump_yaw        = config["odometry_jump"]["yaw"].as<double>();
 
             // Hpc: pitch frame to camera optical frame
             const auto& Hpc_config = config["Hpc"];
@@ -118,10 +121,6 @@ namespace module::input {
             const auto Hhp_rpy = Hhp_config["rotation_rpy"];
             cfg.Hhp.linear()   = rpy_intrinsic_to_mat(
                 Eigen::Vector3d(Hhp_rpy[0].as<double>(), Hhp_rpy[1].as<double>(), Hhp_rpy[2].as<double>()));
-
-            std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
-            booster_odometry_has_offset = false;
-            booster_odometry_offset     = {};
         });
 
 
@@ -139,25 +138,22 @@ namespace module::input {
         });
 
 
-        // When field localisation is reset, re-capture the BoosterOdometry zero offset so that odometry is
-        // reported relative to the robot's new post-reset pose.
+        // Re-zero the odometry so it is reported relative to the robot's post-reset pose. HardwareIO also
+        // resets the controller's odometry, which lands at an unknown later time; that jump in the raw
+        // odometry is absorbed below rather than reported.
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
-            booster_odometry_has_offset = false;
-            booster_odometry_offset     = {};
-            log<INFO>("Sensors clearing BoosterOdometry offset after field localisation reset");
+            odometry_rezero = true;
+            log<INFO>("Re-zeroing odometry after field localisation reset");
         });
 
-
-        // Any motion mode change causes HardwareIO to reset the Booster odometry, so re-capture the
-        // zero offset from the first sample after the change, regardless of which mode was entered.
+        // HardwareIO resets the controller's odometry on any mode change, so re-zero as for a reset
         on<Trigger<BoosterModeState>>().then([this](const BoosterModeState& mode_state) {
             std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
             const int mode = static_cast<int>(mode_state.mode);
             if (last_booster_mode != -1 && mode != last_booster_mode) {
-                booster_odometry_has_offset = false;
-                booster_odometry_offset     = {};
-                log<INFO>("Sensors clearing BoosterOdometry offset after mode change");
+                odometry_rezero = true;
+                log<INFO>("Re-zeroing odometry after mode change");
             }
             last_booster_mode = mode;
         });
@@ -167,23 +163,36 @@ namespace module::input {
             [this](const RawSensors& raw_sensors,
                    const BoosterOdometry& odo,
                    const std::shared_ptr<const BoosterOdometryTwist>& twist) {
+                const Eigen::Isometry2d raw = Eigen::Translation2d(odo.x, odo.y) * Eigen::Rotation2Dd(odo.theta);
                 std::array<double, 3> normalized_odometry{};
                 {
                     std::lock_guard<std::mutex> lock(odometry_mutex);
-                    if (!booster_odometry_has_offset) {
-                        booster_odometry_offset     = {odo.x, odo.y, odo.theta};
-                        booster_odometry_has_offset = true;
-                        log<INFO>("Sensors stored BoosterOdometry zero offset",
-                                  booster_odometry_offset[0],
-                                  booster_odometry_offset[1],
-                                  booster_odometry_offset[2]);
+                    if (odometry_rezero) {
+                        odometry_offset = raw;
+                        odometry_rezero = false;
+                        log<INFO>("Odometry zeroed at raw pose", odo.x, odo.y, odo.theta);
+                    }
+                    else {
+                        // A step no robot can make between samples is the controller resetting its odometry:
+                        // move the offset so the reported pose stays where it was
+                        const Eigen::Isometry2d step = last_raw_odometry.inverse() * raw;
+                        const double step_yaw        = std::abs(Eigen::Rotation2Dd(step.rotation()).smallestAngle());
+                        if (step.translation().norm() > cfg.odometry_jump_xy || step_yaw > cfg.odometry_jump_yaw) {
+                            odometry_offset = raw * last_odometry.inverse();
+                            log<INFO>("Absorbed a raw odometry discontinuity of",
+                                      step.translation().norm(),
+                                      "m,",
+                                      step_yaw,
+                                      "rad");
+                        }
                     }
 
-                    normalized_odometry = {
-                        odo.x - booster_odometry_offset[0],
-                        odo.y - booster_odometry_offset[1],
-                        odo.theta - booster_odometry_offset[2],
-                    };
+                    const Eigen::Isometry2d out = odometry_offset.inverse() * raw;
+                    last_raw_odometry           = raw;
+                    last_odometry               = out;
+                    normalized_odometry         = {out.translation().x(),
+                                                   out.translation().y(),
+                                                   Eigen::Rotation2Dd(out.rotation()).angle()};
                 }
 
                 // Snap tiny residuals to zeroes
@@ -255,7 +264,8 @@ namespace module::input {
                 // vTw: the controller's odometry twist, which is in its body frame (child_frame_id, by ROS
                 // convention), rotated into the world by the torso's orientation. NaN without a recent twist.
                 sensors->vTw = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
-                if (twist != nullptr && raw_sensors.timestamp - twist->timestamp <= cfg.odometry_twist_max_age) {
+                if (twist != nullptr && raw_sensors.timestamp - twist->timestamp <= cfg.odometry_twist_max_age
+                    && Eigen::Vector3d(twist->linear).norm() <= cfg.odometry_twist_max_speed) {
                     Eigen::Vector3d vtw =
                         Eigen::Isometry3d(sensors->Htw).inverse().linear() * Eigen::Vector3d(twist->linear);
                     sensors->vTw = vtw;
@@ -265,8 +275,10 @@ namespace module::input {
                         emit(graph("Sensors: vTw", vtw));
                     }
                 }
-                else if (!twist_warned.exchange(true)) {
-                    log<WARN>("No recent odometry twist from rt/odom - Sensors.vTw is not measured");
+                else if (twist == nullptr || raw_sensors.timestamp - twist->timestamp > cfg.odometry_twist_max_age) {
+                    if (!twist_warned.exchange(true)) {
+                        log<WARN>("No recent odometry twist from rt/odom - Sensors.vTw is not measured");
+                    }
                 }
 
                 bool new_left_down   = raw_sensors.buttons.left;
