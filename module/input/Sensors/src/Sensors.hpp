@@ -32,10 +32,12 @@
 #include <atomic>
 #include <booster/idl/geometry_msgs/Pose.h>
 #include <booster/robot/channel/channel_factory.hpp>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <nuclear>
 #include <string>
+#include <utility>
 
 #include "sensors/k1_model.hpp"
 
@@ -66,6 +68,12 @@ namespace module::input {
             /// odometry), not motion, and is absorbed into the zero offset [m, rad]
             double odometry_jump_xy  = 0.0;
             double odometry_jump_yaw = 0.0;
+            /// @brief The controller's twist can latch a non-zero value for tens of seconds while the robot
+            /// stands. A twist above stuck_twist_speed [m/s] is reported as zero while the odometry pose
+            /// moved slower than stationary_speed [m/s] over the last stationary_window.
+            double stuck_twist_speed = 0.0;
+            double stationary_speed  = 0.0;
+            NUClear::clock::duration stationary_window{};
         } cfg;
 
         /// @brief DDS reader for the head pose topic, created once at startup
@@ -93,6 +101,8 @@ namespace module::input {
         /// @brief Previous raw and reported odometry poses, for discontinuity detection
         Eigen::Isometry2d last_raw_odometry = Eigen::Isometry2d::Identity();
         Eigen::Isometry2d last_odometry     = Eigen::Isometry2d::Identity();
+        /// @brief Recent reported odometry positions since the last re-zero, oldest first
+        std::deque<std::pair<NUClear::clock::time_point, Eigen::Vector2d>> odometry_history;
         /// @brief Last Booster motion mode seen, used to re-zero the odometry whenever the mode changes
         /// (-1 = no mode seen yet)
         int last_booster_mode = -1;

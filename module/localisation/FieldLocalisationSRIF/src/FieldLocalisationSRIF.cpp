@@ -244,25 +244,6 @@ namespace module::localisation {
                         : filter::SystemLocalisation::body_velocity_from_odometry(sensors_window.back(),
                                                                                   s,
                                                                                   cfg.max_odometry_gap);
-            if (s.vBb.norm() > cfg.max_odometry_speed) {
-                s.vBb = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
-            }
-            // A latched twist claims motion the odometry pose does not show; trust the pose
-            if (cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
-                && s.vBb.norm() > cfg.stuck_twist_speed) {
-                const double t_ref = s.t - cfg.stationary_window;
-                auto ref = std::find_if(sensors_window.rbegin(), sensors_window.rend(), [t_ref](const auto& e) {
-                    return e.t <= t_ref;
-                });
-                if (ref != sensors_window.rend()) {
-                    const double moved =
-                        (s.Htw.inverse().translation_vector.head<2>() - ref->Htw.inverse().translation_vector.head<2>())
-                            .norm();
-                    if (moved < cfg.stationary_speed * (s.t - ref->t)) {
-                        s.vBb = Eigen::Vector3d::Zero();
-                    }
-                }
-            }
 
             // A reset or offset recapture shifts Htw in the plane without the torso moving. Compared
             // in the world frame so a fall's fast pitching is not mistaken for one.
@@ -274,6 +255,8 @@ namespace module::localisation {
                 const double dyaw        = std::abs(std::atan2(dR(1, 0), dR(0, 0)));
                 if (dxy > cfg.odometry_jump_xy || dyaw > cfg.odometry_jump_angle) {
                     last_odometry_jump_t = s.t;
+                    // A finite difference across the jump is not a velocity
+                    s.vBb = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
                     log<INFO>("Odometry discontinuity of ",
                               dxy,
                               "m, ",

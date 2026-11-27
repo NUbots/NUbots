@@ -22,6 +22,13 @@ odometry_jump:
   xy: 0.1 # [m]
   yaw: 0.3 # [rad]
 
+# The controller's twist can latch a non-zero value for tens of seconds while the robot stands. A twist faster than
+# speed is reported as zero while the odometry pose moved slower than stationary_speed over stationary_window.
+stuck_twist:
+  speed: 0.2 # [m/s]
+  stationary_speed: 0.05 # [m/s]
+  stationary_window: 0.25 # [s]
+
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians

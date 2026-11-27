@@ -103,6 +103,10 @@ namespace module::input {
             cfg.odometry_twist_max_speed = config["odometry_twist_max_speed"].as<double>();
             cfg.odometry_jump_xy         = config["odometry_jump"]["xy"].as<double>();
             cfg.odometry_jump_yaw        = config["odometry_jump"]["yaw"].as<double>();
+            cfg.stuck_twist_speed        = config["stuck_twist"]["speed"].as<double>();
+            cfg.stationary_speed         = config["stuck_twist"]["stationary_speed"].as<double>();
+            cfg.stationary_window        = std::chrono::duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["stuck_twist"]["stationary_window"].as<double>()));
 
             // Hpc: pitch frame to camera optical frame
             const auto& Hpc_config = config["Hpc"];
@@ -165,11 +169,13 @@ namespace module::input {
                    const std::shared_ptr<const BoosterOdometryTwist>& twist) {
                 const Eigen::Isometry2d raw = Eigen::Translation2d(odo.x, odo.y) * Eigen::Rotation2Dd(odo.theta);
                 std::array<double, 3> normalized_odometry{};
+                bool stationary = false;
                 {
                     std::lock_guard<std::mutex> lock(odometry_mutex);
                     if (odometry_rezero) {
                         odometry_offset = raw;
                         odometry_rezero = false;
+                        odometry_history.clear();
                         log<INFO>("Odometry zeroed at raw pose", odo.x, odo.y, odo.theta);
                     }
                     else {
@@ -193,6 +199,18 @@ namespace module::input {
                     normalized_odometry         = {out.translation().x(),
                                                    out.translation().y(),
                                                    Eigen::Rotation2Dd(out.rotation()).angle()};
+
+                    // Stationary if the pose barely moved since a sample at least stationary_window old
+                    const auto now = raw_sensors.timestamp;
+                    odometry_history.emplace_back(now, out.translation());
+                    while (odometry_history.size() > 2 && odometry_history[1].first <= now - cfg.stationary_window) {
+                        odometry_history.pop_front();
+                    }
+                    const auto& [t_ref, p_ref] = odometry_history.front();
+                    if (t_ref <= now - cfg.stationary_window) {
+                        const double dt = std::chrono::duration<double>(now - t_ref).count();
+                        stationary      = (out.translation() - p_ref).norm() < cfg.stationary_speed * dt;
+                    }
                 }
 
                 // Snap tiny residuals to zeroes
@@ -262,12 +280,17 @@ namespace module::input {
                 }
 
                 // vTw: the controller's odometry twist, which is in its body frame (child_frame_id, by ROS
-                // convention), rotated into the world by the torso's orientation. NaN without a recent twist.
+                // convention), rotated into the world by the torso's orientation. NaN without a recent, plausible
+                // twist; zero while latched (see stuck_twist).
                 sensors->vTw = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
                 if (twist != nullptr && raw_sensors.timestamp - twist->timestamp <= cfg.odometry_twist_max_age
                     && Eigen::Vector3d(twist->linear).norm() <= cfg.odometry_twist_max_speed) {
                     Eigen::Vector3d vtw =
                         Eigen::Isometry3d(sensors->Htw).inverse().linear() * Eigen::Vector3d(twist->linear);
+                    // A latched twist claims motion the odometry pose does not show; trust the pose
+                    if (stationary && vtw.norm() > cfg.stuck_twist_speed) {
+                        vtw.setZero();
+                    }
                     sensors->vTw = vtw;
 
                     if (log_level <= DEBUG) {

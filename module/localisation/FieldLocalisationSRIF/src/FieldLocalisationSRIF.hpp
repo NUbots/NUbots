@@ -140,15 +140,6 @@ namespace module::localisation {
             OdometryVelocitySource odometry_velocity_source = OdometryVelocitySource::HTW_DIFFERENCE;
             /// @brief Body linear velocity measurement noise std dev per axis [m/s]
             double odometry_velocity_sigma = 0.15;
-            /// @brief Odometry velocities above this are discarded [m/s]. The Booster twist
-            ///        reads >100 m/s for a few hundred ms after an odometry reset.
-            double max_odometry_speed = 2.0;
-            /// @brief vTw above stuck_twist_speed [m/s] is replaced by zero while Htw moved slower than
-            ///        stationary_speed [m/s] over the last stationary_window [s]. The Booster twist can
-            ///        latch a non-zero value for tens of seconds while the robot stands.
-            double stuck_twist_speed = 0.2;
-            double stationary_speed  = 0.05;
-            double stationary_window = 0.25;
             /// @brief A step between consecutive Sensors.Htw above these is an odometry
             ///        discontinuity, not motion [m, rad (world yaw)]
             double odometry_jump_xy    = 0.1;

@@ -60,16 +60,15 @@ filter cannot observe its yaw component, which otherwise becomes heading drift.
 
 **Body velocity.** `odometry_velocity_source` picks the signal: `HTW_DIFFERENCE` finite-differences
 consecutive `Sensors.Htw` (any platform); `SENSORS_VTW` rotates `Sensors.vTw` into the torso frame
-(the K1, whose controller reports an odometry twist). Velocities above `max_odometry_speed` are
-discarded. A twist above `stuck_twist_speed` while the odometry pose is stationary is measured as zero
-instead (the Booster twist can latch a non-zero value for tens of seconds while the robot stands).
+(the K1, whose controller reports an odometry twist). Sensors discards implausible twists and zeroes
+latched ones.
 
-**Odometry discontinuities.** An odometry reset (`ResetFieldLocalisation`, or a Booster mode change)
-moves `Sensors.Htw` by metres in one sample, and the Booster twist reads >100 m/s for a few hundred
-ms afterwards. A world-frame xy or yaw step between consecutive `Htw` larger than `odometry_jump_xy`/`odometry_jump_angle`
-marks a discontinuity; vision frames within `odometry_jump_holdoff` of it skip their landmark, init
-and side-disambiguation updates (their `Hcw` and paired `Htw` may straddle it) and re-emit `Hfw`
-against the newest `Htw`. The field-frame belief itself is unaffected.
+**Odometry discontinuities.** `Sensors.Htw` jumps when Sensors re-zeros the odometry
+(`ResetFieldLocalisation`, or a Booster mode change). A world-frame xy or yaw step between consecutive
+`Htw` larger than `odometry_jump_xy`/`odometry_jump_angle` marks a discontinuity. That sample's
+finite-differenced velocity is discarded, and vision frames within `odometry_jump_holdoff` of it skip
+their landmark, init and side-disambiguation updates (their `Hcw` and paired `Htw` may straddle it)
+and re-emit `Hfw` against the newest `Htw`. The field-frame belief itself is unaffected.
 
 **Landmarks.** Goal posts and L/T/X field-line intersections arrive as unit rays in the camera frame:
 the box centre for intersections, the bottom-centre for posts. Detections below `min_confidence` are

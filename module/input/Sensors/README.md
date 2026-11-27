@@ -14,7 +14,9 @@ Odometry is reported relative to the pose at the last re-zero, which happens at 
 `ResetFieldLocalisation` and on any Booster mode change. HardwareIO also resets the controller's own odometry at
 those times, but that lands asynchronously, so any jump in the raw odometry larger than `odometry_jump` is absorbed
 into the zero offset instead of being reported: `Htw` only ever jumps at a re-zero. Twists faster than
-`odometry_twist_max_speed` are discarded.
+`odometry_twist_max_speed` are discarded (`vTw` is NaN). A twist faster than `stuck_twist.speed` while the
+odometry pose is stationary is reported as zero, since the controller's twist can latch a non-zero value for tens
+of seconds while the robot stands.
 
 The head pose reader is also created once at startup; changing `head_pose.topic` in config after that requires a
 restart to take effect.
