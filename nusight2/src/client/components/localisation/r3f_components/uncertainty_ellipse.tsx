@@ -9,23 +9,15 @@ interface UncertaintyEllipseProps {
   position: Vector3;
   /** Covariance of (x, y, theta) from the localisation Field message. */
   covariance: Matrix3;
-  /** How many standard deviations the ellipse traces. 3 covers ~99% of the mass in 1D. */
+  /** Standard deviations the ellipse traces */
   sigma?: number;
   color?: string;
 }
 
 /**
- * The filter's positional uncertainty, drawn on the ground plane.
+ * The (x, y) positional uncertainty ellipse, drawn on the ground plane.
  *
- * The (x, y) block of the covariance is a 2x2 symmetric matrix, so its eigenvectors give the
- * principal axes of the uncertainty and the square roots of its eigenvalues give the standard
- * deviation along each. Drawing that as an ellipse turns a number nobody reads into something
- * you notice out of the corner of your eye: it inflates on a fall, stays inflated while the
- * robot cannot re-acquire landmarks, and shrinks as vision pulls the estimate back. A pose that
- * is drifting while the ellipse stays small is the signature of a filter that is confidently
- * wrong, which is the failure worth catching early.
- *
- * The closed form for a symmetric 2x2 avoids pulling in an eigensolver:
+ * Closed-form eigen-decomposition of the symmetric 2x2 block:
  *   lambda = (a + c)/2 +- sqrt(((a - c)/2)^2 + b^2)
  *   angle  = 0.5 * atan2(2b, a - c)
  */
@@ -39,9 +31,7 @@ export const UncertaintyEllipse: React.FC<UncertaintyEllipseProps> = ({
   const b = covariance.x.y;
   const c = covariance.y.y;
 
-  // A covariance is positive semi-definite, so both eigenvalues are >= 0 -- but a malformed or
-  // not-yet-initialised message can arrive as anything, and a NaN here would silently drop the
-  // whole scene rather than just this overlay.
+  // Guard against malformed input; a NaN would drop the whole scene
   if (!Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(c)) {
     return null;
   }
@@ -62,7 +52,7 @@ export const UncertaintyEllipse: React.FC<UncertaintyEllipseProps> = ({
   const geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(64));
 
   return (
-    // Just above the carpet, matching AssociationLines, so it does not z-fight with the field.
+    // Just above the carpet, as AssociationLines, to avoid z-fighting
     <group position={[position.x, position.y, 0.006]} rotation={[0, 0, angle]}>
       <line>
         <bufferGeometry attach="geometry" {...geometry} />

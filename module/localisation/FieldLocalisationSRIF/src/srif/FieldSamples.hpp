@@ -47,11 +47,8 @@ namespace module::localisation::srif {
         Pose<double> Htw;               ///< world -> torso
         Eigen::Vector3d accelerometer;  ///< [m/s^2], torso frame
         Eigen::Vector3d gyroscope;      ///< [rad/s], torso frame
-        /// @brief Body-fixed linear velocity [m/s], torso frame.
-        ///
-        /// Resolved when the sample is buffered, from whichever signal
-        /// Config::odometry_velocity_source names. Non-finite when none could be
-        /// formed.
+        /// @brief Body-fixed linear velocity [m/s] from Config::odometry_velocity_source; non-finite
+        ///        when unavailable
         Eigen::Vector3d vBb;
     };
 

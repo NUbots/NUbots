@@ -154,8 +154,7 @@ namespace module::output {
                 msg->last_camera_image = last_seen_ball;
                 msg->last_camera_image = last_seen_goal;
 
-                // Set our walk command. skill::Walk is a Director task, never emitted as data, so
-                // the command the walk engine is actually running comes from its WalkState.
+                // From WalkState, since skill::Walk is a Director task rather than data
                 if (walk_state) {
                     msg->walk_command = walk_state->velocity_target.cast<float>();
                 }

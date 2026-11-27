@@ -29,19 +29,9 @@
  * @file MeasurementBodyRates.hpp
  * @brief Direct measurements of the body-fixed velocity states.
  *
- * These are the two signals that used to be a known input to the process model.
- * Making them measurements is the point of carrying vBb and omegaBb as states:
- *
- *  - an input asserts its value as truth, so its noise can only be expressed as
- *    process noise on whatever it drives, and any bias it carries is unmodelled;
- *  - a measurement carries its own sigma and can be gated, suppressed or
- *    contradicted by the rest of the belief, and a bias on it can be a state.
- *
- * That last point is what the gyroscope bias needed. It is unobservable to the
- * upstream Mahony filter (whose bias integrator is driven by the gravity error, a
- * cross product of two near-vertical vectors, which has no component about the
- * vertical), so nothing in the system was estimating the yaw-rate bias -- the one
- * that turns into steady heading drift.
+ * As measurements rather than inputs they carry their own noise and can be gated, and the
+ * gyroscope bias can be estimated. The upstream Mahony filter cannot observe the yaw-rate
+ * bias, which otherwise becomes steady heading drift.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
 #define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
@@ -105,7 +95,7 @@ namespace module::localisation::measurement {
 
     /**
      * @class MeasurementBodyVelocity
-     * @brief Body-fixed linear velocity, from walk-engine odometry or a zero-velocity update.
+     * @brief Body-fixed linear velocity, from odometry or a zero-velocity update.
      *
      *   y = vBb + v,   v ~ N(0, sigma^2 I3)
      *

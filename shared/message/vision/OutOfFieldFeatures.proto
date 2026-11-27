@@ -32,16 +32,13 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Transform.proto";
 
-/// Out-of-field corner features and the map landmarks they were matched against, for one camera
-/// frame. The RoboCup field is symmetric under a 180 degree rotation, so on-field landmarks fit a
-/// pose and its mirror equally well; the asymmetric scenery beyond the field boundary is what breaks
-/// the tie. This is the per-frame working state of that comparison, published for display only --
-/// nothing in the estimator consumes it.
+/// Out-of-field corner features and the map landmarks matched against them for one camera frame,
+/// from FieldLocalisationSRIF's side disambiguator. For display only.
 message OutOfFieldFeature {
     /// What happened to one detected corner this frame. Ordered by precedence: a corner that
     /// qualifies for several is reported as the highest one.
     enum Status {
-        /// Masked out by the carpet classification, so not background scenery. Shown to verify the mask.
+        /// Masked out by the carpet classification
         ON_CARPET = 0;
         /// Out-of-field, but nothing in the map or the candidate pool claimed it
         UNMATCHED = 1;
@@ -50,7 +47,7 @@ message OutOfFieldFeature {
         /// Gated to a landmark but rejected: clutter explains it better, or it lost the
         /// one-to-one assignment to a closer corner
         OUTLIER = 3;
-        /// Associated only under the mirrored pose, i.e. evidence we are on the wrong side
+        /// Associated only under the mirrored pose (wrong-side evidence)
         MIRROR = 4;
         /// Associated to a map landmark at the current pose
         ASSOCIATED = 5;

@@ -50,8 +50,7 @@ namespace module::localisation::measurement {
                                                          const SystemLocalisation& system,
                                                          const Options& options)
         : Measurement(time), map_(map), Tbc_(Tbc), options_(options) {
-        // Exact Hessian is cheap for a 6-dim state and yields the exact
-        // Laplace-approximation posterior sqrt information
+        // Exact Hessian, for the Laplace-approximation posterior
         update_method_ = UpdateMethod::NEWTONTRUSTEIG;
 
         // Gather usable detections
@@ -63,8 +62,7 @@ namespace module::localisation::measurement {
             Eigen::Vector3d ray;
             LandmarkType type;
             if (detection_ray(det, ray, type)) {
-                // Confidence sets how much of this detection's likelihood is the
-                // inlier Gaussian rather than flat clutter (see Options).
+                // Confidence sets the inlier weight
                 const double w =
                     std::clamp(options_.inlier_probability * det.confidence / options_.confidence_reference,
                                1e-3,
@@ -128,27 +126,19 @@ namespace module::localisation::measurement {
         const Eigen::Matrix3d Rfc  = Tfc.rotation_matrix;
         const Eigen::Vector3d rCFf = Tfc.translation_vector;
 
-        // Pose uncertainty inflating each predicted bearing. Bearings are compared in
-        // {f}: the tangent-plane geometry and the yaw term are both natural there.
+        // Bearings are compared in {f}, inflated by the pose uncertainty
         const Eigen::Matrix3d Ppos = P.topLeftCorner<3, 3>();
-        // Yaw is no longer a state element -- the attitude is a quaternion, so the
-        // heading variance is a projection of its 4x4 block onto the field z axis.
-        const double yaw_var = SystemLocalisation::yaw_variance(x, P);
-        const double sigma2  = options_.sigma_angular * options_.sigma_angular;
-        // Pre-gate widened by the yaw uncertainty (see Options::gate_yaw_scale): a
-        // no-op while the belief is tight, and the only thing that lets a recovering
-        // filter re-associate after a fall has turned the robot further than the
-        // nominal gate.
+        const double yaw_var       = SystemLocalisation::yaw_variance(x, P);
+        const double sigma2        = options_.sigma_angular * options_.sigma_angular;
+        // Pre-gate widened by the yaw std, so a belief uncertain after a fall can re-associate
         const double gate_angle =
             std::min(std::max(options_.gate_angle, options_.gate_yaw_scale * std::sqrt(std::max(yaw_var, 0.0))),
                      options_.gate_angle_max);
         const double cos_gate = std::cos(gate_angle);
 
-        // SNN: enumerate all (detection, landmark) pairs of matching type inside the
-        // geometric pre-gate, score each by its surprisal relative to the clutter
-        // crossover, then assign best-scoring pairs first, each detection/landmark at
-        // most once. A negative score means the inlier component explains the pair
-        // better than clutter does.
+        // Surprisal nearest neighbour: score same-type pairs inside the pre-gate by surprisal
+        // minus the clutter crossover (negative = better than clutter), then assign greedily,
+        // each detection and landmark at most once
         struct CandidatePair {
             double score;
             std::size_t det;
@@ -158,9 +148,7 @@ namespace module::localisation::measurement {
         std::vector<CandidatePair> pairs;
         for (std::size_t i = 0; i < candidates_.size(); ++i) {
             const Eigen::Vector3d u_meas_f = Rfc * candidates_[i].ray;
-            // Crossover surprisal: w N(e; S) > (1 - w)/(4 pi). A weak detection has to
-            // fit much better before it is worth associating at all, and ranks below a
-            // confident one at equal residual, which is what stops the stealing.
+            // Surprisal at which w N(e; S) = (1 - w)/(4 pi); weak detections must fit better
             const double w         = candidates_[i].inlier_weight;
             const double crossover = std::log(w) - std::log(1.0 - w) + std::log(4.0 * M_PI);
 
@@ -173,11 +161,10 @@ namespace module::localisation::measurement {
                 }
                 const Eigen::Vector3d u_pred_f = rel / range;
                 if (u_meas_f.dot(u_pred_f) < cos_gate) {
-                    continue;  // Cheap geometric pre-gate: caps how far an association can reach
+                    continue;
                 }
 
-                // Innovation covariance in the tangent plane: bearing noise + camera
-                // position uncertainty across the range + yaw uncertainty.
+                // Tangent-plane innovation covariance: bearing noise + position + yaw
                 const Eigen::Matrix<double, 3, 2> T = tangent_basis(u_pred_f);
                 const Eigen::Vector2d a             = T.transpose() * Eigen::Vector3d::UnitZ().cross(u_pred_f);
                 const Eigen::Matrix2d S             = Eigen::Matrix2d::Identity() * sigma2
@@ -196,7 +183,7 @@ namespace module::localisation::measurement {
         });
 
         std::vector<bool> det_used(candidates_.size(), false);
-        // Landmark usage tracked per type via flat key: type-major index
+        // Flat type-major landmark key
         auto lm_key = [](LandmarkType type, std::size_t j) { return static_cast<std::size_t>(type) * 1000 + j; };
         std::vector<std::size_t> used_landmarks;
         std::vector<const CandidatePair*> chosen;
@@ -229,7 +216,6 @@ namespace module::localisation::measurement {
 
     Eigen::VectorXd MeasurementFieldLandmarks::simulate(const Eigen::VectorXd& x,
                                                         const SystemEstimator& /*system*/) const {
-        // Stack predicted rays (noise-free measurement model)
         Eigen::Matrix<double, 3, Eigen::Dynamic> u_pred = predict_rays<double>(x);
         return Eigen::Map<Eigen::VectorXd>(u_pred.data(), u_pred.size());
     }
@@ -281,27 +267,24 @@ namespace module::localisation::measurement {
         SystemEstimator& system          = dynamic_cast<SystemEstimator&>(system_);
         const GaussianInfo<double> prior = system.density;
 
-        // Iterated re-association (cf. iterative landmark matching): optimise with
-        // the current association, then re-associate at the posterior mean; if the
-        // association set changed, restore the prior and re-run. The starting
-        // association is whatever was set for this density: the constructor's (single
-        // hypothesis) or reassociate()'s (each mixture component, see process()).
+        // Optimise, re-associate at the posterior mean, and re-run from the prior if the
+        // association changed
         for (int iteration = 0; iteration < max_association_iterations_; ++iteration) {
             if (u_meas_.cols() == 0) {
-                system.density = prior;  // Nothing associated; leave the prior untouched
+                system.density = prior;
                 return;
             }
 
             Measurement::update(system);
 
             if (iteration == max_association_iterations_ - 1) {
-                break;  // Iteration budget exhausted
+                break;
             }
 
             std::vector<std::pair<std::size_t, std::size_t>> new_keys =
                 associate(system.density.mean(), system.density.cov());
             if (new_keys == assoc_keys_) {
-                break;  // Association converged (associate() rebuilt the same set)
+                break;  // Converged
             }
             assoc_keys_    = new_keys;
             system.density = prior;

@@ -41,18 +41,11 @@ namespace module::localisation::srif {
         return new SystemLocalisation(*this);
     }
 
-    // Templated dynamics for autodiff. Autonomous: nothing is a known input any more,
-    // so the derivative is the rigid-body kinematics driven by the velocity STATES.
-    //
-    //   d(rBFf)/dt = Rfb*vBb           (Fossen's eta-dot = J(eta)*nu, position half)
-    //   dq/dt      = 0.5*Xi(q)*omegaBb (        ... and the attitude half)
-    //   everything else is a random walk: zero drift, process noise only
-    //
-    // Note there is no Coriolis term in d(vBb)/dt. That would appear if vBb were
-    // driven by measured specific force (a strapdown INS); here the model is simply
-    // that the body-fixed velocity is nearly constant between measurements, which is
-    // exactly why body-fixed is the right frame to carry it in -- a robot walking a
-    // curve holds vBb while its field-frame velocity rotates the whole way round.
+    // Rigid-body kinematics driven by the velocity states (templated for autodiff):
+    //   d(rBFf)/dt = Rfb*vBb
+    //   dq/dt      = 0.5*Xi(q)*omegaBb
+    // Everything else is a random walk. vBb is modelled as nearly constant in the body frame,
+    // so there is no Coriolis term.
     template <typename Scalar>
     static Eigen::VectorX<Scalar> dynamics_localisation_templated(const Eigen::VectorX<Scalar>& x) {
         assert(x.size() == SystemLocalisation::nx);
@@ -66,18 +59,12 @@ namespace module::localisation::srif {
         Eigen::VectorX<Scalar> f(SystemLocalisation::nx);
         f.setZero();
         f.segment(SystemLocalisation::i_pos, 3) = Rfb * vBb;
-        // qdot = 0.5*Xi(q)*omega_b. No singularity anywhere: every entry of Xi is
-        // linear in q, so the toppling robot that used to blow up the roll-pitch-yaw
-        // rate transform at pitch = +-90 deg now integrates like any other attitude.
+        // Xi is linear in q, so there is no singularity at pitch = +-90 deg
         f.segment(SystemLocalisation::i_quat, 4) = Scalar(0.5) * quat_Xi(q) * omegaBb;
-        // vBb, omegaBb, the gyroscope bias and the camera mount bias are all random
-        // walks: zero drift.
         return f;
     }
 
-    // The input is unused: the process model is autonomous, driven by the velocity
-    // states rather than by a twist fed in from outside. The parameter stays because
-    // SystemBase's interface is shared with input-driven systems.
+    // The model is autonomous; u is unused but required by SystemBase.
     Eigen::VectorXd SystemLocalisation::dynamics(double /*t*/,
                                                  const Eigen::VectorXd& x,
                                                  const Eigen::VectorXd& /*u*/,
@@ -103,13 +90,7 @@ namespace module::localisation::srif {
     }
 
     Eigen::VectorXd SystemLocalisation::input(double, const Eigen::VectorXd&) const {
-        // The process model is autonomous. What used to be a known input -- the body
-        // twist finite-differenced from walk-engine odometry, with the gyroscope
-        // substituted for its angular part -- is now two measurements
-        // (MeasurementBodyVelocity, MeasurementGyroscope) of two velocity states. That
-        // is the whole point of carrying the rates: the odometry's noise is modelled
-        // where it belongs instead of being asserted as truth, and the gyroscope's bias
-        // becomes an estimated state rather than a heuristic subtracted up front.
+        // Autonomous: odometry and gyroscope enter as measurements of the velocity states
         return Eigen::VectorXd();
     }
 
@@ -117,9 +98,7 @@ namespace module::localisation::srif {
         // dw ~ N^{-1}(0, LambdaQ/dt), i.e., cov(dw) = Q*dt
         Eigen::VectorXd sigma(nx);
         if (diffusing_) {
-            // The gyroscope and camera-mount biases are properties of the hardware, not
-            // of the posture, so they keep their ordinary (deliberately tiny) PSDs: a
-            // fall is no reason to let a calibration wander.
+            // Hardware biases keep their ordinary PSDs; a fall does not change them
             sigma << params.sigma_pos_xy_disturbed, params.sigma_pos_xy_disturbed, params.sigma_pos_z_disturbed,
                 quaternion_sigma(params.sigma_att_disturbed, params.sigma_yaw_disturbed),
                 Eigen::Vector3d::Constant(params.sigma_vel_disturbed),
@@ -139,10 +118,8 @@ namespace module::localisation::srif {
     }
 
     std::vector<Eigen::Index> SystemLocalisation::process_noise_index() const {
-        // Every state takes process noise. Built from nx rather than written out: the
-        // list silently disagreeing with process_noise_density's dimension is not caught
-        // anywhere, and when the state grew to carry a quaternion the stale eight-entry
-        // literal turned the first non-zero-dt prediction into NaN.
+        // Every state takes process noise; built from nx so it cannot disagree with
+        // process_noise_density's dimension
         std::vector<Eigen::Index> idx(nx);
         std::iota(idx.begin(), idx.end(), Eigen::Index{0});
         return idx;
@@ -166,8 +143,7 @@ namespace module::localisation::srif {
             return invalid;
         }
 
-        // Relative pose of torso(b) w.r.t. torso(a) is already the body-frame increment, so
-        // dividing its translation by dt gives vBb with no rotation into {b} afterwards.
+        // The relative pose is already a body-frame increment
         const Eigen::Vector3d vBb = (Twta.inverse() * Twtb).translation_vector / dt;
         return vBb.allFinite() ? vBb : invalid;
     }
@@ -176,10 +152,7 @@ namespace module::localisation::srif {
         assert(new_density.dim() == nx);
         density = new_density;
         time_   = time;
-        // A reset asserts a single known belief, so it collapses any mixture -- the
-        // old components describe a state we are declaring void (init, injected
-        // kidnap). Recovery of the alternative, if needed, is re-seeded afterwards
-        // (initialise_hypotheses at startup, or spawn_mirror on out-of-field doubt).
+        // Collapses any mixture; callers re-seed hypotheses afterwards if wanted
         components_.clear();
         log_weights_.clear();
         last_rep_mean_ = Eigen::VectorXd();
@@ -197,7 +170,7 @@ namespace module::localisation::srif {
         auto inflate = [&](const GaussianInfo<double>& g) {
             Eigen::MatrixXd P = g.cov();
             P += extra_cov;
-            // Symmetrise before the Cholesky in from_moment, matching mirror_density.
+            // Symmetrise before the Cholesky in from_moment
             P = 0.5 * (P + P.transpose()).eval();
             return GaussianInfo<double>::from_moment(g.mean(), P);
         };
@@ -210,9 +183,6 @@ namespace module::localisation::srif {
             c = inflate(c);
         }
         // With the bank live, `density` is a copy of the representative component
-        // rather than state in its own right, so it is refreshed from the inflated
-        // components instead of being inflated separately. Inflation does not move
-        // any mean, so the representative does not change.
         set_representative();
     }
 
@@ -221,8 +191,7 @@ namespace module::localisation::srif {
             predict(time);
             return;
         }
-        // Rewind the shared clock per component so each predicts over the identical
-        // interval, exactly as process() does.
+        // Rewind the shared clock so each component predicts over the same interval
         const double t0 = time_;
         for (std::size_t i = 0; i < components_.size(); ++i) {
             time_   = t0;
@@ -241,9 +210,7 @@ namespace module::localisation::srif {
             return g;  // Degenerate: leave it for the norm prior to pull back
         }
         mu.segment<4>(SystemLocalisation::i_quat) /= n;
-        // q and -q are the same rotation. Letting the mean wander between the two
-        // hemispheres would make a Gaussian over the components describe a bimodal
-        // thing it cannot represent, so it is kept in w >= 0.
+        // q and -q are the same rotation; keep the mean in the w >= 0 hemisphere
         if (mu(SystemLocalisation::i_quat) < 0.0) {
             mu.segment<4>(SystemLocalisation::i_quat) = -mu.segment<4>(SystemLocalisation::i_quat);
         }
@@ -252,19 +219,15 @@ namespace module::localisation::srif {
 
     void SystemLocalisation::predict(double time) {
         SystemEstimator::predict(time);
-        // Prediction integrates qdot, which leaves the unit sphere at second order
-        // over a step and would otherwise let |q| wander. Only `density` is touched:
-        // predict_all drives this per component with density as its working copy.
+        // Integrating qdot drifts off the unit sphere at second order. Only `density` is
+        // touched; predict_all uses it as the per-component working copy.
         density = project_quaternion(density);
     }
 
     void SystemLocalisation::normalise_quaternion() {
-        // Renormalising the mean is a projection back onto the unit sphere, which
-        // MeasurementQuaternionNorm keeps the belief near but cannot enforce exactly
-        // (it is a soft prior, and prediction pushes off the sphere between updates).
-        // The covariance is left alone: to first order the projection's Jacobian is
-        // the identity on the three attitude directions, and the radial direction is
-        // the one the norm prior owns.
+        // Projects the mean onto the unit sphere; MeasurementQuaternionNorm is only a soft prior.
+        // The covariance is unchanged: to first order the projection is the identity on the
+        // attitude directions.
         if (components_.empty()) {
             density = project_quaternion(density);
             return;
@@ -281,19 +244,9 @@ namespace module::localisation::srif {
 
     Eigen::VectorXd SystemLocalisation::mirror_state(const Eigen::VectorXd& x) {
         assert(x.size() == nx);
-        // 180 deg rotation about the field-centre z axis: premultiplying the pose by
-        // Rz(pi) negates the horizontal position and turns the attitude by pi about
-        // field z, leaving height and the camera-mount bias unchanged. On the
-        // quaternion that premultiplication is qz(pi) (x) q with qz(pi) = (0,0,0,1),
-        // i.e. (w,x,y,z) -> (-z,-y,x,w) -- a signed permutation, so unlike the yaw
-        // offset it used to be it is exactly linear and needs no wrapping.
-        //
-        // The velocity states are untouched, and that is a property of carrying them
-        // body-fixed rather than an oversight: v_b' = (Rz(pi) Rfb)^T Rz(pi) v_f = v_b.
-        // The robot is doing exactly the same thing, just somewhere else on the field.
-        // Field-frame velocity would have needed its horizontal components negated
-        // alongside the position. The gyroscope and camera biases are hardware
-        // properties and are likewise unaffected by where the robot is standing.
+        // Premultiply the pose by Rz(pi) about the field centre: negate x and y, and apply
+        // qz(pi) (x) q, i.e. (w,x,y,z) -> (-z,-y,x,w). Body-fixed velocities, rates and biases
+        // are invariant.
         Eigen::VectorXd y    = x;
         y(0)                 = -x(0);
         y(1)                 = -x(1);
@@ -303,11 +256,7 @@ namespace module::localisation::srif {
 
     GaussianInfo<double> SystemLocalisation::mirror_density(const GaussianInfo<double>& g) {
         assert(g.dim() == nx);
-        // The mirror map is now exactly linear: y = M*x, with M block-diagonal over
-        // (position, quaternion, camera bias). It used to be affine because the yaw
-        // offset pi lived in the constant term; on the quaternion the same rotation
-        // is the signed permutation mirror_quat_map(), which is orthogonal, so
-        // P' = M*P*M^T is exact rather than a small-angle approximation.
+        // The mirror is linear, y = M*x with M orthogonal, so P' = M*P*M^T is exact
         Eigen::MatrixXd M             = Eigen::MatrixXd::Identity(nx, nx);
         M(0, 0)                       = -1.0;
         M(1, 1)                       = -1.0;
@@ -336,8 +285,7 @@ namespace module::localisation::srif {
             initialise_hypotheses();
             return;
         }
-        // Mirror the current leading hypothesis and add it at equal weight to the
-        // leader, so a symmetry flip can be recovered from.
+        // Add the leader's mirror at equal weight
         std::size_t best =
             std::distance(log_weights_.begin(), std::max_element(log_weights_.begin(), log_weights_.end()));
         components_.push_back(mirror_density(components_[best]));
@@ -351,11 +299,8 @@ namespace module::localisation::srif {
         if (components_.size() < 2 || !std::isfinite(log_ratio)) {
             return;  // Nothing to disambiguate, or no usable evidence this frame
         }
-        // Favour the representative -- the pose SideDisambiguator scored as "own" --
-        // by log_ratio. It is the component matching the current density, which under
-        // a near-tie is the hysteresis pick, NOT necessarily the max-weight one, so
-        // match on the mean rather than taking an argmax. With the usual own+mirror
-        // pair this is a shift of the pair; normalise_weights keeps them summing to one.
+        // Favour the representative (the pose SideDisambiguator scored as "own") by log_ratio.
+        // Under a near-tie it is the hysteresis pick, not the argmax, so match on the mean.
         const Eigen::VectorXd rep = density.mean();
         std::size_t rep_idx       = 0;
         double best_dist          = std::numeric_limits<double>::infinity();
@@ -405,10 +350,8 @@ namespace module::localisation::srif {
     }
 
     void SystemLocalisation::merge_components() {
-        // Greedy keep-best merge: components whose means lie within the position and
-        // yaw gates are collapsed, retaining the higher-weight density and summing
-        // their weights (log-sum-exp). Symmetric field hypotheses sit a whole field
-        // apart, so this only fuses genuine duplicates.
+        // Greedy keep-best merge of components within the position and yaw gates, summing
+        // their weights
         bool merged = true;
         while (merged && components_.size() > 1) {
             merged = false;
@@ -417,16 +360,13 @@ namespace module::localisation::srif {
                     Eigen::VectorXd mi = components_[i].mean();
                     Eigen::VectorXd mj = components_[j].mean();
                     double d_pos       = (mi.head<2>() - mj.head<2>()).norm();
-                    // Through heading(), not an element: x(5) was yaw under the old
-                    // roll-pitch-yaw state but is the quaternion's y component now.
-                    double d_yaw = std::abs(std::remainder(heading(mi) - heading(mj), 2.0 * M_PI));
+                    double d_yaw       = std::abs(std::remainder(heading(mi) - heading(mj), 2.0 * M_PI));
                     if (d_pos < hyp.merge_position && d_yaw < hyp.merge_yaw) {
                         std::size_t keep = log_weights_[i] >= log_weights_[j] ? i : j;
                         std::size_t drop = keep == i ? j : i;
                         double a = log_weights_[i], b = log_weights_[j];
                         double m           = std::max(a, b);
                         double combined    = m + std::log(std::exp(a - m) + std::exp(b - m));
-                        components_[keep]  = components_[keep];  // density unchanged (keep-best)
                         log_weights_[keep] = combined;
                         components_.erase(components_.begin() + drop);
                         log_weights_.erase(log_weights_.begin() + drop);
@@ -479,10 +419,8 @@ namespace module::localisation::srif {
     }
 
     void SystemLocalisation::respawn_if_unconfident() {
-        // Once the bank has collapsed to a single hypothesis it can no longer
-        // recover from a symmetry flip. If that lone hypothesis is spatially
-        // uncertain (large horizontal position std), re-seed its mirror so the
-        // symmetry can be re-resolved by future evidence.
+        // A lone hypothesis cannot recover from a symmetry flip; re-seed its mirror while it is
+        // uncertain in position
         if (components_.size() != 1)
             return;
 
@@ -500,12 +438,8 @@ namespace module::localisation::srif {
             return;
         const double max_lw = *std::max_element(log_weights_.begin(), log_weights_.end());
 
-        // Hysteresis on a near-tie: the two symmetric hypotheses sit at 50/50 on
-        // landmark evidence alone and are numerically indistinguishable, so a plain
-        // argmax would swap the reported pose between a side and its mirror on
-        // floating-point noise. Among components within tie_eps of the top weight,
-        // keep the one nearest the outgoing representative; a decisive lead
-        // (out-of-field evidence) exceeds tie_eps and switches cleanly.
+        // Hysteresis: symmetric hypotheses tie on landmark evidence, so among components within
+        // tie_eps of the top weight keep the one nearest the previous representative
         constexpr double tie_eps = 0.5;  ///< Weight lead [nats] needed to unseat the incumbent
         std::size_t best         = 0;
         if (last_rep_mean_.size() == nx) {
@@ -535,20 +469,14 @@ namespace module::localisation::srif {
             return;
         }
 
-        // Multi-hypothesis mode: apply the event to each component through the same
-        // verified predict/update path, rewinding the shared system clock each time
-        // so every component predicts over the identical interval.
+        // Multi-hypothesis mode: apply the event to each component, rewinding the shared clock
         const double t0   = time_;
         Measurement* meas = dynamic_cast<Measurement*>(&event);
 
         for (std::size_t i = 0; i < components_.size(); ++i) {
             time_   = t0;
             density = components_[i];
-            // Re-run any pose-dependent data association against THIS component
-            // before the update, so a hypothesis is scored on its own assignment
-            // rather than the representative's (no-op for measurements without
-            // association). The single-hypothesis path above never calls this, so
-            // its behaviour is byte-for-byte unchanged.
+            // Score each hypothesis on its own data association
             if (meas != nullptr) {
                 meas->reassociate(*this);
             }
@@ -561,8 +489,6 @@ namespace module::localisation::srif {
                 }
             }
         }
-        // time_ is now the event time (set by the last component's predict).
-
         normalise_quaternion();
         normalise_weights();
         merge_components();
@@ -570,10 +496,7 @@ namespace module::localisation::srif {
         respawn_if_unconfident();
         set_representative();
 
-        // Leave the measurement's stored association matching the representative, so
-        // downstream diagnostics (num_associated, the residual overlays) reflect the
-        // pose actually reported rather than whichever component happened to be
-        // processed last.
+        // Leave the stored association matching the reported pose, for diagnostics
         if (meas != nullptr) {
             meas->reassociate(*this);
         }

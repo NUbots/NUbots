@@ -23,20 +23,18 @@ use_gravity: true
 use_kinematic_height: true
 
 # --- How far each sensor is trusted (noise standard deviations) -----------------------------------
-# The values in this file were tuned in NUSim against ground truth (see the README's Tuning section), whose
-# odometry error model is fit to the real K1's. NUSim's vision is cleaner than a real camera's, so sigma_angular and
-# the association gate may need loosening on a real robot.
+# Tuned in NUSim against ground truth (see the README's Tuning section). NUSim's vision is cleaner than a real
+# camera's, so sigma_angular and the association gate may need loosening on a real robot.
 
 gyroscope_sigma: 0.011 # [rad/s] per axis
 
 # Which signal measures the body linear velocity vBb.
 #   HTW_DIFFERENCE - finite difference of consecutive Sensors.Htw. Available on every platform.
-#   SENSORS_VTW    - Sensors.vTw rotated into the torso frame. For platforms whose odometry is a
-#                    real state estimator.
+#   SENSORS_VTW    - Sensors.vTw rotated into the torso frame.
 odometry_velocity_source: SENSORS_VTW
 
-# body linear velocity [m/s] per axis; size it for the source above. Large because the K1's odometry velocity has a
-# scale error and a wandering bias of ~0.1 m/s (and the torso's step-to-step sway), so vision has to carry position
+# body linear velocity [m/s] per axis, for the source above. Large: the K1's odometry velocity has a scale error, a
+# ~0.1 m/s wandering bias and step-to-step sway
 odometry_velocity_sigma: 0.45
 gravity_sigma: 1.1 # accelerometer gravity-direction noise [m/s^2] (TODO: why so large?)
 height_sigma: 0.034 # kinematic torso-height noise [m]

@@ -187,9 +187,7 @@ export class VisionNetwork {
         return {
           uPCc: Vector3.from(landmark.uPCc),
           status,
-          // The emitter fills this in for associated landmarks only, but the field is a plain vec3 on
-          // the wire and so always arrives -- as the zero vector when there was no match, which is not
-          // a ray and would draw a residual line to nowhere. The status is what says it is real.
+          // Only meaningful when associated; otherwise it arrives as the zero vector
           uMatchCc: status === "associated" ? Vector3.from(landmark.uMatchCc) : undefined,
           bearingOnly: landmark.bearingOnly ?? false,
         };

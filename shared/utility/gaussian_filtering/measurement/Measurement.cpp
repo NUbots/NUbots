@@ -123,10 +123,7 @@ namespace utility::gaussian_filtering::measurement {
                 assert(Q.cols() == nx);
                 assert(v.size() == nx);
 
-                // Foreshadowing: If we were doing landmark SLAM with a quasi-Newton method,
-                //                we can purposely introduce negative eigenvalues for newly
-                //                initialised landmarks to force the Hessian and hence
-                //                posterior sqrt information matrix to be approximated correctly.
+                // For SLAM, negative eigenvalues could be introduced here for new landmarks
 
                 // Create cost function with prototype V = cost_func(x, g)
                 auto cost_func = [&](const Eigen::VectorXd& x, Eigen::VectorXd& g) {

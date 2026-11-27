@@ -46,14 +46,9 @@ export interface OutOfFieldModel {
 }
 
 /**
- * The colour key, shared with the offline viewer this was ported from.
- *
- * Read it as a story about one corner: cyan means the detector found usable background scenery that
- * nothing in the map explains yet; steel means it is being tracked towards becoming a landmark;
- * green means it matched the map at the pose we believe; yellow means it matched only the MIRRORED
- * pose, so a screen filling with yellow is the filter being told it is on the wrong side of the
- * field. Red is a corner the evidence rejected, and grey is a corner masked out as carpet rather
- * than background -- drawn faintly only so the mask itself can be checked.
+ * Colour key. Cyan: unexplained background corner. Steel: candidate track. Green: matched at the
+ * current pose. Yellow: matched only at the mirrored pose (wrong-side evidence). Red: rejected.
+ * Grey (faint): masked as carpet.
  */
 const featureColour: Record<OutOfFieldFeatureStatus, Vector4> = {
   "on-carpet": new Vector4(0.35, 0.35, 0.35, 0.6),
@@ -75,12 +70,8 @@ const landmarkColour: Record<OutOfFieldLandmarkStatus, Vector4> = {
 };
 
 /**
- * Angular radius of each marker, in radians.
- *
- * These are angles rather than pixel sizes because everything here is drawn as a cone about a camera
- * ray, so the marker follows the lens distortion the same way the image content does. Kept small and
- * differentiated by status so overlapping markers stay readable: an associated corner sits inside
- * its landmark's ring rather than on top of it.
+ * Angular radius of each marker [rad]. Drawn as cones about camera rays so markers follow the lens
+ * distortion.
  */
 const featureRadius: Record<OutOfFieldFeatureStatus, number> = {
   "on-carpet": 0.0015,
@@ -111,16 +102,14 @@ export class OutOfFieldViewModel {
   }
 
   readonly outOfField = group(() => {
-    // One pass over each list, landmarks first so the corner markers draw on top of the prediction
-    // rings they sit inside.
+    // Landmarks first so corner markers draw on top
     const Hcc = this.Hcc;
     return { children: [...this.landmarkObjects(Hcc), ...this.featureObjects(Hcc)] };
   });
 
   /**
-   * Rays were captured against the frame's own Hcw, which is a frame or two behind the image now on
-   * screen. Re-expressing them in the current camera lands the markers on the pixels they were
-   * measured from rather than trailing behind a turning head.
+   * Rays are relative to the measurement's Hcw, which may lag the displayed image; re-express them
+   * in the current camera.
    */
   private get Hcc(): THREE.Matrix4 {
     const Hwc = new THREE.Matrix4().copy(this.model.Hcw.toThree()).invert();
@@ -145,7 +134,6 @@ export class OutOfFieldViewModel {
   private landmarkObjects(Hcc: THREE.Matrix4): THREE.Object3D[] {
     const objects: THREE.Object3D[] = [];
     for (const landmark of this.model.landmarks) {
-      // A landmark that does not project into this image has nothing to mark.
       if (landmark.status === "not-in-view") {
         continue;
       }
@@ -156,14 +144,11 @@ export class OutOfFieldViewModel {
           axis,
           radius: Math.cos(landmarkRadius),
           color: colour,
-          // A bearing-only landmark was mapped at an assumed range because it never accrued usable
-          // parallax, so its predicted position is far softer than a triangulated one. Drawing it
-          // thinner keeps that visible rather than letting it claim the same confidence.
+          // Bearing-only landmarks are drawn thinner, as their position is far less certain
           lineWidth: landmark.bearingOnly ? 2 : 4,
         }),
       );
-      // The residual: how far the corner that claimed this landmark sits from where the current pose
-      // predicted it. Long lines mean the pose is drifting, even while the matches still hold.
+      // Residual from the prediction to the matched corner
       if (landmark.uMatchCc) {
         objects.push(
           this.lineProjection.planeSegment({

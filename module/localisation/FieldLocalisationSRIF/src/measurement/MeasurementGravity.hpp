@@ -26,7 +26,7 @@
  */
 
 /**
- * @file MeasurementGravity.h
+ * @file MeasurementGravity.hpp
  * @brief Accelerometer gravity-direction measurement of torso roll/pitch.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTGRAVITY_HPP
@@ -44,12 +44,8 @@
  * @class MeasurementGravity
  * @brief Quasi-static accelerometer measurement of the gravity direction.
  *
- * Under the quasi-static assumption the accelerometer measures the specific
- * force in the torso frame:
- *   y = Rfb(Theta)^T * [0, 0, g] + v,   v ~ N(0, sigma^2 I3)
- * which informs the roll and pitch states. The noise should be inflated
- * relative to the sensor datasheet to account for walking-induced
- * accelerations violating the quasi-static assumption.
+ *   y = Rfb^T * [0, 0, g] + v,   v ~ N(0, sigma^2 I3)
+ * Informs roll and pitch. sigma is inflated above the datasheet to cover walking accelerations.
  */
 
 namespace module::localisation::measurement {

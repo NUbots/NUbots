@@ -215,9 +215,7 @@ namespace utility::gaussian_filtering {
      */
     inline Eigen::Vector4d rot2quat(const Eigen::Matrix3d& R) {
         const Eigen::Quaterniond q(R);
-        // Eigen stores (x, y, z, w); the sign is free, so pick w >= 0 for a canonical
-        // representative -- q and -q are the same rotation, and letting the mean drift
-        // between the two hemispheres would make a Gaussian over the components meaningless.
+        // Eigen stores (x, y, z, w); q and -q are the same rotation, so pick w >= 0
         Eigen::Vector4d v(q.w(), q.x(), q.y(), q.z());
         if (v(0) < 0.0) {
             v = -v;

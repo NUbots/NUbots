@@ -50,9 +50,7 @@ namespace module::localisation::srif {
     /**
      * @brief Physical measurements of a RoboCup humanoid soccer field, in metres
      *
-     * Field names and defaults mirror
-     * NUbots/module/support/configuration/SoccerConfig/data/config/FieldDescription.yaml and
-     * NUbots/shared/message/support/FieldDescription.proto (message FieldDescription.FieldDimensions).
+     * Names and defaults mirror FieldDescription.FieldDimensions (FieldDescription.proto).
      */
     struct FieldDimensions {
         // Values come from FieldDescription.yaml
@@ -116,9 +114,7 @@ namespace module::localisation::srif {
         /**
          * @brief Squared distance from a ground-plane point to the nearest painted line.
          *
-         * Analytic minimum over all line segments and circles. Working with the
-         * squared distance keeps the function smooth through zero (points exactly
-         * on a line), which matters for derivative-based optimisation.
+         * Analytic minimum over all segments and circles; squared so it is smooth through zero.
          *
          * @param p Point (x, y) in the field frame {f}
          * @return Squared distance to the nearest line centreline [m^2]

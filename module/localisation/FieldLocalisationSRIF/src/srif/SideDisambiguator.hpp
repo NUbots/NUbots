@@ -26,17 +26,12 @@
  */
 
 /**
- * @file SideDisambiguator.h
+ * @file SideDisambiguator.hpp
  * @brief Out-of-field landmark map and field-side disambiguation.
  *
- * The field is symmetric under a 180 degree rotation about its centre, so
- * on-field landmarks cannot tell own-half from opponent-half. The background
- * scenery (walls, posters, furniture, ceiling structure) is not symmetric.
- * This module builds a persistent map of out-of-field corner landmarks online
- * and continuously compares how well the current pose estimate and its 180
- * degree mirror explain the corners seen now. A decisive, sustained preference
- * for the mirror indicates the filter is on the wrong side (mid-game kidnap /
- * wrong-side convergence) and requests a flip.
+ * On-field landmarks cannot tell a pose from its 180 deg mirror, but the background can. This
+ * builds a map of out-of-field corner landmarks online and compares how well the pose and its
+ * mirror explain the corners in view. Sustained preference for the mirror requests a flip.
  *
  * Pipeline per video frame:
  *  1. FAST corners + ORB descriptors, classified out-of-field (OutOfFieldDetector).
@@ -47,19 +42,13 @@
  *  3. Robust side score at the pose and at its mirror: sum of
  *     log(inlier density / clutter density) over accepted associations.
  *     The difference accumulates into a forgetting log-likelihood ratio.
- *  4. Map maintenance (only while the pose is confident and the side is not
- *     in doubt): unmatched corners spawn bearing candidates; re-observed
- *     candidates with enough parallax are triangulated by linear least squares
- *     into 3D landmarks in {f}. Dynamic objects (crowd, robots, handlers) are
- *     rejected by a static-consistency test: the bounded observation window
- *     must fit a single static point (normalised triangulation residual),
- *     and landmarks that are repeatedly predicted visible but not re-observed
- *     are pruned.
+ *  4. Map maintenance (only while the pose is confident and the side is not in doubt):
+ *     unmatched corners spawn bearing candidates, which are triangulated into landmarks in {f}
+ *     once they have parallax. Dynamic objects fail a static-consistency test; landmarks
+ *     repeatedly predicted visible but not seen are pruned.
  *
- * The map is only trustworthy if it was anchored while the filter was on the
- * correct side (e.g. built early in the game, when the start-in-own-half prior
- * guarantees the side). Map building therefore freezes whenever the accumulated
- * evidence starts favouring the mirror.
+ * The map is only valid if built on the correct side, so building freezes whenever the
+ * evidence favours the mirror.
  */
 #ifndef MODULE_LOCALISATION_SRIF_SIDEDISAMBIGUATOR_HPP
 #define MODULE_LOCALISATION_SRIF_SIDEDISAMBIGUATOR_HPP
@@ -91,147 +80,83 @@ namespace module::localisation::srif {
          */
         struct Options {
             // --- SNN association ---
-            double sigma_angular =
-                0.05;  ///< Corner bearing noise std dev [rad] (~3 deg: pixel noise + unmodelled pose drift)
-            double clutter_density = 5.0;        ///< Effective clutter density [features/steradian] (physical is ~55;
-                                                 ///< lower widens acceptance so the true side survives estimator drift)
-            double pos_std_floor = 0.6;          ///< Floor on the camera position std used for gating [m]: the filter
-                                                 ///< is known to be optimistic, and a too-tight gate starves the TRUE
-                                                 ///< side of matches whenever the estimate drifts (both sides get the
-                                                 ///< same widening, so the comparison stays fair)
+            double sigma_angular   = 0.05;       ///< Corner bearing noise std dev [rad]
+            double clutter_density = 5.0;        ///< Clutter density [features/sr]; below physical (~55) to
+                                                 ///< tolerate estimator drift
+            double pos_std_floor = 0.6;          ///< Floor on the camera position std used for gating [m]; the
+                                                 ///< filter is optimistic. Applied to both sides alike.
             int max_descriptor_distance = 64;    ///< ORB Hamming gate for an association pair
-            double pre_gate_angle       = 0.20;  ///< Cheap dot-product pre-gate before surprisal evaluation [rad]
-            int visible_margin          = 30;  ///< Landmark counts as predicted-visible this far inside the image [px]
-            double max_tangent_sigma    = 0.16;  ///< Skip landmarks whose predicted bearing sigma exceeds this [rad]:
-                                                 ///< a bearing-only landmark viewed far from its anchor spans an
-                                                 ///< acceptance corridor that aliases; it carries no side information
-                                                 ///< at this baseline and must neither match nor count as missed
+            double pre_gate_angle       = 0.20;  ///< Dot-product pre-gate before surprisal [rad]
+            int visible_margin          = 30;    ///< Predicted-visible only this far inside the image [px]
+            double max_tangent_sigma    = 0.16;  ///< Skip landmarks whose predicted bearing sigma exceeds
+                                                 ///< this [rad]; they cannot discriminate the mirror
 
             // --- candidate spawning and promotion ---
-            double cand_gate_angle =
-                0.10;  ///< Candidate re-match gate on ray angle in {f} [rad] (rotation cancels; covers pose jitter)
-            int cand_max_descriptor_distance = 50;   ///< Stricter Hamming gate for growing a candidate track
-            int min_obs                      = 4;    ///< Observations needed to attempt promotion
-            double min_time_span             = 1.0;  ///< Track must span at least this long [s]
-            double min_parallax =
-                0.10;  ///< Max pairwise ray angle must exceed this [rad] (~6 deg; keeps depth above pose noise)
+            double cand_gate_angle           = 0.10;  ///< Candidate re-match gate on ray angle in {f} [rad]
+            int cand_max_descriptor_distance = 50;    ///< Hamming gate for growing a candidate track
+            int min_obs                      = 4;     ///< Observations needed to attempt promotion
+            double min_time_span             = 1.0;   ///< Track must span at least this long [s]
+            double min_parallax              = 0.10;  ///< Max pairwise ray angle must exceed this [rad]
 
             // --- far (bearing-only) landmarks ---
-            // Most background structure never accrues reliable parallax (pose jitter
-            // is the same order as the true parallax), yet its bearing alone fully
-            // discriminates the 180 deg mirror. Directionally tight tracks therefore
-            // promote as bearing-only landmarks at an assumed range with a large
-            // radial variance; the SNN tangent-plane covariance handles the missing
-            // depth, and later parallax upgrades them to proper points.
-            int far_promote_obs          = 6;     ///< Observations needed for a bearing-only promotion
-            double far_promote_time_span = 2.0;   ///< ... spanning at least this long [s]
-            double far_max_spread        = 0.08;  ///< RMS angle about the mean bearing must stay below this [rad]
-            double assumed_range         = 6.0;   ///< Nominal range of a bearing-only landmark [m]
-            double cand_max_age          = 3.0;   ///< Drop candidates unmatched for this long [s]
-            std::size_t max_candidates   = 600;   ///< Candidate pool cap (oldest dropped first)
-            double max_elevation =
-                50.0 * M_PI / 180.0;  ///< Don't track features above this elevation [rad]:
-                                      ///< overhead lighting grids are near-symmetric under the field's
-                                      ///< 180 deg rotation and would feed the mirror hypothesis
+            // Most background never gains reliable parallax, but its bearing alone discriminates
+            // the mirror. Tight tracks promote at an assumed range with a large radial variance and
+            // upgrade to points if parallax later accrues.
+            int far_promote_obs          = 6;                    ///< Observations needed for a bearing-only promotion
+            double far_promote_time_span = 2.0;                  ///< ... spanning at least this long [s]
+            double far_max_spread        = 0.08;                 ///< Max RMS angle about the mean bearing [rad]
+            double assumed_range         = 6.0;                  ///< Nominal range of a bearing-only landmark [m]
+            double cand_max_age          = 3.0;                  ///< Drop candidates unmatched for this long [s]
+            std::size_t max_candidates   = 600;                  ///< Candidate pool cap
+            double max_elevation         = 50.0 * M_PI / 180.0;  ///< Ignore features above this elevation
+                                                                 ///< [rad]; ceiling lights are near-symmetric
 
-            // --- landmark maintenance / outlier (dynamic object) rejection ---
-            double sigma_static =
-                0.04;  ///< Angular residual scale for the static-consistency test [rad] (incl. pose drift)
-            double static_chi2_mean   = 9.0;   ///< Reject when the mean normalised squared residual exceeds this
-            int obs_window            = 12;    ///< Bounded per-landmark observation window (re-triangulated each hit)
-            int max_miss_streak       = 20;    ///< Prune after this many predicted-visible frames without a hit
-            std::size_t max_landmarks = 500;   ///< Map cap (lowest-scoring evicted first, see evict_half_life)
-            double evict_half_life    = 20.0;  ///< Staleness that halves a landmark's cap score [s].
-                                               ///< The map sits pinned at max_landmarks for most of a run, so the
-                                               ///< cap -- not the miss rule -- is the dominant eviction path, and
-                                               ///< ranking on lifetime hits alone let a landmark that earned its
-                                               ///< hits early outrank a fresh one that is matching NOW. Scoring
-                                               ///< hits/(1 + age/half_life) keeps established landmarks (50 hits
-                                               ///< unseen 100 s still beats 5 hits seen now) while letting truly
-                                               ///< dead ones fall out. Not pure recency on purpose: a landmark
-                                               ///< behind the robot is not failing, and the mirror test needs
-                                               ///< coverage in every direction, so staleness must decay influence
-                                               ///< rather than decide eviction outright.
-            double min_range = 0.8;            ///< Reject triangulations closer than this to the camera [m]
-            double max_range = 40.0;           ///< Reject triangulations farther than this [m]
-            double min_height_on_carpet =
-                1.5;                     ///< Points above the carpet in xy must be at least this high [m] (ceiling)
-            double field_margin = 0.30;  ///< Carpet margin matching the detector's classification [m]
+            // --- landmark maintenance / dynamic object rejection ---
+            double sigma_static       = 0.04;    ///< Angular residual scale for the static-consistency test [rad]
+            double static_chi2_mean   = 9.0;     ///< Reject when the mean normalised squared residual exceeds this
+            int obs_window            = 12;      ///< Per-landmark observation window (re-triangulated each hit)
+            int max_miss_streak       = 20;      ///< Prune after this many predicted-visible frames without a hit
+            std::size_t max_landmarks = 500;     ///< Map cap; lowest hits/(1 + age/evict_half_life) evicted first
+            double evict_half_life    = 20.0;    ///< Staleness that halves a landmark's cap score [s]. Decays
+                                                 ///< rather than evicts, so landmarks behind the robot survive.
+            double min_range            = 0.8;   ///< Reject triangulations closer than this [m]
+            double max_range            = 40.0;  ///< Reject triangulations farther than this [m]
+            double min_height_on_carpet = 1.5;   ///< Points over the carpet must be at least this high [m]
+            double field_margin         = 0.30;  ///< Carpet margin matching the detector's classification [m]
 
             // --- map building gate ---
-            double max_pos_std = 0.5;   ///< Build the map only when horizontal position std is below this [m]
-            double freeze_llr  = -1.0;  ///< Freeze map building when the accumulated LLR drops below this
-            double rebuild_llr = 5.0;   ///< After deep doubt (LLR past the flip threshold), building stays
-                                        ///< frozen until the LLR earns its way back above this: forgetting
-                                        ///< decays the LLR towards zero on its own, and decay is not
-                                        ///< evidence, so it must never re-arm building on a doubtful side
+            double max_pos_std = 0.5;   ///< Build the map only below this horizontal position std [m]
+            double freeze_llr  = -1.0;  ///< Freeze map building below this LLR
+            double rebuild_llr = 5.0;   ///< After deep doubt, stay frozen until the LLR exceeds this;
+                                        ///< forgetting alone is not evidence
 
             // --- side decision ---
-            double forgetting  = 0.98;          ///< Per-frame forgetting factor on the accumulated LLR
-            double llr_clamp   = 40.0;          ///< Clamp on the accumulated LLR [nats]
-            double delta_clamp = 6.0;           ///< Clamp on the per-frame LLR increment [nats]: one frame of
-                                                ///< aliased matches must not swing the decision by itself
-            double max_yaw_rate = 0.6;          ///< Don't accumulate LLR while turning faster than this [rad/s]:
-                                                ///< motion blur and fresh viewpoints starve the true side of matches
-            double flip_threshold      = 25.0;  ///< Request a flip when the LLR is below the negative of this [nats]
-            int flip_consecutive       = 10;    ///< ... for at least this many consecutive scored frames
-            std::size_t min_flip_assoc = 3;     ///< ... each backed by at least this many mirror-side associations
-                                             ///< (a sparse map must not flip on one or two symmetric-structure matches)
-            double flip_dominance = 2.0;  ///< ... and the mirror associations must outnumber own by this factor:
-                                          ///< a degraded own pose weakening its own matches is "no decision",
-                                          ///< not evidence for the other side
-            double flip_coverage = 0.5;   ///< ... and the own hypothesis must have at least this fraction of the
-                                          ///< mirror's predicted-visible landmarks: when own looks at unmapped
-                                          ///< territory the comparison is structurally unfair, so no decision
+            double forgetting          = 0.98;  ///< Per-frame forgetting factor on the LLR
+            double llr_clamp           = 40.0;  ///< Clamp on the LLR [nats]
+            double delta_clamp         = 6.0;   ///< Clamp on the per-frame LLR increment [nats]
+            double max_yaw_rate        = 0.6;   ///< No LLR accumulation while turning faster than this [rad/s]
+            double flip_threshold      = 25.0;  ///< Request a flip when the LLR is below -flip_threshold [nats]
+            int flip_consecutive       = 10;    ///< ... for this many consecutive scored frames
+            std::size_t min_flip_assoc = 3;     ///< ... each with at least this many mirror associations
+            double flip_dominance      = 2.0;   ///< ... outnumbering own associations by this factor
+            double flip_coverage       = 0.5;   ///< ... with own predicting at least this fraction of the
+                                                ///< mirror's visible landmarks
 
             // --- blind-own flip escape ---
-            // When the wrong-side pose stares at territory the map never covered,
-            // the coverage condition above can never become fair and the fair path
-            // never fires. The escape accepts much deeper, longer evidence instead:
-            // the LLR must sit near its clamp while the own pose is essentially
-            // blind (at most one, likely aliased, association) and the mirror keeps
-            // matching real structure. On the recorded false-flip episode (own
-            // merely degraded, not mirrored) own retains associations on most
-            // frames, so the blind streak leaks and never accumulates (max 7 vs
-            // threshold 40); on a genuine mirror lock it reaches 40 within ~2 s.
-            double flip_blind_llr = 35.0;          ///< Blind path needs the LLR at or below the negative of this [nats]
-            std::size_t flip_blind_own_max   = 1;  ///< ... with at most this many own-side associations
-            std::size_t flip_blind_min_assoc = 2;  ///< ... and at least this many mirror-side associations
-            int flip_blind_consecutive       = 40;  ///< ... over this many (leaky) scored frames
-
-            // The escape's premise is that a pose staring at unmapped territory while
-            // the mirror matches must BE the mirror. That is only sound if the robot
-            // has not simply turned to face somewhere it never mapped. Against a
-            // background that is itself 180 deg symmetric -- the webots stadium, both
-            // ends alike -- turning around in place and being mirrored produce the
-            // SAME observation, exactly, and the escape resolves the tie towards
-            // "mirrored" by construction. It did so on data4_webots at t = 65.8 s
-            // after the robot physically turned 164.6 deg, flipping a pose that was
-            // correct to 2 cm and costing the rest of the run.
-            //
-            // The escape therefore requires that the own hypothesis PREDICTS something
-            // and fails to match it. A hypothesis that predicts nothing cannot be
-            // contradicted by anything: vis_own == 0 says the map does not cover where
-            // own is looking, which is what happens every time the robot turns to face
-            // new scenery, and says nothing whatever about which side it is on.
-            // Scoring it as mirror evidence is the reasoning error.
-            //
-            // A net-180 deg turn gate is kept as a second line: after a turn the map
-            // may still predict a handful of landmarks near the edge of view, and a
-            // turn of about half a revolution is precisely the motion that makes a
-            // symmetric background look mirrored. The odometry knows about that turn
-            // and a flip asserts a 180 deg jump contradicting it, so "no decision" is
-            // the honest answer. A kidnapped robot is carried, not turned under its own
-            // gyroscope, so a genuine displacement still gets through; the fair path
-            // above is untouched either way.
-            std::size_t flip_blind_min_visible_own = 1;  ///< Own must predict at least this many landmarks in view
-            double blind_turn_tolerance = 60.0 * M_PI / 180.0;  ///< Refuse the escape within this of a 180 deg net
-                                                                ///< turn [rad]
+            // When the wrong-side pose faces unmapped territory flip_coverage can never be met. The
+            // escape instead requires a near-clamped LLR, an essentially blind own pose that still
+            // predicts landmarks (so it is contradicted, not merely uncovered), and no net ~180 deg
+            // turn, which makes a symmetric background look mirrored.
+            double flip_blind_llr                  = 35.0;      ///< LLR at or below -flip_blind_llr [nats]
+            std::size_t flip_blind_own_max         = 1;         ///< ... at most this many own associations
+            std::size_t flip_blind_min_assoc       = 2;         ///< ... at least this many mirror associations
+            int flip_blind_consecutive             = 40;        ///< ... over this many (leaky) scored frames
+            std::size_t flip_blind_min_visible_own = 1;         ///< Own must predict at least this many landmarks
+            double blind_turn_tolerance = 60.0 * M_PI / 180.0;  ///< Refuse within this of a 180 deg net turn [rad]
             std::size_t blind_match_min_assoc = 10;   ///< Own counts as confirmed at this many associations ...
             double blind_match_fraction       = 0.1;  ///< ... and at least this fraction of its predicted-visible
 
-            double flip_cooldown = 5.0;  ///< Freeze map building for this long after a flip [s], so the
-                                         ///< estimator can re-converge before new observations are trusted
+            double flip_cooldown = 5.0;  ///< Freeze map building for this long after a flip [s]
         };
 
         /**
@@ -245,8 +170,7 @@ namespace module::localisation::srif {
             int hits         = 0;    ///< Number of associated observations
             int miss_streak  = 0;    ///< Consecutive predicted-visible frames without association
             double last_seen = 0.0;  ///< Time of the last associated observation [s]
-            int last_status  = 0;    ///< LandmarkStatus this frame (travels with the landmark, so it
-                                     ///< stays correct across map compaction; for the 3D view)
+            int last_status  = 0;    ///< LandmarkStatus this frame
 
             /// @brief One observation used for (re-)triangulation.
             struct Obs {
@@ -311,16 +235,14 @@ namespace module::localisation::srif {
             std::size_t n_candidates        = 0;    ///< Live bearing candidates
             double score_own                = 0.0;  ///< Robust side score at the current pose [nats]
             double score_mirror             = 0.0;  ///< Robust side score at the mirrored pose [nats]
-            double side_delta               = 0.0;  ///< Clamped, turn-gated own-minus-mirror increment this frame
-                                                    ///< [nats]; 0 on an unscored frame. This is the per-frame
-                                                    ///< evidence to fold into a hypothesis bank (SystemLocalisation::
-            ///< add_side_log_evidence) -- the same quantity that drives the LLR.
-            double llr              = 0.0;    ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
-            bool map_frozen         = false;  ///< Map building was frozen this frame
-            bool flip_requested     = false;  ///< The evidence says the filter is on the wrong side
-            double turn_since_match = 0.0;    ///< Net heading change since the own side was last confirmed [rad]
-            bool blind_turn_blocked = false;  ///< The blind escape was refused because that turn explains
-                                              ///< the view
+            double side_delta               = 0.0;  ///< Clamped own-minus-mirror LLR increment [nats]; 0 if
+                                                    ///< unscored. Input to add_side_log_evidence.
+            double llr              = 0.0;          ///< Accumulated own-vs-mirror log-likelihood ratio [nats]
+            bool map_frozen         = false;        ///< Map building was frozen this frame
+            bool flip_requested     = false;        ///< The evidence says the filter is on the wrong side
+            double turn_since_match = 0.0;          ///< Net heading change since the own side was last confirmed [rad]
+            bool blind_turn_blocked = false;        ///< The blind escape was refused because that turn explains
+                                                    ///< the view
             std::vector<OutOfFieldFeature> features;   ///< The detected corners (for display)
             std::vector<int> feature_status;           ///< Per detected corner: a FeatureStatus
             std::vector<LandmarkView> landmark_views;  ///< Map landmarks projected into the image at the current pose
@@ -368,9 +290,7 @@ namespace module::localisation::srif {
         /**
          * @brief Notify that the filter state was mirrored (flip applied or kidnap injected).
          *
-         * Negates the accumulated LLR (evidence for the old "own" side is evidence
-         * against the new one), resets the flip streak and freezes map building for
-         * the cooldown period.
+         * Negates the LLR, resets the flip streak and freezes map building for flip_cooldown.
          *
          * @param t Time the flip was applied [s]
          */
@@ -422,8 +342,7 @@ namespace module::localisation::srif {
             std::size_t landmark;         ///< Index into landmarks_
             Eigen::Vector2d px;           ///< Predicted pixel position
             bool well_inside;             ///< Predicted at least visible_margin inside the image border
-            bool ambiguous;               ///< Predicted bearing too smeared to discriminate (max_tangent_sigma):
-                                          ///< excluded from matching, from scoring and from the miss count
+            bool ambiguous;               ///< Bearing too smeared to discriminate (max_tangent_sigma)
             bool associated     = false;  ///< Claimed by a corner in the one-to-one assignment
             std::size_t feature = 0;      ///< The claiming corner (associated only)
         };
@@ -436,9 +355,7 @@ namespace module::localisation::srif {
          * @param yaw_std Yaw std [rad] (inflates the predictive covariance)
          * @param score Output: robust side score, sum of log(inlier/clutter) density ratios
          * @param predictions Output: every landmark that projects into the image, with its outcome
-         * @param feature_outlier Output (per feature): the corner was gated to at least one landmark
-         *                       but ended up unassociated -- rejected as clutter or beaten in the
-         *                       one-to-one assignment
+         * @param feature_outlier Output (per feature): gated to a landmark but left unassociated
          */
         std::vector<Association> associate(const std::vector<OutOfFieldFeature>& features,
                                            const Pose<double>& Tfc,
@@ -470,10 +387,8 @@ namespace module::localisation::srif {
         /**
          * @brief Fit a bearing-only landmark from an observation window.
          *
-         * Places the landmark at the assumed range along the mean bearing from the
-         * mean camera position, with a large radial variance standing in for the
-         * unknown depth. Fails if the bearings are not directionally tight (jittery
-         * track: dynamic object or association hops).
+         * Placed at assumed_range along the mean bearing with a large radial variance. Fails if
+         * the bearings are not tight.
          */
         bool fit_far(const std::vector<Landmark::Obs>& obs, Eigen::Vector3d& rPFf, Eigen::Matrix3d& P) const;
 

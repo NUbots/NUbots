@@ -79,47 +79,38 @@ namespace module::localisation::srif {
      * Field frame {f}: origin at centre of field on the ground plane, z up,
      * consistent with the NUbots Hfw convention.
      *
-     * Pose is held in {f} and velocity in {b}, the Fossen (eta, nu) convention:
-     * the velocity states are a random walk, and every velocity measurement
-     * arrives body-fixed, so h(x) is the identity rather than Rfb^T.
+     * Pose is held in {f} and velocity in {b} (Fossen's eta, nu), so body-fixed velocity
+     * measurements have h(x) = identity. There is no known input: the gyroscope and odometry
+     * are measurements of omegaBb and vBb.
      *
-     * Nothing is a known input. The gyroscope and the walk-engine odometry are
-     * measurements of omegaBb and vBb (MeasurementGyroscope,
-     * MeasurementBodyVelocity), and the gyroscope bias is estimated rather than
-     * calibrated.
-     *
-     * The process model is the kinematics plus a random walk on the rates:
+     * Process model:
      *
      *   d(rBFf)/dt = Rfb*vBb,   dq/dt = 0.5*Xi(q)*omegaBb,
      *   d(vBb)/dt  = dw_v,      d(omegaBb)/dt = dw_omega,
      *   d(bGyro)/dt = dw_b,     d(deltaC)/dt  = dw_c
      *
-     * The camera bias models a constant error in the kinematic torso-to-camera
-     * chain. It is a random-walk state applied on the camera side of the
-     * extrinsic transform by vision measurements: Tfc = Tfb(x) * Tbc * R(deltaC)
+     * The camera bias models a constant error in the torso-to-camera chain, applied as
+     * Tfc = Tfb(x) * Tbc * R(deltaC).
      */
     class SystemLocalisation : public SystemEstimator {
     public:
         /**
-         * @brief Process noise and input handling parameters.
+         * @brief Process noise parameters.
          */
         struct Parameters {
-            // The pose PSDs are a floor against collapse; growth comes from integrating
-            // the velocity states.
+            // Pose PSDs are a floor; growth comes from integrating the velocity states
             double sigma_pos_xy = 0.02;  ///< Position process noise PSD, horizontal [m/sqrt(s)]
             double sigma_pos_z  = 0.01;  ///< Position process noise PSD, vertical [m/sqrt(s)]
             double sigma_att    = 0.01;  ///< Roll/pitch process noise PSD [rad/sqrt(s)]
             double sigma_yaw    = 0.01;  ///< Yaw process noise PSD [rad/sqrt(s)]
 
-            // How fast the body-fixed rates may change between measurements; the
-            // dominant process noise.
+            // How fast the body-fixed rates may change; the dominant process noise
             double sigma_vel       = 0.35;  ///< Body linear velocity process noise PSD [m/s/sqrt(s)]
             double sigma_omega     = 1.50;  ///< Body angular velocity process noise PSD [rad/s/sqrt(s)]
             double sigma_gyro_bias = 2e-4;  ///< Gyroscope bias random walk PSD [rad/s/sqrt(s)]: thermal drift only
             double sigma_cam_bias  = 3e-4;  ///< Camera mount bias process noise PSD [rad/sqrt(s)]
 
-            // PSDs the belief decays towards while the robot is not upright, where the
-            // walk-engine odometry no longer describes real motion.
+            // PSDs while the robot is not upright
             double sigma_vel_disturbed    = 1.00;  ///< Body linear velocity PSD while not upright [m/s/sqrt(s)]
             double sigma_omega_disturbed  = 3.00;  ///< Body angular velocity PSD while not upright [rad/s/sqrt(s)]
             double sigma_pos_xy_disturbed = 0.20;  ///< Horizontal position PSD while not upright [m/sqrt(s)]
@@ -139,11 +130,9 @@ namespace module::localisation::srif {
         //   13..15  bGyro        gyroscope bias in {b} [rad/s]
         //   16..17  camera mount bias (roll, pitch) [rad]
         //
-        // Attitude is a quaternion so the state stays valid through a topple, where an
-        // Euler parameterisation is singular. quat2rot normalises, so |q| is invisible
-        // to every geometric model and MeasurementQuaternionNorm supplies the only
-        // information along it. No index means "heading": see attitude_tangent() for
-        // expressing a 3-DOF attitude quantity in these four components.
+        // A quaternion stays valid through a topple, where Euler angles are singular.
+        // quat2rot normalises, so only MeasurementQuaternionNorm informs |q|. No index is the
+        // heading; use heading() and attitude_tangent().
         static constexpr Eigen::Index nx = 18;  ///< State dimension
 
         static constexpr Eigen::Index i_pos       = 0;   ///< First position index
@@ -323,14 +312,9 @@ namespace module::localisation::srif {
         /**
          * @brief Declare the robot's posture for this step.
          *
-         * A fall has two consequences with different lifetimes, so they are separate
-         * switches. Odometry velocity is meaningless for the whole time the robot is not
-         * upright, and is suppressed by the caller, which substitutes a zero-velocity
-         * update for MeasurementBodyVelocity. This method carries the other half: the
-         * process noise switches to the `*Disturbed` PSDs for params.disturbed_window
-         * seconds from the start of the episode, then stands down.
-         *
-         * A mode, not an event: the caller sets it every frame from the posture.
+         * While not upright the process noise uses the `*_disturbed` PSDs for the first
+         * params.disturbed_window seconds. Odometry suppression is the caller's job. Set
+         * every frame.
          *
          * @param upright True when the robot is upright
          * @param disturbed_for Seconds since the current non-upright episode began (ignored
@@ -343,9 +327,7 @@ namespace module::localisation::srif {
         /**
          * @brief Add variance to the belief without moving its mean.
          *
-         * Used on recovery from a fall, where the pre-fall mean is still the best
-         * estimate but its confidence is not. Applies to every live hypothesis as well
-         * as to the representative density.
+         * Applies to every live hypothesis. Used on fall recovery.
          *
          * @param extra_var Variance to add per state element (length nx, non-negative)
          */
@@ -401,9 +383,7 @@ namespace module::localisation::srif {
         /**
          * @brief Advance the belief to @p time with no measurement.
          *
-         * Prediction otherwise only happens inside Event::process, so a frame with no
-         * usable measurement would advance neither the state nor the clock. Predicts
-         * every hypothesis when the bank is active.
+         * Predicts every hypothesis when the bank is active.
          *
          * @param time Time to advance the belief to [s]
          */
@@ -414,17 +394,10 @@ namespace module::localisation::srif {
         // ---------------------------------------------------------------------
         // Hypothesis bank (multi-hypothesis field-symmetry handling)
         //
-        // The RoboCup field has a 180 deg rotational symmetry about its centre, so a
-        // pose and its mirror produce identical landmark observations and a single
-        // Gaussian cannot represent the belief while the symmetry is unbroken. The
-        // belief is instead a weighted Gaussian mixture (cf. B-Human, Rofer et al.):
-        // each component is an independent pose density run through the same
-        // predict/update machinery, weighted by the Laplace log-evidence each
-        // measurement reports (Measurement::log_evidence()).
-        //
-        // With no hypotheses active (components_ empty) the estimator is exactly a
-        // single-Gaussian filter over `density`. Once the bank is active, `density`
-        // tracks the maximum-weight component so single-Gaussian accessors keep working.
+        // The field's 180 deg symmetry makes a pose and its mirror indistinguishable to
+        // landmarks, so the belief may be a Gaussian mixture weighted by each measurement's
+        // Laplace log-evidence. With components_ empty this is a single-Gaussian filter over
+        // `density`; otherwise `density` is the representative component.
         // ---------------------------------------------------------------------
 
         /**
@@ -444,9 +417,7 @@ namespace module::localisation::srif {
         /**
          * @brief Activate the mixture with the current density and its 180 deg mirror.
          *
-         * Seeds two equally weighted hypotheses so a symmetry ambiguity present at
-         * initialisation can be resolved by later asymmetric evidence; the wrong mirror
-         * is down-weighted and pruned automatically.
+         * Two equal weights; later asymmetric evidence prunes the wrong one.
          */
         void initialise_hypotheses();
 
@@ -459,11 +430,7 @@ namespace module::localisation::srif {
         /**
          * @brief Fold one frame of out-of-field side evidence into the mixture weights.
          *
-         * On-field landmarks fit both symmetric hypotheses equally well, so only the
-         * asymmetric background scenery can separate them. @p log_ratio (SideDisambiguator's
-         * clamped own-minus-mirror score, FrameResult::side_delta) is added to the
-         * representative component's log-weight: a sustained positive ratio collapses the
-         * mirror, a negative one hands leadership to it.
+         * @p log_ratio (FrameResult::side_delta) is added to the representative's log-weight.
          *
          * No-op unless at least two hypotheses are live.
          *
@@ -474,11 +441,8 @@ namespace module::localisation::srif {
         /**
          * @brief Process an event across every active hypothesis.
          *
-         * For each component the shared system clock is rewound and the event applied
-         * through the ordinary single-Gaussian path, with measurement events also
-         * accumulating their Laplace log-evidence into the component weight. The mixture
-         * is then normalised, merged, pruned, respawned if it has collapsed to a single
-         * uncertain component, and `density` set to the maximum-weight component.
+         * Applies the event to each component, adds measurement log-evidence to its weight,
+         * then normalises, merges, prunes, respawns and picks the representative.
          *
          * With no active hypotheses this is exactly `event.process(*this)`.
          *
@@ -519,8 +483,6 @@ namespace module::localisation::srif {
         static GaussianInfo<double> mirror_density(const GaussianInfo<double>& g);
 
     protected:
-        // No input buffer: the process model is autonomous, and every would-be input is
-        // a measurement of the corresponding state.
         bool diffusing_ = false;  ///< Elevated fall PSDs in force (bounded window, see set_posture)
 
         std::vector<GaussianInfo<double>> components_;  ///< Mixture components (empty => single-hypothesis)

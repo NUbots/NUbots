@@ -29,9 +29,7 @@
  * @file FieldMapFromDescription.hpp
  * @brief Build a FieldMap/FieldDimensions from a NUbots message::support::FieldDescription.
  *
- * This is kept separate from FieldMap.hpp so the filter core (FieldMap and the measurement/system
- * headers that include it) stays free of the message library: only code that actually has a
- * FieldDescription to hand pulls in the protobuf dependency by including this header.
+ * Separate from FieldMap.hpp to keep the filter core free of the message library.
  */
 #ifndef MODULE_LOCALISATION_SRIF_FIELDMAPFROMDESCRIPTION_HPP
 #define MODULE_LOCALISATION_SRIF_FIELDMAPFROMDESCRIPTION_HPP
@@ -45,9 +43,7 @@ namespace module::localisation::srif {
     /**
      * @brief FieldDimensions from a NUbots FieldDescription message.
      *
-     * Maps message::support::FieldDescription::FieldDimensions (snake_case, metres) onto the
-     * estimator's FieldDimensions. Fields the map does not use (goalpost cross-section, crossbar,
-     * net, etc.) are ignored.
+     * Fields the map does not use (goalpost cross-section, crossbar, net, etc.) are ignored.
      */
     inline FieldDimensions field_dimensions(const message::support::FieldDescription& fd) {
         FieldDimensions dims;

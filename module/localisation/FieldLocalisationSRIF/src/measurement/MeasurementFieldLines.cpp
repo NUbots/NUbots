@@ -49,10 +49,8 @@ namespace module::localisation::measurement {
         : Measurement(time), map_(map), Tbc_(Tbc), options_(options) {
         update_method_ = UpdateMethod::NEWTONTRUSTEIG;
 
-        // Select usable rays at the prior mean: downward-looking with a bounded
-        // ground projection range, subsampled to the point budget. Fixing the
-        // selection here keeps the term count of the cost constant during the
-        // optimisation.
+        // Select downward rays within range at the prior mean, subsampled; fixed here so the cost
+        // keeps a constant term count
         const Eigen::VectorXd x_prior = system.density.mean();
         Pose<double> Tbias(SystemLocalisation::camera_bias_rotation<double>(x_prior), Eigen::Vector3d::Zero());
         Pose<double> Tfc            = SystemLocalisation::field_pose<double>(x_prior) * Tbc_ * Tbias;

@@ -80,26 +80,25 @@ namespace module::localisation::measurement {
          * @brief Association and noise options.
          */
         struct Options {
-            double sigma_angular =
-                0.25;  ///< Inlier ray angular noise std dev [rad] (total per-frame error incl. systematic)
-            double gate_angle = 0.35;  ///< Max association residual angle [rad] (~20 deg)
+            double sigma_angular = 0.25;  ///< Inlier ray angular noise std dev [rad]
+            double gate_angle    = 0.35;  ///< Max association residual angle [rad]
 
             /// Yaw std devs the pre-gate widens by, so an uncertain belief can re-associate
             double gate_yaw_scale = 2.0;
-            double gate_angle_max = 1.0;  ///< Ceiling on the widened pre-gate [rad] (~57 deg)
+            double gate_angle_max = 1.0;  ///< Ceiling on the widened pre-gate [rad]
 
             double min_confidence     = 0.5;  ///< Reject detections below this confidence outright
             double inlier_probability = 0.7;  ///< Inlier mixture weight at confidence_reference
 
             double confidence_reference   = 0.7;   ///< Confidence that maps to inlier_probability
-            double max_inlier_probability = 0.95;  ///< Cap: no detection is ever treated as certain
+            double max_inlier_probability = 0.95;  ///< Cap on the inlier weight
         };
 
         /**
          * @brief Construct and associate a landmark measurement.
          * @param time Event time [s]
          * @param sample Vision sample containing YOLO detections (rays in {c})
-         * @param Tbc Camera pose w.r.t. torso (from kinematics; Tbc = Htw * Hcw^{-1} at capture time)
+         * @param Tbc Camera pose w.r.t. torso at capture time
          * @param map Field landmark map
          * @param system System whose prior mean is used for data association
          * @param options Association and noise options
@@ -152,8 +151,7 @@ namespace module::localisation::measurement {
         /**
          * @brief Re-associate the detections against the system's current pose.
          *
-         * Used by the hypothesis bank so each mixture component is scored against the
-         * landmark assignment implied by its own pose rather than a shared one.
+         * Used by the hypothesis bank so each component is scored on its own association.
          */
         void reassociate(const SystemEstimator& system) override {
             assoc_keys_ = associate(system.density.mean(), system.density.cov());
@@ -185,9 +183,8 @@ namespace module::localisation::measurement {
         /**
          * @brief (Re)build the associated pairs from the stored candidates at the given state.
          *
-         * Surprisal nearest neighbour: pairs are ranked by how much better the inlier
-         * component explains them than the uniform clutter component, so ranking
-         * accounts for bearing sensitivity and detection confidence as well as angle.
+         * Surprisal nearest neighbour, ranked by how much better the inlier component explains
+         * a pair than clutter.
          *
          * @param x State to predict the landmarks at
          * @param P State covariance, inflating each predicted bearing by the pose uncertainty

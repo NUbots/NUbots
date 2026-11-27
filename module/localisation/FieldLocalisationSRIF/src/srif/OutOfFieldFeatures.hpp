@@ -26,16 +26,10 @@
  */
 
 /**
- * @file OutOfFieldFeatures.h
+ * @file OutOfFieldFeatures.hpp
  * @brief FAST corner detection and out-of-field classification for side disambiguation.
  *
- * The RoboCup field is symmetric under a 180 degree rotation about its centre, so
- * on-field landmarks cannot distinguish a pose from its mirror. The scenery beyond
- * the field boundary (walls, posters, furniture, spectators) is not symmetric, so
- * bearings to persistent out-of-field corner features carry exactly the information
- * the field landmarks lack.
- *
- * This module extracts those features from a camera frame:
+ * Extracts per frame:
  *  - FAST corners on the grayscale image (strongest max_features kept),
  *  - an ORB descriptor per corner (oriented BRIEF, matchable across frames),
  *  - a unit ray in the camera frame {c} per corner (utility::vision::unproject_pixel),
@@ -43,9 +37,8 @@
  *    a ray is out-of-field when it points at/above the horizon or its ground-plane
  *    intersection lands outside the field carpet (boundary + border strip + margin).
  *
- * The classification is invariant to the 180 degree field symmetry: the carpet
- * region of the image is the same under a pose and its mirror, so a wrong-side
- * estimate still masks the field correctly.
+ * The classification is invariant to the field symmetry, so a wrong-side estimate still masks
+ * the carpet correctly.
  */
 #ifndef MODULE_LOCALISATION_SRIF_OUTOFFIELDFEATURES_HPP
 #define MODULE_LOCALISATION_SRIF_OUTOFFIELDFEATURES_HPP

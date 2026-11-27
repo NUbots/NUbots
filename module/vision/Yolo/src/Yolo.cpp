@@ -313,7 +313,7 @@ namespace module::vision {
 
                     i.rIWw = rIWw;
 
-                    // Bounding box centre in pixel coordinates, used by FieldLocalisationSRIF
+                    // Bounding box centre in pixel coordinates
                     i.pixel_centre =
                         Eigen::Vector2d(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height / 2.0);
 

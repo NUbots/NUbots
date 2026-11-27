@@ -27,7 +27,7 @@
 
 /**
  * @file MeasurementQuaternionNorm.hpp
- * @brief Unit-norm pseudo-measurement pinning the redundant quaternion DOF.
+ * @brief Unit-norm pseudo-measurement on the attitude quaternion.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTQUATERNIONNORM_HPP
 #define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTQUATERNIONNORM_HPP
@@ -51,20 +51,9 @@ namespace module::localisation::measurement {
      * @class MeasurementQuaternionNorm
      * @brief Pseudo-measurement asserting |q| = 1.
      *
-     * The attitude is four numbers for three degrees of freedom, and quat2rot
-     * normalises, so no bearing, gravity or height measurement can see |q| at all.
-     * Left alone that makes the MAP Hessian singular along the radial direction --
-     * the Newton update has a flat direction to wander down, and the covariance
-     * there means nothing.
-     *
-     * This supplies the missing information and nothing else. It is deliberately
-     * *soft*: a hard constraint would need the estimator to carry a manifold, which
-     * is not what the information-form Gaussian underneath is. sigma is small enough
-     * to hold the belief against a frame of prediction and large enough not to
-     * dominate the Newton step, and because the radial direction is orthogonal to
-     * the three attitude directions, tightening or loosening it does not move the
-     * attitude estimate -- only how far off the sphere the mean is allowed to drift
-     * between the renormalisations in SystemLocalisation::normalise_quaternion.
+     * quat2rot normalises, so no other measurement informs |q| and the MAP Hessian would be
+     * singular along it. Soft rather than a hard constraint; the radial direction is
+     * orthogonal to the attitude, so sigma does not move the attitude estimate.
      */
     class MeasurementQuaternionNorm : public Measurement {
     public:

@@ -58,9 +58,7 @@ namespace utility::vision {
 
         template <typename T>
         inline T theta(const T& r, const T& f) {
-            // Past r = 2f this model has no solution (it is the horizon of an equisolid lens), and asin
-            // would be nan. Saturating there keeps a pixel outside the lens circle mapping to a ray that
-            // a bounds check can reject, rather than poisoning everything downstream with nan.
+            // Saturate past r = 2f (the equisolid horizon) instead of returning nan
             return T(2.0) * std::asin(std::clamp(r / (T(2.0) * f), T(-1.0), T(1.0)));
         }
     }  // namespace equisolid
@@ -183,8 +181,7 @@ namespace utility::vision {
         const Eigen::Matrix<T, 2, 1>& dimensions) {
 
         const T f = lens.focal_length;
-        // A ray that has been rotated into the camera frame is only unit length to within rounding, so
-        // clamp before acos rather than let a component a few ulp outside [-1, 1] produce nan
+        // Clamp so rounding outside [-1, 1] cannot produce nan
         const T x          = std::clamp(T(ray.x()), T(-1), T(1));
         const T theta      = std::acos(x);
         const T rsin_theta = T(1) / std::sqrt(T(1) - x * x);
@@ -260,11 +257,8 @@ namespace utility::vision {
      * @brief Projects a unit vector into a pixel coordinate for a width-normalised lens.
      *
      * @details
-     *  project() works in whatever units the lens parameters are expressed in. The lens carried on a
-     *  message::input::Image is normalised by the image width, so its natural output is a width-normalised
-     *  pixel and its natural `dimensions` are {1, height/width}. Callers that hold real pixels (image
-     *  processing, drawing onto a frame) want neither. This does that conversion in one place: pass the
-     *  message's lens and the image dimensions in pixels, get a pixel back.
+     *  The lens on message::input::Image is normalised by image width; this converts to and from
+     *  real pixels.
      *
      * @tparam T the scalar type used for calculations and storage (normally one of float or double)
      *

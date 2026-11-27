@@ -65,9 +65,8 @@ namespace module::localisation::srif {
         : SideDisambiguator(lens, dimensions, dims, Options{}) {}
 
     bool SideDisambiguator::is_background_point(const Eigen::Vector3d& rPFf) const {
-        // Plausible static background: beyond the carpet in plan view, or overhead
-        // structure (ceiling lights/trusses above the field are static and useful).
-        // Reject underground or absurdly high solutions outright.
+        // Static background: beyond the carpet in plan view, or overhead. Reject underground or
+        // implausibly high solutions.
         if (rPFf.z() < -1.0 || rPFf.z() > 15.0) {
             return false;
         }
@@ -101,9 +100,8 @@ namespace module::localisation::srif {
         }
         rPFf = A.ldlt().solve(b);
 
-        // Static-consistency test: every observation must point at the solved point
-        // to within the angular residual scale. Dynamic objects (crowd, robots)
-        // cannot satisfy this once there is parallax in the window.
+        // Static-consistency test: every observation must point at the solved point. Dynamic
+        // objects fail this once the window has parallax.
         const double sigma2  = options.sigma_static * options.sigma_static;
         double chi2          = 0.0;
         Eigen::Matrix3d info = Eigen::Matrix3d::Identity() * (1.0 / (options.max_range * options.max_range));
@@ -178,10 +176,8 @@ namespace module::localisation::srif {
         const double eff_pos_std   = std::max(pos_std, options.pos_std_floor);
         const Eigen::Matrix3d Pcam = Eigen::Matrix3d::Identity() * eff_pos_std * eff_pos_std;
 
-        // Predict every landmark into this camera and precompute its predictive
-        // density in the ray tangent plane. Predictions that project into the image
-        // are all reported (the visualiser draws them); the ambiguous ones simply
-        // take no part in matching or scoring.
+        // Predict every landmark into this camera with its tangent-plane predictive density. All
+        // in-image predictions are reported; ambiguous ones are not matched or scored.
         struct Predicted {
             Eigen::Vector3d uFf;            ///< Predicted unit ray in {f}
             Eigen::Matrix<double, 3, 2> T;  ///< Tangent basis at the predicted ray
@@ -212,19 +208,14 @@ namespace module::localisation::srif {
             pr.uFf = uFf;
             pr.T   = tangent_basis(uFf);
 
-            // Innovation covariance in the tangent plane: bearing noise + landmark
-            // and camera position uncertainty projected across the range + camera
-            // yaw uncertainty (rotation about field-up).
+            // Tangent-plane innovation covariance: bearing noise + landmark and camera position + yaw
             const Eigen::Vector2d a = pr.T.transpose() * Eigen::Vector3d::UnitZ().cross(uFf);
             Eigen::Matrix2d S       = Eigen::Matrix2d::Identity() * (options.sigma_angular * options.sigma_angular)
                                 + pr.T.transpose() * (lm.P + Pcam) * pr.T / (range * range)
                                 + yaw_std * yaw_std * a * a.transpose();
 
-            // A bearing-only landmark viewed far from its anchor smears into a long
-            // thin acceptance corridor (its radial depth variance leaks into the
-            // tangent plane). Such a prediction cannot discriminate anything at
-            // this baseline: exclude the landmark from matching rather than let
-            // corridor matches alias, and don't count it as predicted-visible either.
+            // A bearing-only landmark far from its anchor smears into a long thin corridor that cannot
+            // discriminate; exclude it from matching and from predicted-visible.
             const double tr_S = S.trace();
             const double dS   = std::sqrt(std::max(0.25 * tr_S * tr_S - S.determinant(), 0.0));
 
@@ -242,10 +233,8 @@ namespace module::localisation::srif {
             predictions.push_back(out);
         }
 
-        // Surprisal of every gated (feature, landmark) pair. The clutter hypothesis
-        // (uniform density over direction space) sets the acceptance threshold: an
-        // association is only worth making if the predictive density at the residual
-        // beats the clutter density.
+        // Surprisal of every gated (feature, landmark) pair; accepted only if it beats the uniform
+        // clutter density.
         struct Pair {
             double surprisal;
             std::size_t f;
@@ -266,10 +255,7 @@ namespace module::localisation::srif {
                     cv::norm(landmarks_[predictions[k].landmark].descriptor, features[i].descriptor, cv::NORM_HAMMING));
                 if (dist > options.max_descriptor_distance)
                     continue;
-                // Past both gates this corner is a plausible sighting of this
-                // landmark; if it still ends the frame unassociated it was rejected
-                // on the evidence, which is worth telling the visualiser apart from
-                // a corner nothing ever proposed a match for.
+                // Plausible sighting; if still unassociated it was rejected on the evidence
                 feature_outlier[i]      = 1;
                 const Eigen::Vector2d e = pr.T.transpose() * (u_meas_f - pr.uFf);
                 const double s          = 0.5 * e.dot(pr.Sinv * e) + pr.half_log_det_2pi_S;
@@ -307,10 +293,8 @@ namespace module::localisation::srif {
         const Eigen::Vector3d rCFf = Tfc.translation_vector;
         const double cos_gate      = std::cos(options.cand_gate_angle);
 
-        // Gated (feature, candidate) pairs ranked by descriptor distance, matched
-        // greedily one-to-one. The geometric gate compares against the candidate's
-        // most recent bearing (no depth yet, so a generous angular gate stands in
-        // for a proper prediction).
+        // Gated (feature, candidate) pairs, matched greedily by descriptor distance. The gate uses
+        // the candidate's latest bearing.
         struct Pair {
             int dist;
             std::size_t f;
@@ -375,9 +359,8 @@ namespace module::localisation::srif {
                     max_parallax =
                         std::max(max_parallax, std::acos(std::clamp(cand.obs[a].uFf.dot(cand.obs[b2].uFf), -1.0, 1.0)));
             if (max_parallax < options.min_parallax) {
-                // No usable depth. If the track is long, old and directionally
-                // tight, promote it as a bearing-only landmark: bearing alone
-                // discriminates the mirror. Jittery tracks are dropped as dynamic.
+                // No usable depth: promote a long, old, directionally tight track as bearing-only. Jittery
+                // tracks are dropped as dynamic.
                 if (cand.obs.size() >= static_cast<std::size_t>(options.far_promote_obs)
                     && cand.obs.back().t - cand.obs.front().t >= options.far_promote_time_span) {
                     Eigen::Vector3d rPFf;
@@ -462,9 +445,7 @@ namespace module::localisation::srif {
             candidates_.push_back(std::move(cand));
         }
 
-        // Cap the candidate pool. Established tracks (more observations) outrank
-        // fresh single-observation spawns, so the cap churns the spawn pool rather
-        // than evicting tracks that are accumulating parallax.
+        // Cap the candidate pool, evicting fresh spawns before established tracks
         if (candidates_.size() > options.max_candidates) {
             std::sort(candidates_.begin(), candidates_.end(), [](const Candidate& a, const Candidate& b) {
                 if (a.obs.size() != b.obs.size())
@@ -504,9 +485,8 @@ namespace module::localisation::srif {
         std::vector<Association> assoc_mirror =
             associate(features, TfcMirror, pos_std, yaw_std, res.score_mirror, pred_mirror, outlier_mirror);
 
-        // Landmarks predicted comfortably inside the image (and able to discriminate)
-        // are what makes a frame worth scoring; the unassociated ones feed the
-        // miss-streak pruning below.
+        // Discriminating landmarks well inside the image make a frame worth scoring; unassociated
+        // ones feed the miss-streak pruning.
         std::vector<std::size_t> miss_own;
         std::size_t vis_own = 0, vis_mirror = 0;
         for (const Prediction& p : pred_own) {
@@ -525,10 +505,8 @@ namespace module::localisation::srif {
         res.n_visible_own       = vis_own;
         res.n_visible_mirror    = vis_mirror;
 
-        // Per-corner status for the visualiser, in order of increasing precedence:
-        // a corner rejected under one pose but associated under the other reads as
-        // associated. Mirror-only matches are exactly the wrong-side evidence the
-        // LLR accumulates, so they get their own colour rather than hiding.
+        // Per-corner status, in increasing precedence. Mirror-only matches are the wrong-side
+        // evidence, so they get their own colour.
         for (std::size_t i = 0; i < features.size(); ++i) {
             if (features[i].out_of_field && (outlier_own[i] || outlier_mirror[i])) {
                 res.feature_status[i] = FEATURE_OUTLIER;
@@ -543,11 +521,8 @@ namespace module::localisation::srif {
         res.n_outlier = static_cast<std::size_t>(
             std::count(res.feature_status.begin(), res.feature_status.end(), static_cast<int>(FEATURE_OUTLIER)));
 
-        // Projected map landmarks for the visualiser. Statuses are as they stand
-        // after association; the maintenance pass below upgrades any that it culls.
-        // The status is also stamped on the landmark itself so the 3D view can
-        // colour the whole map: stored there it survives the compaction below,
-        // which a landmarks_-indexed side table would not.
+        // Projected landmarks for the visualiser, as of association; maintenance may upgrade them
+        // to culled. Stamped on the landmark so it survives compaction.
         for (Landmark& lm : landmarks_) {
             lm.last_status = LANDMARK_NOT_IN_VIEW;
         }
@@ -572,11 +547,8 @@ namespace module::localisation::srif {
             res.landmark_views.push_back(lv);
         }
 
-        // Accumulate the side evidence whenever the map could have discriminated
-        // (some landmark was predicted visible under either hypothesis) and the
-        // view is trustworthy (not mid-turn: motion blur and a freshly-panned
-        // viewpoint starve the true side of matches without saying anything about
-        // which side is right).
+        // Accumulate evidence when some landmark was predicted visible and the robot is not
+        // mid-turn (blur and a fresh viewpoint starve the true side of matches).
         const bool scored_frame = vis_own + vis_mirror > 0 && yaw_rate_abs < options.max_yaw_rate;
         if (scored_frame) {
             const double delta =
@@ -593,12 +565,8 @@ namespace module::localisation::srif {
         else if (llr_ >= options.rebuild_llr)
             doubt_ = false;
 
-        // A flip needs sustained, substantive and DOMINANT mirror evidence: the LLR
-        // must sit below the threshold, each streak frame must carry enough
-        // mirror-side associations that a couple of matches to symmetric structure
-        // cannot flip a barely-covered map, and the mirror must clearly outnumber
-        // the own side (a degraded own pose is "no decision", not mirror evidence).
-        // Unscored frames leave the streak untouched.
+        // A flip needs the LLR below threshold, enough mirror associations each streak frame, and
+        // the mirror clearly outnumbering the own side. Unscored frames leave the streak untouched.
         if (scored_frame) {
             if (llr_ <= -options.flip_threshold && res.n_associated_mirror >= options.min_flip_assoc
                 && static_cast<double>(res.n_associated_mirror)
@@ -613,12 +581,8 @@ namespace module::localisation::srif {
                 flip_streak_--;  // Still in doubt, frame unqualifying: leak, don't reset
             }
 
-            // Remember where the robot was pointing the last time the map actually
-            // confirmed the own side. That is the reference the turn gate below
-            // measures against, so it deliberately needs a healthy match rather than
-            // any match at all: during a turn the association count decays through
-            // small non-zero values, and taking the last of those as the reference
-            // would measure the turn from halfway through it.
+            // Heading at the last healthy own-side match, the reference for the turn gate. A healthy
+            // match is required because the count decays through small values during a turn.
             const bool own_confirmed =
                 vis_own > 0
                 && res.n_associated >= std::max(options.blind_match_min_assoc,
@@ -629,10 +593,8 @@ namespace module::localisation::srif {
                 have_own_match_       = true;
             }
 
-            // Net heading change since then. A flip asserts a 180 deg discontinuity;
-            // if the robot has already turned by about that much under its own
-            // gyroscope, the mirror-looking view is what the turn predicts and the
-            // out-of-field evidence cannot separate the two (see Options).
+            // If the robot has already turned ~180 deg, the mirror-looking view is expected and the
+            // evidence cannot separate the two (see Options).
             const double turn    = have_own_match_ ? std::remainder(heading - heading_at_own_match_, 2.0 * M_PI) : 0.0;
             res.turn_since_match = turn;
             const bool turn_explains_mirror =
@@ -651,9 +613,7 @@ namespace module::localisation::srif {
             }
             else if (llr_ <= -options.flip_blind_llr
                      && (turn_explains_mirror || vis_own < options.flip_blind_min_visible_own)) {
-                // Refused because the comparison is not a comparison: hold the streak
-                // rather than leaking it, so a robot that turns back to mapped
-                // territory neither flips nor re-earns the evidence from scratch.
+                // Hold the streak rather than decay it
                 res.blind_turn_blocked = true;
             }
             else if (llr_ > -options.flip_threshold) {
@@ -667,9 +627,8 @@ namespace module::localisation::srif {
                 flip_streak_ >= options.flip_consecutive || blind_streak_ >= options.flip_blind_consecutive;
         }
 
-        // Map maintenance. Frozen while the pose is uncertain, the side is in
-        // doubt, or a flip just happened, so a wrong-side excursion cannot poison
-        // the map.
+        // Map maintenance, frozen while the pose is uncertain, the side is in doubt or a flip just
+        // happened
         const bool frozen = pos_std > options.max_pos_std || llr_ < options.freeze_llr || doubt_ || res.flip_requested
                             || t < map_freeze_until_;
         res.map_frozen = frozen;
@@ -682,9 +641,8 @@ namespace module::localisation::srif {
                     res.landmark_views[view_of_landmark[idx]].status = status;
             };
 
-            // Hits: extend the observation window and re-triangulate. A landmark
-            // that stops fitting a static point (someone who stood still and then
-            // moved) fails the consistency test and is culled.
+            // Hits extend the observation window and re-triangulate; a point that stops fitting is
+            // culled
             for (const Association& a : assoc_own) {
                 feature_used[a.feature] = true;
                 Landmark& lm            = landmarks_[a.landmark];

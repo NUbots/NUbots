@@ -26,7 +26,7 @@
  */
 
 /**
- * @file MeasurementKinematicHeight.h
+ * @file MeasurementKinematicHeight.hpp
  * @brief Forward-kinematic torso height pseudo-measurement.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTKINEMATICHEIGHT_HPP
@@ -41,10 +41,8 @@
  * @class MeasurementKinematicHeight
  * @brief Torso height above the ground plane from forward kinematics.
  *
- * The support-leg kinematic chain gives the torso height above the ground.
- * Since the field frame origin lies on the ground plane,
  *   y = x_z + v,   v ~ N(0, sigma^2)
- * This anchors the otherwise weakly observable z state.
+ * Anchors the otherwise weakly observable z state.
  */
 
 namespace module::localisation::measurement {

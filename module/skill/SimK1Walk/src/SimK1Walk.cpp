@@ -412,8 +412,7 @@ namespace module::skill {
                         << joint_vel_stream.str() << ']' << " cmd_q=[" << cmd_q_stream.str() << ']';
                     log<DEBUG>(out.str());
                 }
-                // Re-emit on a command change too: velocity_target is what Overview and
-                // RobotCommunication report as the walk command.
+                // Also on a command change, since Overview reports velocity_target
                 if (int(state) != last_walk_state || cmd != last_walk_command) {
                     emit(std::make_unique<WalkState>(state, cmd));
                     last_walk_state   = int(state);

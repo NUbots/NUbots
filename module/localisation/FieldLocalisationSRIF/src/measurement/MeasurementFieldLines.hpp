@@ -26,7 +26,7 @@
  */
 
 /**
- * @file MeasurementFieldLines.h
+ * @file MeasurementFieldLines.hpp
  * @brief Field-line point measurement against the analytic field line map.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTFIELDLINES_HPP
@@ -55,15 +55,9 @@
  *   log p = sum_j logsumexp( log(w_in) + logN(d_j; 0, sigma_j^2),
  *                            log(1 - w_in) + log p_clutter )
  *
- * where d_j is the distance to the nearest line and sigma_j grows with the
- * projection range (grazing rays are noisier). This is the map-matching
- * approach of Lauer et al. ("Calculating the Perfect Match", RoboCup 2006)
- * and the NUbots field-line distance map, expressed as a proper likelihood
- * inside the MAP/Laplace framework.
- *
- * Rays whose ground intersection is invalid (upward or grazing) at the prior
- * mean are excluded once at construction so the cost surface keeps a fixed
- * term count during optimisation.
+ * where d_j is the distance to the nearest line and sigma_j grows with range (Lauer et al.,
+ * "Calculating the Perfect Match", 2006). Rays without a valid ground intersection at the prior
+ * mean are excluded at construction.
  */
 
 namespace module::localisation::measurement {

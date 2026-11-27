@@ -49,11 +49,7 @@ using utility::gaussian_filtering::gaussian::GaussianInfo;
 
 namespace {
 
-    /// @brief State vector from a pose in roll-pitch-yaw plus camera-mount bias.
-    ///
-    /// The state carries (w, x, y, z) at i_quat, so a test can no longer write an attitude by
-    /// streaming three Euler angles into the vector. This wraps the conversion so the tests keep
-    /// reading in roll/pitch/yaw, which is what they are actually about.
+    /// @brief State vector from roll-pitch-yaw, position and camera-mount bias.
     Eigen::VectorXd make_state(double x,
                                double y,
                                double z,
@@ -79,8 +75,7 @@ namespace {
         return make_state(1.5, -0.8, 0.44, 0.0, 0.0, 0.3);
     }
 
-    /// A state moving at a given body-fixed twist. The twist is part of the state now, not an
-    /// input buffer -- that is the whole point of the velocity states.
+    /// @brief A state moving at a given body-fixed twist.
     Eigen::VectorXd moving_state(const Eigen::Vector3d& v, const Eigen::Vector3d& w = Eigen::Vector3d::Zero()) {
         Eigen::VectorXd x                         = nominal_state();
         x.segment<3>(SystemLocalisation::i_vel)   = v;
@@ -110,9 +105,7 @@ SCENARIO("The quaternion attitude state round-trips through roll-pitch-yaw", "[s
     }
 
     GIVEN("An attitude at the gimbal lock a forward fall passes through") {
-        // Under roll-pitch-yaw this is the singular point, and passing through it landed the state
-        // on the alias (roll+180, 180-pitch, yaw+180) -- the same rotation, so the geometry kept
-        // working, but every consumer reading x(5) as heading was 180 deg out from then on.
+        // Singular under roll-pitch-yaw; must not land on the alias (roll+180, 180-pitch, yaw+180)
         const Eigen::VectorXd x = make_state(0.0, 0.0, 0.2, 0.0, 0.5 * M_PI, 0.7);
 
         THEN("the state is finite and its rotation matrix is orthonormal") {
@@ -125,9 +118,8 @@ SCENARIO("The quaternion attitude state round-trips through roll-pitch-yaw", "[s
 
 SCENARIO("Attitude covariance maps the quaternion block onto the field axes", "[slam][localisation]") {
     GIVEN("An identity attitude with a known tangent-space uncertainty") {
-        // dq = 0.5*Xi*dtheta, so a tangent std of s is a component std of s/2. Building the
-        // covariance forwards from the tangent means the answer is known independently of the
-        // inverse mapping under test.
+        // dq = 0.5*Xi*dtheta, so a tangent std of s is a component std of s/2. Built forwards so
+        // the expected value is independent of the mapping under test.
         const Eigen::VectorXd x  = make_state(0.0, 0.0, 0.44, 0.0, 0.0, 0.0);
         const double sigma_roll  = 0.03;
         const double sigma_pitch = 0.07;
@@ -140,8 +132,7 @@ SCENARIO("Attitude covariance maps the quaternion block onto the field axes", "[
         P.block<4, 4>(SystemLocalisation::i_quat, SystemLocalisation::i_quat) = J * Sig * J.transpose();
 
         THEN("the reported per-axis std devs are exactly what went in") {
-            // The regression this pins: folding attitude_tangent's 0.5 into the inverse a second
-            // time silently halves every attitude std dev the filter reports.
+            // Applying attitude_tangent's 0.5 twice would halve every reported attitude std
             const Eigen::Vector3d s = SystemLocalisation::attitude_std(x, P);
             REQUIRE_THAT(s(0), WithinRel(sigma_roll, 1e-9));
             REQUIRE_THAT(s(1), WithinRel(sigma_pitch, 1e-9));
@@ -169,8 +160,7 @@ SCENARIO("Recovery from a fall widens the belief without moving it", "[slam][loc
         const Eigen::MatrixXd P0 = sys.density.cov();
 
         WHEN("the recovery inflation is applied") {
-            // Built exactly as FieldLocalisationSRIF builds it: position on the diagonal, yaw as a
-            // rank-one block about the field z axis.
+            // As FieldLocalisationSRIF builds it: position diagonal, yaw as a rank-one block
             const double yaw_std  = 1.0;
             Eigen::MatrixXd extra = Eigen::MatrixXd::Zero(SystemLocalisation::nx, SystemLocalisation::nx);
             extra(0, 0) = extra(1, 1)   = 0.25;  // 0.5 m std
@@ -181,15 +171,12 @@ SCENARIO("Recovery from a fall widens the belief without moving it", "[slam][loc
             sys.inflate_covariance(extra);
 
             THEN("the mean is untouched") {
-                // The pre-fall position is still the best estimate available; a fall and getup move
-                // the torso well under a metre.
+                // The mean is kept
                 REQUIRE_THAT((sys.density.mean() - x0).norm(), WithinAbs(0.0, 1e-9));
             }
 
             THEN("exactly the requested yaw variance is added") {
-                // The whole point of the rank-one form: the yaw uncertainty the filter reports grows
-                // by exactly what was asked for, even though it is spread over four components and
-                // no element is "yaw".
+                // Reported yaw uncertainty grows by exactly the requested amount
                 const Eigen::MatrixXd P = sys.density.cov();
                 REQUIRE_THAT(P(0, 0) - P0(0, 0), WithinAbs(0.25, 1e-9));
                 REQUIRE_THAT(SystemLocalisation::yaw_variance(sys.density.mean(), P) - yaw_var0,
@@ -197,9 +184,7 @@ SCENARIO("Recovery from a fall widens the belief without moving it", "[slam][loc
             }
 
             THEN("roll and pitch are left alone") {
-                // A yaw inflation must not smear into the other two attitude axes: they are re-fixed
-                // by the very next gravity update, and inflating them would only make that update
-                // fight a wider prior.
+                // Yaw inflation must not leak into roll and pitch
                 const Eigen::Matrix3d A0 = SystemLocalisation::attitude_covariance(x0, P0);
                 const Eigen::Matrix3d A =
                     SystemLocalisation::attitude_covariance(sys.density.mean(), sys.density.cov());
@@ -249,9 +234,7 @@ SCENARIO("The velocity states carry the estimate, and measurements steer them", 
             const Eigen::VectorXd mu = sys.density.mean();
 
             THEN("the velocity state carries the position forward") {
-                // 0.3 m/s for 2 s along body x, rotated into {f} by yaw 0.3. Nothing was fed
-                // in: the motion comes from the state, which is what makes the odometry a
-                // measurement rather than an assertion.
+                // 0.3 m/s for 2 s along body x, rotated into {f} by yaw 0.3, driven by the state alone
                 REQUIRE_THAT(mu(0), WithinAbs(x0(0) + 0.6 * std::cos(0.3), 0.05));
                 REQUIRE_THAT(mu(1), WithinAbs(x0(1) + 0.6 * std::sin(0.3), 0.05));
             }
@@ -268,9 +251,7 @@ SCENARIO("The velocity states carry the estimate, and measurements steer them", 
             }
 
             THEN("and the estimate then stays put under prediction") {
-                // This is the property that keeps a fallen robot on the spot. Without it the
-                // pre-fall gait integrates for the whole fall and the estimate walks off the
-                // field -- measured on data4_webots, 0.12 -> 0.62 -> 1.76 m over two falls.
+                // Keeps a fallen robot on the spot instead of integrating the pre-fall gait
                 const Eigen::VectorXd before = sys.density.mean();
                 sys.predict_all(4.0);
                 REQUIRE((sys.density.mean().head<2>() - before.head<2>()).norm() < 0.05);
@@ -296,17 +277,8 @@ SCENARIO("The velocity states carry the estimate, and measurements steer them", 
 
 SCENARIO("The gyroscope measures the rate, and its bias is observable", "[slam][localisation]") {
     GIVEN("A stationary belief and a gyroscope reading a pure bias") {
-        // A robot held still while the gyro reads 0.02 rad/s about z. The reading is
-        // omegaBb + bGyro, so on its own it cannot say which of the two it is -- that is
-        // exactly why the bias needs something else to pin the rate. On the robot that
-        // something is the landmark measurements; here it is a zero-velocity update standing
-        // in for them.
-        //
-        // This matters because the bias is unobservable to the upstream Mahony filter: its
-        // bias integrator is driven by the gravity error, a cross product of two near-vertical
-        // vectors, which has no component about the vertical. Nothing else in the system
-        // estimates the yaw-rate bias, and on the data2 recording estimating it is worth
-        // 2.5 deg of heading RMSE.
+        // Robot held still while the gyro reads 0.02 rad/s about z. The reading is omegaBb + bGyro;
+        // a zero-velocity update (standing in for landmarks) pins the rate so the bias is observable.
         const Eigen::VectorXd x0 = nominal_state();
         SystemLocalisation sys(tight_belief(x0, 0.02));
         sys.reset_to(tight_belief(x0, 0.02), 0.0);
@@ -330,17 +302,8 @@ SCENARIO("The gyroscope measures the rate, and its bias is observable", "[slam][
 }
 
 SCENARIO("Prediction through a topple tracks the rotation rather than a chart of it", "[slam][localisation]") {
-    // Under roll-pitch-yaw the trajectory below runs straight through the Euler-rate singularity at
-    // pitch = 90 deg, and the STATE landed on the alias (roll+180, 180-pitch, yaw+180) and stayed
-    // there: the same rotation, so the geometry kept working, but every consumer reading x(5) as
-    // heading was 180 deg out for the rest of the run. With a quaternion, pitch = 90 deg is an
-    // ordinary point -- every entry of Xi is linear in q.
-    //
-    // Note what is NOT claimed: attitude_rpy() still reads a roll-pitch-yaw chart, and that chart is
-    // genuinely discontinuous at pitch = +-90 deg. A momentary 180 deg step in the reported heading
-    // while the robot is mid-topple is the chart, not the estimate. What matters is that the
-    // underlying rotation is continuous and that the heading is right again once the robot is not
-    // standing on its head -- which is exactly what the old state could not deliver.
+    // Pitch = 90 deg is an ordinary point for a quaternion. attitude_rpy() is still discontinuous
+    // there, so only the rotation's continuity and the final heading are checked.
     GIVEN("A robot pitching over at 1.5 rad/s from upright") {
         const Eigen::VectorXd x0 = make_state(0.0, 0.0, 0.44, 0.0, 0.0, 1.0);
         const double rate        = 1.5;
@@ -351,9 +314,7 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
         sys.reset_to(tight_belief(xr), 0.0);
 
         WHEN("it is predicted in small steps through and past vertical") {
-            // A whole revolution about the body y axis, so the robot ends upright on the heading it
-            // started with. Stepped as exact fractions of it rather than by accumulating a float
-            // increment, so the final step lands on the revolution instead of just short of it.
+            // A whole revolution about body y, stepped as exact fractions so the last step lands on it
             const double revolution  = 2.0 * M_PI / rate;
             constexpr int steps      = 84;  // ~0.05 s apart
             const double step        = revolution / steps;
@@ -367,8 +328,7 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
                 const Eigen::VectorXd mu = sys.density.mean();
                 finite                   = finite && mu.allFinite() && sys.density.cov().allFinite();
 
-                // Chart-free continuity: the angle of the incremental rotation between consecutive
-                // steps, which should never exceed what the gyroscope asked for.
+                // The incremental rotation between steps must not exceed what the gyroscope asked for
                 const Eigen::Matrix3d Rfb = SystemLocalisation::field_pose<double>(mu).rotation_matrix;
                 const double c            = 0.5 * ((previous.transpose() * Rfb).trace() - 1.0);
                 max_step_rotation         = std::max(max_step_rotation, std::acos(std::clamp(c, -1.0, 1.0)));
@@ -380,7 +340,7 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
             }
 
             THEN("the rotation is continuous the whole way round") {
-                // No jump anywhere near the half revolution the gimbal alias used to introduce.
+                // No half-revolution jump from the gimbal alias
                 REQUIRE(max_step_rotation < 1.5 * rate * step);
             }
 
@@ -390,7 +350,6 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
             }
 
             THEN("a full revolution returns the robot upright on its original heading") {
-                // The regression in one line: the old state came back from a topple 180 deg out.
                 const Eigen::Vector3d rpy = SystemLocalisation::attitude_rpy(sys.density.mean());
                 REQUIRE_THAT(rpy(0), WithinAbs(0.0, 1e-3));
                 REQUIRE_THAT(rpy(1), WithinAbs(0.0, 1e-3));
@@ -435,8 +394,7 @@ SCENARIO("The field mirror is an exact linear map on the state", "[slam][localis
         const GaussianInfo<double> gm = SystemLocalisation::mirror_density(g);
 
         THEN("the reported yaw uncertainty is unchanged") {
-            // mirror_quat_map is orthogonal, so P' = M*P*M^T is exact rather than a small-angle
-            // approximation, and a mirrored hypothesis is exactly as confident as its partner.
+            // mirror_quat_map is orthogonal, so the mirrored covariance is exact
             REQUIRE_THAT(SystemLocalisation::yaw_variance(gm.mean(), gm.cov()),
                          WithinRel(SystemLocalisation::yaw_variance(g.mean(), g.cov()), 1e-6));
         }
@@ -448,9 +406,7 @@ SCENARIO("Every state takes process noise", "[slam][localisation]") {
         SystemLocalisation sys(tight_belief(nominal_state()));
 
         THEN("process_noise_index covers the whole state") {
-            // A stale hardcoded list disagreeing with process_noise_density's dimension is not caught
-            // anywhere: when the state grew to carry a quaternion it turned the first non-zero-dt
-            // prediction into NaN.
+            // Must match process_noise_density's dimension
             REQUIRE(sys.process_noise_index().size() == std::size_t(SystemLocalisation::nx));
             REQUIRE(sys.process_noise_density(0.1).dim() == SystemLocalisation::nx);
         }

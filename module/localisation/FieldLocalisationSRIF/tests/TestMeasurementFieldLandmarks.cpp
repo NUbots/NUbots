@@ -70,8 +70,7 @@ namespace {
         return dims;
     }
 
-    /// A detection whose four corner rays all point exactly at the landmark rLFf, as seen by
-    /// a camera at Tfc. That is what a perfect YOLO box of that landmark reduces to.
+    /// A detection whose four corner rays all point at landmark rLFf from a camera at Tfc
     Detection detection_of(const std::string& name, const Eigen::Vector3d& rLFf, const Pose<double>& Tfc) {
         const Eigen::Vector3d ray = (Tfc.rotation_matrix.transpose() * (rLFf - Tfc.translation_vector)).normalized();
         Detection det;
