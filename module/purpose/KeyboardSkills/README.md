@@ -28,7 +28,9 @@ Ball commands are in the robot's yaw frame (x forward, y left). `skill::Walk` cl
 
 ## Usage
 
-Run `nusim/keyboardskills` against NUSim (`./b run sim/soccer` there). With `interactive: false` and a `script` in
+Run `nusim/keyboardskills` against NUSim (`./b run sim/soccer` there), or `keyboardskills` on the robot. On the robot
+`p` and `b` do nothing, as only NUSim listens for ball commands, and the ball observation comes from vision
+(`skill::Walk`'s `config/bin/keyboardskills/BallSkills.yaml`). The ball skills have not run on a real robot before. With `interactive: false` and a `script` in
 `KeyboardSkills.yaml` it plays the scripted keys with no terminal, printing the log.
 
 ## Consumes

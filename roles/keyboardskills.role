@@ -1,0 +1,40 @@
+# Plays the real K1 from the keyboard with the mjlab policies: the walk and the six ball skills (receive, dribble, kick,
+# air shot, directional first touch, first-time pass), all run by skill::Walk. The hardware counterpart of
+# nusim/keyboardskills. The ball skills have not run on a real robot before: keep a hand on the robot. `p` and `b` (roll
+# a pass, place the ball) only do anything in NUSim. The ball comes straight from vision (see
+# module/skill/Walk/data/config/bin/keyboardskills/BallSkills.yaml), so no field localisation is needed. No
+# ConsoleLogHandler: KeyboardSkills shows the log in its terminal UI.
+nuclear_role(
+  # FileWatcher and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  # Configuration
+  support::configuration::SoccerConfig # Field description
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  output::ImageCompressor
+  # Sensors
+  input::Camera
+  input::Sensors
+  # Vision
+  vision::Yolo
+  # Director
+  extension::Director
+  # Servos
+  actuation::Servos # Director-arbitrated sink for the K1 low-level channel
+  # Skills
+  skill::Walk # mjlab walk + ball-skill ONNX policies -> LowCmd
+  skill::GetUp
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  # Strategies
+  strategy::FallRecovery
+  # Purpose
+  purpose::KeyboardSkills
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+)

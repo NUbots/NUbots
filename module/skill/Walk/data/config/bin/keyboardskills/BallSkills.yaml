@@ -1,0 +1,4 @@
+# The hardware keyboardskills role runs no ball localisation: take the ball straight from vision, which is also closest
+# to how the policies were trained (per-frame detections, the last one held when the ball is not seen)
+ball:
+  source: vision
