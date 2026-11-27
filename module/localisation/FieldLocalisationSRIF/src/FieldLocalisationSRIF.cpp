@@ -759,24 +759,16 @@ namespace module::localisation {
         }
         field->cost = cost;
 
-                  sensors_window.empty() ? 0.0 : sensors_window.back().t,
-                  mean(0),
-                  mean(1),
-                  filter::SystemLocalisation::heading(mean) * 180.0 / M_PI,
-                  field->localised);
-                  emit(field);
+        emit(field);
 
-                  if (log_level <= DEBUG) {
-                      emit(graph("SRIF field pose (x, y, yaw)",
-                                 mean(0),
-                                 mean(1),
-                                 filter::SystemLocalisation::heading(mean)));
-                      emit(graph("SRIF uncertainty", field->uncertainty));
-                      emit(graph("SRIF cost (mean ray residual)", cost));
-                      if (measurement != nullptr) {
-                          emit(graph("SRIF associations", double(measurement->num_associated())));
-                      }
-                  }
+        if (log_level <= DEBUG) {
+            emit(graph("SRIF field pose (x, y, yaw)", mean(0), mean(1), filter::SystemLocalisation::heading(mean)));
+            emit(graph("SRIF uncertainty", field->uncertainty));
+            emit(graph("SRIF cost (mean ray residual)", cost));
+            if (measurement != nullptr) {
+                emit(graph("SRIF associations", double(measurement->num_associated())));
+            }
+        }
     }
 
 }  // namespace module::localisation
