@@ -77,8 +77,7 @@ namespace module::localisation {
         explicit FieldLocalisationSRIF(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// @brief Parameters tuned once and left alone. What changes per robot, venue or game
-        ///        is in the yaml.
+        /// @brief Fixed parameters; per-robot, venue or game ones are in the yaml
         struct Config {
             /// @brief Process noise PSDs [m/sqrt(s), rad/sqrt(s)]
             filter::SystemLocalisation::Parameters process{};
@@ -86,11 +85,8 @@ namespace module::localisation {
             filter::SystemLocalisation::HypothesisParameters hypothesis{};
             /// @brief Landmark measurement noise/association options
             filter::MeasurementFieldLandmarks::Options measurement{};
-            /// @brief Initial sqrt-covariance diagonal for the 18-dim state after the grid solve.
-            ///
-            /// Bigger means less certain. Never set an entry near zero: these are stored inverted
-            /// (square-root information form), so a near-zero std dev becomes near-infinite
-            /// information and the estimate eventually goes non-finite.
+            /// @brief Initial sqrt-covariance diagonal after the grid solve. Keep every entry well
+            ///        above zero: it is stored inverted.
             // clang-format off
             Eigen::Matrix<double, 18, 1> initial_sqrt_covariance =
                 (Eigen::Matrix<double, 18, 1>() <<
@@ -107,10 +103,9 @@ namespace module::localisation {
             double grid_step_yaw = 18.0 * M_PI / 180.0;
             /// @brief Minimum landmark associations to trust an initial grid solve
             int min_init_associations = 4;
-            /// @brief Field.localised is set while the reported horizontal position std (sqrt of
-            ///        the xy covariance trace) is below this [m] and the yaw std below
-            ///        localised_yaw_std [rad]. Both sit under the widths a fresh grid solve and a
-            ///        fall recovery hand the belief, so either must be confirmed by vision first.
+            /// @brief Field.localised requires sqrt(trace(P_xy)) below localised_pos_std [m] and
+            ///        the yaw std below localised_yaw_std [rad]. Both are under the initial and
+            ///        fall-recovery widths, so vision must confirm the pose first.
             double localised_pos_std = 0.5;
             double localised_yaw_std = 0.35;
             /// @brief Enable the multi-hypothesis (field-symmetry) Gaussian mixture bank
@@ -128,8 +123,7 @@ namespace module::localisation {
             bool use_kinematic_height = true;
             /// @brief Kinematic torso-height noise std dev [m]
             double height_sigma = 0.02;
-            /// @brief Std dev on the |q| = 1 pseudo-measurement (dimensionless). Without it the
-            ///        MAP Hessian is singular along |q|.
+            /// @brief Std dev of the |q| = 1 pseudo-measurement
             double quaternion_norm_sigma = 1e-3;
 
             // --- body-rate measurements ---
@@ -139,31 +133,34 @@ namespace module::localisation {
             enum class OdometryVelocitySource {
                 /// Finite difference of consecutive Sensors.Htw. Available on every platform.
                 HTW_DIFFERENCE,
-                /// Sensors.vTw rotated into the torso frame. For platforms whose odometry is a
-                /// real state estimator.
+                /// Sensors.vTw rotated into the torso frame
                 SENSORS_VTW,
             };
             /// @brief Where vBb is measured from
             OdometryVelocitySource odometry_velocity_source = OdometryVelocitySource::HTW_DIFFERENCE;
             /// @brief Body linear velocity measurement noise std dev per axis [m/s]
             double odometry_velocity_sigma = 0.15;
-            /// @brief Odometry velocities faster than this are discarded [m/s]. The Booster
-            ///        controller reports >100 m/s for a few hundred ms after an odometry reset.
+            /// @brief Odometry velocities above this are discarded [m/s]. The Booster twist
+            ///        reads >100 m/s for a few hundred ms after an odometry reset.
             double max_odometry_speed = 2.0;
-            /// @brief A step between consecutive Sensors.Htw larger than this is an odometry
-            ///        discontinuity (reset or offset recapture), not motion [m, rad]
+            /// @brief vTw above stuck_twist_speed [m/s] is replaced by zero while Htw moved slower than
+            ///        stationary_speed [m/s] over the last stationary_window [s]. The Booster twist can
+            ///        latch a non-zero value for tens of seconds while the robot stands.
+            double stuck_twist_speed = 0.2;
+            double stationary_speed  = 0.05;
+            double stationary_window = 0.25;
+            /// @brief A step between consecutive Sensors.Htw above these is an odometry
+            ///        discontinuity, not motion [m, rad (world yaw)]
             double odometry_jump_xy    = 0.1;
             double odometry_jump_angle = 0.3;
-            /// @brief Frames this close to a discontinuity skip Hcw-dependent updates, since Hcw
-            ///        and the paired Htw may straddle it [s]
+            /// @brief Frames this close to a discontinuity skip Hcw-dependent updates [s]
             double odometry_jump_holdoff = 0.25;
             /// @brief Zero-velocity update noise while FALLEN (lying still) [m/s]
             double zupt_sigma = 0.02;
             /// @brief Zero-velocity update noise while FALLING or getting up [m/s]
             double zupt_dynamic_sigma = 0.30;
 
-            // --- fall handling ---
-            // How long the elevated PSDs apply is process.disturbed_window.
+            // --- fall handling (duration is process.disturbed_window) ---
             /// @brief Horizontal position std restored on recovering from a fall [m]
             double recovery_pos_std = 0.5;
             /// @brief Yaw std restored on recovering from a fall [rad]
@@ -181,8 +178,7 @@ namespace module::localisation {
         /// @brief Whether t0 has been captured yet
         bool have_t0 = false;
 
-        /// @brief Rolling window of recent odometry samples, newest last, each carrying the
-        ///        velocity it was measured with (bounded by sensors_window_seconds)
+        /// @brief Recent odometry samples, newest last
         std::vector<filter::SensorsSample> sensors_window;
         /// @brief Time of the latest odometry discontinuity [s since t0]
         double last_odometry_jump_t = -std::numeric_limits<double>::infinity();
@@ -192,7 +188,7 @@ namespace module::localisation {
         std::unique_ptr<filter::FieldMap> map;
         /// @brief Out-of-field side disambiguator (null until the first image, which carries the lens)
         std::unique_ptr<filter::SideDisambiguator> side;
-        /// @brief Time of the last mirror re-seed, so a latched flip request cannot respawn every frame
+        /// @brief Time of the last mirror re-seed, for the flip cooldown
         double last_respawn_t = -std::numeric_limits<double>::infinity();
         /// @brief Whether the estimator has been initialised from a landmark frame
         bool initialised = false;
@@ -214,8 +210,7 @@ namespace module::localisation {
          */
         [[nodiscard]] const filter::SensorsSample* nearest_sensors(double t) const;
 
-        /// @brief Whether Hcw-dependent updates at time t should be skipped because an odometry
-        ///        discontinuity is too close (see odometry_jump_holdoff)
+        /// @brief Whether t is within odometry_jump_holdoff of an odometry discontinuity
         [[nodiscard]] bool near_odometry_jump(double t) const {
             return std::abs(t - last_odometry_jump_t) < cfg.odometry_jump_holdoff;
         }
@@ -228,8 +223,8 @@ namespace module::localisation {
 
         /**
          * @brief Emit the localisation Field message (and debug graphs) from the current belief.
-         * @param Htw World-to-torso pose paired with the processed vision frame (from Sensors)
-         * @param measurement The processed landmark measurement (nullptr on the bootstrap frame)
+         * @param Htw World-to-torso pose to compose with the field pose
+         * @param measurement The frame's landmark measurement, or nullptr if none ran
          */
         void emit_field(const filter::Pose<double>& Htw, const filter::MeasurementFieldLandmarks* measurement);
 

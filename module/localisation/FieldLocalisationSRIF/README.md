@@ -2,18 +2,16 @@
 
 ## Description
 
-A localisation method for estimating where the field is in world space, as a Gaussian in square-root
-information form. Nothing is a known input: the process model is rigid-body kinematics driven by
-velocity states, and every sensor — vision, gyroscope, accelerometer, walk odometry, kinematic height
-— enters as a measurement with its own noise. Each vision frame applies a MAP (trust-region Newton)
+Estimates where the field is in world space as a Gaussian in square-root information form. The process
+model is rigid-body kinematics driven by velocity states; vision, gyroscope, accelerometer, odometry
+and kinematic height all enter as measurements. Each vision frame applies a MAP (trust-region Newton)
 update over a robust landmark likelihood, and the Laplace approximation at the optimum gives the
-posterior square-root information. Every estimate therefore carries a covariance saying how much to
-trust it, rather than a bare pose.
+posterior, so every pose comes with a covariance.
 
 ### State
 
-The state is 18 elements: the 6-DOF torso pose in the field frame `{f}`, 6-DOF Torso fixed velocities, 3-DOF gyro bias states plus a 2-DOF camera-mount
-attitude bias.
+The state is 18 elements: the 6-DOF torso pose in the field frame `{f}`, 6-DOF body-fixed velocities, a
+3-DOF gyroscope bias and a 2-DOF camera-mount attitude bias.
 
 |  Index | Symbol   | Meaning                                                       |
 | -----: | -------- | ------------------------------------------------------------- |
@@ -22,25 +20,19 @@ attitude bias.
 |   7..9 | `v`      | Torso fixed linear velocities [m/s]                           |
 | 10..12 | `omega`  | Torso fixed rotational velocities [rads/s]                    |
 | 13..15 | `bG`     | Gyroscope bias estimates [rads/s]                             |
-| 17..18 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                |
+| 16..17 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                |
 
 Field frame `{f}`: origin at the centre of the field on the ground plane, z up.
 
-Attitude is a quaternion rather than roll-pitch-yaw because the Euler rate transform is singular at
-pitch = ±90°, which is on the trajectory of every topple. Passing through it put the old state on the
-alias `(roll+180, 180−pitch, yaw+180)` — the same rotation, so the geometry kept working, but every
-consumer reading the yaw element was then 180° out. A quaternion has no such point, so the filter can
-sit face-down and keep updating. The cost is a fourth parameter for three degrees of freedom, handled
-three ways: `quat2rot` normalises, so `|q|` is invisible to every geometric model and cannot corrupt
-the attitude; `MeasurementQuaternionNorm` supplies the only information along that direction (without
-it the MAP Hessian is singular there); and the mean is projected back onto the unit sphere after every
-predict and update. No index means "heading" any more — read it through
-`SystemLocalisation::heading()`.
+Attitude is a quaternion because roll-pitch-yaw is singular at pitch = ±90°, which every topple
+passes through. The redundant fourth parameter is handled three ways: `quat2rot` normalises, so `|q|`
+cannot corrupt the geometry; `MeasurementQuaternionNorm` supplies the only information along `|q|`
+(otherwise the MAP Hessian is singular); and the mean is projected back onto the unit sphere after
+every predict and update. No index is the heading; use `SystemLocalisation::heading()`.
 
-The camera bias models a constant error in the kinematic torso-to-camera chain, visible in recorded
-data as ground-projection error growing with range² (~1 m at 4–5 m range, consistent with a 1.5–2°
-pitch bias). It is a random-walk state with deliberately tiny process noise, applied on the camera
-side of the extrinsic: `Tfc = Tfb(x) · Tbc · R(deltaC)`.
+The camera bias models a constant error in the torso-to-camera chain (seen as ground-projection error
+growing with range²). It is a random walk with tiny process noise, applied as
+`Tfc = Tfb(x) · Tbc · R(deltaC)`.
 
 ### Initialisation
 
@@ -48,13 +40,9 @@ The first vision frame carrying enough landmarks triggers a coarse grid search o
 scored by the same robust landmark likelihood used for updates. Roll, pitch and torso height are taken
 from the gravity-aligned kinematic chain rather than searched.
 
-The field is symmetric under a 180° rotation about its centre, so the maximum and its mirror score
-identically. The tie is broken by the rule that every robot starts in its own half, which is **+x** by
-the field-frame convention the rest of the codebase already hardcodes — our goal at
-`+field_length/2` (`Defend`, `Goalie`, `ReadyAttack`, `FieldLocalisationNLopt`), the goal we attack at
-`-field_length/2` (`WalkToBall`, `PenaltyShootout`). The frame is defined relative to our own goal and
-nothing swaps it by team or by half, so this is not configurable. The prior is only true at kick-off —
-see [Limitations](#limitations).
+The maximum and its 180° mirror score identically. The tie is broken by assuming the robot starts in
+its own half, **+x** (own goal at `+field_length/2`, as hardcoded across the codebase). This only
+holds at kick-off and fails near the halfway line; see [Limitations](#limitations).
 
 ### Measurement updates
 
@@ -67,86 +55,53 @@ see [Limitations](#limitations).
 | Gyroscope              | `MeasurementGyroscope`       | Every frame, any posture             |
 | Body linear velocity   | `MeasurementBodyVelocity`    | Every frame (ZUPT while not upright) |
 
-Nothing is a known input, the gyroscope included: it measures `omegaBb` with its own sigma and its
-own estimated bias, rather than being substituted into the odometry's angular rate. That bias is the
-point — it is invisible to the upstream Mahony filter, whose integrator is driven by the gravity
-error, and it is the yaw-rate component that becomes heading drift.
+The gyroscope measures `omegaBb + bGyro`. Estimating the bias matters because the upstream Mahony
+filter cannot observe its yaw component, which otherwise becomes heading drift.
 
-**Body velocity.** `odometry_velocity_source` picks the signal, and there is deliberately no option
-to go without one: `MeasurementBodyVelocity` is the only thing that measures `vBb`, so with no
-source it falls to the `sigma_vel` random walk between vision frames — worse than any odometry.
-`HTW_DIFFERENCE` finite-differences consecutive `Sensors.Htw` and works on every platform;
-`SENSORS_VTW` reads `Sensors.vTw` and rotates it into the torso frame, for platforms whose odometry
-is a real state estimator rather than support-leg dead reckoning. On the NUgus `vTw` is itself a
-low-passed difference of the same `Htw` with `z` zeroed, so `HTW_DIFFERENCE` strictly dominates
-there; on a platform like the K1 it does not. The velocity is resolved once, when the sample is
-buffered, so the vision reaction reads it off the same paired sample the extrinsics come from.
+**Body velocity.** `odometry_velocity_source` picks the signal: `HTW_DIFFERENCE` finite-differences
+consecutive `Sensors.Htw` (any platform); `SENSORS_VTW` rotates `Sensors.vTw` into the torso frame
+(the K1, whose controller reports an odometry twist). Velocities above `max_odometry_speed` are
+discarded. A twist above `stuck_twist_speed` while the odometry pose is stationary is measured as zero
+instead (the Booster twist can latch a non-zero value for tens of seconds while the robot stands).
+
+**Odometry discontinuities.** An odometry reset (`ResetFieldLocalisation`, or a Booster mode change)
+moves `Sensors.Htw` by metres in one sample, and the Booster twist reads >100 m/s for a few hundred
+ms afterwards. A world-frame xy or yaw step between consecutive `Htw` larger than `odometry_jump_xy`/`odometry_jump_angle`
+marks a discontinuity; vision frames within `odometry_jump_holdoff` of it skip their landmark, init
+and side-disambiguation updates (their `Hcw` and paired `Htw` may straddle it) and re-emit `Hfw`
+against the newest `Htw`. The field-frame belief itself is unaffected.
 
 **Landmarks.** Goal posts and L/T/X field-line intersections arrive as unit rays in the camera frame:
 the box centre for intersections, the bottom-centre for posts. Detections below `min_confidence` are
-dropped outright; above it, YOLO confidence scales the **inlier weight** of a robust mixture rather
-than the noise sigma. That is deliberate — scaling sigma would claim the landmark is certainly real
-but poorly measured, whereas the actual failure mode of a weak detection is that it is not a landmark
-at all. As the weight tends to zero the per-detection likelihood tends to the flat clutter term, which
-contributes almost nothing to either the gradient or the Hessian, so a weak detection cannot sharpen
-the posterior. Association is greedy surprisal-nearest-neighbour against rays predicted at the prior
+dropped; above it, YOLO confidence scales the **inlier weight** of a robust mixture rather than the
+noise sigma, since a weak detection's failure mode is not being a landmark at all. Association is greedy surprisal-nearest-neighbour against rays predicted at the prior
 mean, inside a geometric pre-gate that widens with the filter's own yaw uncertainty.
 
-**Gravity.** Gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, which is the model's real
-validity condition: the accelerometer reads gravity whenever the torso is not being accelerated. That
-is true of a robot lying still on the carpet and false of one in free fall or hitting the ground, so
-it is both the right test during a fall and a better one than "is the robot upright" while walking.
+**Gravity.** Gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, not on posture: it holds for a
+robot lying still and fails in free fall or on impact.
 
 ### Falls
 
-The gate is per-model, not all-or-nothing. Only kinematic height is genuinely invalidated by a fall —
-lying down, the support-leg chain still reports a near-upright 0.44 m torso and would fight the
-attitude the other measurements are establishing. Landmarks are plain geometry and, given the right
-attitude, are as valid face-down as standing. A robot that spins while toppling or getting up changes
-its heading, and only measurements taken _during_ the event can catch that.
+Each measurement is gated on its own assumption. Only kinematic height is invalidated by a fall (lying
+down, the leg chain still reports an upright torso); landmarks and the gyroscope stay valid and catch
+any spin during the topple or getup.
 
 Posture comes from `message::behaviour::state::Stability` (not upright at or below `FALLING`). While
-not upright, two separate things happen, and they expire differently:
+not upright:
 
-- The walk-odometry velocity measurement is **replaced by a zero-velocity update** for the whole
-  episode. On the ground the odometry describes a gait that is not happening, and during a getup a
-  scripted flail that is not locomotion. Leaving `vBb` unmeasured instead is not the neutral choice it
-  looks like — it asserts the robot may still be travelling at whatever it was doing when it fell,
-  which is the one thing it certainly is not doing, and the pre-fall velocity then integrates for the
-  whole fall. Measured on data4_webots, that failure compounds the error 0.12 → 0.62 → 1.76 m across
-  two falls and never recovers. The sigma varies with posture: `zupt_sigma` while `FALLEN` (lying
-  still), `zupt_dynamic_sigma` while `FALLING` or getting up, where the torso genuinely moves — just
-  not anywhere. The gyroscope measurement runs throughout, because it measures the topple for real.
-- The elevated `sigma_*_disturbed` PSDs apply for `process.disturbed_window` seconds and then stand
-  down. This one _is_ bounded: a fall is a bounded event, and modelling a robot lying still as a
-  0.40 m/√s random walk would make the belief's width report how long it had been down rather than how
-  far it could have gone.
+- The odometry velocity is **replaced by a zero-velocity update** for the whole episode, so the
+  pre-fall gait does not integrate through the fall: `zupt_sigma` while `FALLEN`, the looser
+  `zupt_dynamic_sigma` while `FALLING` or getting up.
+- The `sigma_*_disturbed` PSDs apply for the first `process.disturbed_window` seconds only, so the
+  belief's width reflects how far the robot could have moved rather than how long it was down.
 
-Keeping those as one switch is a trap: it means that from `disturbed_window` seconds into a fall the
-filter resumes integrating getup odometry at walking-grade confidence, and marches off the field with
-a covariance too tight for the association gate to recover it.
-
-On standing up, the belief is widened without moving its mean. A fall and getup translate the torso
-well under a metre, so the pre-fall position is still the best estimate available, and re-solving
-globally would be worse because the own-half prior is false once play is under way. What a fall
-destroys is confidence, above all in yaw, so that is what is handed back — as a rank-one block about
-the field z axis, since yaw is a direction in the quaternion block rather than an element. The widened
-belief is also what reopens the landmark association gate; without it a getup that turned the robot
-leaves every predicted bearing outside the gate and the filter can never re-acquire.
-
-Frames with no usable detections still run a prediction, so the belief decays honestly across a fall
-instead of emerging with pre-fall confidence in a mean that has moved.
+On standing up the covariance is widened (mainly yaw, as a rank-one block about field z) without
+moving the mean, which also reopens the association gate. Frames without detections still predict.
 
 ### Output
 
-The emitted `Hfw` is **planar**: `(x, y)` and yaw, with torso height and roll/pitch dropped. The field
-is a flat z = 0 model, so a full SE(3) `Hfw` (carrying the walking torso's tilt and ~0.4 m height)
-would tip the field lines off the plane in NUsight. This matches the `FieldLocalisationNLopt`
-convention, and every consumer reasons about the field on the ground plane anyway.
-
-The reported `(x, y, yaw)` covariance takes yaw through row 2 of
-`SystemLocalisation::attitude_jacobian`, since yaw is a direction in the quaternion block rather than a
-state element — that applies to its cross-covariance with position too.
+The emitted `Hfw` is **planar** (`x`, `y`, yaw), as in `FieldLocalisationNLopt`. The `(x, y, yaw)`
+covariance takes yaw through row 2 of `SystemLocalisation::attitude_jacobian`.
 
 ## Usage
 
@@ -162,12 +117,9 @@ is treated as always upright and the fall handling never engages.
 
 Emit `ResetFieldLocalisation` to drop the estimate and re-run the initial grid search.
 
-Tuning is split by how often you would reach for it. `data/config/FieldLocalisationSRIF.yaml` holds
-the knobs you change because something about the robot, the venue or the game changed — the tables
-below are all of it. Everything else was tuned once against recorded data and is a constant in the
-code, documented where it is defined: `struct Config` in `FieldLocalisationSRIF.hpp` (initial
-covariance, grid search, ZUPT noise, the odometry buffer, gravity gating, the |q| = 1 prior) and
-`SystemLocalisation::Parameters` (the remaining process PSDs, the `*_disturbed` set and its window).
+`data/config/FieldLocalisationSRIF.yaml` holds the per-robot, venue and game parameters listed below.
+Everything else is a constant in `struct Config` (`FieldLocalisationSRIF.hpp`) and
+`SystemLocalisation::Parameters`.
 
 The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 
@@ -223,19 +175,18 @@ The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 
 ### Tuning
 
-The values in the yaml were tuned in NUSim, by playing recordings back offline and scoring the estimate against
-NUSim's ground truth (`message::localisation::RobotPoseGroundTruth`, from `input::NUSimGroundTruth` with
-`ground_truth: true`). NUSim's odometry error model is fit to the real K1's, but its vision is cleaner than a real
-camera's, so `sigma_angular` and the association gate may need loosening on a real robot. Recordings carry no
-`Stability` (it is an enum, which `DataLogging` cannot record), so the `fall:` values were not tuned this way.
+The yaml values were tuned by replaying NUSim recordings offline against ground truth
+(`message::localisation::RobotPoseGroundTruth`). NUSim's vision is cleaner than a real camera's, so
+`sigma_angular` and the association gate may need loosening on a real robot. Recordings carry no
+`Stability`, so the `fall:` values were not tuned this way.
 
 ## Consumes
 
 - `message::support::FieldDescription` — field dimensions; the landmark map is built from this at startup
 - `message::input::Sensors` — `Htw` odometry, `accelerometer`, `gyroscope`
 - `message::vision::BoundingBoxes` — YOLO detections as corner unit rays in `{c}`, plus `Hcw`
-- `message::input::Image` — the raw camera frame, for out-of-field corner detection
-  (`use_side_disambiguator` only)
+- `message::input::Image` — the raw camera frame (RGB3, BGR3, RGBA, RGGB or GREY), for out-of-field
+  corner detection (`use_side_disambiguator` only)
 - `message::behaviour::state::Stability` — optional; posture for the fall gate
 - `message::localisation::ResetFieldLocalisation` — forces re-initialisation
 
@@ -244,29 +195,20 @@ camera's, so `sigma_angular` and the association gate may need loosening on a re
 - `message::localisation::Field` — planar `Hfw`, `(x, y, yaw)` covariance, `uncertainty` (its trace),
   hypothesis `particles`, `cost` (mean chordal angular residual of the associated rays [rad]), and
   `localised`, set while the position and yaw std are under `Config::localised_pos_std` and
-  `localised_yaw_std` (FieldPlayer and Goalie stand and look around until it is)
-- `message::vision::OutOfFieldFeatures` — per-frame out-of-field working state for the NUsight vision
-  pane: every detected corner and every predicted landmark as a ray in `{c}` with its association
-  outcome, plus the accumulated own-vs-mirror log-likelihood ratio. Display only; nothing in the
-  estimator consumes it.
+  `localised_yaw_std`
+- `message::vision::OutOfFieldFeatures` — per-frame side-disambiguator state for the NUsight vision
+  pane (corners, predicted landmarks, LLR). Display only.
 - NUsight graphs for pose, uncertainty, cost, association count and the side evidence, at `DEBUG` log
   level
 
-NUsight's localisation view draws the `(x, y)` covariance as a 3σ uncertainty ellipse on the field,
-toggled by **Debug → Uncertainty**. That is the signal worth watching live: it inflates on a fall and
-shrinks as vision re-acquires, so a pose drifting while the ellipse stays small is the signature of a
-filter that is confidently wrong. `particles` are drawn on the same view when the hypothesis bank is
-enabled.
+NUsight's localisation view draws the `(x, y)` covariance as a 3σ ellipse (**Debug → Uncertainty**).
+A pose drifting while the ellipse stays small means the filter is confidently wrong.
 
-The vision pane draws the out-of-field corners over the camera image, toggled by **Out of Field**.
-Colour is the association outcome: cyan is usable background scenery nothing has claimed, steel is a
-candidate track being grown, green matched the map at the pose we believe, and **yellow matched only
-the mirrored pose**. A view filling with yellow is the disambiguator telling you the filter is on the
-wrong side of the field, and is what precedes a flip. Red is a corner the evidence rejected; faint
-grey dots are corners masked out as carpet rather than background, drawn only so the mask can be
-checked. Wider rings are map landmarks predicted into the frame (thin when bearing-only), each joined
-to its matched corner by a line whose length is the reprojection residual — lines growing while the
-matches still hold is drift.
+The vision pane draws out-of-field corners over the image (**Out of Field**): cyan unclaimed
+background, steel candidate track, green matched at the current pose, **yellow matched only at the
+mirrored pose** (wrong-side evidence, precedes a flip), red rejected, faint grey masked as carpet.
+Rings are predicted landmarks (thin when bearing-only), joined to their matched corner by the
+residual.
 
 ## Dependencies
 
@@ -281,25 +223,16 @@ matches still hold is drift.
 
 ## Limitations
 
-- **The 180° field symmetry is resolved by out-of-field evidence alone.** On-field landmarks fit a pose
-  and its mirror equally well, so they can never recover a wrong-side lock, and `use_hypothesis_bank`
-  cannot either — each component is scored on its own association, so the pair sits at a genuine 50/50.
-  `srif::SideDisambiguator` (`src/srif`) is what breaks it: out-of-field FAST/ORB corner landmarks
-  classified geometrically against the carpet and horizon, triangulated online (mostly as bearing-only
-  landmarks, since distant background rarely accrues usable parallax), then scored against the pose and
-  its mirror. Enabled by `use_side_disambiguator`; costs roughly 4 ms/frame, on its own reaction so it
-  delays no landmark update. With the hypothesis bank on, each frame's evidence goes into the mixture
-  weights through `SystemLocalisation::add_side_log_evidence` and the correction happens smoothly as the
-  representative changes; with it off, a sustained and decisive mirror preference flips the belief
-  outright. Turning `use_side_disambiguator` off leaves the symmetry broken only at initialisation, by
-  the own-half (+x) rule — which is false once play is under way.
-- The map is only trustworthy if it was built while the filter was on the correct side, so map building
-  freezes whenever the accumulated evidence starts favouring the mirror. A robot that starts the half
-  already on the wrong side has no anchor to recover from.
-- Only the torso pose is localised. Foot poses in the field frame would come from composing the
-  kinematic foot frames (`Sensors.Htx[L_FOOT_BASE]`/`[R_FOOT_BASE]`) with the field pose; not emitted.
-- `MeasurementFieldLines` exists in `src/measurement` but is not wired in — this module localises from
-  YOLO landmarks alone, not raw field-line points.
-- The zero-velocity update asserts the robot is not travelling for the whole non-upright window. That
-  is sound for a topple and a getup, but wrong if a handler picks the robot up while it still reads
-  `FALLEN`; `Config::zupt_sigma` (in the header) is the knob if that becomes a problem in a real game.
+- **Only out-of-field evidence resolves the 180° symmetry** after initialisation; on-field landmarks
+  (and the hypothesis bank alone) cannot. `srif::SideDisambiguator` maps out-of-field FAST/ORB corners
+  online (mostly bearing-only) and scores the pose against its mirror (~4 ms/frame, on its own
+  reaction). With the hypothesis bank on, the evidence reweights the mixture
+  (`add_side_log_evidence`); with it off, sustained mirror preference flips the belief. With
+  `use_side_disambiguator` off (the default), only the own-half rule at initialisation breaks the
+  symmetry, so a reset near the halfway line can lock onto the mirror.
+- The out-of-field map is only valid if built on the correct side; building freezes when the evidence
+  favours the mirror, and the map is cleared on `ResetFieldLocalisation`.
+- Only the torso pose is localised; feet in `{f}` are not emitted.
+- `MeasurementFieldLines` exists but is not wired in.
+- The zero-velocity update is wrong if a handler carries the robot while it reads `FALLEN`
+  (`Config::zupt_sigma`).
