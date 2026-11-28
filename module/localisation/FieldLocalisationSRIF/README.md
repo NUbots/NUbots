@@ -13,19 +13,19 @@ posterior, so every pose comes with a covariance.
 The state is 18 elements: the 6-DOF torso pose in the field frame `{f}`, 6-DOF body-fixed velocities, a
 3-DOF gyroscope bias and a 2-DOF camera-mount attitude bias.
 
-|  Index | Symbol   | Meaning                                                       |
-| -----: | -------- | ------------------------------------------------------------- |
-|   0..2 | `rTFf`   | Torso position in the field frame [m]                         |
-|   3..6 | `q`      | Torso attitude quaternion `(w, x, y, z)`, `Rfb = quat2rot(q)` |
-|   7..9 | `v`      | Torso fixed linear velocities [m/s]                           |
-| 10..12 | `omega`  | Torso fixed rotational velocities [rads/s]                    |
-| 13..15 | `bG`     | Gyroscope bias estimates [rads/s]                             |
-| 16..17 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                |
+|  Index | Symbol   | Meaning                                                          |
+| -----: | -------- | ---------------------------------------------------------------- |
+|   0..2 | `rTFf`   | Torso position in the field frame [m]                            |
+|   3..6 | `q`      | Torso attitude quaternion `(w, x, y, z)`, `Rfb = wxyz_to_mat(q)` |
+|   7..9 | `v`      | Torso fixed linear velocities [m/s]                              |
+| 10..12 | `omega`  | Torso fixed rotational velocities [rads/s]                       |
+| 13..15 | `bG`     | Gyroscope bias estimates [rads/s]                                |
+| 16..17 | `deltaC` | Camera-mount attitude bias (roll, pitch) [rad]                   |
 
 Field frame `{f}`: origin at the centre of the field on the ground plane, z up.
 
 Attitude is a quaternion because roll-pitch-yaw is singular at pitch = ±90°, which every topple
-passes through. The redundant fourth parameter is handled three ways: `quat2rot` normalises, so `|q|`
+passes through. The redundant fourth parameter is handled three ways: `wxyz_to_mat` normalises, so `|q|`
 cannot corrupt the geometry; `MeasurementQuaternionNorm` supplies the only information along `|q|`
 (otherwise the MAP Hessian is singular); and the mean is projected back onto the unit sphere after
 every predict and update. No index is the heading; use `SystemLocalisation::heading()`.

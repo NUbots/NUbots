@@ -39,10 +39,10 @@
 #include "srif/FieldMap.hpp"
 #include "srif/FieldSamples.hpp"
 #include "srif/SystemLocalisation.hpp"
+#include "srif/tangent_basis.hpp"
 
 #include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 /**
@@ -66,9 +66,9 @@ namespace module::localisation::measurement {
     using srif::FieldMap;
     using srif::LandmarkType;
     using srif::SystemLocalisation;
+    using srif::tangent_basis;
     using srif::VisionSample;
     using utility::gaussian_filtering::Pose;
-    using utility::gaussian_filtering::tangent_basis;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemBase;

@@ -36,15 +36,17 @@
 #include "srif/SystemLocalisation.hpp"
 
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/math/quaternion.hpp"
 
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
+using utility::math::euler::rpy_intrinsic_to_mat;
+using utility::math::quaternion::mat_to_wxyz;
 
 using module::localisation::measurement::MeasurementBodyVelocity;
 using module::localisation::measurement::MeasurementGyroscope;
 using module::localisation::srif::SystemLocalisation;
-using utility::gaussian_filtering::rpy2quat;
 using utility::gaussian_filtering::gaussian::GaussianInfo;
 
 namespace {
@@ -60,7 +62,7 @@ namespace {
                                double bias_pitch = 0.0) {
         Eigen::VectorXd s = Eigen::VectorXd::Zero(SystemLocalisation::nx);
         s.head<3>() << x, y, z;
-        s.segment<4>(SystemLocalisation::i_quat) = rpy2quat(Eigen::Vector3d(roll, pitch, yaw));
+        s.segment<4>(SystemLocalisation::i_quat) = mat_to_wxyz(rpy_intrinsic_to_mat(Eigen::Vector3d(roll, pitch, yaw)));
         s(SystemLocalisation::i_bias)            = bias_roll;
         s(SystemLocalisation::i_bias + 1)        = bias_pitch;
         return s;

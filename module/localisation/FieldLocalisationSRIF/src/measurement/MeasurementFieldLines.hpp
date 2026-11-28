@@ -41,7 +41,6 @@
 
 #include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
 /**

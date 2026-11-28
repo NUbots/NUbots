@@ -51,7 +51,7 @@ namespace module::localisation::srif {
         assert(x.size() == SystemLocalisation::nx);
 
         const Eigen::Vector4<Scalar> q   = x.segment(SystemLocalisation::i_quat, 4);
-        const Eigen::Matrix3<Scalar> Rfb = quat2rot(q);
+        const Eigen::Matrix3<Scalar> Rfb = wxyz_to_mat(q);
 
         const Eigen::Vector3<Scalar> vBb     = x.segment(SystemLocalisation::i_vel, 3);
         const Eigen::Vector3<Scalar> omegaBb = x.segment(SystemLocalisation::i_omega, 3);
@@ -60,7 +60,7 @@ namespace module::localisation::srif {
         f.setZero();
         f.segment(SystemLocalisation::i_pos, 3) = Rfb * vBb;
         // Xi is linear in q, so there is no singularity at pitch = +-90 deg
-        f.segment(SystemLocalisation::i_quat, 4) = Scalar(0.5) * quat_Xi(q) * omegaBb;
+        f.segment(SystemLocalisation::i_quat, 4) = Scalar(0.5) * wxyz_kinematics(q) * omegaBb;
         return f;
     }
 

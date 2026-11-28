@@ -40,7 +40,7 @@ namespace module::localisation::measurement {
     }
 
     Eigen::VectorXd MeasurementGravity::simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
-        const Eigen::Matrix3d Rfb = quat2rot(Eigen::Vector4d(x.segment<4>(srif::SystemLocalisation::i_quat)));
+        const Eigen::Matrix3d Rfb = wxyz_to_mat(Eigen::Vector4d(x.segment<4>(srif::SystemLocalisation::i_quat)));
         return Rfb.transpose() * Eigen::Vector3d(0, 0, gravity_);
     }
 

@@ -43,7 +43,6 @@
 namespace module::localisation::measurement {
 
     using srif::SystemLocalisation;
-    using utility::gaussian_filtering::quat2rot;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemEstimator;
 
@@ -51,7 +50,7 @@ namespace module::localisation::measurement {
      * @class MeasurementQuaternionNorm
      * @brief Pseudo-measurement asserting |q| = 1.
      *
-     * quat2rot normalises, so no other measurement informs |q| and the MAP Hessian would be
+     * wxyz_to_mat normalises, so no other measurement informs |q| and the MAP Hessian would be
      * singular along it. Soft rather than a hard constraint; the radial direction is
      * orthogonal to the attitude, so sigma does not move the attitude estimate.
      */

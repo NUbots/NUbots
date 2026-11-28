@@ -62,16 +62,15 @@
 
 #include "srif/FieldMap.hpp"
 #include "srif/OutOfFieldFeatures.hpp"
+#include "srif/tangent_basis.hpp"
 
 #include "message/input/Image.hpp"
 
 #include "utility/gaussian_filtering/Pose.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
 
 namespace module::localisation::srif {
 
     using utility::gaussian_filtering::Pose;
-    using utility::gaussian_filtering::tangent_basis;
 
     class SideDisambiguator {
     public:

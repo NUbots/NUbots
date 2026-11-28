@@ -37,8 +37,8 @@
 #include "srif/SystemLocalisation.hpp"
 
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
+#include "utility/math/quaternion.hpp"
 
 /**
  * @class MeasurementGravity
@@ -51,9 +51,9 @@
 namespace module::localisation::measurement {
 
     using srif::SystemLocalisation;
-    using utility::gaussian_filtering::quat2rot;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemEstimator;
+    using utility::math::quaternion::wxyz_to_mat;
 
     class MeasurementGravity : public Measurement {
     public:
@@ -91,7 +91,7 @@ namespace module::localisation::measurement {
     template <typename Scalar>
     Scalar MeasurementGravity::log_likelihood_impl(const Eigen::VectorX<Scalar>& x) const {
         const Eigen::Vector4<Scalar> q   = x.segment(srif::SystemLocalisation::i_quat, 4);
-        const Eigen::Matrix3<Scalar> Rfb = quat2rot(q);
+        const Eigen::Matrix3<Scalar> Rfb = wxyz_to_mat(q);
 
         Eigen::Vector3<Scalar> gf(Scalar(0), Scalar(0), Scalar(gravity_));
         Eigen::Vector3<Scalar> yhat = Rfb.transpose() * gf;

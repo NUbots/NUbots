@@ -49,28 +49,29 @@
 #include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/math/quaternion.hpp"
 
 
 namespace module::localisation::srif {
 
     using utility::gaussian_filtering::Event;
     using utility::gaussian_filtering::Pose;
-    using utility::gaussian_filtering::quat2rot;
-    using utility::gaussian_filtering::quat_Xi;
-    using utility::gaussian_filtering::rot2rpy;
-    using utility::gaussian_filtering::rpy2rot;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemEstimator;
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::math::quaternion::wxyz_kinematics;
+    using utility::math::quaternion::wxyz_to_mat;
 
     /*
      * State contains the 6-DOF torso pose in the field frame {f}, its body-fixed
      * velocity, the gyroscope bias, and a 2-DOF camera-mount attitude bias:
      *
      *     [ rBFf    ] Torso position in field frame (3)
-     *     [ q       ] Torso orientation quaternion (4), Rfb = quat2rot(q)
+     *     [ q       ] Torso orientation quaternion (4), Rfb = wxyz_to_mat(q)
      * x = [ vBb     ] Body-fixed translational velocity (3)
      *     [ omegaBb ] Body-fixed angular velocity (3)
      *     [ bGyro   ] Gyroscope bias, body frame (3)
@@ -124,14 +125,14 @@ namespace module::localisation::srif {
 
         // State layout (nx = 18):
         //   0..2    rBFf         torso position in {f} [m]
-        //   3..6    q            attitude quaternion (w, x, y, z), Rfb = quat2rot(q)
+        //   3..6    q            attitude quaternion (w, x, y, z), Rfb = wxyz_to_mat(q)
         //   7..9    vBb          body-fixed linear velocity [m/s]
         //   10..12  omegaBb      body-fixed angular velocity [rad/s]
         //   13..15  bGyro        gyroscope bias in {b} [rad/s]
         //   16..17  camera mount bias (roll, pitch) [rad]
         //
         // A quaternion stays valid through a topple, where Euler angles are singular.
-        // quat2rot normalises, so only MeasurementQuaternionNorm informs |q|. No index is the
+        // wxyz_to_mat normalises, so only MeasurementQuaternionNorm informs |q|. No index is the
         // heading; use heading() and attitude_tangent().
         static constexpr Eigen::Index nx = 18;  ///< State dimension
 
@@ -162,7 +163,7 @@ namespace module::localisation::srif {
         template <typename Scalar>
         static Pose<Scalar> field_pose(const Eigen::VectorX<Scalar>& x) {
             Pose<Scalar> Tfb;
-            Tfb.rotation_matrix    = quat2rot(Eigen::Vector4<Scalar>(x.template segment<4>(i_quat)));
+            Tfb.rotation_matrix    = wxyz_to_mat(Eigen::Vector4<Scalar>(x.template segment<4>(i_quat)));
             Tfb.translation_vector = x.template segment<3>(i_pos);
             return Tfb;
         }
@@ -176,7 +177,7 @@ namespace module::localisation::srif {
         static Eigen::Matrix3<Scalar> camera_bias_rotation(const Eigen::VectorX<Scalar>& x) {
             Eigen::Vector3<Scalar> rpy;
             rpy << x(i_bias), x(i_bias + 1), Scalar(0);
-            return rpy2rot(rpy);
+            return rpy_intrinsic_to_mat(rpy);
         }
 
         /**
@@ -188,7 +189,7 @@ namespace module::localisation::srif {
          * @return [roll, pitch, yaw] in radians
          */
         static Eigen::Vector3d attitude_rpy(const Eigen::VectorXd& x) {
-            return rot2rpy(quat2rot(Eigen::Vector4d(x.segment<4>(i_quat))));
+            return mat_to_rpy_intrinsic(wxyz_to_mat(Eigen::Vector4d(x.segment<4>(i_quat))));
         }
 
         /// @brief Heading (yaw) of the estimated attitude [rad].
@@ -209,7 +210,7 @@ namespace module::localisation::srif {
         static Eigen::Matrix<double, 4, 3> attitude_tangent(const Eigen::VectorXd& x) {
             Eigen::Vector4d q = x.segment<4>(i_quat);
             q.normalize();
-            return 0.5 * quat_Xi(q);
+            return 0.5 * wxyz_kinematics(q);
         }
 
         /**
@@ -222,7 +223,7 @@ namespace module::localisation::srif {
          * @return 4x3 matrix dq/dtheta_f at the state's attitude
          */
         static Eigen::Matrix<double, 4, 3> attitude_tangent_field(const Eigen::VectorXd& x) {
-            const Eigen::Matrix3d Rfb = quat2rot(Eigen::Vector4d(x.segment<4>(i_quat)));
+            const Eigen::Matrix3d Rfb = wxyz_to_mat(Eigen::Vector4d(x.segment<4>(i_quat)));
             return attitude_tangent(x) * Rfb.transpose();
         }
 
@@ -255,7 +256,7 @@ namespace module::localisation::srif {
             // 2*attitude_tangent^T, which already carries the 0.5.
             Eigen::Vector4d q = x.segment<4>(i_quat);
             q.normalize();
-            return quat2rot(q) * (2.0 * quat_Xi(q).transpose());
+            return wxyz_to_mat(q) * (2.0 * wxyz_kinematics(q).transpose());
         }
 
         /// @brief Variance of the field-frame yaw implied by the attitude covariance.

@@ -36,7 +36,8 @@
 #include "srif/SystemLocalisation.hpp"
 
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/math/quaternion.hpp"
 
 using module::localisation::measurement::MeasurementFieldLandmarks;
 using module::localisation::srif::Detection;
@@ -46,8 +47,9 @@ using module::localisation::srif::LandmarkType;
 using module::localisation::srif::SystemLocalisation;
 using module::localisation::srif::VisionSample;
 using utility::gaussian_filtering::Pose;
-using utility::gaussian_filtering::rpy2quat;
 using utility::gaussian_filtering::gaussian::GaussianInfo;
+using utility::math::euler::rpy_intrinsic_to_mat;
+using utility::math::quaternion::mat_to_wxyz;
 
 namespace {
 
@@ -88,7 +90,7 @@ SCENARIO("Landmark detections associate under the class names the K1 YOLO model 
     // Torso on the field facing roughly down the field, with the camera above and ahead of it
     Eigen::VectorXd x = Eigen::VectorXd::Zero(SystemLocalisation::nx);
     x.head<3>() << -2.0, 1.0, 0.5;
-    x.segment<4>(SystemLocalisation::i_quat) = rpy2quat(Eigen::Vector3d(0.0, 0.0, 0.3));
+    x.segment<4>(SystemLocalisation::i_quat) = mat_to_wxyz(rpy_intrinsic_to_mat(Eigen::Vector3d(0.0, 0.0, 0.3)));
     const SystemLocalisation system(GaussianInfo<double>::from_sqrt_moment(
         x,
         Eigen::MatrixXd::Identity(SystemLocalisation::nx, SystemLocalisation::nx) * 0.01));

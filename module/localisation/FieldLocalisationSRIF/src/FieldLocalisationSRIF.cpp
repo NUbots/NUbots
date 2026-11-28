@@ -49,7 +49,8 @@
 #include "message/vision/OutOfFieldFeatures.hpp"
 
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
-#include "utility/gaussian_filtering/rotation.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/math/quaternion.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/Vision.hpp"
@@ -77,9 +78,10 @@ namespace module::localisation {
     using measurement::MeasurementGyroscope;
     using measurement::MeasurementKinematicHeight;
     using measurement::MeasurementQuaternionNorm;
-    using utility::gaussian_filtering::rot2rpy;
-    using utility::gaussian_filtering::rpy2quat;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::math::quaternion::mat_to_wxyz;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -632,7 +634,7 @@ namespace module::localisation {
         constexpr Eigen::Index nx = filter::SystemLocalisation::nx;
 
         // Roll, pitch and torso height come from the kinematic chain, unsearched.
-        const Eigen::Vector3d rpy_torso = rot2rpy(Twt.rotation_matrix);
+        const Eigen::Vector3d rpy_torso = mat_to_rpy_intrinsic(Twt.rotation_matrix);
         const double roll0              = rpy_torso.x();
         const double pitch0             = rpy_torso.y();
         const double z0                 = Twt.translation_vector.z();
@@ -653,7 +655,7 @@ namespace module::localisation {
             for (double y = -half_width; y <= half_width; y += cfg.grid_step_xy) {
                 for (double yaw = -M_PI; yaw < M_PI; yaw += cfg.grid_step_yaw) {
                     Eigen::VectorXd candidate(nx);
-                    candidate << x, y, z0, rpy2quat(Eigen::Vector3d(roll0, pitch0, yaw)),
+                    candidate << x, y, z0, mat_to_wxyz(rpy_intrinsic_to_mat(Eigen::Vector3d(roll0, pitch0, yaw))),
                         Eigen::Matrix<double, 9, 1>::Zero(), 0.0, 0.0;
                     probe.reset_to(GaussianInfo<double>::from_sqrt_moment(candidate, S_probe), sample.t);
 
@@ -694,7 +696,7 @@ namespace module::localisation {
         auto field                       = std::make_unique<Field>();
 
         // Planar, as FieldLocalisationNLopt: Hfw = Translation(x, y, 0) * Rz(yaw)
-        const double yaw      = rot2rpy(Hfw_full.rotation()).z();
+        const double yaw      = mat_to_rpy_intrinsic(Hfw_full.rotation()).z();
         Eigen::Isometry3d Hfw = Eigen::Isometry3d::Identity();
         Hfw.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hfw.translation()     = Eigen::Vector3d(Hfw_full.translation().x(), Hfw_full.translation().y(), 0.0);
