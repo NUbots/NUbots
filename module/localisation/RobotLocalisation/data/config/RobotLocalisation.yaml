@@ -11,11 +11,44 @@ ukf:
       velocity: [1e-2, 1e-2]
 
   initial_covariance:
+    # Used for teammates created from comms messages
     position: [1e-3, 1e-3]
     velocity: [1e-3, 1e-3]
+    # Velocity variance of a track created from a vision detection (position covariance is the detection's own
+    # measurement covariance, see `measurement`). Large, as the velocity is unknown at first sight.
+    vision_velocity: [1.0, 1.0]
 
-association_distance: 0.5
+# Vision measurement covariance, built per detection from its range r (m) from the camera, in the
+# range/bearing frame of the detection:
+#   range std      = sqrt((range_base + range_quad * r^2)^2 + pose_std^2)
+#   tangential std = sqrt((bearing_per_metre * r)^2 + pose_std^2)
+# Range error grows with r^2 because it comes from ground-projecting the robot's foot pixel.
+measurement:
+  range_base: 0.05
+  range_quad: 0.011
+  bearing_per_metre: 0.015
+  pose_std: 0.14 # Uncertainty of the camera's own position in the world
 
+# A vision detection can only update a track if its squared Mahalanobis distance to the track is below this
+# (chi-squared, 2 dof; 9.21 = 99%). Detections are assigned to tracks one-to-one, lowest distance first.
+gate_chi2: 9.2103
+
+# Vision cannot tell teams apart, so a detection can only update a teammate track (from comms) if it is also within
+# this distance (m) of it. Stops opponents near a teammate being absorbed into the teammate's track.
+teammate_association_distance: 0.5
+
+# Opponent tracks that have gone this long (seconds) without a vision update are removed
+max_track_age: 3.0
+
+# Tracks within this distance (m) of an older track are duplicates and are removed
+merge_distance: 0.5
+
+# Maximum number of non-teammate tracks. Keeps the tracks with the most vision updates. 0 disables the limit
+# (set it to the number of opponents on the field to enable)
+max_robot_tracks: 0
+
+# Teammates only: a teammate seen as out of the camera view is kept; one in view that is not detected is removed
+# after this many consecutive misses
 max_missed_count: 25
 
 # How long (seconds) without a comms message before a teammate is considered gone. Teammates broadcast

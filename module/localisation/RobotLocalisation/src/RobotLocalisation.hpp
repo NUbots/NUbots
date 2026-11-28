@@ -55,14 +55,31 @@ namespace module::localisation {
                     } process{};
                 } noise{};
                 struct InitialCovariance {
-                    Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                    Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
+                    Eigen::Vector2d position        = Eigen::Vector2d::Zero();
+                    Eigen::Vector2d velocity        = Eigen::Vector2d::Zero();
+                    Eigen::Vector2d vision_velocity = Eigen::Vector2d::Zero();
                 } initial_covariance{};
             } ukf{};
 
-            /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
-            double association_distance = 0.0;
-            /// @brief The maximum number of times a robot can be missed consecutively before it is removed
+            /// @brief Parameters of the per-detection vision measurement covariance
+            struct VisionMeasurement {
+                double range_base        = 0.0;
+                double range_quad        = 0.0;
+                double bearing_per_metre = 0.0;
+                double pose_std          = 0.0;
+            } measurement{};
+
+            /// @brief Squared Mahalanobis distance above which a detection cannot update a track
+            double gate_chi2 = 0.0;
+            /// @brief A detection can only update a teammate track if it is within this distance (m) of it
+            double teammate_association_distance = 0.0;
+            /// @brief Seconds without a vision update after which a non-teammate track is removed
+            double max_track_age = 0.0;
+            /// @brief Tracks closer than this (m) to an older track are removed as duplicates
+            double merge_distance = 0.0;
+            /// @brief Maximum number of non-teammate tracks (0 = unlimited)
+            int max_robot_tracks = 0;
+            /// @brief The maximum number of times a teammate can be missed consecutively before it is removed
             int max_missed_count = 0;
             /// @brief How long (seconds) without a comms message before a teammate is removed. Teammates are
             /// pruned on comms staleness rather than the vision-driven missed_count, since they are frequently
@@ -84,6 +101,10 @@ namespace module::localisation {
             bool seen = true;
             /// @brief The number of times the robot has been undetected in a row
             long missed_count = 0;
+            /// @brief Time of the last vision update (or creation)
+            NUClear::clock::time_point last_vision_time = NUClear::clock::now();
+            /// @brief The number of vision updates applied to this robot
+            unsigned long vision_updates = 0;
             /// @brief A unique identifier for the robot
             unsigned long id;
 
@@ -100,10 +121,12 @@ namespace module::localisation {
             /// @param cfg_ukf The UKF configuration to use for the robot
             /// @param next_id The unique id to assign to this new robot
             /// @param p An optional purpose message that can be used to associate the robot with a teammate
+            /// @param vision_R If given, the robot is created from a vision detection with this position covariance
             TrackedRobot(const Eigen::Vector3d& initial_rRWw,
                          const Config::UKF& cfg_ukf,
                          const unsigned long next_id,
-                         const std::unique_ptr<message::purpose::Purpose>& p = nullptr)
+                         const std::unique_ptr<message::purpose::Purpose>& p = nullptr,
+                         const Eigen::Matrix2d* vision_R                     = nullptr)
                 : id(next_id) {
                 NUClear::log<NUClear::LogLevel::DEBUG>("Making robot with id: ", id);
                 RobotModel<double>::StateVec initial_state;
@@ -112,7 +135,13 @@ namespace module::localisation {
                 RobotModel<double>::StateVec initial_covariance;
                 initial_covariance.rRWw = cfg_ukf.initial_covariance.position;
                 initial_covariance.vRw  = cfg_ukf.initial_covariance.velocity;
-                ukf.set_state(initial_state, initial_covariance.asDiagonal());
+                Eigen::Matrix4d P0      = initial_covariance.asDiagonal();
+                if (vision_R != nullptr) {
+                    P0.setZero();
+                    P0.topLeftCorner<2, 2>()     = *vision_R;
+                    P0.bottomRightCorner<2, 2>() = cfg_ukf.initial_covariance.vision_velocity.asDiagonal();
+                }
+                ukf.set_state(initial_state, P0);
 
                 RobotModel<double>::StateVec process_noise;
                 process_noise.rRWw      = cfg_ukf.noise.process.position;
@@ -152,6 +181,18 @@ namespace module::localisation {
         /// @param purpose An optional purpose message that can be used to associate the robot with teammate
         void data_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
                               const std::unique_ptr<message::purpose::Purpose>& purpose = nullptr);
+
+        /// @brief Associate vision detections with the tracked robots, gated by Mahalanobis distance and assigned
+        /// one-to-one, lowest distance first. Unassociated detections create new tracks.
+        /// @param robots_rRWw The detections in world coordinates
+        /// @param covariances The measurement covariance of each detection
+        void vision_association(const std::vector<Eigen::Vector3d>& robots_rRWw,
+                                const std::vector<Eigen::Matrix2d>& covariances);
+
+        /// @brief The covariance of a detection, from its range from the camera
+        /// @param rRWw The detection in world coordinates
+        /// @param rCWw The camera position in world coordinates
+        Eigen::Matrix2d vision_covariance(const Eigen::Vector3d& rRWw, const Eigen::Vector3d& rCWw) const;
 
         /// @brief Run maintenance on the tracked robots
         /// This will remove any viewable robots that have been missed too many times or are too close to another robot
