@@ -28,7 +28,8 @@ NOTE: If you are running a model for the first time on a robot using the TensorR
 
 - `message::input::Image` the image to run the YOLO on.
 - `message::support::FieldDescription` the ball radius. A ball's position is where the ray through the centre of its
-  box meets the plane a ball radius above the field, where the ball's centre is
+  box meets the plane a ball radius above the field, where the ball's centre is. Yolo does not run until a
+  `FieldDescription` has been emitted
 
 ## Emits
 
