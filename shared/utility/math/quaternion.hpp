@@ -135,6 +135,60 @@ namespace utility::math::quaternion {
         // https://www.gamedev.net/forums/topic/423462-rotation-difference-between-two-quaternions/?do=findComment&comment=3818213
         return a.inverse() * b;
     }
+
+    /**
+     * @brief Rotation matrix from a (w, x, y, z) quaternion vector.
+     *
+     * q is normalised first, so the result is invariant to |q|.
+     *
+     * @param q Quaternion (w, x, y, z); need not be unit length
+     * @return 3x3 rotation matrix
+     */
+    template <typename Derived>
+    inline Eigen::Matrix3<typename Derived::Scalar> wxyz_to_mat(const Eigen::MatrixBase<Derived>& q) {
+        using Scalar = typename Derived::Scalar;
+        return Eigen::Quaternion<Scalar>(q(0), q(1), q(2), q(3)).normalized().toRotationMatrix();
+    }
+
+    /**
+     * @brief Unit (w, x, y, z) quaternion vector from a rotation matrix.
+     *
+     * @param R 3x3 rotation matrix
+     * @return Unit quaternion (w, x, y, z) with w >= 0
+     */
+    inline Eigen::Vector4d mat_to_wxyz(const Eigen::Matrix3d& R) {
+        const Eigen::Quaterniond q(R);
+        Eigen::Vector4d v(q.w(), q.x(), q.y(), q.z());
+        // q and -q are the same rotation
+        if (v(0) < 0.0) {
+            v = -v;
+        }
+        return v.normalized();
+    }
+
+    /**
+     * @brief Quaternion kinematics matrix Xi(q), with qdot = 0.5 * Xi(q) * omega for body rates omega.
+     *
+     * @param q Quaternion (w, x, y, z)
+     * @return 4x3 matrix Xi(q)
+     */
+    template <typename Derived>
+    inline Eigen::Matrix<typename Derived::Scalar, 4, 3> wxyz_kinematics(const Eigen::MatrixBase<Derived>& q) {
+        using Scalar    = typename Derived::Scalar;
+        const Scalar& w = q(0);
+        const Scalar& x = q(1);
+        const Scalar& y = q(2);
+        const Scalar& z = q(3);
+
+        // clang-format off
+        Eigen::Matrix<Scalar, 4, 3> Xi;
+        Xi << -x, -y, -z,
+               w, -z,  y,
+               z,  w, -x,
+              -y,  x,  w;
+        // clang-format on
+        return Xi;
+    }
 }  // namespace utility::math::quaternion
 
 
