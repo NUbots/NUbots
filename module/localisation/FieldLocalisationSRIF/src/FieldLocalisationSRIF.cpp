@@ -78,6 +78,7 @@ namespace module::localisation {
     using measurement::MeasurementGyroscope;
     using measurement::MeasurementKinematicHeight;
     using measurement::MeasurementQuaternionNorm;
+    using measurement::MeasurementRest;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -164,6 +165,10 @@ namespace module::localisation {
             // IMU pre-filtering, after VQF (Laidig & Seel, 2023)
             cfg.use_filtered_gravity = config["imu"]["use_filtered_gravity"].as<bool>();
             cfg.imu.tau_acc          = config["imu"]["tau_acc"].as<double>();
+            cfg.use_rest_detection   = config["imu"]["use_rest_detection"].as<bool>();
+            cfg.imu.rest_min_time    = config["imu"]["rest_min_time"].as<double>();
+            cfg.rest_omega_sigma     = config["imu"]["rest_omega_sigma"].as<double>();
+            cfg.rest_bias_sigma      = config["imu"]["rest_bias_sigma"].as<double>();
             imu.params               = cfg.imu;
 
             // How far vision is trusted
@@ -230,7 +235,9 @@ namespace module::localisation {
 
             // At the Sensors rate, so the filter sees every IMU sample and not only those paired with vision
             imu.update(s.t, s.gyroscope, s.accelerometer, gyro_bias_estimate);
-            s.gravity = imu.gravity();
+            s.gravity        = imu.gravity();
+            s.at_rest        = imu.at_rest();
+            s.gyroscope_mean = imu.gyroscope_mean();
 
             // Non-finite when unavailable
             s.vBb = cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
@@ -322,6 +329,13 @@ namespace module::localisation {
                     if (paired->gyroscope.allFinite()) {
                         MeasurementGyroscope gyro(t, paired->gyroscope, cfg.gyroscope_sigma);
                         system->process(gyro);
+                    }
+
+                    // At rest the gyroscope reads its bias (VQF), the only yaw-rate bias information
+                    // other than vision
+                    if (cfg.use_rest_detection && paired->at_rest && paired->gyroscope_mean.allFinite()) {
+                        MeasurementRest rest(t, paired->gyroscope_mean, cfg.rest_omega_sigma, cfg.rest_bias_sigma);
+                        system->process(rest);
                     }
 
                     // Odometry velocity only while upright, otherwise a zero-velocity update

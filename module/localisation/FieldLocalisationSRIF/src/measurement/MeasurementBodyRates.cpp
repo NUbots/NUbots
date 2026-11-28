@@ -32,7 +32,7 @@
 
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
 
-// Both models are linear in the state, so the exact Hessian is constant and the
+// All three models are linear in the state, so the exact Hessian is constant and the
 // trust-region Newton update converges in one step.
 
 namespace module::localisation::measurement {
@@ -133,6 +133,66 @@ namespace module::localisation::measurement {
                                                    const SystemEstimator& /*system*/,
                                                    Eigen::VectorXd& g,
                                                    Eigen::MatrixXd& H) const {
+        using autodiff::at;
+        using autodiff::dual2nd;
+        using autodiff::hessian;
+        using autodiff::wrt;
+
+        g.resize(x.size());
+        H.resize(x.size(), x.size());
+
+        Eigen::VectorX<dual2nd> xdual = x.cast<dual2nd>();
+        dual2nd fdual;
+        auto func = [this](const Eigen::VectorX<dual2nd>& xd) -> dual2nd {
+            return this->template log_likelihood_impl<dual2nd>(xd);
+        };
+        H = hessian(func, wrt(xdual), at(xdual), fdual, g);
+        return static_cast<double>(fdual);
+    }
+
+    // =====================================================================
+    // MeasurementRest
+    // =====================================================================
+
+    MeasurementRest::MeasurementRest(double time,
+                                     const Eigen::Vector3d& gyroscope_mean,
+                                     double sigma_omega,
+                                     double sigma_bias)
+        : Measurement(time), y_(gyroscope_mean), sigma_omega_(sigma_omega), sigma_bias_(sigma_bias) {
+        update_method_ = UpdateMethod::NEWTONTRUSTEIG;
+    }
+
+    Eigen::VectorXd MeasurementRest::simulate(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
+        Eigen::VectorXd y(6);
+        y << x.segment<3>(SystemLocalisation::i_omega), x.segment<3>(SystemLocalisation::i_gyro_bias);
+        return y;
+    }
+
+    double MeasurementRest::log_likelihood(const Eigen::VectorXd& x, const SystemEstimator& /*system*/) const {
+        return log_likelihood_impl<double>(x);
+    }
+
+    double MeasurementRest::log_likelihood(const Eigen::VectorXd& x,
+                                           const SystemEstimator& /*system*/,
+                                           Eigen::VectorXd& g) const {
+        using autodiff::at;
+        using autodiff::dual;
+        using autodiff::gradient;
+        using autodiff::wrt;
+
+        Eigen::VectorX<dual> xdual = x.cast<dual>();
+        dual fdual;
+        auto func = [this](const Eigen::VectorX<dual>& xd) -> dual {
+            return this->template log_likelihood_impl<dual>(xd);
+        };
+        g = gradient(func, wrt(xdual), at(xdual), fdual);
+        return static_cast<double>(fdual);
+    }
+
+    double MeasurementRest::log_likelihood(const Eigen::VectorXd& x,
+                                           const SystemEstimator& /*system*/,
+                                           Eigen::VectorXd& g,
+                                           Eigen::MatrixXd& H) const {
         using autodiff::at;
         using autodiff::dual2nd;
         using autodiff::hessian;

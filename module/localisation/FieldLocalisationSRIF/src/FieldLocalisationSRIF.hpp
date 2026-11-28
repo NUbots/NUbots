@@ -124,6 +124,13 @@ namespace module::localisation {
             bool use_filtered_gravity = true;
             /// @brief VQF-style IMU pre-filter parameters
             filter::ImuPreFilter::Parameters imu{};
+            /// @brief Apply a rest measurement (zero angular velocity, gyroscope reads its bias) while the
+            ///        IMU pre-filter finds the robot at rest
+            bool use_rest_detection = true;
+            /// @brief Zero angular velocity noise std dev at rest, per vision frame [rad/s]
+            double rest_omega_sigma = 0.005;
+            /// @brief Gyroscope bias reading noise std dev at rest, per vision frame [rad/s]
+            double rest_bias_sigma = 0.01;
             /// @brief Enable the kinematic torso-height measurement
             bool use_kinematic_height = true;
             /// @brief Kinematic torso-height noise std dev [m]
@@ -176,7 +183,7 @@ namespace module::localisation {
 
         /// @brief Recent odometry samples, newest last
         std::vector<filter::SensorsSample> sensors_window;
-        /// @brief Sensors-rate IMU pre-filter (filtered gravity)
+        /// @brief Sensors-rate IMU pre-filter (filtered gravity, rest detection)
         filter::ImuPreFilter imu;
         /// @brief The estimator's gyroscope bias after the latest vision frame, for the IMU pre-filter [rad/s]
         Eigen::Vector3d gyro_bias_estimate = Eigen::Vector3d::Zero();

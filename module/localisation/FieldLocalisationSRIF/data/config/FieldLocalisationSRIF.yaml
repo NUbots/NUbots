@@ -47,6 +47,12 @@ imu:
   # sample paired with the vision frame. Gravity stays put in that frame while walking accelerations average out.
   use_filtered_gravity: true
   tau_acc: 3.0 # time constant of the gravity low-pass filter [s] (VQF's default)
+  # Rest detection: once the gyroscope and accelerometer have stayed close to their own low-pass filtered values
+  # for rest_min_time, the robot is at rest, so its angular velocity is zero and the gyroscope reads its bias.
+  use_rest_detection: true
+  rest_min_time: 1.5 # [s] (VQF's default)
+  rest_omega_sigma: 0.005 # zero angular velocity noise at rest, per vision frame [rad/s]
+  rest_bias_sigma: 0.01 # gyroscope bias reading noise at rest, per vision frame [rad/s]
 
 # --- How far vision is trusted --------------------------------------------------------------------
 measurement:

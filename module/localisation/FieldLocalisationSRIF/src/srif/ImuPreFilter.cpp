@@ -77,6 +77,9 @@ namespace module::localisation::srif {
         initialised = false;
         qib         = Eigen::Quaterniond::Identity();
         acc_i_lp.reset();
+        gyro_lp.reset();
+        acc_lp.reset();
+        rest_time = 0.0;
     }
 
     void ImuPreFilter::update(double t,
@@ -96,6 +99,8 @@ namespace module::localisation::srif {
         if (!initialised) {
             qib = Eigen::Quaterniond::Identity();
             acc_i_lp.update(accelerometer, 0.0, params.tau_acc);
+            gyro_lp.update(gyroscope, 0.0, params.rest_filter_tau);
+            acc_lp.update(accelerometer, 0.0, params.rest_filter_tau);
             initialised = true;
             return;
         }
@@ -112,6 +117,14 @@ namespace module::localisation::srif {
 
         // Gravity is constant in {i}, so filter there
         acc_i_lp.update(qib * accelerometer, dt, params.tau_acc);
+
+        // Rest detection: both signals stay close to their own low-pass filtered values
+        const Eigen::Vector3d gyro_mean = gyro_lp.update(gyroscope, dt, params.rest_filter_tau);
+        const Eigen::Vector3d acc_mean  = acc_lp.update(accelerometer, dt, params.rest_filter_tau);
+        const bool still =
+            (gyroscope - gyro_mean).squaredNorm() < params.rest_threshold_gyro * params.rest_threshold_gyro
+            && (accelerometer - acc_mean).squaredNorm() < params.rest_threshold_acc * params.rest_threshold_acc;
+        rest_time = still ? rest_time + dt : 0.0;
     }
 
     Eigen::Vector3d ImuPreFilter::gravity() const {

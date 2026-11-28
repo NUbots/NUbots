@@ -139,6 +139,60 @@ namespace module::localisation::measurement {
         double sigma_;       ///< Noise standard deviation [m/s]
     };
 
+    /**
+     * @class MeasurementRest
+     * @brief The robot is at rest (see srif::ImuPreFilter), after VQF's rest bias estimation.
+     *
+     * At rest the body angular velocity is zero, and the low-pass filtered gyroscope reads the bias:
+     *
+     *   0         = omegaBb + v1,   v1 ~ N(0, sigma_omega^2 I3)
+     *   gyro_mean = bGyro   + v2,   v2 ~ N(0, sigma_bias^2 I3)
+     *
+     * This is what makes the yaw-rate bias observable without vision. The gyro_mean of successive
+     * vision frames are strongly correlated (they share the low-pass filter's memory), so sigma_bias
+     * is per frame and deliberately loose.
+     */
+    class MeasurementRest : public Measurement {
+    public:
+        /**
+         * @brief Construct a rest measurement.
+         * @param time Event time [s]
+         * @param gyroscope_mean Low-pass filtered gyroscope reading [rad/s]
+         * @param sigma_omega Noise standard deviation of the zero angular velocity per axis [rad/s]
+         * @param sigma_bias Noise standard deviation of the bias reading per axis [rad/s]
+         */
+        MeasurementRest(double time, const Eigen::Vector3d& gyroscope_mean, double sigma_omega, double sigma_bias);
+
+        virtual Eigen::VectorXd simulate(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double log_likelihood(const Eigen::VectorXd& x, const SystemEstimator& system) const override;
+        virtual double log_likelihood(const Eigen::VectorXd& x,
+                                      const SystemEstimator& system,
+                                      Eigen::VectorXd& g) const override;
+        virtual double log_likelihood(const Eigen::VectorXd& x,
+                                      const SystemEstimator& system,
+                                      Eigen::VectorXd& g,
+                                      Eigen::MatrixXd& H) const override;
+
+        /// @brief Templated log-likelihood for autodiff.
+        template <typename Scalar>
+        Scalar log_likelihood_impl(const Eigen::VectorX<Scalar>& x) const {
+            const Eigen::Vector3<Scalar> e_omega =
+                Eigen::Vector3<Scalar>(x.segment(srif::SystemLocalisation::i_omega, 3));
+            const Eigen::Vector3<Scalar> e_bias =
+                y_.cast<Scalar>() - Eigen::Vector3<Scalar>(x.segment(srif::SystemLocalisation::i_gyro_bias, 3));
+            const double so2 = sigma_omega_ * sigma_omega_;
+            const double sb2 = sigma_bias_ * sigma_bias_;
+            return Scalar(-1.5 * std::log(2.0 * M_PI * so2) - 1.5 * std::log(2.0 * M_PI * sb2))
+                   - Scalar(0.5) * e_omega.squaredNorm() / Scalar(so2)
+                   - Scalar(0.5) * e_bias.squaredNorm() / Scalar(sb2);
+        }
+
+    protected:
+        Eigen::Vector3d y_;   ///< Low-pass filtered gyroscope reading [rad/s]
+        double sigma_omega_;  ///< Zero angular velocity noise standard deviation [rad/s]
+        double sigma_bias_;   ///< Bias reading noise standard deviation [rad/s]
+    };
+
 }  // namespace module::localisation::measurement
 
 #endif  // MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP

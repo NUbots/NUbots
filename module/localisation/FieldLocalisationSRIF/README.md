@@ -53,10 +53,19 @@ holds at kick-off and fails near the halfway line; see [Limitations](#limitation
 | Kinematic torso height | `MeasurementKinematicHeight` | While upright only                   |
 | Unit-norm prior        | `MeasurementQuaternionNorm`  | Every update                         |
 | Gyroscope              | `MeasurementGyroscope`       | Every frame, any posture             |
+| Rest (zero rate, bias) | `MeasurementRest`            | While the IMU is at rest             |
 | Body linear velocity   | `MeasurementBodyVelocity`    | Every frame (ZUPT while not upright) |
 
 The gyroscope measures `omegaBb + bGyro`. Estimating the bias matters because the upstream Mahony
 filter cannot observe its yaw component, which otherwise becomes heading drift.
+
+**Rest.** While walking, only vision separates the yaw-rate bias from a real turn. Following VQF's
+rest bias estimation [[1]](#references), `srif::ImuPreFilter` low-pass filters the gyroscope and
+accelerometer (time constant 0.5 s) at the Sensors rate. The robot is at rest once both have stayed
+within 2°/s and 0.5 m/s² of their filtered values for `imu.rest_min_time`. While at rest, each vision
+frame applies `MeasurementRest`: zero body angular velocity, and the filtered gyroscope as a direct
+reading of the bias. The filtered readings of successive frames share the filter's memory, so
+`imu.rest_bias_sigma` is per frame and deliberately loose.
 
 **Body velocity.** `odometry_velocity_source` picks the signal: `HTW_DIFFERENCE` finite-differences
 consecutive `Sensors.Htw` (any platform); `SENSORS_VTW` rotates `Sensors.vTw` into the torso frame
@@ -156,6 +165,10 @@ The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 | ---------------------- | ----------------------------------------------------------------------------- |
 | `use_filtered_gravity` | Gravity reading from the almost-inertial low-pass filter rather than raw      |
 | `tau_acc`              | Time constant of that filter [s]; longer smooths more, but trusts gyro longer |
+| `use_rest_detection`   | Apply `MeasurementRest` while the IMU is at rest                              |
+| `rest_min_time`        | How long the IMU must stay still before it counts as at rest [s]              |
+| `rest_omega_sigma`     | Zero angular velocity noise at rest, per vision frame [rad/s]                 |
+| `rest_bias_sigma`      | Gyroscope bias reading noise at rest, per vision frame [rad/s]                |
 
 **How far vision is trusted** (`measurement:`)
 
@@ -257,4 +270,4 @@ residual.
 1. D. Laidig and T. Seel, "VQF: Highly Accurate IMU Orientation Estimation with Bias Estimation and
    Magnetic Disturbance Rejection", *Information Fusion* 91 (2023) 187–204.
    [arXiv:2203.17024](https://arxiv.org/abs/2203.17024). Source of the almost-inertial gravity
-   filter in `srif::ImuPreFilter`.
+   filter and the rest detection in `srif::ImuPreFilter`.

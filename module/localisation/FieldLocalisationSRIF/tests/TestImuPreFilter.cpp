@@ -137,3 +137,38 @@ SCENARIO("The IMU pre-filter restarts after a gap in the samples", "[localisatio
     imu.update(1.0, Eigen::Vector3d::Zero(), Eigen::Vector3d(g, 0, 0), Eigen::Vector3d::Zero());
     CHECK((imu.gravity() - Eigen::Vector3d(g, 0, 0)).norm() < 1e-9);
 }
+
+SCENARIO("The IMU pre-filter detects rest and reads the gyroscope bias", "[localisation][srif][imu]") {
+    ImuPreFilter imu;
+    const Eigen::Vector3d bias(0.004, -0.006, 0.009);
+    int k = 0;
+    // 1 s still: not yet at rest, rest_min_time is 1.5 s
+    for (; k < 500; ++k) {
+        imu.update(k * dt, bias, Eigen::Vector3d(0, 0, g), Eigen::Vector3d::Zero());
+    }
+    CHECK_FALSE(imu.at_rest());
+    // 3 s more
+    for (; k < 2000; ++k) {
+        imu.update(k * dt, bias, Eigen::Vector3d(0, 0, g), Eigen::Vector3d::Zero());
+    }
+    CHECK(imu.at_rest());
+    CHECK((imu.gyroscope_mean() - bias).norm() < 1e-6);
+}
+
+SCENARIO("The IMU pre-filter does not find a walking robot at rest", "[localisation][srif][imu]") {
+    ImuPreFilter imu;
+    const double w    = 2.0 * M_PI * 2.0;
+    bool ever_at_rest = false;
+    for (int k = 0; k < 5000; ++k) {
+        const double t            = k * dt;
+        const double roll         = 0.05 * std::sin(w * t);
+        const Eigen::Matrix3d Rwb = Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX()).toRotationMatrix();
+        const Eigen::Vector3d a_w(1.5 * std::sin(w * t), 1.0 * std::cos(w * t), 2.0 * std::sin(2.0 * w * t));
+        imu.update(t,
+                   Eigen::Vector3d(0.05 * w * std::cos(w * t), 0, 0),
+                   Rwb.transpose() * (a_w + Eigen::Vector3d(0, 0, g)),
+                   Eigen::Vector3d::Zero());
+        ever_at_rest = ever_at_rest || imu.at_rest();
+    }
+    CHECK_FALSE(ever_at_rest);
+}

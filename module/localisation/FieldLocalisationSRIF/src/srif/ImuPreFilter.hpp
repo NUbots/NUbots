@@ -32,14 +32,19 @@
  * D. Laidig and T. Seel, "VQF: Highly Accurate IMU Orientation Estimation with Bias Estimation and
  * Magnetic Disturbance Rejection", Information Fusion 91 (2023) 187-204, arXiv:2203.17024.
  *
- * Run at the full Sensors rate rather than the vision rate.
+ * Two ideas from the paper are used, both at the full Sensors rate rather than the vision rate:
  *
- * Gravity is filtered in an almost-inertial frame {i}. The gyroscope (minus the SRIF's current bias
- * estimate) is integrated into Rib, the accelerometer is rotated into {i}, low-pass filtered
- * there with a second-order Butterworth filter, and rotated back into the torso frame. Gravity is
- * constant in {i} while the walking robot's own accelerations average out, and since the
- * rotation into and out of {i} use the same Rib, only the drift of Rib within the filter time
- * constant matters. A single raw accelerometer sample is a poor gravity reading on a walking robot.
+ * 1. Gravity filtered in an almost-inertial frame {i}. The gyroscope (minus the SRIF's current bias
+ *    estimate) is integrated into Rib, the accelerometer is rotated into {i}, low-pass filtered
+ *    there with a second-order Butterworth filter, and rotated back into the torso frame. Gravity is
+ *    constant in {i} while the walking robot's own accelerations average out, and since the
+ *    rotation into and out of {i} use the same Rib, only the drift of Rib within the filter time
+ *    constant matters. A single raw accelerometer sample is a poor gravity reading on a walking robot.
+ *
+ * 2. Rest detection. The gyroscope and accelerometer are low-pass filtered, and the robot is at rest
+ *    once both have stayed within a threshold of their low-passed values for a minimum time. At rest
+ *    the body angular velocity is zero, so the gyroscope reads its bias directly, which makes the
+ *    yaw-rate bias observable without vision.
  */
 #ifndef MODULE_LOCALISATION_SRIF_IMUPREFILTER_HPP
 #define MODULE_LOCALISATION_SRIF_IMUPREFILTER_HPP
@@ -87,6 +92,14 @@ namespace module::localisation::srif {
         struct Parameters {
             /// @brief Time constant of the gravity low-pass filter in {i} [s] (VQF tau_acc)
             double tau_acc = 3.0;
+            /// @brief Time constant of the rest-detection low-pass filters [s]
+            double rest_filter_tau = 0.5;
+            /// @brief Maximum deviation of the gyroscope from its low-passed value at rest [rad/s]
+            double rest_threshold_gyro = 2.0 * M_PI / 180.0;
+            /// @brief Maximum deviation of the accelerometer from its low-passed value at rest [m/s^2]
+            double rest_threshold_acc = 0.5;
+            /// @brief Time both must stay under their thresholds before the robot is at rest [s]
+            double rest_min_time = 1.5;
             /// @brief Sample gaps longer than this reset the filters [s]
             double max_gap = 0.2;
         };
@@ -111,6 +124,16 @@ namespace module::localisation::srif {
         /// @brief Low-pass filtered specific force in the torso frame [m/s^2]; non-finite until the first sample
         [[nodiscard]] Eigen::Vector3d gravity() const;
 
+        /// @brief Whether the robot is at rest
+        [[nodiscard]] bool at_rest() const {
+            return rest_time >= params.rest_min_time;
+        }
+
+        /// @brief Low-pass filtered gyroscope reading [rad/s]; the bias while at_rest()
+        [[nodiscard]] const Eigen::Vector3d& gyroscope_mean() const {
+            return gyro_lp.value();
+        }
+
     private:
         bool initialised = false;
         double last_t    = 0.0;
@@ -118,6 +141,11 @@ namespace module::localisation::srif {
         Eigen::Quaterniond qib = Eigen::Quaterniond::Identity();
         /// @brief Specific force low-pass filtered in {i}
         Butterworth3 acc_i_lp;
+        /// @brief Rest detection low-pass filters
+        Butterworth3 gyro_lp;
+        Butterworth3 acc_lp;
+        /// @brief How long the rest conditions have held [s]
+        double rest_time = 0.0;
     };
 
 }  // namespace module::localisation::srif
