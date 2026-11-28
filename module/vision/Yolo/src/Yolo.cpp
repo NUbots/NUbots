@@ -312,6 +312,11 @@ namespace module::vision {
                     Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
 
                     i.rIWw = rIWw;
+
+                    // Bounding box centre in pixel coordinates
+                    i.pixel_centre =
+                        Eigen::Vector2d(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height / 2.0);
+
                     if (objects[class_id].name == "LCross") {
                         i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
                     }

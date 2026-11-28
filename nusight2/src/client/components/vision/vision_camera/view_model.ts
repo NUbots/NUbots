@@ -8,6 +8,7 @@ import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { GoalsViewModel } from "./goals";
 import { VisionCameraModel } from "./model";
 import { OtherRobotsViewModel } from "./other_robots";
+import { OutOfFieldViewModel } from "./out_of_field";
 
 export class VisionCameraViewModel extends CameraViewModel {
   constructor(
@@ -28,6 +29,7 @@ export class VisionCameraViewModel extends CameraViewModel {
       drawOptions.drawGoals && this.goals?.goals(),
       drawOptions.drawRobots && this.robots?.robots(),
       drawOptions.drawBoundingBoxes && this.boundingBoxes?.boundingBoxes(),
+      drawOptions.drawOutOfField && this.outOfField?.outOfField(),
     ];
   };
 
@@ -69,6 +71,14 @@ export class VisionCameraViewModel extends CameraViewModel {
         this.imageAspectRatio,
         this.model.image,
       )
+    );
+  }
+
+  @computed
+  private get outOfField(): OutOfFieldViewModel | undefined {
+    return (
+      this.model.outOfField &&
+      OutOfFieldViewModel.of(this.model.outOfField, this.model.params, this.canvas, this.imageAspectRatio)
     );
   }
 }

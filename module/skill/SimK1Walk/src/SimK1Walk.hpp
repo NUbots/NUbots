@@ -114,8 +114,9 @@ namespace module::skill {
         /// Time the current in-walk kick started
         NUClear::clock::time_point kick_start_time{};
 
-        /// Last emitted walk state, to avoid re-emitting unchanged states at 50 Hz
-        int last_walk_state = -1;
+        /// Last emitted walk state and command, to avoid re-emitting an unchanged WalkState at 50 Hz
+        int last_walk_state               = -1;
+        Eigen::Vector3d last_walk_command = Eigen::Vector3d::Zero();
 
         void reset_policy_state();
     };

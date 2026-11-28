@@ -3,6 +3,11 @@ import { CompressedImage, CompressedImage_Lens_ProjectionEnum } from "@proto/mes
 import { Balls } from "@proto/message/vision/Ball";
 import { BoundingBoxes } from "@proto/message/vision/BoundingBoxes";
 import { Goal_SideEnum, Goals } from "@proto/message/vision/Goal";
+import {
+  OutOfFieldFeature_StatusFromEnum,
+  OutOfFieldFeatures,
+  OutOfFieldLandmark_StatusFromEnum,
+} from "@proto/message/vision/OutOfFieldFeatures";
 import { Robots } from "@proto/message/vision/Robot";
 import { action, runInAction } from "mobx";
 
@@ -32,6 +37,7 @@ export class VisionNetwork {
     this.network.on(Goals, this.onGoals);
     this.network.on(Robots, this.onRobots);
     this.network.on(BoundingBoxes, this.onBoundingBoxes);
+    this.network.on(OutOfFieldFeatures, this.onOutOfFieldFeatures);
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -159,6 +165,37 @@ export class VisionNetwork {
       corners: boundingBox.corners?.map((corner) => Vector3.from(corner))!,
       colour: Vector4.from(boundingBox.colour),
     }));
+  }
+
+  @action
+  private onOutOfFieldFeatures(robotModel: RobotModel, packet: OutOfFieldFeatures) {
+    const robot = VisionRobotModel.of(robotModel);
+    const { id, timestamp, Hcw, features, landmarks, llr, mapFrozen, flipRequested } = packet;
+    const camera = robot.cameras.get(id);
+    if (!camera) {
+      return;
+    }
+    camera.outOfField = {
+      timestamp: Timestamp.toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      features: features.map((feature) => ({
+        uPCc: Vector3.from(feature.uPCc),
+        status: OutOfFieldFeature_StatusFromEnum[feature.status!],
+      })),
+      landmarks: landmarks.map((landmark) => {
+        const status = OutOfFieldLandmark_StatusFromEnum[landmark.status!];
+        return {
+          uPCc: Vector3.from(landmark.uPCc),
+          status,
+          // Only meaningful when associated; otherwise it arrives as the zero vector
+          uMatchCc: status === "associated" ? Vector3.from(landmark.uMatchCc) : undefined,
+          bearingOnly: landmark.bearingOnly ?? false,
+        };
+      }),
+      llr: llr ?? 0,
+      mapFrozen: mapFrozen ?? false,
+      flipRequested: flipRequested ?? false,
+    };
   }
 }
 

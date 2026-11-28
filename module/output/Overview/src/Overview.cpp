@@ -31,6 +31,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
@@ -38,7 +39,6 @@
 #include "message/localisation/Field.hpp"
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
-#include "message/skill/Walk.hpp"
 #include "message/support/GlobalConfig.hpp"
 #include "message/support/nusight/Overview.hpp"
 #include "message/vision/Ball.hpp"
@@ -47,6 +47,7 @@
 namespace module::output {
 
     using extension::Configuration;
+    using message::behaviour::state::WalkState;
     using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
@@ -54,7 +55,6 @@ namespace module::output {
     using message::purpose::Purpose;
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
-    using message::skill::Walk;
     using message::support::GlobalConfig;
     using NUClear::message::CommandLineArguments;
 
@@ -88,7 +88,7 @@ namespace module::output {
            Optional<With<LocalisationBall>>,
            Optional<With<Kick>>,
            Optional<With<GameState>>,
-           Optional<With<Walk>>,
+           Optional<With<WalkState>>,
            Optional<With<Purpose>>,
            Single,
            Priority::LOW>()
@@ -99,7 +99,7 @@ namespace module::output {
                          const std::shared_ptr<const LocalisationBall>& loc_ball,
                          const std::shared_ptr<const Kick>& kick,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const Walk>& walk,
+                         const std::shared_ptr<const WalkState>& walk_state,
                          const std::shared_ptr<const Purpose>& purpose) {
                 auto msg = std::make_unique<OverviewMsg>();
 
@@ -154,9 +154,9 @@ namespace module::output {
                 msg->last_camera_image = last_seen_ball;
                 msg->last_camera_image = last_seen_goal;
 
-                // Set our walk command
-                if (walk) {
-                    msg->walk_command = walk->velocity_target.cast<float>();
+                // From WalkState, since skill::Walk is a Director task rather than data
+                if (walk_state) {
+                    msg->walk_command = walk_state->velocity_target.cast<float>();
                 }
                 else {
                     msg->walk_command = Eigen::Vector3f::Zero();

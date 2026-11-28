@@ -3,6 +3,7 @@ import { observable } from "mobx";
 import { computed } from "mobx";
 import { action } from "mobx";
 
+import { Matrix3 } from "../../../shared/math/matrix3";
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector2 } from "../../../shared/math/vector2";
@@ -200,6 +201,8 @@ export class LocalisationRobotModel {
   // fields on this model, which store world-space data and expose field-space via a computed).
   @observable desiredSupportPosition?: Vector2;
   @observable associationLines?: Line[];
+  // Covariance of the localisation (x, y, theta) estimate; undefined until a Field message arrives
+  @observable covariance?: Matrix3;
   @observable maxAlignRadius: number;
   @observable minAlignRadius: number;
   @observable angleToFinalHeading: number;
@@ -243,6 +246,7 @@ export class LocalisationRobotModel {
     purpose,
     desiredSupportPosition,
     associationLines,
+    covariance,
     maxAlignRadius,
     minAlignRadius,
     angleToFinalHeading,
@@ -279,6 +283,7 @@ export class LocalisationRobotModel {
     purpose: string;
     desiredSupportPosition?: Vector2;
     associationLines?: Line[];
+    covariance?: Matrix3;
     maxAlignRadius: number;
     minAlignRadius: number;
     angleToFinalHeading: number;
@@ -322,6 +327,7 @@ export class LocalisationRobotModel {
     this.desiredSupportPosition = desiredSupportPosition;
     this.teamColour = teamColour || "blue";
     this.associationLines = associationLines;
+    this.covariance = covariance;
     this.maxAlignRadius = maxAlignRadius;
     this.minAlignRadius = minAlignRadius;
     this.angleToFinalHeading = angleToFinalHeading;

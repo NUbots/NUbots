@@ -12,6 +12,23 @@ odometry_deadband: 1.0e-6
 # seconds. Without one this recent, vTw is left unmeasured (NaN).
 odometry_twist_max_age: 0.1
 
+# Twists faster than this [m/s] are discarded (vTw is NaN). The controller reports >100 m/s for a few hundred ms
+# after an odometry reset.
+odometry_twist_max_speed: 3.0
+
+# A step in the raw odometry between consecutive samples larger than this is the controller resetting its odometry
+# rather than motion, and is absorbed so Sensors.Htw stays continuous.
+odometry_jump:
+  xy: 0.1 # [m]
+  yaw: 0.3 # [rad]
+
+# The controller's twist can latch a non-zero value for tens of seconds while the robot stands. A twist faster than
+# speed is reported as zero while the odometry pose moved slower than stationary_speed over stationary_window.
+stuck_twist:
+  speed: 0.2 # [m/s]
+  stationary_speed: 0.05 # [m/s]
+  stationary_window: 0.25 # [s]
+
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians
