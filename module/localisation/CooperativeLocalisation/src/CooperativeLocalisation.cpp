@@ -125,19 +125,12 @@ namespace module::localisation {
                 cfg.observer_window     = config["tracks"]["observer_window"].as<double>();
             });
 
-        on<Trigger<GlobalConfig>, Sync<CooperativeLocalisation>>().then(
-            [this](const GlobalConfig& global_config) { player_id = global_config.player_id; });
-
-        on<Trigger<FieldDescription>, Sync<CooperativeLocalisation>>().then([this](const FieldDescription& fd) {
-            field_description      = fd;
-            have_field_description = true;
-        });
-
         // Our own ball detections
         on<Trigger<VisionBalls>, With<Field>, Sync<CooperativeLocalisation>>().then(
             [this](const VisionBalls& vision_balls, const Field& field) {
-                // Without a trusted pose our detections cannot be put on the field
-                if (!field.localised) {
+                // Without a trusted pose our detections cannot be put on the field. Without our player id we can't
+                // label them
+                if (!field.localised || player_id == 0) {
                     return;
                 }
                 const Eigen::Isometry3d Hwc(Eigen::Isometry3d(vision_balls.Hcw).inverse());
@@ -173,7 +166,7 @@ namespace module::localisation {
         // Our own robot detections
         on<Trigger<VisionRobots>, With<Field>, Sync<CooperativeLocalisation>>().then(
             [this](const VisionRobots& vision_robots, const Field& field) {
-                if (!field.localised) {
+                if (!field.localised || player_id == 0) {
                     return;
                 }
                 const Eigen::Isometry3d Hwc(Eigen::Isometry3d(vision_robots.Hcw).inverse());
@@ -239,8 +232,21 @@ namespace module::localisation {
             process_scan(read(robocup.nubots.robots, Target::ROBOT));
         });
 
-        on<Every<UPDATE_RATE, Per<std::chrono::seconds>>, With<Field>, Sync<CooperativeLocalisation>>().then(
-            [this](const Field& field) {
+        // GlobalConfig and FieldDescription are emitted while modules are still being installed, too early for a
+        // Trigger here, so read their latest values
+        on<Every<UPDATE_RATE, Per<std::chrono::seconds>>,
+           With<Field>,
+           With<GlobalConfig>,
+           Optional<With<FieldDescription>>,
+           Sync<CooperativeLocalisation>>()
+            .then([this](const Field& field,
+                         const GlobalConfig& global_config,
+                         const std::shared_ptr<const FieldDescription>& fd) {
+                player_id = global_config.player_id;
+                if (fd) {
+                    field_description      = *fd;
+                    have_field_description = true;
+                }
                 const auto now = NUClear::clock::now();
                 predict(now);
                 maintenance();
