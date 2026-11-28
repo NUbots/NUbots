@@ -32,12 +32,10 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/booster/BoosterModeState.hpp"
 #include "message/booster/BoosterOdometry.hpp"
 #include "message/booster/BoosterOdometryTwist.hpp"
 #include "message/input/Buttons.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/euler.hpp"
@@ -50,16 +48,16 @@ namespace module::input {
 
     using booster::robot::ChannelFactory;
     using extension::Configuration;
-    using message::booster::BoosterModeState;
     using message::booster::BoosterOdometry;
     using message::booster::BoosterOdometryTwist;
     using message::input::ButtonLeftDown;
     using message::input::ButtonLeftUp;
     using message::input::ButtonMiddleDown;
     using message::input::ButtonMiddleUp;
-    using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
+    using utility::input::ServoID;
     using utility::nusight::graph;
+    using utility::platform::get_raw_servo;
 
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
@@ -101,10 +99,8 @@ namespace module::input {
             cfg.odometry_twist_max_age = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["odometry_twist_max_age"].as<double>()));
             cfg.odometry_twist_max_speed = config["odometry_twist_max_speed"].as<double>();
-            cfg.odometry_jump_xy         = config["odometry_jump"]["xy"].as<double>();
-            cfg.odometry_jump_yaw        = config["odometry_jump"]["yaw"].as<double>();
             cfg.stuck_twist_speed        = config["stuck_twist"]["speed"].as<double>();
-            cfg.stationary_speed         = config["stuck_twist"]["stationary_speed"].as<double>();
+            cfg.stationary_joint_range   = config["stuck_twist"]["stationary_joint_range"].as<double>();
             cfg.stationary_window        = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["stuck_twist"]["stationary_window"].as<double>()));
 
@@ -142,27 +138,6 @@ namespace module::input {
         });
 
 
-        // Re-zero the odometry so it is reported relative to the robot's post-reset pose. HardwareIO also
-        // resets the controller's odometry, which lands at an unknown later time; that jump in the raw
-        // odometry is absorbed below rather than reported.
-        on<Trigger<ResetFieldLocalisation>>().then([this] {
-            std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
-            odometry_rezero = true;
-            log<INFO>("Re-zeroing odometry after field localisation reset");
-        });
-
-        // HardwareIO resets the controller's odometry on any mode change, so re-zero as for a reset
-        on<Trigger<BoosterModeState>>().then([this](const BoosterModeState& mode_state) {
-            std::lock_guard<std::mutex> odometry_lock(odometry_mutex);
-            const int mode = static_cast<int>(mode_state.mode);
-            if (last_booster_mode != -1 && mode != last_booster_mode) {
-                odometry_rezero = true;
-                log<INFO>("Re-zeroing odometry after mode change");
-            }
-            last_booster_mode = mode;
-        });
-
-
         on<Trigger<RawSensors>, With<BoosterOdometry>, Optional<With<BoosterOdometryTwist>>>().then(
             [this](const RawSensors& raw_sensors,
                    const BoosterOdometry& odo,
@@ -172,44 +147,35 @@ namespace module::input {
                 bool stationary = false;
                 {
                     std::lock_guard<std::mutex> lock(odometry_mutex);
-                    if (odometry_rezero) {
+                    // Zero on the first sample so the odometry world starts at the robot
+                    if (!odometry_zeroed) {
                         odometry_offset = raw;
-                        odometry_rezero = false;
-                        odometry_history.clear();
+                        odometry_zeroed = true;
                         log<INFO>("Odometry zeroed at raw pose", odo.x, odo.y, odo.theta);
                     }
-                    else {
-                        // A step no robot can make between samples is the controller resetting its odometry:
-                        // move the offset so the reported pose stays where it was
-                        const Eigen::Isometry2d step = last_raw_odometry.inverse() * raw;
-                        const double step_yaw        = std::abs(Eigen::Rotation2Dd(step.rotation()).smallestAngle());
-                        if (step.translation().norm() > cfg.odometry_jump_xy || step_yaw > cfg.odometry_jump_yaw) {
-                            odometry_offset = raw * last_odometry.inverse();
-                            log<INFO>("Absorbed a raw odometry discontinuity of",
-                                      step.translation().norm(),
-                                      "m,",
-                                      step_yaw,
-                                      "rad");
-                        }
-                    }
-
                     const Eigen::Isometry2d out = odometry_offset.inverse() * raw;
-                    last_raw_odometry           = raw;
-                    last_odometry               = out;
                     normalized_odometry         = {out.translation().x(),
                                                    out.translation().y(),
                                                    Eigen::Rotation2Dd(out.rotation()).angle()};
 
-                    // Stationary if the pose barely moved since a sample at least stationary_window old
+                    // Stationary if no leg joint moved more than stationary_joint_range over stationary_window
                     const auto now = raw_sensors.timestamp;
-                    odometry_history.emplace_back(now, out.translation());
-                    while (odometry_history.size() > 2 && odometry_history[1].first <= now - cfg.stationary_window) {
-                        odometry_history.pop_front();
+                    LegJoints q;
+                    for (int i = 0; i < n_leg_joints; ++i) {
+                        q[i] = get_raw_servo(ServoID(first_leg_joint + i), raw_sensors).present_position;
                     }
-                    const auto& [t_ref, p_ref] = odometry_history.front();
-                    if (t_ref <= now - cfg.stationary_window) {
-                        const double dt = std::chrono::duration<double>(now - t_ref).count();
-                        stationary      = (out.translation() - p_ref).norm() < cfg.stationary_speed * dt;
+                    leg_history.emplace_back(now, q);
+                    while (leg_history.size() > 2 && leg_history[1].first <= now - cfg.stationary_window) {
+                        leg_history.pop_front();
+                    }
+                    if (leg_history.front().first <= now - cfg.stationary_window) {
+                        LegJoints lo = q;
+                        LegJoints hi = q;
+                        for (const auto& sample : leg_history) {
+                            lo = lo.cwiseMin(sample.second);
+                            hi = hi.cwiseMax(sample.second);
+                        }
+                        stationary = (hi - lo).maxCoeff() < cfg.stationary_joint_range;
                     }
                 }
 
@@ -287,7 +253,7 @@ namespace module::input {
                     && Eigen::Vector3d(twist->linear).norm() <= cfg.odometry_twist_max_speed) {
                     Eigen::Vector3d vtw =
                         Eigen::Isometry3d(sensors->Htw).inverse().linear() * Eigen::Vector3d(twist->linear);
-                    // A latched twist claims motion the odometry pose does not show; trust the pose
+                    // A latched twist claims motion the legs do not show
                     if (stationary && vtw.norm() > cfg.stuck_twist_speed) {
                         vtw.setZero();
                     }

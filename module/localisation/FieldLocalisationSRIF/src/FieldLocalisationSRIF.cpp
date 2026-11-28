@@ -231,26 +231,6 @@ namespace module::localisation {
                                                                                   s,
                                                                                   cfg.max_odometry_gap);
 
-            // A reset or offset recapture shifts Htw in the plane without the torso moving. Compared
-            // in the world frame so a fall's fast pitching is not mistaken for one.
-            if (!sensors_window.empty()) {
-                const Eigen::Isometry3d Twt_prev = sensors_window.back().Htw.inverse();
-                const Eigen::Isometry3d Twt      = s.Htw.inverse();
-                const double dxy         = (Twt.translation().head<2>() - Twt_prev.translation().head<2>()).norm();
-                const Eigen::Matrix3d dR = Twt.linear() * Twt_prev.linear().transpose();
-                const double dyaw        = std::abs(std::atan2(dR(1, 0), dR(0, 0)));
-                if (dxy > cfg.odometry_jump_xy || dyaw > cfg.odometry_jump_angle) {
-                    last_odometry_jump_t = s.t;
-                    // A finite difference across the jump is not a velocity
-                    s.vBb = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
-                    log<INFO>("Odometry discontinuity of ",
-                              dxy,
-                              "m, ",
-                              dyaw * 180.0 / M_PI,
-                              "deg; holding off vision updates");
-                }
-            }
-
             sensors_window.push_back(std::move(s));
 
             // Drop samples older than the window, keeping at least two
@@ -328,16 +308,6 @@ namespace module::localisation {
                             MeasurementBodyVelocity::stationary(t, settled ? cfg.zupt_sigma : cfg.zupt_dynamic_sigma);
                         system->process(zupt);
                     }
-                }
-
-                // Tbc is unreliable across an odometry discontinuity. The field-frame belief is
-                // unaffected, so Hfw is re-emitted against the newest Htw.
-                if (near_odometry_jump(t)) {
-                    if (initialised) {
-                        system->predict_all(t);
-                        emit_field(sensors_window.back().Htw, nullptr);
-                    }
-                    return;
                 }
 
                 // Advance the state and clock even without detections
@@ -444,11 +414,7 @@ namespace module::localisation {
                 map->dims);
         }
 
-        const double t = seconds(image.timestamp);
-        if (near_odometry_jump(t)) {
-            return;
-        }
-
+        const double t                      = seconds(image.timestamp);
         const filter::SensorsSample* paired = nearest_sensors(t);
         if (paired == nullptr) {
             log<DEBUG>("No odometry sample near the camera frame; skipping side disambiguation");

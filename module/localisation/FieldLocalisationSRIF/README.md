@@ -63,13 +63,6 @@ consecutive `Sensors.Htw` (any platform); `SENSORS_VTW` rotates `Sensors.vTw` in
 (the K1, whose controller reports an odometry twist). Sensors discards implausible twists and zeroes
 latched ones.
 
-**Odometry discontinuities.** `Sensors.Htw` jumps when Sensors re-zeros the odometry
-(`ResetFieldLocalisation`, or a Booster mode change). A world-frame xy or yaw step between consecutive
-`Htw` larger than `odometry_jump_xy`/`odometry_jump_angle` marks a discontinuity. That sample's
-finite-differenced velocity is discarded, and vision frames within `odometry_jump_holdoff` of it skip
-their landmark, init and side-disambiguation updates (their `Hcw` and paired `Htw` may straddle it)
-and re-emit `Hfw` against the newest `Htw`. The field-frame belief itself is unaffected.
-
 **Landmarks.** Goal posts and L/T/X field-line intersections arrive as unit rays in the camera frame:
 the box centre for intersections, the bottom-centre for posts. Detections below `min_confidence` are
 dropped; above it, YOLO confidence scales the **inlier weight** of a robust mixture rather than the

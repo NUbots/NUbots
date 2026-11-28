@@ -44,6 +44,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/input/ServoID.hpp"
+
 namespace module::input {
 
     using SensorsMsg = message::input::Sensors;
@@ -61,18 +63,13 @@ namespace module::input {
             double odometry_deadband = 0.0;
             /// @brief Oldest odometry twist used for vTw; older than this, vTw is left unmeasured
             NUClear::clock::duration odometry_twist_max_age{};
-            /// @brief Twists faster than this are not physical (the controller reports >100 m/s after an
-            /// odometry reset), so vTw is left unmeasured [m/s]
+            /// @brief Twists faster than this are not physical, so vTw is left unmeasured [m/s]
             double odometry_twist_max_speed = 0.0;
-            /// @brief A raw odometry step above these is a discontinuity (the controller resetting its
-            /// odometry), not motion, and is absorbed into the zero offset [m, rad]
-            double odometry_jump_xy  = 0.0;
-            double odometry_jump_yaw = 0.0;
-            /// @brief The controller's twist can latch a non-zero value for tens of seconds while the robot
-            /// stands. A twist above stuck_twist_speed [m/s] is reported as zero while the odometry pose
-            /// moved slower than stationary_speed [m/s] over the last stationary_window.
-            double stuck_twist_speed = 0.0;
-            double stationary_speed  = 0.0;
+            /// @brief The controller's twist can latch a non-zero value while the robot stands. A twist above
+            /// stuck_twist_speed [m/s] is reported as zero while no leg joint moved more than
+            /// stationary_joint_range [rad] over the last stationary_window.
+            double stuck_twist_speed      = 0.0;
+            double stationary_joint_range = 0.0;
             NUClear::clock::duration stationary_window{};
         } cfg;
 
@@ -92,20 +89,19 @@ namespace module::input {
         /// @brief Set once the missing odometry twist warning has been logged
         std::atomic<bool> twist_warned{false};
 
-        /// @brief Guards the odometry state below, which the reset and mode reactions also write
+        /// @brief Leg joints, hip yaw to ankle roll, used to detect standing still
+        static constexpr int first_leg_joint = utility::input::ServoID::R_HIP_YAW;
+        static constexpr int n_leg_joints    = 12;
+        using LegJoints                      = Eigen::Matrix<double, n_leg_joints, 1>;
+
+        /// @brief Guards the odometry state below against concurrent RawSensors reactions
         std::mutex odometry_mutex;
-        /// @brief Re-zero the odometry on the next sample
-        bool odometry_rezero = true;
-        /// @brief Raw odometry pose at the zero: the reported pose is offset^-1 * raw
+        /// @brief Whether odometry_offset has been captured from the first sample
+        bool odometry_zeroed = false;
+        /// @brief Raw odometry pose at the first sample: the reported pose is offset^-1 * raw
         Eigen::Isometry2d odometry_offset = Eigen::Isometry2d::Identity();
-        /// @brief Previous raw and reported odometry poses, for discontinuity detection
-        Eigen::Isometry2d last_raw_odometry = Eigen::Isometry2d::Identity();
-        Eigen::Isometry2d last_odometry     = Eigen::Isometry2d::Identity();
-        /// @brief Recent reported odometry positions since the last re-zero, oldest first
-        std::deque<std::pair<NUClear::clock::time_point, Eigen::Vector2d>> odometry_history;
-        /// @brief Last Booster motion mode seen, used to re-zero the odometry whenever the mode changes
-        /// (-1 = no mode seen yet)
-        int last_booster_mode = -1;
+        /// @brief Recent leg joint positions, oldest first
+        std::deque<std::pair<NUClear::clock::time_point, LegJoints>> leg_history;
 
         bool left_down   = false;
         bool middle_down = false;
