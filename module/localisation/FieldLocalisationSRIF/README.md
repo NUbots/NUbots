@@ -49,23 +49,16 @@ holds at kick-off and fails near the halfway line; see [Limitations](#limitation
 | Source                 | Model                        | When                                 |
 | ---------------------- | ---------------------------- | ------------------------------------ |
 | YOLO field landmarks   | `MeasurementFieldLandmarks`  | Every frame with usable detections   |
-| Accelerometer          | `MeasurementGravity`         | While quasi-static (see below)       |
+| Accelerometer          | `MeasurementGravity`         | While the reading is close to 1 g    |
 | Kinematic torso height | `MeasurementKinematicHeight` | While upright only                   |
 | Unit-norm prior        | `MeasurementQuaternionNorm`  | Every update                         |
 | Gyroscope              | `MeasurementGyroscope`       | Every frame, any posture             |
 | Rest (zero rate, bias) | `MeasurementRest`            | While the IMU is at rest             |
 | Body linear velocity   | `MeasurementBodyVelocity`    | Every frame (ZUPT while not upright) |
 
-The gyroscope measures `omegaBb + bGyro`. Estimating the bias matters because the upstream Mahony
-filter cannot observe its yaw component, which otherwise becomes heading drift.
-
-**Rest.** While walking, only vision separates the yaw-rate bias from a real turn. Following VQF's
-rest bias estimation [[1]](#references), `srif::ImuPreFilter` low-pass filters the gyroscope and
-accelerometer (time constant 0.5 s) at the Sensors rate. The robot is at rest once both have stayed
-within 2°/s and 0.5 m/s² of their filtered values for `imu.rest_min_time`. While at rest, each vision
-frame applies `MeasurementRest`: zero body angular velocity, and the filtered gyroscope as a direct
-reading of the bias. The filtered readings of successive frames share the filter's memory, so
-`imu.rest_bias_sigma` is per frame and deliberately loose.
+The gyroscope measures `omegaBb + bGyro`. Estimating the bias matters because nothing upstream does:
+`Sensors.Htw` takes its yaw from the walk controller's odometry, and an unestimated yaw-rate bias
+would become heading drift between vision frames.
 
 **Body velocity.** `odometry_velocity_source` picks the signal: `HTW_DIFFERENCE` finite-differences
 consecutive `Sensors.Htw` (any platform); `SENSORS_VTW` rotates `Sensors.vTw` into the torso frame
@@ -82,20 +75,35 @@ and re-emit `Hfw` against the newest `Htw`. The field-frame belief itself is una
 **Landmarks.** Goal posts and L/T/X field-line intersections arrive as unit rays in the camera frame:
 the box centre for intersections, the bottom-centre for posts. Detections below `min_confidence` are
 dropped; above it, YOLO confidence scales the **inlier weight** of a robust mixture rather than the
-noise sigma, since a weak detection's failure mode is not being a landmark at all. Association is greedy surprisal-nearest-neighbour against rays predicted at the prior
-mean, inside a geometric pre-gate that widens with the filter's own yaw uncertainty.
+noise sigma, since a weak detection's failure mode is not being a landmark at all. Association is
+greedy surprisal-nearest-neighbour against rays predicted at the prior mean, inside a geometric
+pre-gate that widens with the filter's own yaw uncertainty.
 
-**Gravity.** A single accelerometer sample on a walking robot is gravity plus the torso's own
-acceleration. Following VQF [[1]](#references), `srif::ImuPreFilter` integrates the bias-corrected
-gyroscope at the Sensors rate into an almost-inertial frame `{i}`, rotates each accelerometer sample
-into `{i}`, low-pass filters it there (second-order Butterworth, time constant `imu.tau_acc`) and
-rotates the result back into the torso frame. Gravity is constant in `{i}`, so the walking
-accelerations average out while the torso's rotation is still tracked by the gyroscope. The filter
-uses the SRIF's own gyroscope bias estimate from the previous vision frame. Set
-`imu.use_filtered_gravity: false` to go back to the raw sample paired with the vision frame.
+**Gravity.** Gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, not on posture: it holds for a
+robot lying still and fails in free fall or on impact. The reading is the filtered one below unless
+`imu.use_filtered_gravity` is off, in which case it is the raw accelerometer sample paired with the
+vision frame.
 
-Either reading is gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, not on posture: it holds
-for a robot lying still and fails in free fall or on impact.
+### IMU pre-filtering
+
+`srif::ImuPreFilter` runs on every `Sensors` message, not just those paired with a vision frame. It
+applies two ideas from VQF [[1]](#references).
+
+**Gravity in an almost-inertial frame.** A single accelerometer sample on a walking robot is gravity
+plus the torso's own acceleration. The pre-filter integrates the gyroscope, minus the SRIF's bias
+estimate from the previous vision frame, into an almost-inertial frame `{i}`. It rotates each
+accelerometer sample into `{i}`, low-pass filters it there (second-order Butterworth, time constant
+`imu.tau_acc`) and rotates the result back into the torso frame. Gravity is constant in `{i}`, so the
+gait's accelerations average out, while a rotation (a fall included) is still followed through the
+gyroscope without waiting for the filter. The filtered reading is far less noisy than a raw sample,
+which is why `gravity_sigma` is 0.3 m/s² rather than the ~1.1 m/s² a raw sample needs.
+
+**Rest.** While walking, only vision separates the yaw-rate bias from a real turn. The pre-filter also
+low-pass filters the gyroscope and accelerometer directly (time constant 0.5 s). The robot is at rest
+once both have stayed within 2°/s and 0.5 m/s² of their filtered values for `imu.rest_min_time`.
+While at rest, each vision frame applies `MeasurementRest`: zero body angular velocity, and the
+filtered gyroscope as a direct reading of the bias. The filtered readings of successive frames share
+the filter's memory, so `imu.rest_bias_sigma` is per frame and deliberately loose.
 
 ### Falls
 
@@ -156,7 +164,7 @@ The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 | `gyroscope_sigma`          | Gyroscope noise [rad/s]; drives the body angular velocity and its bias |
 | `odometry_velocity_source` | `HTW_DIFFERENCE` or `SENSORS_VTW` — which signal measures `vBb`        |
 | `odometry_velocity_sigma`  | Body linear velocity measurement [m/s]; size it for the source chosen  |
-| `gravity_sigma`            | Accelerometer gravity direction [m/s²]                                 |
+| `gravity_sigma`            | Gravity reading [m/s²]; 0.3 for the filtered reading, ~1.1 for raw     |
 | `height_sigma`             | Torso height from the support-leg chain [m]                            |
 
 **IMU pre-filtering** (`imu:`), after VQF [[1]](#references)
@@ -208,10 +216,15 @@ The yaml values were tuned by replaying NUSim recordings offline against ground 
 `sigma_angular` and the association gate may need loosening on a real robot. Recordings carry no
 `Stability`, so the `fall:` values were not tuned this way.
 
+`gravity_sigma` and the `imu:` values were checked the same way on three NUSim recordings, each also
+replayed with a gyroscope bias added (NUSim's IMU has none). NUSim publishes `Sensors` at 50 Hz, and
+its robots rarely stand still outside kick-off, so rest detection is barely exercised there.
+
 ## Consumes
 
 - `message::support::FieldDescription` — field dimensions; the landmark map is built from this at startup
-- `message::input::Sensors` — `Htw` odometry, `accelerometer`, `gyroscope`
+- `message::input::Sensors` — `Htw` odometry; `accelerometer` and `gyroscope` for the IMU pre-filter
+  (every message) and the gyroscope measurement (once per vision frame)
 - `message::vision::BoundingBoxes` — YOLO detections as corner unit rays in `{c}`, plus `Hcw`
 - `message::input::Image` — the raw camera frame (RGB3, BGR3, RGBA, RGGB or GREY), for out-of-field
   corner detection (`use_side_disambiguator` only)
@@ -264,10 +277,14 @@ residual.
 - `MeasurementFieldLines` exists but is not wired in.
 - The zero-velocity update is wrong if a handler carries the robot while it reads `FALLEN`
   (`Config::zupt_sigma`).
+- The rest thresholds are VQF's, which were chosen for hand-held IMUs. A standing humanoid's balance
+  sway can stay below them and be read as bias. The bias state's slow random walk averages
+  `MeasurementRest` over several seconds, which should absorb sway, but this is untested on a real
+  robot; `imu.use_rest_detection: false` turns it off.
 
 ## References
 
 1. D. Laidig and T. Seel, "VQF: Highly Accurate IMU Orientation Estimation with Bias Estimation and
-   Magnetic Disturbance Rejection", *Information Fusion* 91 (2023) 187–204.
+   Magnetic Disturbance Rejection", _Information Fusion_ 91 (2023) 187–204.
    [arXiv:2203.17024](https://arxiv.org/abs/2203.17024). Source of the almost-inertial gravity
-   filter and the rest detection in `srif::ImuPreFilter`.
+   filter and the rest detection in `srif::ImuPreFilter`; see [IMU pre-filtering](#imu-pre-filtering).

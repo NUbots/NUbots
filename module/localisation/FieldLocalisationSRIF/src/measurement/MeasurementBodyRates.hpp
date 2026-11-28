@@ -30,8 +30,8 @@
  * @brief Direct measurements of the body-fixed velocity states.
  *
  * As measurements rather than inputs they carry their own noise and can be gated, and the
- * gyroscope bias can be estimated. The upstream Mahony filter cannot observe the yaw-rate
- * bias, which otherwise becomes steady heading drift.
+ * gyroscope bias can be estimated. Nothing upstream estimates the yaw-rate bias (Sensors takes
+ * its yaw from the walk controller's odometry), so unestimated it becomes steady heading drift.
  */
 #ifndef MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
 #define MODULE_LOCALISATION_MEASUREMENT_MEASUREMENTBODYRATES_HPP
