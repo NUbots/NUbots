@@ -15,9 +15,9 @@ Include this module in roles that require field geometry.
 The module listens to configuration updates for `FieldDescription.yaml` and re-emits an updated
 `message::support::FieldDescription` when the file changes.
 
-It also sends the current `FieldDescription` over NUClearNet to `nusight`, once when any peer joins and then once a
-second. NUsight's localisation view draws the field from it when its "Field Type" is "Auto (from robot)", the default.
-Only the network copy is sent, so modules that trigger on `FieldDescription` locally don't run again.
+It also sends the current `FieldDescription` over NUClearNet to `nusight` once a second. NUsight's localisation view
+draws the field from it when its "Field Type" is "Auto (from robot)", the default. Only the network copy is sent, so
+modules that trigger on `FieldDescription` locally don't run again.
 
 Configuration files are located at:
 
@@ -29,7 +29,6 @@ Key configured values include field size, line width, goal dimensions, penalty a
 ## Consumes
 
 - `extension::Configuration` from `FieldDescription.yaml`
-- `NUClear::message::NetworkJoin`, to resend the description to NUsight
 
 ## Emits
 

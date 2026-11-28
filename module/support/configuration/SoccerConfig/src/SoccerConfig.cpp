@@ -101,15 +101,9 @@ namespace module::support::configuration {
             });
 
         // NUsight draws the field from this message. The message is emitted only when the config loads, which is
-        // normally before NUsight connects, so send a copy to NUsight when a peer joins (in case it's NUsight) and
-        // once a second after that, for a NUsight page opened or reloaded later. Only the network copy is sent, so
-        // the modules that trigger on FieldDescription locally don't run again.
-        on<Trigger<NUClear::message::NetworkJoin>, With<FieldDescription>>().then(
-            "Send FieldDescription to new peer",
-            [this](const NUClear::message::NetworkJoin& /*join*/, const FieldDescription& fd) {
-                emit<Scope::NETWORK>(std::make_unique<FieldDescription>(fd), "nusight", true);
-            });
-
+        // normally before NUsight connects, so send a copy to NUsight once a second, for a NUsight page opened or
+        // reloaded later. Only the network copy is sent, so the modules that trigger on FieldDescription locally don't
+        // run again.
         on<Every<1, std::chrono::seconds>, With<FieldDescription>>().then(
             "Send FieldDescription to NUsight",
             [this](const FieldDescription& fd) {
