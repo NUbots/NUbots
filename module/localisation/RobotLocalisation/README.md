@@ -4,9 +4,9 @@
 
 Estimates the position and velocity of other robots on the field.
 
-The module works by tracking multiple robots using a UKF filter for each. Vision measurements are associated with each tracked robot using global nearest neighbor and an acceptance radius. Messages over the network from other robots are used to determine whether a tracked robot is a teammate or opponent and to update the filter.
+The module works by tracking multiple robots using a UKF filter for each. Each vision detection gets its own measurement covariance, built from its range from the camera (range error grows with range squared, as it comes from ground-projecting the robot's feet). Detections are gated against each track by squared Mahalanobis distance (`gate_chi2`) and assigned one-to-one, lowest distance first; a detection that matches no track starts a new one. Messages over the network from other robots are used to determine whether a tracked robot is a teammate or opponent and to update the filter.
 
-Tracked robots are discarded if they are not seen for a consecutive number of times when they should be visible.
+Opponent tracks are removed when they have had no vision update for `max_track_age` seconds, or when they are within `merge_distance` of an older track or a teammate. `max_robot_tracks` optionally limits the number of opponent tracks, keeping those with the most vision updates. Teammates are removed after being missed `max_missed_count` times in a row while they should be visible.
 
 ## Usage
 
