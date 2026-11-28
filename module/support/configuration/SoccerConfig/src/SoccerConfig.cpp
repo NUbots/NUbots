@@ -99,15 +99,5 @@ namespace module::support::configuration {
                 auto fd   = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
                 emit(std::move(fd));
             });
-
-        // NUsight draws the field from this message. The message is emitted only when the config loads, which is
-        // normally before NUsight connects, so send a copy to NUsight once a second, for a NUsight page opened or
-        // reloaded later. Only the network copy is sent, so the modules that trigger on FieldDescription locally don't
-        // run again.
-        on<Every<1, std::chrono::seconds>, With<FieldDescription>>().then(
-            "Send FieldDescription to NUsight",
-            [this](const FieldDescription& fd) {
-                emit<Scope::NETWORK>(std::make_unique<FieldDescription>(fd), "nusight", false);
-            });
     }
 }  // namespace module::support::configuration

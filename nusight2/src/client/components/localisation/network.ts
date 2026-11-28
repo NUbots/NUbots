@@ -11,7 +11,7 @@ import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose"
 import { SupportPosition } from "@proto/message/purpose/SupportPosition";
 import { TimeToBall } from "@proto/message/strategy/TimeToBall";
 import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
-import { FieldDescription } from "@proto/message/support/FieldDescription";
+import { FieldDescription, IFieldDescription } from "@proto/message/support/FieldDescription";
 import { Overview } from "@proto/message/support/nusight/Overview";
 import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
 import { FieldLines } from "@proto/message/vision/FieldLines";
@@ -122,7 +122,7 @@ export class LocalisationNetwork {
   };
 
   @action
-  private onFieldDescription = (_robotModel: RobotModel, description: FieldDescription) => {
+  private onFieldDescription = (_robotModel: RobotModel, description: IFieldDescription) => {
     const d = description.dimensions;
     if (!d) {
       return;
@@ -148,8 +148,8 @@ export class LocalisationNetwork {
       borderStripMinWidth: d.borderStripMinWidth,
     });
 
-    // Robots resend their description every second, so only swap it in when it changes, to avoid rebuilding the
-    // field each time
+    // Robots resend their description in every overview packet, so only swap it in when it changes, to avoid
+    // rebuilding the field each time
     const field = this.model.field;
     if (field.robotDimensions && sameDimensions(field.robotDimensions, dimensions)) {
       return;
@@ -415,6 +415,11 @@ export class LocalisationNetwork {
 
   @action
   private onOverview = (robotModel: RobotModel, overview: Overview) => {
+    // The overview carries the field the robot is playing on, which the "Auto (from robot)" field type draws
+    if (overview.fieldDescription) {
+      this.onFieldDescription(robotModel, overview.fieldDescription);
+    }
+
     const robot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)

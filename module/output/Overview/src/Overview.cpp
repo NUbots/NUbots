@@ -39,6 +39,7 @@
 #include "message/purpose/Purpose.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/support/GlobalConfig.hpp"
 #include "message/support/nusight/Overview.hpp"
 #include "message/vision/Ball.hpp"
@@ -55,6 +56,7 @@ namespace module::output {
     using message::purpose::SoccerPosition;
     using message::skill::Kick;
     using message::skill::Walk;
+    using message::support::FieldDescription;
     using message::support::GlobalConfig;
     using NUClear::message::CommandLineArguments;
 
@@ -90,6 +92,7 @@ namespace module::output {
            Optional<With<GameState>>,
            Optional<With<Walk>>,
            Optional<With<Purpose>>,
+           Optional<With<FieldDescription>>,
            Single,
            Priority::LOW>()
             .then([this](const std::shared_ptr<const GlobalConfig>& global,
@@ -100,7 +103,8 @@ namespace module::output {
                          const std::shared_ptr<const Kick>& kick,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Walk>& walk,
-                         const std::shared_ptr<const Purpose>& purpose) {
+                         const std::shared_ptr<const Purpose>& purpose,
+                         const std::shared_ptr<const FieldDescription>& field_description) {
                 auto msg = std::make_unique<OverviewMsg>();
 
                 // Set properties
@@ -164,6 +168,12 @@ namespace module::output {
 
                 // Set the role (soccer position) the robot has decided to take
                 msg->role = purpose ? purpose->purpose : SoccerPosition(SoccerPosition::UNKNOWN);
+
+                // Send the field description so NUsight can draw the field this robot is playing on. It is emitted
+                // only when the config loads, normally before NUsight connects, so it is resent with every overview
+                if (field_description) {
+                    msg->field_description = *field_description;
+                }
 
                 emit(msg);
             });
