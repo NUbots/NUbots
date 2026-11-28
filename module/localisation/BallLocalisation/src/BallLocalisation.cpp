@@ -252,10 +252,20 @@ namespace module::localisation {
                     return;
                 }
 
+                // The teammate's ball is in the mixed-team protocol's field frame, which is our field frame rotated
+                // 180 degrees about the centre (RobotCommunication negates x and y before sending), so undo that
                 Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+                rBFf.x()             = -rBFf.x();
+                rBFf.y()             = -rBFf.y();
 
-                // Resize the vector of guesses if it is not large enough
-                if (team_guesses.capacity() < robocup.current_pose.player_id) {
+                // Player id 0 means unknown, and has no slot in the vector of guesses
+                if (robocup.current_pose.player_id == 0) {
+                    return;
+                }
+
+                // Resize the vector of guesses if it is not large enough. Compare against size, not capacity, as
+                // capacity can exceed size and the element would then be written past the end.
+                if (team_guesses.size() < robocup.current_pose.player_id) {
                     team_guesses.resize(robocup.current_pose.player_id);
                 }
 
