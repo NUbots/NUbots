@@ -1,5 +1,5 @@
 log_level: INFO
-field_type: lab # options: lab, small, l1, l3, middle, 5v5
+field_type: lab # options: lab, small, runswift, l1, l3, middle, 5v5
 
 # ROBOCUP FIELD SIZES
 Units: m
@@ -29,6 +29,18 @@ presets:
     CenterCircleDiameter: 1.5
     PenaltyAreaLength: 1.9
     PenaltyAreaWidth: 3.9
+  runswift: # rUNSWift lab field
+    FieldLength: 9.0
+    FieldWidth: 6.0
+    GoalDepth: 0.58 # not supplied, taken from small
+    GoalWidth: 2.575 # not supplied, taken from small
+    GoalCrossbarHeight: 1.2 # not supplied, taken from small
+    GoalAreaLength: 0.6
+    GoalAreaWidth: 2.2
+    PenaltyMarkDistance: 1.5
+    CenterCircleDiameter: 1.5
+    PenaltyAreaLength: 1.65
+    PenaltyAreaWidth: 4.0
   l1:
     FieldLength: 12.0
     FieldWidth: 9.0

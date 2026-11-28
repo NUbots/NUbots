@@ -50,6 +50,7 @@ const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
   { label: "RoboCup (Small)", value: "robocup_small" },
   { label: "RoboCup (Middle)", value: "robocup_middle" },
+  { label: "rUNSWift", value: "runswift" },
   { label: "RoboCup (Large)", value: "robocup_large" },
   { label: "RoboCup (5v5)", value: "robocup_5v5" },
 ];
