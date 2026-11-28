@@ -1,0 +1,6 @@
+# NUSim (the docker platform): the head camera as NUSim mounts it (mujoco/models/k1/K1_22dof.xml camera "head",
+# pos 0.075 0 0.089 in Head_2, no rotation). The default Hpc is a real robot's calibration, which put every Yolo
+# ball in NUSim 4-16 cm to the side (about 5 deg of yaw); with this the Yolo error in NUSim is under 1 cm.
+Hpc:
+  translation: [0.075, 0.0, 0.089]
+  rotation_rpy: [0.0, 0.0, 0.0]
