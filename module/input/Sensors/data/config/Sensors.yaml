@@ -12,6 +12,16 @@ odometry_deadband: 1.0e-6
 # seconds. Without one this recent, vTw is left unmeasured (NaN).
 odometry_twist_max_age: 0.1
 
+# Twists faster than this [m/s] are not physical and are discarded (vTw is NaN)
+odometry_twist_max_speed: 3.0
+
+# The controller's twist can latch a non-zero value while the robot stands. A twist faster than speed is reported as
+# zero while no leg joint moved more than stationary_joint_range over stationary_window.
+stuck_twist:
+  speed: 0.2 # [m/s]
+  stationary_joint_range: 0.1 # [rad]
+  stationary_window: 0.25 # [s]
+
 # Configurable transform from head frame to pitch frame
 # translation: [x, y, z] in metres
 # rotation_rpy: [roll, pitch, yaw] in radians

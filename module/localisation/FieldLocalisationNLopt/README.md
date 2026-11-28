@@ -80,7 +80,8 @@ This mechanism provides robustness against temporary vision anomalies or ambiguo
 
 ### Reset
 
-A soft reset `ResetFieldLocalisation` is used when the robot is starting on the side of the field (or in a custom position specified in the configuration).
+A soft reset `ResetFieldLocalisation` is used when the robot is starting on the side of the field (or in a custom position specified in the configuration). The starting positions (and a `PenaltyReset` position) are robot poses, placed relative to the current odometry
+since the odometry is not reset.
 
 A more extreme reset `UncertaintyResetFieldLocalisation` is used when the cost of the current field position is high during play and either a local search or field-wide search must be conducted to regain the position. The local search is a grid search using configurable parameters and uses the lowest cost position if it is under the configurable cost threshold. If this fails to find an appropriate position, a global grid search is conducted. This grid search occurs over the half of the field that the robot was last in, so as to ignore mirror states.
 

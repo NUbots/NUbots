@@ -26,7 +26,7 @@ nuclear_role(
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
-  localisation::FieldLocalisationNLopt
+  localisation::FieldLocalisationSRIF
   localisation::RobotLocalisation
   # Director
   extension::Director
@@ -45,5 +45,5 @@ nuclear_role(
   purpose::KeyboardWalk
   # Platform — Booster HardwareIO bridges to NUSim's SdkBridge over DDS in sim
   platform::${SUBCONTROLLER}::HardwareIO
-  support::logging::DataLogging
+  # support::logging::DataLogging
 )

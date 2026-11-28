@@ -57,7 +57,6 @@ namespace module::platform::Booster {
     using message::booster::FallDownStateType;
     using message::booster::K1Mode;
     using message::booster::VisualKickVer;
-    using message::localisation::ResetFieldLocalisation;
     using message::platform::RawSensors;
 
     /// Internal event used to switch into prep mode once the gait has had time to stop.
@@ -88,10 +87,6 @@ namespace module::platform::Booster {
             booster_client.ChangeMode(RobotMode::kPrepare);
             // Publish the initial mode so other modules can query it before the first poll
             publish_current_mode();
-
-            if (int32_t res = booster_client.ResetOdometry(); res != 0) {
-                log<ERROR>("Failed to reset odometry on startup: " + res_code_to_string(res));
-            }
 
             low_state_channel = ChannelFactory::Instance()->CreateRecvChannel<booster_interface::msg::LowState>(
                 "rt/low_state",
@@ -264,13 +259,6 @@ namespace module::platform::Booster {
             }
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] {
-            int32_t res = booster_client.ResetOdometry();
-            if (res != 0) {
-                log<ERROR>("Failed to reset odometry: " + res_code_to_string(res));
-            }
-        });
-
         on<Trigger<BoosterMode>>().then([this](const BoosterMode& mode_msg) {
             RobotMode robot_mode;
             switch (static_cast<int>(mode_msg.mode)) {
@@ -340,15 +328,6 @@ namespace module::platform::Booster {
         if (res != 0) {
             log<WARN>("Failed to get current mode: " + res_code_to_string(res));
             return;
-        }
-
-        // Any mode transition invalidates the odometry track, so zero the odometry whenever the mode
-        // changes, regardless of which mode it changed to. Skip the first observation (kUnknown) as
-        // startup already resets odometry explicitly.
-        if (current_mode != mode_response.mode_ && current_mode != RobotMode::kUnknown) {
-            if (int32_t reset_res = booster_client.ResetOdometry(); reset_res != 0) {
-                log<ERROR>("Failed to reset odometry on mode change: " + res_code_to_string(reset_res));
-            }
         }
 
         // Cache the mode so movement/look commands can be gated without a per-command SDK round-trip

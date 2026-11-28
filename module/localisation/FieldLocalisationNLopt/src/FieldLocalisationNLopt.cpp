@@ -189,38 +189,45 @@ namespace module::localisation {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] {
-            log<INFO>("Resetting field localisation");
-            state             = cfg.initial_hypotheses[0];
-            filtered_state    = state;
-            first_measurement = true;
-            startup           = true;
-            last_reset        = NUClear::clock::now();
-            localised         = false;
-            num_accepted      = 0;
-            // While ground truth perception is on, Field comes from the simulator instead
-            if (!localisation_reaction.enabled()) {
-                return;
-            }
-            // Emit an unlocalised Field immediately so consumers don't act on the stale pre-reset pose
-            auto field       = std::make_unique<Field>();
-            field->Hfw       = compute_Hfw(filtered_state);
-            field->cost      = std::numeric_limits<double>::max();
-            field->localised = false;
-            emit(field);
-        });
+        // The hypotheses are robot poses, so they are placed relative to the current odometry
+        on<Trigger<ResetFieldLocalisation>, Optional<With<Sensors>>>().then(
+            [this](const std::shared_ptr<const Sensors>& sensors) {
+                log<INFO>("Resetting field localisation");
+                const Eigen::Isometry3d Hrw =
+                    sensors != nullptr ? Eigen::Isometry3d(sensors->Hrw) : Eigen::Isometry3d::Identity();
+                state             = state_from_robot_pose(cfg.initial_hypotheses[0], Hrw);
+                filtered_state    = state;
+                first_measurement = true;
+                startup           = true;
+                last_reset        = NUClear::clock::now();
+                localised         = false;
+                num_accepted      = 0;
+                // While ground truth perception is on, Field comes from the simulator instead
+                if (!localisation_reaction.enabled()) {
+                    return;
+                }
+                // Emit an unlocalised Field immediately so consumers don't act on the stale pre-reset pose
+                auto field       = std::make_unique<Field>();
+                field->Hfw       = compute_Hfw(filtered_state);
+                field->cost      = std::numeric_limits<double>::max();
+                field->localised = false;
+                emit(field);
+            });
 
-        on<Trigger<PenaltyReset>>().then([this](const PenaltyReset& reset) {
-            log<INFO>("Resetting field localisation for penalty kick");
-            state              = reset.penalty_kick_position;
-            filtered_state     = state;
-            first_measurement  = true;
-            last_reset         = NUClear::clock::now();
-            last_certain_state = state;  // Update the last certain state
-            // The penalty kick position is known exactly, so the pose can be trusted straight away
-            localised    = true;
-            num_accepted = cfg.min_localised_measurements;
-        });
+        on<Trigger<PenaltyReset>, Optional<With<Sensors>>>().then(
+            [this](const PenaltyReset& reset, const std::shared_ptr<const Sensors>& sensors) {
+                log<INFO>("Resetting field localisation for penalty kick");
+                const Eigen::Isometry3d Hrw =
+                    sensors != nullptr ? Eigen::Isometry3d(sensors->Hrw) : Eigen::Isometry3d::Identity();
+                state              = state_from_robot_pose(reset.penalty_kick_position, Hrw);
+                filtered_state     = state;
+                first_measurement  = true;
+                last_reset         = NUClear::clock::now();
+                last_certain_state = state;  // Update the last certain state
+                // The penalty kick position is known exactly, so the pose can be trusted straight away
+                localised    = true;
+                num_accepted = cfg.min_localised_measurements;
+            });
 
         // While ground truth perception is on, Field comes from the simulator instead, so stop our own reaction
         on<Trigger<GroundTruthMode>>().then(
@@ -279,7 +286,8 @@ namespace module::localisation {
                           if (startup && cfg.starting_side == StartingSide::EITHER) {
                               // Find the best initial state to use based on the visible field features.
                               std::vector<std::pair<Eigen::Vector3d, double>> opt_results{};
-                              for (auto& hypothesis : cfg.initial_hypotheses) {
+                              for (const auto& pose : cfg.initial_hypotheses) {
+                                  const Eigen::Vector3d hypothesis = state_from_robot_pose(pose, sensors.Hrw);
                                   if (enough_field_line_intersections) {
                                       opt_results.push_back(
                                           run_field_line_optimisation(hypothesis, field_intersections, goals));
@@ -425,6 +433,12 @@ namespace module::localisation {
                * Eigen::AngleAxis<double>(state.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
     }
 
+
+    Eigen::Vector3d FieldLocalisationNLopt::state_from_robot_pose(const Eigen::Vector3d& pose,
+                                                                  const Eigen::Isometry3d& Hrw) {
+        const Eigen::Isometry3d Hfw = compute_Hfw(pose) * Hrw;
+        return {Hfw.translation().x(), Hfw.translation().y(), std::atan2(Hfw(1, 0), Hfw(0, 0))};
+    }
 
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> FieldLocalisationNLopt::data_association(
         const FieldIntersections& field_intersections,

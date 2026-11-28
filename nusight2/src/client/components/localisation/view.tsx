@@ -32,6 +32,7 @@ import { PurposeLabel } from "./r3f_components/purpose_label";
 import { SkyboxView } from "./r3f_components/skybox/view";
 import { SupportPositionMarker } from "./r3f_components/support_position_marker";
 import { TimeToBallLabel } from "./r3f_components/time_to_ball_label";
+import { UncertaintyEllipse } from "./r3f_components/uncertainty_ellipse";
 import { WalkPathGoal } from "./r3f_components/walk_path_goal";
 import { WalkPathVisualiser } from "./r3f_components/walk_path_visualiser";
 import { WalkTrajectory } from "./r3f_components/walk_trajectory";
@@ -48,6 +49,7 @@ type LocalisationViewProps = {
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
   { label: "RoboCup (Small)", value: "robocup_small" },
+  { label: "RoboCup (Middle)", value: "robocup_middle" },
   { label: "rUNSWift", value: "runswift" },
   { label: "RoboCup (Large)", value: "robocup_large" },
   { label: "RoboCup (5v5)", value: "robocup_5v5" },
@@ -139,6 +141,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleRobotVisibility={this.toggleRobotVisibility}
             toggleBallVisibility={this.toggleBallVisibility}
             toggleParticleVisibility={this.toggleParticleVisibility}
+            toggleUncertaintyVisibility={this.toggleUncertaintyVisibility}
             toggleGoalVisibility={this.toggleGoalVisibility}
             toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
             toggleCameraProjectionVisibility={this.toggleCameraProjectionVisibility}
@@ -173,6 +176,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
             toggleRobotVisibility={this.toggleRobotVisibility}
             toggleBallVisibility={this.toggleBallVisibility}
             toggleParticleVisibility={this.toggleParticleVisibility}
+            toggleUncertaintyVisibility={this.toggleUncertaintyVisibility}
             toggleGoalVisibility={this.toggleGoalVisibility}
             toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
             toggleCameraProjectionVisibility={this.toggleCameraProjectionVisibility}
@@ -266,6 +270,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleParticlesVisibility(this.props.model);
   };
 
+  private toggleUncertaintyVisibility = () => {
+    this.props.controller.toggleUncertaintyVisibility(this.props.model);
+  };
+
   private toggleGoalVisibility = () => {
     this.props.controller.toggleGoalVisibility(this.props.model);
   };
@@ -332,6 +340,7 @@ interface LocalisationMenuBarProps {
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
   toggleParticleVisibility(): void;
+  toggleUncertaintyVisibility(): void;
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
   toggleCameraProjectionVisibility(): void;
@@ -441,6 +450,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         toggleRobotVisibility={props.toggleRobotVisibility}
         toggleBallVisibility={props.toggleBallVisibility}
         toggleParticleVisibility={props.toggleParticleVisibility}
+        toggleUncertaintyVisibility={props.toggleUncertaintyVisibility}
         toggleGoalVisibility={props.toggleGoalVisibility}
         toggleFieldLinePointsVisibility={props.toggleFieldLinePointsVisibility}
         toggleCameraProjectionVisibility={props.toggleCameraProjectionVisibility}
@@ -507,6 +517,7 @@ const VisibilityPanel = observer((props: Omit<LocalisationMenuBarProps, "Menu">)
       title: "Debug",
       buttons: [
         { label: "Particles", isVisible: model.particlesVisible, onClick: props.toggleParticleVisibility },
+        { label: "Uncertainty", isVisible: model.uncertaintyVisible, onClick: props.toggleUncertaintyVisibility },
         {
           label: "Camera Projection",
           isVisible: model.cameraProjectionVisible,
@@ -611,6 +622,9 @@ const RobotComponents: React.FC<RobotRenderProps> = observer(({ robot, model }) 
 
       {model.fieldLinePointsVisible && <FieldPoints points={robot.rPFf} color={"blue"} size={0.02} />}
       {model.particlesVisible && <FieldPoints points={robot.particles} color={"blue"} size={0.02} />}
+      {model.uncertaintyVisible && robot.covariance && (
+        <UncertaintyEllipse position={robot.Hft.decompose().translation} covariance={robot.covariance} />
+      )}
 
       {model.ballVisible && robot.rBFf && <Ball position={robot.rBFf.toArray()} scale={robot.rBFf.z} />}
 

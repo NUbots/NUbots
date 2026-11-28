@@ -345,6 +345,14 @@ namespace module::localisation {
         Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& state);
 
         /**
+         * @brief Compute the state that places the robot at a given field pose
+         * @param pose The robot's pose in field space (x, y, yaw)
+         * @param Hrw The current transform from world {w} to robot {r} space
+         * @return The state (x, y, yaw) of Hfw
+         */
+        Eigen::Vector3d state_from_robot_pose(const Eigen::Vector3d& pose, const Eigen::Isometry3d& Hrw);
+
+        /**
          * @brief Find error between computed Hfw and ground truth if available
          * @param Hfw Computed Hfw to be compared against ground truth
          */

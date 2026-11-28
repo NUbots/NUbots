@@ -19,7 +19,6 @@ This module is built when the subcontroller CMake flag is set to `Booster`. Usin
 - `message::booster::BoosterVisualKick` to trigger a vision-guided kick.
 - `message::booster::BoosterGetUp` to trigger the get-up routine.
 - `message::booster::BoosterMode` to change the robot's motion mode.
-- `message::localisation::ResetFieldLocalisation` to reset the robot's odometry.
 
 ## Emits
 

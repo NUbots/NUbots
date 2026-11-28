@@ -24,7 +24,8 @@ nuclear_role(
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
-  localisation::FieldLocalisationNLopt
+  # localisation::FieldLocalisationNLopt # Both emit Field; run only one
+  localisation::FieldLocalisationSRIF
   localisation::RobotLocalisation
   # Director
   extension::Director
@@ -45,5 +46,5 @@ nuclear_role(
   purpose::KeyboardWalk
   # Platform
   platform::${SUBCONTROLLER}::HardwareIO
-  support::logging::DataLogging
+  # support::logging::DataLogging
 )
