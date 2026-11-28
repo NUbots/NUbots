@@ -142,24 +142,16 @@ namespace module::localisation {
                 }
                 const Eigen::Isometry3d Hwc(Eigen::Isometry3d(vision_balls.Hcw).inverse());
                 const Eigen::Isometry3d Hfw(field.Hfw);
-                const Eigen::Vector3d rCWw = Hwc.translation();
-                const Eigen::Vector2d rCFf = (Hfw * rCWw).head<2>();
-                const double ball_radius   = have_field_description ? field_description.ball_radius : 0.0;
+                const Eigen::Vector2d rCFf = (Hfw * Hwc.translation()).head<2>();
 
                 teammates[player_id] = TeammatePosition{vision_balls.timestamp, rCFf};
 
                 std::vector<Observation> observations{};
                 for (const auto& ball : vision_balls.balls) {
-                    if (ball.is_invalid) {
+                    if (ball.is_invalid || ball.measurements.empty()) {
                         continue;
                     }
-                    // Vision ground-projects the ray through the ball's centre, which puts the ball too far away by
-                    // ball_radius / camera height. Intersect the ray with the plane of the ball's centre instead.
-                    const Eigen::Vector3d uBCw = Hwc.linear() * Eigen::Vector3d(ball.uBCc).normalized();
-                    if (uBCw.z() > -1e-3) {
-                        continue;  // At or above the horizon
-                    }
-                    const Eigen::Vector3d rBWw = rCWw + uBCw * ((ball_radius - rCWw.z()) / uBCw.z());
+                    const Eigen::Vector3d rBWw = Hwc * Eigen::Vector3d(ball.measurements[0].rBCc);
                     observations.push_back(
                         Observation{Target::BALL, rCFf, (Hfw * rBWw).head<2>(), vision_balls.timestamp, player_id});
                 }
