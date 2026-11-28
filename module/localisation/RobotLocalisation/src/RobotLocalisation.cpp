@@ -134,9 +134,11 @@ namespace module::localisation {
                 prediction();
 
                 // **Data association**
-                // RoboCup messages come from teammates. Their position is in field space, so convert to world.
-                std::vector<Eigen::Vector3d> robots_rRWw{
-                    (field.Hfw.inverse() * robocup.current_pose.position.cast<double>())};
+                // RoboCup messages come from teammates. Their position is (x, y, yaw) in the mixed-team protocol's
+                // field frame, which is our field frame rotated 180 degrees about the centre (RobotCommunication
+                // negates x and y before sending), so undo that and convert to world.
+                const Eigen::Vector3d rRFf(-robocup.current_pose.position.x(), -robocup.current_pose.position.y(), 0.0);
+                std::vector<Eigen::Vector3d> robots_rRWw{field.Hfw.inverse() * rRFf};
                 auto purpose = std::make_unique<Purpose>();
                 // Set the purpose message with the teammate's player id and whether they are going for the ball
                 purpose->player_id = robocup.current_pose.player_id;
