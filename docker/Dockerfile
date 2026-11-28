@@ -392,6 +392,14 @@ RUN . /root/.dep_env && \
     --prefix ${DEP_PREFIX} \
     ${DEP_TOOLCHAIN}
 
+# autodiff
+RUN install-from-source https://github.com/autodiff/autodiff/archive/refs/tags/v1.1.2.tar.gz \
+    --jobs $(nproc) \
+    -DAUTODIFF_BUILD_PYTHON=OFF \
+    -DAUTODIFF_BUILD_TESTS=OFF \
+    -DAUTODIFF_BUILD_EXAMPLES=OFF \
+    -DAUTODIFF_BUILD_DOCS=OFF
+
 # Install Booster Robotics SDK
 
 RUN install-package curl lsb-release
