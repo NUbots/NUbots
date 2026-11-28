@@ -30,6 +30,7 @@ package message.support.nusight;
 import "google/protobuf/timestamp.proto";
 import "message/input/GameState.proto";
 import "message/purpose/Purpose.proto";
+import "message/support/FieldDescription.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
@@ -75,4 +76,6 @@ message Overview {
     fvec3 walk_command = 18;
     /// The role (soccer position) the robot has decided to take, e.g. ATTACK, DEFEND, SUPPORT
     purpose.SoccerPosition role = 19;
+    /// The field this robot is playing on, from its FieldDescription.yaml. NUsight draws the field from this
+    support.FieldDescription field_description = 20;
 }

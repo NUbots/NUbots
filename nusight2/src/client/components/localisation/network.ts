@@ -11,6 +11,7 @@ import { Purpose, SoccerPositionFromEnum } from "@proto/message/purpose/Purpose"
 import { SupportPosition } from "@proto/message/purpose/SupportPosition";
 import { TimeToBall } from "@proto/message/strategy/TimeToBall";
 import { WalkInsideBoundedBox } from "@proto/message/strategy/WalkInsideBoundedBox";
+import { FieldDescription, IFieldDescription } from "@proto/message/support/FieldDescription";
 import { Overview } from "@proto/message/support/nusight/Overview";
 import { FieldIntersections } from "@proto/message/vision/FieldIntersections";
 import { FieldLines } from "@proto/message/vision/FieldLines";
@@ -19,6 +20,7 @@ import { Iiso3 } from "@proto/Transform";
 import { action, runInAction } from "mobx";
 import * as THREE from "three";
 
+import { FieldDimensions } from "../../../shared/field/dimensions";
 import { Matrix2 } from "../../../shared/math/matrix2";
 import { Matrix3 } from "../../../shared/math/matrix3";
 import { Matrix4 } from "../../../shared/math/matrix4";
@@ -59,6 +61,7 @@ export class LocalisationNetwork {
     this.network.on(WalkState, this.onWalkState);
     this.network.on(Overview, this.onOverview);
     this.network.on(CompressedImage, this.onCompressedImage);
+    this.network.on(FieldDescription, this.onFieldDescription);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -116,6 +119,45 @@ export class LocalisationNetwork {
         }),
       };
     });
+  };
+
+  @action
+  private onFieldDescription = (_robotModel: RobotModel, description: IFieldDescription) => {
+    const d = description.dimensions;
+    if (!d) {
+      return;
+    }
+
+    const dimensions = new FieldDimensions({
+      lineWidth: d.lineWidth,
+      // The robot's config has no mark width, so use the same one as the presets
+      markWidth: 0.1,
+      fieldLength: d.fieldLength,
+      fieldWidth: d.fieldWidth,
+      goalDepth: d.goalDepth,
+      goalWidth: d.goalWidth,
+      goalAreaLength: d.goalAreaLength,
+      goalAreaWidth: d.goalAreaWidth,
+      penaltyAreaLength: d.penaltyAreaLength,
+      penaltyAreaWidth: d.penaltyAreaWidth,
+      goalCrossbarHeight: d.goalCrossbarHeight,
+      goalPostDiameter: d.goalpostWidth,
+      goalNetHeight: d.goalNetHeight,
+      penaltyMarkDistance: d.penaltyMarkDistance,
+      centerCircleDiameter: d.centerCircleDiameter,
+      borderStripMinWidth: d.borderStripMinWidth,
+    });
+
+    // Robots resend their description in every overview packet, so only swap it in when it changes, to avoid
+    // rebuilding the field each time
+    const field = this.model.field;
+    if (field.robotDimensions && sameDimensions(field.robotDimensions, dimensions)) {
+      return;
+    }
+    field.robotDimensions = dimensions;
+    if (field.fieldType === "auto") {
+      field.dimensions = dimensions;
+    }
   };
 
   @action
@@ -373,6 +415,11 @@ export class LocalisationNetwork {
 
   @action
   private onOverview = (robotModel: RobotModel, overview: Overview) => {
+    // The overview carries the field the robot is playing on, which the "Auto (from robot)" field type draws
+    if (overview.fieldDescription) {
+      this.onFieldDescription(robotModel, overview.fieldDescription);
+    }
+
     const robot = DashboardRobotModel.of(robotModel);
 
     // Timestamp this message was sent (for comparison with last seen)
@@ -448,4 +495,27 @@ function fromProtoMat44(m: Iiso3): THREE.Matrix4 {
     m!.z!.t!,
     m!.t!.t!,
   );
+}
+
+const FIELD_DIMENSION_KEYS = [
+  "lineWidth",
+  "markWidth",
+  "fieldLength",
+  "fieldWidth",
+  "goalDepth",
+  "goalWidth",
+  "goalAreaLength",
+  "goalAreaWidth",
+  "penaltyAreaLength",
+  "penaltyAreaWidth",
+  "goalCrossbarHeight",
+  "goalPostDiameter",
+  "goalNetHeight",
+  "penaltyMarkDistance",
+  "centerCircleDiameter",
+  "borderStripMinWidth",
+] as const;
+
+function sameDimensions(a: FieldDimensions, b: FieldDimensions): boolean {
+  return FIELD_DIMENSION_KEYS.every((key) => a[key] === b[key]);
 }
