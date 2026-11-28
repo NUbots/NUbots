@@ -38,6 +38,7 @@
 #include "measurement/MeasurementFieldLandmarks.hpp"
 #include "srif/FieldMap.hpp"
 #include "srif/FieldSamples.hpp"
+#include "srif/ImuPreFilter.hpp"
 #include "srif/SideDisambiguator.hpp"
 #include "srif/SystemLocalisation.hpp"
 
@@ -52,6 +53,7 @@ namespace module::localisation {
         using srif::Detection;
         using srif::FieldDimensions;
         using srif::FieldMap;
+        using srif::ImuPreFilter;
         using srif::SensorsSample;
         using srif::SideDisambiguator;
         using srif::SystemLocalisation;
@@ -117,6 +119,18 @@ namespace module::localisation {
             /// @brief Maximum deviation of the specific-force magnitude from standard gravity that
             ///        is still treated as a gravity reading [m/s^2]
             double gravity_quasi_static_tolerance = 3.0;
+            /// @brief Use the accelerometer low-pass filtered in an almost-inertial frame (VQF) as the
+            ///        gravity reading, rather than the raw sample paired with the vision frame
+            bool use_filtered_gravity = true;
+            /// @brief VQF-style IMU pre-filter parameters
+            filter::ImuPreFilter::Parameters imu{};
+            /// @brief Apply a rest measurement (zero angular velocity, gyroscope reads its bias) while the
+            ///        IMU pre-filter finds the robot at rest
+            bool use_rest_detection = true;
+            /// @brief Zero angular velocity noise std dev at rest, per vision frame [rad/s]
+            double rest_omega_sigma = 0.005;
+            /// @brief Gyroscope bias reading noise std dev at rest, per vision frame [rad/s]
+            double rest_bias_sigma = 0.01;
             /// @brief Enable the kinematic torso-height measurement
             bool use_kinematic_height = true;
             /// @brief Kinematic torso-height noise std dev [m]
@@ -169,6 +183,10 @@ namespace module::localisation {
 
         /// @brief Recent odometry samples, newest last
         std::vector<filter::SensorsSample> sensors_window;
+        /// @brief Sensors-rate IMU pre-filter (filtered gravity, rest detection)
+        filter::ImuPreFilter imu;
+        /// @brief The estimator's gyroscope bias after the latest vision frame, for the IMU pre-filter [rad/s]
+        Eigen::Vector3d gyro_bias_estimate = Eigen::Vector3d::Zero();
         /// @brief Time of the latest odometry discontinuity [s since t0]
         double last_odometry_jump_t = -std::numeric_limits<double>::infinity();
         /// @brief The estimator (null until the first successful initial-pose solve)

@@ -36,8 +36,23 @@ odometry_velocity_source: SENSORS_VTW
 # body linear velocity [m/s] per axis, for the source above. Large: the K1's odometry velocity has a scale error, a
 # ~0.1 m/s wandering bias and step-to-step sway
 odometry_velocity_sigma: 0.45
-gravity_sigma: 1.1 # accelerometer gravity-direction noise [m/s^2] (TODO: why so large?)
+gravity_sigma: 0.3 # accelerometer gravity-direction noise [m/s^2], for the reading imu.use_filtered_gravity selects (raw: ~1.1)
 height_sigma: 0.034 # kinematic torso-height noise [m]
+
+# --- IMU pre-filtering ----------------------------------------------------------------------------
+# After VQF (Laidig & Seel, "VQF: Highly Accurate IMU Orientation Estimation with Bias Estimation and Magnetic
+# Disturbance Rejection", Information Fusion 2023, arXiv:2203.17024). Runs at the Sensors rate.
+imu:
+  # Use the accelerometer low-pass filtered in an almost-inertial frame as the gravity reading, instead of the raw
+  # sample paired with the vision frame. Gravity stays put in that frame while walking accelerations average out.
+  use_filtered_gravity: true
+  tau_acc: 3.0 # time constant of the gravity low-pass filter [s] (VQF's default)
+  # Rest detection: once the gyroscope and accelerometer have stayed close to their own low-pass filtered values
+  # for rest_min_time, the robot is at rest, so its angular velocity is zero and the gyroscope reads its bias.
+  use_rest_detection: true
+  rest_min_time: 1.5 # [s] (VQF's default)
+  rest_omega_sigma: 0.005 # zero angular velocity noise at rest, per vision frame [rad/s]
+  rest_bias_sigma: 0.01 # gyroscope bias reading noise at rest, per vision frame [rad/s]
 
 # --- How far vision is trusted --------------------------------------------------------------------
 measurement:

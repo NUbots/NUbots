@@ -46,6 +46,7 @@ using utility::math::quaternion::mat_to_wxyz;
 
 using module::localisation::measurement::MeasurementBodyVelocity;
 using module::localisation::measurement::MeasurementGyroscope;
+using module::localisation::measurement::MeasurementRest;
 using module::localisation::srif::SystemLocalisation;
 using utility::gaussian_filtering::gaussian::GaussianInfo;
 
@@ -298,6 +299,35 @@ SCENARIO("The gyroscope measures the rate, and its bias is observable", "[slam][
                 const Eigen::VectorXd mu = sys.density.mean();
                 const double predicted = SystemLocalisation::body_rate(mu).z() + SystemLocalisation::gyro_bias(mu).z();
                 REQUIRE_THAT(predicted, WithinAbs(0.02, 0.004));
+            }
+        }
+    }
+}
+
+SCENARIO("At rest the gyroscope reading is all bias", "[slam][localisation]") {
+    GIVEN("A stationary belief and a gyroscope reading a pure bias") {
+        const Eigen::VectorXd x0 = nominal_state();
+        SystemLocalisation sys(tight_belief(x0, 0.02));
+        sys.reset_to(tight_belief(x0, 0.02), 0.0);
+        const Eigen::Vector3d bias(0.004, -0.006, 0.02);
+
+        WHEN("the gyroscope and rest measurements are applied") {
+            for (int i = 1; i <= 100; ++i) {
+                const double t = 0.03 * i;
+                MeasurementGyroscope gyro(t, bias, 0.02);
+                sys.process(gyro);
+                MeasurementRest rest(t, bias, 0.005, 0.01);
+                sys.process(rest);
+            }
+
+            THEN("the bias takes the reading and the rate stays at zero") {
+                const Eigen::VectorXd mu = sys.density.mean();
+                const Eigen::Vector3d b  = SystemLocalisation::gyro_bias(mu);
+                const Eigen::Vector3d w  = SystemLocalisation::body_rate(mu);
+                REQUIRE_THAT(b.x(), WithinAbs(bias.x(), 0.002));
+                REQUIRE_THAT(b.y(), WithinAbs(bias.y(), 0.002));
+                REQUIRE_THAT(b.z(), WithinAbs(bias.z(), 0.002));
+                REQUIRE(w.norm() < 0.002);
             }
         }
     }
