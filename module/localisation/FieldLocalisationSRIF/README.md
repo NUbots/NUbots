@@ -76,8 +76,17 @@ dropped; above it, YOLO confidence scales the **inlier weight** of a robust mixt
 noise sigma, since a weak detection's failure mode is not being a landmark at all. Association is greedy surprisal-nearest-neighbour against rays predicted at the prior
 mean, inside a geometric pre-gate that widens with the filter's own yaw uncertainty.
 
-**Gravity.** Gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, not on posture: it holds for a
-robot lying still and fails in free fall or on impact.
+**Gravity.** A single accelerometer sample on a walking robot is gravity plus the torso's own
+acceleration. Following VQF [[1]](#references), `srif::ImuPreFilter` integrates the bias-corrected
+gyroscope at the Sensors rate into an almost-inertial frame `{i}`, rotates each accelerometer sample
+into `{i}`, low-pass filters it there (second-order Butterworth, time constant `imu.tau_acc`) and
+rotates the result back into the torso frame. Gravity is constant in `{i}`, so the walking
+accelerations average out while the torso's rotation is still tracked by the gyroscope. The filter
+uses the SRIF's own gyroscope bias estimate from the previous vision frame. Set
+`imu.use_filtered_gravity: false` to go back to the raw sample paired with the vision frame.
+
+Either reading is gated on `| ‖a‖ − g | < gravity_quasi_static_tolerance`, not on posture: it holds
+for a robot lying still and fails in free fall or on impact.
 
 ### Falls
 
@@ -140,6 +149,13 @@ The yaml values were tuned in NUSim (see [Tuning](#tuning)).
 | `odometry_velocity_sigma`  | Body linear velocity measurement [m/s]; size it for the source chosen  |
 | `gravity_sigma`            | Accelerometer gravity direction [m/s²]                                 |
 | `height_sigma`             | Torso height from the support-leg chain [m]                            |
+
+**IMU pre-filtering** (`imu:`), after VQF [[1]](#references)
+
+| Key                    | Meaning                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| `use_filtered_gravity` | Gravity reading from the almost-inertial low-pass filter rather than raw      |
+| `tau_acc`              | Time constant of that filter [s]; longer smooths more, but trusts gyro longer |
 
 **How far vision is trusted** (`measurement:`)
 
@@ -235,3 +251,10 @@ residual.
 - `MeasurementFieldLines` exists but is not wired in.
 - The zero-velocity update is wrong if a handler carries the robot while it reads `FALLEN`
   (`Config::zupt_sigma`).
+
+## References
+
+1. D. Laidig and T. Seel, "VQF: Highly Accurate IMU Orientation Estimation with Bias Estimation and
+   Magnetic Disturbance Rejection", *Information Fusion* 91 (2023) 187–204.
+   [arXiv:2203.17024](https://arxiv.org/abs/2203.17024). Source of the almost-inertial gravity
+   filter in `srif::ImuPreFilter`.

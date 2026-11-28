@@ -31,6 +31,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <filesystem>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,9 @@ namespace module::localisation::srif {
         Eigen::Isometry3d Htw = Eigen::Isometry3d::Identity();  ///< world -> torso
         Eigen::Vector3d accelerometer;                          ///< [m/s^2], torso frame
         Eigen::Vector3d gyroscope;                              ///< [rad/s], torso frame
+        /// @brief Specific force low-pass filtered in an almost-inertial frame (see ImuPreFilter)
+        ///        [m/s^2], torso frame; non-finite when unavailable
+        Eigen::Vector3d gravity = Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN());
         /// @brief Body-fixed linear velocity [m/s] from Config::odometry_velocity_source; non-finite
         ///        when unavailable
         Eigen::Vector3d vBb;

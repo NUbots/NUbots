@@ -161,6 +161,11 @@ namespace module::localisation {
             cfg.gravity_sigma = config["gravity_sigma"].as<double>();
             cfg.height_sigma  = config["height_sigma"].as<double>();
 
+            // IMU pre-filtering, after VQF (Laidig & Seel, 2023)
+            cfg.use_filtered_gravity = config["imu"]["use_filtered_gravity"].as<bool>();
+            cfg.imu.tau_acc          = config["imu"]["tau_acc"].as<double>();
+            imu.params               = cfg.imu;
+
             // How far vision is trusted
             cfg.measurement.sigma_angular          = config["measurement"]["sigma_angular"].as<double>();
             cfg.measurement.gate_angle             = config["measurement"]["gate_angle"].as<double>();
@@ -202,8 +207,9 @@ namespace module::localisation {
         on<Trigger<ResetFieldLocalisation>, Sync<FieldLocalisationSRIF>>().then([this] {
             log<INFO>("Resetting field localisation");
             system.reset();
-            initialised = false;
-            was_upright = true;
+            initialised        = false;
+            was_upright        = true;
+            gyro_bias_estimate = Eigen::Vector3d::Zero();
             // Its out-of-field map was built under the old belief
             side.reset();
             last_respawn_t = -std::numeric_limits<double>::infinity();
@@ -221,6 +227,10 @@ namespace module::localisation {
             s.Htw           = Eigen::Isometry3d(sensors.Htw);
             s.accelerometer = sensors.accelerometer;
             s.gyroscope     = sensors.gyroscope;
+
+            // At the Sensors rate, so the filter sees every IMU sample and not only those paired with vision
+            imu.update(s.t, s.gyroscope, s.accelerometer, gyro_bias_estimate);
+            s.gravity = imu.gravity();
 
             // Non-finite when unavailable
             s.vBb = cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
@@ -390,12 +400,15 @@ namespace module::localisation {
                 filter::MeasurementFieldLandmarks measurement(t, sample, Tbc, *map, *system, cfg.measurement);
                 system->process(measurement);
 
-                // Gravity only while the specific force is close to 1 g
-                if (cfg.use_gravity && paired->accelerometer.allFinite()) {
+                // Gravity only while the specific force is close to 1 g. The filtered reading averages
+                // out the walking accelerations (see ImuPreFilter), so its magnitude is gated as well.
+                const Eigen::Vector3d& specific_force =
+                    cfg.use_filtered_gravity && paired->gravity.allFinite() ? paired->gravity : paired->accelerometer;
+                if (cfg.use_gravity && specific_force.allFinite()) {
                     constexpr double standard_gravity = 9.80665;
-                    const double a_mag                = paired->accelerometer.norm();
+                    const double a_mag                = specific_force.norm();
                     if (std::abs(a_mag - standard_gravity) < cfg.gravity_quasi_static_tolerance) {
-                        MeasurementGravity gravity(t, paired->accelerometer, cfg.gravity_sigma);
+                        MeasurementGravity gravity(t, specific_force, cfg.gravity_sigma);
                         system->process(gravity);
                     }
                 }
@@ -415,6 +428,9 @@ namespace module::localisation {
                     initialised = false;
                     return;
                 }
+
+                // Fed back to the IMU pre-filter's strapdown integration
+                gyro_bias_estimate = filter::SystemLocalisation::gyro_bias(system->density.mean());
 
                 emit_field(Htw, &measurement);
             });
