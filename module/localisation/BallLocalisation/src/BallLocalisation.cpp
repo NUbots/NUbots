@@ -252,7 +252,11 @@ namespace module::localisation {
                     return;
                 }
 
+                // The teammate's ball is in the mixed-team protocol's field frame, which is our field frame rotated
+                // 180 degrees about the centre (RobotCommunication negates x and y before sending), so undo that
                 Eigen::Vector3d rBFf = robocup.ball.position.cast<double>();
+                rBFf.x()             = -rBFf.x();
+                rBFf.y()             = -rBFf.y();
 
                 // Resize the vector of guesses if it is not large enough
                 if (team_guesses.capacity() < robocup.current_pose.player_id) {
