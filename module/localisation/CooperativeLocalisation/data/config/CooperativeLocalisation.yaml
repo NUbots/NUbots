@@ -1,0 +1,73 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Process model of each target: constant velocity with velocity damping (friction, 1/s), driven by white acceleration
+# noise on the velocity (acceleration_std, m/s^2/sqrt(Hz)). initial_velocity_std (m/s) is a new track's velocity std.
+# Values from the soccer-sim evaluation, close to the ground truth motion in the Booster sim
+motion:
+  ball:
+    friction: 0.2
+    acceleration_std: 0.6
+    initial_velocity_std: 2.5
+  robot:
+    friction: 0.0
+    acceleration_std: 0.3
+    initial_velocity_std: 1.0
+
+# Range/bearing measurement noise, from each detection's range r (m) from the camera:
+#   range std   = range_base + range_quad * r^2   (from ground-projecting a pixel, so it grows with r^2)
+#   bearing std = bearing_std (rad)
+# plus the observer's own pose uncertainty: its position (observer_position_std per axis, times observer_inflation to
+# cover the error being correlated over time) across and along the line of sight, and its heading
+measurement:
+  ball:
+    range_base: 0.05
+    range_quad: 0.012
+    bearing_std: 0.015
+    observer_inflation: 2.0
+  robot:
+    range_base: 0.05
+    range_quad: 0.011
+    bearing_std: 0.015
+    observer_inflation: 3.0
+  observer_position_std: 0.14
+  observer_heading_std: 0.035
+
+association:
+  # A detection can only update a track within this squared Mahalanobis distance (chi-squared, 3 dof, 3 sigma)
+  gate_chi2: 14.16
+  # Add log det of the innovation covariance to the association cost, so a tighter track wins at equal distance
+  log_det: true
+  # A robot track within this distance (m) of the observer can't take its detections (a robot never sees itself)
+  self_exclusion: 1.0
+  # No robot track is started from a detection closer than this (m): it is dominated by the observer's pose error
+  min_spawn_range: 1.5
+  # Detections further than this (m) outside the field are ignored, and tracks that drift there removed
+  max_distance_from_field: 1.0
+  # Detections older than this (s) when they arrive (teammates' are delayed by up to a comms period) are ignored
+  max_detection_age: 1.0
+
+# A robot detection that agrees with a teammate's (or this robot's) reported position is that teammate, and is not
+# tracked: chi-squared (2 dof, 2 sigma) gate on the detection and report covariance, grown by max_speed (m/s) times
+# the report's age. Reports older than max_age (s) are not used. Teammates broadcast at 2 Hz
+teammates:
+  gate_chi2: 6.18
+  max_age: 2.0
+  max_speed: 0.5
+
+tracks:
+  # Remove tracks whose largest position std (m) grows beyond these
+  robot_lost_std: 2.0
+  ball_lost_std: 4.0
+  # Two tracks within this squared Mahalanobis distance (chi-squared, 2 dof, 2 sigma) of each other are duplicates,
+  # if both have a largest position std of at most merge_max_std (m)
+  merge_chi2: 6.18
+  merge_max_std: 0.6
+  # Restart the ball after this many scans in a row whose ball detections all fail the ball track's gate
+  ball_reset_count: 3
+  # A ball detection with a range std above this (m) never starts a track by itself. It waits up to pending_window (s)
+  # for another robot's detection whose ray crosses it, and the ball starts at the intersection
+  spawn_max_range_std: 0.6
+  pending_window: 1.0
+  # Robots with a detection fused in this time (s) are listed as observers of the ball
+  observer_window: 1.0
