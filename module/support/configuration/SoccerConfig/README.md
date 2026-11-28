@@ -18,7 +18,6 @@ The module listens to configuration updates for `FieldDescription.yaml` and re-e
 Configuration files are located at:
 
 - `module/support/configuration/SoccerConfig/data/config/FieldDescription.yaml`
-- `module/support/configuration/SoccerConfig/data/config/webots/FieldDescription.yaml`
 
 Key configured values include field size, line width, goal dimensions, penalty area dimensions, and ball radius.
 
