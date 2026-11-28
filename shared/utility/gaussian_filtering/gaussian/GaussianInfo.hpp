@@ -30,7 +30,6 @@
 
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
-#include <Eigen/LU>  // TODO: Remove this header after fixing GaussianInfo::affine_transform to pass all unit tests
 #include <Eigen/QR>
 #include <Eigen/SVD>
 #include <cmath>
