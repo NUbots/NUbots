@@ -28,6 +28,7 @@
 #define MODULE_VISION_YOLO_HPP
 
 #include <Eigen/Core>
+#include <atomic>
 #include <nuclear>
 #include <opencv2/opencv.hpp>
 
@@ -44,6 +45,9 @@ namespace module::vision {
             /// @brief NMS confidence (score) threshold for filtering out low confidence detections
             double nms_score_threshold = 0.5;
         } cfg;
+
+        /// @brief Radius of the ball (m), from the field description. The ball's centre is this far above the field
+        std::atomic<double> ball_radius{0.0};
 
         /// @brief ONNX Runtime session used to run the YOLO model
         std::unique_ptr<utility::onnx::ONNXRuntime> onnx_rt{};

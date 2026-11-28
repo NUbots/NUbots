@@ -34,6 +34,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/BoundingBoxes.hpp"
 #include "message/vision/FieldIntersections.hpp"
@@ -51,6 +52,7 @@ namespace module::vision {
     using extension::Configuration;
 
     using message::input::Image;
+    using message::support::FieldDescription;
     using message::vision::Ball;
     using message::vision::Balls;
     using message::vision::BoundingBox;
@@ -98,6 +100,9 @@ namespace module::vision {
                 log<ERROR>("YOLO inference disabled until a valid model is configured");
             }
         });
+
+        on<Trigger<FieldDescription>>().then(
+            [this](const FieldDescription& field_description) { ball_radius = field_description.ball_radius; });
 
         on<Trigger<Image>, Single>().then("Yolo Main Loop", [this](const Image& img) {
             if (!model_loaded) {
@@ -230,12 +235,18 @@ namespace module::vision {
                                  norm_dim);
             };
 
-            // Helper function to simplify projecting rays onto the field plane then transforming into camera space
-            auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
+            // Helper function to simplify projecting rays onto a horizontal plane (by default the field plane) then
+            // transforming into camera space
+            auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray, const double plane_height = 0.0) {
                 Eigen::Vector3d uBCw = Hwc.rotation() * ray;
-                Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
+                Eigen::Vector3d rPWw =
+                    uBCw * std::abs((Hwc.translation().z() - plane_height) / uBCw.z()) + Hwc.translation();
                 return Hwc.inverse() * rPWw;
             };
+
+            // The centre of the ball is a ball radius above the field, so its ray is projected onto that plane.
+            // Projecting it onto the field plane would put the ball too far away by ball_radius / camera height
+            const double ball_centre_height = ball_radius.load();
 
             for (size_t i = 0; i < indices.size(); i++) {
                 // Get the index of the detected object from list of indices
@@ -274,7 +285,7 @@ namespace module::vision {
                     b.uBCc = ray_to_camera_space(centre_ray).normalized();
                     b.measurements.emplace_back();
                     b.measurements.back().type = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
+                    b.measurements.back().rBCc = ray_to_camera_space(centre_ray, ball_centre_height);
                     // Calculate the angular radius of the ball in camera space
                     b.radius = bottom_centre_ray.dot(bottom_left_ray);
                     b.colour.fill(1.0);
