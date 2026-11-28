@@ -29,6 +29,7 @@ nuclear_role(
   localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
   localisation::RobotLocalisation
+  localisation::CooperativeLocalisation # Joint ball and robot tracking from every teammate's detections
   # Director
   extension::Director
   # Servos
