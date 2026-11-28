@@ -24,11 +24,16 @@ ball:
   #   vision: the nearest vision::Balls detection, its ray put on the ball centre (closest to how the policies
   #     were trained: per-frame detections, the last one held when the ball is not seen)
   #   localisation: the filtered localisation::Ball, which is NUSim's ground truth when NUSimGroundTruth is on
-  source: localisation
+  source: vision
   # Ball radius (m), to put a detection's ray on the ball centre
   radius: 0.0785
-  # An estimate older than this (s) counts as not seen this tick. Vision runs at 30 Hz, the policies at 50 Hz.
-  max_age: 0.1
+  # An estimate older than this (s, from when its image was taken) counts as not seen this tick. Detections
+  # arrive 140-180 ms after their image on the K1 (Yolo + camera pipeline, 2026-11-27 recording) and 50-80 ms in
+  # NUSim with Yolo on the CPU, at 13-30 Hz. 0.1 s threw every real detection away, so the policies ran blind
+  # (the dribble squatted onto its toes). 0.3 s keeps the ball seen on 88-98% of steps in NUSim, as in training.
+  # The ray is put in the world with the camera pose of its image and moved into the camera frame of now, so a
+  # late detection is still placed right for the robot's own motion; only the ball's motion since lags.
+  max_age: 0.3
   # localisation only: advance the estimate by its velocity over its age
   predict: true
 
