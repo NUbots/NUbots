@@ -150,16 +150,16 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             exit(0)
 
         # If this is the run command, then use the binary name to determine if
-        # the hostname should be docker or webots
-        # Binaries containing 'webots' (ie in the webots folder) should be given the hostname 'webots'
-        # to ensure the config files are chosen correctly
+        # the hostname should be docker or nusim
+        # Binaries containing 'nusim' (ie in the nusim folder) should be given that
+        # hostname so the per-platform config files (config/nusim) are chosen
         docker_hostname = hostname
         if kwargs["command"] == "run":
-            if any(["webots" in arg for arg in kwargs["args"]]):
-                docker_hostname = "webots"
-            # If "player_id" exists in kwargs, set the hostname to "webots" + player_id
+            if any(["nusim" in arg for arg in kwargs["args"]]):
+                docker_hostname = "nusim"
+            # If "player_id" exists in kwargs, set the hostname to the simulator + player_id
             if kwargs["player_id"] is not None:
-                docker_hostname = f"webots{kwargs['player_id']}"
+                docker_hostname = f"nusim{kwargs['player_id']}"
 
         # Docker arguments
         docker_args = [
