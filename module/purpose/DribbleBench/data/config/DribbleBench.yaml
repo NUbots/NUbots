@@ -1,0 +1,21 @@
+log_level: INFO
+
+# mjlab's dribble benchmarks (scripts/dribbling/check_dribble_speed.py, demo_figure8.py and
+# check_walk_to_dribble.py), run one robot at a time in NUSim. Ground truth is used only to steer and score:
+# the policy sees whatever skill::Walk's BallSkills.yaml gives it.
+
+# Straight lines: each speed held 12 s along the heading +-30 deg; ball speed along it over the last 8 s
+straight_speeds: [0.6, 1.0, 1.3, 1.5, 1.8]
+straight_repeats: 2
+
+# Figure of eight at 0.6 m/s: both circles of each radius, from a fresh start per radius
+figure8_radii: [0.8, 0.6, 0.5, 0.4]
+figure8_repeats: 2
+figure8_circle_timeout: 40.0
+
+# Walk to a still ball 2-3 m away (bearing +-0.6 rad), switch at 0.45-0.75 m, dribble 6 s at 0.8 m/s within
+# +-60 deg of the heading
+walk_to_dribble_repeats: 4
+
+# Random seed for directions and placements
+seed: 1

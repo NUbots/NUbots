@@ -1,0 +1,45 @@
+# Plays one K1 in NUSim from the keyboard with the mjlab policies: the walk and the six ball skills (receive, dribble,
+# kick, air shot, directional first touch, first-time pass), all run by skill::Walk. The NUbots counterpart of NUSim's
+# `./b skills`. `p` rolls a pass at the robot and `b` puts the ball at its feet, through NUSim's ball command topic. No
+# ConsoleLogHandler: KeyboardSkills shows the log in its terminal UI (or prints it when not interactive).
+nuclear_role(
+  # FileWatcher and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # log() calls show in the console
+  # Configuration
+  support::configuration::SoccerConfig # Field description
+  # Network
+  network::NUClearNet
+  network::NetworkForwarder
+  network::PlotJuggler
+  output::Overview
+  output::ImageCompressor
+  # Sensors: NUSim's camera, and its ground truth (off unless NUSimGroundTruth.yaml says so) and ball commands
+  input::NUSimCamera
+  input::NUSimGroundTruth
+  input::Sensors
+  # Vision
+  vision::Yolo
+  # Localisation
+  localisation::FieldLocalisationNLopt
+  localisation::BallLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Servos # Director-arbitrated sink for the K1 low-level channel
+  # Skills
+  skill::Walk # mjlab walk + ball-skill ONNX policies -> LowCmd
+  skill::SimK1GetUp # ONNX get-up inference -> LowCmd
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  # Strategies
+  strategy::FallRecovery
+  # Purpose
+  purpose::DribbleBench # mjlab dribble benchmarks with NUSim ground truth scoring
+  support::PerceptionRecorder # DEBUG(perception model): Yolo frames paired with ground truth
+  support::DynamicsRecorder # DEBUG(dynamics alignment): joint commands with state and ground truth
+  # Platform: Booster HardwareIO bridges to NUSim's SdkBridge over DDS in sim
+  platform::${SUBCONTROLLER}::HardwareIO
+)

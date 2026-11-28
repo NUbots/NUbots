@@ -26,6 +26,8 @@
  */
 #include "NUSimGroundTruth.hpp"
 
+#include <fmt/format.h>
+
 #include <chrono>
 #include <cmath>
 
@@ -37,6 +39,7 @@
 #include "message/localisation/GroundTruthMode.hpp"
 #include "message/platform/NUSimBallCommand.hpp"
 
+#include "utility/nusim/ground_truth.hpp"
 #include "utility/platform/Booster/channel_factory.hpp"
 
 namespace module::input {
@@ -178,6 +181,30 @@ namespace module::input {
                     ball_received  = ball_time;
                     robot_fresh    = now - robot_received < timeout;
                     ball_fresh     = now - ball_received < timeout;
+                }
+                // DEBUG(dribble eval): true robot and ball for benchmarks, simulator world frame
+                if (robot_fresh && ball_fresh) {
+                    auto state  = std::make_unique<utility::nusim::GroundTruthState>();
+                    state->Hst  = torso;
+                    state->rBSs = ball_position;
+                    state->vBs  = ball_velocity;
+                    state->time = NUClear::clock::now();
+                    emit(state);
+                }
+                {
+                    static int gt_tick = 0;
+                    if (gt_tick++ % 5 == 0 && robot_fresh && ball_fresh) {
+                        const Eigen::Vector3d rel = torso.linear().transpose() * (ball_position - torso.translation());
+                        log<INFO>(fmt::format("GTPROBE robot=({:.3f},{:.3f},{:.3f}) ball=({:.3f},{:.3f}) "
+                                              "ball_in_robot=({:.3f},{:.3f})",
+                                              torso.translation().x(),
+                                              torso.translation().y(),
+                                              torso.translation().z(),
+                                              ball_position.x(),
+                                              ball_position.y(),
+                                              rel.x(),
+                                              rel.y()));
+                    }
                 }
 
                 if (cfg.ground_truth) {

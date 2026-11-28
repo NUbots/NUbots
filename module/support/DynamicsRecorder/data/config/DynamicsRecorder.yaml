@@ -1,0 +1,2 @@
+log_level: INFO
+# DEBUG(dynamics alignment): one DYNREC line per joint command, for fitting mjlab to NUSim (after JOGA WB-UAN)
