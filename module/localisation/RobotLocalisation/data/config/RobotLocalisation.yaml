@@ -33,6 +33,10 @@ measurement:
 # (chi-squared, 2 dof; 9.21 = 99%). Detections are assigned to tracks one-to-one, lowest distance first.
 gate_chi2: 9.2103
 
+# Vision cannot tell teams apart, so a detection can only update a teammate track (from comms) if it is also within
+# this distance (m) of it. Stops opponents near a teammate being absorbed into the teammate's track.
+teammate_association_distance: 0.5
+
 # Opponent tracks that have gone this long (seconds) without a vision update are removed
 max_track_age: 3.0
 

@@ -71,6 +71,8 @@ namespace module::localisation {
 
             /// @brief Squared Mahalanobis distance above which a detection cannot update a track
             double gate_chi2 = 0.0;
+            /// @brief A detection can only update a teammate track if it is within this distance (m) of it
+            double teammate_association_distance = 0.0;
             /// @brief Seconds without a vision update after which a non-teammate track is removed
             double max_track_age = 0.0;
             /// @brief Tracks closer than this (m) to an older track are removed as duplicates

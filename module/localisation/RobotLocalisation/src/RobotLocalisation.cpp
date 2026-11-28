@@ -87,6 +87,7 @@ namespace module::localisation {
             cfg.measurement.bearing_per_metre = config["measurement"]["bearing_per_metre"].as<double>();
             cfg.measurement.pose_std          = config["measurement"]["pose_std"].as<double>();
             cfg.gate_chi2                     = config["gate_chi2"].as<double>();
+            cfg.teammate_association_distance = config["teammate_association_distance"].as<double>();
             cfg.max_track_age                 = config["max_track_age"].as<double>();
             cfg.merge_distance                = config["merge_distance"].as<double>();
             cfg.max_robot_tracks              = config["max_robot_tracks"].as<int>();
@@ -254,7 +255,12 @@ namespace module::localisation {
             const Eigen::Matrix2d P    = tracked_robots[i].ukf.get_covariance().topLeftCorner<2, 2>();
             for (size_t j = 0; j < n_dets; ++j) {
                 const Eigen::Vector2d nu = robots_rRWw[j].head<2>() - mean;
-                const double d2          = nu.dot((P + covariances[j]).ldlt().solve(nu));
+                // Vision cannot tell teams apart, so a teammate track only takes detections very close to it.
+                // Otherwise its wide gate (comms are infrequent) absorbs nearby opponents and labels them teammates.
+                if (tracked_robots[i].teammate && nu.norm() > cfg.teammate_association_distance) {
+                    continue;
+                }
+                const double d2 = nu.dot((P + covariances[j]).ldlt().solve(nu));
                 if (d2 <= cfg.gate_chi2) {
                     cost[i][j] = d2;
                 }
