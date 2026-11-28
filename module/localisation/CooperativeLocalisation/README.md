@@ -37,6 +37,9 @@ filter update in square-root information form). The noise is:
 The observer's position covariance is inflated (`observer_inflation`), as the observer's pose error is correlated over
 time while the filter treats each detection as independent.
 
+Ball detections are re-projected onto the plane of the ball's centre (`ball_radius` above the ground) rather than the
+ground, which vision does and which puts the ball too far away by `ball_radius / camera height` (around 10 %).
+
 Teammates' detections arrive late (up to a comms period, 0.5 s). A detection from `lag` seconds ago measures where the
 target was then, `p - lag * v`, plus the process noise over the lag, so it can be fused into a track that is already at
 the current time.
