@@ -149,6 +149,12 @@ export class LocalisationController {
   setFieldDimensions(field_type: string, model: LocalisationModel) {
     model.field.fieldType = field_type;
     switch (field_type) {
+      case "auto":
+        // Draw the field the robots last described. Until one does, keep drawing whatever field is showing.
+        if (model.field.robotDimensions) {
+          model.field.dimensions = model.field.robotDimensions;
+        }
+        break;
       case "lab":
         model.field.dimensions = new FieldDimensions({
           lineWidth: 0.05,

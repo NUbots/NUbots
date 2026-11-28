@@ -6,7 +6,10 @@ export class FieldModel {
   @observable dimensions: FieldDimensions;
   @observable fieldColor: string;
   @observable lineColor: string;
+  /** "auto" to draw the field the robots describe, otherwise the name of one of the controller's presets. */
   @observable fieldType: string;
+  /** The field from the last FieldDescription a robot sent, drawn while `fieldType` is "auto". */
+  @observable.ref robotDimensions?: FieldDimensions;
   @observable blueGoalColor: string;
   @observable yellowGoalColor: string;
 
@@ -24,7 +27,7 @@ export class FieldModel {
       dimensions: FieldDimensions.of(),
       fieldColor: "#00cc00",
       lineColor: "#ffffff",
-      fieldType: "lab",
+      fieldType: "auto",
       blueGoalColor: "#0000ff",
       yellowGoalColor: "#ffff00",
     });
