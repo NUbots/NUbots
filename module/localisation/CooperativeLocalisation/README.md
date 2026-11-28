@@ -18,7 +18,7 @@ that wants them, but nothing uses them yet.
 
 ### Filter
 
-Each target (the ball, or one robot) has its own square-root information filter (`utility::math::filter::SRIF`) over
+Each target (the ball, or one robot) has its own square-root extended Kalman filter (`SquareRootEKF.hpp`) over
 `[x, y, vx, vy]` on the field. The process model is constant velocity with velocity damping (`friction`, the ball
 slowing as it rolls), driven by white acceleration noise. Both updates are a single QR factorisation, so the covariance
 stays positive definite even when a detection is very tight across the line of sight and very loose along it.
@@ -26,8 +26,8 @@ stays positive definite even when a detection is very tight across the line of s
 ### Measurement
 
 A detection is a range and bearing from the observing camera, `y = [u; r]` with `u` the unit vector from the camera to
-the detection on the field and `r` the range, linearised at the track mean (one Gauss-Newton step, the extended Kalman
-filter update in square-root information form). The noise is:
+the detection on the field and `r` the range, linearised at the track mean (the extended Kalman filter update). The
+noise is:
 
 - bearing: the detector's `bearing_std`, the observer's heading std, and the observer's position std across the line
   of sight divided by the range
@@ -93,4 +93,3 @@ In NUSim, team messages reach the other robots because NUSim's match launcher se
 ## Dependencies
 
 - Eigen
-- `utility::math::filter::SRIF`

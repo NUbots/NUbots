@@ -32,7 +32,7 @@ import "google/protobuf/timestamp.proto";
 import "message/localisation/Ball.proto";
 import "message/localisation/Robot.proto";
 
-/// The ball estimated by localisation::CooperativeLocalisation, a joint square-root information filter that fuses
+/// The ball estimated by localisation::CooperativeLocalisation, a joint square-root extended Kalman filter that fuses
 /// this robot's ball detections with the detections its teammates share over team communication
 message CooperativeBall {
     /// The ball estimate in world {w} space, with the same conventions as localisation::BallLocalisation's Ball.

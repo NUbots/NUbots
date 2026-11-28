@@ -453,7 +453,7 @@ namespace module::localisation {
         Track track;
         track.id                              = next_id++;
         track.target                          = observation.target;
-        track.filter                          = utility::math::filter::SRIF<double, 4>(x, P);
+        track.filter                          = SquareRootEKF<4>(x, P);
         track.time                            = now;
         track.last_measurement                = observation.time;
         track.fusions                         = 1;

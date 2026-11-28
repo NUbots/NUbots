@@ -33,16 +33,16 @@
 #include <set>
 #include <vector>
 
+#include "SquareRootEKF.hpp"
+
 #include "message/localisation/Cooperative.hpp"
 #include "message/support/FieldDescription.hpp"
-
-#include "utility/math/filter/SRIF.hpp"
 
 namespace module::localisation {
 
     /**
      * @brief Cooperative (joint) tracking of the ball and the other robots, fusing this robot's detections with the
-     * detections its teammates share over team communication into one square-root information filter per target.
+     * detections its teammates share over team communication into one square-root extended Kalman filter per target.
      *
      * Ported from the cooperative tracking evaluation in Sebastian Brooker's soccer-sim (FYP), where the joint filter
      * tracked the ball and opponents better than each robot tracking on its own. See the README for the models.
@@ -154,7 +154,7 @@ namespace module::localisation {
             /// @brief What the track is of
             Target target = Target::BALL;
             /// @brief Filter over [x, y, vx, vy] on the field {f}
-            utility::math::filter::SRIF<double, 4> filter{};
+            SquareRootEKF<4> filter{};
             /// @brief The time the filter state is at
             NUClear::clock::time_point time{};
             /// @brief The time of the most recent detection fused (or that started the track)
