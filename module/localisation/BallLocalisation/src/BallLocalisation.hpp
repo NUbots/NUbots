@@ -83,14 +83,6 @@ namespace module::localisation {
             /// @brief Maximum number of detections of a ball not being accepted before it is accepted
             int max_rejections = 0;
 
-            /// @brief Whether or not to use teammate balls
-            bool use_r2r_balls = false;
-            /// @brief Timeout on stale teammate ball guesses
-            double team_ball_recency = 0.0;
-            /// @brief Max allowed std on teammate guesses
-            double team_guess_error = 0.0;
-            /// @brief Timeout for switching from own balls to teammate balls
-            double team_guess_default_timer = 0.0;
             /// @brief Maximum distance from the field that a ball can be before it is ignored
             double max_distance_from_field = 0.0;
             /// @brief Whether to fall back to the cooperative ball when we have lost the ball ourselves
@@ -120,7 +112,6 @@ namespace module::localisation {
         /// @brief The reactions that update the ball estimate. Disabled while input::NUSimGroundTruth is providing
         /// Ball, so this module does not emit its own
         ReactionHandle vision_ball_reaction{};
-        ReactionHandle team_ball_reaction{};
         ReactionHandle cooperative_ball_reaction{};
 
         /// @brief Unscented Kalman Filter for ball filtering
@@ -130,22 +121,7 @@ namespace module::localisation {
         /// @param cooperative The ball from localisation::CooperativeLocalisation
         void cooperative_fallback(const message::localisation::CooperativeBall& cooperative);
 
-        /// @brief Calculates ball position using robot to robot communication
-        /// @param average_rBFf The average position of the ball in field space
-        /// @return Whether the teammate ball is a valid guess and the average position of the ball in field space
-        std::pair<bool, Eigen::Vector3d> get_average_team_rBFf();
-
-        /// @brief A struct to hold the guess from a teammate
-        struct TeamGuess {
-            /// @brief The time the guess was given
-            NUClear::clock::time_point last_heard = NUClear::clock::now();
-            /// @brief The position of the ball in field space
-            Eigen::Vector3d rBFf = Eigen::Vector3d::Zero();
-        };
-        /// @brief A vector of guesses from teammates, where the index is the player ID - 1
-        std::vector<TeamGuess> team_guesses{};
-
-        /// @brief The last Hcw from a ball measurement, to use with teammate balls
+        /// @brief The last Hcw from a ball measurement, to use with the cooperative ball
         Eigen::Isometry3d last_Hcw = Eigen::Isometry3d::Identity();
 
     public:
