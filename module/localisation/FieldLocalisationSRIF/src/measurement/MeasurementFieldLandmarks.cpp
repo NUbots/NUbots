@@ -45,7 +45,7 @@ namespace module::localisation::measurement {
 
     MeasurementFieldLandmarks::MeasurementFieldLandmarks(double time,
                                                          const VisionSample& sample,
-                                                         const Pose<double>& Tbc,
+                                                         const Eigen::Isometry3d& Tbc,
                                                          const FieldMap& map,
                                                          const SystemLocalisation& system,
                                                          const Options& options)
@@ -76,7 +76,7 @@ namespace module::localisation::measurement {
 
     MeasurementFieldLandmarks::MeasurementFieldLandmarks(double time,
                                                          const VisionSample& sample,
-                                                         const Pose<double>& Tbc,
+                                                         const Eigen::Isometry3d& Tbc,
                                                          const FieldMap& map,
                                                          const SystemLocalisation& system)
         : MeasurementFieldLandmarks(time, sample, Tbc, map, system, Options{}) {}
@@ -121,10 +121,10 @@ namespace module::localisation::measurement {
         }
 
         // Predicted ray for every mapped landmark at the given state (incl. camera mount bias)
-        Pose<double> Tbias(SystemLocalisation::camera_bias_rotation<double>(x), Eigen::Vector3d::Zero());
-        Pose<double> Tfc           = SystemLocalisation::field_pose<double>(x) * Tbc_ * Tbias;
-        const Eigen::Matrix3d Rfc  = Tfc.rotation_matrix;
-        const Eigen::Vector3d rCFf = Tfc.translation_vector;
+        Eigen::Isometry3d Tbias(SystemLocalisation::camera_bias_rotation<double>(x));
+        Eigen::Isometry3d Tfc      = SystemLocalisation::field_pose<double>(x) * Tbc_ * Tbias;
+        const Eigen::Matrix3d Rfc  = Tfc.linear();
+        const Eigen::Vector3d rCFf = Tfc.translation();
 
         // Bearings are compared in {f}, inflated by the pose uncertainty
         const Eigen::Matrix3d Ppos = P.topLeftCorner<3, 3>();

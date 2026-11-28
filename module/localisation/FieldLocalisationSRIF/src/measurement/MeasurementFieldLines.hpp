@@ -39,7 +39,6 @@
 #include "srif/FieldSamples.hpp"
 #include "srif/SystemLocalisation.hpp"
 
-#include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
@@ -62,9 +61,9 @@
 namespace module::localisation::measurement {
 
     using srif::FieldMap;
+    using srif::Isometry3;
     using srif::LinePointsSample;
     using srif::SystemLocalisation;
-    using utility::gaussian_filtering::Pose;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemBase;
@@ -96,7 +95,7 @@ namespace module::localisation::measurement {
          */
         MeasurementFieldLines(double time,
                               const LinePointsSample& sample,
-                              const Pose<double>& Tbc,
+                              const Eigen::Isometry3d& Tbc,
                               const FieldMap& map,
                               const SystemLocalisation& system,
                               const Options& options);
@@ -106,7 +105,7 @@ namespace module::localisation::measurement {
          */
         MeasurementFieldLines(double time,
                               const LinePointsSample& sample,
-                              const Pose<double>& Tbc,
+                              const Eigen::Isometry3d& Tbc,
                               const FieldMap& map,
                               const SystemLocalisation& system);
 
@@ -134,7 +133,7 @@ namespace module::localisation::measurement {
         virtual void update(SystemBase& system) override;
 
         const FieldMap& map_;                            ///< Field map (line primitives)
-        Pose<double> Tbc_;                               ///< Camera pose w.r.t. torso at capture time
+        Eigen::Isometry3d Tbc_;                          ///< Camera pose w.r.t. torso at capture time
         Eigen::Matrix<double, 3, Eigen::Dynamic> rays_;  ///< Selected unit rays in {c}
         Eigen::VectorXd sigma2_;                         ///< Per-ray distance noise variance [m^2]
         Options options_;
@@ -151,10 +150,10 @@ namespace module::localisation::measurement {
 
         // Camera pose in field frame with mount-bias correction:
         // Tfc = Tfb(x) * Tbc * R(deltaC)
-        Pose<Scalar> Tbias(SystemLocalisation::camera_bias_rotation(x), Eigen::Vector3<Scalar>::Zero());
-        Pose<Scalar> Tfc                  = SystemLocalisation::field_pose(x) * Pose<Scalar>(Tbc_) * Tbias;
-        const Eigen::Matrix3<Scalar> Rfc  = Tfc.rotation_matrix;
-        const Eigen::Vector3<Scalar> rCFf = Tfc.translation_vector;
+        Isometry3<Scalar> Tbias(SystemLocalisation::camera_bias_rotation(x));
+        Isometry3<Scalar> Tfc             = SystemLocalisation::field_pose(x) * Tbc_.template cast<Scalar>() * Tbias;
+        const Eigen::Matrix3<Scalar> Rfc  = Tfc.linear();
+        const Eigen::Vector3<Scalar> rCFf = Tfc.translation();
 
         const double log_inlier_weight = std::log(options_.inlier_probability);
         const double log_clutter       = std::log(1.0 - options_.inlier_probability) - std::log(options_.clutter_area);

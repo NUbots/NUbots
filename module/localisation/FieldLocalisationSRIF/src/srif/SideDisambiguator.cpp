@@ -158,7 +158,7 @@ namespace module::localisation::srif {
 
     std::vector<SideDisambiguator::Association> SideDisambiguator::associate(
         const std::vector<OutOfFieldFeature>& features,
-        const Pose<double>& Tfc,
+        const Eigen::Isometry3d& Tfc,
         double pos_std,
         double yaw_std,
         double& score,
@@ -168,8 +168,8 @@ namespace module::localisation::srif {
         predictions.clear();
         feature_outlier.assign(features.size(), 0);
 
-        const Eigen::Matrix3d Rcf  = Tfc.rotation_matrix.transpose();
-        const Eigen::Vector3d rCFf = Tfc.translation_vector;
+        const Eigen::Matrix3d Rcf  = Tfc.linear().transpose();
+        const Eigen::Vector3d rCFf = Tfc.translation();
         const double log_clutter   = std::log(options.clutter_density);
         const double cos_pre_gate  = std::cos(options.pre_gate_angle);
         const double eff_pos_std   = std::max(pos_std, options.pos_std_floor);
@@ -243,7 +243,7 @@ namespace module::localisation::srif {
         for (std::size_t i = 0; i < features.size(); ++i) {
             if (!features[i].out_of_field)
                 continue;
-            const Eigen::Vector3d u_meas_f = Tfc.rotation_matrix * features[i].uPCc;
+            const Eigen::Vector3d u_meas_f = Tfc.linear() * features[i].uPCc;
             for (std::size_t k = 0; k < predicted.size(); ++k) {
                 if (predictions[k].ambiguous)
                     continue;
@@ -285,11 +285,11 @@ namespace module::localisation::srif {
 
     void SideDisambiguator::update_candidates(const std::vector<OutOfFieldFeature>& features,
                                               const std::vector<bool>& feature_used,
-                                              const Pose<double>& Tfc,
+                                              const Eigen::Isometry3d& Tfc,
                                               double t,
                                               std::vector<char>& feature_grew_track) {
         feature_grew_track.assign(features.size(), 0);
-        const Eigen::Vector3d rCFf = Tfc.translation_vector;
+        const Eigen::Vector3d rCFf = Tfc.translation();
         const double cos_gate      = std::cos(options.cand_gate_angle);
 
         // Gated (feature, candidate) pairs, matched greedily by descriptor distance. The gate uses
@@ -303,7 +303,7 @@ namespace module::localisation::srif {
         for (std::size_t i = 0; i < features.size(); ++i) {
             if (!features[i].out_of_field || feature_used[i])
                 continue;
-            const Eigen::Vector3d u_meas_f = Tfc.rotation_matrix * features[i].uPCc;
+            const Eigen::Vector3d u_meas_f = Tfc.linear() * features[i].uPCc;
             for (std::size_t c = 0; c < candidates_.size(); ++c) {
                 if (u_meas_f.dot(candidates_[c].obs.back().uFf) < cos_gate)
                     continue;
@@ -326,7 +326,7 @@ namespace module::localisation::srif {
             feature_grew_track[pq.f] = 1;
 
             Candidate& cand                = candidates_[pq.c];
-            const Eigen::Vector3d u_meas_f = Tfc.rotation_matrix * features[pq.f].uPCc;
+            const Eigen::Vector3d u_meas_f = Tfc.linear() * features[pq.f].uPCc;
             if (cand.obs.size() >= static_cast<std::size_t>(options.obs_window)) {
                 // Keep the oldest observation as the parallax/timespan anchor and
                 // roll the rest of the window.
@@ -432,7 +432,7 @@ namespace module::localisation::srif {
         for (std::size_t i = 0; i < features.size(); ++i) {
             if (!features[i].out_of_field || feature_used[i] || feat_matched[i])
                 continue;
-            const Eigen::Vector3d uFf = Tfc.rotation_matrix * features[i].uPCc;
+            const Eigen::Vector3d uFf = Tfc.linear() * features[i].uPCc;
             // Overhead lighting grids are near-symmetric under the field's 180 deg
             // rotation; don't let high-elevation features into the map at all.
             if (std::asin(std::clamp(uFf.z(), -1.0, 1.0)) > options.max_elevation)
@@ -457,8 +457,8 @@ namespace module::localisation::srif {
 
     SideDisambiguator::FrameResult SideDisambiguator::process(double t,
                                                               const cv::Mat& gray,
-                                                              const Pose<double>& Tfc,
-                                                              const Pose<double>& TfcMirror,
+                                                              const Eigen::Isometry3d& Tfc,
+                                                              const Eigen::Isometry3d& TfcMirror,
                                                               double pos_std,
                                                               double yaw_std,
                                                               double yaw_rate_abs,
@@ -649,7 +649,7 @@ namespace module::localisation::srif {
                     // Keep the oldest observation as the parallax anchor.
                     lm.obs.erase(lm.obs.begin() + 1);
                 }
-                lm.obs.push_back({Tfc.translation_vector, Tfc.rotation_matrix * features[a.feature].uPCc, t});
+                lm.obs.push_back({Tfc.translation(), Tfc.linear() * features[a.feature].uPCc, t});
 
                 Eigen::Vector3d rPFf;
                 Eigen::Matrix3d P;

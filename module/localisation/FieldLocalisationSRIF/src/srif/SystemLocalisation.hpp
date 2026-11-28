@@ -46,7 +46,6 @@
 #include "srif/FieldSamples.hpp"
 
 #include "utility/gaussian_filtering/Event.hpp"
-#include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/gaussian/GaussianInfo.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
@@ -56,8 +55,11 @@
 
 namespace module::localisation::srif {
 
+    /// @brief Isometry in any scalar type, for autodiff
+    template <typename Scalar>
+    using Isometry3 = Eigen::Transform<Scalar, 3, Eigen::Isometry>;
+
     using utility::gaussian_filtering::Event;
-    using utility::gaussian_filtering::Pose;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemEstimator;
@@ -158,13 +160,13 @@ namespace module::localisation::srif {
         /**
          * @brief Torso pose in field frame from a state vector.
          * @param x State vector (nx)
-         * @return Tfb with rotation_matrix Rfb and translation_vector rBFf
+         * @return Tfb with rotation Rfb and translation rBFf
          */
         template <typename Scalar>
-        static Pose<Scalar> field_pose(const Eigen::VectorX<Scalar>& x) {
-            Pose<Scalar> Tfb;
-            Tfb.rotation_matrix    = wxyz_to_mat(Eigen::Vector4<Scalar>(x.template segment<4>(i_quat)));
-            Tfb.translation_vector = x.template segment<3>(i_pos);
+        static Isometry3<Scalar> field_pose(const Eigen::VectorX<Scalar>& x) {
+            Isometry3<Scalar> Tfb = Isometry3<Scalar>::Identity();
+            Tfb.linear()          = wxyz_to_mat(Eigen::Vector4<Scalar>(x.template segment<4>(i_quat)));
+            Tfb.translation()     = x.template segment<3>(i_pos);
             return Tfb;
         }
 

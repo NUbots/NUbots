@@ -29,24 +29,22 @@
 #define MODULE_LOCALISATION_SRIF_FIELDSAMPLES_HPP
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <filesystem>
 #include <string>
 #include <vector>
 
-#include "utility/gaussian_filtering/Pose.hpp"
 
 namespace module::localisation::srif {
-
-    using utility::gaussian_filtering::Pose;
 
     /**
      * @brief A single message.input.Sensors sample (IMU + torso pose estimate at capture time)
      */
     struct SensorsSample {
-        double t;                       ///< capture time [s since epoch]
-        Pose<double> Htw;               ///< world -> torso
-        Eigen::Vector3d accelerometer;  ///< [m/s^2], torso frame
-        Eigen::Vector3d gyroscope;      ///< [rad/s], torso frame
+        double t;                                               ///< capture time [s since epoch]
+        Eigen::Isometry3d Htw = Eigen::Isometry3d::Identity();  ///< world -> torso
+        Eigen::Vector3d accelerometer;                          ///< [m/s^2], torso frame
+        Eigen::Vector3d gyroscope;                              ///< [rad/s], torso frame
         /// @brief Body-fixed linear velocity [m/s] from Config::odometry_velocity_source; non-finite
         ///        when unavailable
         Eigen::Vector3d vBb;
@@ -65,9 +63,9 @@ namespace module::localisation::srif {
      * @brief A single message.vision.BoundingBoxes sample (camera pose + detections at capture time)
      */
     struct VisionSample {
-        double t;          ///< image capture time [s since epoch]
-        int video_frame;   ///< index into frameTimes / Left.mp4, or -1 if no matching frame
-        Pose<double> Hcw;  ///< world -> camera
+        double t;         ///< image capture time [s since epoch]
+        int video_frame;  ///< index into frameTimes / Left.mp4, or -1 if no matching frame
+        Eigen::Isometry3d Hcw = Eigen::Isometry3d::Identity();  ///< world -> camera
         std::vector<Detection> detections;
     };
 
@@ -75,9 +73,9 @@ namespace module::localisation::srif {
      * @brief A single message.vision.FieldLines sample (field-line points as camera rays)
      */
     struct LinePointsSample {
-        double t;          ///< image capture time [s since epoch]
-        int video_frame;   ///< index into frameTimes / Left.mp4, or -1
-        Pose<double> Hcw;  ///< world -> camera
+        double t;                                               ///< image capture time [s since epoch]
+        int video_frame;                                        ///< index into frameTimes / Left.mp4, or -1
+        Eigen::Isometry3d Hcw = Eigen::Isometry3d::Identity();  ///< world -> camera
         Eigen::Matrix<double, 3, Eigen::Dynamic>
             rays;  ///< unit rays in camera frame {c}, one column per field-line point
     };

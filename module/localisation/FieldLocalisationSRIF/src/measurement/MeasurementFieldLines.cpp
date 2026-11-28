@@ -42,7 +42,7 @@ namespace module::localisation::measurement {
 
     MeasurementFieldLines::MeasurementFieldLines(double time,
                                                  const LinePointsSample& sample,
-                                                 const Pose<double>& Tbc,
+                                                 const Eigen::Isometry3d& Tbc,
                                                  const FieldMap& map,
                                                  const SystemLocalisation& system,
                                                  const Options& options)
@@ -52,10 +52,10 @@ namespace module::localisation::measurement {
         // Select downward rays within range at the prior mean, subsampled; fixed here so the cost
         // keeps a constant term count
         const Eigen::VectorXd x_prior = system.density.mean();
-        Pose<double> Tbias(SystemLocalisation::camera_bias_rotation<double>(x_prior), Eigen::Vector3d::Zero());
-        Pose<double> Tfc            = SystemLocalisation::field_pose<double>(x_prior) * Tbc_ * Tbias;
-        const Eigen::Matrix3d& Rfc  = Tfc.rotation_matrix;
-        const Eigen::Vector3d& rCFf = Tfc.translation_vector;
+        Eigen::Isometry3d Tbias(SystemLocalisation::camera_bias_rotation<double>(x_prior));
+        Eigen::Isometry3d Tfc      = SystemLocalisation::field_pose<double>(x_prior) * Tbc_ * Tbias;
+        const Eigen::Matrix3d Rfc  = Tfc.linear();
+        const Eigen::Vector3d rCFf = Tfc.translation();
 
         const Eigen::Index n_all = sample.rays.cols();
         std::vector<Eigen::Index> usable;
@@ -98,7 +98,7 @@ namespace module::localisation::measurement {
 
     MeasurementFieldLines::MeasurementFieldLines(double time,
                                                  const LinePointsSample& sample,
-                                                 const Pose<double>& Tbc,
+                                                 const Eigen::Isometry3d& Tbc,
                                                  const FieldMap& map,
                                                  const SystemLocalisation& system)
         : MeasurementFieldLines(time, sample, Tbc, map, system, Options{}) {}

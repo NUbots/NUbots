@@ -41,7 +41,6 @@
 #include "srif/SystemLocalisation.hpp"
 #include "srif/tangent_basis.hpp"
 
-#include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/gaussian_filtering/measurement/Measurement.hpp"
 #include "utility/gaussian_filtering/system/SystemEstimator.hpp"
 
@@ -64,11 +63,11 @@ namespace module::localisation::measurement {
 
     using srif::Detection;
     using srif::FieldMap;
+    using srif::Isometry3;
     using srif::LandmarkType;
     using srif::SystemLocalisation;
     using srif::tangent_basis;
     using srif::VisionSample;
-    using utility::gaussian_filtering::Pose;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
     using utility::gaussian_filtering::system::SystemBase;
@@ -105,7 +104,7 @@ namespace module::localisation::measurement {
          */
         MeasurementFieldLandmarks(double time,
                                   const VisionSample& sample,
-                                  const Pose<double>& Tbc,
+                                  const Eigen::Isometry3d& Tbc,
                                   const FieldMap& map,
                                   const SystemLocalisation& system,
                                   const Options& options);
@@ -115,7 +114,7 @@ namespace module::localisation::measurement {
          */
         MeasurementFieldLandmarks(double time,
                                   const VisionSample& sample,
-                                  const Pose<double>& Tbc,
+                                  const Eigen::Isometry3d& Tbc,
                                   const FieldMap& map,
                                   const SystemLocalisation& system);
 
@@ -194,7 +193,7 @@ namespace module::localisation::measurement {
 
         const FieldMap& map_;                              ///< Field landmark map
         std::vector<CandidateDetection> candidates_;       ///< Usable detections (rays in {c})
-        Pose<double> Tbc_;                                 ///< Camera pose w.r.t. torso at capture time
+        Eigen::Isometry3d Tbc_;                            ///< Camera pose w.r.t. torso at capture time
         Eigen::Matrix<double, 3, Eigen::Dynamic> u_meas_;  ///< Measured unit rays in {c} (associated only)
         Eigen::Matrix<double, 3, Eigen::Dynamic> rLFf_;    ///< Associated landmark positions in {f}
         std::vector<double> inlier_weight_;                ///< Per-column mixture inlier weight (from confidence)
@@ -208,12 +207,12 @@ namespace module::localisation::measurement {
         const Eigen::VectorX<Scalar>& x) const {
         // Camera pose in field frame with mount-bias correction:
         // Tfc = Tfb(x) * Tbc * R(deltaC)
-        Pose<Scalar> Tfb = SystemLocalisation::field_pose(x);
-        Pose<Scalar> Tbias(SystemLocalisation::camera_bias_rotation(x), Eigen::Vector3<Scalar>::Zero());
-        Pose<Scalar> Tfc = Tfb * Pose<Scalar>(Tbc_) * Tbias;
+        Isometry3<Scalar> Tfb = SystemLocalisation::field_pose(x);
+        Isometry3<Scalar> Tbias(SystemLocalisation::camera_bias_rotation(x));
+        Isometry3<Scalar> Tfc = Tfb * Tbc_.template cast<Scalar>() * Tbias;
 
-        const Eigen::Matrix3<Scalar> Rcf  = Tfc.rotation_matrix.transpose();
-        const Eigen::Vector3<Scalar> rCFf = Tfc.translation_vector;
+        const Eigen::Matrix3<Scalar> Rcf  = Tfc.linear().transpose();
+        const Eigen::Vector3<Scalar> rCFf = Tfc.translation();
 
         Eigen::Matrix<Scalar, 3, Eigen::Dynamic> u_pred(3, rLFf_.cols());
         for (Eigen::Index j = 0; j < rLFf_.cols(); ++j) {

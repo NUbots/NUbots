@@ -66,11 +66,8 @@
 
 #include "message/input/Image.hpp"
 
-#include "utility/gaussian_filtering/Pose.hpp"
 
 namespace module::localisation::srif {
-
-    using utility::gaussian_filtering::Pose;
 
     class SideDisambiguator {
     public:
@@ -279,8 +276,8 @@ namespace module::localisation::srif {
          */
         FrameResult process(double t,
                             const cv::Mat& gray,
-                            const Pose<double>& Tfc,
-                            const Pose<double>& TfcMirror,
+                            const Eigen::Isometry3d& Tfc,
+                            const Eigen::Isometry3d& TfcMirror,
                             double pos_std,
                             double yaw_std,
                             double yaw_rate_abs,
@@ -357,7 +354,7 @@ namespace module::localisation::srif {
          * @param feature_outlier Output (per feature): gated to a landmark but left unassociated
          */
         std::vector<Association> associate(const std::vector<OutOfFieldFeature>& features,
-                                           const Pose<double>& Tfc,
+                                           const Eigen::Isometry3d& Tfc,
                                            double pos_std,
                                            double yaw_std,
                                            double& score,
@@ -397,7 +394,7 @@ namespace module::localisation::srif {
          */
         void update_candidates(const std::vector<OutOfFieldFeature>& features,
                                const std::vector<bool>& feature_used,
-                               const Pose<double>& Tfc,
+                               const Eigen::Isometry3d& Tfc,
                                double t,
                                std::vector<char>& feature_grew_track);
 

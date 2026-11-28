@@ -52,12 +52,9 @@
 
 #include "message/input/Image.hpp"
 
-#include "utility/gaussian_filtering/Pose.hpp"
 #include "utility/vision/projection.hpp"
 
 namespace module::localisation::srif {
-
-    using utility::gaussian_filtering::Pose;
 
     /**
      * @brief One detected corner feature, with its camera ray and classification.
@@ -109,7 +106,7 @@ namespace module::localisation::srif {
          * @param Tfc Estimated camera pose in the field frame {f}
          * @return Detected features, strongest first, each with ray and classification
          */
-        std::vector<OutOfFieldFeature> detect(const cv::Mat& gray, const Pose<double>& Tfc) const;
+        std::vector<OutOfFieldFeature> detect(const cv::Mat& gray, const Eigen::Isometry3d& Tfc) const;
 
         /**
          * @brief Classify a single camera ray against the field extent.
@@ -117,7 +114,7 @@ namespace module::localisation::srif {
          * @param Tfc Camera pose in {f}
          * @return True if the ray looks beyond the field carpet (or at/above the horizon)
          */
-        bool is_out_of_field(const Eigen::Vector3d& uPCc, const Pose<double>& Tfc) const;
+        bool is_out_of_field(const Eigen::Vector3d& uPCc, const Eigen::Isometry3d& Tfc) const;
 
         Options options;
 

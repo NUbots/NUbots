@@ -43,7 +43,6 @@
 
 #include "message/input/Image.hpp"
 
-#include "utility/gaussian_filtering/Pose.hpp"
 
 namespace module::localisation {
 
@@ -57,7 +56,6 @@ namespace module::localisation {
         using srif::SideDisambiguator;
         using srif::SystemLocalisation;
         using srif::VisionSample;
-        using utility::gaussian_filtering::Pose;
     }  // namespace filter
 
     /**
@@ -217,7 +215,7 @@ namespace module::localisation {
          * @param Htw World-to-torso pose to compose with the field pose
          * @param measurement The frame's landmark measurement, or nullptr if none ran
          */
-        void emit_field(const filter::Pose<double>& Htw, const filter::MeasurementFieldLandmarks* measurement);
+        void emit_field(const Eigen::Isometry3d& Htw, const filter::MeasurementFieldLandmarks* measurement);
 
         /**
          * @brief Run out-of-field side disambiguation on one camera frame and act on the verdict.
@@ -243,8 +241,8 @@ namespace module::localisation {
          * @return True if enough landmarks associated to trust the solve
          */
         [[nodiscard]] bool solve_initial_pose(const filter::VisionSample& sample,
-                                              const filter::Pose<double>& Tbc,
-                                              const filter::Pose<double>& Twt,
+                                              const Eigen::Isometry3d& Tbc,
+                                              const Eigen::Isometry3d& Twt,
                                               Eigen::Matrix<double, 18, 1>& eta0) const;
     };
 

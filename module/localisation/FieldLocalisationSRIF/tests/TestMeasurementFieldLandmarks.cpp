@@ -46,7 +46,6 @@ using module::localisation::srif::FieldMap;
 using module::localisation::srif::LandmarkType;
 using module::localisation::srif::SystemLocalisation;
 using module::localisation::srif::VisionSample;
-using utility::gaussian_filtering::Pose;
 using utility::gaussian_filtering::gaussian::GaussianInfo;
 using utility::math::euler::rpy_intrinsic_to_mat;
 using utility::math::quaternion::mat_to_wxyz;
@@ -73,8 +72,8 @@ namespace {
     }
 
     /// A detection whose four corner rays all point at landmark rLFf from a camera at Tfc
-    Detection detection_of(const std::string& name, const Eigen::Vector3d& rLFf, const Pose<double>& Tfc) {
-        const Eigen::Vector3d ray = (Tfc.rotation_matrix.transpose() * (rLFf - Tfc.translation_vector)).normalized();
+    Detection detection_of(const std::string& name, const Eigen::Vector3d& rLFf, const Eigen::Isometry3d& Tfc) {
+        const Eigen::Vector3d ray = (Tfc.linear().transpose() * (rLFf - Tfc.translation())).normalized();
         Detection det;
         det.name       = name;
         det.confidence = 0.9;
@@ -95,10 +94,10 @@ SCENARIO("Landmark detections associate under the class names the K1 YOLO model 
         x,
         Eigen::MatrixXd::Identity(SystemLocalisation::nx, SystemLocalisation::nx) * 0.01));
 
-    Pose<double> Tbc;
-    Tbc.rotation_matrix    = Eigen::Matrix3d::Identity();
-    Tbc.translation_vector = Eigen::Vector3d(0.05, 0.0, 0.3);
-    const Pose<double> Tfc = SystemLocalisation::field_pose<double>(x) * Tbc;
+    Eigen::Isometry3d Tbc       = Eigen::Isometry3d::Identity();
+    Tbc.linear()                = Eigen::Matrix3d::Identity();
+    Tbc.translation()           = Eigen::Vector3d(0.05, 0.0, 0.3);
+    const Eigen::Isometry3d Tfc = SystemLocalisation::field_pose<double>(x) * Tbc;
 
     // One detection per landmark type, each labelled with the given class names
     auto sample_labelled = [&](const std::vector<std::pair<LandmarkType, std::string>>& labels) {

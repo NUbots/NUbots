@@ -51,10 +51,10 @@ namespace module::localisation::srif {
                                            const FieldDimensions& dims)
         : OutOfFieldDetector(lens, dimensions, dims, Options{}) {}
 
-    bool OutOfFieldDetector::is_out_of_field(const Eigen::Vector3d& uPCc, const Pose<double>& Tfc) const {
+    bool OutOfFieldDetector::is_out_of_field(const Eigen::Vector3d& uPCc, const Eigen::Isometry3d& Tfc) const {
         // Ray direction in the field frame and camera position above the ground plane.
-        const Eigen::Vector3d uFf  = Tfc.rotation_matrix * uPCc;
-        const Eigen::Vector3d rCFf = Tfc.translation_vector;
+        const Eigen::Vector3d uFf  = Tfc.linear() * uPCc;
+        const Eigen::Vector3d rCFf = Tfc.translation();
 
         // At or above the horizon: the ray never reaches the carpet, so whatever it
         // sees is background scenery.
@@ -69,7 +69,7 @@ namespace module::localisation::srif {
         return std::abs(g.x()) > half_carpet_length_ || std::abs(g.y()) > half_carpet_width_;
     }
 
-    std::vector<OutOfFieldFeature> OutOfFieldDetector::detect(const cv::Mat& gray, const Pose<double>& Tfc) const {
+    std::vector<OutOfFieldFeature> OutOfFieldDetector::detect(const cv::Mat& gray, const Eigen::Isometry3d& Tfc) const {
         assert(gray.type() == CV_8UC1);
 
         std::vector<cv::KeyPoint> keypoints;

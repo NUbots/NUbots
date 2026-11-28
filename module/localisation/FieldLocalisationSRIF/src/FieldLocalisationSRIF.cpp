@@ -85,22 +85,6 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    /// @brief Convert an Eigen isometry to the filter's pose type
-    static filter::Pose<double> to_pose(const Eigen::Isometry3d& H) {
-        filter::Pose<double> T;
-        T.rotation_matrix    = H.rotation();
-        T.translation_vector = H.translation();
-        return T;
-    }
-
-    /// @brief Convert the filter's pose type to an Eigen isometry
-    static Eigen::Isometry3d to_isometry(const filter::Pose<double>& T) {
-        Eigen::Isometry3d H = Eigen::Isometry3d::Identity();
-        H.linear()          = T.rotation_matrix;
-        H.translation()     = T.translation_vector;
-        return H;
-    }
-
     /// @brief Single-channel 8-bit view of a camera frame, for FAST/ORB.
     /// @return False if the format is not one we can read, leaving `gray` untouched.
     static bool to_grayscale(const Image& image, cv::Mat& gray) {
@@ -131,7 +115,7 @@ namespace module::localisation {
         filter::VisionSample sample;
         sample.t           = t;
         sample.video_frame = -1;
-        sample.Hcw         = to_pose(Eigen::Isometry3d(boxes.Hcw));
+        sample.Hcw         = Eigen::Isometry3d(boxes.Hcw);
 
         for (const BoundingBox& box : boxes.bounding_boxes) {
             if (box.corners.size() != 4) {
@@ -234,13 +218,13 @@ namespace module::localisation {
 
             filter::SensorsSample s;
             s.t             = seconds(sensors.timestamp);
-            s.Htw           = to_pose(Eigen::Isometry3d(sensors.Htw));
+            s.Htw           = Eigen::Isometry3d(sensors.Htw);
             s.accelerometer = sensors.accelerometer;
             s.gyroscope     = sensors.gyroscope;
 
             // Non-finite when unavailable
             s.vBb = cfg.odometry_velocity_source == Config::OdometryVelocitySource::SENSORS_VTW
-                        ? Eigen::Vector3d(s.Htw.rotation_matrix * Eigen::Vector3d(sensors.vTw))
+                        ? Eigen::Vector3d(s.Htw.linear() * Eigen::Vector3d(sensors.vTw))
                     : sensors_window.empty()
                         ? Eigen::Vector3d::Constant(std::numeric_limits<double>::quiet_NaN())
                         : filter::SystemLocalisation::body_velocity_from_odometry(sensors_window.back(),
@@ -250,10 +234,10 @@ namespace module::localisation {
             // A reset or offset recapture shifts Htw in the plane without the torso moving. Compared
             // in the world frame so a fall's fast pitching is not mistaken for one.
             if (!sensors_window.empty()) {
-                const filter::Pose<double> Twt_prev = sensors_window.back().Htw.inverse();
-                const filter::Pose<double> Twt      = s.Htw.inverse();
-                const double dxy = (Twt.translation_vector.head<2>() - Twt_prev.translation_vector.head<2>()).norm();
-                const Eigen::Matrix3d dR = Twt.rotation_matrix * Twt_prev.rotation_matrix.transpose();
+                const Eigen::Isometry3d Twt_prev = sensors_window.back().Htw.inverse();
+                const Eigen::Isometry3d Twt      = s.Htw.inverse();
+                const double dxy         = (Twt.translation().head<2>() - Twt_prev.translation().head<2>()).norm();
+                const Eigen::Matrix3d dR = Twt.linear() * Twt_prev.linear().transpose();
                 const double dyaw        = std::abs(std::atan2(dR(1, 0), dR(0, 0)));
                 if (dxy > cfg.odometry_jump_xy || dyaw > cfg.odometry_jump_angle) {
                     last_odometry_jump_t = s.t;
@@ -316,10 +300,10 @@ namespace module::localisation {
                     }
                     return;
                 }
-                const filter::Pose<double>& Htw = paired->Htw;
+                const Eigen::Isometry3d& Htw = paired->Htw;
 
                 // Tbc = Htw * Hcw^{-1}
-                const filter::Pose<double> Tbc = Htw * to_pose(Eigen::Isometry3d(boxes.Hcw)).inverse();
+                const Eigen::Isometry3d Tbc = Htw * Eigen::Isometry3d(boxes.Hcw).inverse();
 
                 const filter::VisionSample sample = build_vision_sample(t, boxes);
 
@@ -366,7 +350,7 @@ namespace module::localisation {
 
                 // Initialise from a coarse grid search on the first usable frame
                 if (!initialised) {
-                    const filter::Pose<double> Twt = Htw.inverse();
+                    const Eigen::Isometry3d Twt = Htw.inverse();
                     Eigen::Matrix<double, 18, 1> eta0;
                     if (!solve_initial_pose(sample, Tbc, Twt, eta0)) {
                         log<DEBUG>("Initial pose solve did not associate enough landmarks yet");
@@ -417,7 +401,7 @@ namespace module::localisation {
                 }
                 // Torso height assumes a foot on the ground
                 if (cfg.use_kinematic_height && upright) {
-                    const double height = Htw.inverse().translation_vector.z();
+                    const double height = Htw.inverse().translation().z();
                     if (std::isfinite(height)) {
                         MeasurementKinematicHeight kinematic_height(t, height, cfg.height_sigma);
                         system->process(kinematic_height);
@@ -470,14 +454,13 @@ namespace module::localisation {
             log<DEBUG>("No odometry sample near the camera frame; skipping side disambiguation");
             return;
         }
-        const filter::Pose<double> Tbc = paired->Htw * to_pose(Eigen::Isometry3d(image.Hcw)).inverse();
+        const Eigen::Isometry3d Tbc = paired->Htw * Eigen::Isometry3d(image.Hcw).inverse();
 
         // Camera pose in {f} at the mean and at its mirror
         const Eigen::VectorXd mean = system->density.mean();
         auto camera_pose           = [&Tbc](const Eigen::VectorXd& x) {
             return filter::SystemLocalisation::field_pose<double>(x) * Tbc
-                   * filter::Pose<double>(filter::SystemLocalisation::camera_bias_rotation<double>(x),
-                                          Eigen::Vector3d::Zero());
+                   * Eigen::Isometry3d(filter::SystemLocalisation::camera_bias_rotation<double>(x));
         };
         const Eigen::VectorXd mirror = filter::SystemLocalisation::mirror_state(mean);
 
@@ -628,16 +611,16 @@ namespace module::localisation {
     }
 
     bool FieldLocalisationSRIF::solve_initial_pose(const filter::VisionSample& sample,
-                                                   const filter::Pose<double>& Tbc,
-                                                   const filter::Pose<double>& Twt,
+                                                   const Eigen::Isometry3d& Tbc,
+                                                   const Eigen::Isometry3d& Twt,
                                                    Eigen::Matrix<double, 18, 1>& eta0) const {
         constexpr Eigen::Index nx = filter::SystemLocalisation::nx;
 
         // Roll, pitch and torso height come from the kinematic chain, unsearched.
-        const Eigen::Vector3d rpy_torso = mat_to_rpy_intrinsic(Twt.rotation_matrix);
+        const Eigen::Vector3d rpy_torso = mat_to_rpy_intrinsic(Twt.linear());
         const double roll0              = rpy_torso.x();
         const double pitch0             = rpy_torso.y();
-        const double z0                 = Twt.translation_vector.z();
+        const double z0                 = Twt.translation().z();
 
         const filter::FieldDimensions& dims = map->dims;
         const double half_length            = dims.field_length / 2.0 + dims.border_strip_min_width;
@@ -686,13 +669,13 @@ namespace module::localisation {
         return true;
     }
 
-    void FieldLocalisationSRIF::emit_field(const filter::Pose<double>& Htw,
+    void FieldLocalisationSRIF::emit_field(const Eigen::Isometry3d& Htw,
                                            const filter::MeasurementFieldLandmarks* measurement) {
         const Eigen::VectorXd mean = system->density.mean();
 
         // Hfw = Tfb(mean) * Htw
-        const filter::Pose<double> Tfb   = filter::SystemLocalisation::field_pose<double>(mean);
-        const Eigen::Isometry3d Hfw_full = to_isometry(Tfb * Htw);
+        const Eigen::Isometry3d Tfb      = filter::SystemLocalisation::field_pose<double>(mean);
+        const Eigen::Isometry3d Hfw_full = Tfb * Htw;
         auto field                       = std::make_unique<Field>();
 
         // Planar, as FieldLocalisationNLopt: Hfw = Translation(x, y, 0) * Rz(yaw)

@@ -112,7 +112,7 @@ SCENARIO("The quaternion attitude state round-trips through roll-pitch-yaw", "[s
 
         THEN("the state is finite and its rotation matrix is orthonormal") {
             REQUIRE(x.allFinite());
-            const Eigen::Matrix3d Rfb = SystemLocalisation::field_pose<double>(x).rotation_matrix;
+            const Eigen::Matrix3d Rfb = SystemLocalisation::field_pose<double>(x).linear();
             REQUIRE_THAT((Rfb.transpose() * Rfb - Eigen::Matrix3d::Identity()).norm(), WithinAbs(0.0, 1e-12));
         }
     }
@@ -322,7 +322,7 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
             const double step        = revolution / steps;
             bool finite              = true;
             double max_step_rotation = 0.0;
-            Eigen::Matrix3d previous = SystemLocalisation::field_pose<double>(xr).rotation_matrix;
+            Eigen::Matrix3d previous = SystemLocalisation::field_pose<double>(xr).linear();
 
             for (int i = 1; i <= steps; ++i) {
                 const double t = i * step;
@@ -331,7 +331,7 @@ SCENARIO("Prediction through a topple tracks the rotation rather than a chart of
                 finite                   = finite && mu.allFinite() && sys.density.cov().allFinite();
 
                 // The incremental rotation between steps must not exceed what the gyroscope asked for
-                const Eigen::Matrix3d Rfb = SystemLocalisation::field_pose<double>(mu).rotation_matrix;
+                const Eigen::Matrix3d Rfb = SystemLocalisation::field_pose<double>(mu).linear();
                 const double c            = 0.5 * ((previous.transpose() * Rfb).trace() - 1.0);
                 max_step_rotation         = std::max(max_step_rotation, std::acos(std::clamp(c, -1.0, 1.0)));
                 previous                  = Rfb;

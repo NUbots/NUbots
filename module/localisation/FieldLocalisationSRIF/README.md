@@ -213,8 +213,8 @@ residual.
 
 - `utility::gaussian_filtering` (`shared/utility/gaussian_filtering`) — the generic estimator scaffolding, nothing localisation
   specific: `GaussianInfo` (square-root information Gaussian), the `Event`/`Measurement` and
-  `SystemBase`/`SystemEstimator` base classes, `Pose`, the rotation and kinematics helpers, and the
-  trust-region optimiser (`funcmin`)
+  `SystemBase`/`SystemEstimator` base classes and the trust-region optimiser (`funcmin`)
+- `utility::math::euler`, `utility::math::quaternion` — attitude conversions and quaternion kinematics
 - `src/srif` and `src/measurement` (this module) — everything specific to this filter: the state
   layout (`SystemLocalisation`), `FieldMap`, the log-replay sample types, the side disambiguator and
   the concrete measurement models

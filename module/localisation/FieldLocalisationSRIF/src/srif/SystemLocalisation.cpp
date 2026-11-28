@@ -28,8 +28,6 @@
 
 
 namespace module::localisation::srif {
-
-    using utility::gaussian_filtering::Pose;
     using utility::gaussian_filtering::gaussian::GaussianInfo;
     using utility::gaussian_filtering::measurement::Measurement;
 
@@ -136,15 +134,15 @@ namespace module::localisation::srif {
         }
 
         // Torso pose in world: Twt = Htw^{-1}
-        const Pose<double> Twta = Pose<double>(a.Htw.rotation_matrix, a.Htw.translation_vector).inverse();
-        const Pose<double> Twtb = Pose<double>(b.Htw.rotation_matrix, b.Htw.translation_vector).inverse();
-        if (!Twta.translation_vector.allFinite() || !Twtb.translation_vector.allFinite()
-            || !Twta.rotation_matrix.allFinite() || !Twtb.rotation_matrix.allFinite()) {
+        const Eigen::Isometry3d Twta = a.Htw.inverse();
+        const Eigen::Isometry3d Twtb = b.Htw.inverse();
+        if (!Twta.translation().allFinite() || !Twtb.translation().allFinite() || !Twta.linear().allFinite()
+            || !Twtb.linear().allFinite()) {
             return invalid;
         }
 
         // The relative pose is already a body-frame increment
-        const Eigen::Vector3d vBb = (Twta.inverse() * Twtb).translation_vector / dt;
+        const Eigen::Vector3d vBb = (Twta.inverse() * Twtb).translation() / dt;
         return vBb.allFinite() ? vBb : invalid;
     }
 
