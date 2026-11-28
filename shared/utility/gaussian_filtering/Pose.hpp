@@ -73,7 +73,7 @@ namespace utility::gaussian_filtering {
             , translation_vector(T.translation_vector.template cast<Scalar>()) {}
 
         /**
-         * @brief Compose two transforms: Tac = Tab * Tbc.
+         * @brief Compose two transforms: Hac = Hab * Hbc.
          *
          * @param other The other pose to compose with
          * @return The resulting composed pose
