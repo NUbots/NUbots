@@ -28,6 +28,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <algorithm>
+#include <cmath>
 #include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
@@ -37,6 +39,7 @@
 #include "message/input/RoboCup.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Cooperative.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/purpose/Purpose.hpp"
@@ -53,6 +56,7 @@ namespace module::network {
     using message::input::RoboCup;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::CooperativeDetections;
     using message::localisation::Field;
     using message::planning::WalkToDebug;
     using message::purpose::Purpose;
@@ -65,6 +69,37 @@ namespace module::network {
 
 
     struct StartupDelay {};
+
+    namespace {
+        /// @brief A field position in whole centimetres, in the mixed-team protocol's field frame (our field frame
+        /// rotated 180 degrees about the centre, see current_pose below)
+        std::pair<int32_t, int32_t> to_team_cm(const Eigen::Vector2d& rXFf) {
+            return {static_cast<int32_t>(std::lround(-rXFf.x() * 100.0)),
+                    static_cast<int32_t>(std::lround(-rXFf.y() * 100.0))};
+        }
+
+        /// @brief Encode one frame's detections for the NUbots team data, if recent enough
+        /// @return Whether there was anything to encode
+        bool encode_detections(const CooperativeDetections::Detections& detections,
+                               const NUClear::clock::time_point& now,
+                               const double max_age,
+                               const size_t max_count,
+                               message::input::NUbotsTeamData::Detections& out) {
+            const double age = std::chrono::duration<double>(now - detections.timestamp).count();
+            if (detections.positions.empty() || age < 0.0 || age > max_age) {
+                return false;
+            }
+            out.age_ms          = static_cast<uint32_t>(std::lround(age * 1000.0));
+            const auto [ox, oy] = to_team_cm(detections.rCFf);
+            out.observer        = {ox, oy};
+            for (size_t i = 0; i < std::min(max_count, detections.positions.size()); ++i) {
+                const auto [x, y] = to_team_cm(detections.positions[i]);
+                out.positions.push_back(x);
+                out.positions.push_back(y);
+            }
+            return true;
+        }
+    }  // namespace
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -80,6 +115,11 @@ namespace module::network {
                 // Maximum message size and count
                 cfg.max_message_size      = config["max_message_size"].as<uint>();
                 cfg.max_messages_per_game = config["max_messages_per_game"].as<uint>();
+                // Detections shared for cooperative tracking
+                cfg.share_detections         = config["share_detections"].as<bool>();
+                cfg.shared_detection_max_age = config["shared_detection_max_age"].as<double>();
+                cfg.max_shared_balls         = config["max_shared_balls"].as<uint>();
+                cfg.max_shared_robots        = config["max_shared_robots"].as<uint>();
 
                 // Compute ports as 10000 + team_id unless overridden in config
                 const uint configured_send_port = config["send_port"].as<uint>();
@@ -171,6 +211,7 @@ namespace module::network {
            Optional<With<GameState>>,
            Optional<With<Purpose>>,
            Optional<With<WalkToDebug>>,
+           Optional<With<CooperativeDetections>>,
            With<GlobalConfig>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -180,6 +221,7 @@ namespace module::network {
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const Purpose>& purpose,
                          const std::shared_ptr<const WalkToDebug>& walk_to,
+                         const std::shared_ptr<const CooperativeDetections>& detections,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
@@ -305,6 +347,21 @@ namespace module::network {
                 msg->going_for_ball = (purpose
                                        && (purpose->purpose.value == SoccerPosition::ATTACK
                                            || purpose->purpose.value == SoccerPosition::READY_ATTACK));
+
+                // Our latest detections, for teammates' cooperative tracking (localisation::CooperativeLocalisation)
+                if (cfg.share_detections && detections) {
+                    const auto now = NUClear::clock::now();
+                    encode_detections(detections->balls,
+                                      now,
+                                      cfg.shared_detection_max_age,
+                                      cfg.max_shared_balls,
+                                      msg->nubots.balls);
+                    encode_detections(detections->robots,
+                                      now,
+                                      cfg.shared_detection_max_age,
+                                      cfg.max_shared_robots,
+                                      msg->nubots.robots);
+                }
 
                 // Single-line summary of the outgoing broadcast
                 log<DEBUG>(fmt::format(

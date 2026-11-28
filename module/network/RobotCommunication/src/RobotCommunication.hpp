@@ -52,6 +52,14 @@ namespace module::network {
             uint max_message_size = 512;
             /// @brief Maximum number of team messages per game (Ready/Set/Playing states)
             uint max_messages_per_game = 12000;
+            /// @brief Whether to share our latest ball and robot detections for cooperative tracking
+            bool share_detections = false;
+            /// @brief Detections older than this (s) are not shared
+            double shared_detection_max_age = 0.0;
+            /// @brief Maximum number of ball detections shared per message
+            uint max_shared_balls = 0;
+            /// @brief Maximum number of robot detections shared per message
+            uint max_shared_robots = 0;
         } cfg;
 
         /// @brief ignore packets from these IP addresses

@@ -14,6 +14,13 @@ The information that has been received over UDP is then emitted locally.
 Team messages are sent on port `10000 + team_number` with a maximum payload size of 512 bytes. Messages are counted only during
 Ready, Set, and Playing game states toward the 12000 message budget per game.
 
+When `share_detections` is on, the message also carries this robot's latest ball and robot detections (from
+`localisation::CooperativeLocalisation`) in the NUbots team data field (`nubots`, tag 101 = 100 + our GameController team
+number). Positions are whole centimetres in the same mixed-team field frame as `current_pose`, with the camera position
+and the age of the camera frame, so teammates can fuse them into their cooperative ball and robot tracks. Detections
+older than `shared_detection_max_age` are not sent, and at most `max_shared_balls` and `max_shared_robots` are sent, to
+stay within the 128 byte team data budget.
+
 ## Usage
 
 Add this module to get information about other robots.
@@ -27,6 +34,7 @@ Add this module to get information about other robots.
 - `message::localisation::Ball` which contains information about the estimated position and velocity of the ball
 - `message::localisation::Field` which contains information to convert values from world to field space
 - `message::skill::Kick` which contains the direction and target of the robot's kick
+- `message::localisation::CooperativeDetections` which contains this robot's latest ball and robot detections on the field, to share with teammates
 
 ## Emits
 

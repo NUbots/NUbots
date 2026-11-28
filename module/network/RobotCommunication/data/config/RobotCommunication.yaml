@@ -15,3 +15,12 @@ max_message_size: 512
 
 # Maximum number of team messages per game
 max_messages_per_game: 60000
+
+# Share our latest ball and robot detections in the NUbots team data, for teammates' cooperative tracking
+# (localisation::CooperativeLocalisation). Each detection costs about 5 bytes of the 128 byte team data budget
+share_detections: true
+# Detections older than this (s) when a message is sent are not shared
+shared_detection_max_age: 0.5
+# Maximum number of detections shared per message
+max_shared_balls: 2
+max_shared_robots: 8
