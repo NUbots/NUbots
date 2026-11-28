@@ -38,3 +38,11 @@ team_guess_default_timer: 2.0
 
 # Maximum distance in meters from the field that a ball can be before it is ignored
 max_distance_from_field: 1.0
+
+# Fall back to the cooperative ball (localisation::CooperativeLocalisation, fused from every teammate's detections)
+# when we have lost the ball ourselves. Takes precedence over the r2r team guesses above
+use_cooperative_ball: true
+# Seconds without an accepted ball of our own before the cooperative ball is used
+cooperative_ball_timeout: 1.0
+# Only use the cooperative ball while its latest fused detection (from any robot) is at most this many seconds old
+cooperative_ball_max_age: 1.0

@@ -36,6 +36,7 @@
 #include "message/eye/DataPoint.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Cooperative.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/GroundTruthMode.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -54,6 +55,7 @@ namespace module::localisation {
 
     using message::eye::DataPoint;
     using message::input::RoboCup;
+    using message::localisation::CooperativeBall;
     using message::localisation::Field;
     using message::support::FieldDescription;
     using message::support::GlobalConfig;
@@ -113,6 +115,10 @@ namespace module::localisation {
 
             cfg.max_distance_from_field = config["max_distance_from_field"].as<double>();
 
+            cfg.use_cooperative_ball     = config["use_cooperative_ball"].as<bool>();
+            cfg.cooperative_ball_timeout = config["cooperative_ball_timeout"].as<double>();
+            cfg.cooperative_ball_max_age = config["cooperative_ball_max_age"].as<double>();
+
             last_time_update = NUClear::clock::now();
         });
 
@@ -120,10 +126,14 @@ namespace module::localisation {
         on<Trigger<GroundTruthMode>>().then([this](const GroundTruthMode& mode) {
             vision_ball_reaction.enable(!mode.enabled);
             team_ball_reaction.enable(!mode.enabled);
+            cooperative_ball_reaction.enable(!mode.enabled);
         });
 
+        // Every reaction that touches the filter is synced, so the cooperative fallback can't race a vision update
+        using BallSync = Sync<BallLocalisation>;
+
         /* To run whenever a ball has been detected */
-        vision_ball_reaction = on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single>().then(
+        vision_ball_reaction = on<Trigger<VisionBalls>, With<FieldDescription>, With<Field>, Single, BallSync>().then(
             [this](const VisionBalls& balls, const FieldDescription& fd, const Field& field) {
                 // If there are no balls or there are no valid balls, return
                 if (std::ranges::none_of(balls.balls, [](const auto& ball) { return !ball.is_invalid; })) {
@@ -214,6 +224,7 @@ namespace module::localisation {
                     ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
                                 cfg.ukf.noise.measurement.position,
                                 MeasurementType::BALL_POSITION());
+                    last_own_ball_time = last_time_update;
 
                     // Get the new state, here we are assuming ball is on the ground
                     state            = BallModel<double>::StateVec(ukf.get_state());
@@ -241,7 +252,7 @@ namespace module::localisation {
 
         // Stores ball positions received from teammates
         team_ball_reaction =
-            on<Trigger<RoboCup>, With<Field>>().then([this](const RoboCup& robocup, const Field& field) {
+            on<Trigger<RoboCup>, With<Field>, BallSync>().then([this](const RoboCup& robocup, const Field& field) {
                 if (!cfg.use_r2r_balls) {
                     return;
                 }
@@ -271,6 +282,13 @@ namespace module::localisation {
                     return;
                 }
 
+                // The cooperative ball is a better fallback than the average of teammates' guesses, so prefer it
+                const double since_cooperative =
+                    std::chrono::duration<double>(NUClear::clock::now() - last_cooperative_time).count();
+                if (cfg.use_cooperative_ball && since_cooperative < cfg.team_guess_default_timer) {
+                    return;
+                }
+
                 // If we have a valid guess, emit a new ball message
                 last_time_update          = NUClear::clock::now();
                 auto ball                 = std::make_unique<Ball>();
@@ -281,6 +299,45 @@ namespace module::localisation {
                 ball->Hcw                 = last_Hcw;
                 emit(ball);
             });
+
+        // Backup for when we have lost the ball: the cooperative ball, fused from every teammate's detections
+        cooperative_ball_reaction =
+            on<Trigger<CooperativeBall>, Single, BallSync>().then([this](const CooperativeBall& cooperative) {
+                if (cfg.use_cooperative_ball) {
+                    cooperative_fallback(cooperative);
+                }
+            });
+    }
+
+    void BallLocalisation::cooperative_fallback(const CooperativeBall& cooperative) {
+        const auto now = NUClear::clock::now();
+        // Only a backup: while we are seeing the ball ourselves, our own estimate is used
+        if (std::chrono::duration<double>(now - last_own_ball_time).count() < cfg.cooperative_ball_timeout) {
+            return;
+        }
+        // The cooperative ball is only worth using while someone has seen the ball recently
+        if (std::chrono::duration<double>(now - cooperative.ball.time_of_measurement).count()
+            > cfg.cooperative_ball_max_age) {
+            return;
+        }
+
+        // Move our own filter onto the cooperative estimate, so our next detection of the ball is gated around where
+        // the team thinks it is, rather than around where we lost it
+        BallModel<double>::StateVec state;
+        state.rBWw = cooperative.ball.rBWw.head<2>();
+        state.vBw  = cooperative.ball.vBw.head<2>();
+        ukf.set_state(state.getStateVec(), cooperative.ball.covariance);
+        last_time_update      = now;
+        last_cooperative_time = now;
+        rejection_count       = 0;
+
+        auto ball                 = std::make_unique<Ball>(cooperative.ball);
+        ball->confidence          = 0.0;  // Not our own measurement
+        ball->Hcw                 = last_Hcw;
+        ball->average_rBWw        = cooperative.ball.rBWw;
+        ball->time_of_measurement = cooperative.ball.time_of_measurement;
+        log<DEBUG>("Using the cooperative ball, seen by", cooperative.observers.size(), "robots");
+        emit(ball);
     }
 
     std::pair<bool, Eigen::Vector3d> BallLocalisation::get_average_team_rBFf() {
