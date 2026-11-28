@@ -95,6 +95,26 @@ message Ball {
     float age = 4;
 }
 
+/// NUbots team-specific data, sent in the RoboCup message's team field (100 + our GameController team number)
+/// Must stay within the 128 Byte team data budget: positions are whole centimetres in sint32 (2 - 3 Bytes each)
+message NUbotsTeamData {
+    /// One camera frame's detections of one kind of object
+    message Detections {
+        /// Age of the camera frame in milliseconds, at the time the message was created
+        uint32 age_ms = 1;
+        /// Position of the camera on the field when the frame was taken, [x, y] in centimetres, same field convention
+        /// as Robot.position
+        repeated sint32 observer = 2;
+        /// The detected positions on the field, [x0, y0, x1, y1, ...] in centimetres, same field convention as
+        /// Robot.position. Balls are the ball centre's ground point, robots are the foot point
+        repeated sint32 positions = 3;
+    }
+    /// The most recent ball detections, unset if there are none recent enough
+    Detections balls = 1;
+    /// The most recent robot detections, unset if there are none recent enough
+    Detections robots = 2;
+}
+
 /// The current playing state of the robot
 enum State {
     UNKNOWN_STATE = 0;
@@ -146,6 +166,9 @@ message RoboCup {
     /// (Attacking)
     /// 1 + 1 tag = 2 Bytes
     bool going_for_ball = 8;
+
+    /// NUbots team-specific data (GameController team number 1), used for cooperative ball and robot tracking
+    NUbotsTeamData nubots = 101;
 
     // Team specific data to be set in tag number equal to 100 + GC number
     // This should not exceed 128 Bytes (tag and length will add 2 Bytes of overhead)
